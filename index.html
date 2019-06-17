@@ -9,6 +9,9 @@
     .dropdown-item {
       cursor: pointer;
     }
+    textarea.invalid {
+      border-color: red !important;
+    }
   </style>
 </head>
 <body>
@@ -19,8 +22,19 @@
   <div class="container">
     <div class="row my-4">
       <div class="col-12 col-md-7">
-        <div class="btn-group pb-3">
-          <button type="button" class="btn btn-success d-block float-left" onclick="addPool(this)">Add Pool</button>
+        <div class="input-group pb-3">
+          <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)">Add Pool</button>
+          <div class="input-group-prepend">
+            <span class="input-group-text rounded-left">Type</span>
+          </div>
+          <select id="tableType" class="form-control" style="max-width: 9em;" onchange="updateTableType(this)">
+            <option value="minecraft:empty">Empty</option>
+            <option value="minecraft:entity">Entity</option>
+            <option value="minecraft:block">Block</option>
+            <option value="minecraft:chest">Chest</option>
+            <option value="minecraft:fishing">Fishing</option>
+            <option value="minecraft:generic">Generic</option>
+          </select>
         </div>
         <div id="structure" class="mb-3">
         </div>
@@ -31,7 +45,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Indentation</span>
             </div>
-            <select id="indentationSelect" class="form-control" style="max-width: 7em;" onchange="updateIndentation(this)">
+            <select id="indentationSelect" class="form-control rounded-right" style="max-width: 7em;" onchange="updateIndentation(this)">
               <option value="2">2 Spaces</option>
               <option value="4">4 Spaces</option>
               <option value="tab">Tabs</option>
@@ -39,7 +53,7 @@
             <button type="button" class="btn ml-3 btn-secondary" onclick="copySource(this)">Copy</button>
           </div>
         </div>
-        <textarea id="source" class="form-control"></textarea>
+        <textarea id="source" class="form-control" onchange="updateSouce()" rows="20"></textarea>
       </div>
     </div>
   </div>
@@ -52,34 +66,34 @@
         <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
       </div>
       <div class="card-body">
-        <div class="input-group mb-3 rolls">
+        <div class="input-group mb-3 rolls" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Rolls</span>
             <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
-            <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="switchExact(this)">Exact</a>
-              <a class="dropdown-item" onclick="switchRange(this)">Range</a>
-              <a class="dropdown-item" onclick="switchBinomial(this)">Binomial</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" onclick="switchRollsType(this, 'exact')">Exact</a>
+                <a class="dropdown-item" onclick="switchRollsType(this, 'range')">Range</a>
+                <a class="dropdown-item" onclick="switchRollsType(this, 'binomial')">Binomial</a>
+              </div>
             </div>
+            <input type="text" class="form-control exact d-none rounded-right" onchange="updateRollsField(this)" value="1">
+            <span class="input-group-text rounded-0 range d-none">Min</span>
+            <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)">
+            <span class="input-group-text rounded-0 range d-none">Max</span>
+            <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRollsField(this)">
+            <span class="input-group-text rounded-0 binomial d-none">n</span>
+            <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRollsField(this)">
+            <span class="input-group-text rounded-0 binomial d-none">p</span>
+            <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRollsField(this)">
           </div>
-          <input type="text" class="form-control exact" onchange="updateRollsField(this)" value="1">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateRollsField(this)">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRollsField(this)">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none" value="2" onchange="updateRollsField(this)">
         </div>
       </div>
     </div>
-  </div>
 
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-  <script src="autogrow.js" charset="utf-8"></script>
-  <script src="script.js" charset="utf-8"></script>
-</body>
-</html>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="autogrow.js" charset="utf-8"></script>
+    <script src="script.js" charset="utf-8"></script>
+  </body>
+  </html>

@@ -1,8 +1,10 @@
 
 $("#source").val('');
+$('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
 let indentation = 2;
 let table = {
+  type: "minecraft:generic",
   pools: []
 };
 addPool();
@@ -12,75 +14,65 @@ function addPool(el) {
     rolls: 1,
     entries: []
   });
-  let $pool = $('#poolTemplate').clone();
-  $pool.removeAttr('id').attr('data-index', table.pools.length - 1);
-  $('#structure').append($pool);
   invalidated();
 }
 
 function removePool(el) {
-  let $pool = $(el).closest('.pool');
-  table.pools.pop($pool.attr('data-index'));
-  $('#structure .pool').each((i, el) => {
-    if ($(el).attr('data-index') > $pool.attr('data-index')) {
-      $(el).attr('data-index', $(el).attr('data-index') - 1);
-    }
-  });
-  $pool.remove();
+  let index = parseInt($(el).closest('.pool').attr('data-index'));
+  if (index === 0) {
+    table.pools.shift();
+  } else {
+    table.pools.splice(index, index);
+  }
   invalidated();
+}
+
+function getRangeField($el, type) {
+  if (type === 'exact') {
+    return parseInt($el.find('.exact').val());
+  } else if (type === 'range') {
+    let data = {};
+    let min = $el.find('.range.min').val();
+    let max = $el.find('.range.max').val();
+    if (min) data.min = parseInt(min);
+    if (max) data.max = parseInt(max);
+    return data;
+  } else if (type === 'binomial') {
+    let data = {type: "minecraft:binomial"};
+    let n = $el.find('.binomial.n').val();
+    let p = $el.find('.binomial.p').val();
+    if (n) data.n = parseInt(n);
+    if (p) data.p = parseFloat(p);
+    return data;
+  }
+}
+
+function switchRollsType(el, type) {
+  $(el).closest('.rolls').attr('data-type', type);
+  updateRollsField(el);
 }
 
 function updateRollsField(el) {
-  let $pool = $(el).closest('.pool')
-  let $rolls = $(el).closest('.rolls');
-  let data = parseInt($rolls.find('.exact').val());
-  if ($rolls.attr('data-type') === 'range') {
-    data = {};
-    let min = $rolls.find('.range.min').val();
-    let max = $rolls.find('.range.max').val();
-    if (min) data.min = parseInt(min);
-    if (max) data.max = parseInt(max);
-  } else if ($rolls.attr('data-type') === 'binomial') {
-    data = {type: "minecraft:binomial"};
-    let n = $rolls.find('.binomial.n').val();
-    let p = $rolls.find('.binomial.p').val();
-    if (n) data.n = parseInt(n);
-    if (p) data.p = parseFloat(p);
-  }
-  table.pools[$pool.attr('data-index')].rolls = data;
+  let type = $(el).closest('.rolls').attr('data-type');
+  let data = getRangeField($(el).closest('.rolls'), type);
+  table.pools[$(el).closest('.pool').attr('data-index')].rolls = data;
   invalidated();
 }
 
-function switchExact(el) {
-  let $rolls = $(el).closest('.rolls');
-  $rolls.attr('data-type', 'exact');
-  $rolls.find('.exact').removeClass('d-none');
-  $rolls.find('.range').addClass('d-none');
-  $rolls.find('.binomial').addClass('d-none');
-  updateRollsField(el);
+function updateTableType() {
+  table.type = $('#tableType').val();
+  invalidated();
 }
 
-function switchRange(el) {
-  let $rolls = $(el).closest('.rolls');
-  $rolls.attr('data-type', 'range');
-  $rolls.find('.exact').addClass('d-none');
-  $rolls.find('.range').removeClass('d-none');
-  $rolls.find('.binomial').addClass('d-none');
-  updateRollsField(el);
-}
-
-function switchBinomial(el) {
-  let $rolls = $(el).closest('.rolls');
-  $rolls.attr('data-type', 'binomial');
-  $rolls.find('.exact').addClass('d-none');
-  $rolls.find('.range').addClass('d-none');
-  $rolls.find('.binomial').removeClass('d-none');
-  updateRollsField(el);
-}
-
-function invalidated() {
-  $('#source').val(JSON.stringify(table, null, indentation));
-  $('#source').autogrow();
+function updateSouce() {
+  $('#source').removeClass('invalid');
+  try {
+    table = JSON.parse($('#source').val());
+  } catch {
+    $('#source').addClass('invalid');
+    return;
+  }
+  invalidated();
 }
 
 function updateIndentation(el) {
@@ -95,4 +87,39 @@ function updateIndentation(el) {
 function copySource(el) {
   $('#source').get()[0].select();
   document.execCommand('copy');
+}
+
+function invalidated() {
+  generateStructure();
+  $('#source').val(JSON.stringify(table, null, indentation));
+}
+
+function generateStructure() {
+  $('#structure').html('');
+
+  for (let i = 0; i < table.pools.length; i += 1) {
+    let pool = table.pools[i];
+    let $pool = $('#poolTemplate').clone();
+    $pool.removeAttr('id').attr('data-index', i);
+    // Rolls
+    let $rolls = $pool.find('.rolls');
+    if (typeof pool.rolls === 'object') {
+      if (pool.rolls.type && pool.rolls.type.match(/(minecraft:)?binomial/)) {
+        $rolls.attr('data-type', 'binomial');
+        $rolls.find('.binomial').removeClass('d-none');
+        $rolls.find('.binomial.n').val(pool.rolls.n);
+        $rolls.find('.binomial.p').val(pool.rolls.p);
+      } else {
+        $rolls.attr('data-type', 'range');
+        $rolls.find('.range').removeClass('d-none');
+        $rolls.find('.range.min').val(pool.rolls.min);
+        $rolls.find('.range.max').val(pool.rolls.max);
+      }
+    } else {
+      $rolls.attr('data-type', 'exact');
+      $rolls.find('.exact').removeClass('d-none');
+      $rolls.find('.exact').val(pool.rolls);
+    }
+    $('#structure').append($pool);
+  }
 }
