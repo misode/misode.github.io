@@ -22,7 +22,7 @@
   <div class="container">
     <div class="row my-4">
       <div class="col-12 col-md-7">
-        <div class="input-group pb-3">
+        <div class="input-group">
           <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)">Add Pool</button>
           <div class="input-group-prepend">
             <span class="input-group-text rounded-left">Type</span>
@@ -36,11 +36,11 @@
             <option value="minecraft:generic">Generic</option>
           </select>
         </div>
-        <div id="structure" class="mb-3">
+        <div id="structure"">
         </div>
       </div>
       <div class="col-12 col-md-5">
-        <div class="mb-3 float-right">
+        <div class="mb-3 float-md-right">
           <div class="input-group">
             <div class="input-group-prepend">
               <span class="input-group-text">Indentation</span>
@@ -59,40 +59,79 @@
   </div>
 
   <div class="d-none">
-    <div id="poolTemplate" class="card pool">
+    <div id="poolTemplate" class="card mt-3 pool">
       <div class="card-header pb-1">
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removePool(this)">Remove Pool</button>
-        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Entry</button>
+        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left" onclick="addEntry(this)">Add Entry</button>
         <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
       </div>
       <div class="card-body">
-        <div class="input-group mb-3 rolls" data-type="exact">
+        <div class="input-group rolls" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Rolls</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
-              <div class="dropdown-menu">
-                <a class="dropdown-item" onclick="switchRollsType(this, 'exact')">Exact</a>
-                <a class="dropdown-item" onclick="switchRollsType(this, 'range')">Range</a>
-                <a class="dropdown-item" onclick="switchRollsType(this, 'binomial')">Binomial</a>
-              </div>
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" onclick="switchRollsType(this, 'exact')">Exact</a>
+              <a class="dropdown-item" onclick="switchRollsType(this, 'range')">Range</a>
+              <a class="dropdown-item" onclick="switchRollsType(this, 'binomial')">Binomial</a>
             </div>
-            <input type="text" class="form-control exact d-none rounded-right" onchange="updateRollsField(this)" value="1">
-            <span class="input-group-text rounded-0 range d-none">Min</span>
-            <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)">
-            <span class="input-group-text rounded-0 range d-none">Max</span>
-            <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRollsField(this)">
-            <span class="input-group-text rounded-0 binomial d-none">n</span>
-            <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRollsField(this)">
-            <span class="input-group-text rounded-0 binomial d-none">p</span>
-            <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRollsField(this)">
           </div>
+          <input type="text" class="form-control exact d-none rounded-right" onchange="updateRollsField(this)" value="1">
+          <span class="input-group-text rounded-0 range d-none">Min</span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)">
+          <span class="input-group-text rounded-0 range d-none">Max</span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRollsField(this)">
+          <span class="input-group-text rounded-0 binomial d-none">n</span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRollsField(this)">
+          <span class="input-group-text rounded-0 binomial d-none">p</span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRollsField(this)">
         </div>
       </div>
     </div>
+    <div id="entryTemplate" class="card mt-3 entry">
+      <div class="card-header pb-1">
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeEntry(this)">Remove Entry</button>
+        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
+        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Function</button>
+      </div>
+      <div class="card-body">
+        <div class="input-group entry-type">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Type</span>
+          </div>
+          <select class="form-control entry-type" onchange="updateEntryType(this)">
+            <option value="minecraft:empty">Empty</option>
+            <option value="minecraft:item">Item</option>
+            <option value="minecraft:tag">Item Tag</option>
+            <option value="minecraft:loot_table">Loot Table</option>
+            <option value="minecraft:alternatives">Alternatives</option>
+            <option value="minecraft:sequence">Sequence</option>
+            <option value="minecraft:dynamic">Dynamic</option>
+            <option value="minecraft:group">Group</option>
+          </select>
+        </div>
+        <div class="input-group mt-3 entry-name d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Name</span>
+          </div>
+          <input type="text" class="form-control" onchange="updateEntryName(this)">
+        </div>
+        <div class="input-group mt-3 entry-weight d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Weight</span>
+          </div>
+          <input type="text" class="form-control" onchange="updateEntryWeight(this)">
+        </div>
+        <div class="input-group mt-3 entry-children d-none">
+          <button type="button" class="btn btn-outline-success">Add Child</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-    <script src="script.js" charset="utf-8"></script>
-  </body>
-  </html>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  <script src="script.js" charset="utf-8"></script>
+</body>
+</html>

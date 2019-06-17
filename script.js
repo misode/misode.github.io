@@ -8,6 +8,18 @@ let table = {
   pools: []
 };
 addPool();
+addEntry($('.pool').get());
+
+function getPool(el) {
+  let poolIndex = parseInt($(el).closest('.pool').attr('data-index'));
+  return table.pools[poolIndex];
+}
+
+function getEntry(el) {
+  let poolIndex = parseInt($(el).closest('.pool').attr('data-index'));
+  let entryIndex = parseInt($(el).closest('.entry').attr('data-index'));
+  return table.pools[poolIndex].entries[entryIndex];
+}
 
 function addPool(el) {
   table.pools.push({
@@ -18,11 +30,29 @@ function addPool(el) {
 }
 
 function removePool(el) {
-  let index = parseInt($(el).closest('.pool').attr('data-index'));
-  if (index === 0) {
+  let poolIndex = parseInt($(el).closest('.pool').attr('data-index'));
+  if (poolIndex === 0) {
     table.pools.shift();
   } else {
-    table.pools.splice(index, index);
+    table.pools.splice(poolIndex, poolIndex);
+  }
+  invalidated();
+}
+
+function addEntry(el) {
+  getPool(el).entries.push({
+    type: "minecraft:item",
+    name: "minecraft:stone"
+  });
+  invalidated();
+}
+
+function removeEntry(el) {
+  let entryIndex = parseInt($(el).closest('.entry').attr('data-index'));
+  if (entryIndex === 0) {
+    getPool(el).entries.shift();
+  } else {
+    getPool(el).entries.splice(entryIndex, entryIndex);
   }
   invalidated();
 }
@@ -55,7 +85,36 @@ function switchRollsType(el, type) {
 function updateRollsField(el) {
   let type = $(el).closest('.rolls').attr('data-type');
   let data = getRangeField($(el).closest('.rolls'), type);
-  table.pools[$(el).closest('.pool').attr('data-index')].rolls = data;
+  getPool(el).rolls = data;
+  invalidated();
+}
+
+function updateEntryType(el) {
+  let entry = getEntry(el);
+  entry.type = $(el).val();
+  if (entry.type === 'minecraft:dynamic') {
+    entry.name = 'minecraft:contents';
+  }
+  invalidated();
+}
+
+function updateEntryName(el) {
+  let entry = getEntry(el);
+  if (entry.type === 'minecraft:dynamic') {
+    entry.name = 'minecraft:contents';
+  } else {
+    entry.name = $(el).val();
+  }
+  invalidated();
+}
+
+function updateEntryWeight(el) {
+  let weight = parseInt($(el).val());
+  if (isNaN(weight)) {
+    delete getEntry(el).weight;
+  } else {
+    getEntry(el).weight = weight;
+  }
   invalidated();
 }
 
@@ -101,6 +160,7 @@ function generateStructure() {
     let pool = table.pools[i];
     let $pool = $('#poolTemplate').clone();
     $pool.removeAttr('id').attr('data-index', i);
+
     // Rolls
     let $rolls = $pool.find('.rolls');
     if (typeof pool.rolls === 'object') {
@@ -119,6 +179,32 @@ function generateStructure() {
       $rolls.attr('data-type', 'exact');
       $rolls.find('.exact').removeClass('d-none');
       $rolls.find('.exact').val(pool.rolls);
+    }
+
+    // Entries
+    for (let j = 0; j < pool.entries.length; j += 1) {
+      let entry = pool.entries[j];
+      let $entry = $('#entryTemplate').clone();
+      $entry.removeAttr('id').attr('data-index', j);
+
+      $entry.find('.entry-type').val(entry.type);
+      if (entry.type === 'minecraft:item' || entry.type === 'minecraft:tag' || entry.type === 'minecraft:loot_table' || entry.type === 'minecraft:dynamic') {
+        $entry.find('.entry-name').removeClass('d-none');
+        if (entry.type === 'minecraft:dynamic') {
+          entry.name = 'minecraft:contents';
+        }
+        $entry.find('.entry-name input').val(entry.name);
+      }
+      $entry.find('.entry-weight').removeClass('d-none');
+      if (entry.weight) {
+        $entry.find('.entry-weight input').val(entry.weight);
+      }
+      if (entry.type === 'minecraft:alternatives' || entry.type === 'minecraft:sequence' || entry.type === 'minecraft:group') {
+        delete entry.name;
+        $entry.find('.entry-children').removeClass('d-none');
+      }
+
+      $pool.children('.card-body').append($entry);
     }
     $('#structure').append($pool);
   }
