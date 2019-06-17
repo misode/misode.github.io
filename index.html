@@ -9,6 +9,7 @@
 <body>
   <nav class="navbar navbar-dark bg-dark">
     <span class="navbar-brand mb-0 h1">Loot Table Generator for Minecraft 1.14</span>
+    <span class="float-right"><a href="https://github.com/misode" style="color: #ddd;">by Misode</a></span>
   </nav>
   <div class="container">
     <div class="row my-4">
@@ -20,8 +21,16 @@
         </div>
       </div>
       <div class="col-12 col-md-5">
-        <div class="btn-group pb-3 float-right">
-          <button type="button" class="btn btn-light" onclick="copySource(this)">Copy</button>
+        <div class="input-group pb-3 float-right">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Indentation</span>
+          </div>
+          <select id="indentationSelect" class="form-control" style="max-width: 7em;" onchange="updateIndentation(this)">
+            <option value="2">2 Spaces</option>
+            <option value="4">4 Spaces</option>
+            <option value="tab">Tabs</option>
+          </select>
+          <button type="button" class="btn ml-3 btn-secondary" onclick="copySource(this)">Copy</button>
         </div>
         <textarea id="source" class="form-control"></textarea>
       </div>

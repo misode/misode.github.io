@@ -1,6 +1,7 @@
 
 $("#source").val('');
-
+$('#indentationSelect').val("2");
+let indentation = 2;
 let table = {
   pools: []
 };
@@ -29,6 +30,15 @@ function removePool(el) {
   invalidated();
 }
 
+function updateIndentation(el) {
+  if (el.value === 'tab') {
+    indentation = '\t';
+  } else {
+    indentation = parseInt(el.value);
+  }
+  invalidated();
+}
+
 function updateRollsField(el) {
   let $pool = $(el).parent().parent().parent();
   let value = parseInt($(el).val());
@@ -37,7 +47,7 @@ function updateRollsField(el) {
 }
 
 function invalidated() {
-  $('#source').val(JSON.stringify(table, null, 2));
+  $('#source').val(JSON.stringify(table, null, indentation));
   $('#source').autogrow();
 }
 
