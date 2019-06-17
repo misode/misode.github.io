@@ -3,6 +3,7 @@ $("#source").val('');
 $('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
 let indentation = 2;
+let luck_based = false;
 let table = {
   type: "minecraft:generic",
   pools: []
@@ -134,8 +135,23 @@ function updateEntryWeight(el) {
   invalidated();
 }
 
+function updateEntryQuality(el) {
+  let quality = parseInt($(el).val());
+  if (isNaN(quality)) {
+    delete getEntry(el).quality;
+  } else {
+    getEntry(el).quality = quality;
+  }
+  invalidated();
+}
+
 function updateTableType() {
   table.type = $('#tableType').val();
+  invalidated();
+}
+
+function updateLuckBased() {
+  luck_based = $('#luckBased').prop('checked');
   invalidated();
 }
 
@@ -203,6 +219,7 @@ function generateStructure() {
     // Bonus Rolls
     let $bonus_rolls = $pool.find('.bonus-rolls');
     if (pool.bonus_rolls) {
+      luck_based = true;
       if (typeof pool.bonus_rolls === 'object') {
         if (pool.bonus_rolls.type && pool.bonus_rolls.type.match(/(minecraft:)?binomial/)) {
           $bonus_rolls.attr('data-type', 'binomial');
@@ -223,6 +240,9 @@ function generateStructure() {
     } else {
       $bonus_rolls.find('.exact').removeClass('d-none');
     }
+    if (!luck_based) {
+      $pool.find('.bonus-rolls').addClass('d-none');
+    }
 
     // Entries
     for (let j = 0; j < pool.entries.length; j += 1) {
@@ -239,8 +259,17 @@ function generateStructure() {
         $entry.find('.entry-name input').val(entry.name);
       }
       $entry.find('.entry-weight').removeClass('d-none');
+      if (luck_based) {
+        $entry.find('.entry-quality').removeClass('d-none');
+      } else {
+        $entry.find('.entry-quality').addClass('d-none');
+      }
       if (entry.weight) {
         $entry.find('.entry-weight input').val(entry.weight);
+      }
+      if (entry.quality) {
+        luck_based = true;
+        $entry.find('.entry-quality input').val(entry.quality);
       }
       if (entry.type === 'minecraft:alternatives' || entry.type === 'minecraft:sequence' || entry.type === 'minecraft:group') {
         delete entry.name;
@@ -250,5 +279,7 @@ function generateStructure() {
       $pool.children('.card-body').append($entry);
     }
     $('#structure').append($pool);
+
+    $('#luck-based').attr('checked', luck_based);
   }
 }

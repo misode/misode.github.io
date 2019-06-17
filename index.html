@@ -21,13 +21,13 @@
   </nav>
   <div class="container">
     <div class="row my-4">
-      <div class="col-12 col-md-7">
+      <div class="col-12 col-md-7 mb-3">
         <div class="input-group">
           <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)">Add Pool</button>
           <div class="input-group-prepend">
             <span class="input-group-text rounded-left">Type</span>
           </div>
-          <select id="tableType" class="form-control" style="max-width: 9em;" onchange="updateTableType(this)">
+          <select id="tableType" class="form-control mr-3 rounded-right" style="max-width: 9em;" onchange="updateTableType(this)">
             <option value="minecraft:empty">Empty</option>
             <option value="minecraft:entity">Entity</option>
             <option value="minecraft:block">Block</option>
@@ -35,6 +35,12 @@
             <option value="minecraft:fishing">Fishing</option>
             <option value="minecraft:generic">Generic</option>
           </select>
+          <div class="input-group-prepend">
+            <div class="input-group-text rounded-left">
+              <input id="luckBased" type="checkbox" onchange="updateLuckBased(this)">
+            </div>
+          </div>
+          <label class="form-control overflow-hidden" for="luckBased" style="max-width: 7em;">Luck based</label>
         </div>
         <div id="structure"">
         </div>
@@ -141,6 +147,12 @@
             <span class="input-group-text">Weight</span>
           </div>
           <input type="text" class="form-control" onchange="updateEntryWeight(this)">
+        </div>
+        <div class="input-group mt-3 entry-quality d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Quality</span>
+          </div>
+          <input type="text" class="form-control" onchange="updateEntryQuality(this)">
         </div>
         <div class="input-group mt-3 entry-children d-none">
           <button type="button" class="btn btn-outline-success">Add Child</button>
