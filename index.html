@@ -17,20 +17,22 @@
         <div class="btn-group pb-3">
           <button type="button" class="btn btn-success d-block float-left" onclick="addPool(this)">Add Pool</button>
         </div>
-        <div id="structure">
+        <div id="structure" class="mb-3">
         </div>
       </div>
       <div class="col-12 col-md-5">
-        <div class="input-group pb-3 float-right">
-          <div class="input-group-prepend">
-            <span class="input-group-text">Indentation</span>
+        <div class="mb-3 float-right">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Indentation</span>
+            </div>
+            <select id="indentationSelect" class="form-control" style="max-width: 7em;" onchange="updateIndentation(this)">
+              <option value="2">2 Spaces</option>
+              <option value="4">4 Spaces</option>
+              <option value="tab">Tabs</option>
+            </select>
+            <button type="button" class="btn ml-3 btn-secondary" onclick="copySource(this)">Copy</button>
           </div>
-          <select id="indentationSelect" class="form-control" style="max-width: 7em;" onchange="updateIndentation(this)">
-            <option value="2">2 Spaces</option>
-            <option value="4">4 Spaces</option>
-            <option value="tab">Tabs</option>
-          </select>
-          <button type="button" class="btn ml-3 btn-secondary" onclick="copySource(this)">Copy</button>
         </div>
         <textarea id="source" class="form-control"></textarea>
       </div>
@@ -39,10 +41,10 @@
 
   <div class="d-none">
     <div id="poolTemplate" class="card pool">
-      <div class="card-header">
-        <button type="button" class="btn btn-outline-success mr-3 float-left">Add Entry</button>
-        <button type="button" class="btn btn-outline-success float-left">Add Condition</button>
-        <button type="button" class="btn btn-danger float-right" onclick="removePool(this)">Remove Pool</button>
+      <div class="card-header pb-1">
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removePool(this)">Remove Pool</button>
+        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Entry</button>
+        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
       </div>
       <div class="card-body">
         <div class="input-group">
