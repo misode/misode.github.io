@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Loot Table Generator</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <style media="screen">
+    .dropdown-item {
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar navbar-dark bg-dark">
@@ -47,11 +52,25 @@
         <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
       </div>
       <div class="card-body">
-        <div class="input-group">
+        <div class="input-group mb-3 rolls">
           <div class="input-group-prepend">
             <span class="input-group-text">Rolls</span>
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+            <div class="dropdown-menu">
+              <a class="dropdown-item" onclick="switchExact(this)">Exact</a>
+              <a class="dropdown-item" onclick="switchRange(this)">Range</a>
+              <a class="dropdown-item" onclick="switchBinomial(this)">Binomial</a>
+            </div>
           </div>
-          <input type="text" class="form-control" onchange="updateRollsField(this)" value="1">
+          <input type="text" class="form-control exact" onchange="updateRollsField(this)" value="1">
+          <span class="input-group-text rounded-0 range d-none">Min</span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)">
+          <span class="input-group-text rounded-0 range d-none">Max</span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateRollsField(this)">
+          <span class="input-group-text rounded-0 binomial d-none">n</span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRollsField(this)">
+          <span class="input-group-text rounded-0 binomial d-none">p</span>
+          <input type="text" class="form-control binomial p d-none" value="2" onchange="updateRollsField(this)">
         </div>
       </div>
     </div>
