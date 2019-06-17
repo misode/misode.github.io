@@ -76,7 +76,7 @@
               <a class="dropdown-item" onclick="switchRollsType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateRollsField(this)" value="1">
+          <input type="text" class="form-control exact d-none rounded-right" onchange="updateRollsField(this)">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -85,6 +85,26 @@
           <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRollsField(this)">
           <span class="input-group-text rounded-0 binomial d-none">p</span>
           <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRollsField(this)">
+        </div>
+        <div class="input-group mt-3 bonus-rolls" data-type="exact">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Bonus Rolls</span>
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" onclick="switchBonusRollsType(this, 'exact')">Exact</a>
+              <a class="dropdown-item" onclick="switchBonusRollsType(this, 'range')">Range</a>
+              <a class="dropdown-item" onclick="switchBonusRollsType(this, 'binomial')">Binomial</a>
+            </div>
+          </div>
+          <input type="text" class="form-control exact d-none rounded-right" onchange="updateBonusRollsField(this)">
+          <span class="input-group-text rounded-0 range d-none">Min</span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateBonusRollsField(this)">
+          <span class="input-group-text rounded-0 range d-none">Max</span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateBonusRollsField(this)">
+          <span class="input-group-text rounded-0 binomial d-none">n</span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateBonusRollsField(this)">
+          <span class="input-group-text rounded-0 binomial d-none">p</span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateBonusRollsField(this)">
         </div>
       </div>
     </div>

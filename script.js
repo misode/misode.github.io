@@ -89,6 +89,22 @@ function updateRollsField(el) {
   invalidated();
 }
 
+function switchBonusRollsType(el, type) {
+  $(el).closest('.bonus-rolls').attr('data-type', type);
+  updateBonusRollsField(el);
+}
+
+function updateBonusRollsField(el) {
+  let type = $(el).closest('.bonus-rolls').attr('data-type');
+  let data = getRangeField($(el).closest('.bonus-rolls'), type);
+  if (type ==='exact' && isNaN(data)) {
+    delete getPool(el).bonus_rolls;
+  } else {
+    getPool(el).bonus_rolls = data;
+  }
+  invalidated();
+}
+
 function updateEntryType(el) {
   let entry = getEntry(el);
   entry.type = $(el).val();
@@ -162,6 +178,9 @@ function generateStructure() {
     $pool.removeAttr('id').attr('data-index', i);
 
     // Rolls
+    if (!pool.rolls) {
+      pool.rolls = 1;
+    }
     let $rolls = $pool.find('.rolls');
     if (typeof pool.rolls === 'object') {
       if (pool.rolls.type && pool.rolls.type.match(/(minecraft:)?binomial/)) {
@@ -179,6 +198,30 @@ function generateStructure() {
       $rolls.attr('data-type', 'exact');
       $rolls.find('.exact').removeClass('d-none');
       $rolls.find('.exact').val(pool.rolls);
+    }
+
+    // Bonus Rolls
+    let $bonus_rolls = $pool.find('.bonus-rolls');
+    if (pool.bonus_rolls) {
+      if (typeof pool.bonus_rolls === 'object') {
+        if (pool.bonus_rolls.type && pool.bonus_rolls.type.match(/(minecraft:)?binomial/)) {
+          $bonus_rolls.attr('data-type', 'binomial');
+          $bonus_rolls.find('.binomial').removeClass('d-none');
+          $bonus_rolls.find('.binomial.n').val(pool.bonus_rolls.n);
+          $bonus_rolls.find('.binomial.p').val(pool.bonus_rolls.p);
+        } else {
+          $bonus_rolls.attr('data-type', 'range');
+          $bonus_rolls.find('.range').removeClass('d-none');
+          $bonus_rolls.find('.range.min').val(pool.bonus_rolls.min);
+          $bonus_rolls.find('.range.max').val(pool.bonus_rolls.max);
+        }
+      } else {
+        $bonus_rolls.attr('data-type', 'exact');
+        $bonus_rolls.find('.exact').removeClass('d-none');
+        $bonus_rolls.find('.exact').val(pool.bonus_rolls);
+      }
+    } else {
+      $bonus_rolls.find('.exact').removeClass('d-none');
     }
 
     // Entries
