@@ -1,16 +1,16 @@
-.bg-info {
+.card.bg-info {
   background-color: #91cdd6 !important;
 }
 
-.bg-success {
+.card.bg-success {
   background-color: #91d8a1 !important;
 }
 
-.bg-secondary {
+.card.bg-secondary {
   background-color: #adb5bd !important;
 }
 
-.bg-dark {
+.card.bg-dark {
   background-color: #646b72 !important;
 }
 

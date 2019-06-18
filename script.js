@@ -35,7 +35,7 @@ function getParent(el) {
 }
 
 function getSuperParent(el) {
-  let $parent = $(el).closest('.table, .pool, .entry, .child, .term, .function, .condition, .modifier');
+  let $parent = $(el).closest('.table, .pool, .entry, .child, .term, .function, .condition, .modifier .score');
   return getParent($parent.parent());
 }
 
@@ -113,7 +113,7 @@ function addCondition(el) {
   }
   parent.conditions.push({
     condition: "minecraft:random_chance",
-    change: 0.5
+    chance: 0.5
   });
   invalidated();
 }
@@ -233,7 +233,7 @@ function updateCountField(el) {
 
 function switchDamageType(el, type) {
   $(el).closest('.function-damage').attr('data-type', type);
-  updateCountField(el);
+  updateDamageField(el);
 }
 
 function updateDamageField(el) {
@@ -378,6 +378,81 @@ function removeModifierSlot(el) {
     }
     invalidated();
   }
+}
+
+function updateConditionType(el) {
+  let condition = $(el).val();
+  let $condition = getParent(el);
+  if (condition === 'minecraft:random_chance_with_looting') {
+    $condition.looting_multiplier = 1;
+  } else if (condition === 'minecraft:entity_properties' || condition === 'minecraft:entity_scores'){
+    $condition.entity = 'this';
+  }
+  $condition.condition = condition;
+  invalidated();
+}
+
+function updateConditionChance(el) {
+  let chance = parseFloat($(el).val());
+  if (isNaN(chance)) {
+    delete getParent(el).chance;
+  } else {
+    getParent(el).chance = chance;
+  }
+  invalidated();
+}
+
+function updateConditionLootingMultiplier(el) {
+  let multiplier = parseFloat($(el).val());
+  if (isNaN(multiplier)) {
+    multiplier = 1;
+  }
+  getParent(el).looting_multiplier = multiplier;
+  invalidated();
+}
+
+function updateInvertedField(el) {
+  let inverted = $(el).prop('checked');
+  if (inverted) {
+    getParent(el).inverted = true;
+  } else {
+    delete getParent(el).inverted;
+  }
+  invalidated();
+}
+
+function updateConditionEntity(el) {
+  getParent(el).entity = $(el).val();
+  invalidated();
+}
+
+function addScore(el) {
+  let condition = getParent(el);
+  let objective = $(el).closest('.condition-entity-scores').find('input').val();
+  if (!condition.scores) {
+    condition.scores = {};
+  }
+  condition.scores[objective] = 1;
+  invalidated();
+}
+
+function removeScore(el) {
+  let objective = $(el).closest('.score').attr('data-objective');
+  delete getParent(el).scores[objective];
+  invalidated();
+}
+
+function switchConditionScoreType(el, type) {
+  $(el).closest('.score').attr('data-type', type);
+  updateConditionScoreField(el);
+}
+
+function updateConditionScoreField(el) {
+  let type = $(el).closest('.score').attr('data-type');
+  let data = getRangeField($(el).closest('.score'), type);
+  let objective = $(el).closest('.score').attr('data-objective');
+  getParent(el).scores[objective] = data;
+  invalidated();
 }
 
 function updateTableType() {
@@ -647,6 +722,63 @@ function generateModifier(modifier, i) {
 function generateCondition(condition, i) {
   let $condition = $('#conditionTemplate').clone();
   $condition.removeAttr('id').attr('data-index', i);
+
+  $condition.find('.condition-type').val(condition.condition);
+  if (condition.condition === 'minecraft:random_chance' || condition.condition === 'minecraft:random_chance_with_looting') {
+    $condition.find('.condition-chance').removeClass('d-none');
+    $condition.find('.condition-chance input').val(condition.chance);
+  } else {
+    delete condition.chance;
+  }
+  if (condition.condition === 'minecraft:random_chance_with_looting') {
+    $condition.find('.condition-looting-multiplier').removeClass('d-none');
+    $condition.find('.condition-looting-multiplier input').val(condition.looting_multiplier);
+  } else {
+    delete condition.looting_multiplier;
+  }
+  if (condition.condition === 'minecraft:killed_by_player') {
+    $condition.find('.condition-killed-inverted').removeClass('d-none');
+    let inverted = false;
+    if (condition.inverted) {
+      inverted = true;
+    }
+    let id = 'invertedCheckbox' + Math.floor(1000000*Math.random());
+    $condition.find('.condition-killed-inverted').attr('for', id);
+    $condition.find('.condition-killed-inverted label').attr('for', id);
+    $condition.find('.condition-killed-inverted input').prop('checked', inverted).attr('id', id);
+  } else {
+    delete condition.inverted;
+  }
+  if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:entity_scores') {
+    $condition.find('.condition-entity').removeClass('d-none');
+    $condition.find('.condition-entity select').val(condition.entity);
+  } else {
+    delete condition.entity;
+  }
+  if (condition.condition === 'minecraft:entity_properties') {
+    $condition.find('.condition-predicate').removeClass('d-none');
+  } else {
+    delete condition.predicate;
+  }
+  if (condition.condition === 'minecraft:entity_scores') {
+    $condition.find('.condition-entity-scores').removeClass('d-none');
+
+    if (condition.scores) {
+      $condition.find('.scores-list').removeClass('d-none');
+      for (let objective in condition.scores) {
+        let score = condition.scores[objective];
+        delete score.type;
+        let $score = $('#scoreTemplate').clone();
+        $score.removeAttr('id').attr('data-objective', objective);
+        $score.find('.objective').text(objective);
+        generateRange($score, score);
+
+        $condition.find('.scores-list').append($score);
+      }
+    }
+  } else {
+    delete condition.scores;
+  }
 
   return $condition;
 }

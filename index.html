@@ -73,7 +73,7 @@
               <a class="dropdown-item" onclick="switchRollsType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateRollsField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRollsField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateRollsField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -93,7 +93,7 @@
               <a class="dropdown-item" onclick="switchBonusRollsType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateBonusRollsField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateBonusRollsField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateBonusRollsField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -112,7 +112,7 @@
         <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>``
       </div>
       <div class="card-body">
-        <div class="input-group entry-type">
+        <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">Type</span>
           </div>
@@ -181,7 +181,7 @@
               <a class="dropdown-item" onclick="switchCountType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateCountField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateCountField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateCountField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -201,7 +201,7 @@
               <a class="dropdown-item" onclick="switchDamageType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateDamageField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateDamageField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateDamageField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -278,7 +278,7 @@
               <a class="dropdown-item" onclick="switchLevelsType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateLevelsField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateLevelsField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateLevelsField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -346,7 +346,7 @@
               <a class="dropdown-item" onclick="switchModifierAmountType(this, 'binomial')">Binomial</a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" onchange="updateModifierAmountField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateModifierAmountField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
           <input type="text" class="form-control range min d-none" value="1" onchange="updateModifierAmountField(this)" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
@@ -393,6 +393,80 @@
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeCondition(this)">Remove Condition</button>
       </div>
       <div class="card-body">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Condition</span>
+          </div>
+          <select class="form-control condition-type" onchange="updateConditionType(this)">
+            <option value="minecraft:random_chance">Random Chance</option>
+            <option value="minecraft:random_chance_with_looting">Random Chance with Looting</option>
+            <option value="minecraft:killed_by_player">Killed by Player</option>
+            <option value="minecraft:entity_properties">Entity Properties</option>
+            <option value="minecraft:entity_scores">Entity Scores</option>
+          </select>
+        </div>
+        <div class="input-group mt-3 condition-chance d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Chance</span>
+          </div>
+          <input type="text" class="form-control" onchange="updateConditionChance(this)" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3 condition-looting-multiplier d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Looting Multiplier</span>
+          </div>
+          <input type="text" class="form-control" onchange="updateConditionLootingMultiplier(this)" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3 condition-killed-inverted d-none">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="invertedCheckbox" onchange="updateInvertedField(this)">
+            <label class="custom-control-label" for="invertedCheckbox">Inverted</label>
+          </div>
+        </div>
+        <div class="input-group mt-3 condition-entity d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Entity</span>
+          </div>
+          <select class="form-control" onchange="updateConditionEntity(this)">
+            <option value="this">This</option>
+            <option value="killer">Killer</option>
+            <option value="killer_player">Killer Player</option>
+          </select>
+        </div>
+        <div class="card bg-dark mt-3 condition-predicate d-none">
+          <div class="card-body">
+
+          </div>
+        </div>
+        <div class="input-group mt-3 condition-entity-scores d-none">
+          <div class="input-group-prepend">
+            <label class="input-group-text">Objective</label>
+          </div>
+          <input type="text" class="form-control">
+          <div class="input-group-append">
+            <button class="btn btn-dark" type="button" onclick="addScore(this)">Add Score</button>
+          </div>
+        </div>
+        <div class="mt-3 scores-list d-none">
+        </div>
+      </div>
+    </div>
+    <div id="scoreTemplate" class="input-group mt-3 score">
+      <div class="input-group-prepend">
+        <span class="input-group-text objective"></span>
+        <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" onclick="switchConditionScoreType(this, 'exact')">Exact</a>
+          <a class="dropdown-item" onclick="switchConditionScoreType(this, 'range')">Range</a>
+        </div>
+      </div>
+      <input type="text" class="form-control exact d-none" value="1" onchange="updateConditionScoreField(this)" onclick="this.select()">
+      <span class="input-group-text rounded-0 range d-none">Min</span>
+      <input type="text" class="form-control range min d-none" value="1" onchange="updateConditionScoreField(this)" onclick="this.select()">
+      <span class="input-group-text rounded-0 range d-none">Max</span>
+      <input type="text" class="form-control range max d-none" value="2" onchange="updateConditionScoreField(this)" onclick="this.select()">
+      <div class="input-group-append">
+        <button class="btn btn-outline-danger bg-light" type="button" onclick="removeScore(this)">Remove</button>
       </div>
     </div>
   </div>
