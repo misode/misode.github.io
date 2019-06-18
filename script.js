@@ -10,26 +10,38 @@ let table = {
   pools: []
 };
 addPool();
-addEntry($('.pool').get());
+addEntry($('#structure .pool').get());
 
-function getPool(el) {
-  let index = parseInt($(el).closest('.pool').attr('data-index'));
-  return table.pools[index];
+function getParent(el) {
+  let $parent = $(el).closest('.table, .pool, .entry, .child, .term, .function, .condition, .modifier');
+  let index = $parent.attr('data-index');
+  if ($parent.hasClass('table')) {
+    return table;
+  } else if ($parent.hasClass('pool')) {
+    return getParent($parent.parent()).pools[index];
+  } else if ($parent.hasClass('entry')) {
+    return getParent($parent.parent()).entries[index];
+  } else if ($parent.hasClass('child')) {
+    return getParent($parent.parent()).children[index];
+  } else if ($parent.hasClass('term')) {
+    return getParent($parent.parent()).term;
+  } else if ($parent.hasClass('function')) {
+    return getParent($parent.parent()).functions[index];
+  } else if ($parent.hasClass('condition')) {
+    return getParent($parent.parent()).conditions[index];
+  } else if ($parent.hasClass('modifier')) {
+    return getParent($parent.parent()).modifiers[index];
+  }
 }
 
-function getEntry(el) {
-  let index = parseInt($(el).closest('.entry').attr('data-index'));
-  return getPool(el).entries[index];
+function getSuperParent(el) {
+  let $parent = $(el).closest('.table, .pool, .entry, .child, .term, .function, .condition, .modifier');
+  return getParent($parent.parent());
 }
 
-function getFunction(el) {
-  let index = parseInt($(el).closest('.function').attr('data-index'));
-  return getEntry(el).functions[index];
-}
-
-function getModifier(el) {
-  let index = parseInt($(el).closest('.modifier').attr('data-index'));
-  return getFunction(el).modifiers[index];
+function getIndex(el) {
+  let $parent = $(el).closest('.table, .pool, .entry, .child, .term, .function, .condition, .modifier');
+  return parseInt($parent.attr('data-index'));
 }
 
 function addPool(el) {
@@ -41,13 +53,13 @@ function addPool(el) {
 }
 
 function removePool(el) {
-  let index = parseInt($(el).closest('.pool').attr('data-index'));
-  table.pools.splice(index, 1);
+  let index = getIndex(el);
+  getSuperParent(el).pools.splice(index, 1);
   invalidated();
 }
 
 function addEntry(el) {
-  getPool(el).entries.push({
+  getParent(el).entries.push({
     type: "minecraft:item",
     name: "minecraft:stone"
   });
@@ -55,13 +67,27 @@ function addEntry(el) {
 }
 
 function removeEntry(el) {
-  let index = parseInt($(el).closest('.entry').attr('data-index'));
-  getPool(el).entries.splice(index, 1);
+  let index = getIndex(el);
+  getSuperParent(el).entries.splice(index, 1);
+  invalidated();
+}
+
+function addChild(el) {
+  getParent(el).children.push({
+    type: "minecraft:item",
+    name: "minecraft:stone"
+  });
+  invalidated();
+}
+
+function removeChild(el) {
+  let index = getIndex(el);
+  getSuperParent(el).children.splice(index, 1);
   invalidated();
 }
 
 function addFunction(el) {
-  let entry = getEntry(el);
+  let entry = getParent(el);
   if (!entry.functions) {
     entry.functions = [];
   }
@@ -72,8 +98,32 @@ function addFunction(el) {
 }
 
 function removeFunction(el) {
-  let index = parseInt($(el).closest('.function').attr('data-index'));
-  getEntry(el).functions.splice(index, 1);
+  let parent = getSuperParent(el);
+  parent.functions.splice(getIndex(el), 1);
+  if (parent.functions.length === 0) {
+    delete parent.functions;
+  }
+  invalidated();
+}
+
+function addCondition(el) {
+  let parent = getParent(el);
+  if (!parent.conditions) {
+    parent.conditions = [];
+  }
+  parent.conditions.push({
+    condition: "minecraft:random_chance",
+    change: 0.5
+  });
+  invalidated();
+}
+
+function removeCondition(el) {
+  let parent = getSuperParent(el);
+  parent.conditions.splice(getIndex(el), 1);
+  if (parent.conditions.length === 0) {
+    delete parent.conditions;
+  }
   invalidated();
 }
 
@@ -105,7 +155,7 @@ function switchRollsType(el, type) {
 function updateRollsField(el) {
   let type = $(el).closest('.rolls').attr('data-type');
   let data = getRangeField($(el).closest('.rolls'), type);
-  getPool(el).rolls = data;
+  getParent(el).rolls = data;
   invalidated();
 }
 
@@ -118,15 +168,15 @@ function updateBonusRollsField(el) {
   let type = $(el).closest('.bonus-rolls').attr('data-type');
   let data = getRangeField($(el).closest('.bonus-rolls'), type);
   if (type ==='exact' && isNaN(data)) {
-    delete getPool(el).bonus_rolls;
+    delete getParent(el).bonus_rolls;
   } else {
-    getPool(el).bonus_rolls = data;
+    getParent(el).bonus_rolls = data;
   }
   invalidated();
 }
 
 function updateEntryType(el) {
-  let entry = getEntry(el);
+  let entry = getParent(el);
   entry.type = $(el).val();
   if (entry.type === 'minecraft:dynamic') {
     entry.name = 'minecraft:contents';
@@ -135,7 +185,7 @@ function updateEntryType(el) {
 }
 
 function updateEntryName(el) {
-  let entry = getEntry(el);
+  let entry = getParent(el);
   if (entry.type === 'minecraft:dynamic') {
     entry.name = 'minecraft:contents';
   } else {
@@ -147,9 +197,9 @@ function updateEntryName(el) {
 function updateEntryWeight(el) {
   let weight = parseInt($(el).val());
   if (isNaN(weight)) {
-    delete getEntry(el).weight;
+    delete getParent(el).weight;
   } else {
-    getEntry(el).weight = weight;
+    getParent(el).weight = weight;
   }
   invalidated();
 }
@@ -157,15 +207,15 @@ function updateEntryWeight(el) {
 function updateEntryQuality(el) {
   let quality = parseInt($(el).val());
   if (isNaN(quality)) {
-    delete getEntry(el).quality;
+    delete getParent(el).quality;
   } else {
-    getEntry(el).quality = quality;
+    getParent(el).quality = quality;
   }
   invalidated();
 }
 
 function updateFunctionType(el) {
-  getFunction(el).function = $(el).val();
+  getParent(el).function = $(el).val();
   invalidated();
 }
 
@@ -177,7 +227,7 @@ function switchCountType(el, type) {
 function updateCountField(el) {
   let type = $(el).closest('.function-count').attr('data-type');
   let data = getRangeField($(el).closest('.function-count'), type);
-  getFunction(el).count = data;
+  getParent(el).count = data;
   invalidated();
 }
 
@@ -189,7 +239,7 @@ function switchDamageType(el, type) {
 function updateDamageField(el) {
   let type = $(el).closest('.function-damage').attr('data-type');
   let data = getRangeField($(el).closest('.function-damage'), type);
-  getFunction(el).damage = data;
+  getParent(el).damage = data;
   invalidated();
 }
 
@@ -201,12 +251,12 @@ function updateTagField(el) {
   if (!nbt.endsWith('}')) {
     nbt = nbt + '}';
   }
-  getFunction(el).tag = nbt;
+  getParent(el).tag = nbt;
   invalidated();
 }
 
 function addEnchantment(el) {
-  let func = getFunction(el);
+  let func = getParent(el);
   let enchantment = $(el).attr('data-ench');
   if (!func.enchantments) {
     func.enchantments = [];
@@ -216,7 +266,7 @@ function addEnchantment(el) {
 }
 
 function removeEnchantment(el) {
-  let func = getFunction(el);
+  let func = getParent(el);
   let ench = $(el).attr('data-ench');
   let index = func.enchantments.indexOf(ench);
   if (index > -1) {
@@ -236,17 +286,16 @@ function switchLevelsType(el, type) {
 function updateLevelsField(el) {
   let type = $(el).closest('.function-ench-levels').attr('data-type');
   let data = getRangeField($(el).closest('.function-ench-levels'), type);
-  getFunction(el).levels = data;
+  getParent(el).levels = data;
   invalidated();
 }
 
 function updateTreasureField(el) {
   let treasure = $(el).prop('checked');
-  console.log(treasure);
   if (treasure) {
-    getFunction(el).treasure = true;
+    getParent(el).treasure = true;
   } else {
-    delete getFunction(el).treasure;
+    delete getParent(el).treasure;
   }
   invalidated();
 }
@@ -254,15 +303,15 @@ function updateTreasureField(el) {
 function updateLimitField(el) {
   let limit = parseInt($(el).val());
   if (isNaN(limit)) {
-    delete getFunction(el).limit;
+    delete getParent(el).limit;
   } else {
-    getFunction(el).limit = limit;
+    getParent(el).limit = limit;
   }
   invalidated();
 }
 
 function addModifier(el) {
-  let func = getFunction(el);
+  let func = getParent(el);
   if (!func.modifiers) {
     func.modifiers = [];
   }
@@ -278,17 +327,17 @@ function addModifier(el) {
 
 function removeModifier(el) {
   let index = parseInt($(el).closest('.modifier').attr('data-index'));
-  getFunction(el).modifiers.splice(index, 1);
+  getParent(el).modifiers.splice(index, 1);
   invalidated();
 }
 
 function updateModifierAttribute(el) {
-  getModifier(el).attribute = $(el).val();
+  getParent(el).attribute = $(el).val();
   invalidated();
 }
 
 function updateModifierName(el) {
-  getModifier(el).name = $(el).val();
+  getParent(el).name = $(el).val();
   invalidated();
 }
 
@@ -300,17 +349,17 @@ function switchModifierAmountType(el, type) {
 function updateModifierAmountField(el) {
   let type = $(el).closest('.modifier-amount').attr('data-type');
   let data = getRangeField($(el).closest('.modifier-amount'), type);
-  getModifier(el).amount = data;
+  getParent(el).amount = data;
   invalidated();
 }
 
 function updateModifierOperation(el) {
-  getModifier(el).operation = $(el).val();
+  getParent(el).operation = $(el).val();
   invalidated();
 }
 
 function addModifierSlot(el) {
-  let modifier = getModifier(el);
+  let modifier = getParent(el);
   if (!modifier.slots) {
     modifier.slots = [];
   }
@@ -319,7 +368,7 @@ function addModifierSlot(el) {
 }
 
 function removeModifierSlot(el) {
-  let modifier = getModifier(el);
+  let modifier = getParent(el);
   let slot = $(el).attr('data-slot');
   let index = modifier.slots.indexOf(slot);
   if (index > -1) {
@@ -425,10 +474,16 @@ function generatePool(pool, i) {
     $pool.find('.bonus-rolls').addClass('d-none');
   }
 
-  // Entries
   for (let j = 0; j < pool.entries.length; j += 1) {
     let $entry = generateEntry(pool.entries[j], j);
     $pool.children('.card-body').append($entry);
+  }
+
+  if (pool.conditions) {
+    for (let j = 0; j < pool.conditions.length; j += 1) {
+      let $condition = generateCondition(pool.conditions[j], j);
+      $pool.children('.card-body').append($condition);
+    }
   }
 
   return $pool;
@@ -464,10 +519,25 @@ function generateEntry(entry, i) {
     $entry.find('.entry-children').removeClass('d-none');
   }
 
+  if (entry.children) {
+    for (let j = 0; j < entry.children.length; j += 1) {
+      let $child = generateEntry(entry.children[j], j);
+      $child.removeClass('entry').addClass('child');
+      $entry.children('.card-body').append($child);
+    }
+  }
+
   if (entry.functions) {
     for (let j = 0; j < entry.functions.length; j += 1) {
       let $function = generateFunction(entry.functions[j], j);
       $entry.children('.card-body').append($function);
+    }
+  }
+
+  if (entry.conditions) {
+    for (let j = 0; j < entry.conditions.length; j += 1) {
+      let $condition = generateCondition(entry.conditions[j], j);
+      $entry.children('.card-body').append($condition);
     }
   }
 
@@ -503,7 +573,7 @@ function generateFunction(func, i) {
       for (let e of func.enchantments) {
         let item = $function.find('.dropdown-item[data-ench="' + e + '"]');
         item.addClass('d-none');
-        let html = '<button type="button" class="btn btn-outline-danger btn-sm mr-2 mt-2" data-ench="' + e + '" onclick="removeEnchantment(this)">' + item.text() + '</button>';
+        let html = '<button type="button" class="btn btn-outline-danger bg-light btn-sm mr-2 mt-2" data-ench="' + e + '" onclick="removeEnchantment(this)">' + item.text() + '</button>';
         $function.find('.enchantment-list').append(html);
       }
     }
@@ -543,6 +613,13 @@ function generateFunction(func, i) {
     delete func.modifiers;
   }
 
+  if (func.conditions) {
+    for (let j = 0; j < func.conditions.length; j += 1) {
+      let $condition = generateCondition(func.conditions[j], j);
+      $function.children('.card-body').append($condition);
+    }
+  }
+
   return $function;
 }
 
@@ -557,13 +634,19 @@ function generateModifier(modifier, i) {
 
   if (modifier.slots) {
     for (let s of modifier.slots) {
-      console.log(s);
       let item = $modifier.find('.dropdown-item[data-slot="' + s + '"]');
       item.addClass('d-none');
-      let html = '<button type="button" class="btn btn-outline-danger btn-sm mr-2 mt-2" data-slot="' + s + '" onclick="removeModifierSlot(this)">' + item.text() + '</button>';
+      let html = '<button type="button" class="btn btn-outline-danger bg-light btn-sm mr-2 mt-2" data-slot="' + s + '" onclick="removeModifierSlot(this)">' + item.text() + '</button>';
       $modifier.find('.modifier-slots-list').append(html);
     }
   }
 
   return $modifier
+}
+
+function generateCondition(condition, i) {
+  let $condition = $('#conditionTemplate').clone();
+  $condition.removeAttr('id').attr('data-index', i);
+
+  return $condition;
 }

@@ -1,0 +1,27 @@
+.bg-info {
+  background-color: #91cdd6 !important;
+}
+
+.bg-success {
+  background-color: #91d8a1 !important;
+}
+
+.bg-secondary {
+  background-color: #adb5bd !important;
+}
+
+.bg-dark {
+  background-color: #646b72 !important;
+}
+
+.dropdown-item {
+  cursor: pointer;
+}
+textarea.invalid {
+  border-color: red !important;
+}
+.scrollable-menu {
+  height: auto;
+  max-height: 300px;
+  overflow-x: hidden;
+}

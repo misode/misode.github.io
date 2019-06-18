@@ -5,19 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Loot Table Generator</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <style media="screen">
-    .dropdown-item {
-      cursor: pointer;
-    }
-    textarea.invalid {
-      border-color: red !important;
-    }
-    .scrollable-menu {
-      height: auto;
-      max-height: 300px;
-      overflow-x: hidden;
-    }
-  </style>
+  <link rel="stylesheet" href="custom.css">
 </head>
 <body>
   <nav class="navbar navbar-dark bg-dark">
@@ -45,7 +33,7 @@
             <label class="custom-control-label" for="luckBased">Luck-based</label>
           </div>
         </div>
-        <div id="structure"">
+        <div id="structure" class="table">
         </div>
       </div>
       <div class="col-12 col-lg-5">
@@ -68,17 +56,17 @@
   </div>
 
   <div class="d-none">
-    <div id="poolTemplate" class="card mt-3 pool">
+    <div id="poolTemplate" class="card bg-success text-white mt-3 pool">
       <div class="card-header pb-1">
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removePool(this)">Remove Pool</button>
-        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left" onclick="addEntry(this)">Add Entry</button>
-        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
+        <button type="button" class="btn btn-light mr-3 mb-2 float-left" onclick="addEntry(this)">Add Entry</button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>
       </div>
       <div class="card-body">
         <div class="input-group rolls" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Rolls</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
               <a class="dropdown-item" onclick="switchRollsType(this, 'exact')">Exact</a>
               <a class="dropdown-item" onclick="switchRollsType(this, 'range')">Range</a>
@@ -98,7 +86,7 @@
         <div class="input-group mt-3 bonus-rolls" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Bonus Rolls</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
               <a class="dropdown-item" onclick="switchBonusRollsType(this, 'exact')">Exact</a>
               <a class="dropdown-item" onclick="switchBonusRollsType(this, 'range')">Range</a>
@@ -120,8 +108,8 @@
     <div id="entryTemplate" class="card mt-3 entry">
       <div class="card-header pb-1">
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeEntry(this)">Remove Entry</button>
-        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
-        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left" onclick="addFunction(this)">Add Function</button>
+        <button type="button" class="btn btn-secondary mr-3 mb-2 float-left" onclick="addFunction(this)">Add Function</button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>``
       </div>
       <div class="card-body">
         <div class="input-group entry-type">
@@ -158,14 +146,14 @@
           <input type="text" class="form-control" onchange="updateEntryQuality(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3 entry-children d-none">
-          <button type="button" class="btn btn-outline-success">Add Child</button>
+          <button type="button" class="btn btn-outline-success" onclick="addChild(this)">Add Child</button>
         </div>
       </div>
     </div>
-    <div id="functionTemplate" class="card mt-3 function">
+    <div id="functionTemplate" class="card bg-secondary mt-3 function">
       <div class="card-header pb-1">
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFunction(this)">Remove Function</button>
-        <button type="button" class="btn btn-outline-success mr-3 mb-2 float-left">Add Condition</button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>
       </div>
       <div class="card-body">
         <div class="input-group">
@@ -186,7 +174,7 @@
         <div class="input-group function-count mt-3 d-none" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Count</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
               <a class="dropdown-item" onclick="switchCountType(this, 'exact')">Exact</a>
               <a class="dropdown-item" onclick="switchCountType(this, 'range')">Range</a>
@@ -206,7 +194,7 @@
         <div class="input-group function-damage mt-3 d-none" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Damage</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
               <a class="dropdown-item" onclick="switchDamageType(this, 'exact')">Exact</a>
               <a class="dropdown-item" onclick="switchDamageType(this, 'range')">Range</a>
@@ -235,7 +223,7 @@
               <span class="input-group-text">Optional Enchantments</span>
             </div>
             <div class="input-group-append">
-              <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
+              <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
               <div class="dropdown-menu scrollable-menu">
                 <a class="dropdown-item" data-ench="minecraft:aqua_affinity" onclick="addEnchantment(this)">Aqua Affinity</a>
                 <a class="dropdown-item" data-ench="minecraft:bane_of_arthropods" onclick="addEnchantment(this)">Bane of Arthropods</a>
@@ -283,7 +271,7 @@
         <div class="input-group function-ench-levels mt-3 d-none" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Levels</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
               <a class="dropdown-item" onclick="switchLevelsType(this, 'exact')">Exact</a>
               <a class="dropdown-item" onclick="switchLevelsType(this, 'range')">Range</a>
@@ -313,11 +301,11 @@
           <input type="text" class="form-control" onchange="updateLimitField(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3 function-attributes d-none">
-          <button type="button" class="btn btn-outline-success" onclick="addModifier(this)">Add Modifier</button>
+          <button type="button" class="btn btn-dark" onclick="addModifier(this)">Add Modifier</button>
         </div>
       </div>
     </div>
-    <div id="modifierTemplate" class="card mt-3 modifier">
+    <div id="modifierTemplate" class="card bg-dark mt-3 modifier">
       <div class="card-header pb-1">
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeModifier(this)">Remove Modifier</button>
       </div>
@@ -351,7 +339,7 @@
         <div class="input-group mt-3 modifier-amount" data-type="exact">
           <div class="input-group-prepend">
             <span class="input-group-text">Amount</span>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
               <a class="dropdown-item" onclick="switchModifierAmountType(this, 'exact')">Exact</a>
               <a class="dropdown-item" onclick="switchModifierAmountType(this, 'range')">Range</a>
@@ -384,7 +372,7 @@
               <span class="input-group-text">Slots</span>
             </div>
             <div class="input-group-append">
-              <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
+              <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
               <div class="dropdown-menu">
                 <a class="dropdown-item" data-slot="mainhand" onclick="addModifierSlot(this)">Mainhand</a>
                 <a class="dropdown-item" data-slot="offhand" onclick="addModifierSlot(this)">Offhand</a>
@@ -398,6 +386,13 @@
           <div class="modifier-slots-list">
           </div>
         </div>
+      </div>
+    </div>
+    <div id="conditionTemplate" class="card mt-3 bg-info condition">
+      <div class="card-header pb-1">
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeCondition(this)">Remove Condition</button>
+      </div>
+      <div class="card-body">
       </div>
     </div>
   </div>
