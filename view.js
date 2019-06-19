@@ -27,11 +27,18 @@ function generateRange($el, data) {
 function generateStructure() {
   $('#structure').html('');
 
-  for (let i = 0; i < table.pools.length; i += 1) {
-    let $pool = generatePool(table.pools[i], i);
-    $('#structure').append($pool);
+  if (!table.type) {
+    table.type = 'minecraft:empty';
+  }
+  $('#tableType').val(table.type);
 
-    $('#luck-based').attr('checked', luck_based);
+  if (table.pools) {
+    for (let i = 0; i < table.pools.length; i += 1) {
+      let $pool = generatePool(table.pools[i], i);
+      $('#structure').append($pool);
+
+      $('#luck-based').attr('checked', luck_based);
+    }
   }
 }
 
@@ -56,9 +63,11 @@ function generatePool(pool, i) {
     $pool.find('.bonus-rolls').addClass('d-none');
   }
 
-  for (let j = 0; j < pool.entries.length; j += 1) {
-    let $entry = generateEntry(pool.entries[j], j, pool.entries.length);
-    $pool.children('.card-body').append($entry);
+  if (pool.entries) {
+    for (let j = 0; j < pool.entries.length; j += 1) {
+      let $entry = generateEntry(pool.entries[j], j, pool.entries.length);
+      $pool.children('.card-body').append($entry);
+    }
   }
 
   if (pool.conditions) {
@@ -394,18 +403,21 @@ function generateCondition(condition, i) {
   $condition.removeAttr('id').attr('data-index', i);
 
   $condition.find('.condition-type').val(condition.condition);
+
   if (condition.condition === 'minecraft:random_chance' || condition.condition === 'minecraft:random_chance_with_looting') {
     $condition.find('.condition-chance').removeClass('d-none');
     $condition.find('.condition-chance input').val(condition.chance);
   } else {
     delete condition.chance;
   }
+
   if (condition.condition === 'minecraft:random_chance_with_looting') {
     $condition.find('.condition-looting-multiplier').removeClass('d-none');
     $condition.find('.condition-looting-multiplier input').val(condition.looting_multiplier);
   } else {
     delete condition.looting_multiplier;
   }
+
   if (condition.condition === 'minecraft:killed_by_player') {
     $condition.find('.condition-killed-inverted').removeClass('d-none');
     let inverted = false;
@@ -419,35 +431,79 @@ function generateCondition(condition, i) {
   } else {
     delete condition.inverted;
   }
+
   if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:entity_scores') {
     $condition.find('.condition-entity').removeClass('d-none');
     $condition.find('.condition-entity select').val(condition.entity);
   } else {
     delete condition.entity;
   }
-  if (condition.condition === 'minecraft:entity_properties') {
+
+  if (condition.condition === 'minecraft:blockstate_propery') {
+    $condition.find('.condition-block').removeClass('d-none');
+    $condition.find('.condition-block input').val(condition.block);
+    $condition.find('.condition-block-properties').removeClass('d-none');
+  } else {
+    delete condition.block;
+    delete condition.properties;
+  }
+
+  if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:location_predicate' || condition.condition === 'minecraft:match_tool') {
     $condition.find('.condition-predicate').removeClass('d-none');
   } else {
     delete condition.predicate;
   }
+
   if (condition.condition === 'minecraft:entity_scores') {
     $condition.find('.condition-entity-scores').removeClass('d-none');
-
-    if (condition.scores) {
-      $condition.find('.scores-list').removeClass('d-none');
-      for (let objective in condition.scores) {
-        let score = condition.scores[objective];
-        delete score.type;
-        let $score = $('#scoreTemplate').clone();
-        $score.removeAttr('id').attr('data-objective', objective);
-        $score.find('.objective').text(objective);
-        generateRange($score, score);
-
-        $condition.find('.scores-list').append($score);
-      }
-    }
   } else {
     delete condition.scores;
+  }
+
+  if (condition.condition === 'minecraft:alternatives') {
+    $condition.find('.condition-terms').removeCLass('d-none');
+  } else {
+    delete condition.terms;
+  }
+
+  if (condition.scores) {
+    $condition.find('.scores-list').removeClass('d-none');
+    for (let objective in condition.scores) {
+      let score = condition.scores[objective];
+      delete score.type;
+      let $score = $('#scoreTemplate').clone();
+      $score.removeAttr('id').attr('data-objective', objective);
+      $score.find('.objective').text(objective);
+      generateRange($score, score);
+
+      $condition.find('.scores-list').append($score);
+    }
+  }
+
+  if (condition.properties) {
+    $condition.find('.property-list').removeClass('d-none');
+    for (let blockstate in condition.properties) {
+      let $property = $('#blockPropertyTemplate').clone();
+      $property.removeAttr('id').attr('data-blockstate', blockstate);
+      $property.find('input').val(condition.properties[blockstate]);
+      $property.find('.blockstate').text(blockstate);
+
+      $condition.find('.property-list').append($property);
+    }
+  }
+
+  if (condition.term) {
+    let $term = generateCondition(condition.term, 0);
+    $term.removeClass('condition').addClass('term');
+    $condition.children('.card-body').append($term);
+  }
+
+  if (condition.terms) {
+    for (let j = 0; j < condition.terms.length; j += 1) {
+      let $term = generateCondition(condition.terms[j], j);
+      $term.removeClass('condition').addClass('terms');
+      $condition.children('.card-body').append($term);
+    }
   }
 
   return $condition;

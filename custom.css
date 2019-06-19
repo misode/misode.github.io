@@ -1,3 +1,7 @@
+.card.child {
+  background-color: #eee;
+}
+
 .card.bg-info {
   background-color: #91cdd6 !important;
   color: black !important;

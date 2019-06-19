@@ -5,7 +5,7 @@ $('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
 let indentation = 2;
 let luck_based = false;
-let nodes = '.table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation';
+let nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation';
 let table = {
   type: "minecraft:generic",
   pools: []
@@ -28,8 +28,11 @@ function updateSouce() {
   try {
     table = JSON.parse($('#source').val());
   } catch {
-    $('#source').addClass('invalid');
-    return;
+    if ($('#source').val().length > 0) {
+      $('#source').addClass('invalid');
+      return;
+    }
+    table = {};
   }
   invalidated();
 }
@@ -51,7 +54,7 @@ function copySource(el) {
 function getParent(el) {
   let $parent = $(el).closest(nodes);
   let index = $parent.attr('data-index');
-  if ($parent.hasClass('table')) {
+  if ($parent.hasClass('loot-table')) {
     return table;
   } else if ($parent.hasClass('pool')) {
     return getParent($parent.parent()).pools[index];
@@ -85,16 +88,22 @@ function getIndex(el) {
 }
 
 function addPool(el) {
+  if (!table.pools) {
+    table.pools = [];
+  }
   table.pools.push({
-    rolls: 1,
-    entries: []
+    rolls: 1
   });
   invalidated();
 }
 
 function removePool(el) {
+  let parent = getSuperParent(el);
   let index = getIndex(el);
-  getSuperParent(el).pools.splice(index, 1);
+  parent.pools.splice(index, 1);
+  if (parent.pools.length === 0) {
+    delete parent.pools;
+  }
   invalidated();
 }
 
@@ -111,8 +120,12 @@ function addEntry(el) {
 }
 
 function removeEntry(el) {
+  let parent = getSuperParent(el);
   let index = getIndex(el);
-  getSuperParent(el).entries.splice(index, 1);
+  parent.entries.splice(index, 1);
+  if (parent.entries.length === 0) {
+    delete parent.entries;
+  }
   invalidated();
 }
 
@@ -359,7 +372,7 @@ function removeOperation(el) {
   invalidated();
 }
 
-function updateIntField(el, field) {
+function updateParameterIntField(el, field) {
   let value = parseInt($(el).val());
   if (isNaN(value)) {
     delete getParent(el).parameters[field];
@@ -369,12 +382,34 @@ function updateIntField(el, field) {
   invalidated();
 }
 
-function updateFloatField(el, field) {
+function updateParameterFloatField(el, field) {
   let value = parseFloat($(el).val());
   if (isNaN(value)) {
     delete getParent(el).parameters[field];
   } else {
     getParent(el).parameters[field] = value;
   }
+  invalidated();
+}
+
+function addBlockProperty(el) {
+  let func = getParent(el);
+  let blockstate = $(el).closest('.condition-block-properties').find('input').val();
+  if (!func.properties) {
+    func.properties = {};
+  }
+  func.properties[blockstate] = '';
+  invalidated();
+}
+
+function removeBlockProperty(el) {
+  let blockstate = $(el).closest('.block-property').attr('data-blockstate');
+  delete getParent(el).properties[blockstate];
+  invalidated();
+}
+
+function updateBlockPropertyField(el) {
+  let blockstate = $(el).closest('.block-property').attr('data-blockstate');
+  getParent(el).properties[blockstate] = $(el).val();
   invalidated();
 }
