@@ -39,14 +39,12 @@ function generatePool(pool, i) {
   let $pool = $('#poolTemplate').clone();
   $pool.removeAttr('id').attr('data-index', i);
 
-  // Rolls
   if (!pool.rolls) {
     pool.rolls = 1;
   }
   let $rolls = $pool.find('.rolls');
   generateRange($rolls, pool.rolls);
 
-  // Bonus Rolls
   let $bonus_rolls = $pool.find('.bonus-rolls');
   if (pool.bonus_rolls) {
     luck_based = true;
@@ -59,7 +57,7 @@ function generatePool(pool, i) {
   }
 
   for (let j = 0; j < pool.entries.length; j += 1) {
-    let $entry = generateEntry(pool.entries[j], j);
+    let $entry = generateEntry(pool.entries[j], j, pool.entries.length);
     $pool.children('.card-body').append($entry);
   }
 
@@ -73,7 +71,7 @@ function generatePool(pool, i) {
   return $pool;
 }
 
-function generateEntry(entry, i) {
+function generateEntry(entry, i, size) {
   let $entry = $('#entryTemplate').clone();
   $entry.removeAttr('id').attr('data-index', i);
 
@@ -85,13 +83,15 @@ function generateEntry(entry, i) {
     }
     $entry.find('.entry-name input').val(entry.name);
   }
-  $entry.find('.entry-weight').removeClass('d-none');
+  if (size > 1) {
+    $entry.find('.entry-weight').removeClass('d-none');
+  }
   if (luck_based) {
     $entry.find('.entry-quality').removeClass('d-none');
   } else {
     $entry.find('.entry-quality').addClass('d-none');
   }
-  if (entry.weight) {
+  if (entry.weight ) {
     $entry.find('.entry-weight input').val(entry.weight);
   }
   if (entry.quality) {
@@ -105,7 +105,7 @@ function generateEntry(entry, i) {
 
   if (entry.children) {
     for (let j = 0; j < entry.children.length; j += 1) {
-      let $child = generateEntry(entry.children[j], j);
+      let $child = generateEntry(entry.children[j], j, entry.children.length);
       $child.removeClass('entry').addClass('child');
       $entry.children('.card-body').append($child);
     }
@@ -133,24 +133,36 @@ function generateFunction(func, i) {
   $function.removeAttr('id').attr('data-index', i);
 
   $function.find('.function-type').val(func.function);
+
   if (func.function === 'minecraft:set_count' || func.function === 'minecraft:looting_enchant') {
     $function.find('.function-count').removeClass('d-none');
     generateRange($function.find('.function-count'), func.count);
   } else {
     delete func.count;
   }
+
   if (func.function === 'minecraft:set_damage') {
     $function.find('.function-damage').removeClass('d-none');
     generateRange($function.find('.function-damage'), func.damage);
   } else {
     delete func.damage;
   }
+
   if (func.function === 'minecraft:set_nbt') {
+    if (func.tag) {
+      if (!func.tag.startsWith('{')) {
+        func.tag = '{' + func.tag;
+      }
+      if (!func.tag.endsWith('}')) {
+        func.tag = func.tag + '}';
+      }
+    }
     $function.find('.function-nbt').removeClass('d-none');
     $function.find('.function-nbt input').val(func.tag);
   } else {
     delete func.tag;
   }
+
   if (func.function === 'minecraft:enchant_randomly') {
     $function.find('.function-ench-rand').removeClass('d-none');
     if (func.enchantments) {
@@ -164,6 +176,7 @@ function generateFunction(func, i) {
   } else {
     delete func.enchantments;
   }
+
   if (func.function === 'minecraft:enchant_with_levels') {
     $function.find('.function-ench-levels').removeClass('d-none');
     generateRange($function.find('.function-ench-levels'), func.levels);
@@ -171,6 +184,8 @@ function generateFunction(func, i) {
     let treasure = false;
     if (func.treasure) {
       treasure = true;
+    } else {
+      delete func.treasure;
     }
     let id = 'treasureCheckbox' + Math.floor(1000000*Math.random());
     $function.find('.function-ench-treasure label').attr('for', id);
@@ -179,12 +194,19 @@ function generateFunction(func, i) {
     delete func.levels;
     delete func.treasure;
   }
-  if (func.function === 'minecraft:looting_enchant') {
-    $function.find('.function-limit').removeClass('d-none');
-    $function.find('.function-limit input').val(func.limit);
+
+  if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
+    if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
+      $function.find('.function-limit').removeClass('d-none');
+      $function.find('.function-limit input').val(func.limit);
+    } else {
+      $function.find('.function-limit-range').removeClass('d-none');
+      generateRange($function.find('.function-limit-range'), func.limit);
+    }
   } else {
     delete func.limit;
   }
+
   if (func.function === 'minecraft:set_attributes') {
     $function.find('.function-attributes').removeClass('d-none');
     if (func.modifiers) {
@@ -195,6 +217,132 @@ function generateFunction(func, i) {
     }
   } else {
     delete func.modifiers;
+  }
+
+  if (func.function === 'minecraft:set_name') {
+    $function.find('.function-name').removeClass('d-none');
+    $function.find('.function-name input').val(func.name);
+  } else {
+    delete func.name;
+  }
+
+  if (func.function === 'minecraft:set_lore') {
+    let lore = "";
+    if (func.lore) {
+      for (let j = 0; j < func.lore.length; j += 1) {
+        lore += func.lore[j];
+        if (j < func.lore.length - 1) {
+          lore += "\n";
+        }
+      }
+    }
+
+    $function.find('.function-lore').removeClass('d-none');
+    $function.find('.function-lore textarea').val(lore);
+
+    if(!func.replace) {
+      delete func.replace;
+    }
+
+    $function.find('.function-lore-replace').removeClass('d-none');
+    $function.find('.function-lore-replace input').prop('checked', func.replace);
+  } else {
+    delete func.lore;
+    delete func.replace;
+  }
+
+  if (func.function === 'minecraft:copy_name' || func.function === 'minecraft:copy_nbt') {
+    if (func.function === 'minecraft:copy_name') {
+      func.source = 'block_entity';
+    }
+    if (!func.source) {
+      func.source = 'this';
+    }
+    $function.find('.function-source').removeClass('d-none');
+    $function.find('.function-source select').val(func.source);
+  } else {
+    delete func.source;
+  }
+
+  if (func.function === 'minecraft:set_name' || func.function === 'minecraft:fill_player_head') {
+    if (!func.entity) {
+      func.entity = 'this';
+    }
+    $function.find('.function-entity').removeClass('d-none');
+    $function.find('.function-entity select').val(func.entity);
+  } else {
+    delete func.entity;
+  }
+
+  if (func.function === 'minecraft:set_contents') {
+    $function.find('.function-entries').removeClass('d-none');
+  } else {
+    delete func.entries;
+  }
+
+  if (func.function === 'minecraft:copy_nbt') {
+    $function.find('.function-operations').removeClass('d-none');
+  } else {
+    delete func.ops;
+  }
+
+  if (func.function === 'minecraft:apply_bonus') {
+    $function.find('.function-enchantment').removeClass('d-none');
+    $function.find('.function-entity input').val(func.enchantment);
+  } else {
+    delete func.enchantment;
+  }
+
+  if (func.function === 'minecraft:apply_bonus') {
+    if (!func.formula) {
+      func.formula = 'minecraft:uniform_bonus_count';
+    }
+    $function.find('.function-formula').removeClass('d-none');
+    $function.find('.function-formula select').val(func.formula);
+
+    if (!func.parameters){
+      func.parameters = {};
+    }
+    if (func.formula === 'minecraft:uniform_bonus_count') {
+      if (!func.parameters.bonusMultiplier) {
+        func.parameters.bonusMultiplier = 1;
+      }
+      delete func.parameters.extra;
+      delete func.parameters.probability;
+      $function.find('.function-bonus-multiplier').removeClass('d-none');
+      $function.find('.function-bonus-multiplier input').val(func.parameters.bonusMultiplier);
+    } else if (func.formula === 'minecraft:binomial_with_bonus_count') {
+      if (!func.parameters.extra) {
+        func.parameters.extra = 0;
+      }
+      if (!func.parameters.probability) {
+        func.parameters.probability = 0.5;
+      }
+      delete func.parameters.multiplier;
+      console.log(func);
+      $function.find('.function-bonus-extra').removeClass('d-none');
+      $function.find('.function-bonus-extra input').val(func.parameters.extra);
+      $function.find('.function-bonus-probability').removeClass('d-none');
+      $function.find('.function-bonus-probability input').val(func.parameters.probability);
+    } else {
+      delete func.parameters;
+    }
+  } else {
+    delete func.formula;
+  }
+
+  if (func.ops) {
+    for (let j = 0; j < func.ops.length; j += 1) {
+      let $operation = generateOperation(func.ops[j], j);
+      $function.children('.card-body').append($operation);
+    }
+  }
+
+  if (func.entries) {
+    for (let j = 0; j < func.entries.length; j += 1) {
+      let $entry = generateEntry(func.entries[j], j, func.entries.length);
+      $function.children('.card-body').append($entry);
+    }
   }
 
   if (func.conditions) {
@@ -226,6 +374,19 @@ function generateModifier(modifier, i) {
   }
 
   return $modifier
+}
+
+function generateOperation(operation, i) {
+  console.log(operation, i);
+  let $operation = $('#operationTemplate').clone();
+  $operation.removeAttr('id').attr('data-index', i);
+
+  $operation.find('.operation-source').val(operation.source);
+  $operation.find('.operation-target').val(operation.target);
+
+  $operation.find('.operation-type').val(operation.op);
+
+  return $operation
 }
 
 function generateCondition(condition, i) {

@@ -1,25 +1,43 @@
 .card.bg-info {
   background-color: #91cdd6 !important;
+  color: black !important;
 }
 
 .card.bg-success {
   background-color: #91d8a1 !important;
+  color: black !important;
 }
 
 .card.bg-secondary {
   background-color: #adb5bd !important;
+  color: black !important;
 }
 
 .card.bg-dark {
   background-color: #646b72 !important;
+  color: white !important;
 }
 
 .dropdown-item {
   cursor: pointer;
 }
+
+.code {
+  font-family: Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  -webkit-tab-size: 4;
+}
+
 textarea.invalid {
   border-color: red !important;
 }
+
+textarea.invalid:focus {
+  box-shadow: 0 0 0 .2rem rgba(255,0,0,.25) !important;
+}
+
 .scrollable-menu {
   height: auto;
   max-height: 300px;
