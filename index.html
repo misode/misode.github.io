@@ -37,7 +37,7 @@
         </div>
       </div>
       <div class="col-12 col-lg-5">
-        <div class="mb-3 float-lg-right">
+        <div class="mb-3 float-lg-right menu-right">
           <div class="input-group">
             <div class="input-group-prepend">
               <span class="input-group-text">Indentation</span>
@@ -47,9 +47,11 @@
               <option value="4">4 Spaces</option>
               <option value="tab">Tabs</option>
             </select>
+            <button id="linkSource" type="button" class="btn btn-secondary ml-3" onclick="linkSource(this)">Link</button>
             <button type="button" class="btn btn-secondary ml-3" onclick="copySource(this)">Copy</button>
           </div>
         </div>
+        <textarea id="copyTextarea" rows="1" class="form-control mb-3 d-none"></textarea>
         <textarea id="source" class="form-control code" onchange="updateSouce()" rows="20" spellcheck="false"></textarea>
       </div>
     </div>

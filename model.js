@@ -3,15 +3,22 @@ $("#source").val('');
 $('#luckBased').prop('checked', false);
 $('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
+
 let indentation = 2;
 let luck_based = false;
-let nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation';
+const nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation';
 let table = {
   type: "minecraft:generic",
   pools: []
 };
 addPool();
 addEntry($('#structure .pool').get());
+
+const params = new URLSearchParams(window.location.search);
+if (params.has('q')) {
+  $('#source').val(params.get('q'));
+  updateSouce();
+}
 
 function updateTableType() {
   table.type = $('#tableType').val();
@@ -21,6 +28,17 @@ function updateTableType() {
 function updateLuckBased() {
   luck_based = $('#luckBased').prop('checked');
   invalidated();
+}
+
+function linkSource() {
+  let link = window.location.origin + window.location.pathname + '?q=' + JSON.stringify(table);
+  console.log(link);
+  $('#copyTextarea').removeClass('d-none').val(link);
+  $('#copyTextarea').get()[0].select();
+  document.execCommand('copy');
+  setTimeout(() => {
+    $('#copyTextarea').addClass('d-none');
+  }, 2000);
 }
 
 function updateSouce() {
