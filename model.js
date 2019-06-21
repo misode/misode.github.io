@@ -30,6 +30,18 @@ function updateLuckBased() {
   invalidated();
 }
 
+function hideSource() {
+  $('.source-container').addClass('d-none');
+  $('.structure-container').removeClass('col-lg-7');
+  $('#showSourceButton').removeClass('d-none');
+}
+
+function showSource() {
+  $('.source-container').removeClass('d-none');
+  $('.structure-container').addClass('col-lg-7');
+  $('#showSourceButton').addClass('d-none');
+}
+
 function linkSource() {
   let link = window.location.origin + window.location.pathname + '?q=' + JSON.stringify(table);
   $('#copyTextarea').removeClass('d-none').val(link);
@@ -54,12 +66,8 @@ function updateSouce() {
   invalidated();
 }
 
-function updateIndentation(el) {
-  if (el.value === 'tab') {
-    indentation = '\t';
-  } else {
-    indentation = parseInt(el.value);
-  }
+function updateIndentation(value) {
+  indentation = value;
   invalidated();
 }
 

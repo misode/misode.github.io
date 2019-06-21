@@ -14,7 +14,7 @@
   </nav>
   <div class="container">
     <div class="row my-4">
-      <div class="col-12 col-lg-7 mb-3">
+      <div class="col-12 col-lg-7 mb-3 structure-container">
         <div class="input-group">
           <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)">Add Pool</button>
           <div class="input-group-prepend">
@@ -28,31 +28,36 @@
             <option value="minecraft:fishing">Fishing</option>
             <option value="minecraft:generic">Generic</option>
           </select>
-          <div class="custom-control custom-checkbox" style="margin: auto 0">
+          <div class="custom-control custom-checkbox mr-3" style="margin: auto 0">
             <input type="checkbox" class="custom-control-input" id="luckBased" onchange="updateLuckBased(this)">
             <label class="custom-control-label" for="luckBased">Luck-based</label>
+          </div>
+          <div id="showSourceButton" class="ml-auto d-none">
+            <button type="button" class="btn btn-secondary" onclick="showSource()">Show Source</button>
           </div>
         </div>
         <div id="structure" class="loot-table">
         </div>
       </div>
-      <div class="col-12 col-lg-5">
-        <div class="mb-3 float-lg-right menu-right">
+      <div class="col-12 col-lg-5 source-container">
+        <div class="mb-3 float-lg-right source-menu">
           <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Indentation</span>
+            <div class="btn-group">
+              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">More</button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" onclick="updateIndentation(2)">2 Spaces</a>
+                <a class="dropdown-item" onclick="updateIndentation(4)">4 Spaces</a>
+                <a class="dropdown-item" onclick="updateIndentation('\t')">Tabs</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" onclick="hideSource()">Hide Source</a>
+              </div>
             </div>
-            <select id="indentationSelect" class="form-control rounded-right" style="max-width: 7em;" onchange="updateIndentation(this)">
-              <option value="2">2 Spaces</option>
-              <option value="4">4 Spaces</option>
-              <option value="tab">Tabs</option>
-            </select>
-            <button id="linkSource" type="button" class="btn btn-secondary ml-3" onclick="linkSource(this)">Link</button>
-            <button type="button" class="btn btn-secondary ml-3" onclick="copySource(this)">Copy</button>
+            <button id="linkSource" type="button" class="btn btn-secondary ml-3" onclick="linkSource()">Link</button>
+            <button type="button" class="btn btn-secondary ml-3" onclick="copySource()">Copy</button>
           </div>
         </div>
         <textarea id="copyTextarea" rows="1" class="form-control mb-3 d-none"></textarea>
-        <textarea id="source" class="form-control code" onchange="updateSouce()" rows="20" spellcheck="false"></textarea>
+        <textarea id="source" class="form-control code" onchange="updateSouce()" rows="19" spellcheck="false"></textarea>
       </div>
     </div>
   </div>
