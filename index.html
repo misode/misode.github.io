@@ -65,7 +65,7 @@
         <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>
       </div>
       <div class="card-body">
-        <div class="input-group rolls" data-type="exact">
+        <div class="input-group rolls" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Rolls</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -85,7 +85,7 @@
           <span class="input-group-text rounded-0 binomial d-none">p</span>
           <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 bonus-rolls" data-type="exact">
+        <div class="input-group mt-3 bonus-rolls">
           <div class="input-group-prepend">
             <span class="input-group-text">Bonus Rolls</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -182,7 +182,7 @@
             <option value="minecraft:apply_bonus">Apply Bonus</option>
           </select>
         </div>
-        <div class="input-group function-count mt-3 d-none" data-type="exact">
+        <div class="input-group function-count mt-3 d-none">
           <div class="input-group-prepend">
             <span class="input-group-text">Count</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -202,7 +202,7 @@
           <span class="input-group-text rounded-0 binomial d-none">p</span>
           <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'count')" onclick="this.select()">
         </div>
-        <div class="input-group function-damage mt-3 d-none" data-type="exact">
+        <div class="input-group function-damage mt-3 d-none">
           <div class="input-group-prepend">
             <span class="input-group-text">Damage</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -279,7 +279,7 @@
           <div class="enchantment-list">
           </div>
         </div>
-        <div class="input-group function-ench-levels mt-3 d-none" data-type="exact">
+        <div class="input-group function-ench-levels mt-3 d-none">
           <div class="input-group-prepend">
             <span class="input-group-text">Levels</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -331,7 +331,7 @@
           </div>
           <textarea type="text" class="form-control code" onchange="updateField(this, 'name')" onclick="this.select()" style="height: 0px"></textarea>
         </div>
-        <div class="input-group function-limit-range mt-3 d-none" data-type="exact">
+        <div class="input-group function-limit-range mt-3 d-none">
           <div class="input-group-prepend">
             <span class="input-group-text">limit</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -443,7 +443,7 @@
           </div>
           <input type="text" class="form-control modifier-name" onchange="updateField(this, 'name')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 modifier-amount" data-type="exact">
+        <div class="input-group mt-3 modifier-amount">
           <div class="input-group-prepend">
             <span class="input-group-text">Amount</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -627,9 +627,21 @@
             <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'thundering')">True</button>
           </div>
         </div>
+        <div class="input-group mt-3 condition-enchantment d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Enchantment</span>
+          </div>
+          <input type="text" class="form-control" onchange="updateField(this, 'enchantment')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3 condition-chances d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Chances</span>
+          </div>
+          <input type="text" class="form-control code" onchange="updateChancesField(this)" onclick="this.select()">
+        </div>
       </div>
     </div>
-    <div id="scoreTemplate" class="input-group mt-3 score">
+    <div id="scoreTemplate" class="input-group mt-3 score" data-type="range">
       <div class="input-group-prepend">
         <span class="input-group-text objective"></span>
         <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>

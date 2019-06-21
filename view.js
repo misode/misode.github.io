@@ -14,18 +14,15 @@ function preventNewline(e) {
 function generateRange($el, data) {
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
-      $el.attr('data-type', 'binomial');
       $el.find('.binomial').removeClass('d-none');
       $el.find('.binomial.n').val(data.n);
       $el.find('.binomial.p').val(data.p);
     } else {
-      $el.attr('data-type', 'range');
       $el.find('.range').removeClass('d-none');
       $el.find('.range.min').val(data.min);
       $el.find('.range.max').val(data.max);
     }
   } else {
-    $el.attr('data-type', 'exact');
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
@@ -577,6 +574,25 @@ function generateCondition(condition, i) {
   } else {
     delete condition.raining;
     delete condition.thundering;
+  }
+
+  if (condition.condition === 'minecraft:table_bonus') {
+    $condition.find('.condition-enchantment').removeClass('d-none');
+    $condition.find('.condition-enchantment input').val(condition.enchantment);
+
+    let chances = JSON.stringify(condition.chances);
+    if (chances) {
+      chances = chances.split(',').join(', ').slice(1, -1);
+    }
+    $condition.find('.condition-chances').removeClass('d-none');
+    $condition.find('.condition-chances input').val(chances);
+
+    if (condition.enchantment === '') {
+      delete condition.enchantment;
+    }
+  } else {
+    delete condition.enchantment;
+    delete condition.chances;
   }
 
   if (condition.scores) {

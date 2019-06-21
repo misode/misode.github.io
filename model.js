@@ -260,8 +260,6 @@ function getValue(root, field) {
 }
 
 function updateField(el, field) {
-  console.log('update', field, '->', $(el).val());
-  console.log(getParent(el));
   updateValue(getParent(el), field, $(el).val());
   invalidated();
 }
@@ -298,35 +296,37 @@ function updateCheckedField(el, field) {
 }
 
 function updateRangeType(el, field, type) {
-  $(el).closest('[data-type]').attr('data-type', type);
+  if (type === 'range') {
+    updateValue(getParent(el), field, {});
+  } else if (type === 'binomial') {
+    updateValue(getParent(el), field, {type: "minecraft:binomial"});
+  } else {
+    updateValue(getParent(el), field, 0);
+  }
   updateRangeField(el, field);
 }
 
 function updateRangeField(el, field) {
-  let type = $(el).closest('[data-type]').attr('data-type');
-  let data = getRangeField($(el).closest('[data-type]'), type);
-  getParent(el)[field] = data;
-  invalidated();
-}
-
-function getRangeField($el, type) {
-  if (type === 'exact') {
-    return parseFloat($el.find('.exact').val());
-  } else if (type === 'range') {
-    let data = {};
-    let min = $el.find('.range.min').val();
-    let max = $el.find('.range.max').val();
-    if (min) data.min = parseFloat(min);
-    if (max) data.max = parseFloat(max);
-    return data;
-  } else if (type === 'binomial') {
-    let data = {type: "minecraft:binomial"};
-    let n = $el.find('.binomial.n').val();
-    let p = $el.find('.binomial.p').val();
-    if (n) data.n = parseInt(n);
-    if (p) data.p = parseFloat(p);
-    return data;
+  let parent = getParent(el);
+  let data = getValue(parent, field);
+  let $range = $(el).closest('[data-type="range"]');
+  if (typeof data === 'object') {
+    if (data.type && data.type.match(/(minecraft:)?binomial/)) {
+      let n = $range.find('.binomial.n').val();
+      let p = $range.find('.binomial.p').val();
+      if (n) data.n = parseInt(n);
+      if (p) data.p = parseFloat(p);
+    } else {
+      let min = $range.find('.range.min').val();
+      let max = $range.find('.range.max').val();
+      if (min) data.min = parseFloat(min);
+      if (max) data.max = parseFloat(max);
+    }
+  } else {
+    data = parseFloat($range.find('.exact').val());
   }
+  updateValue(parent, field, data);
+  invalidated();
 }
 
 function updateRadioField(el, field) {
@@ -435,15 +435,39 @@ function removeScore(el) {
 }
 
 function updateScoreType(el, type) {
-  $(el).closest('.score').attr('data-type', type);
+  let objective = $(el).closest('.score').attr('data-objective');
+  if (type === 'range') {
+    getParent(el).scores[objective] = {};
+  } else if (type === 'binomial') {
+    getParent(el).scores[objective] = {type: "minecraft:binomial"};
+  } else {
+    getParent(el).scores[objective] = 0;
+  }
   updateScoreField(el);
 }
 
 function updateScoreField(el) {
-  let type = $(el).closest('.score').attr('data-type');
-  let data = getRangeField($(el).closest('.score'), type);
+  let parent = getParent(el);
   let objective = $(el).closest('.score').attr('data-objective');
-  getParent(el).scores[objective] = data;
+  let data = parent.scores[objective];
+  let $range = $(el).closest('[data-type="range"]');
+  if (typeof data === 'object') {
+    let min = $range.find('.range.min').val();
+    let max = $range.find('.range.max').val();
+    if (min) {
+      data.min = parseInt(min);
+    } else {
+      delete data.min;
+    }
+    if (max) {
+      data.max = parseInt(max);
+    } else {
+      delete data.max;
+    }
+  } else {
+    data = parseInt($range.find('.exact').val());
+  }
+  parent.scores[objective] = data;
   invalidated();
 }
 
@@ -590,6 +614,22 @@ function toggleDirectEntity(el) {
     delete parent.direct_entity;
   } else {
     parent.direct_entity = {};
+  }
+  invalidated();
+}
+
+function updateChancesField(el) {
+  let parent = getParent(el);
+  let chances = '[' + $(el).val() + ']';
+  try {
+    parent.chances = JSON.parse(chances);
+    for (let i = 0; i < parent.chances.length; i += 1) {
+      if (parent.chances[i] > 1) {
+        parent.chances[i] = 1;
+      }
+    }
+  } catch {
+    parent.chances = [];
   }
   invalidated();
 }
