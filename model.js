@@ -6,7 +6,7 @@ $('#indentationSelect').val("2");
 
 let indentation = 2;
 let luck_based = false;
-const nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation, .predicate, .location';
+const nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation, .predicate, .location, .source-entity, .direct-entity';
 let table = {
   type: "minecraft:generic",
   pools: []
@@ -95,6 +95,10 @@ function getParent(el) {
     return getParent($parent.parent()).predicate;
   } else if ($parent.hasClass('location')) {
     return getParent($parent.parent()).location;
+  } else if ($parent.hasClass('source-entity')) {
+    return getParent($parent.parent()).source_entity;
+  } else if ($parent.hasClass('direct-entity')) {
+    return getParent($parent.parent()).direct_entity;
   }
 }
 
@@ -245,7 +249,19 @@ function deleteValue(root, field) {
   if (f.length === 6) delete root[f[0]][f[1]][f[2]][f[3]][f[4]][f[6]];
 }
 
+function getValue(root, field) {
+  let f = field.split('.');
+  if (f.length === 1) return root[f[0]];
+  if (f.length === 2) return root[f[0]][f[1]];
+  if (f.length === 3) return root[f[0]][f[1]][f[2]];
+  if (f.length === 4) return root[f[0]][f[1]][f[2]][f[3]];
+  if (f.length === 5) return root[f[0]][f[1]][f[2]][f[3]][f[4]];
+  if (f.length === 6) return root[f[0]][f[1]][f[2]][f[3]][f[4]][f[6]];
+}
+
 function updateField(el, field) {
+  console.log('update', field, '->', $(el).val());
+  console.log(getParent(el));
   updateValue(getParent(el), field, $(el).val());
   invalidated();
 }
@@ -311,6 +327,26 @@ function getRangeField($el, type) {
     if (p) data.p = parseFloat(p);
     return data;
   }
+}
+
+function updateRadioField(el, field) {
+  let parent = getParent(el);
+  let value = $(el).val();
+  let oldvalue = getValue(parent, field);
+  if (value === 'true') {
+    if (oldvalue === true) {
+      deleteValue(parent, field);
+    } else {
+      updateValue(getParent(el), field, true);
+    }
+  } else if (value === 'false') {
+    if (oldvalue === false) {
+      deleteValue(parent, field);
+    } else {
+      updateValue(getParent(el), field, false);
+    }
+  }
+  invalidated();
 }
 
 function addEnchantment(el) {
@@ -524,6 +560,36 @@ function updateItemField(el, type) {
   } else {
     parent.tag = $(el).closest('.predicate').find('input.tag').val();
     delete parent.name;
+  }
+  invalidated();
+}
+
+function toggleDamageFlags(el) {
+  let parent = getParent(el);
+  if (parent.type) {
+    delete parent.type;
+  } else {
+    parent.type = {};
+  }
+  invalidated();
+}
+
+function toggleSourceEntity(el) {
+  let parent = getParent(el);
+  if (parent.source_entity) {
+    delete parent.source_entity;
+  } else {
+    parent.source_entity = {};
+  }
+  invalidated();
+}
+
+function toggleDirectEntity(el) {
+  let parent = getParent(el);
+  if (parent.direct_entity) {
+    delete parent.direct_entity;
+  } else {
+    parent.direct_entity = {};
   }
   invalidated();
 }

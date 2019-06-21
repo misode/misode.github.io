@@ -4,6 +4,13 @@ function invalidated() {
   $('#source').val(JSON.stringify(table, null, indentation));
 }
 
+function preventNewline(e) {
+  if (e.which === 13) {
+    $(e.target).trigger('change');
+    e.preventDefault();
+  }
+}
+
 function generateRange($el, data) {
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
@@ -21,6 +28,14 @@ function generateRange($el, data) {
     $el.attr('data-type', 'exact');
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
+  }
+}
+
+function generateRadio($el, data) {
+  if (data === true) {
+    $el.find('[value="true"]').addClass('active');
+  } else if (data === false) {
+    $el.find('[value="false"]').addClass('active');
   }
 }
 
@@ -167,7 +182,7 @@ function generateFunction(func, i) {
       }
     }
     $function.find('.function-nbt').removeClass('d-none');
-    $function.find('.function-nbt input').val(func.tag);
+    $function.find('.function-nbt textarea').val(func.tag).keydown(e => preventNewline(e));
   } else {
     delete func.tag;
   }
@@ -234,7 +249,7 @@ function generateFunction(func, i) {
     if (typeof value !== 'string') {
       value = JSON.stringify(value);
     }
-    $function.find('.function-name input').val(value);
+    $function.find('.function-name input').val(value).keydown(e => preventNewline(e));
   } else {
     delete func.name;
   }
@@ -485,7 +500,7 @@ function generateCondition(condition, i) {
     delete condition.properties;
   }
 
-  if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:location_check' || condition.condition === 'minecraft:match_tool') {
+  if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:location_check' || condition.condition === 'minecraft:match_tool' || condition.condition === 'minecraft:damage_source_properties') {
 
     if(!condition.predicate) {
       condition.predicate = {};
@@ -514,10 +529,17 @@ function generateCondition(condition, i) {
       }
     }
 
+    if (condition.condition === 'minecraft:damage_source_properties') {
+      let $damage = generateDamage(condition.predicate);
+      $condition.children('.card-body').append($damage);
+      if (condition.predicate) {
+        delete condition.nbt;
+      }
+    }
+
     if (condition.condition === 'minecraft:match_tool') {
       let $item = generateItem(condition.predicate);
       $condition.children('.card-body').append($item);
-    } else {
     }
 
   } else {
@@ -684,7 +706,7 @@ function generateEntity(entity) {
     }
   }
   $entity.find('.type').val(entity.type);
-  $entity.find('.nbt').val(entity.nbt);
+  $entity.find('.nbt').val(entity.nbt).keydown(e => preventNewline(e));
   if (entity.type === '') {
     delete entity.type;
   }
@@ -716,7 +738,7 @@ function generateItem(item) {
   }
   generateRange($item.find('.item-count'), item.count);
   generateRange($item.find('.item-durability'), item.durability);
-  $item.find('.nbt').val(item.nbt);
+  $item.find('.nbt').val(item.nbt).keydown(e => preventNewline(e));
   $item.find('.potion').val(item.potion);
   if (item.name === '') {
     delete item.name;
@@ -732,4 +754,46 @@ function generateItem(item) {
   }
 
   return $item;
+}
+
+function generateDamage(damage) {
+  let $damage = $('#damageTemplate').clone().removeAttr('id').addClass('predicate');
+  if (!damage) {
+    damage = {};
+  }
+  if (damage.type) {
+    $damage.find('.damage-flag').removeClass('d-none');
+    generateRadio($damage.find('.damage-projectile'), damage.type.is_projectile);
+    generateRadio($damage.find('.damage-explosion'), damage.type.is_explosion);
+    generateRadio($damage.find('.damage-fire'), damage.type.is_fire);
+    generateRadio($damage.find('.damage-magic'), damage.type.is_magic);
+    generateRadio($damage.find('.damage-lightning'), damage.is_lightning);
+    generateRadio($damage.find('.damage-starvation'), damage.type.bypasses_magic);
+    generateRadio($damage.find('.damage-void'), damage.type.bypasses_invulnerability);
+    generateRadio($damage.find('.damage-armor'), damage.type.bypasses_armor);
+  }
+
+  if (damage.source_entity) {
+    let $entity = generateEntity(damage.source_entity);
+    $entity.removeClass('predicate');
+    $damage.find('.source-entity').append($entity);
+  }
+  if (damage.direct_entity) {
+    let $entity = generateEntity(damage.direct_entity);
+    $entity.removeClass('predicate');
+    $damage.find('.direct-entity').append($entity);
+  }
+
+  if (typeof damage.dealt !== 'object' && isNaN(damage.dealt)) {
+    delete damage.dealt;
+  }
+  if (typeof damage.dealt !== 'object' && isNaN(damage.taken)) {
+    delete damage.taken;
+  }
+  generateRange($damage.find('.damage-dealt'), damage.dealt);
+  generateRange($damage.find('.damage-taken'), damage.taken);
+
+  generateRadio($damage.find('.damage-blocked'), damage.blocked);
+
+  return $damage;
 }

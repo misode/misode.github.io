@@ -28,6 +28,10 @@
 }
 
 .card.bg-dark .card.bg-dark {
+  background-color: #565b60 !important;
+}
+
+.card.bg-dark .card.bg-dark .card.bg-dark {
   background-color: #4b4f54 !important;
 }
 
@@ -41,6 +45,10 @@
   -moz-tab-size: 4;
   -o-tab-size: 4;
   -webkit-tab-size: 4;
+}
+
+textarea {
+  min-height: 37.6px;
 }
 
 textarea.invalid {
