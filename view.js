@@ -230,7 +230,11 @@ function generateFunction(func, i) {
 
   if (func.function === 'minecraft:set_name') {
     $function.find('.function-name').removeClass('d-none');
-    $function.find('.function-name input').val(func.name);
+    let value = func.name;
+    if (typeof value !== 'string') {
+      value = JSON.stringify(value);
+    }
+    $function.find('.function-name input').val(value);
   } else {
     delete func.name;
   }
@@ -239,7 +243,11 @@ function generateFunction(func, i) {
     let lore = "";
     if (func.lore) {
       for (let j = 0; j < func.lore.length; j += 1) {
-        lore += func.lore[j];
+        let value = func.lore[j];
+        if (typeof value !== 'string') {
+          value = JSON.stringify(value);
+        }
+        lore += value;
         if (j < func.lore.length - 1) {
           lore += "\n";
         }
@@ -385,7 +393,6 @@ function generateModifier(modifier, i) {
 }
 
 function generateOperation(operation, i) {
-  console.log(operation, i);
   let $operation = $('#operationTemplate').clone();
   $operation.removeAttr('id').attr('data-index', i);
 
@@ -508,8 +515,6 @@ function generateCondition(condition, i) {
     }
 
     if (condition.condition === 'minecraft:match_tool') {
-      console.log('!!');
-      console.log(condition.predicate);
       let $item = generateItem(condition.predicate);
       $condition.children('.card-body').append($item);
     } else {
@@ -692,7 +697,6 @@ function generateEntity(entity) {
 
 function generateItem(item) {
   let $item = $('#itemTemplate').clone().removeAttr('id').addClass('predicate');
-  console.log(item.nbt);
   if (!item) {
     item = {};
   }

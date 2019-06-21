@@ -12,7 +12,7 @@ let table = {
   pools: []
 };
 addPool();
-addCondition($('#structure .pool').get());
+addEntry($('#structure .pool').get());
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
@@ -247,7 +247,12 @@ function deleteValue(root, field) {
 
 function updateField(el, field) {
   updateValue(getParent(el), field, $(el).val());
-  console.log(getParent(el));
+  invalidated();
+}
+
+function updateJSONField(el, field) {
+  let value = parseJSONValue($(el).val());
+  updateValue(getParent(el), field, value);
   invalidated();
 }
 
@@ -290,13 +295,13 @@ function updateRangeField(el, field) {
 
 function getRangeField($el, type) {
   if (type === 'exact') {
-    return parseInt($el.find('.exact').val());
+    return parseFloat($el.find('.exact').val());
   } else if (type === 'range') {
     let data = {};
     let min = $el.find('.range.min').val();
     let max = $el.find('.range.max').val();
-    if (min) data.min = parseInt(min);
-    if (max) data.max = parseInt(max);
+    if (min) data.min = parseFloat(min);
+    if (max) data.max = parseFloat(max);
     return data;
   } else if (type === 'binomial') {
     let data = {type: "minecraft:binomial"};
@@ -406,8 +411,25 @@ function updateScoreField(el) {
   invalidated();
 }
 
+function parseJSONValue(value) {
+  if (value.startsWith('"') || value.startsWith('{') || value.startsWith('[')) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+  return value;
+}
+
 function updateLoreField(el) {
-  console.log($(el).val());
+  let lines = $(el).val().split('\n');
+  let parent = getParent(el);
+  parent.lore = [];
+  for (let line of lines) {
+    parent.lore.push(parseJSONValue(line));
+  }
+  invalidated();
 }
 
 function addOperation(el) {

@@ -214,9 +214,9 @@
           </div>
           <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="0" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
           <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
           <span class="input-group-text rounded-0 binomial d-none">n</span>
           <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
           <span class="input-group-text rounded-0 binomial d-none">p</span>
@@ -329,7 +329,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text">Name</span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'name')" onclick="this.select()">
+          <input type="text" class="form-control code" onchange="updateJSONField(this, 'name')" onclick="this.select()">
         </div>
         <div class="input-group function-limit-range mt-3 d-none" data-type="exact">
           <div class="input-group-prepend">
@@ -355,7 +355,7 @@
           <button type="button" class="btn btn-light" onclick="addEntry(this)">Add Entry</button>
         </div>
         <div class="input-group mt-3 function-lore d-none">
-          <textarea class="form-control code" onchange="updateLoreField(this)" rows=3 placeholder="JSON text component on each line"></textarea>
+          <textarea class="form-control code" onchange="updateLoreField(this)" rows=3></textarea>
         </div>
         <div class="input-group mt-3 function-lore-replace d-none">
           <div class="custom-control custom-checkbox">
