@@ -1,6 +1,3 @@
-.card.child {
-  background-color: #eee;
-}
 
 .card.bg-info {
   background-color: #91cdd6 !important;
@@ -20,6 +17,18 @@
 .card.bg-dark {
   background-color: #646b72 !important;
   color: white !important;
+}
+
+.card.child {
+  background-color: #eee !important;
+}
+
+.card.term, .card.terms {
+  background-color: #7cb6bf !important;
+}
+
+.card.bg-dark .card.bg-dark {
+  background-color: #4b4f54 !important;
 }
 
 .dropdown-item {

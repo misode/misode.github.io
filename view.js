@@ -328,7 +328,6 @@ function generateFunction(func, i) {
         func.parameters.probability = 0.5;
       }
       delete func.parameters.multiplier;
-      console.log(func);
       $function.find('.function-bonus-extra').removeClass('d-none');
       $function.find('.function-bonus-extra input').val(func.parameters.extra);
       $function.find('.function-bonus-probability').removeClass('d-none');
@@ -404,6 +403,32 @@ function generateCondition(condition, i) {
 
   $condition.find('.condition-type').val(condition.condition);
 
+  if (table.type === 'minecraft:generic') {
+    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
+    $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
+    $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
+    $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
+  } else if (table.type === 'minecraft:block') {
+    $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
+  } else if (table.type === 'minecraft:fishing') {
+    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
+    $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
+    $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
+  } else if (table.type === 'minecraft:entity') {
+    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
+    $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
+    $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
+  } else if (table.type === 'minecraft:chest') {
+    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
+    $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
+    $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
+    $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
+  }
+
   if (condition.condition === 'minecraft:random_chance' || condition.condition === 'minecraft:random_chance_with_looting') {
     $condition.find('.condition-chance').removeClass('d-none');
     $condition.find('.condition-chance input').val(condition.chance);
@@ -423,6 +448,8 @@ function generateCondition(condition, i) {
     let inverted = false;
     if (condition.inverted) {
       inverted = true;
+    } else {
+      delete condition.inverted;
     }
     let id = 'invertedCheckbox' + Math.floor(1000000*Math.random());
     $condition.find('.condition-killed-inverted').attr('for', id);
@@ -433,6 +460,9 @@ function generateCondition(condition, i) {
   }
 
   if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:entity_scores') {
+    if (!condition.entity) {
+      condition.entity = 'this';
+    }
     $condition.find('.condition-entity').removeClass('d-none');
     $condition.find('.condition-entity select').val(condition.entity);
   } else {
@@ -448,8 +478,43 @@ function generateCondition(condition, i) {
     delete condition.properties;
   }
 
-  if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:location_predicate' || condition.condition === 'minecraft:match_tool') {
-    $condition.find('.condition-predicate').removeClass('d-none');
+  if (condition.condition === 'minecraft:entity_properties' || condition.condition === 'minecraft:location_check' || condition.condition === 'minecraft:match_tool') {
+
+    if(!condition.predicate) {
+      condition.predicate = {};
+    }
+
+    if (condition.condition === 'minecraft:entity_properties') {
+      let $entity = generateEntity(condition.predicate);
+      $condition.children('.card-body').append($entity);
+    } else {
+      delete condition.predicate.entity;
+      delete condition.predicate.location;
+    }
+
+    if (condition.condition === 'minecraft:location_check') {
+      let $location = generateLocation(condition.predicate);
+      $condition.children('.card-body').append($location);
+      if (condition.predicate) {
+        delete condition.nbt;
+      }
+    } else {
+      if (condition.predicate) {
+        delete condition.predicate.biome;
+        delete condition.predicate.feature;
+        delete condition.predicate.position;
+        delete condition.predicate.dimension;
+      }
+    }
+
+    if (condition.condition === 'minecraft:match_tool') {
+      console.log('!!');
+      console.log(condition.predicate);
+      let $item = generateItem(condition.predicate);
+      $condition.children('.card-body').append($item);
+    } else {
+    }
+
   } else {
     delete condition.predicate;
   }
@@ -460,10 +525,48 @@ function generateCondition(condition, i) {
     delete condition.scores;
   }
 
-  if (condition.condition === 'minecraft:alternatives') {
-    $condition.find('.condition-terms').removeCLass('d-none');
+  if (condition.condition === 'minecraft:alternative') {
+    $condition.find('.condition-terms').removeClass('d-none');
   } else {
     delete condition.terms;
+  }
+
+  if (condition.condition === 'minecraft:inverted') {
+    if (!condition.term) {
+      condition.term = {
+        condition: "minecraft:random_chance",
+        chance: 0.5
+      };
+    }
+  } else {
+    delete condition.term;
+  }
+
+  if (condition.condition === 'minecraft:weather_check') {
+    $condition.find('.condition-raining').removeClass('d-none');
+    let raining = false;
+    if (condition.raining) {
+      raining = true;
+    } else {
+      delete condition.raining;
+    }
+    let id = 'rainingCheckbox' + Math.floor(1000000*Math.random());
+    $condition.find('.condition-raining label').attr('for', id);
+    $condition.find('.condition-raining input').prop('checked', raining).attr('id', id);
+
+    $condition.find('.condition-thundering').removeClass('d-none');
+    let thundering = false;
+    if (condition.thundering) {
+      thundering = true;
+    } else {
+      delete condition.thundering;
+    }
+    let id2 = 'thunderingCheckbox' + Math.floor(1000000*Math.random());
+    $condition.find('.condition-thundering label').attr('for', id2);
+    $condition.find('.condition-thundering input').prop('checked', thundering).attr('id', id2);
+  } else {
+    delete condition.raining;
+    delete condition.thundering;
   }
 
   if (condition.scores) {
@@ -495,6 +598,7 @@ function generateCondition(condition, i) {
   if (condition.term) {
     let $term = generateCondition(condition.term, 0);
     $term.removeClass('condition').addClass('term');
+    $term.find('.card-header').remove();
     $condition.children('.card-body').append($term);
   }
 
@@ -507,4 +611,121 @@ function generateCondition(condition, i) {
   }
 
   return $condition;
+}
+
+function generateLocation(location) {
+  let $location = $('#locationTemplate').clone().removeAttr('id').addClass('predicate');
+  if (!location) {
+    location = {};
+  }
+
+  if (location.position) {
+    $location.find('.position-collapse').removeClass('d-none');
+    if (location.position.x) {
+      $location.find('.position-x .min').val(location.position.x.min);
+      $location.find('.position-x .max').val(location.position.x.max);
+      if ($.isEmptyObject(location.position.x)) {
+        delete location.position.x;
+      }
+    }
+    if (location.position.y) {
+      $location.find('.position-y .min').val(location.position.y.min);
+      $location.find('.position-y .max').val(location.position.y.max);
+      if ($.isEmptyObject(location.position.y)) {
+        delete location.position.y;
+      }
+    }
+    if (location.position.z) {
+      $location.find('.position-z .min').val(location.position.z.min);
+      $location.find('.position-z .max').val(location.position.z.max);
+      if ($.isEmptyObject(location.position.z)) {
+        delete location.position.z;
+      }
+    }
+  }
+
+  $location.find('.biome').val(location.biome);
+  $location.find('.feature').val(location.feature);
+  $location.find('.dimension').val(location.dimension);
+  if (location.biome === '') {
+    delete location.biome;
+  }
+  if (location.feature === '') {
+    delete location.feature;
+  }
+  if (location.dimension === '') {
+    delete location.dimension;
+  }
+
+  return $location;
+}
+
+function generateEntity(entity) {
+  let $entity = $('#entityTemplate').clone().removeAttr('id').addClass('predicate');
+  if (!entity) {
+    entity = {};
+  }
+  if (entity.location) {
+    let $location = generateLocation(entity.location);
+    $location.removeClass('predicate').addClass('location');
+    $entity.children('.card-body').append($location);
+  }
+  if (entity.nbt) {
+    if (!entity.nbt.startsWith('{')) {
+      entity.nbt = '{' + entity.nbt;
+    }
+    if (!entity.nbt.endsWith('}')) {
+      entity.nbt = entity.nbt + '}';
+    }
+  }
+  $entity.find('.type').val(entity.type);
+  $entity.find('.nbt').val(entity.nbt);
+  if (entity.type === '') {
+    delete entity.type;
+  }
+  if (entity.nbt === '') {
+    delete entity.nbt;
+  }
+
+  return $entity;
+}
+
+function generateItem(item) {
+  let $item = $('#itemTemplate').clone().removeAttr('id').addClass('predicate');
+  console.log(item.nbt);
+  if (!item) {
+    item = {};
+  }
+  if (item.nbt) {
+    if (!item.nbt.startsWith('{')) {
+      item.nbt = '{' + item.nbt;
+    }
+    if (!item.nbt.endsWith('}')) {
+      item.nbt = item.nbt + '}';
+    }
+  }
+
+  if (item.tag) {
+    $item.find('.tag').removeClass('d-none').val(item.tag);
+  } else {
+    $item.find('.name').removeClass('d-none').val(item.name);
+  }
+  generateRange($item.find('.item-count'), item.count);
+  generateRange($item.find('.item-durability'), item.durability);
+  $item.find('.nbt').val(item.nbt);
+  $item.find('.potion').val(item.potion);
+  if (item.name === '') {
+    delete item.name;
+  }
+  if (item.tag === '') {
+    delete item.tag;
+  }
+  if (item.nbt === '') {
+    delete item.nbt;
+  }
+  if (item.nbt === '') {
+    delete item.nbt;
+  }
+
+  return $item;
 }

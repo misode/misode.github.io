@@ -396,19 +396,19 @@
           <div class="input-group-prepend">
             <span class="input-group-text">Multiplier</span>
           </div>
-          <input type="text" class="form-control" onchange="updateParameterIntField(this, 'bonusMultiplier')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateIntField(this, 'parameters.bonusMultiplier')" onclick="this.select()">
         </div>
         <div class="input-group mt-3 function-bonus-extra d-none">
           <div class="input-group-prepend">
             <span class="input-group-text">Extra</span>
           </div>
-          <input type="text" class="form-control" onchange="updateParameterIntField(this, 'extra')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateIntField(this, 'parameters.extra')" onclick="this.select()">
         </div>
         <div class="input-group mt-3 function-bonus-probability d-none">
           <div class="input-group-prepend">
             <span class="input-group-text">Propability</span>
           </div>
-          <input type="text" class="form-control" onchange="updateParameterFloatField(this, 'probability')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateFloatField(this, 'parameters.probability')" onclick="this.select()">
         </div>
       </div>
     </div>
@@ -534,14 +534,14 @@
             <span class="input-group-text">Condition</span>
           </div>
           <select class="form-control condition-type" onchange="updateField(this, 'condition')">
-            <option value="minecraft:entity_properties">Entity Properties</option>
-            <option value="minecraft:blockstate_propery">Block Properties</option>
-            <option value="minecraft:damage_source_properties">Damage Source Properties</option>
-            <option value="minecraft:location_check">Location Check</option>
-            <option value="minecraft:weather_check">Weather Check</option>
-            <option value="minecraft:match_tool">Tool Check</option>
             <option value="minecraft:alternative">Alternative</option>
             <option value="minecraft:inverted">Inverted</option>
+            <option value="minecraft:entity_properties">Entity Properties</option>
+            <option value="minecraft:blockstate_propery">Block Properties</option>
+            <option value="minecraft:match_tool">Tool Properties</option>
+            <option value="minecraft:damage_source_properties">Damage Source</option>
+            <option value="minecraft:location_check">Location</option>
+            <option value="minecraft:weather_check">Weather</option>
             <option value="minecraft:entity_scores">Entity Scores</option>
             <option value="minecraft:random_chance">Random Chance</option>
             <option value="minecraft:random_chance_with_looting">Random Chance with Looting</option>
@@ -598,11 +598,6 @@
           </div>
           <input type="text" class="form-control" onchange="updateField(this, 'block')" onclick="this.select()">
         </div>
-        <div class="card bg-dark mt-3 condition-predicate d-none">
-          <div class="card-body">
-
-          </div>
-        </div>
         <div class="input-group mt-3 condition-block-properties d-none">
           <div class="input-group-prepend">
             <label class="input-group-text">Block State</label>
@@ -617,13 +612,13 @@
         <div class="input-group mt-3 condition-raining d-none">
           <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" id="rainingCheckbox" onchange="updateCheckedField(this, 'raining')">
-            <label class="custom-control-label" for="rainingCheckbox">Treasure</label>
+            <label class="custom-control-label" for="rainingCheckbox">Raining</label>
           </div>
         </div>
         <div class="input-group mt-3 condition-thundering d-none">
           <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" id="thunderingCheckbox" onchange="updateCheckedField(this, 'thundering')">
-            <label class="custom-control-label" for="thunderingCheckbox">Treasure</label>
+            <label class="custom-control-label" for="thunderingCheckbox">Thundering</label>
           </div>
         </div>
       </div>
@@ -653,6 +648,138 @@
       <input type="text" class="form-control exact" onchange="updateBlockPropertyField(this)" onclick="this.select()">
       <div class="input-group-append">
         <button class="btn btn-outline-danger bg-light" type="button" onclick="removeBlockProperty(this)">Remove</button>
+      </div>
+    </div>
+    <div id="locationTemplate" class="card bg-dark mt-3">
+      <div class="card-body">
+        <button class="btn btn-light dropdown-toggle" type="button" data-shows="false" onclick="togglePosition(this)">Position</button>
+        <div class="input-group mt-2 position-collapse position-x d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">X</span>
+          </div>
+          <span class="input-group-text rounded-0 range">Min</span>
+          <input type="text" class="form-control min" onchange="updateFloatField(this, 'position.x.min')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range">Max</span>
+          <input type="text" class="form-control max" onchange="updateFloatField(this, 'position.x.max')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-2 position-collapse position-y d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Y</span>
+          </div>
+          <span class="input-group-text rounded-0 range">Min</span>
+          <input type="text" class="form-control min" onchange="updateFloatField(this, 'position.y.min')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range">Max</span>
+          <input type="text" class="form-control max" onchange="updateFloatField(this, 'position.y.max')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-2 position-collapse position-z d-none">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Z</span>
+          </div>
+          <span class="input-group-text rounded-0">Min</span>
+          <input type="text" class="form-control min" onchange="updateFloatField(this, 'position.z.min')" onclick="this.select()">
+          <span class="input-group-text rounded-0">Max</span>
+          <input type="text" class="form-control max" onchange="updateFloatField(this, 'position.z.max')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Biome</span>
+          </div>
+          <input type="text" class="form-control biome" onchange="updateField(this, 'biome')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Feature</span>
+          </div>
+          <input type="text" class="form-control feature" onchange="updateField(this, 'feature')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Dimension</span>
+          </div>
+          <select class="form-control dimension" onchange="updateField(this, 'dimension')">
+            <option value="">Unset</option>
+            <option value="minecraft:overworld">Overworld</option>
+            <option value="minecraft:the_nether">The Nether</option>
+            <option value="minecraft:the_end">The End</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="entityTemplate" class="card bg-dark mt-3">
+      <div class="card-body">
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Type</span>
+          </div>
+          <input type="text" class="form-control type" onchange="updateField(this, 'type')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">NBT</span>
+          </div>
+          <input type="text" class="form-control nbt code" onchange="updateField(this, 'nbt')" onclick="this.select()">
+        </div>
+        <button class="btn btn-light mt-3 dropdown-toggle" type="button" onclick="toggleEntityLocation(this)">Location</button>
+      </div>
+    </div>
+    <div id="itemTemplate" class="card bg-dark mt-3">
+      <div class="card-body">
+        <div class="input-group mt-3 item-type">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Item</span>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" onclick="updateItemType(this, 'name')">Name</a>
+              <a class="dropdown-item" onclick="updateItemType(this, 'tag')">Tag</a>
+            </div>
+          </div>
+          <span class="input-group-text rounded-0 name d-none">Name</span>
+          <input type="text" class="form-control name d-none" onchange="updateItemField(this, 'name')" onclick="this.select()">
+          <span class="input-group-text rounded-0 tag d-none">Tag</span>
+          <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3 item-count">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Count</span>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'exact')">Exact</a>
+              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'range')">Range</a>
+            </div>
+          </div>
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range d-none">Min</span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range d-none">Max</span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'count')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3 item-durability">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Durability</span>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" onclick="updateRangeType(this, 'durability', 'exact')">Exact</a>
+              <a class="dropdown-item" onclick="updateRangeType(this, 'durability', 'range')">Range</a>
+            </div>
+          </div>
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateRangeField(this, 'durability')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range d-none">Min</span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'durability')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range d-none">Max</span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'durability')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Potion</span>
+          </div>
+          <input type="text" class="form-control potion" onchange="updateField(this, 'potion')" onclick="this.select()">
+        </div>
+        <div class="input-group mt-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text">NBT</span>
+          </div>
+          <input type="text" class="form-control nbt code" onchange="updateField(this, 'nbt')" onclick="this.select()">
+        </div>
       </div>
     </div>
   </div>

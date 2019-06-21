@@ -6,13 +6,13 @@ $('#indentationSelect').val("2");
 
 let indentation = 2;
 let luck_based = false;
-const nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation';
+const nodes = '.loot-table, .pool, .entry, .child, .term, .terms, .function, .condition, .modifier, .operation, .predicate, .location';
 let table = {
   type: "minecraft:generic",
   pools: []
 };
 addPool();
-addEntry($('#structure .pool').get());
+addCondition($('#structure .pool').get());
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
@@ -32,7 +32,6 @@ function updateLuckBased() {
 
 function linkSource() {
   let link = window.location.origin + window.location.pathname + '?q=' + JSON.stringify(table);
-  console.log(link);
   $('#copyTextarea').removeClass('d-none').val(link);
   $('#copyTextarea').get()[0].select();
   document.execCommand('copy');
@@ -92,6 +91,10 @@ function getParent(el) {
     return getParent($parent.parent()).modifiers[index];
   } else if ($parent.hasClass('operation')) {
     return getParent($parent.parent()).ops[index];
+  } else if ($parent.hasClass('predicate')) {
+    return getParent($parent.parent()).predicate;
+  } else if ($parent.hasClass('location')) {
+    return getParent($parent.parent()).location;
   }
 }
 
@@ -203,24 +206,57 @@ function addCondition(el) {
 
 function removeCondition(el) {
   let parent = getSuperParent(el);
-  parent.conditions.splice(getIndex(el), 1);
-  if (parent.conditions.length === 0) {
-    delete parent.conditions;
+  if (parent.conditions) {
+    parent.conditions.splice(getIndex(el), 1);
+    if (parent.conditions.length === 0) {
+      delete parent.conditions;
+    }
+  } else {
+    parent.terms.splice(getIndex(el), 1);
+    if (parent.terms.length === 0) {
+      delete parent.terms;
+    }
   }
   invalidated();
 }
 
+function updateValue(root, field, value) {
+  let f = field.split('.');
+  if (f.length === 1) return root[f[0]] = value;
+  if (!root[f[0]]) root[f[0]] = {};
+  if (f.length === 2) return root[f[0]][f[1]] = value;
+  if (!root[f[0]][f[1]]) root[f[0]][f[1]] = {};
+  if (f.length === 3) return root[f[0]][f[1]][f[2]] = value;
+  if (!root[f[0]][f[1]][f[2]]) root[f[0]][f[1]][f[2]] = {};
+  if (f.length === 4) return root[f[0]][f[1]][f[2]][f[3]] = value;
+  if (!root[f[0]][f[1]][f[2]][f[3]]) root[f[0]][f[1]][f[2]][f[3]] = {};
+  if (f.length === 5) return root[f[0]][f[1]][f[2]][f[3]][f[4]] = value;
+  if (!root[f[0]][f[1]][f[2]][f[3]][f[4]]) root[f[0]][f[1]][f[2]][f[3]][f[4]] = {};
+  if (f.length === 6) return root[f[0]][f[1]][f[2]][f[3]][f[4]][f[5]] = value;
+}
+
+function deleteValue(root, field) {
+  let f = field.split('.');
+  if (f.length === 1) delete root[f[0]];
+  if (f.length === 2) delete root[f[0]][f[1]];
+  if (f.length === 3) delete root[f[0]][f[1]][f[2]];
+  if (f.length === 4) delete root[f[0]][f[1]][f[2]][f[3]];
+  if (f.length === 5) delete root[f[0]][f[1]][f[2]][f[3]][f[4]];
+  if (f.length === 6) delete root[f[0]][f[1]][f[2]][f[3]][f[4]][f[6]];
+}
+
 function updateField(el, field) {
-  getParent(el)[field] = $(el).val();
+  updateValue(getParent(el), field, $(el).val());
+  console.log(getParent(el));
   invalidated();
 }
 
 function updateIntField(el, field) {
   let value = parseInt($(el).val());
   if (isNaN(value)) {
-    delete getParent(el)[field];
+    deleteValue(getParent(el), field);
   } else {
-    getParent(el)[field] = value;
+    updateValue(getParent(el), field, value);
   }
   invalidated();
 }
@@ -228,9 +264,9 @@ function updateIntField(el, field) {
 function updateFloatField(el, field) {
   let value = parseFloat($(el).val());
   if (isNaN(value)) {
-    delete getParent(el)[field];
+    deleteValue(getParent(el), field);
   } else {
-    getParent(el)[field] = value;
+    updateValue(getParent(el), field, value);
   }
   invalidated();
 }
@@ -240,16 +276,16 @@ function updateCheckedField(el, field) {
   invalidated();
 }
 
+function updateRangeType(el, field, type) {
+  $(el).closest('[data-type]').attr('data-type', type);
+  updateRangeField(el, field);
+}
+
 function updateRangeField(el, field) {
   let type = $(el).closest('[data-type]').attr('data-type');
   let data = getRangeField($(el).closest('[data-type]'), type);
   getParent(el)[field] = data;
   invalidated();
-}
-
-function updateRangeType(el, field, type) {
-  $(el).closest('[data-type]').attr('data-type', type);
-  updateRangeField(el, field);
 }
 
 function getRangeField($el, type) {
@@ -341,6 +377,9 @@ function removeModifierSlot(el) {
 function addScore(el) {
   let condition = getParent(el);
   let objective = $(el).closest('.condition-entity-scores').find('input').val();
+  if (!objective.length) {
+    return;
+  }
   if (!condition.scores) {
     condition.scores = {};
   }
@@ -356,7 +395,7 @@ function removeScore(el) {
 
 function updateScoreType(el, type) {
   $(el).closest('.score').attr('data-type', type);
-  updateConditionScoreField(el);
+  updateScoreField(el);
 }
 
 function updateScoreField(el) {
@@ -390,26 +429,6 @@ function removeOperation(el) {
   invalidated();
 }
 
-function updateParameterIntField(el, field) {
-  let value = parseInt($(el).val());
-  if (isNaN(value)) {
-    delete getParent(el).parameters[field];
-  } else {
-    getParent(el).parameters[field] = value;
-  }
-  invalidated();
-}
-
-function updateParameterFloatField(el, field) {
-  let value = parseFloat($(el).val());
-  if (isNaN(value)) {
-    delete getParent(el).parameters[field];
-  } else {
-    getParent(el).parameters[field] = value;
-  }
-  invalidated();
-}
-
 function addBlockProperty(el) {
   let func = getParent(el);
   let blockstate = $(el).closest('.condition-block-properties').find('input').val();
@@ -429,5 +448,60 @@ function removeBlockProperty(el) {
 function updateBlockPropertyField(el) {
   let blockstate = $(el).closest('.block-property').attr('data-blockstate');
   getParent(el).properties[blockstate] = $(el).val();
+  invalidated();
+}
+
+function addTerm(el) {
+  let condition = getParent(el);
+  if (!condition.terms) {
+    condition.terms = [];
+  }
+  condition.terms.push({
+    condition: "minecraft:random_chance",
+    chance: 0.5
+  });
+  invalidated();
+}
+
+function togglePosition(el) {
+  let parent = getParent(el);
+  if (parent.position) {
+    delete parent.position;
+  } else {
+    parent.position = {};
+  }
+  invalidated();
+}
+
+function toggleEntityLocation(el) {
+  let parent = getParent(el);
+  if (parent.location) {
+    delete parent.location;
+  } else {
+    parent.location = {};
+  }
+  invalidated();
+}
+
+function updateItemType(el, type) {
+  let $predicate = $(el).closest('.predicate');
+  if (type === 'name') {
+    $predicate.find('.name').removeClass('d-none');
+    $predicate.find('.tag').addClass('d-none');
+  } else {
+    $predicate.find('.tag').removeClass('d-none');
+    $predicate.find('.name').addClass('d-none');
+  }
+}
+
+function updateItemField(el, type) {
+  let parent = getParent(el);
+  if (type === 'name') {
+    parent.name = $(el).closest('.predicate').find('input.name').val();
+    delete parent.tag;
+  } else {
+    parent.tag = $(el).closest('.predicate').find('input.tag').val();
+    delete parent.name;
+  }
   invalidated();
 }
