@@ -571,26 +571,9 @@ function generateCondition(condition, i) {
 
   if (condition.condition === 'minecraft:weather_check') {
     $condition.find('.condition-raining').removeClass('d-none');
-    let raining = false;
-    if (condition.raining) {
-      raining = true;
-    } else {
-      delete condition.raining;
-    }
-    let id = 'rainingCheckbox' + Math.floor(1000000*Math.random());
-    $condition.find('.condition-raining label').attr('for', id);
-    $condition.find('.condition-raining input').prop('checked', raining).attr('id', id);
-
     $condition.find('.condition-thundering').removeClass('d-none');
-    let thundering = false;
-    if (condition.thundering) {
-      thundering = true;
-    } else {
-      delete condition.thundering;
-    }
-    let id2 = 'thunderingCheckbox' + Math.floor(1000000*Math.random());
-    $condition.find('.condition-thundering label').attr('for', id2);
-    $condition.find('.condition-thundering input').prop('checked', thundering).attr('id', id2);
+    generateRadio($condition.find('.condition-raining'), condition.raining);
+    generateRadio($condition.find('.condition-thundering'), condition.thundering);
   } else {
     delete condition.raining;
     delete condition.thundering;

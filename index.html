@@ -610,15 +610,21 @@
         <div class="mt-3 property-list d-none">
         </div>
         <div class="input-group mt-3 condition-raining d-none">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="rainingCheckbox" onchange="updateCheckedField(this, 'raining')">
-            <label class="custom-control-label" for="rainingCheckbox">Raining</label>
+          <div class="input-group-prepend">
+            <span class="input-group-text">Raining</span>
+          </div>
+          <div class="btn-group">
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'raining')">False</button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'raining')">True</button>
           </div>
         </div>
         <div class="input-group mt-3 condition-thundering d-none">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="thunderingCheckbox" onchange="updateCheckedField(this, 'thundering')">
-            <label class="custom-control-label" for="thunderingCheckbox">Thundering</label>
+          <div class="input-group-prepend">
+            <span class="input-group-text">Thundering</span>
+          </div>
+          <div class="btn-group">
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'thundering')">False</button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'thundering')">True</button>
           </div>
         </div>
       </div>
