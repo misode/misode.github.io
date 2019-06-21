@@ -85,7 +85,7 @@
           <span class="input-group-text rounded-0 binomial d-none">p</span>
           <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 bonus-rolls">
+        <div class="input-group mt-3 bonus-rolls" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Bonus Rolls</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -182,7 +182,7 @@
             <option value="minecraft:apply_bonus">Apply Bonus</option>
           </select>
         </div>
-        <div class="input-group function-count mt-3 d-none">
+        <div class="input-group function-count mt-3 d-none" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Count</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -202,7 +202,7 @@
           <span class="input-group-text rounded-0 binomial d-none">p</span>
           <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'count')" onclick="this.select()">
         </div>
-        <div class="input-group function-damage mt-3 d-none">
+        <div class="input-group function-damage mt-3 d-none" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Damage</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -279,7 +279,7 @@
           <div class="enchantment-list">
           </div>
         </div>
-        <div class="input-group function-ench-levels mt-3 d-none">
+        <div class="input-group function-ench-levels mt-3 d-none" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Levels</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -331,7 +331,7 @@
           </div>
           <textarea type="text" class="form-control code" onchange="updateField(this, 'name')" onclick="this.select()" style="height: 0px"></textarea>
         </div>
-        <div class="input-group function-limit-range mt-3 d-none">
+        <div class="input-group function-limit-range mt-3 d-none" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">limit</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -443,7 +443,7 @@
           </div>
           <input type="text" class="form-control modifier-name" onchange="updateField(this, 'name')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 modifier-amount">
+        <div class="input-group mt-3 modifier-amount" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Amount</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -756,7 +756,7 @@
           <span class="input-group-text rounded-0 tag d-none">Tag</span>
           <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 item-count">
+        <div class="input-group mt-3 item-count" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Count</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -771,7 +771,7 @@
           <span class="input-group-text rounded-0 range d-none">Max</span>
           <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'count')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 item-durability">
+        <div class="input-group mt-3 item-durability" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Durability</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -875,7 +875,7 @@
             <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.bypasses_armor')">True</button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-dealt">
+        <div class="input-group mt-3 damage-dealt" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Dealt</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -890,7 +890,7 @@
           <span class="input-group-text rounded-0 range d-none">Max</span>
           <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'dealt')" onclick="this.select()">
         </div>
-        <div class="input-group mt-3 damage-taken">
+        <div class="input-group mt-3 damage-taken" data-type="range">
           <div class="input-group-prepend">
             <span class="input-group-text">Taken</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>

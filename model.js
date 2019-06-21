@@ -314,13 +314,29 @@ function updateRangeField(el, field) {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
       let n = $range.find('.binomial.n').val();
       let p = $range.find('.binomial.p').val();
-      if (n) data.n = parseInt(n);
-      if (p) data.p = parseFloat(p);
+      if (n) {
+        data.n = parseInt(n);
+      } else {
+        delete data.n;
+      }
+      if (p) {
+        data.p = parseFloat(p);
+      } else {
+        delete data.min;
+      }
     } else {
       let min = $range.find('.range.min').val();
       let max = $range.find('.range.max').val();
-      if (min) data.min = parseFloat(min);
-      if (max) data.max = parseFloat(max);
+      if (min) {
+        data.min = parseFloat(min);
+      } else {
+        delete data.min;
+      }
+      if (max) {
+        data.max = parseFloat(max);
+      } else {
+        delete data.max;
+      }
     }
   } else {
     data = parseFloat($range.find('.exact').val());
