@@ -246,7 +246,7 @@ function generateFunction(func, i) {
     if (typeof value !== 'string') {
       value = JSON.stringify(value);
     }
-    $function.find('.function-name input').val(value).keydown(e => preventNewline(e));
+    $function.find('.function-name textarea').val(value).keydown(e => preventNewline(e));
   } else {
     delete func.name;
   }
