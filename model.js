@@ -343,12 +343,6 @@ function addModifier(el) {
   invalidated();
 }
 
-function removeModifier(el) {
-  let index = parseInt($(el).closest('.modifier').attr('data-index'));
-  getSuperParent(el).modifiers.splice(index, 1);
-  invalidated();
-}
-
 function addModifierSlot(el) {
   let modifier = getParent(el);
   if (!modifier.slot) {
@@ -584,5 +578,17 @@ function updateChancesField(el) {
   } catch {
     parent.chances = [];
   }
+  invalidated();
+}
+
+function addConditionEnchantment(el) {
+  let condition = getParent(el);
+  if (!condition.enchantments) {
+    condition.enchantments = [];
+  }
+  condition.enchantments.push({
+    enchantment: 'minecraft:silk_touch',
+    level: 1
+  });
   invalidated();
 }

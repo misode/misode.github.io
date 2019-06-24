@@ -752,6 +752,13 @@ function generateItem(item) {
     delete item.nbt;
   }
 
+  if (item.enchantments) {
+    for (let j = 0; j < item.enchantments.length; j += 1) {
+      let $enchantment = generateEnchantment(item.enchantments[j], j);
+      $item.children('.card-body').append($enchantment);
+    }
+  }
+
   return $item;
 }
 
@@ -795,4 +802,14 @@ function generateDamage(damage) {
   generateRadio($damage.find('.damage-blocked'), damage.blocked);
 
   return $damage;
+}
+
+function generateEnchantment(enchantment, i) {
+  let $enchantment = $('#enchantmentTemplate').clone();
+  $enchantment.removeAttr('id').attr('data-index', i);
+
+  $enchantment.find('.enchantment-id').val(enchantment.enchantment);
+  generateRange($enchantment.find('.enchantment-level'), enchantment.level);
+
+  return $enchantment;
 }

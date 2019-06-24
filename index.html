@@ -407,10 +407,8 @@
       </div>
     </div>
     <div id="modifierTemplate" class="card bg-dark mt-3 modifier" data-field="modifiers[]">
-      <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)">Remove Modifier</button>
-      </div>
       <div class="card-body">
+        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)">Remove Modifier</button>
         <div class="input-group" data-type="enum" data-field="attribute">
           <div class="input-group-prepend">
             <span class="input-group-text">Attribute</span>
@@ -792,6 +790,9 @@
           </div>
           <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onclick="this.select()"></textarea>
         </div>
+        <div class="input-group mt-3">
+          <button class="btn btn-dark" type="button" onclick="addConditionEnchantment(this)">Add Enchantment</button>
+        </div>
       </div>
     </div>
     <div id="damageTemplate" class="card bg-dark mt-3 damage" data-field="predicate">
@@ -913,6 +914,70 @@
         </div>
         <button class="btn btn-light dropdown-toggle mt-3" type="button" data-shows="false" onclick="toggleDirectEntity(this)">Direct Entity</button>
         <div class="direct-entity">
+        </div>
+      </div>
+    </div>
+    <div id="enchantmentTemplate" class="card bg-dark mt-3 enchantment" data-field="enchantments[]">
+      <div class="card-body">
+        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)">Remove Enchantment</button>
+        <div class="input-group" data-type="enum" data-field="enchantment">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Enchantment</span>
+          </div>
+          <select class="form-control enchantment-id" onchange="updateField(this)">
+            <option value="minecraft:aqua_affinity">Aqua Affinity</option>
+            <option value="minecraft:bane_of_arthropods">Bane of Arthropods</option>
+            <option value="minecraft:blast_protection">Blast Protection</option>
+            <option value="minecraft:channeling">Channeling</option>
+            <option value="minecraft:binding_curse">Curse of Binding</option>
+            <option value="minecraft:vanishing_curse">Curse of Vanishing</option>
+            <option value="minecraft:depth_strider">Depth Strider</option>
+            <option value="minecraft:efficiency">Efficiency</option>
+            <option value="minecraft:feather_falling">Feather Falling</option>
+            <option value="minecraft:fire_aspect">Fire Aspect</option>
+            <option value="minecraft:fire_protection">Fire Protection</option>
+            <option value="minecraft:flame">Flame</option>
+            <option value="minecraft:fortune">Fortune</option>
+            <option value="minecraft:frost_walker">Frost Walker</option>
+            <option value="minecraft:impaling">Impaling</option>
+            <option value="minecraft:infinity">Infinity</option>
+            <option value="minecraft:knockback">Knockback</option>
+            <option value="minecraft:looting">Looting</option>
+            <option value="minecraft:loyalty">Loyalty</option>
+            <option value="minecraft:luck_of_the_sea">Luck of the Sea</option>
+            <option value="minecraft:lure">Lure</option>
+            <option value="minecraft:mending">Mending</option>
+            <option value="minecraft:multishot">Multishot</option>
+            <option value="minecraft:piercing">Piercing</option>
+            <option value="minecraft:power">Power</option>
+            <option value="minecraft:projectile_protection">Projectile Protection</option>
+            <option value="minecraft:protection">Protection</option>
+            <option value="minecraft:punch">Punch</option>
+            <option value="minecraft:quick_charge">Quick Charge</option>
+            <option value="minecraft:respiration">Respiration</option>
+            <option value="minecraft:riptide">Riptide</option>
+            <option value="minecraft:sharpness">Sharpness</option>
+            <option value="minecraft:silk_touch">Silk Touch</option>
+            <option value="minecraft:smite">Smite</option>
+            <option value="minecraft:sweeping">Sweeping Edge</option>
+            <option value="minecraft:thorns">Thorns</option>
+            <option value="minecraft:unbreaking">Unbreaking</option>
+          </select>
+        </div>
+        <div class="input-group mt-3 enchantment-level" data-type="range" data-field="level">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Level</span>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)">Exact</a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)">Range</a>
+            </div>
+          </div>
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <span class="input-group-text rounded-0 range d-none">Min</span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <span class="input-group-text rounded-0 range d-none">Max</span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
         </div>
       </div>
     </div>
