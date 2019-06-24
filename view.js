@@ -127,7 +127,7 @@ function generateEntry(entry, i, size) {
   if (entry.children) {
     for (let j = 0; j < entry.children.length; j += 1) {
       let $child = generateEntry(entry.children[j], j, entry.children.length);
-      $child.removeClass('entry').addClass('child');
+      $child.attr('data-field', 'children[]');
       $entry.children('.card-body').append($child);
     }
   }
@@ -216,8 +216,8 @@ function generateFunction(func, i) {
     delete func.treasure;
   }
 
-  if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
-    if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
+  if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
+    if (func.function === 'minecraft:looting_enchant') {
       $function.find('.function-limit').removeClass('d-none');
       $function.find('.function-limit input').val(func.limit);
     } else {
@@ -317,7 +317,7 @@ function generateFunction(func, i) {
 
   if (func.function === 'minecraft:apply_bonus') {
     $function.find('.function-enchantment').removeClass('d-none');
-    $function.find('.function-entity input').val(func.enchantment);
+    $function.find('.function-enchantment input').val(func.enchantment);
   } else {
     delete func.enchantment;
   }
@@ -392,8 +392,8 @@ function generateModifier(modifier, i) {
   generateRange($modifier.find('.modifier-amount'), modifier.amount);
   $modifier.find('.modifier-operation').val(modifier.operation);
 
-  if (modifier.slots) {
-    for (let s of modifier.slots) {
+  if (modifier.slot) {
+    for (let s of modifier.slot) {
       let item = $modifier.find('.dropdown-item[data-slot="' + s + '"]');
       item.addClass('d-none');
       let html = '<button type="button" class="btn btn-outline-danger bg-light btn-sm mr-2 mt-2" data-slot="' + s + '" onclick="removeModifierSlot(this)">' + item.text() + '</button>';
@@ -623,7 +623,7 @@ function generateCondition(condition, i) {
 
   if (condition.term) {
     let $term = generateCondition(condition.term, 0);
-    $term.removeClass('condition').addClass('term');
+    $term.attr('data-field', 'term');
     $term.find('.card-header').remove();
     $condition.children('.card-body').append($term);
   }
@@ -631,7 +631,7 @@ function generateCondition(condition, i) {
   if (condition.terms) {
     for (let j = 0; j < condition.terms.length; j += 1) {
       let $term = generateCondition(condition.terms[j], j);
-      $term.removeClass('condition').addClass('terms');
+      $term.attr('data-field', 'terms[]');
       $condition.children('.card-body').append($term);
     }
   }
@@ -693,7 +693,7 @@ function generateEntity(entity) {
   }
   if (entity.location) {
     let $location = generateLocation(entity.location);
-    $location.removeClass('predicate').addClass('location');
+    $location.attr('data-field', 'location');
     $entity.children('.card-body').append($location);
   }
   if (entity.nbt) {
@@ -756,7 +756,7 @@ function generateItem(item) {
 }
 
 function generateDamage(damage) {
-  let $damage = $('#damageTemplate').clone().removeAttr('id').addClass('predicate');
+  let $damage = $('#damageTemplate').clone().removeAttr('id');
   if (!damage) {
     damage = {};
   }
@@ -774,12 +774,12 @@ function generateDamage(damage) {
 
   if (damage.source_entity) {
     let $entity = generateEntity(damage.source_entity);
-    $entity.removeClass('predicate');
+    $entity.attr('data-field', 'source_entity');
     $damage.find('.source-entity').append($entity);
   }
   if (damage.direct_entity) {
     let $entity = generateEntity(damage.direct_entity);
-    $entity.removeClass('predicate');
+    $entity.attr('data-field', 'direct_entity');
     $damage.find('.direct-entity').append($entity);
   }
 
