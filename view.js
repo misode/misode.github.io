@@ -809,7 +809,7 @@ function generateEnchantment(enchantment, i) {
   $enchantment.removeAttr('id').attr('data-index', i);
 
   $enchantment.find('.enchantment-id').val(enchantment.enchantment);
-  generateRange($enchantment.find('.enchantment-level'), enchantment.level);
+  generateRange($enchantment.find('.enchantment-levels'), enchantment.levels);
 
   return $enchantment;
 }
