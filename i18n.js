@@ -3,7 +3,7 @@ i18next
   .use(i18nextXHRBackend)
   .init({
     backend: { loadPath: 'locales/{{lng}}.json' },
-    whitelist: ['en'],
+    whitelist: ['en', 'zh_CN'],
     fallbackLng: 'en'
   })
   .then(() => {
