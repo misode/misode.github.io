@@ -414,19 +414,19 @@
             <span class="input-group-text" data-i18n="$modifier.attribute"></span>
           </div>
           <select class="form-control modifier-attribute" onchange="updateField(this)">
-            <option value="generic.maxHealth" data-i18n="generic_maxHealth"></option>
-            <option value="generic.followRange" data-i18n="generic_followRange"></option>
-            <option value="generic.knockbackResistance" data-i18n="generic_knockbackResistance"></option>
-            <option value="generic.movementSpeed" data-i18n="generic_movementSpeed"></option>
-            <option value="generic.attackDamage" data-i18n="generic_attackDamage"></option>
-            <option value="generic.armor" data-i18n="generic_armor"></option>
-            <option value="generic.armorThoughness" data-i18n="generic_armorThoughness"></option>
-            <option value="generic.attackSpeed" data-i18n="generic_attackSpeed"></option>
-            <option value="generic.luck" data-i18n="generic_luck"></option>
-            <option value="horse.jumpStrength" data-i18n="horse_jumpStrength"></option>
-            <option value="generic.attackKnockback" data-i18n="generic_attackKnockback"></option>
-            <option value="generic.flyingSpeed" data-i18n="generic_flyingSpeed"></option>
-            <option value="zombie.spawnReinforcements" data-i18n="zombie_spawnReinforcements"></option>
+            <option value="generic.maxHealth" data-i18n="$modifier.generic_maxHealth"></option>
+            <option value="generic.followRange" data-i18n="$modifier.generic_followRange"></option>
+            <option value="generic.knockbackResistance" data-i18n="$modifier.generic_knockbackResistance"></option>
+            <option value="generic.movementSpeed" data-i18n="$modifier.generic_movementSpeed"></option>
+            <option value="generic.attackDamage" data-i18n="$modifier.generic_attackDamage"></option>
+            <option value="generic.armor" data-i18n="$modifier.generic_armor"></option>
+            <option value="generic.armorThoughness" data-i18n="$modifier.generic_armorThoughness"></option>
+            <option value="generic.attackSpeed" data-i18n="$modifier.generic_attackSpeed"></option>
+            <option value="generic.luck" data-i18n="$modifier.generic_luck"></option>
+            <option value="horse.jumpStrength" data-i18n="$modifier.horse_jumpStrength"></option>
+            <option value="generic.attackKnockback" data-i18n="$modifier.generic_attackKnockback"></option>
+            <option value="generic.flyingSpeed" data-i18n="$modifier.generic_flyingSpeed"></option>
+            <option value="zombie.spawnReinforcements" data-i18n="$modifier.zombie_spawnReinforcements"></option>
           </select>
         </div>
         <div class="input-group mt-3" data-type="string" data-field="name">
@@ -480,7 +480,7 @@
                 <a class="dropdown-item" data-slot="legs" onclick="addModifierSlot(this)" data-i18n="$slot.legs"></a>
                 <a class="dropdown-item" data-slot="feet" onclick="addModifierSlot(this)" data-i18n="$slot.feet"></a>
               </div>
-            </div>`
+            </div>
           </div>
           <div class="modifier-slots-list">
           </div>
@@ -494,24 +494,24 @@
       <div class="card-body">
         <div class="input-group" data-type="string" data-field="source">
           <div class="input-group-prepend">
-            <span class="input-group-text" data-i18n="ration.source"></span>
+            <span class="input-group-text" data-i18n="$operation.source"></span>
           </div>
           <input type="text" class="form-control code operation-source" onchange="updateField(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3" data-type="string" data-field="target">
           <div class="input-group-prepend">
-            <span class="input-group-text" data-i18n="ration.target"></span>
+            <span class="input-group-text" data-i18n="$operation.target"></span>
           </div>
           <input type="text" class="form-control code operation-target" onchange="updateField(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3" data-type="enum" data-field="op">
           <div class="input-group-prepend">
-            <span class="input-group-text" data-i18n="ration.operation"></span>
+            <span class="input-group-text" data-i18n="$operation.operation"></span>
           </div>
           <select class="form-control operation-type" onchange="updateField(this)">
-            <option value="replace" data-i18n="ration.$operation.replace"></option>
-            <option value="append" data-i18n="ration.$operation.append"></option>
-            <option value="merge" data-i18n="ration.$operation.merge"></option>
+            <option value="replace" data-i18n="$operation.$operation.replace"></option>
+            <option value="append" data-i18n="$operation.$operation.append"></option>
+            <option value="merge" data-i18n="$operation.$operation.merge"></option>
           </select>
         </div>
       </div>
@@ -567,7 +567,7 @@
           <select class="form-control" onchange="updateField(this)">
             <option value="this" data-i18n="$source.this"></option>
             <option value="killer" data-i18n="$source.killer"></option>
-            <option value="killer_player" data-i18n="$souce.killer_player"></option>
+            <option value="killer_player" data-i18n="$source.killer_player"></option>
           </select>
         </div>
         <div class="input-group mt-3 condition-entity-scores d-none">
@@ -621,7 +621,7 @@
         </div>
         <div class="input-group mt-3 condition-enchantment d-none" data-type="string" data-field="enchantment">
           <div class="input-group-prepend">
-            <span class="input-group-text" data-i18n="enchatment"></span>
+            <span class="input-group-text" data-i18n="enchantment"></span>
           </div>
           <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
         </div>
@@ -638,7 +638,7 @@
         <span class="input-group-text objective"></span>
         <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
         <div class="dropdown-menu">
-          <a class="dropdown-item" onclick="updateScoreType(this, 'exact')" data-i18n="$range.Exact"></a>
+          <a class="dropdown-item" onclick="updateScoreType(this, 'exact')" data-i18n="$range.exact"></a>
           <a class="dropdown-item" onclick="updateScoreType(this, 'range')" data-i18n="$range.range"></a>
         </div>
       </div>
@@ -902,7 +902,7 @@
         </div>
         <div class="input-group mt-3 damage-blocked" data-type="boolean" data-field="blocked">
           <div class="input-group-prepend">
-            <span class="input-group-text" data-i18n="$range.blocked"></span>
+            <span class="input-group-text" data-i18n="$damage.blocked"></span>
           </div>
           <div class="btn-group">
             <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
