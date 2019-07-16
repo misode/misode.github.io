@@ -1,13 +1,26 @@
+const lngs = [
+  ['en', 'English'],
+  ['zh-CN', '简体中文']
+]
+
+lngs.forEach(v => $('#lngList').append(`<a class="dropdown-item" onclick="changeLng('${v[0]}')">${v[1]}</a>`))
+
 i18next
   .use(i18nextBrowserLanguageDetector)
   .use(i18nextXHRBackend)
   .init({
     lng: 'zh-CN',
     backend: { loadPath: 'locales/{{lng}}.json' },
-    whitelist: ['en', 'zh-CN'],
-    fallbackLng: 'en'
+    fallbackLng: 'en',
+    whitelist: lngs.map(v => v[0])
   })
   .then(() => {
     jqueryI18next.init(i18next, $, { parseDefaultValueFromContent: false })
     $('html').localize()
   })
+
+function changeLng(code) {
+  i18next.changeLanguage(code).then(() => {
+    $('html').localize()
+  })
+}
