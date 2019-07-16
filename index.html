@@ -324,10 +324,10 @@
             <span class="input-group-text" data-i18n="source"></span>
           </div>
           <select class="form-control" onchange="updateField(this)">
-            <option value="block_entity" data-i18n="block_entity"></option>
-            <option value="this" data-i18n="this"></option>
-            <option value="killer" data-i18n="killer"></option>
-            <option value="killer_player" data-i18n="killer_player"></option>
+            <option value="block_entity" data-i18n="$source.block_entity"></option>
+            <option value="this" data-i18n="$source.this"></option>
+            <option value="killer" data-i18n="$source.killer"></option>
+            <option value="killer_player" data-i18n="$source.killer_player"></option>
           </select>
         </div>
         <div class="input-group mt-3 function-name d-none" data-type="json" data-field="name">
@@ -372,7 +372,7 @@
         </div>
         <div class="input-group mt-3 function-enchantment d-none" data-type="string" data-field="enchantment">
           <div class="input-group-prepend">
-            <span class="input-group-text" data-i18n="$function.$enchatment.ench">Enchantment</span>
+            <span class="input-group-text" data-i18n="enchantment"></span>
           </div>
           <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
         </div>
@@ -526,20 +526,20 @@
             <span class="input-group-text" data-i18n="condition"></span>
           </div>
           <select class="form-control condition-type" onchange="updateField(this)">
-            <option value="minecraft:alternative" datai-18n="$condition.alternative"></option>
-            <option value="minecraft:inverted" datai-18n="$condition.inverted"></option>
-            <option value="minecraft:entity_properties" datai-18n="$condition.entity_properties"></option>
-            <option value="minecraft:blockstate_propery" datai-18n="$condition.blockstate_propery"></option>
-            <option value="minecraft:match_tool" datai-18n="$condition.match_tool"></option>
-            <option value="minecraft:damage_source_properties" datai-18n="$condition.damage_source_properties"></option>
-            <option value="minecraft:location_check" datai-18n="$condition.location_check"></option>
-            <option value="minecraft:weather_check" datai-18n="$condition.weather_check"></option>
-            <option value="minecraft:entity_scores" datai-18n="$condition.entity_scores"></option>
-            <option value="minecraft:random_chance" datai-18n="$condition.random_chance"></option>
-            <option value="minecraft:random_chance_with_looting" datai-18n="$condition.random_chance_with_looting"></option>
-            <option value="minecraft:table_bonus" datai-18n="$condition.table_bonus"></option>
-            <option value="minecraft:killed_by_player" datai-18n="$condition.killed_by_player"></option>
-            <option value="minecraft:survives_explosion" datai-18n="$condition.survives_explosion"></option>
+            <option value="minecraft:alternative" data-i18n="$condition.alternative"></option>
+            <option value="minecraft:inverted" data-i18n="$condition.inverted"></option>
+            <option value="minecraft:entity_properties" data-i18n="$condition.entity_properties"></option>
+            <option value="minecraft:blockstate_propery" data-i18n="$condition.blockstate_propery"></option>
+            <option value="minecraft:match_tool" data-i18n="$condition.match_tool"></option>
+            <option value="minecraft:damage_source_properties" data-i18n="$condition.damage_source_properties"></option>
+            <option value="minecraft:location_check" data-i18n="$condition.location_check"></option>
+            <option value="minecraft:weather_check" data-i18n="$condition.weather_check"></option>
+            <option value="minecraft:entity_scores" data-i18n="$condition.entity_scores"></option>
+            <option value="minecraft:random_chance" data-i18n="$condition.random_chance"></option>
+            <option value="minecraft:random_chance_with_looting" data-i18n="$condition.random_chance_with_looting"></option>
+            <option value="minecraft:table_bonus" data-i18n="$condition.table_bonus"></option>
+            <option value="minecraft:killed_by_player" data-i18n="$condition.killed_by_player"></option>
+            <option value="minecraft:survives_explosion" data-i18n="$condition.survives_explosion"></option>
           </select>
         </div>
         <div class="input-group mt-3 condition-chance d-none" data-type="float" data-field="chance">
