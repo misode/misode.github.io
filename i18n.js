@@ -2,8 +2,9 @@ i18next
   .use(i18nextBrowserLanguageDetector)
   .use(i18nextXHRBackend)
   .init({
+    lng: 'zh-CN',
     backend: { loadPath: 'locales/{{lng}}.json' },
-    whitelist: ['en', 'zh_CN'],
+    whitelist: ['en', 'zh-CN'],
     fallbackLng: 'en'
   })
   .then(() => {
