@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -8,8 +8,16 @@
   <link rel="stylesheet" href="custom.css">
 </head>
 <body>
-  <nav class="navbar navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <span class="navbar-brand mb-0 h1" data-i18n="description"></span>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Language
+        </a>
+        <div id="lngList" class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"></div>
+      </li>
+    </ul>
     <span class="float-right"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
   </nav>
   <div class="container">
