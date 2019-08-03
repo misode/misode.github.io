@@ -423,7 +423,7 @@ function generateCondition(condition, i) {
   $condition.find('.condition-type').val(condition.condition);
 
   if (table.type === 'minecraft:generic') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
@@ -431,17 +431,17 @@ function generateCondition(condition, i) {
   } else if (table.type === 'minecraft:block') {
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
   } else if (table.type === 'minecraft:fishing') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
     $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
   } else if (table.type === 'minecraft:entity') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
     $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
     $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
   } else if (table.type === 'minecraft:chest') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
     $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
@@ -488,7 +488,7 @@ function generateCondition(condition, i) {
     delete condition.entity;
   }
 
-  if (condition.condition === 'minecraft:blockstate_propery') {
+  if (condition.condition === 'minecraft:block_state_propery') {
     $condition.find('.condition-block').removeClass('d-none');
     $condition.find('.condition-block input').val(condition.block);
     $condition.find('.condition-block-properties').removeClass('d-none');
