@@ -3,7 +3,7 @@
 		"alternative": "析取范式",
 		"inverted": "取反",
 		"entity_properties": "实体属性",
-		"blockstate_propery": "方块属性",
+		"block_state_propery": "方块属性",
 		"match_tool": "工具属性",
 		"damage_source_properties": "伤害源",
 		"location_check": "位置",

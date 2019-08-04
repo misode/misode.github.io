@@ -3,7 +3,7 @@
 		"alternative": "Alternative",
 		"inverted": "Inverted",
 		"entity_properties": "Entity Properties",
-		"blockstate_propery": "Block Properties",
+		"block_state_propery": "Block Properties",
 		"match_tool": "Tool Properties",
 		"damage_source_properties": "Damage Source",
 		"location_check": "Location",
