@@ -15,7 +15,7 @@ addEntry($('#structure .pool').get());
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
-  $('#source').val(params.get('q'));
+  $('#source').val(atob(params.get('q')));
   updateSouce();
 }
 
@@ -42,7 +42,7 @@ function showSource() {
 }
 
 function linkSource() {
-  let link = window.location.origin + window.location.pathname + '?q=' + JSON.stringify(table);
+  let link = window.location.origin + window.location.pathname + '?q=' + btoa(JSON.stringify(table));
   $('#copyTextarea').removeClass('d-none').val(link);
   $('#copyTextarea').get()[0].select();
   document.execCommand('copy');
