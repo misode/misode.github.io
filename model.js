@@ -55,7 +55,7 @@ function updateSouce() {
   $('#source').removeClass('invalid');
   try {
     table = JSON.parse($('#source').val());
-  } catch {
+  } catch(e) {
     if ($('#source').val().length > 0) {
       $('#source').addClass('invalid');
       return;
@@ -422,7 +422,7 @@ function parseJSONValue(value) {
   if (value.startsWith('"') || value.startsWith('{') || value.startsWith('[')) {
     try {
       return JSON.parse(value);
-    } catch {
+    } catch(e) {
       return value;
     }
   }
@@ -575,7 +575,7 @@ function updateChancesField(el) {
         parent.chances[i] = 1;
       }
     }
-  } catch {
+  } catch(e) {
     parent.chances = [];
   }
   invalidated();
