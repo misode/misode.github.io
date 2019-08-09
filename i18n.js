@@ -1,5 +1,6 @@
 const lngs = [
-  ['en', 'English']
+  ['en', 'English'],
+  ['zh-CN', '简体中文']
 ]
 
 lngs.forEach(v => $('#lngList').append(`<a class="dropdown-item" onclick="changeLng('${v[0]}')">${v[1]}</a>`))
