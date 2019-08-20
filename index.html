@@ -24,7 +24,7 @@
     <div class="row my-4">
       <div class="col-12 col-lg-7 mb-3 structure-container">
         <div class="input-group">
-          <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)" data-i18n="add;[append]pool"></button>
+          <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)" data-i18n="add_pool"></button>
           <div class="input-group-prepend">
             <span class="input-group-text rounded-left" data-i18n="$table.type"></span>
           </div>
@@ -73,9 +73,9 @@
   <div class="d-none">
     <div id="poolTemplate" class="card bg-success text-white mt-3 pool" data-field="pools[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove;[append]pool"></button>
-        <button type="button" class="btn btn-light mr-3 mb-2 float-left" onclick="addEntry(this)" data-i18n="add;[append]entry"></button>
-        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add;[append]condition"></button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_pool"></button>
+        <button type="button" class="btn btn-light mr-3 mb-2 float-left" onclick="addEntry(this)" data-i18n="add_entry"></button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add_condition"></button>
       </div>
       <div class="card-body">
         <div class="input-group rolls" data-type="range" data-field="rolls">
@@ -122,9 +122,9 @@
     </div>
     <div id="entryTemplate" class="card mt-3 entry" data-field="entries[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove;[append]entry"></button>
-        <button type="button" class="btn btn-secondary mr-3 mb-2 float-left" onclick="addFunction(this)" data-i18n="add;[append]function"></button>
-        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add;[append]condition"></button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_entry"></button>
+        <button type="button" class="btn btn-secondary mr-3 mb-2 float-left" onclick="addFunction(this)" data-i18n="add_function"></button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add_condition"></button>
       </div>
       <div class="card-body">
         <div class="input-group" data-type="enum" data-field="type">
@@ -161,14 +161,14 @@
           <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3 entry-children d-none">
-          <button type="button" class="btn btn-outline-success" onclick="addChild(this)" data-i18n="add;[append]child"></button>
+          <button type="button" class="btn btn-outline-success" onclick="addChild(this)" data-i18n="add_child"></button>
         </div>
       </div>
     </div>
     <div id="functionTemplate" class="card bg-secondary mt-3 function" data-field="functions[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove;[append]function"></button>
-        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add;[append]condition"></button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_function"></button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add_condition"></button>
       </div>
       <div class="card-body">
         <div class="input-group" data-type="enum" data-field="function">
@@ -325,7 +325,7 @@
           <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3 function-attributes d-none">
-          <button type="button" class="btn btn-dark" onclick="addModifier(this)" data-i18n="add;[append]modifier"></button>
+          <button type="button" class="btn btn-dark" onclick="addModifier(this)" data-i18n="add_modifier"></button>
         </div>
         <div class="input-group mt-3 function-source d-none" data-type="enum" data-field="source">
           <div class="input-group-prepend">
@@ -354,7 +354,7 @@
           <input type="text" class="form-control range max rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
         </div>
         <div class="input-group mt-3 function-entries d-none">
-          <button type="button" class="btn btn-light" onclick="addEntry(this)" data-i18n="add;[append]entry"></button>
+          <button type="button" class="btn btn-light" onclick="addEntry(this)" data-i18n="add_entry"></button>
         </div>
         <div class="input-group mt-3 function-lore d-none" data-type="json-list" data-field="lore">
           <textarea class="form-control code" onchange="updateLoreField(this)" rows=3></textarea>
@@ -416,7 +416,7 @@
     </div>
     <div id="modifierTemplate" class="card bg-dark mt-3 modifier" data-field="modifiers[]">
       <div class="card-body">
-        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)" data-i18n="remove;[append]modifier"></button>
+        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)" data-i18n="remove_modifier"></button>
         <div class="input-group" data-type="enum" data-field="attribute">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$modifier.attribute"></span>
@@ -497,7 +497,7 @@
     </div>
     <div id="operationTemplate" class="card bg-dark mt-3 operation" data-field="ops[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove;[append]operation"></button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_operation"></button>
       </div>
       <div class="card-body">
         <div class="input-group" data-type="string" data-field="source">
@@ -526,7 +526,7 @@
     </div>
     <div id="conditionTemplate" class="card mt-3 bg-info condition" data-field="conditions[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove;[append]condition"></button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_condition"></button>
       </div>
       <div class="card-body">
         <div class="input-group" data-type="enum" data-field="condition">
@@ -584,13 +584,13 @@
           </div>
           <input type="text" class="form-control">
           <div class="input-group-append">
-            <button class="btn btn-dark" type="button" onclick="addScore(this)" data-i18n="add;[append]score"></button>
+            <button class="btn btn-dark" type="button" onclick="addScore(this)" data-i18n="add_score"></button>
           </div>
         </div>
         <div class="mt-3 scores-list d-none">
         </div>
         <div class="input-group mt-3 condition-terms d-none">
-          <button type="button" class="btn btn-light" onclick="addTerm(this)" data-i18n="add;[append]$condition.$terms.term"></button>
+          <button type="button" class="btn btn-light" onclick="addTerm(this)" data-i18n="add_term"></button>
         </div>
         <div class="input-group mt-3 condition-block d-none" data-type="string" data-field="block">
           <div class="input-group-prepend">
@@ -604,7 +604,7 @@
           </div>
           <input type="text" class="form-control">
           <div class="input-group-append">
-            <button class="btn btn-dark" type="button" onclick="addBlockProperty(this)" data-i18n="add;[append]block_state"></button>
+            <button class="btn btn-dark" type="button" onclick="addBlockProperty(this)" data-i18n="add_block_state"></button>
           </div>
         </div>
         <div class="mt-3 property-list d-none">
@@ -799,7 +799,7 @@
           <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onclick="this.select()"></textarea>
         </div>
         <div class="input-group mt-3">
-          <button class="btn btn-dark" type="button" onclick="addConditionEnchantment(this)" data-i18n="add;[append]enchantment"></button>
+          <button class="btn btn-dark" type="button" onclick="addConditionEnchantment(this)" data-i18n="add_enchantment"></button>
         </div>
       </div>
     </div>
@@ -927,7 +927,7 @@
     </div>
     <div id="enchantmentTemplate" class="card bg-dark mt-3 enchantment" data-field="enchantments[]">
       <div class="card-body">
-        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)" data-i18n="remove;[append]enchantment"></button>
+        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)" data-i18n="remove_enchantment"></button>
         <div class="input-group" data-type="enum" data-field="enchantment">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="enchantment"></span>
