@@ -88,15 +88,15 @@
               <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 bonus-rolls" data-type="range" data-field="bonus_rolls">
           <div class="input-group-prepend">
@@ -108,15 +108,15 @@
               <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
       </div>
     </div>
@@ -146,19 +146,19 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$entry.name"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 entry-weight d-none" data-type="int" data-field="weight">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$entry.weight"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 entry-quality d-none" data-type="int" data-field="quality">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$entry.quality"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 entry-children d-none">
           <button type="button" class="btn btn-outline-success" onclick="addChild(this)" data-i18n="add_child"></button>
@@ -205,15 +205,15 @@
               <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group function-damage mt-3 d-none" data-type="range" data-field="damage">
           <div class="input-group-prepend">
@@ -225,21 +225,21 @@
               <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="0" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="0" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-nbt d-none" data-type="nbt" data-field="tag">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="nbt"></span>
           </div>
-          <textarea type="text" class="form-control code" onchange="updateField(this)" onclick="this.select()"></textarea>
+          <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()"></textarea>
         </div>
         <div class="mt-3 function-ench-rand d-none" data-type="set" data-field="enchantments">
           <div class="input-group">
@@ -302,15 +302,15 @@
               <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-ench-treasure d-none" data-type="checkbox" data-field="treasure">
           <div class="custom-control custom-checkbox">
@@ -322,7 +322,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$function.$limit.limit"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-attributes d-none">
           <button type="button" class="btn btn-dark" onclick="addModifier(this)" data-i18n="add_modifier"></button>
@@ -342,16 +342,16 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$function.$name.name"></span>
           </div>
-          <textarea type="text" class="form-control code" onchange="updateField(this)" onclick="this.select()" style="height: 0px"></textarea>
+          <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 0px"></textarea>
         </div>
         <div class="input-group function-limit-range mt-3 d-none" data-type="range" data-field="limit">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$function.$limit.limit"></span>
           </div>
           <span class="input-group-text rounded-0 range" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-entries d-none">
           <button type="button" class="btn btn-light" onclick="addEntry(this)" data-i18n="add_entry"></button>
@@ -382,7 +382,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="enchantment"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-formula d-none" data-type="enum" data-field="formula">
           <div class="input-group-prepend">
@@ -398,19 +398,19 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$function.$bonus_multiplier.multiplier"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'parameters.bonusMultiplier')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this, 'parameters.bonusMultiplier')" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-bonus-extra d-none" data-type="int" data-field="parameters.extra">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$function.$bonus_extra.extra"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'parameters.extra')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this, 'parameters.extra')" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-bonus-probability d-none" data-type="float" data-field="parameters.probability">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$function.$bonus_probability.probability"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'parameters.probability')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this, 'parameters.probability')" onfocus="this.select()">
         </div>
       </div>
     </div>
@@ -441,7 +441,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$modifier.name"></span>
           </div>
-          <input type="text" class="form-control modifier-name" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control modifier-name" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 modifier-amount" data-type="range" data-field="amount">
           <div class="input-group-prepend">
@@ -453,15 +453,15 @@
               <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.binimial.n"></span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.binimial.p"></span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="enum" data-field="operation">
           <div class="input-group-prepend">
@@ -504,13 +504,13 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$operation.source"></span>
           </div>
-          <input type="text" class="form-control code operation-source" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control code operation-source" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="string" data-field="target">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$operation.target"></span>
           </div>
-          <input type="text" class="form-control code operation-target" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control code operation-target" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="enum" data-field="op">
           <div class="input-group-prepend">
@@ -554,13 +554,13 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="chance"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 condition-looting-multiplier d-none" data-type="float" data-field="looting_multiplier">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="looting_multiplier"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 condition-killed-inverted d-none" data-type="checkbox" data-field="inverted">
           <div class="custom-control custom-checkbox">
@@ -596,7 +596,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="block"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 condition-block-properties d-none">
           <div class="input-group-prepend">
@@ -631,13 +631,13 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="enchantment"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 condition-chances d-none" data-type="list" data-field="chances">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="chance_plural"></span>
           </div>
-          <input type="text" class="form-control code" onchange="updateChancesField(this)" onclick="this.select()">
+          <input type="text" class="form-control code" onchange="updateChancesField(this)" onfocus="this.select()">
         </div>
       </div>
     </div>
@@ -650,11 +650,11 @@
           <a class="dropdown-item" onclick="updateScoreType(this, 'range')" data-i18n="$range.range"></a>
         </div>
       </div>
-      <input type="text" class="form-control exact d-none" value="1" onchange="updateScoreField(this)" onclick="this.select()">
+      <input type="text" class="form-control exact d-none" value="1" onchange="updateScoreField(this)" onfocus="this.select()">
       <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-      <input type="text" class="form-control range min d-none" value="1" onchange="updateScoreField(this)" onclick="this.select()">
+      <input type="text" class="form-control range min d-none" value="1" onchange="updateScoreField(this)" onfocus="this.select()">
       <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-      <input type="text" class="form-control range max d-none" value="2" onchange="updateScoreField(this)" onclick="this.select()">
+      <input type="text" class="form-control range max d-none" value="2" onchange="updateScoreField(this)" onfocus="this.select()">
       <div class="input-group-append">
         <button class="btn btn-outline-danger bg-light" type="button" onclick="removeScore(this)" data-i18n="remove"></button>
       </div>
@@ -663,7 +663,7 @@
       <div class="input-group-prepend">
         <span class="input-group-text blockstate"></span>
       </div>
-      <input type="text" class="form-control exact" onchange="updateBlockPropertyField(this)" onclick="this.select()">
+      <input type="text" class="form-control exact" onchange="updateBlockPropertyField(this)" onfocus="this.select()">
       <div class="input-group-append">
         <button class="btn btn-outline-danger bg-light" type="button" onclick="removeBlockProperty(this)" data-i18n="remove"></button>
       </div>
@@ -676,39 +676,39 @@
             <span class="input-group-text" data-i18n="x"></span>
           </div>
           <span class="input-group-text rounded-0" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-2 position-collapse position-y d-none" data-type="range" data-field="position.y">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="y">Y</span>
           </div>
           <span class="input-group-text rounded-0" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min" onchange="updateField(this, 'position.y.min')" onclick="this.select()">
+          <input type="text" class="form-control range min" onchange="updateField(this, 'position.y.min')" onfocus="this.select()">
           <span class="input-group-text rounded-0" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max" onchange="updateField(this, 'position.y.max')" onclick="this.select()">
+          <input type="text" class="form-control range max" onchange="updateField(this, 'position.y.max')" onfocus="this.select()">
         </div>
         <div class="input-group mt-2 position-collapse position-z d-none" data-type="range" data-field="position.z">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="z">Z</span>
           </div>
           <span class="input-group-text rounded-0" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min" onchange="updateField(this, 'position.z.min')" onclick="this.select()">
+          <input type="text" class="form-control range min" onchange="updateField(this, 'position.z.min')" onfocus="this.select()">
           <span class="input-group-text rounded-0" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max" onchange="updateField(this, 'position.z.max')" onclick="this.select()">
+          <input type="text" class="form-control range max" onchange="updateField(this, 'position.z.max')" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="string" data-field="biome">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="biome"></span>
           </div>
-          <input type="text" class="form-control biome" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control biome" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="string" data-field="feature">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="feature"></span>
           </div>
-          <input type="text" class="form-control feature" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control feature" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="enum" data-field="dimension">
           <div class="input-group-prepend">
@@ -729,13 +729,13 @@
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="type"></span>
           </div>
-          <input type="text" class="form-control type" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control type" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="nbt" data-field="nbt">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="nbt"></span>
           </div>
-          <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onclick="this.select()"></textarea>
+          <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onfocus="this.select()"></textarea>
         </div>
         <button class="btn btn-light mt-3 dropdown-toggle" type="button" onclick="toggleEntityLocation(this)" data-i18n="location"></button>
       </div>
@@ -752,9 +752,9 @@
             </div>
           </div>
           <span class="input-group-text rounded-0 name d-none" data-i18n="name"></span>
-          <input type="text" class="form-control name d-none" onchange="updateItemField(this, 'name')" onclick="this.select()">
+          <input type="text" class="form-control name d-none" onchange="updateItemField(this, 'name')" onfocus="this.select()">
           <span class="input-group-text rounded-0 tag d-none" data-i18n="tag"></span>
-          <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onclick="this.select()">
+          <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 item-count" data-type="range" data-field="count">
           <div class="input-group-prepend">
@@ -765,11 +765,11 @@
               <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 item-durability" data-type="range" data-field="durability">
           <div class="input-group-prepend">
@@ -780,23 +780,23 @@
               <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="string" data-field="potion">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="potion"></span>
           </div>
-          <input type="text" class="form-control potion" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control potion" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3" data-type="nbt" data-field="nbt">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="nbt"></span>
           </div>
-          <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onclick="this.select()"></textarea>
+          <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onfocus="this.select()"></textarea>
         </div>
         <div class="input-group mt-3">
           <button class="btn btn-dark" type="button" onclick="addConditionEnchantment(this)" data-i18n="add_enchantment"></button>
@@ -887,11 +887,11 @@
               <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 damage-taken" data-type="range" data-field="taken">
           <div class="input-group-prepend">
@@ -902,11 +902,11 @@
               <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 damage-blocked" data-type="boolean" data-field="blocked">
           <div class="input-group-prepend">
@@ -981,11 +981,11 @@
               <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
           <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onclick="this.select()">
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
       </div>
     </div>
