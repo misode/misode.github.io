@@ -27,9 +27,7 @@
 		"bypass_armor": "Bypass Armor",
 		"dealt": "Dealt",
 		"taken": "Taken",
-		"blocked": "Blocked",
-		"source_enitity": "Source Entity",
-		"direct_enitity": "Direct Entity"
+		"blocked": "Blocked"
 	},
 	"$dimension": {
 		"overworld": "Overworld",
