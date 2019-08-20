@@ -27,9 +27,7 @@
 		"bypass_armor": "破甲",
 		"dealt": "被防御前的伤害",
 		"taken": "实际造成的伤害",
-		"blocked": "被盾牌阻挡",
-		"source_enitity": "根本来源实体",
-		"direct_enitity": "直接来源实体"
+		"blocked": "被盾牌阻挡"
 	},
 	"$dimension": {
 		"overworld": "主世界",
@@ -248,6 +246,7 @@
 	"count": "数量",
 	"description": "适用于 Minecraft 1.14 的战利品表生成器",
 	"dimension": "维度",
+	"direct_entity": "直接来源实体",
 	"durability": "耐久度",
 	"enchantment": "附魔",
 	"entity": "实体",
@@ -287,6 +286,7 @@
 	"share": "分享",
 	"show_source": "显示源代码",
 	"source": "源",
+	"source_entity": "根本来源实体",
 	"tabs": "Tab 缩进",
 	"tag": "标签",
 	"term": "条件",
