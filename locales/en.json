@@ -152,7 +152,7 @@
 		"generic_movementSpeed": "Movement Speed",
 		"generic_attackDamage": "Attack Damage",
 		"generic_armor": "Armor",
-		"generic_armorThoughness": "Armor Toughness",
+		"generic_armorToughness": "Armor Toughness",
 		"generic_attackSpeed": "Attack Speed",
 		"generic_luck": "Luck",
 		"horse_jumpStrength": "Jump Strength",

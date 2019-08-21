@@ -428,7 +428,7 @@
             <option value="generic.movementSpeed" data-i18n="$modifier.generic_movementSpeed"></option>
             <option value="generic.attackDamage" data-i18n="$modifier.generic_attackDamage"></option>
             <option value="generic.armor" data-i18n="$modifier.generic_armor"></option>
-            <option value="generic.armorThoughness" data-i18n="$modifier.generic_armorThoughness"></option>
+            <option value="generic.armorToughness" data-i18n="$modifier.generic_armorToughness"></option>
             <option value="generic.attackSpeed" data-i18n="$modifier.generic_attackSpeed"></option>
             <option value="generic.luck" data-i18n="$modifier.generic_luck"></option>
             <option value="horse.jumpStrength" data-i18n="$modifier.horse_jumpStrength"></option>
@@ -747,12 +747,12 @@
             <span class="input-group-text" data-i18n="item"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateItemType(this, 'name')" data-i18n="name"></a>
+              <a class="dropdown-item" onclick="updateItemType(this, 'item')" data-i18n="name"></a>
               <a class="dropdown-item" onclick="updateItemType(this, 'tag')" data-i18n="tag"></a>
             </div>
           </div>
-          <span class="input-group-text rounded-0 name d-none" data-i18n="name"></span>
-          <input type="text" class="form-control name d-none" onchange="updateItemField(this, 'name')" onfocus="this.select()">
+          <span class="input-group-text rounded-0 item d-none" data-i18n="name"></span>
+          <input type="text" class="form-control item d-none" onchange="updateItemField(this, 'item')" onfocus="this.select()">
           <span class="input-group-text rounded-0 tag d-none" data-i18n="tag"></span>
           <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onfocus="this.select()">
         </div>

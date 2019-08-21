@@ -733,14 +733,14 @@ function generateItem(item) {
   if (item.tag) {
     $item.find('.tag').removeClass('d-none').val(item.tag);
   } else {
-    $item.find('.name').removeClass('d-none').val(item.name);
+    $item.find('.item').removeClass('d-none').val(item.item);
   }
   generateRange($item.find('.item-count'), item.count);
   generateRange($item.find('.item-durability'), item.durability);
   $item.find('.nbt').val(item.nbt).keydown(e => preventNewline(e));
   $item.find('.potion').val(item.potion);
-  if (item.name === '') {
-    delete item.name;
+  if (item.item === '') {
+    delete item.item;
   }
   if (item.tag === '') {
     delete item.tag;

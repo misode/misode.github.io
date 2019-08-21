@@ -152,7 +152,7 @@
 		"generic_movementSpeed": "Скорость",
 		"generic_attackDamage": "Урон",
 		"generic_armor": "Броня",
-		"generic_armorThoughness": "Твёрдость брони",
+		"generic_armorToughness": "Твёрдость брони",
 		"generic_attackSpeed": "Скорость атаки",
 		"generic_luck": "Удача",
 		"horse_jumpStrength": "Сила прыжка лошади",
