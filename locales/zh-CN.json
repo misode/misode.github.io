@@ -152,7 +152,7 @@
 		"generic_movementSpeed": "移动速度",
 		"generic_attackDamage": "普通攻击伤害",
 		"generic_armor": "盔甲防御点数",
-		"generic_armorThoughness": "盔甲韧性",
+		"generic_armorToughness": "盔甲韧性",
 		"generic_attackSpeed": "攻击速度",
 		"generic_luck": "幸运",
 		"horse_jumpStrength": "弹跳力",
