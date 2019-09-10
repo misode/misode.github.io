@@ -74,6 +74,51 @@
   </div>
 
   <div class="d-none">
+    <div id="components">
+      <div data-type="string">
+        <div class="input-group-prepend">
+          <span class="input-group-text"></span>
+        </div>
+        <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
+      </div>
+      <div data-type="enum">
+        <div class="input-group-prepend">
+          <span class="input-group-text"></span>
+        </div>
+        <select class="form-control entry-type" onchange="updateField(this)">
+        </select>
+      </div>
+      <div data-type="range">
+        <div class="input-group-prepend">
+          <span class="input-group-text"></span>
+          <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="range.exact"></a>
+            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="range.range"></a>
+            <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="range.binomial"></a>
+          </div>
+        </div>
+        <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+        <span class="input-group-text rounded-0 range d-none" data-i18n="range.min"></span>
+        <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+        <span class="input-group-text rounded-0 range d-none" data-i18n="range.max"></span>
+        <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
+        <span class="input-group-text rounded-0 binomial d-none" data-i18n="range.n"></span>
+        <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+        <span class="input-group-text rounded-0 binomial d-none" data-i18n="range.p"></span>
+        <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
+      </div>
+      <div data-type="radio">
+        <div class="input-group-prepend">
+          <span class="input-group-text"></span>
+        </div>
+        <div class="btn-group">
+          <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
+          <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
+        </div>
+      </div>
+    </div>
+
     <div id="poolTemplate" class="card bg-success text-white mt-3 pool" data-field="pools[]">
       <div class="card-header pb-1">
         <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_pool"></button>
@@ -1002,6 +1047,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-xhr-backend/3.0.0/i18nextXHRBackend.min.js" integrity="sha384-dK+VwLEvPDbpKM7G7D/LtbW6W2zlt99nuVTwoYIkMulAedST9Vj9OCRkv2xV8GjD" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-i18next/1.2.1/jquery-i18next.min.js" integrity="sha384-fLTSt6zHOb152KeFkj7kSiXdkyjKf6fjk5bdzWYLDPDo9evwd9PVs3TKoYYaaxdl" crossorigin="anonymous"></script>
   <script src="i18n.js" charset="utf-8"></script>
+  <script src="validate.js" charset="utf-8"></script>
   <script src="view.js" charset="utf-8"></script>
   <script src="model.js" charset="utf-8"></script>
 </body>

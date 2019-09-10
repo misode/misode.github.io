@@ -1,0 +1,182 @@
+{
+  "root": {
+    "fields": [
+      {
+        "id": "type",
+        "type": "enum",
+        "values": [
+          "minecraft:empty",
+          "minecraft:entity",
+          "minecraft:block",
+          "minecraft:chest",
+          "minecraft:fishing",
+          "minecraft:generic"
+        ],
+        "default": "minecraft:generic"
+      },
+      {
+        "id": "pools",
+        "type": "array",
+        "values": "pool"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "pool",
+      "type": "object",
+      "class": "card bg-success",
+      "default": {
+        "rolls": 1,
+        "entries": [
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:stone"
+          }
+        ]
+      },
+      "fields": [
+        {
+          "id": "rolls",
+          "type": "range",
+          "default": 1
+        },
+        {
+          "id": "bonus_rolls",
+          "type": "number",
+          "default": 1
+        },
+        {
+          "id": "entries",
+          "type": "array",
+          "values": "entry"
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "values": "condition"
+        }
+      ]
+    },
+    {
+      "id": "entry",
+      "type": "object",
+      "class": "card",
+      "default": {
+        "type": "minecraft:item",
+        "name": "minecraft:stone"
+      },
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "values": [
+            "minecraft:empty",
+            "minecraft:item",
+            "minecraft:tag",
+            "minecraft:loot_table",
+            "minecraft:alternatives",
+            "minecraft:sequence",
+            "minecraft:group",
+            "minecraft:dynamic"
+          ],
+          "default": "minecraft:item"
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "default": "minecraft:stone",
+          "require": [
+            "minecraft:item",
+            "minecraft:tag",
+            "minecraft:loot_table",
+            "minecraft:dynamic"
+          ]
+        },
+        {
+          "id": "children",
+          "type": "array",
+          "values": "entry",
+          "require": [
+            "minecraft:alternatives",
+            "minecraft:sequence",
+            "minecraft:group"
+          ]
+        },
+        {
+          "id": "functions",
+          "type": "array",
+          "values": "function"
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "values": "condition"
+        }
+      ]
+    },
+    {
+      "id": "function",
+      "type": "object",
+      "class": "card bg-info",
+      "default": {
+        "function": "minecraft:set_count",
+        "count": 2
+      },
+      "fields": [
+        {
+          "id": "function",
+          "type": "enum",
+          "values": [
+            "minecraft:set_count",
+            "minecraft:set_damage",
+            "minecraft:set_name",
+            "minecraft:set_lore",
+            "minecraft:set_nbt",
+            "minecraft:set_attributes",
+            "minecraft:set_contents",
+            "minecraft:enchant_randomly",
+            "minecraft:enchant_with_levels",
+            "minecraft:looting_enchant",
+            "minecraft:limit_count",
+            "minecraft:furnace_smelt",
+            "minecraft:explosion_decay",
+            "minecraft:fill_player_head",
+            "minecraft:copy_name",
+            "minecraft:copy_nbt",
+            "minecraft:apply_bonus"
+          ],
+          "default": "set_count"
+        },
+        {
+          "id": "count",
+          "type": "range",
+          "default": 2,
+          "require": [
+            "minecraft:set_count"
+          ]
+        },
+        {
+          "id": "damage",
+          "type": "range",
+          "default": 1,
+          "require": [
+            "minecraft:set_damage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "condition",
+      "type": "object",
+      "card": true,
+      "default": {
+        "condition": "minecraft:random_chance",
+        "chance": 0.5
+      },
+      "fields": [
+
+      ]
+    }
+  ]
+}
