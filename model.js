@@ -16,7 +16,7 @@ addEntry($('#structure .pool').get());
 const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
   $('#source').val(atob(params.get('q')));
-  updateSouce();
+  updateSource();
 }
 
 function updateTableType() {
@@ -51,7 +51,7 @@ function linkSource() {
   }, 2000);
 }
 
-function updateSouce() {
+function updateSource() {
   $('#source').removeClass('invalid');
   try {
     table = JSON.parse($('#source').val());
