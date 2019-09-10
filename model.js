@@ -514,23 +514,23 @@ function toggleEntityLocation(el) {
 
 function updateItemType(el, type) {
   let $predicate = $(el).closest('.predicate');
-  if (type === 'name') {
-    $predicate.find('.name').removeClass('d-none');
+  if (type === 'item') {
+    $predicate.find('.item').removeClass('d-none');
     $predicate.find('.tag').addClass('d-none');
   } else {
     $predicate.find('.tag').removeClass('d-none');
-    $predicate.find('.name').addClass('d-none');
+    $predicate.find('.item').addClass('d-none');
   }
 }
 
 function updateItemField(el, type) {
   let parent = getParent(el);
-  if (type === 'name') {
-    parent.name = $(el).closest('.predicate').find('input.name').val();
+  if (type === 'item') {
+    parent.item = $(el).closest('.predicate').find('input.item').val();
     delete parent.tag;
   } else {
     parent.tag = $(el).closest('.predicate').find('input.tag').val();
-    delete parent.name;
+    delete parent.item;
   }
   invalidated();
 }

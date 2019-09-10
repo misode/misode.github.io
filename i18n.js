@@ -1,5 +1,6 @@
 const lngs = [
   ['en', 'English'],
+  ['ru', 'Русский'],
   ['zh-CN', '简体中文']
 ]
 
