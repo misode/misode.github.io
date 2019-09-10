@@ -1,0 +1,302 @@
+{
+	"$condition": {
+		"alternative": "Выбор",
+		"inverted": "Инвертирование",
+		"entity_properties": "Свойства сущности",
+		"block_state_propery": "Свойства блока",
+		"match_tool": "Свойства инструмента",
+		"damage_source_properties": "Источник урона",
+		"location_check": "Местоположение",
+		"weather_check": "Погода",
+		"entity_scores": "Счёты сущности",
+		"random_chance": "Случайность",
+		"random_chance_with_looting": "Случайность с «Добычей»",
+		"table_bonus": "Бонус таблицы",
+		"killed_by_player": "Убит игроком",
+		"survives_explosion": "Переживает взрыв"
+	},
+	"$damage": {
+		"damage_type": "Тип урона",
+		"projectile": "Снаряд",
+		"explosion": "Взрыв",
+		"fire": "Огонь",
+		"magic": "Магия",
+		"lightning": "Молния",
+		"starvation": "Голод",
+		"void": "Бездна",
+		"bypass_armor": "Обход брони",
+		"dealt": "Нанесено",
+		"taken": "Получено",
+		"blocked": "Заблокирован"
+	},
+	"$dimension": {
+		"overworld": "Обычный мир",
+		"the_nether": "Незер",
+		"the_end": "Энд"
+	},
+	"$enchantment": {
+		"aqua_affinity": "Подводник",
+		"bane_of_arthropods": "Бич членистоногих",
+		"blast_protection": "Взрывоустойчивость",
+		"channeling": "Громовержец",
+		"binding_curse": "Проклятие несъёмности",
+		"vanishing_curse": "Проклятие утраты",
+		"depth_strider": "Подводная ходьба",
+		"efficiency": "Эффективность",
+		"feather_falling": "Невесомость",
+		"fire_aspect": "Заговор огня",
+		"fire_protection": "Огнеупорность",
+		"flame": "Горящая стрела",
+		"fortune": "Удача",
+		"frost_walker": "Ледоход",
+		"impaling": "Пронзатель",
+		"infinity": "Бесконечность",
+		"knockback": "Отдача",
+		"looting": "Добыча",
+		"loyalty": "Верность",
+		"luck_of_the_sea": "Везучий рыбак",
+		"lure": "Приманка",
+		"mending": "Починка",
+		"multishot": "Тройной выстрел",
+		"piercing": "Пронзающая стрела",
+		"power": "Сила",
+		"projectile_protection": "Защита от снарядов",
+		"protection": "Защита",
+		"punch": "Откидывание",
+		"quick_charge": "Быстрая перезарядка",
+		"respiration": "Подводное дыхание",
+		"riptide": "Тягун",
+		"sharpness": "Острота",
+		"silk_touch": "Шёлковое касание",
+		"smite": "Небесная кара",
+		"sweeping": "Разящий клинок",
+		"thorns": "Шипы",
+		"unbreaking": "Прочность"
+	},
+	"$entry": {
+		"name": "ID",
+		"type": "Тип",
+		"$type": {
+			"empty": "Ничего",
+			"item": "Предмет",
+			"tag": "Тег предметов",
+			"loot_table": "Таблица добычи",
+			"alternatives": "Выбор",
+			"sequence": "Последовательность",
+			"group": "Группа",
+			"dynamic": "Динамический"
+		},
+		"weight": "Вес",
+		"quality": "Качество"
+	},
+	"$function": {
+		"set_count": "Задать количество",
+		"set_damage": "Задать повреждение",
+		"set_name": "Задать имя",
+		"set_lore": "Задать описание",
+		"set_nbt": "Задать NBT",
+		"set_attributes": "Задать атрибуты",
+		"set_contents": "Задать содержимое",
+		"enchant_randomly": "Наложить случайные чары",
+		"enchant_with_levels": "Наложить чары с уровнем",
+		"looting_enchant": "Чары «Добыча»",
+		"limit_count": "Ограничить количество",
+		"furnace_smelt": "Расплавить в печи",
+		"explosion_decay": "Разрушить взрывом",
+		"fill_player_head": "Задать скин голове игрока",
+		"copy_name": "Скопировать имя",
+		"copy_nbt": "Скопировать NBT",
+		"apply_bonus": "Применить бонус",
+		"$damage": {
+			"damage": "Повреждение"
+		},
+		"$ench_rand": {
+			"ench": "Чары"
+		},
+		"$limit": {
+			"limit": "Ограничение"
+		},
+		"$name": {
+			"name": "Имя"
+		},
+		"$lore_replace": {
+			"replace": "Заменить старое"
+		},
+		"$entity": {
+			"entity": "Сущность"
+		},
+		"$operations": {
+			"add_op": "Добавить действие"
+		},
+		"$formula": {
+			"formula": "Формула",
+			"uniform_bonus_count": "Равномерное распределение",
+			"binomial_with_bonus_count": "Биноминальное распределение",
+			"ore_drops": "Добыча руд"
+		},
+		"$bonus_multiplier": {
+			"multiplier": "Множитель"
+		},
+		"$bonus_extra": {
+			"extra": "Дополнительное значение"
+		},
+		"$bonus_probability": {
+			"probability": "Вероятность"
+		}
+	},
+	"$modifier": {
+		"attribute": "Атрибут",
+		"generic_maxHealth": "Максимальное здоровье",
+		"generic_followRange": "Диапазон преследования моба",
+		"generic_knockbackResistance": "Сопротивление отбрасыванию",
+		"generic_movementSpeed": "Скорость",
+		"generic_attackDamage": "Урон",
+		"generic_armor": "Броня",
+		"generic_armorToughness": "Твёрдость брони",
+		"generic_attackSpeed": "Скорость атаки",
+		"generic_luck": "Удача",
+		"horse_jumpStrength": "Сила прыжка лошади",
+		"generic_attackKnockback": "Отбрасывание",
+		"generic_flyingSpeed": "Скорость полёта",
+		"zombie_spawnReinforcements": "Подкрепление зомби",
+		"name": "Имя",
+		"amount": "Количество",
+		"operation": "Действие",
+		"$operation": {
+			"addition": "Прибавление",
+			"multiply_base": "Умножение базового",
+			"multiply_total": "Умножение общего"
+		},
+		"slots": "Ячейки"
+	},
+	"$operation": {
+		"source": "Источник",
+		"target": "Цель",
+		"operation": "Действие",
+		"$operation": {
+			"replace": "Замена",
+			"append": "Добавление",
+			"merge": "Объединение"
+		}
+	},
+	"$pool": {
+		"rolls": "Бросков",
+		"bonus_rolls": "Бонусных бросков"
+	},
+	"$range": {
+		"exact": "Число",
+		"range": "Диапазон",
+		"$range": {
+			"min": "Мин.",
+			"max": "Макс."
+		},
+		"binomial": "Биномиальное распределение",
+		"$binomial": {
+			"n": "n",
+			"p": "p"
+		}
+	},
+	"$slot": {
+		"mainhand": "Ведущая рука",
+		"offhand": "Вторая рука",
+		"head": "Голова",
+		"chest": "Тело",
+		"legs": "Ноги",
+		"feet": "Стопы"
+	},
+	"$source": {
+		"block_entity": "Блок-сущность",
+		"this": "Текущая",
+		"killer": "Убийца",
+		"killer_player": "Игрок-убийца"
+	},
+	"$table": {
+		"type": "Тип",
+		"$type": {
+			"empty": "Ничего",
+			"entity": "Сущность",
+			"block": "Блок",
+			"chest": "Сундук",
+			"fishing": "Рыбалка",
+			"generic": "Общий"
+		}
+	},
+	"2_spaces": "2 пробела",
+	"4_spaces": "4 пробела",
+	"add_block_state": "Добавить состояние блока",
+	"add_child": "Добавить потомка",
+	"add_condition": "Добавить условие",
+	"add_enchantment": "Добавить чары",
+	"add_entry": "Добавить запись",
+	"add_function": "Добавить функцию",
+	"add_modifier": "Добавить модификатор",
+	"add_operation": "Добавить действие",
+	"add_pool": "Добавить пул",
+	"add_score": "Добавить счёт",
+	"add_term": "Добавить выражение",
+	"author": "Автор: Misode",
+	"biome": "Биом",
+	"block": "Блок",
+	"block_state": "состояние блока",
+	"chance": "Шанс",
+	"chance_plural": "Шансы",
+	"child": "Потомок",
+	"condition": "Условие",
+	"copy": "Скопировать",
+	"count": "Количество",
+	"description": "Генератор таблицы добычи для Minecraft 1.14",
+	"dimension": "Измерение",
+	"direct_entity": "Сущность-причина урона",
+	"durability": "Прочность",
+	"enchantment": "Чары",
+	"entity": "Сущность",
+	"entry": "Запись",
+	"false": "Нет",
+	"feature": "Строение",
+	"function": "Функция",
+	"hide_source": "Скрыть источник",
+	"inverted": "Инвертировать",
+	"item": "Предмет",
+	"level_plural": "Уровень",
+	"location": "Местоположение",
+	"looting_multiplier": "Множитель «Добычи»",
+	"luck_based": "Основано на удаче",
+	"modifier": "Модификатор",
+	"more": "Больше",
+	"name": "ID",
+	"nbt": "NBT",
+	"objective": "Задача",
+	"operation": "Действие",
+	"pool": "Пул",
+	"position": "Позиция",
+	"potion": "Зелье",
+	"raining": "Дождь",
+	"remove": "Удалить",
+	"remove_block_state": "Удалить состояние блока",
+	"remove_condition": "Удалить условие",
+	"remove_enchantment": "Удалить чары",
+	"remove_entry": "Удалить запись",
+	"remove_function": "Удалить функцию",
+	"remove_modifier": "Удалить модификатор",
+	"remove_operation": "Удалить действие",
+	"remove_pool": "Удалить пул",
+	"remove_score": "Удалить счёт",
+	"remove_term": "Удалить выражение",
+	"score": "Счёт",
+	"share": "Поделиться",
+	"show_source": "Показать источник",
+	"source": "Источник",
+	"source_entity": "Сущность-источник урона",
+	"tabs": "Табуляция",
+	"tag": "Тег",
+	"term": "Выражение",
+	"thundering": "Гроза",
+	"title": "Генератор таблицы добычи",
+	"treasure": "Чары-сокровища",
+	"true": "Да",
+	"type": "Тип",
+	"unset": "Не задано",
+	"x": "X",
+	"y": "Y",
+	"z": "Z"
+}

@@ -1,0 +1,302 @@
+{
+	"$condition": {
+		"alternative": "Alternative",
+		"inverted": "Inverted",
+		"entity_properties": "Entity Properties",
+		"block_state_propery": "Block Properties",
+		"match_tool": "Tool Properties",
+		"damage_source_properties": "Damage Source",
+		"location_check": "Location",
+		"weather_check": "Weather",
+		"entity_scores": "Entity Scores",
+		"random_chance": "Random Chance",
+		"random_chance_with_looting": "Random Chance with Looting",
+		"table_bonus": "Table Bonus",
+		"killed_by_player": "Killed by Player",
+		"survives_explosion": "Survives Explosion"
+	},
+	"$damage": {
+		"damage_type": "Damage Type",
+		"projectile": "Projectile",
+		"explosion": "Explosion",
+		"fire": "Fire",
+		"magic": "Magic",
+		"lightning": "Lightning",
+		"starvation": "Starvation",
+		"void": "Void",
+		"bypass_armor": "Bypass Armor",
+		"dealt": "Dealt",
+		"taken": "Taken",
+		"blocked": "Blocked"
+	},
+	"$dimension": {
+		"overworld": "Overworld",
+		"the_nether": "The Nether",
+		"the_end": "The End"
+	},
+	"$enchantment": {
+		"aqua_affinity": "Aqua Affinity",
+		"bane_of_arthropods": "Bane of Arthropods",
+		"blast_protection": "Blast Protection",
+		"channeling": "Channeling",
+		"binding_curse": "Curse of Binding",
+		"vanishing_curse": "Curse of Vanishing",
+		"depth_strider": "Depth Strider",
+		"efficiency": "Efficiency",
+		"feather_falling": "Feather Falling",
+		"fire_aspect": "Fire Aspect",
+		"fire_protection": "Fire Protection",
+		"flame": "Flame",
+		"fortune": "Fortune",
+		"frost_walker": "Frost Walker",
+		"impaling": "Impaling",
+		"infinity": "Infinity",
+		"knockback": "Knockback",
+		"looting": "Looting",
+		"loyalty": "Loyalty",
+		"luck_of_the_sea": "Luck of the Sea",
+		"lure": "Lure",
+		"mending": "Mending",
+		"multishot": "Multishot",
+		"piercing": "Piercing",
+		"power": "Power",
+		"projectile_protection": "Projectile Protection",
+		"protection": "Protection",
+		"punch": "Punch",
+		"quick_charge": "Quick Charge",
+		"respiration": "Respiration",
+		"riptide": "Riptide",
+		"sharpness": "Sharpness",
+		"silk_touch": "Silk Touch",
+		"smite": "Smite",
+		"sweeping": "Sweeping Edge",
+		"thorns": "Thorns",
+		"unbreaking": "Unbreaking"
+	},
+	"$entry": {
+		"name": "Name",
+		"type": "Type",
+		"$type": {
+			"empty": "Empty",
+			"item": "Item",
+			"tag": "Item Tag",
+			"loot_table": "Loot Table",
+			"alternatives": "Alternatives",
+			"sequence": "Sequence",
+			"group": "Group",
+			"dynamic": "Dynamic"
+		},
+		"weight": "Weight",
+		"quality": "Quality"
+	},
+	"$function": {
+		"set_count": "Set Count",
+		"set_damage": "Set Damage",
+		"set_name": "Set Name",
+		"set_lore": "Set Lore",
+		"set_nbt": "Set NBT",
+		"set_attributes": "Set Attributes",
+		"set_contents": "Set Contents",
+		"enchant_randomly": "Enchant Randomly",
+		"enchant_with_levels": "Enchant With Levels",
+		"looting_enchant": "Looting Enchant",
+		"limit_count": "Limit Count",
+		"furnace_smelt": "Furnace Smelt",
+		"explosion_decay": "Explosion Decay",
+		"fill_player_head": "Fill Player Head",
+		"copy_name": "Copy Name",
+		"copy_nbt": "Copy NBT",
+		"apply_bonus": "Apply Bonus",
+		"$damage": {
+			"damage": "Damage"
+		},
+		"$ench_rand": {
+			"ench": "Optional Enchantments"
+		},
+		"$limit": {
+			"limit": "Limit"
+		},
+		"$name": {
+			"name": "Name"
+		},
+		"$lore_replace": {
+			"replace": "Replace"
+		},
+		"$entity": {
+			"entity": "Entity"
+		},
+		"$operations": {
+			"add_op": "Add Operation"
+		},
+		"$formula": {
+			"formula": "Formula",
+			"uniform_bonus_count": "Uniform Bonus Count",
+			"binomial_with_bonus_count": "Binomial with Bonus Count",
+			"ore_drops": "Ore Drops"
+		},
+		"$bonus_multiplier": {
+			"multiplier": "Multiplier"
+		},
+		"$bonus_extra": {
+			"extra": "Extra"
+		},
+		"$bonus_probability": {
+			"probability": "Propability"
+		}
+	},
+	"$modifier": {
+		"attribute": "Attribute",
+		"generic_maxHealth": "Max Health",
+		"generic_followRange": "Follow Range",
+		"generic_knockbackResistance": "Knockback Resistance",
+		"generic_movementSpeed": "Movement Speed",
+		"generic_attackDamage": "Attack Damage",
+		"generic_armor": "Armor",
+		"generic_armorToughness": "Armor Toughness",
+		"generic_attackSpeed": "Attack Speed",
+		"generic_luck": "Luck",
+		"horse_jumpStrength": "Jump Strength",
+		"generic_attackKnockback": "Attack Knockback",
+		"generic_flyingSpeed": "Flying Speed",
+		"zombie_spawnReinforcements": "Spawn Reinforcements",
+		"name": "Name",
+		"amount": "Amount",
+		"operation": "Operation",
+		"$operation": {
+			"addition": "Addition",
+			"multiply_base": "Multiply Base",
+			"multiply_total": "Multiply Total"
+		},
+		"slots": "Slots"
+	},
+	"$operation": {
+		"source": "Source",
+		"target": "Target",
+		"operation": "Operation",
+		"$operation": {
+			"replace": "Replace",
+			"append": "Append",
+			"merge": "Merge"
+		}
+	},
+	"$pool": {
+		"rolls": "Rolls",
+		"bonus_rolls": "Bonus Rolls"
+	},
+	"$range": {
+		"exact": "Exact",
+		"range": "Range",
+		"$range": {
+			"min": "Min",
+			"max": "Max"
+		},
+		"binomial": "Binomial",
+		"$binomial": {
+			"n": "n",
+			"p": "p"
+		}
+	},
+	"$slot": {
+		"mainhand": "Mainhand",
+		"offhand": "Offhand",
+		"head": "Head",
+		"chest": "Chest",
+		"legs": "Legs",
+		"feet": "Feet"
+	},
+	"$source": {
+		"block_entity": "Block Entity",
+		"this": "This",
+		"killer": "Killer",
+		"killer_player": "Killer Player"
+	},
+	"$table": {
+		"type": "Type",
+		"$type": {
+			"empty": "Empty",
+			"entity": "Entity",
+			"block": "Block",
+			"chest": "Chest",
+			"fishing": "Fishing",
+			"generic": "Generic"
+		}
+	},
+	"2_spaces": "2 Spaces",
+	"4_spaces": "4 Spaces",
+	"add_block_state": "Add Block State",
+	"add_child": "Add Child",
+	"add_condition": "Add Condition",
+	"add_enchantment": "Add Enchantment",
+	"add_entry": "Add Entry",
+	"add_function": "Add Function",
+	"add_modifier": "Add Modifier",
+	"add_operation": "Add Operation",
+	"add_pool": "Add Pool",
+	"add_score": "Add Score",
+	"add_term": "Add Term",
+	"author": "by Misode",
+	"biome": "Biome",
+	"block": "Block",
+	"block_state": "Block State",
+	"chance": "Chance",
+	"chance_plural": "Chances",
+	"child": "Child",
+	"condition": "Condition",
+	"copy": "Copy",
+	"count": "Count",
+	"description": "Loot Table Generator for Minecraft 1.14",
+	"dimension": "Dimension",
+	"direct_entity": "Direct Entity",
+	"durability": "Durability",
+	"enchantment": "Enchantment",
+	"entity": "Entity",
+	"entry": "Entry",
+	"false": "False",
+	"feature": "Feature",
+	"function": "Function",
+	"hide_source": "Hide Source",
+	"inverted": "Inverted",
+	"item": "Item",
+	"level_plural": "Levels",
+	"location": "Location",
+	"looting_multiplier": "Looting Multiplier",
+	"luck_based": "Luck-based",
+	"modifier": "Modifier",
+	"more": "More",
+	"name": "Name",
+	"nbt": "NBT",
+	"objective": "Objective",
+	"operation": "Operation",
+	"pool": "Pool",
+	"position": "Position",
+	"potion": "Potion",
+	"raining": "Raining",
+	"remove": "Remove",
+	"remove_block_state": "Remove Block State",
+	"remove_condition": "Remove Condition",
+	"remove_enchantment": "Remove Enchantment",
+	"remove_entry": "Remove Entry",
+	"remove_function": "Remove Function",
+	"remove_modifier": "Remove Modifier",
+	"remove_operation": "Remove Operation",
+	"remove_pool": "Remove Pool",
+	"remove_score": "Remove Score",
+	"remove_term": "Remove Term",
+	"score": "Score",
+	"share": "Share",
+	"show_source": "Show Source",
+	"source": "Source",
+	"source_entity": "Source Entity",
+	"tabs": "Tabs",
+	"tag": "Tag",
+	"term": "Term",
+	"thundering": "Thundering",
+	"title": "Loot Table Generator",
+	"treasure": "Treasure",
+	"true": "True",
+	"type": "Type",
+	"unset": "Unset",
+	"x": "X",
+	"y": "Y",
+	"z": "Z"
+}

@@ -1,497 +1,495 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Loot Table Generator</title>
+  <title data-i18n="title"></title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <link rel="stylesheet" href="custom.css">
 </head>
 <body>
-  <nav class="navbar navbar-dark bg-dark">
-    <span class="navbar-brand mb-0 h1">Loot Table Generator for Minecraft 1.14</span>
-    <span class="float-right"><a href="https://github.com/misode/loot-table" style="color: #ddd;">by Misode</a></span>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <span class="navbar-brand mb-0 h1" data-i18n="description"></span>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Language
+        </a>
+        <div id="lngList" class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"></div>
+      </li>
+    </ul>
+    <span class="float-right"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
   </nav>
-  <div class="container">
+  <div class="container d-none">
     <div class="row my-4">
       <div class="col-12 col-lg-7 mb-3 structure-container">
         <div class="input-group">
-          <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)">Add Pool</button>
+          <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addPool(this)" data-i18n="add_pool"></button>
           <div class="input-group-prepend">
-            <span class="input-group-text rounded-left">Type</span>
+            <span class="input-group-text rounded-left" data-i18n="$table.type"></span>
           </div>
           <select id="tableType" class="form-control mr-3 rounded-right" style="max-width: 9em;" onchange="updateTableType(this)">
-            <option value="minecraft:empty">Empty</option>
-            <option value="minecraft:entity">Entity</option>
-            <option value="minecraft:block">Block</option>
-            <option value="minecraft:chest">Chest</option>
-            <option value="minecraft:fishing">Fishing</option>
-            <option value="minecraft:generic">Generic</option>
+            <option value="minecraft:empty" data-i18n="$table.$type.empty"></option>
+            <option value="minecraft:entity" data-i18n="$table.$type.entity"></option>
+            <option value="minecraft:block" data-i18n="$table.$type.block"></option>
+            <option value="minecraft:chest" data-i18n="$table.$type.chest"></option>
+            <option value="minecraft:fishing" data-i18n="$table.$type.fishing"></option>
+            <option value="minecraft:generic" data-i18n="$table.$type.generic"></option>
           </select>
           <div class="custom-control custom-checkbox mr-3" style="margin: auto 0">
             <input type="checkbox" class="custom-control-input" id="luckBased" onchange="updateLuckBased(this)">
-            <label class="custom-control-label" for="luckBased">Luck-based</label>
+            <label class="custom-control-label" for="luckBased" data-i18n="luck_based"></label>
           </div>
           <div id="showSourceButton" class="ml-auto d-none">
-            <button type="button" class="btn btn-secondary" onclick="showSource()">Show Source</button>
+            <button type="button" class="btn btn-secondary" onclick="showSource()" data-i18n="show_source"></button>
           </div>
         </div>
-        <div id="structure" class="loot-table">
+        <div id="structure" class="loot-table" data-field="table">
         </div>
       </div>
       <div class="col-12 col-lg-5 source-container">
         <div class="mb-3 float-lg-right source-menu">
           <div class="input-group">
             <div class="btn-group">
-              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">More</button>
+              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-i18n="more"></button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" onclick="updateIndentation(2)">2 Spaces</a>
-                <a class="dropdown-item" onclick="updateIndentation(4)">4 Spaces</a>
-                <a class="dropdown-item" onclick="updateIndentation('\t')">Tabs</a>
+                <a class="dropdown-item" onclick="updateIndentation(2)" data-i18n="2_spaces"></a>
+                <a class="dropdown-item" onclick="updateIndentation(4)" data-i18n="4_spaces"></a>
+                <a class="dropdown-item" onclick="updateIndentation('\t')" data-i18n="tabs"></a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" onclick="hideSource()">Hide Source</a>
+                <a class="dropdown-item" onclick="hideSource()" data-i18n="hide_source"></a>
               </div>
             </div>
-            <button id="linkSource" type="button" class="btn btn-secondary ml-3" onclick="linkSource()">Share</button>
-            <button type="button" class="btn btn-secondary ml-3" onclick="copySource()">Copy</button>
+            <button id="linkSource" type="button" class="btn btn-secondary ml-3" onclick="linkSource()" data-i18n="share"></button>
+            <button type="button" class="btn btn-secondary ml-3" onclick="copySource()" data-i18n="copy"></button>
           </div>
         </div>
-        <textarea id="copyTextarea" rows="1" class="form-control mb-3 d-none"></textarea>
-        <textarea id="source" class="form-control code" onchange="updateSouce()" rows="19" spellcheck="false"></textarea>
+        <div id="copyContainer" class="mb-3 d-none">
+          <input id="copyTextarea" rows="1" class="form-control"></input>
+          <button id="copy" type="button" class="btn btn-block btn-secondary mt-2" onclick="copyLink()" data-i18n="copy"></button>
+        </div>
+        <textarea id="source" class="form-control code" onchange="updateSource()" rows="19" spellcheck="false"></textarea>
       </div>
     </div>
   </div>
 
   <div class="d-none">
-    <div id="poolTemplate" class="card bg-success text-white mt-3 pool">
+    <div id="poolTemplate" class="card bg-success text-white mt-3 pool" data-field="pools[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removePool(this)">Remove Pool</button>
-        <button type="button" class="btn btn-light mr-3 mb-2 float-left" onclick="addEntry(this)">Add Entry</button>
-        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_pool"></button>
+        <button type="button" class="btn btn-light mr-3 mb-2 float-left" onclick="addEntry(this)" data-i18n="add_entry"></button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add_condition"></button>
       </div>
       <div class="card-body">
-        <div class="input-group rolls" data-type="range">
+        <div class="input-group rolls" data-type="range" data-field="rolls">
           <div class="input-group-prepend">
-            <span class="input-group-text">Rolls</span>
+            <span class="input-group-text" data-i18n="$pool.rolls"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'rolls', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'rolls', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'rolls', 'binomial')">Binomial</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+              <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'rolls')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 bonus-rolls" data-type="range">
+        <div class="input-group mt-3 bonus-rolls" data-type="range" data-field="bonus_rolls">
           <div class="input-group-prepend">
-            <span class="input-group-text">Bonus Rolls</span>
+            <span class="input-group-text" data-i18n="$pool.bonus_rolls"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'bonus_rolls', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'bonus_rolls', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'bonus_rolls', 'binomial')">Binomial</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+              <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'bonus_rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'bonus_rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'bonus_rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'bonus_rolls')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'bonus_rolls')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
       </div>
     </div>
-    <div id="entryTemplate" class="card mt-3 entry">
+    <div id="entryTemplate" class="card mt-3 entry" data-field="entries[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeEntry(this)">Remove Entry</button>
-        <button type="button" class="btn btn-secondary mr-3 mb-2 float-left" onclick="addFunction(this)">Add Function</button>
-        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_entry"></button>
+        <button type="button" class="btn btn-secondary mr-3 mb-2 float-left" onclick="addFunction(this)" data-i18n="add_function"></button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add_condition"></button>
       </div>
       <div class="card-body">
-        <div class="input-group">
+        <div class="input-group" data-type="enum" data-field="type">
           <div class="input-group-prepend">
-            <span class="input-group-text">Type</span>
+            <span class="input-group-text" data-i18n="$entry.type"></span>
           </div>
-          <select class="form-control entry-type" onchange="updateField(this, 'type')">
-            <option value="minecraft:empty">Empty</option>
-            <option value="minecraft:item">Item</option>
-            <option value="minecraft:tag">Item Tag</option>
-            <option value="minecraft:loot_table">Loot Table</option>
-            <option value="minecraft:alternatives">Alternatives</option>
-            <option value="minecraft:sequence">Sequence</option>
-            <option value="minecraft:group">Group</option>
-            <option value="minecraft:dynamic">Dynamic</option>
+          <select class="form-control entry-type" onchange="updateField(this)">
+            <option value="minecraft:empty" data-i18n="$entry.$type.empty"></option>
+            <option value="minecraft:item" data-i18n="$entry.$type.item"></option>
+            <option value="minecraft:tag" data-i18n="$entry.$type.tag"></option>
+            <option value="minecraft:loot_table" data-i18n="$entry.$type.loot_table"></option>
+            <option value="minecraft:alternatives" data-i18n="$entry.$type.alternatives"></option>
+            <option value="minecraft:sequence" data-i18n="$entry.$type.sequence"></option>
+            <option value="minecraft:group" data-i18n="$entry.$type.group"></option>
+            <option value="minecraft:dynamic" data-i18n="$entry.$type.dynamic"></option>
           </select>
         </div>
-        <div class="input-group mt-3 entry-name d-none">
+        <div class="input-group mt-3 entry-name d-none" data-type="string" data-field="name">
           <div class="input-group-prepend">
-            <span class="input-group-text">Name</span>
+            <span class="input-group-text" data-i18n="$entry.name"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'name')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 entry-weight d-none">
+        <div class="input-group mt-3 entry-weight d-none" data-type="int" data-field="weight">
           <div class="input-group-prepend">
-            <span class="input-group-text">Weight</span>
+            <span class="input-group-text" data-i18n="$entry.weight"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateIntField(this, 'weight')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 entry-quality d-none">
+        <div class="input-group mt-3 entry-quality d-none" data-type="int" data-field="quality">
           <div class="input-group-prepend">
-            <span class="input-group-text">Quality</span>
+            <span class="input-group-text" data-i18n="$entry.quality"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateIntField(this, 'quality')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 entry-children d-none">
-          <button type="button" class="btn btn-outline-success" onclick="addChild(this)">Add Child</button>
+          <button type="button" class="btn btn-outline-success" onclick="addChild(this)" data-i18n="add_child"></button>
         </div>
       </div>
     </div>
-    <div id="functionTemplate" class="card bg-secondary mt-3 function">
+    <div id="functionTemplate" class="card bg-secondary mt-3 function" data-field="functions[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFunction(this)">Remove Function</button>
-        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)">Add Condition</button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_function"></button>
+        <button type="button" class="btn btn-info mr-3 mb-2 float-left" onclick="addCondition(this)" data-i18n="add_condition"></button>
       </div>
       <div class="card-body">
-        <div class="input-group">
+        <div class="input-group" data-type="enum" data-field="function">
           <div class="input-group-prepend">
-            <span class="input-group-text">Function</span>
+            <span class="input-group-text" data-i18n="function"></span>
           </div>
-          <select class="form-control function-type" onchange="updateField(this, 'function')">
-            <option value="minecraft:set_count">Set Count</option>
-            <option value="minecraft:set_damage">Set Damage</option>
-            <option value="minecraft:set_name">Set Name</option>
-            <option value="minecraft:set_lore">Set Lore</option>
-            <option value="minecraft:set_nbt">Set NBT</option>
-            <option value="minecraft:set_attributes">Set Attributes</option>
-            <option value="minecraft:set_contents">Set Contents</option>
-            <option value="minecraft:enchant_randomly">Enchant Randomly</option>
-            <option value="minecraft:enchant_with_levels">Enchant With Levels</option>
-            <option value="minecraft:looting_enchant">Looting Enchant</option>
-            <option value="minecraft:limit_count">Limit Count</option>
-            <option value="minecraft:furnace_smelt">Furnace Smelt</option>
-            <option value="minecraft:explosion_decay">Explosion Decay</option>
-            <option value="minecraft:fill_player_head">Fill Player Head</option>
-            <option value="minecraft:copy_name">Copy Name</option>
-            <option value="minecraft:copy_nbt">Copy NBT</option>
-            <option value="minecraft:apply_bonus">Apply Bonus</option>
+          <select class="form-control function-type" onchange="updateField(this)">
+            <option value="minecraft:set_count" data-i18n="$function.set_count"></option>
+            <option value="minecraft:set_damage" data-i18n="$function.set_damage"></option>
+            <option value="minecraft:set_name" data-i18n="$function.set_name"></option>
+            <option value="minecraft:set_lore" data-i18n="$function.set_lore"></option>
+            <option value="minecraft:set_nbt" data-i18n="$function.set_nbt"></option>
+            <option value="minecraft:set_attributes" data-i18n="$function.set_attributes"></option>
+            <option value="minecraft:set_contents" data-i18n="$function.set_contents"></option>
+            <option value="minecraft:enchant_randomly" data-i18n="$function.enchant_randomly"></option>
+            <option value="minecraft:enchant_with_levels" data-i18n="$function.enchant_with_levels"></option>
+            <option value="minecraft:looting_enchant" data-i18n="$function.looting_enchant"></option>
+            <option value="minecraft:limit_count" data-i18n="$function.limit_count"></option>
+            <option value="minecraft:furnace_smelt" data-i18n="$function.furnace_smelt"></option>
+            <option value="minecraft:explosion_decay" data-i18n="$function.explosion_decay"></option>
+            <option value="minecraft:fill_player_head" data-i18n="$function.fill_player_head"></option>
+            <option value="minecraft:copy_name" data-i18n="$function.copy_name"></option>
+            <option value="minecraft:copy_nbt" data-i18n="$function.copy_nbt"></option>
+            <option value="minecraft:apply_bonus" data-i18n="$function.apply_bonus"></option>
           </select>
         </div>
-        <div class="input-group function-count mt-3 d-none" data-type="range">
+        <div class="input-group function-count mt-3 d-none" data-type="range" data-field="count">
           <div class="input-group-prepend">
-            <span class="input-group-text">Count</span>
+            <span class="input-group-text" data-i18n="count">Count</span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'binomial')">Binomial</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+              <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'count')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'count')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group function-damage mt-3 d-none" data-type="range">
+        <div class="input-group function-damage mt-3 d-none" data-type="range" data-field="damage">
           <div class="input-group-prepend">
-            <span class="input-group-text">Damage</span>
+            <span class="input-group-text" data-i18n="$function.$damage.damage"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'damage', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'damage', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'damage', 'binomial')">Binomial</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+              <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="0" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'damage')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="0" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 function-nbt d-none">
+        <div class="input-group mt-3 function-nbt d-none" data-type="nbt" data-field="tag">
           <div class="input-group-prepend">
-            <span class="input-group-text">Tag</span>
+            <span class="input-group-text" data-i18n="nbt"></span>
           </div>
-          <textarea type="text" class="form-control code" onchange="updateField(this, 'tag')" onclick="this.select()"></textarea>
+          <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()"></textarea>
         </div>
-        <div class="mt-3 function-ench-rand d-none">
+        <div class="mt-3 function-ench-rand d-none" data-type="set" data-field="enchantments">
           <div class="input-group">
             <div class="input-group-prepend">
-              <span class="input-group-text">Optional Enchantments</span>
+              <span class="input-group-text" data-i18n="$function.$ench_rand.ench"></span>
             </div>
             <div class="input-group-append">
               <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
               <div class="dropdown-menu scrollable-menu">
-                <a class="dropdown-item" data-ench="minecraft:aqua_affinity" onclick="addEnchantment(this)">Aqua Affinity</a>
-                <a class="dropdown-item" data-ench="minecraft:bane_of_arthropods" onclick="addEnchantment(this)">Bane of Arthropods</a>
-                <a class="dropdown-item" data-ench="minecraft:blast_protection" onclick="addEnchantment(this)">Blast Protection</a>
-                <a class="dropdown-item" data-ench="minecraft:channeling" onclick="addEnchantment(this)">Channeling</a>
-                <a class="dropdown-item" data-ench="minecraft:binding_curse" onclick="addEnchantment(this)">Curse of Binding</a>
-                <a class="dropdown-item" data-ench="minecraft:vanishing_curse" onclick="addEnchantment(this)">Curse of Vanishing</a>
-                <a class="dropdown-item" data-ench="minecraft:depth_strider" onclick="addEnchantment(this)">Depth Strider</a>
-                <a class="dropdown-item" data-ench="minecraft:efficiency" onclick="addEnchantment(this)">Efficiency</a>
-                <a class="dropdown-item" data-ench="minecraft:feather_falling" onclick="addEnchantment(this)">Feather Falling</a>
-                <a class="dropdown-item" data-ench="minecraft:fire_aspect" onclick="addEnchantment(this)">Fire Aspect</a>
-                <a class="dropdown-item" data-ench="minecraft:fire_protection" onclick="addEnchantment(this)">Fire Protection</a>
-                <a class="dropdown-item" data-ench="minecraft:flame" onclick="addEnchantment(this)">Flame</a>
-                <a class="dropdown-item" data-ench="minecraft:fortune" onclick="addEnchantment(this)">Fortune</a>
-                <a class="dropdown-item" data-ench="minecraft:frost_walker" onclick="addEnchantment(this)">Frost Walker</a>
-                <a class="dropdown-item" data-ench="minecraft:impaling" onclick="addEnchantment(this)">Impaling</a>
-                <a class="dropdown-item" data-ench="minecraft:infinity" onclick="addEnchantment(this)">Infinity</a>
-                <a class="dropdown-item" data-ench="minecraft:knockback" onclick="addEnchantment(this)">Knockback</a>
-                <a class="dropdown-item" data-ench="minecraft:looting" onclick="addEnchantment(this)">Looting</a>
-                <a class="dropdown-item" data-ench="minecraft:loyalty" onclick="addEnchantment(this)">Loyalty</a>
-                <a class="dropdown-item" data-ench="minecraft:luck_of_the_sea" onclick="addEnchantment(this)">Luck of the Sea</a>
-                <a class="dropdown-item" data-ench="minecraft:lure" onclick="addEnchantment(this)">Lure</a>
-                <a class="dropdown-item" data-ench="minecraft:mending" onclick="addEnchantment(this)">Mending</a>
-                <a class="dropdown-item" data-ench="minecraft:multishot" onclick="addEnchantment(this)">Multishot</a>
-                <a class="dropdown-item" data-ench="minecraft:piercing" onclick="addEnchantment(this)">Piercing</a>
-                <a class="dropdown-item" data-ench="minecraft:power" onclick="addEnchantment(this)">Power</a>
-                <a class="dropdown-item" data-ench="minecraft:projectile_protection" onclick="addEnchantment(this)">Projectile Protection</a>
-                <a class="dropdown-item" data-ench="minecraft:protection" onclick="addEnchantment(this)">Protection</a>
-                <a class="dropdown-item" data-ench="minecraft:punch" onclick="addEnchantment(this)">Punch</a>
-                <a class="dropdown-item" data-ench="minecraft:quick_charge" onclick="addEnchantment(this)">Quick Charge</a>
-                <a class="dropdown-item" data-ench="minecraft:respiration" onclick="addEnchantment(this)">Respiration</a>
-                <a class="dropdown-item" data-ench="minecraft:riptide" onclick="addEnchantment(this)">Riptide</a>
-                <a class="dropdown-item" data-ench="minecraft:sharpness" onclick="addEnchantment(this)">Sharpness</a>
-                <a class="dropdown-item" data-ench="minecraft:silk_touch" onclick="addEnchantment(this)">Silk Touch</a>
-                <a class="dropdown-item" data-ench="minecraft:smite" onclick="addEnchantment(this)">Smite</a>
-                <a class="dropdown-item" data-ench="minecraft:sweeping" onclick="addEnchantment(this)">Sweeping Edge</a>
-                <a class="dropdown-item" data-ench="minecraft:thorns" onclick="addEnchantment(this)">Thorns</a>
-                <a class="dropdown-item" data-ench="minecraft:unbreaking" onclick="addEnchantment(this)">Unbreaking</a>
+                <a class="dropdown-item" data-ench="minecraft:aqua_affinity" onclick="addEnchantment(this)" data-i18n="$enchantment.aqua_affinity"></a>
+                <a class="dropdown-item" data-ench="minecraft:bane_of_arthropods" onclick="addEnchantment(this)" data-i18n="$enchantment.bane_of_arthropods"></a>
+                <a class="dropdown-item" data-ench="minecraft:blast_protection" onclick="addEnchantment(this)" data-i18n="$enchantment.blast_protection"></a>
+                <a class="dropdown-item" data-ench="minecraft:channeling" onclick="addEnchantment(this)" data-i18n="$enchantment.channeling"></a>
+                <a class="dropdown-item" data-ench="minecraft:binding_curse" onclick="addEnchantment(this)" data-i18n="$enchantment.binding_curse"></a>
+                <a class="dropdown-item" data-ench="minecraft:vanishing_curse" onclick="addEnchantment(this)" data-i18n="$enchantment.vanishing_curse"></a>
+                <a class="dropdown-item" data-ench="minecraft:depth_strider" onclick="addEnchantment(this)" data-i18n="$enchantment.depth_strider"></a>
+                <a class="dropdown-item" data-ench="minecraft:efficiency" onclick="addEnchantment(this)" data-i18n="$enchantment.efficiency"></a>
+                <a class="dropdown-item" data-ench="minecraft:feather_falling" onclick="addEnchantment(this)" data-i18n="$enchantment.feather_falling"></a>
+                <a class="dropdown-item" data-ench="minecraft:fire_aspect" onclick="addEnchantment(this)" data-i18n="$enchantment.fire_aspect"></a>
+                <a class="dropdown-item" data-ench="minecraft:fire_protection" onclick="addEnchantment(this)" data-i18n="$enchantment.fire_protection"></a>
+                <a class="dropdown-item" data-ench="minecraft:flame" onclick="addEnchantment(this)" data-i18n="$enchantment.flame"></a>
+                <a class="dropdown-item" data-ench="minecraft:fortune" onclick="addEnchantment(this)" data-i18n="$enchantment.fortune"></a>
+                <a class="dropdown-item" data-ench="minecraft:frost_walker" onclick="addEnchantment(this)" data-i18n="$enchantment.frost_walker"></a>
+                <a class="dropdown-item" data-ench="minecraft:impaling" onclick="addEnchantment(this)" data-i18n="$enchantment.impaling"></a>
+                <a class="dropdown-item" data-ench="minecraft:infinity" onclick="addEnchantment(this)" data-i18n="$enchantment.infinity"></a>
+                <a class="dropdown-item" data-ench="minecraft:knockback" onclick="addEnchantment(this)" data-i18n="$enchantment.knockback"></a>
+                <a class="dropdown-item" data-ench="minecraft:looting" onclick="addEnchantment(this)" data-i18n="$enchantment.looting"></a>
+                <a class="dropdown-item" data-ench="minecraft:loyalty" onclick="addEnchantment(this)" data-i18n="$enchantment.loyalty"></a>
+                <a class="dropdown-item" data-ench="minecraft:luck_of_the_sea" onclick="addEnchantment(this)" data-i18n="$enchantment.luck_of_the_sea"></a>
+                <a class="dropdown-item" data-ench="minecraft:lure" onclick="addEnchantment(this)" data-i18n="$enchantment.lure"></a>
+                <a class="dropdown-item" data-ench="minecraft:mending" onclick="addEnchantment(this)" data-i18n="$enchantment.mending"></a>
+                <a class="dropdown-item" data-ench="minecraft:multishot" onclick="addEnchantment(this)" data-i18n="$enchantment.multishot"></a>
+                <a class="dropdown-item" data-ench="minecraft:piercing" onclick="addEnchantment(this)" data-i18n="$enchantment.piercing"></a>
+                <a class="dropdown-item" data-ench="minecraft:power" onclick="addEnchantment(this)" data-i18n="$enchantment.power"></a>
+                <a class="dropdown-item" data-ench="minecraft:projectile_protection" onclick="addEnchantment(this)" data-i18n="$enchantment.projectile_protection"></a>
+                <a class="dropdown-item" data-ench="minecraft:protection" onclick="addEnchantment(this)" data-i18n="$enchantment.protection"></a>
+                <a class="dropdown-item" data-ench="minecraft:punch" onclick="addEnchantment(this)" data-i18n="$enchantment.punch"></a>
+                <a class="dropdown-item" data-ench="minecraft:quick_charge" onclick="addEnchantment(this)" data-i18n="$enchantment.quick_charge"></a>
+                <a class="dropdown-item" data-ench="minecraft:respiration" onclick="addEnchantment(this)" data-i18n="$enchantment.respiration"></a>
+                <a class="dropdown-item" data-ench="minecraft:riptide" onclick="addEnchantment(this)" data-i18n="$enchantment.riptide"></a>
+                <a class="dropdown-item" data-ench="minecraft:sharpness" onclick="addEnchantment(this)" data-i18n="$enchantment.sharpness"></a>
+                <a class="dropdown-item" data-ench="minecraft:silk_touch" onclick="addEnchantment(this)" data-i18n="$enchantment.silk_touch"></a>
+                <a class="dropdown-item" data-ench="minecraft:smite" onclick="addEnchantment(this)" data-i18n="$enchantment.smite"></a>
+                <a class="dropdown-item" data-ench="minecraft:sweeping" onclick="addEnchantment(this)" data-i18n="$enchantment.sweeping"></a>
+                <a class="dropdown-item" data-ench="minecraft:thorns" onclick="addEnchantment(this)" data-i18n="$enchantment.thorns"></a>
+                <a class="dropdown-item" data-ench="minecraft:unbreaking" onclick="addEnchantment(this)" data-i18n="$enchantment.unbreaking"></a>
               </div>
             </div>
           </div>
           <div class="enchantment-list">
           </div>
         </div>
-        <div class="input-group function-ench-levels mt-3 d-none" data-type="range">
+        <div class="input-group function-ench-levels mt-3 d-none" data-type="range" data-field="levels">
           <div class="input-group-prepend">
-            <span class="input-group-text">Levels</span>
+            <span class="input-group-text" data-i18n="level_plural"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'levels', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'levels', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'levels', 'binomial')">Binomial</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+              <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'levels')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'levels')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'levels')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'levels')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'levels')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.n"></span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.$binomial.p"></span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 function-ench-treasure d-none">
+        <div class="input-group mt-3 function-ench-treasure d-none" data-type="checkbox" data-field="treasure">
           <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="treasureCheckbox" onchange="updateCheckedField(this, 'treasure')">
-            <label class="custom-control-label" for="treasureCheckbox">Treasure</label>
+            <input type="checkbox" class="custom-control-input" id="treasureCheckbox" onchange="updateField(this)">
+            <label class="custom-control-label" for="treasureCheckbox" data-i18n="treasure"></label>
           </div>
         </div>
-        <div class="input-group mt-3 function-limit d-none">
+        <div class="input-group mt-3 function-limit d-none" data-type="int" data-field="limit">
           <div class="input-group-prepend">
-            <span class="input-group-text">Limit</span>
+            <span class="input-group-text" data-i18n="$function.$limit.limit"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'limit')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-attributes d-none">
-          <button type="button" class="btn btn-dark" onclick="addModifier(this)">Add Modifier</button>
+          <button type="button" class="btn btn-dark" onclick="addModifier(this)" data-i18n="add_modifier"></button>
         </div>
-        <div class="input-group mt-3 function-source d-none">
+        <div class="input-group mt-3 function-source d-none" data-type="enum" data-field="source">
           <div class="input-group-prepend">
-            <span class="input-group-text">Source</span>
+            <span class="input-group-text" data-i18n="source"></span>
           </div>
-          <select class="form-control" onchange="updateField(this, 'source')">
-            <option value="block_entity">Block Entity</option>
-            <option value="this">This</option>
-            <option value="killer">Killer</option>
-            <option value="killer_player">Killer Player</option>
+          <select class="form-control" onchange="updateField(this)">
+            <option value="block_entity" data-i18n="$source.block_entity"></option>
+            <option value="this" data-i18n="$source.this"></option>
+            <option value="killer" data-i18n="$source.killer"></option>
+            <option value="killer_player" data-i18n="$source.killer_player"></option>
           </select>
         </div>
-        <div class="input-group mt-3 function-name d-none">
+        <div class="input-group mt-3 function-name d-none" data-type="json" data-field="name">
           <div class="input-group-prepend">
-            <span class="input-group-text">Name</span>
+            <span class="input-group-text" data-i18n="$function.$name.name"></span>
           </div>
-          <textarea type="text" class="form-control code" onchange="updateJSONField(this, 'name')" onclick="this.select()" style="height: 0px"></textarea>
+          <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 0px"></textarea>
         </div>
-        <div class="input-group function-limit-range mt-3 d-none" data-type="range">
+        <div class="input-group function-limit-range mt-3 d-none" data-type="range" data-field="limit">
           <div class="input-group-prepend">
-            <span class="input-group-text">limit</span>
-            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'limit', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'limit', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'limit', 'binomial')">Binomial</a>
-            </div>
+            <span class="input-group-text" data-i18n="$function.$limit.limit"></span>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'limit')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'limit')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'limit')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'limit')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'limit')" onclick="this.select()">
+          <span class="input-group-text rounded-0 range" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 function-entries d-none">
-          <button type="button" class="btn btn-light" onclick="addEntry(this)">Add Entry</button>
+          <button type="button" class="btn btn-light" onclick="addEntry(this)" data-i18n="add_entry"></button>
         </div>
-        <div class="input-group mt-3 function-lore d-none">
+        <div class="input-group mt-3 function-lore d-none" data-type="json-list" data-field="lore">
           <textarea class="form-control code" onchange="updateLoreField(this)" rows=3></textarea>
         </div>
-        <div class="input-group mt-3 function-lore-replace d-none">
+        <div class="input-group mt-3 function-lore-replace d-none" data-type="checkbox" data-field="replace">
           <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="loreReplaceCheckbox" onchange="updateCheckedField(this, 'replace')">
-            <label class="custom-control-label" for="loreReplaceCheckbox">Replace</label>
+            <input type="checkbox" class="custom-control-input" id="loreReplaceCheckbox" onchange="updateField(this)">
+            <label class="custom-control-label" for="loreReplaceCheckbox" data-i18n="$function.$lore_replace.replace"></label>
           </div>
         </div>
-        <div class="input-group mt-3 function-entity d-none">
+        <div class="input-group mt-3 function-entity d-none" data-type="enum" data-field="entity">
           <div class="input-group-prepend">
-            <span class="input-group-text">Entity</span>
+            <span class="input-group-text" data-i18n="$function.$entity.entity"></span>
           </div>
-          <select class="form-control" onchange="updateField(this, 'entity')">
-            <option value="this">This</option>
-            <option value="killer">Killer</option>
-            <option value="killer_player">Killer Player</option>
+          <select class="form-control" onchange="updateField(this)">
+            <option value="this" data-i18n="$source.this"></option>
+            <option value="killer" data-i18n="$source.killer"></option>
+            <option value="killer_player" data-i18n="$source.killer_player"></option>
           </select>
         </div>
         <div class="input-group mt-3 function-operations d-none">
-          <button type="button" class="btn btn-dark" onclick="addOperation(this)">Add Operation</button>
+          <button type="button" class="btn btn-dark" onclick="addOperation(this)" data-i18n="$function.$operations.add_op"></button>
         </div>
-        <div class="input-group mt-3 function-enchantment d-none">
+        <div class="input-group mt-3 function-enchantment d-none" data-type="string" data-field="enchantment">
           <div class="input-group-prepend">
-            <span class="input-group-text">Enchantment</span>
+            <span class="input-group-text" data-i18n="enchantment"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'enchantment')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 function-formula d-none">
+        <div class="input-group mt-3 function-formula d-none" data-type="enum" data-field="formula">
           <div class="input-group-prepend">
-            <span class="input-group-text">Formula</span>
+            <span class="input-group-text" data-i18n="$function.$formula.formula"></span>
           </div>
-          <select class="form-control function-type" onchange="updateField(this, 'formula')">
-            <option value="minecraft:uniform_bonus_count">Uniform Bonus Count</option>
-            <option value="minecraft:binomial_with_bonus_count">Binomial with Bonus Count</option>
-            <option value="minecraft:ore_drops">Ore Drops</option>
+          <select class="form-control" onchange="updateField(this)">
+            <option value="minecraft:uniform_bonus_count" data-i18n="$function.$formula.uniform_bonus_count"></option>
+            <option value="minecraft:binomial_with_bonus_count" data-i18n="$function.$formula.binomial_with_bonus_count"></option>
+            <option value="minecraft:ore_drops" data-i18n="$function.$formula.ore_drops"></option>
           </select>
         </div>
-        <div class="input-group mt-3 function-bonus-multiplier d-none">
+        <div class="input-group mt-3 function-bonus-multiplier d-none" data-type="float" data-field="parameters.bonusMultiplier">
           <div class="input-group-prepend">
-            <span class="input-group-text">Multiplier</span>
+            <span class="input-group-text" data-i18n="$function.$bonus_multiplier.multiplier"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateIntField(this, 'parameters.bonusMultiplier')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this, 'parameters.bonusMultiplier')" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 function-bonus-extra d-none">
+        <div class="input-group mt-3 function-bonus-extra d-none" data-type="int" data-field="parameters.extra">
           <div class="input-group-prepend">
-            <span class="input-group-text">Extra</span>
+            <span class="input-group-text" data-i18n="$function.$bonus_extra.extra"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateIntField(this, 'parameters.extra')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this, 'parameters.extra')" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 function-bonus-probability d-none">
+        <div class="input-group mt-3 function-bonus-probability d-none" data-type="float" data-field="parameters.probability">
           <div class="input-group-prepend">
-            <span class="input-group-text">Propability</span>
+            <span class="input-group-text" data-i18n="$function.$bonus_probability.probability"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateFloatField(this, 'parameters.probability')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this, 'parameters.probability')" onfocus="this.select()">
         </div>
       </div>
     </div>
-    <div id="modifierTemplate" class="card bg-dark mt-3 modifier">
-      <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeModifier(this)">Remove Modifier</button>
-      </div>
+    <div id="modifierTemplate" class="card bg-dark mt-3 modifier" data-field="modifiers[]">
       <div class="card-body">
-        <div class="input-group">
+        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)" data-i18n="remove_modifier"></button>
+        <div class="input-group" data-type="enum" data-field="attribute">
           <div class="input-group-prepend">
-            <span class="input-group-text">Attribute</span>
+            <span class="input-group-text" data-i18n="$modifier.attribute"></span>
           </div>
-          <select class="form-control modifier-attribute" onchange="updateField(this, 'attribute')">
-            <option value="generic.maxHealth">Max Health</option>
-            <option value="generic.followRange">Follow Range</option>
-            <option value="generic.knockbackResistance">Knockback Resistance</option>
-            <option value="generic.movementSpeed">Movement Speed</option>
-            <option value="generic.attackDamage">Attack Damage</option>
-            <option value="generic.armor">Armor</option>
-            <option value="generic.armorThoughness">Armor Toughness</option>
-            <option value="generic.attackSpeed">Attack Speed</option>
-            <option value="generic.luck">Luck</option>
-            <option value="horse.jumpStrength">Jump Strength</option>
-            <option value="generic.attackKnockback">Attack Knockback</option>
-            <option value="generic.flyingSpeed">Flying Speed</option>
-            <option value="zombie.spawnReinforcements">Spawn Reinforcements</option>
+          <select class="form-control modifier-attribute" onchange="updateField(this)">
+            <option value="generic.maxHealth" data-i18n="$modifier.generic_maxHealth"></option>
+            <option value="generic.followRange" data-i18n="$modifier.generic_followRange"></option>
+            <option value="generic.knockbackResistance" data-i18n="$modifier.generic_knockbackResistance"></option>
+            <option value="generic.movementSpeed" data-i18n="$modifier.generic_movementSpeed"></option>
+            <option value="generic.attackDamage" data-i18n="$modifier.generic_attackDamage"></option>
+            <option value="generic.armor" data-i18n="$modifier.generic_armor"></option>
+            <option value="generic.armorToughness" data-i18n="$modifier.generic_armorToughness"></option>
+            <option value="generic.attackSpeed" data-i18n="$modifier.generic_attackSpeed"></option>
+            <option value="generic.luck" data-i18n="$modifier.generic_luck"></option>
+            <option value="horse.jumpStrength" data-i18n="$modifier.horse_jumpStrength"></option>
+            <option value="generic.attackKnockback" data-i18n="$modifier.generic_attackKnockback"></option>
+            <option value="generic.flyingSpeed" data-i18n="$modifier.generic_flyingSpeed"></option>
+            <option value="zombie.spawnReinforcements" data-i18n="$modifier.zombie_spawnReinforcements"></option>
           </select>
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="string" data-field="name">
           <div class="input-group-prepend">
-            <span class="input-group-text">Name</span>
+            <span class="input-group-text" data-i18n="$modifier.name"></span>
           </div>
-          <input type="text" class="form-control modifier-name" onchange="updateField(this, 'name')" onclick="this.select()">
+          <input type="text" class="form-control modifier-name" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 modifier-amount" data-type="range">
+        <div class="input-group mt-3 modifier-amount" data-type="range" data-field="amount">
           <div class="input-group-prepend">
-            <span class="input-group-text">Amount</span>
+            <span class="input-group-text" data-i18n="$modifier.amount"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'amount', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'amount', 'range')">Range</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'amount', 'binomial')">Binomial</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+              <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateRangeField(this, 'amount')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'amount')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateRangeField(this, 'amount')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">n</span>
-          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateRangeField(this, 'amount')" onclick="this.select()">
-          <span class="input-group-text rounded-0 binomial d-none">p</span>
-          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateRangeField(this, 'amount')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.binimial.n"></span>
+          <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.binimial.p"></span>
+          <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="enum" data-field="operation">
           <div class="input-group-prepend">
-            <span class="input-group-text">Operation</span>
+            <span class="input-group-text" data-i18n="$modifier.operation"></span>
           </div>
-          <select class="form-control modifier-operation" onchange="updateField(this, 'operation')">
-            <option value="addition">Addition</option>
-            <option value="multiply_base">Multiply Base</option>
-            <option value="multiply_total">Multiply Total</option>
+          <select class="form-control modifier-operation" onchange="updateField(this)">
+            <option value="addition" data-i18n="$modifier.$operation.addition"></option>
+            <option value="multiply_base" data-i18n="$modifier.$operation.multiply_base"></option>
+            <option value="multiply_total" data-i18n="$modifier.$operation.multiply_total"></option>
           </select>
         </div>
         <div class="mt-3 modifier-slots">
-          <div class="input-group">
+          <div class="input-group" data-type="set" data-field="slot">
             <div class="input-group-prepend">
-              <span class="input-group-text">Slots</span>
+              <span class="input-group-text" data-i18n="$modifier.slots"></span>
             </div>
             <div class="input-group-append">
               <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" data-slot="mainhand" onclick="addModifierSlot(this)">Mainhand</a>
-                <a class="dropdown-item" data-slot="offhand" onclick="addModifierSlot(this)">Offhand</a>
-                <a class="dropdown-item" data-slot="head" onclick="addModifierSlot(this)">Head</a>
-                <a class="dropdown-item" data-slot="chest" onclick="addModifierSlot(this)">Chest</a>
-                <a class="dropdown-item" data-slot="legs" onclick="addModifierSlot(this)">Legs</a>
-                <a class="dropdown-item" data-slot="feet" onclick="addModifierSlot(this)">Feet</a>
+                <a class="dropdown-item" data-slot="mainhand" onclick="addModifierSlot(this)" data-i18n="$slot.mainhand"></a>
+                <a class="dropdown-item" data-slot="offhand" onclick="addModifierSlot(this)" data-i18n="$slot.offhand"></a>
+                <a class="dropdown-item" data-slot="head" onclick="addModifierSlot(this)" data-i18n="$slot.head"></a>
+                <a class="dropdown-item" data-slot="chest" onclick="addModifierSlot(this)" data-i18n="$slot.chest"></a>
+                <a class="dropdown-item" data-slot="legs" onclick="addModifierSlot(this)" data-i18n="$slot.legs"></a>
+                <a class="dropdown-item" data-slot="feet" onclick="addModifierSlot(this)" data-i18n="$slot.feet"></a>
               </div>
             </div>
           </div>
@@ -500,430 +498,497 @@
         </div>
       </div>
     </div>
-    <div id="operationTemplate" class="card bg-dark mt-3 operation">
+    <div id="operationTemplate" class="card bg-dark mt-3 operation" data-field="ops[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeOperation(this)">Remove Operation</button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_operation"></button>
       </div>
       <div class="card-body">
-        <div class="input-group">
+        <div class="input-group" data-type="string" data-field="source">
           <div class="input-group-prepend">
-            <span class="input-group-text">Source</span>
+            <span class="input-group-text" data-i18n="$operation.source"></span>
           </div>
-          <input type="text" class="form-control code operation-source" onchange="updateField(this, 'source')" onclick="this.select()">
+          <input type="text" class="form-control code operation-source" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="string" data-field="target">
           <div class="input-group-prepend">
-            <span class="input-group-text">Target</span>
+            <span class="input-group-text" data-i18n="$operation.target"></span>
           </div>
-          <input type="text" class="form-control code operation-target" onchange="updateField(this, 'target')" onclick="this.select()">
+          <input type="text" class="form-control code operation-target" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="enum" data-field="op">
           <div class="input-group-prepend">
-            <span class="input-group-text">Operation</span>
+            <span class="input-group-text" data-i18n="$operation.operation"></span>
           </div>
-          <select class="form-control operation-type" onchange="updateField(this, 'op')">
-            <option value="replace">Replace</option>
-            <option value="append">Append</option>
-            <option value="merge">Merge</option>
+          <select class="form-control operation-type" onchange="updateField(this)">
+            <option value="replace" data-i18n="$operation.$operation.replace"></option>
+            <option value="append" data-i18n="$operation.$operation.append"></option>
+            <option value="merge" data-i18n="$operation.$operation.merge"></option>
           </select>
         </div>
       </div>
     </div>
-    <div id="conditionTemplate" class="card mt-3 bg-info condition">
+    <div id="conditionTemplate" class="card mt-3 bg-info condition" data-field="conditions[]">
       <div class="card-header pb-1">
-        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeCondition(this)">Remove Condition</button>
+        <button type="button" class="btn btn-danger mb-2 float-right" onclick="removeField(this)" data-i18n="remove_condition"></button>
       </div>
       <div class="card-body">
-        <div class="input-group">
+        <div class="input-group" data-type="enum" data-field="condition">
           <div class="input-group-prepend">
-            <span class="input-group-text">Condition</span>
+            <span class="input-group-text" data-i18n="condition"></span>
           </div>
-          <select class="form-control condition-type" onchange="updateField(this, 'condition')">
-            <option value="minecraft:alternative">Alternative</option>
-            <option value="minecraft:inverted">Inverted</option>
-            <option value="minecraft:entity_properties">Entity Properties</option>
-            <option value="minecraft:blockstate_propery">Block Properties</option>
-            <option value="minecraft:match_tool">Tool Properties</option>
-            <option value="minecraft:damage_source_properties">Damage Source</option>
-            <option value="minecraft:location_check">Location</option>
-            <option value="minecraft:weather_check">Weather</option>
-            <option value="minecraft:entity_scores">Entity Scores</option>
-            <option value="minecraft:random_chance">Random Chance</option>
-            <option value="minecraft:random_chance_with_looting">Random Chance with Looting</option>
-            <option value="minecraft:table_bonus">Table Bonus</option>
-            <option value="minecraft:killed_by_player">Killed by Player</option>
-            <option value="minecraft:survives_explosion">Survives Explosion</option>
+          <select class="form-control condition-type" onchange="updateField(this)">
+            <option value="minecraft:alternative" data-i18n="$condition.alternative"></option>
+            <option value="minecraft:inverted" data-i18n="$condition.inverted"></option>
+            <option value="minecraft:entity_properties" data-i18n="$condition.entity_properties"></option>
+            <option value="minecraft:block_state_propery" data-i18n="$condition.block_state_propery"></option>
+            <option value="minecraft:match_tool" data-i18n="$condition.match_tool"></option>
+            <option value="minecraft:damage_source_properties" data-i18n="$condition.damage_source_properties"></option>
+            <option value="minecraft:location_check" data-i18n="$condition.location_check"></option>
+            <option value="minecraft:weather_check" data-i18n="$condition.weather_check"></option>
+            <option value="minecraft:entity_scores" data-i18n="$condition.entity_scores"></option>
+            <option value="minecraft:random_chance" data-i18n="$condition.random_chance"></option>
+            <option value="minecraft:random_chance_with_looting" data-i18n="$condition.random_chance_with_looting"></option>
+            <option value="minecraft:table_bonus" data-i18n="$condition.table_bonus"></option>
+            <option value="minecraft:killed_by_player" data-i18n="$condition.killed_by_player"></option>
+            <option value="minecraft:survives_explosion" data-i18n="$condition.survives_explosion"></option>
           </select>
         </div>
-        <div class="input-group mt-3 condition-chance d-none">
+        <div class="input-group mt-3 condition-chance d-none" data-type="float" data-field="chance">
           <div class="input-group-prepend">
-            <span class="input-group-text">Chance</span>
+            <span class="input-group-text" data-i18n="chance"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateFloatField(this, 'chance')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 condition-looting-multiplier d-none">
+        <div class="input-group mt-3 condition-looting-multiplier d-none" data-type="float" data-field="looting_multiplier">
           <div class="input-group-prepend">
-            <span class="input-group-text">Looting Multiplier</span>
+            <span class="input-group-text" data-i18n="looting_multiplier"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateFloatField(this, 'looting_multiplier')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 condition-killed-inverted d-none">
+        <div class="input-group mt-3 condition-killed-inverted d-none" data-type="checkbox" data-field="inverted">
           <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="invertedCheckbox" onchange="updateCheckedField(this, 'inverted')">
-            <label class="custom-control-label" for="invertedCheckbox">Inverted</label>
+            <input type="checkbox" class="custom-control-input" id="invertedCheckbox" onchange="updateField(this)">
+            <label class="custom-control-label" for="invertedCheckbox" data-i18n="inverted"></label>
           </div>
         </div>
-        <div class="input-group mt-3 condition-entity d-none">
+        <div class="input-group mt-3 condition-entity d-none" data-type="enum" data-field="entity">
           <div class="input-group-prepend">
-            <span class="input-group-text">Entity</span>
+            <span class="input-group-text" data-i18n="entity"></span>
           </div>
-          <select class="form-control" onchange="updateField(this, 'entity')">
-            <option value="this">This</option>
-            <option value="killer">Killer</option>
-            <option value="killer_player">Killer Player</option>
+          <select class="form-control" onchange="updateField(this)">
+            <option value="this" data-i18n="$source.this"></option>
+            <option value="killer" data-i18n="$source.killer"></option>
+            <option value="killer_player" data-i18n="$source.killer_player"></option>
           </select>
         </div>
         <div class="input-group mt-3 condition-entity-scores d-none">
           <div class="input-group-prepend">
-            <label class="input-group-text">Objective</label>
+            <label class="input-group-text" data-i18n="objective"></label>
           </div>
           <input type="text" class="form-control">
           <div class="input-group-append">
-            <button class="btn btn-dark" type="button" onclick="addScore(this)">Add Score</button>
+            <button class="btn btn-dark" type="button" onclick="addScore(this)" data-i18n="add_score"></button>
           </div>
         </div>
         <div class="mt-3 scores-list d-none">
         </div>
         <div class="input-group mt-3 condition-terms d-none">
-          <button type="button" class="btn btn-light" onclick="addTerm(this)">Add Term</button>
+          <button type="button" class="btn btn-light" onclick="addTerm(this)" data-i18n="add_term"></button>
         </div>
-        <div class="input-group mt-3 condition-block d-none">
+        <div class="input-group mt-3 condition-block d-none" data-type="string" data-field="block">
           <div class="input-group-prepend">
-            <span class="input-group-text">Block</span>
+            <span class="input-group-text" data-i18n="block"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'block')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
         <div class="input-group mt-3 condition-block-properties d-none">
           <div class="input-group-prepend">
-            <label class="input-group-text">Block State</label>
+            <label class="input-group-text" data-i18n="block_state"></label>
           </div>
           <input type="text" class="form-control">
           <div class="input-group-append">
-            <button class="btn btn-dark" type="button" onclick="addBlockProperty(this)">Add Block State</button>
+            <button class="btn btn-dark" type="button" onclick="addBlockProperty(this)" data-i18n="add_block_state"></button>
           </div>
         </div>
         <div class="mt-3 property-list d-none">
         </div>
-        <div class="input-group mt-3 condition-raining d-none">
+        <div class="input-group mt-3 condition-raining d-none" data-type="boolean" data-field="raining">
           <div class="input-group-prepend">
-            <span class="input-group-text">Raining</span>
+            <span class="input-group-text" data-i18n="raining"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'raining')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'raining')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 condition-thundering d-none">
+        <div class="input-group mt-3 condition-thundering d-none" data-type="boolean" data-field="thundering">
           <div class="input-group-prepend">
-            <span class="input-group-text">Thundering</span>
+            <span class="input-group-text" data-i18n="thundering"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'thundering')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'thundering')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 condition-enchantment d-none">
+        <div class="input-group mt-3 condition-enchantment d-none" data-type="string" data-field="enchantment">
           <div class="input-group-prepend">
-            <span class="input-group-text">Enchantment</span>
+            <span class="input-group-text" data-i18n="enchantment"></span>
           </div>
-          <input type="text" class="form-control" onchange="updateField(this, 'enchantment')" onclick="this.select()">
+          <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 condition-chances d-none">
+        <div class="input-group mt-3 condition-chances d-none" data-type="list" data-field="chances">
           <div class="input-group-prepend">
-            <span class="input-group-text">Chances</span>
+            <span class="input-group-text" data-i18n="chance_plural"></span>
           </div>
-          <input type="text" class="form-control code" onchange="updateChancesField(this)" onclick="this.select()">
+          <input type="text" class="form-control code" onchange="updateChancesField(this)" onfocus="this.select()">
         </div>
       </div>
     </div>
-    <div id="scoreTemplate" class="input-group mt-3 score" data-type="range">
+    <div id="scoreTemplate" class="input-group mt-3 score" data-type="range" data-field="scores">
       <div class="input-group-prepend">
         <span class="input-group-text objective"></span>
         <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
         <div class="dropdown-menu">
-          <a class="dropdown-item" onclick="updateScoreType(this, 'exact')">Exact</a>
-          <a class="dropdown-item" onclick="updateScoreType(this, 'range')">Range</a>
+          <a class="dropdown-item" onclick="updateScoreType(this, 'exact')" data-i18n="$range.exact"></a>
+          <a class="dropdown-item" onclick="updateScoreType(this, 'range')" data-i18n="$range.range"></a>
         </div>
       </div>
-      <input type="text" class="form-control exact d-none" value="1" onchange="updateScoreField(this)" onclick="this.select()">
-      <span class="input-group-text rounded-0 range d-none">Min</span>
-      <input type="text" class="form-control range min d-none" value="1" onchange="updateScoreField(this)" onclick="this.select()">
-      <span class="input-group-text rounded-0 range d-none">Max</span>
-      <input type="text" class="form-control range max d-none" value="2" onchange="updateScoreField(this)" onclick="this.select()">
+      <input type="text" class="form-control exact d-none" value="1" onchange="updateScoreField(this)" onfocus="this.select()">
+      <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+      <input type="text" class="form-control range min d-none" value="1" onchange="updateScoreField(this)" onfocus="this.select()">
+      <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+      <input type="text" class="form-control range max d-none" value="2" onchange="updateScoreField(this)" onfocus="this.select()">
       <div class="input-group-append">
-        <button class="btn btn-outline-danger bg-light" type="button" onclick="removeScore(this)">Remove</button>
+        <button class="btn btn-outline-danger bg-light" type="button" onclick="removeScore(this)" data-i18n="remove"></button>
       </div>
     </div>
     <div id="blockPropertyTemplate" class="input-group mt-3 block-property">
       <div class="input-group-prepend">
         <span class="input-group-text blockstate"></span>
       </div>
-      <input type="text" class="form-control exact" onchange="updateBlockPropertyField(this)" onclick="this.select()">
+      <input type="text" class="form-control exact" onchange="updateBlockPropertyField(this)" onfocus="this.select()">
       <div class="input-group-append">
-        <button class="btn btn-outline-danger bg-light" type="button" onclick="removeBlockProperty(this)">Remove</button>
+        <button class="btn btn-outline-danger bg-light" type="button" onclick="removeBlockProperty(this)" data-i18n="remove"></button>
       </div>
     </div>
-    <div id="locationTemplate" class="card bg-dark mt-3">
+    <div id="locationTemplate" class="card bg-dark mt-3" data-field="predicate">
       <div class="card-body">
-        <button class="btn btn-light dropdown-toggle" type="button" data-shows="false" onclick="togglePosition(this)">Position</button>
-        <div class="input-group mt-2 position-collapse position-x d-none">
+        <button class="btn btn-light dropdown-toggle" type="button" data-shows="false" onclick="togglePosition(this)" data-i18n="position"></button>
+        <div class="input-group mt-2 position-collapse position-x d-none" data-type="range" data-field="position.x">
           <div class="input-group-prepend">
-            <span class="input-group-text">X</span>
+            <span class="input-group-text" data-i18n="x"></span>
           </div>
-          <span class="input-group-text rounded-0 range">Min</span>
-          <input type="text" class="form-control min" onchange="updateFloatField(this, 'position.x.min')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range">Max</span>
-          <input type="text" class="form-control max" onchange="updateFloatField(this, 'position.x.max')" onclick="this.select()">
+          <span class="input-group-text rounded-0" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-2 position-collapse position-y d-none">
+        <div class="input-group mt-2 position-collapse position-y d-none" data-type="range" data-field="position.y">
           <div class="input-group-prepend">
-            <span class="input-group-text">Y</span>
+            <span class="input-group-text" data-i18n="y">Y</span>
           </div>
-          <span class="input-group-text rounded-0 range">Min</span>
-          <input type="text" class="form-control min" onchange="updateFloatField(this, 'position.y.min')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range">Max</span>
-          <input type="text" class="form-control max" onchange="updateFloatField(this, 'position.y.max')" onclick="this.select()">
+          <span class="input-group-text rounded-0" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min" onchange="updateField(this, 'position.y.min')" onfocus="this.select()">
+          <span class="input-group-text rounded-0" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max" onchange="updateField(this, 'position.y.max')" onfocus="this.select()">
         </div>
-        <div class="input-group mt-2 position-collapse position-z d-none">
+        <div class="input-group mt-2 position-collapse position-z d-none" data-type="range" data-field="position.z">
           <div class="input-group-prepend">
-            <span class="input-group-text">Z</span>
+            <span class="input-group-text" data-i18n="z">Z</span>
           </div>
-          <span class="input-group-text rounded-0">Min</span>
-          <input type="text" class="form-control min" onchange="updateFloatField(this, 'position.z.min')" onclick="this.select()">
-          <span class="input-group-text rounded-0">Max</span>
-          <input type="text" class="form-control max" onchange="updateFloatField(this, 'position.z.max')" onclick="this.select()">
+          <span class="input-group-text rounded-0" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min" onchange="updateField(this, 'position.z.min')" onfocus="this.select()">
+          <span class="input-group-text rounded-0" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max" onchange="updateField(this, 'position.z.max')" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="string" data-field="biome">
           <div class="input-group-prepend">
-            <span class="input-group-text">Biome</span>
+            <span class="input-group-text" data-i18n="biome"></span>
           </div>
-          <input type="text" class="form-control biome" onchange="updateField(this, 'biome')" onclick="this.select()">
+          <input type="text" class="form-control biome" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="string" data-field="feature">
           <div class="input-group-prepend">
-            <span class="input-group-text">Feature</span>
+            <span class="input-group-text" data-i18n="feature"></span>
           </div>
-          <input type="text" class="form-control feature" onchange="updateField(this, 'feature')" onclick="this.select()">
+          <input type="text" class="form-control feature" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="enum" data-field="dimension">
           <div class="input-group-prepend">
-            <span class="input-group-text">Dimension</span>
+            <span class="input-group-text" data-i18n="dimension"></span>
           </div>
-          <select class="form-control dimension" onchange="updateField(this, 'dimension')">
-            <option value="">Unset</option>
-            <option value="minecraft:overworld">Overworld</option>
-            <option value="minecraft:the_nether">The Nether</option>
-            <option value="minecraft:the_end">The End</option>
+          <select class="form-control dimension" onchange="updateField(this)">
+            <option value="" data-i18n="unset"></option>
+            <option value="minecraft:overworld" data-i18n="$dimension.overworld"></option>
+            <option value="minecraft:the_nether" data-i18n="$dimension.the_nether"></option>
+            <option value="minecraft:the_end" data-i18n="$dimension.the_end"></option>
           </select>
         </div>
       </div>
     </div>
-    <div id="entityTemplate" class="card bg-dark mt-3">
+    <div id="entityTemplate" class="card bg-dark mt-3" data-field="predicate">
       <div class="card-body">
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="string" data-field="type">
           <div class="input-group-prepend">
-            <span class="input-group-text">Type</span>
+            <span class="input-group-text" data-i18n="type"></span>
           </div>
-          <input type="text" class="form-control type" onchange="updateField(this, 'type')" onclick="this.select()">
+          <input type="text" class="form-control type" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3">
+        <div class="input-group mt-3" data-type="nbt" data-field="nbt">
           <div class="input-group-prepend">
-            <span class="input-group-text">NBT</span>
+            <span class="input-group-text" data-i18n="nbt"></span>
           </div>
-          <textarea type="text" class="form-control nbt code" onchange="updateField(this, 'nbt')" onclick="this.select()"></textarea>
+          <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onfocus="this.select()"></textarea>
         </div>
-        <button class="btn btn-light mt-3 dropdown-toggle" type="button" onclick="toggleEntityLocation(this)">Location</button>
+        <button class="btn btn-light mt-3 dropdown-toggle" type="button" onclick="toggleEntityLocation(this)" data-i18n="location"></button>
       </div>
     </div>
-    <div id="itemTemplate" class="card bg-dark mt-3">
+    <div id="itemTemplate" class="card bg-dark mt-3" data-field="predicate">
       <div class="card-body">
         <div class="input-group mt-3 item-type">
           <div class="input-group-prepend">
-            <span class="input-group-text">Item</span>
+            <span class="input-group-text" data-i18n="item"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateItemType(this, 'name')">Name</a>
-              <a class="dropdown-item" onclick="updateItemType(this, 'tag')">Tag</a>
+              <a class="dropdown-item" onclick="updateItemType(this, 'item')" data-i18n="name"></a>
+              <a class="dropdown-item" onclick="updateItemType(this, 'tag')" data-i18n="tag"></a>
             </div>
           </div>
-          <span class="input-group-text rounded-0 name d-none">Name</span>
-          <input type="text" class="form-control name d-none" onchange="updateItemField(this, 'name')" onclick="this.select()">
-          <span class="input-group-text rounded-0 tag d-none">Tag</span>
-          <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onclick="this.select()">
+          <span class="input-group-text rounded-0 item d-none" data-i18n="name"></span>
+          <input type="text" class="form-control item d-none" onchange="updateItemField(this, 'item')" onfocus="this.select()">
+          <span class="input-group-text rounded-0 tag d-none" data-i18n="tag"></span>
+          <input type="text" class="form-control tag d-none" onchange="updateItemField(this, 'tag')" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 item-count" data-type="range">
+        <div class="input-group mt-3 item-count" data-type="range" data-field="count">
           <div class="input-group-prepend">
-            <span class="input-group-text">Count</span>
+            <span class="input-group-text" data-i18n="count"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'count', 'range')">Range</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'count')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'count')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 item-durability" data-type="range">
+        <div class="input-group mt-3 item-durability" data-type="range" data-field="durability">
           <div class="input-group-prepend">
-            <span class="input-group-text">Durability</span>
+            <span class="input-group-text" data-i18n="durability"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'durability', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'durability', 'range')">Range</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateRangeField(this, 'durability')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'durability')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'durability')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
+        </div>
+        <div class="input-group mt-3" data-type="string" data-field="potion">
+          <div class="input-group-prepend">
+            <span class="input-group-text" data-i18n="potion"></span>
+          </div>
+          <input type="text" class="form-control potion" onchange="updateField(this)" onfocus="this.select()">
+        </div>
+        <div class="input-group mt-3" data-type="nbt" data-field="nbt">
+          <div class="input-group-prepend">
+            <span class="input-group-text" data-i18n="nbt"></span>
+          </div>
+          <textarea type="text" class="form-control nbt code" onchange="updateField(this)" onfocus="this.select()"></textarea>
         </div>
         <div class="input-group mt-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text">Potion</span>
-          </div>
-          <input type="text" class="form-control potion" onchange="updateField(this, 'potion')" onclick="this.select()">
-        </div>
-        <div class="input-group mt-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text">NBT</span>
-          </div>
-          <textarea type="text" class="form-control nbt code" onchange="updateField(this, 'nbt')" onclick="this.select()"></textarea>
+          <button class="btn btn-dark" type="button" onclick="addConditionEnchantment(this)" data-i18n="add_enchantment"></button>
         </div>
       </div>
     </div>
-    <div id="damageTemplate" class="card bg-dark mt-3 damage">
+    <div id="damageTemplate" class="card bg-dark mt-3 damage" data-field="predicate">
       <div class="card-body">
-        <button class="btn btn-light dropdown-toggle" type="button" data-shows="false" onclick="toggleDamageFlags(this)">Damage Type</button>
-        <div class="input-group mt-3 damage-flag damage-projectile d-none">
+        <button class="btn btn-light dropdown-toggle" type="button" data-shows="false" onclick="toggleDamageFlags(this)" data-i18n="$damage.damage_type"></button>
+        <div class="input-group mt-3 damage-flag damage-projectile d-none" data-type="boolean" data-field="type.is_projectile">
           <div class="input-group-prepend">
-            <span class="input-group-text">Projectile</span>
+            <span class="input-group-text" data-i18n="$damage.projectile"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.is_projectile')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.is_projectile')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.is_projectile')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.is_projectile')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-explosion d-none">
+        <div class="input-group mt-3 damage-flag damage-explosion d-none" data-type="boolean" data-field="type.is_explosion">
           <div class="input-group-prepend">
-            <span class="input-group-text">Explosion</span>
+            <span class="input-group-text" data-i18n="$damage.explosion"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.is_explosion')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.is_explosion')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.is_explosion')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.is_explosion')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-fire d-none">
+        <div class="input-group mt-3 damage-flag damage-fire d-none" data-type="boolean" data-field="type.is_fire">
           <div class="input-group-prepend">
-            <span class="input-group-text">Fire</span>
+            <span class="input-group-text" data-i18n="$damage.fire"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.is_fire')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.is_fire')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.is_fire')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.is_fire')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-magic d-none">
+        <div class="input-group mt-3 damage-flag damage-magic d-none" data-type="boolean" data-field="type.is_magic">
           <div class="input-group-prepend">
-            <span class="input-group-text">Magic</span>
+            <span class="input-group-text" data-i18n="$damage.magic"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.is_magic')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.is_magic')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.is_magic')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.is_magic')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-lightning d-none">
+        <div class="input-group mt-3 damage-flag damage-lightning d-none" data-type="boolean" data-field="is_lightning">
           <div class="input-group-prepend">
-            <span class="input-group-text">Lightning</span>
+            <span class="input-group-text" data-i18n="$damage.lightning"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'is_lightning')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'is_lightning')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-starvation d-none">
+        <div class="input-group mt-3 damage-flag damage-starvation d-none" data-type="boolean" data-field="type.bypasses_magic">
           <div class="input-group-prepend">
-            <span class="input-group-text">Starvation</span>
+            <span class="input-group-text" data-i18n="$damage.starvation"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.bypasses_magic')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.bypasses_magic')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.bypasses_magic')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.bypasses_magic')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-void d-none">
+        <div class="input-group mt-3 damage-flag damage-void d-none" data-type="boolean" data-field="type.bypasses_invulnerability">
           <div class="input-group-prepend">
-            <span class="input-group-text">Void</span>
+            <span class="input-group-text" data-i18n="$damage.void"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.bypasses_invulnerability')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.bypasses_invulnerability')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.bypasses_invulnerability')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.bypasses_invulnerability')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-flag damage-armor d-none">
+        <div class="input-group mt-3 damage-flag damage-armor d-none" data-type="boolean" data-field="type.bypasses_armor">
           <div class="input-group-prepend">
-            <span class="input-group-text">Bypass Armor</span>
+            <span class="input-group-text" data-i18n="$damage.bypass_armor"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'type.bypasses_armor')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'type.bypasses_armor')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this, 'type.bypasses_armor')" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this, 'type.bypasses_armor')" data-i18n="true"></button>
           </div>
         </div>
-        <div class="input-group mt-3 damage-dealt" data-type="range">
+        <div class="input-group mt-3 damage-dealt" data-type="range" data-field="dealt">
           <div class="input-group-prepend">
-            <span class="input-group-text">Dealt</span>
+            <span class="input-group-text" data-i18n="$damage.dealt"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'dealt', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'dealt', 'range')">Range</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateRangeField(this, 'dealt')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'dealt')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'dealt')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 damage-taken" data-type="range">
+        <div class="input-group mt-3 damage-taken" data-type="range" data-field="taken">
           <div class="input-group-prepend">
-            <span class="input-group-text">Taken</span>
+            <span class="input-group-text" data-i18n="$damage.taken"></span>
             <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
             <div class="dropdown-menu">
-              <a class="dropdown-item" onclick="updateRangeType(this, 'taken', 'exact')">Exact</a>
-              <a class="dropdown-item" onclick="updateRangeType(this, 'taken', 'range')">Range</a>
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
             </div>
           </div>
-          <input type="text" class="form-control exact d-none" value="1" onchange="updateRangeField(this, 'taken')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Min</span>
-          <input type="text" class="form-control range min d-none" value="1" onchange="updateRangeField(this, 'taken')" onclick="this.select()">
-          <span class="input-group-text rounded-0 range d-none">Max</span>
-          <input type="text" class="form-control range max d-none" value="2" onchange="updateRangeField(this, 'taken')" onclick="this.select()">
+          <input type="text" class="form-control exact d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
-        <div class="input-group mt-3 damage-blocked">
+        <div class="input-group mt-3 damage-blocked" data-type="boolean" data-field="blocked">
           <div class="input-group-prepend">
-            <span class="input-group-text">Blocked</span>
+            <span class="input-group-text" data-i18n="$damage.blocked"></span>
           </div>
           <div class="btn-group">
-            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateRadioField(this, 'blocked')">False</button>
-            <button type="button" value="true" class="btn btn-secondary" onclick="updateRadioField(this, 'blocked')">True</button>
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
           </div>
         </div>
-        <button class="btn btn-light dropdown-toggle mt-3" type="button" data-shows="false" onclick="toggleSourceEntity(this)">Source Entity</button>
+        <button class="btn btn-light dropdown-toggle mt-3" type="button" data-shows="false" onclick="toggleSourceEntity(this)" data-i18n="source_entity"></button>
         <div class="source-entity">
         </div>
-        <button class="btn btn-light dropdown-toggle mt-3" type="button" data-shows="false" onclick="toggleDirectEntity(this)">Direct Entity</button>
+        <button class="btn btn-light dropdown-toggle mt-3" type="button" data-shows="false" onclick="toggleDirectEntity(this)" data-i18n="direct_entity"></button>
         <div class="direct-entity">
+        </div>
+      </div>
+    </div>
+    <div id="enchantmentTemplate" class="card bg-dark mt-3 enchantment" data-field="enchantments[]">
+      <div class="card-body">
+        <button type="button" class="btn btn-danger mb-3 float-right" onclick="removeField(this)" data-i18n="remove_enchantment"></button>
+        <div class="input-group" data-type="enum" data-field="enchantment">
+          <div class="input-group-prepend">
+            <span class="input-group-text" data-i18n="enchantment"></span>
+          </div>
+          <select class="form-control enchantment-id" onchange="updateField(this)">
+            <option value="minecraft:aqua_affinity" data-i18n="$enchantment.aqua_affinity"></option>
+            <option value="minecraft:bane_of_arthropods" data-i18n="$enchantment.bane_of_arthropods"></option>
+            <option value="minecraft:blast_protection" data-i18n="$enchantment.blast_protection"></option>
+            <option value="minecraft:channeling" data-i18n="$enchantment.channeling"></option>
+            <option value="minecraft:binding_curse" data-i18n="$enchantment.binding_curse"></option>
+            <option value="minecraft:vanishing_curse" data-i18n="$enchantment.vanishing_curse"></option>
+            <option value="minecraft:depth_strider" data-i18n="$enchantment.depth_strider"></option>
+            <option value="minecraft:efficiency" data-i18n="$enchantment.efficiency"></option>
+            <option value="minecraft:feather_falling" data-i18n="$enchantment.feather_falling"></option>
+            <option value="minecraft:fire_aspect" data-i18n="$enchantment.fire_aspect"></option>
+            <option value="minecraft:fire_protection" data-i18n="$enchantment.fire_protection"></option>
+            <option value="minecraft:flame" data-i18n="$enchantment.flame"></option>
+            <option value="minecraft:fortune" data-i18n="$enchantment.fortune"></option>
+            <option value="minecraft:frost_walker" data-i18n="$enchantment.frost_walker"></option>
+            <option value="minecraft:impaling" data-i18n="$enchantment.impaling"></option>
+            <option value="minecraft:infinity" data-i18n="$enchantment.infinity"></option>
+            <option value="minecraft:knockback" data-i18n="$enchantment.knockback"></option>
+            <option value="minecraft:looting" data-i18n="$enchantment.looting"></option>
+            <option value="minecraft:loyalty" data-i18n="$enchantment.loyalty"></option>
+            <option value="minecraft:luck_of_the_sea" data-i18n="$enchantment.luck_of_the_sea"></option>
+            <option value="minecraft:lure" data-i18n="$enchantment.lure"></option>
+            <option value="minecraft:mending" data-i18n="$enchantment.mending"></option>
+            <option value="minecraft:multishot" data-i18n="$enchantment.multishot"></option>
+            <option value="minecraft:piercing" data-i18n="$enchantment.piercing"></option>
+            <option value="minecraft:power" data-i18n="$enchantment.power"></option>
+            <option value="minecraft:projectile_protection" data-i18n="$enchantment.projectile_protection"></option>
+            <option value="minecraft:protection" data-i18n="$enchantment.protection"></option>
+            <option value="minecraft:punch" data-i18n="$enchantment.punch"></option>
+            <option value="minecraft:quick_charge" data-i18n="$enchantment.quick_charge"></option>
+            <option value="minecraft:respiration" data-i18n="$enchantment.respiration"></option>
+            <option value="minecraft:riptide" data-i18n="$enchantment.riptide"></option>
+            <option value="minecraft:sharpness" data-i18n="$enchantment.sharpness"></option>
+            <option value="minecraft:silk_touch" data-i18n="$enchantment.silk_touch"></option>
+            <option value="minecraft:smite" data-i18n="$enchantment.smite"></option>
+            <option value="minecraft:sweeping" data-i18n="$enchantment.sweeping"></option>
+            <option value="minecraft:thorns" data-i18n="$enchantment.thorns"></option>
+            <option value="minecraft:unbreaking" data-i18n="$enchantment.unbreaking"></option>
+          </select>
+        </div>
+        <div class="input-group mt-3 enchantment-levels" data-type="range" data-field="levels">
+          <div class="input-group-prepend">
+            <span class="input-group-text" data-i18n="level_plural"></span>
+            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
+              <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+            </div>
+          </div>
+          <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.min"></span>
+          <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
+          <span class="input-group-text rounded-0 range d-none" data-i18n="$range.$range.max"></span>
+          <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
         </div>
       </div>
     </div>
@@ -932,6 +997,11 @@
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/17.0.6/i18next.min.js" integrity="sha384-DYhccENVzcHrB30my+vk/NvcnUix2+CCUl8Qg7XEzTE1cFLf2IoN5B6c5C38vABH" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-browser-languagedetector/3.0.1/i18nextBrowserLanguageDetector.min.js" integrity="sha384-14ws1HmRivxp+u6W816e62Gs33Y19jhG4zSJb6pL0pB+gYc+CgFXXp4ZnGXcaOww" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-xhr-backend/3.0.0/i18nextXHRBackend.min.js" integrity="sha384-dK+VwLEvPDbpKM7G7D/LtbW6W2zlt99nuVTwoYIkMulAedST9Vj9OCRkv2xV8GjD" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-i18next/1.2.1/jquery-i18next.min.js" integrity="sha384-fLTSt6zHOb152KeFkj7kSiXdkyjKf6fjk5bdzWYLDPDo9evwd9PVs3TKoYYaaxdl" crossorigin="anonymous"></script>
+  <script src="i18n.js" charset="utf-8"></script>
   <script src="view.js" charset="utf-8"></script>
   <script src="model.js" charset="utf-8"></script>
 </body>

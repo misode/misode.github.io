@@ -127,7 +127,7 @@ function generateEntry(entry, i, size) {
   if (entry.children) {
     for (let j = 0; j < entry.children.length; j += 1) {
       let $child = generateEntry(entry.children[j], j, entry.children.length);
-      $child.removeClass('entry').addClass('child');
+      $child.attr('data-field', 'children[]');
       $entry.children('.card-body').append($child);
     }
   }
@@ -216,8 +216,8 @@ function generateFunction(func, i) {
     delete func.treasure;
   }
 
-  if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
-    if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
+  if (func.function === 'minecraft:looting_enchant' || func.function === 'minecraft:limit_count') {
+    if (func.function === 'minecraft:looting_enchant') {
       $function.find('.function-limit').removeClass('d-none');
       $function.find('.function-limit input').val(func.limit);
     } else {
@@ -317,7 +317,7 @@ function generateFunction(func, i) {
 
   if (func.function === 'minecraft:apply_bonus') {
     $function.find('.function-enchantment').removeClass('d-none');
-    $function.find('.function-entity input').val(func.enchantment);
+    $function.find('.function-enchantment input').val(func.enchantment);
   } else {
     delete func.enchantment;
   }
@@ -392,8 +392,8 @@ function generateModifier(modifier, i) {
   generateRange($modifier.find('.modifier-amount'), modifier.amount);
   $modifier.find('.modifier-operation').val(modifier.operation);
 
-  if (modifier.slots) {
-    for (let s of modifier.slots) {
+  if (modifier.slot) {
+    for (let s of modifier.slot) {
       let item = $modifier.find('.dropdown-item[data-slot="' + s + '"]');
       item.addClass('d-none');
       let html = '<button type="button" class="btn btn-outline-danger bg-light btn-sm mr-2 mt-2" data-slot="' + s + '" onclick="removeModifierSlot(this)">' + item.text() + '</button>';
@@ -423,7 +423,7 @@ function generateCondition(condition, i) {
   $condition.find('.condition-type').val(condition.condition);
 
   if (table.type === 'minecraft:generic') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
@@ -431,17 +431,17 @@ function generateCondition(condition, i) {
   } else if (table.type === 'minecraft:block') {
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
   } else if (table.type === 'minecraft:fishing') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
     $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
   } else if (table.type === 'minecraft:entity') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
     $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
     $condition.find('option[value="minecraft:match_tool"]').addClass('d-none');
   } else if (table.type === 'minecraft:chest') {
-    $condition.find('option[value="minecraft:blockstate_propery"]').addClass('d-none');
+    $condition.find('option[value="minecraft:block_state_propery"]').addClass('d-none');
     $condition.find('option[value="minecraft:damage_source_properties"]').addClass('d-none');
     $condition.find('option[value="minecraft:survives_explosion"]').addClass('d-none');
     $condition.find('option[value="minecraft:table_bonus"]').addClass('d-none');
@@ -488,7 +488,7 @@ function generateCondition(condition, i) {
     delete condition.entity;
   }
 
-  if (condition.condition === 'minecraft:blockstate_propery') {
+  if (condition.condition === 'minecraft:block_state_propery') {
     $condition.find('.condition-block').removeClass('d-none');
     $condition.find('.condition-block input').val(condition.block);
     $condition.find('.condition-block-properties').removeClass('d-none');
@@ -623,7 +623,7 @@ function generateCondition(condition, i) {
 
   if (condition.term) {
     let $term = generateCondition(condition.term, 0);
-    $term.removeClass('condition').addClass('term');
+    $term.attr('data-field', 'term');
     $term.find('.card-header').remove();
     $condition.children('.card-body').append($term);
   }
@@ -631,7 +631,7 @@ function generateCondition(condition, i) {
   if (condition.terms) {
     for (let j = 0; j < condition.terms.length; j += 1) {
       let $term = generateCondition(condition.terms[j], j);
-      $term.removeClass('condition').addClass('terms');
+      $term.attr('data-field', 'terms[]');
       $condition.children('.card-body').append($term);
     }
   }
@@ -693,7 +693,7 @@ function generateEntity(entity) {
   }
   if (entity.location) {
     let $location = generateLocation(entity.location);
-    $location.removeClass('predicate').addClass('location');
+    $location.attr('data-field', 'location');
     $entity.children('.card-body').append($location);
   }
   if (entity.nbt) {
@@ -733,14 +733,14 @@ function generateItem(item) {
   if (item.tag) {
     $item.find('.tag').removeClass('d-none').val(item.tag);
   } else {
-    $item.find('.name').removeClass('d-none').val(item.name);
+    $item.find('.item').removeClass('d-none').val(item.item);
   }
   generateRange($item.find('.item-count'), item.count);
   generateRange($item.find('.item-durability'), item.durability);
   $item.find('.nbt').val(item.nbt).keydown(e => preventNewline(e));
   $item.find('.potion').val(item.potion);
-  if (item.name === '') {
-    delete item.name;
+  if (item.item === '') {
+    delete item.item;
   }
   if (item.tag === '') {
     delete item.tag;
@@ -752,11 +752,18 @@ function generateItem(item) {
     delete item.nbt;
   }
 
+  if (item.enchantments) {
+    for (let j = 0; j < item.enchantments.length; j += 1) {
+      let $enchantment = generateEnchantment(item.enchantments[j], j);
+      $item.children('.card-body').append($enchantment);
+    }
+  }
+
   return $item;
 }
 
 function generateDamage(damage) {
-  let $damage = $('#damageTemplate').clone().removeAttr('id').addClass('predicate');
+  let $damage = $('#damageTemplate').clone().removeAttr('id');
   if (!damage) {
     damage = {};
   }
@@ -774,12 +781,12 @@ function generateDamage(damage) {
 
   if (damage.source_entity) {
     let $entity = generateEntity(damage.source_entity);
-    $entity.removeClass('predicate');
+    $entity.attr('data-field', 'source_entity');
     $damage.find('.source-entity').append($entity);
   }
   if (damage.direct_entity) {
     let $entity = generateEntity(damage.direct_entity);
-    $entity.removeClass('predicate');
+    $entity.attr('data-field', 'direct_entity');
     $damage.find('.direct-entity').append($entity);
   }
 
@@ -795,4 +802,14 @@ function generateDamage(damage) {
   generateRadio($damage.find('.damage-blocked'), damage.blocked);
 
   return $damage;
+}
+
+function generateEnchantment(enchantment, i) {
+  let $enchantment = $('#enchantmentTemplate').clone();
+  $enchantment.removeAttr('id').attr('data-index', i);
+
+  $enchantment.find('.enchantment-id').val(enchantment.enchantment);
+  generateRange($enchantment.find('.enchantment-levels'), enchantment.levels);
+
+  return $enchantment;
 }
