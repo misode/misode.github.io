@@ -17,6 +17,12 @@ const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
   $('#source').val(atob(params.get('q')));
   updateSource();
+  $('.container').removeClass('d-none');
+} else if (params.has('s')) {
+  let short = params.get('s').slice(0, -7);
+  window.location = 'https://zws.im/' + short;
+} else {
+  $('.container').removeClass('d-none');
 }
 
 function updateTableType() {
@@ -41,14 +47,27 @@ function showSource() {
   $('#showSourceButton').addClass('d-none');
 }
 
-function linkSource() {
-  let link = window.location.origin + window.location.pathname + '?q=' + btoa(JSON.stringify(table));
-  $('#copyTextarea').removeClass('d-none').val(link);
+async function linkSource() {
+  let site = window.location.origin + window.location.pathname;
+  let url = site + '?q=' + btoa(JSON.stringify(table));
+  if (url.length <= 500) {
+    let shortener = 'https://us-central1-zero-width-shortener.cloudfunctions.net/shortenURL?url=';
+    let response = await fetch(shortener + url);
+    let json = await response.json();
+    let id = Math.random().toString(36).substring(2, 9);
+    url = site + '?s=' + json.short + id;
+  }
+  $('#copyContainer').removeClass('d-none');
+  $('#copyTextarea').val(url);
+  $('#copyTextarea').get()[0].select();
+}
+
+function copyLink() {
   $('#copyTextarea').get()[0].select();
   document.execCommand('copy');
   setTimeout(() => {
-    $('#copyTextarea').addClass('d-none');
-  }, 2000);
+    $('#copyContainer').addClass('d-none');
+  }, 100);
 }
 
 function updateSource() {

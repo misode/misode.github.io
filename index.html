@@ -20,7 +20,7 @@
     </ul>
     <span class="float-right"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
   </nav>
-  <div class="container">
+  <div class="container d-none">
     <div class="row my-4">
       <div class="col-12 col-lg-7 mb-3 structure-container">
         <div class="input-group">
@@ -64,7 +64,10 @@
             <button type="button" class="btn btn-secondary ml-3" onclick="copySource()" data-i18n="copy"></button>
           </div>
         </div>
-        <textarea id="copyTextarea" rows="1" class="form-control mb-3 d-none"></textarea>
+        <div id="copyContainer" class="mb-3 d-none">
+          <input id="copyTextarea" rows="1" class="form-control"></input>
+          <button id="copy" type="button" class="btn btn-block btn-secondary mt-2" onclick="copyLink()" data-i18n="copy"></button>
+        </div>
         <textarea id="source" class="form-control code" onchange="updateSource()" rows="19" spellcheck="false"></textarea>
       </div>
     </div>
