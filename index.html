@@ -151,6 +151,15 @@
           </div>
           <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
         </div>
+        <div class="input-group mt-3 entry-expand d-none" data-type="boolean" data-field="expand">
+          <div class="input-group-prepend">
+            <span class="input-group-text" data-i18n="expand"></span>
+          </div>
+          <div class="btn-group">
+            <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
+            <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
+          </div>
+        </div>
         <div class="input-group mt-3 entry-weight d-none" data-type="int" data-field="weight">
           <div class="input-group-prepend">
             <span class="input-group-text" data-i18n="$entry.weight"></span>

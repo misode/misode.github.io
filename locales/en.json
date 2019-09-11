@@ -86,6 +86,7 @@
 			"group": "Group",
 			"dynamic": "Dynamic"
 		},
+		"expand": "Expand",
 		"weight": "Weight",
 		"quality": "Quality"
 	},
