@@ -104,6 +104,13 @@ function generateEntry(entry, i, size) {
     }
     $entry.find('.entry-name input').val(entry.name);
   }
+  if (entry.type === 'minecraft:tag') {
+    if (entry.expand === undefined) entry.expand = true;
+    $entry.find('.entry-expand').removeClass('d-none');
+    generateRadio($entry.find('.entry-expand'), entry.expand);
+  } else {
+    delete entry.expand;
+  }
   if (size > 1) {
     $entry.find('.entry-weight').removeClass('d-none');
   }
@@ -112,7 +119,7 @@ function generateEntry(entry, i, size) {
   } else {
     $entry.find('.entry-quality').addClass('d-none');
   }
-  if (entry.weight ) {
+  if (entry.weight) {
     $entry.find('.entry-weight input').val(entry.weight);
   }
   if (entry.quality) {
