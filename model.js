@@ -185,6 +185,26 @@ function removeComponent(el) {
   }
   invalidated();
 }
+function addToSet(el, array) {
+  let parent = getParent(el);
+  if (!parent[array]) {
+    parent[array] = [];
+  }
+  parent[array].push($(el).attr('value'));
+  invalidated();
+}
+
+function removeFromSet(el, array) {
+  let parent = getParent(el);
+  let index = parent[array].indexOf($(el).attr('value'));
+  if (index > -1) {
+    parent[array].splice(index, 1);
+    if (parent[array].length === 0) {
+      delete parent[array];
+    }
+    invalidated();
+  }
+}
 
 function updateField(el) {
   let $field = $(el).closest('[data-field]');
@@ -217,6 +237,14 @@ function updateField(el) {
     }
   } else if (type === 'json') {
     value = parseJSONValue(value)
+  } else if (type === 'json-list') {
+    let value = [];
+    for (let line of $(el).val().split('\n')) {
+      value.push(parseJSONValue(line));
+    }
+    if (value.length === 0) {
+      value = '';
+    }
   } else if (type === 'range' || type === 'random') {
     value = getRangeValue($field, node[field]);
   } else if (type === 'checkbox') {
@@ -404,16 +432,6 @@ function parseJSONValue(value) {
     }
   }
   return value;
-}
-
-function updateLoreField(el) {
-  let lines = $(el).val().split('\n');
-  let parent = getParent(el);
-  parent.lore = [];
-  for (let line of lines) {
-    parent.lore.push(parseJSONValue(line));
-  }
-  invalidated();
 }
 
 function addOperation(el) {

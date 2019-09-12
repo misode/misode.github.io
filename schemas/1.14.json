@@ -161,7 +161,8 @@
           "type": "random",
           "default": 2,
           "require": [
-            "minecraft:set_count"
+            "minecraft:set_count",
+            "minecraft:looting_enchant"
           ]
         },
         {
@@ -170,6 +171,137 @@
           "default": 1,
           "require": [
             "minecraft:set_damage"
+          ]
+        },
+        {
+          "id": "name",
+          "type": "json",
+          "require": [
+            "minecraft:set_name"
+          ]
+        },
+        {
+          "id": "lore",
+          "type": "json-list",
+          "require": [
+            "minecraft:set_lore"
+          ]
+        },
+        {
+          "id": "replace",
+          "type": "boolean",
+          "require": [
+            "minecraft:set_lore"
+          ]
+        },
+        {
+          "id": "tag",
+          "type": "string",
+          "require": [
+            "minecraft:set_nbt"
+          ]
+        },
+        {
+          "id": "levels",
+          "type": "random",
+          "require": [
+            "minecraft:enchant_with_levels"
+          ]
+        },
+        {
+          "id": "treasure",
+          "type": "boolean",
+          "default": false,
+          "require": [
+            "minecraft:enchant_with_levels"
+          ]
+        },
+        {
+          "id": "limit",
+          "type": "int",
+          "require": [
+            "minecraft:looting_enchant"
+          ]
+        },
+        {
+          "id": "limit",
+          "type": "boundary",
+          "require": [
+            "minecraft:limit_count"
+          ]
+        },
+        {
+          "id": "entity",
+          "type": "enum",
+          "values": [
+            "minecraft:this",
+            "minecraft:killer",
+            "minecraft:killer_player"
+          ],
+          "require": [
+            "minecraft:set_name",
+            "minecraft:set_lore",
+            "minecraft:fill_player_head"
+          ]
+        },
+        {
+          "id": "source",
+          "type": "enum",
+          "values": [
+            "minecraft:block_entity",
+            "minecraft:this",
+            "minecraft:killer",
+            "minecraft:killer_player"
+          ],
+          "require": [
+            "minecraft:copy_name",
+            "minecraft:copy_nbt"
+          ]
+        },
+        {
+          "id": "enchantments",
+          "type": "set",
+          "values": [
+            "minecraft:aqua_affinity",
+            "minecraft:bane_of_arthropods",
+            "minecraft:blast_protection",
+            "minecraft:channeling",
+            "minecraft:binding_curse",
+            "minecraft:vanishing_curse",
+            "minecraft:depth_strider",
+            "minecraft:efficiency",
+            "minecraft:feather_falling",
+            "minecraft:fire_aspect",
+            "minecraft:fire_protection",
+            "minecraft:flame",
+            "minecraft:fortune",
+            "minecraft:frost_walker",
+            "minecraft:impaling",
+            "minecraft:infinity",
+            "minecraft:knockback",
+            "minecraft:looting",
+            "minecraft:loyalty",
+            "minecraft:luck_of_the_sea",
+            "minecraft:lure",
+            "minecraft:mending",
+            "minecraft:multishot",
+            "minecraft:piercing",
+            "minecraft:power",
+            "minecraft:projectile_protection",
+            "minecraft:protection",
+            "minecraft:punch",
+            "minecraft:quick_charge",
+            "minecraft:respiration",
+            "minecraft:riptide",
+            "minecraft:sharpness",
+            "minecraft:silk_touch",
+            "minecraft:smite",
+            "minecraft:sweeping",
+            "minecraft:thorns",
+            "minecraft:unbreaking"
+          ],
+          "require": [
+            "minecraft:enchant_randomly"
           ]
         },
         {

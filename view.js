@@ -41,13 +41,19 @@ function generateTable() {
 function generateComponent(data, struct) {
   switch (struct.type) {
     case 'string': return generateString(data, struct);
+    case 'int': return generateString(data, struct);
+    case 'float': return generateString(data, struct);
     case 'boolean': return generateBoolean(data, struct);
     case 'random': return generateRandom(data, struct);
     case 'range': return generateRange(data, struct);
+    case 'boundary': return generateBoundary(data, struct);
     case 'enum': return generateEnum(data, struct);
+    case 'set': return generateSet(data, struct);
+    case 'json': return generateJson(data, struct);
+    case 'json-list': return generateJsonList(data, struct);
     case 'array': return generateArray(data, struct);
     case 'object': return generateObject(data, struct);
-  }
+    default: return generateError('Unknown component type "' + struct.type + '"')};
 }
 
 function generateString(data, struct) {
@@ -106,6 +112,17 @@ function generateRange(data, struct) {
   return $el;
 }
 
+function generateBoundary(data, struct) {
+  let $el = $('#components').find('[data-type="boundary"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  if (data) {
+    $el.find('.range.min').val(data.min);
+    $el.find('.range.max').val(data.max);
+  }
+  return $el;
+}
+
 function generateEnum(data, struct) {
   let $el = $('#components').find('[data-type="enum"]').clone();
   $el.attr('data-field', struct.id);
@@ -118,6 +135,65 @@ function generateEnum(data, struct) {
   } else {
     $el.find('select').val(struct.default);
   }
+  return $el;
+}
+
+function generateSet(data, struct) {
+  let $el = $('#components').find('[data-type="set"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  for (let option of struct.values) {
+    $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />').appendTo($el.find('.dropdown-menu')).attr('value', option).attr('data-i18n', struct.source + '.' + option);
+  }
+  if (data) {
+    console.log(data);
+    let $setContainer = $('<div/>');
+    for (let option of data) {
+      let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2').attr('value', option).attr('data-i18n', struct.source + '.' + option);
+      console.log($item);
+      $setContainer.append($item);
+      console.log($setContainer);
+    }
+    $el.append($setContainer);
+  }
+  return $el;
+}
+
+function generateJson(data, struct) {
+  let $el = $('#components').find('[data-type="json"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  if (typeof data !== 'string') {
+    data = JSON.stringify(data);
+  }
+  $el.find('textarea').val(data).keydown(e => preventNewline(e));
+  return $el;
+}
+
+function generateJsonList(data, struct) {
+  let $el = $('#components').find('[data-type="json-list"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  let jsonList = "";
+  if (data) {
+    for (let j = 0; j < data.length; j += 1) {
+      let value = data[j];
+      if (typeof value !== 'string') {
+        value = JSON.stringify(value);
+      }
+      jsonList += value;
+      if (j < data.length - 1) {
+        jsonList += "\n";
+      }
+    }
+  }
+  $el.find('textarea').val(jsonList);
+  return $el;
+}
+
+function generateError(error) {
+  let $el = $('#components').find('[data-type="error"]').clone();
+  $el.find('[data-name]').val(error);
   return $el;
 }
 
@@ -149,7 +225,13 @@ function generateObject(data, struct) {
   }
   for (let field of struct.fields) {
     if ((luck_based || !field.luck_based) && (!field.require || (filter && field.require.includes(data[filter.id])))) {
-      let $field = generateComponent(data[field.id], field);
+      let $field;
+      try {
+        $field = generateComponent(data[field.id], field);
+      } catch (e) {
+        console.error(e);
+        $field = generateError('Failed generating "' + field.id + '" component');
+      }
       if (field.type === 'array') {
         if (field.button === 'header') {
           let color = components.find(e => e.id === field.values).color;
@@ -167,6 +249,14 @@ function generateObject(data, struct) {
   }
   $body.children().first().removeClass('mt-3');
   return $el;
+}
+
+function preventNewline(e) {
+  console.log('ahahahah!!!')
+  if (e.which === 13) {
+    $(e.target).trigger('change');
+    e.preventDefault();
+  }
 }
 
 /*
@@ -928,13 +1018,6 @@ function generateEnchantment(enchantment, i) {
   generateRange($enchantment.find('.enchantment-levels'), enchantment.levels);
 
   return $enchantment;
-}
-
-function preventNewline(e) {
-  if (e.which === 13) {
-    $(e.target).trigger('change');
-    e.preventDefault();
-  }
 }
 
 function generateRange($el, data) {
