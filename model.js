@@ -236,7 +236,6 @@ function updateRangeType(el) {
   let $field = $(el).closest('[data-field]');
   let field = $field.attr('data-field');
   let type = $(el).attr('value');
-  console.log('update range type!!', type, field);
   if (type === 'range') {
     setField(getParent(el), field, {});
   } else if (type === 'binomial') {
@@ -248,9 +247,7 @@ function updateRangeType(el) {
 }
 
 function getRangeValue($field, data) {
-  console.log(data);
   if (typeof data === 'object') {
-    console.log('object');
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
       let n = $field.find('.binomial.n').val();
       let p = $field.find('.binomial.p').val();
@@ -267,7 +264,6 @@ function getRangeValue($field, data) {
       else delete data.max;
     }
   } else {
-    console.log('else');
     data = parseFloat($field.find('.exact').val());
     if (isNaN(data)) {
       data = '';

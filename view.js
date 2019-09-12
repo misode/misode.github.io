@@ -1,11 +1,15 @@
 let structure;
 let components;
 
-$.getJSON('structure.json', json => {
-  structure = json.root;
-  components = json.components;
-  invalidated();
-});
+changeVersion('1.14');
+function changeVersion(version) {
+  $.getJSON('schemas/' + version + '.json', json => {
+    $('#versionLabel').text(version);
+    structure = json.root;
+    components = json.components;
+    invalidated();
+  });
+}
 
 function invalidated() {
   if (structure) {

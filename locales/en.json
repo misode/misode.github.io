@@ -244,7 +244,7 @@
 	"condition": "Condition",
 	"copy": "Copy",
 	"count": "Count",
-	"description": "Loot Table Generator for Minecraft 1.14",
+	"description": "Loot Table Generator for Minecraft",
 	"dimension": "Dimension",
 	"direct_entity": "Direct Entity",
 	"durability": "Durability",

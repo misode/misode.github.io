@@ -1,0 +1,176 @@
+{
+  "root": {
+    "fields": [
+      {
+        "id": "pools",
+        "type": "array",
+        "values": "pool"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "pool",
+      "type": "object",
+      "color": "success",
+      "default": {
+        "rolls": 1,
+        "entries": [
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:stone"
+          }
+        ]
+      },
+      "fields": [
+        {
+          "id": "rolls",
+          "type": "range",
+          "default": 1
+        },
+        {
+          "id": "bonus_rolls",
+          "type": "range",
+          "default": 1,
+          "luck_based": true
+        },
+        {
+          "id": "entries",
+          "type": "array",
+          "values": "entry",
+          "button": "header"
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "values": "condition",
+          "button": "header"
+        }
+      ]
+    },
+    {
+      "id": "entry",
+      "type": "object",
+      "color": "light",
+      "default": {
+        "type": "minecraft:item",
+        "name": "minecraft:stone"
+      },
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "source": "entry",
+          "values": [
+            "minecraft:empty",
+            "minecraft:item",
+            "minecraft:loot_table"
+          ],
+          "default": "minecraft:item"
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "default": "minecraft:stone",
+          "require": [
+            "minecraft:item",
+            "minecraft:loot_table"
+          ]
+        },
+        {
+          "id": "functions",
+          "type": "array",
+          "values": "function",
+          "button": "header"
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "values": "condition",
+          "button": "header"
+        }
+      ]
+    },
+    {
+      "id": "function",
+      "type": "object",
+      "color": "secondary",
+      "default": {
+        "function": "minecraft:set_count",
+        "count": 2
+      },
+      "fields": [
+        {
+          "id": "function",
+          "type": "enum",
+          "source": "function",
+          "values": [
+            "minecraft:set_count",
+            "minecraft:set_data",
+            "minecraft:set_damage",
+            "minecraft:set_nbt",
+            "minecraft:set_attributes",
+            "minecraft:enchant_randomly",
+            "minecraft:enchant_with_levels",
+            "minecraft:looting_enchant",
+            "minecraft:furnace_smelt"
+          ],
+          "default": "set_count"
+        },
+        {
+          "id": "count",
+          "type": "range",
+          "require": [
+            "minecraft:set_count"
+          ]
+        },
+        {
+          "id": "data",
+          "type": "range",
+          "require": [
+            "minecraft:set_data"
+          ]
+        },
+        {
+          "id": "damage",
+          "type": "range",
+          "require": [
+            "minecraft:set_damage"
+          ]
+        },
+        {
+          "id": "tag",
+          "type": "string",
+          "require": [
+            "minecraft:set_nbt"
+          ]
+        },
+        {
+          "id": "levels",
+          "type": "range",
+          "require": [
+            "minecraft:enchant_with_levels"
+          ]
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "values": "condition",
+          "button": "header"
+        }
+      ]
+    },
+    {
+      "id": "condition",
+      "type": "object",
+      "color": "info",
+      "default": {
+        "condition": "minecraft:random_chance",
+        "chance": 0.5
+      },
+      "fields": [
+
+      ]
+    }
+  ]
+}

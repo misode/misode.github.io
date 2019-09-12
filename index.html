@@ -10,12 +10,21 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <span class="navbar-brand mb-0 h1" data-i18n="description"></span>
+    <ul class="navbar-nav">
+      <li class="nav-item dropdown">
+        <a id="versionLabel" class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown"></a>
+        <div id="versionList" class="dropdown-menu">
+          <a class="dropdown-item" onclick="changeVersion('1.13')">1.13</a>
+          <a class="dropdown-item" onclick="changeVersion('1.14')">1.14</a>
+        </div>
+      </li>
+    </ul>
     <ul class="navbar-nav mr-auto">
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown">
           Language
         </a>
-        <div id="lngList" class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"></div>
+        <div id="lngList" class="dropdown-menu"></div>
       </li>
     </ul>
     <span class="float-right"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
