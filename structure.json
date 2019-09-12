@@ -25,7 +25,7 @@
     {
       "id": "pool",
       "type": "object",
-      "class": "card bg-success",
+      "color": "success",
       "default": {
         "rolls": 1,
         "entries": [
@@ -38,30 +38,33 @@
       "fields": [
         {
           "id": "rolls",
-          "type": "range",
+          "type": "random",
           "default": 1
         },
         {
           "id": "bonus_rolls",
-          "type": "number",
-          "default": 1
+          "type": "random",
+          "default": 1,
+          "luck_based": true
         },
         {
           "id": "entries",
           "type": "array",
-          "values": "entry"
+          "values": "entry",
+          "button": "header"
         },
         {
           "id": "conditions",
           "type": "array",
-          "values": "condition"
+          "values": "condition",
+          "button": "header"
         }
       ]
     },
     {
       "id": "entry",
       "type": "object",
-      "class": "card",
+      "color": "light",
       "default": {
         "type": "minecraft:item",
         "name": "minecraft:stone"
@@ -70,6 +73,7 @@
         {
           "id": "type",
           "type": "enum",
+          "source": "entry",
           "values": [
             "minecraft:empty",
             "minecraft:item",
@@ -97,6 +101,7 @@
           "id": "children",
           "type": "array",
           "values": "entry",
+          "button": "field",
           "require": [
             "minecraft:alternatives",
             "minecraft:sequence",
@@ -106,19 +111,21 @@
         {
           "id": "functions",
           "type": "array",
-          "values": "function"
+          "values": "function",
+          "button": "header"
         },
         {
           "id": "conditions",
           "type": "array",
-          "values": "condition"
+          "values": "condition",
+          "button": "header"
         }
       ]
     },
     {
       "id": "function",
       "type": "object",
-      "class": "card bg-info",
+      "color": "secondary",
       "default": {
         "function": "minecraft:set_count",
         "count": 2
@@ -127,6 +134,7 @@
         {
           "id": "function",
           "type": "enum",
+          "source": "function",
           "values": [
             "minecraft:set_count",
             "minecraft:set_damage",
@@ -150,7 +158,7 @@
         },
         {
           "id": "count",
-          "type": "range",
+          "type": "random",
           "default": 2,
           "require": [
             "minecraft:set_count"
@@ -158,18 +166,24 @@
         },
         {
           "id": "damage",
-          "type": "range",
+          "type": "random",
           "default": 1,
           "require": [
             "minecraft:set_damage"
           ]
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "values": "condition",
+          "button": "header"
         }
       ]
     },
     {
       "id": "condition",
       "type": "object",
-      "card": true,
+      "color": "info",
       "default": {
         "condition": "minecraft:random_chance",
         "chance": 0.5

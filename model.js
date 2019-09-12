@@ -8,10 +8,19 @@ let indentation = 2;
 let luck_based = false;
 let table = {
   type: "minecraft:generic",
-  pools: []
+  pools: [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stone"
+        }
+      ]
+    }
+  ]
 };
-addPool();
-addEntry($('#structure .pool').get());
+invalidated();
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
@@ -156,60 +165,24 @@ function getIndex(el) {
   return parseInt($parent.attr('data-index'));
 }
 
-function addPool(el) {
-  if (!table.pools) {
-    table.pools = [];
-  }
-  table.pools.push({
-    rolls: 1
-  });
-  invalidated();
-}
-
-function addEntry(el) {
-  let pool = getParent(el);
-  if (!pool.entries) {
-    pool.entries = [];
-  }
-  pool.entries.push({
-    type: "minecraft:item",
-    name: "minecraft:stone"
-  });
-  invalidated();
-}
-
-function addChild(el) {
-  let entry = getParent(el);
-  if (!entry.children) {
-    entry.children = [];
-  }
-  entry.children.push({
-    type: "minecraft:item",
-    name: "minecraft:stone"
-  });
-  invalidated();
-}
-
-function addFunction(el) {
-  let entry = getParent(el);
-  if (!entry.functions) {
-    entry.functions = [];
-  }
-  entry.functions.push({
-    function: "minecraft:set_count"
-  });
-  invalidated();
-}
-
-function addCondition(el) {
+function addComponent(el, array) {
   let parent = getParent(el);
-  if (!parent.conditions) {
-    parent.conditions = [];
+  if (!parent[array]) {
+    parent[array] = [];
   }
-  parent.conditions.push({
-    condition: "minecraft:random_chance",
-    chance: 0.5
-  });
+  parent[array].push({});
+  invalidated();
+}
+
+function removeComponent(el) {
+  let node = getSuperParent(el);
+  let $field = $(el).closest('[data-field]');
+  let index = $field.attr('data-index');
+  let last = $field.attr('data-field').slice(0, -2);
+  node[last].splice(index, 1);
+  if (node[last].length === 0) {
+    delete node[last];
+  }
   invalidated();
 }
 
@@ -244,7 +217,7 @@ function updateField(el) {
     }
   } else if (type === 'json') {
     value = parseJSONValue(value)
-  } else if (type === 'range') {
+  } else if (type === 'range' || type === 'random') {
     value = getRangeValue($field, node[field]);
   } else if (type === 'checkbox') {
     value = $(el).prop('checked');
@@ -259,22 +232,11 @@ function updateField(el) {
   invalidated();
 }
 
-function removeField(el) {
-  let node = getSuperParent(el);
-  let $field = $(el).closest('[data-field]');
-  let index = $field.attr('data-index');
-  let last = $field.attr('data-field').slice(0, -2);
-  node[last].splice(index, 1);
-  if (node[last].length === 0) {
-    delete node[last];
-  }
-  invalidated();
-}
-
 function updateRangeType(el) {
   let $field = $(el).closest('[data-field]');
   let field = $field.attr('data-field');
   let type = $(el).attr('value');
+  console.log('update range type!!', type, field);
   if (type === 'range') {
     setField(getParent(el), field, {});
   } else if (type === 'binomial') {

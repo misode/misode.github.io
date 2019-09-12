@@ -1,17 +1,75 @@
+let structure;
+let components;
+
+$.getJSON('structure.json', json => {
+  structure = json.root;
+  components = json.components;
+  invalidated();
+});
 
 function invalidated() {
-  generateStructure();
+  if (structure) {
+    generateTable();
+    if (i18next.isInitialized) {
+      $('html').localize();
+    }
+  }
   $('#source').val(JSON.stringify(table, null, indentation));
 }
 
-function preventNewline(e) {
-  if (e.which === 13) {
-    $(e.target).trigger('change');
-    e.preventDefault();
+function generateTable() {
+  $('#structure').removeClass('d-none').html('');
+
+  if (!table.type) {
+    table.type = 'minecraft:empty';
+  }
+  $('#tableType').val(table.type);
+
+  if (table.pools) {
+    $table = generateComponent(table.pools, structure.fields.find(e => e.id === 'pools'));
+    $('#structure').append($table);
+  }
+
+  $('#luck-based').attr('checked', luck_based);
+
+}
+
+function generateComponent(data, struct) {
+  switch (struct.type) {
+    case 'string': return generateString(data, struct);
+    case 'boolean': return generateBoolean(data, struct);
+    case 'random': return generateRandom(data, struct);
+    case 'range': return generateRange(data, struct);
+    case 'enum': return generateEnum(data, struct);
+    case 'array': return generateArray(data, struct);
+    case 'object': return generateObject(data, struct);
   }
 }
 
-function generateRange($el, data) {
+function generateString(data, struct) {
+  let $el = $('#components').find('[data-type="string"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('input').val(data);
+  return $el;
+}
+
+function generateBoolean(data, struct) {
+  let $el = $('#components').find('[data-type="boolean"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  if (data === true) {
+    $el.find('[value="true"]').addClass('active');
+  } else if (data === false) {
+    $el.find('[value="false"]').addClass('active');
+  }
+  return $el;
+}
+
+function generateRandom(data, struct) {
+  let $el = $('#components').find('[data-type="random"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
       $el.find('.binomial').removeClass('d-none');
@@ -26,34 +84,88 @@ function generateRange($el, data) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
+  return $el;
 }
 
-function generateRadio($el, data) {
-  if (data === true) {
-    $el.find('[value="true"]').addClass('active');
-  } else if (data === false) {
-    $el.find('[value="false"]').addClass('active');
+function generateRange(data, struct) {
+  let $el = $('#components').find('[data-type="range"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  if (typeof data === 'object') {
+    $el.find('.range').removeClass('d-none');
+    $el.find('.range.min').val(data.min);
+    $el.find('.range.max').val(data.max);
+  } else {
+    $el.find('.exact').removeClass('d-none');
+    $el.find('.exact').val(data);
   }
+  return $el;
 }
 
-function generateStructure() {
-  $('#structure').html('');
-
-  if (!table.type) {
-    table.type = 'minecraft:empty';
+function generateEnum(data, struct) {
+  let $el = $('#components').find('[data-type="enum"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  for (let option of struct.values) {
+    $('<option/>').appendTo($el.find('select')).attr('value', option).attr('data-i18n', struct.source + '.' + option);
   }
-  $('#tableType').val(table.type);
+  if (data) {
+    $el.find('select').val(data);
+  } else {
+    $el.find('select').val(struct.default);
+  }
+  return $el;
+}
 
-  if (table.pools) {
-    for (let i = 0; i < table.pools.length; i += 1) {
-      let $pool = generatePool(table.pools[i], i);
-      $('#structure').append($pool);
+function generateArray(data, struct) {
+  if (!data || data.length === 0) {
+    return undefined;
+  }
+  let $el = $('<div/>').addClass('mt-3');
+  let child = components.find(e => e.id === struct.values);
+  for (let i = 0; i < data.length; i += 1) {
+    let $child = generateObject(data[i], child);
+    $child.attr('data-field', struct.id + '[]');
+    $child.attr('data-index', i);
+    $child.removeAttr('data-type');
+    $el.append($child);
+  }
+  $el.children().first().removeClass('mt-3');
+  return $el;
+}
 
-      $('#luck-based').attr('checked', luck_based);
+function generateObject(data, struct) {
+  let $el = $('<div/>').addClass('card bg-' + struct.color + ' mt-3');
+  let $header = $('<div class="card-header pb-1"></div>').appendTo($el);
+  let $body = $('<div class="card-body"></div>').appendTo($el);
+  let filter = struct.fields.find(e => e.type === 'enum');
+  $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="remove_' + struct.id + '"></button>');
+  if (data._collapsed) {
+    return $el;
+  }
+  for (let field of struct.fields) {
+    if ((luck_based || !field.luck_based) && (!field.require || (filter && field.require.includes(data[filter.id])))) {
+      let $field = generateComponent(data[field.id], field);
+      if (field.type === 'array') {
+        if (field.button === 'header') {
+          let color = components.find(e => e.id === field.values).color;
+          $header.append('<button type="button" class="btn btn-' + color + ' mr-3 mb-2 float-left" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
+        }
+        if (field.button === 'field') {
+          let color = 'outline-success';
+          $body.append('<button type="button" class="btn btn-' + color + ' mr-3 mt-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
+        }
+      } else {
+        $field.attr('data-field', field.id);
+      }
+      $body.append($field);
     }
   }
+  $body.children().first().removeClass('mt-3');
+  return $el;
 }
 
+/*
 function generatePool(pool, i) {
   let $pool = $('#poolTemplate').clone();
   $pool.removeAttr('id').attr('data-index', i);
@@ -813,3 +925,36 @@ function generateEnchantment(enchantment, i) {
 
   return $enchantment;
 }
+
+function preventNewline(e) {
+  if (e.which === 13) {
+    $(e.target).trigger('change');
+    e.preventDefault();
+  }
+}
+
+function generateRange($el, data) {
+  if (typeof data === 'object') {
+    if (data.type && data.type.match(/(minecraft:)?binomial/)) {
+      $el.find('.binomial').removeClass('d-none');
+      $el.find('.binomial.n').val(data.n);
+      $el.find('.binomial.p').val(data.p);
+    } else {
+      $el.find('.range').removeClass('d-none');
+      $el.find('.range.min').val(data.min);
+      $el.find('.range.max').val(data.max);
+    }
+  } else {
+    $el.find('.exact').removeClass('d-none');
+    $el.find('.exact').val(data);
+  }
+}
+
+function generateRadio($el, data) {
+  if (data === true) {
+    $el.find('[value="true"]').addClass('active');
+  } else if (data === false) {
+    $el.find('[value="false"]').addClass('active');
+  }
+}
+*/
