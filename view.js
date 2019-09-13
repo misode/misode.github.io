@@ -127,8 +127,8 @@ function generateEnum(data, struct) {
   let $el = $('#components').find('[data-type="enum"]').clone();
   $el.attr('data-field', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
-  for (let option of struct.values) {
-    $('<option/>').appendTo($el.find('select')).attr('value', option).attr('data-i18n', struct.source + '.' + option);
+  for (let value of struct.values) {
+    $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
   }
   if (data) {
     $el.find('select').val(data);
@@ -142,21 +142,28 @@ function generateSet(data, struct) {
   let $el = $('#components').find('[data-type="set"]').clone();
   $el.attr('data-field', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
-  for (let option of struct.values) {
-    $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />').appendTo($el.find('.dropdown-menu')).attr('value', option).attr('data-i18n', struct.source + '.' + option);
+  for (let value of struct.values) {
+    let $item = $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />');
+    setValueAndName($item, value, struct.source);
+    $el.find('.dropdown-menu').append($item);
   }
   if (data) {
     console.log(data);
     let $setContainer = $('<div/>');
     for (let option of data) {
-      let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2').attr('value', option).attr('data-i18n', struct.source + '.' + option);
-      console.log($item);
+      let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2');
+      setValueAndName($item, option, struct.source);
       $setContainer.append($item);
-      console.log($setContainer);
     }
     $el.append($setContainer);
   }
   return $el;
+}
+
+function setValueAndName($el, value, source) {
+  let option = value.split(':').slice(-1);
+  let name = (source) ? source + '.' + option : option;
+  return $el.attr('value', value).attr('data-i18n', name);
 }
 
 function generateJson(data, struct) {
@@ -233,12 +240,14 @@ function generateObject(data, struct) {
         $field = generateError('Failed generating "' + field.id + '" component');
       }
       if (field.type === 'array') {
+        let color = field.color;
+        if (color === undefined) {
+          color = components.find(e => e.id === field.values).color;
+        }
         if (field.button === 'header') {
-          let color = components.find(e => e.id === field.values).color;
           $header.append('<button type="button" class="btn btn-' + color + ' mr-3 mb-2 float-left" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
         }
         if (field.button === 'field') {
-          let color = 'outline-success';
           $body.append('<button type="button" class="btn btn-' + color + ' mr-3 mt-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
         }
       } else {
@@ -252,7 +261,6 @@ function generateObject(data, struct) {
 }
 
 function preventNewline(e) {
-  console.log('ahahahah!!!')
   if (e.which === 13) {
     $(e.target).trigger('change');
     e.preventDefault();

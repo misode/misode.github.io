@@ -102,6 +102,7 @@
           "type": "array",
           "values": "entry",
           "button": "field",
+          "color": "success",
           "require": [
             "minecraft:alternatives",
             "minecraft:sequence",
@@ -188,13 +189,6 @@
           ]
         },
         {
-          "id": "replace",
-          "type": "boolean",
-          "require": [
-            "minecraft:set_lore"
-          ]
-        },
-        {
           "id": "tag",
           "type": "string",
           "require": [
@@ -233,6 +227,8 @@
         {
           "id": "entity",
           "type": "enum",
+          "source": "source",
+          "default": "minecraft:this",
           "values": [
             "minecraft:this",
             "minecraft:killer",
@@ -247,6 +243,8 @@
         {
           "id": "source",
           "type": "enum",
+          "source": "source",
+          "default": "minecraft:this",
           "values": [
             "minecraft:block_entity",
             "minecraft:this",
@@ -259,8 +257,16 @@
           ]
         },
         {
+          "id": "replace",
+          "type": "boolean",
+          "require": [
+            "minecraft:set_lore"
+          ]
+        },
+        {
           "id": "enchantments",
           "type": "set",
+          "source": "enchantment",
           "values": [
             "minecraft:aqua_affinity",
             "minecraft:bane_of_arthropods",
@@ -305,6 +311,15 @@
           ]
         },
         {
+          "id": "modifiers",
+          "type": "array",
+          "button": "field",
+          "values": "attribute_modifier",
+          "require": [
+            "minecraft:set_attributes"
+          ]
+        },
+        {
           "id": "conditions",
           "type": "array",
           "values": "condition",
@@ -322,6 +337,73 @@
       },
       "fields": [
 
+      ]
+    },
+    {
+      "id": "attribute_modifier",
+      "type": "object",
+      "color": "dark",
+      "default": {
+        "attribute": "generic.attackDamage",
+        "name": "Attack Damage",
+        "amount": 1,
+        "operation": "addition",
+        "slot": []
+      },
+      "fields": [
+        {
+          "id": "attribute",
+          "type": "enum",
+          "source": "attribute",
+          "default": "generic.attackDamage",
+          "values": [
+            "generic.maxHealth",
+            "generic.followRange",
+            "generic.knockbackResistance",
+            "generic.movementSpeed",
+            "generic.attackDamage",
+            "generic.armor",
+            "generic.armorToughness",
+            "generic.attackSpeed",
+            "generic.luck",
+            "horse.jumpStrength",
+            "generic.attackKnockback",
+            "generic.flyingSpeed",
+            "zombie.spawnReinforcements"
+          ]
+        },
+        {
+          "id": "name",
+          "type": "string"
+        },
+        {
+          "id": "amount",
+          "type": "float",
+          "default": 1
+        },
+        {
+          "id": "operation",
+          "type": "enum",
+          "source": "modifier.operation",
+          "default": "addition",
+          "values": [
+            "addition",
+            "multiply_base",
+            "multiply_total"
+          ]
+        },
+        {
+          "id": "slots",
+          "type": "set",
+          "values": [
+            "mainhand",
+            "offhand",
+            "head",
+            "chest",
+            "legs",
+            "feet"
+          ]
+        }
       ]
     }
   ]

@@ -199,9 +199,6 @@ function removeFromSet(el, array) {
   let index = parent[array].indexOf($(el).attr('value'));
   if (index > -1) {
     parent[array].splice(index, 1);
-    if (parent[array].length === 0) {
-      delete parent[array];
-    }
     invalidated();
   }
 }
