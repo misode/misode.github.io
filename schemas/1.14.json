@@ -190,7 +190,7 @@
         },
         {
           "id": "tag",
-          "type": "string",
+          "type": "nbt",
           "require": [
             "minecraft:set_nbt"
           ]
@@ -320,6 +320,15 @@
           ]
         },
         {
+          "id": "ops",
+          "type": "array",
+          "button": "field",
+          "values": "nbt_operation",
+          "require": [
+            "minecraft:copy_nbt"
+          ]
+        },
+        {
           "id": "conditions",
           "type": "array",
           "values": "condition",
@@ -402,6 +411,37 @@
             "chest",
             "legs",
             "feet"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nbt_operation",
+      "type": "object",
+      "color": "dark",
+      "default": {
+        "operation": "replace"
+      },
+      "fields": [
+        {
+          "id": "source",
+          "type": "string",
+          "class": "code"
+        },
+        {
+          "id": "target",
+          "type": "string",
+          "class": "code"
+        },
+        {
+          "id": "op",
+          "type": "enum",
+          "source": "operation.type",
+          "default": "replace",
+          "values": [
+            "replace",
+            "append",
+            "merge"
           ]
         }
       ]

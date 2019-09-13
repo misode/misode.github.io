@@ -51,6 +51,7 @@ function generateComponent(data, struct) {
     case 'set': return generateSet(data, struct);
     case 'json': return generateJson(data, struct);
     case 'json-list': return generateJsonList(data, struct);
+    case 'nbt': return generateNbt(data, struct);
     case 'array': return generateArray(data, struct);
     case 'object': return generateObject(data, struct);
     default: return generateError('Unknown component type "' + struct.type + '"')};
@@ -198,6 +199,14 @@ function generateJsonList(data, struct) {
   return $el;
 }
 
+function generateNbt(data, struct) {
+  let $el = $('#components').find('[data-type="nbt"]').clone();
+  $el.attr('data-field', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('textarea').val(data).keydown(e => preventNewline(e));
+  return $el;
+}
+
 function generateError(error) {
   let $el = $('#components').find('[data-type="error"]').clone();
   $el.find('[data-name]').val(error);
@@ -239,6 +248,9 @@ function generateObject(data, struct) {
         console.error(e);
         $field = generateError('Failed generating "' + field.id + '" component');
       }
+      if (field.class) {
+        $field.addClass(field.class);
+      }
       if (field.type === 'array') {
         let color = field.color;
         if (color === undefined) {
@@ -254,6 +266,8 @@ function generateObject(data, struct) {
         $field.attr('data-field', field.id);
       }
       $body.append($field);
+    } else {
+      delete data[field.id];
     }
   }
   $body.children().first().removeClass('mt-3');
