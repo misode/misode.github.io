@@ -63,17 +63,15 @@ function redo() {
 
 function invalidated() {
   if (historyIndex === history.length - 1) {
-    historyIndex += 1;
     history.push(JSON.stringify(table));
+    if (history.length > historyBuffer) {
+      history = history.slice(-historyBuffer);
+    }
+    historyIndex = history.length - 1;
   } else {
     historyIndex += 1;
     history = history.slice(0, historyIndex);
     history.push(JSON.stringify(table));
-  }
-  if (history.length > historyBuffer) {
-    console.log('remove history');
-    historyIndex -= 1;
-    history.splice(0, 1);
   }
   updateView();
 }
