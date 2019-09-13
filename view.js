@@ -34,7 +34,7 @@ function generateTable() {
     $('#structure').append($table);
   }
 
-  $('#luck-based').attr('checked', luck_based);
+  $('#luck-based').attr('checked', luckBased);
 
 }
 
@@ -234,24 +234,16 @@ function generateObject(data, struct) {
   let $el = $('<div/>').addClass('card bg-' + struct.color + ' mt-3');
   let $header = $('<div class="card-header pb-1"></div>').appendTo($el);
   let $body = $('<div class="card-body"></div>').appendTo($el);
-  let filter = struct.fields.find(e => e.type === 'enum');
   $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="remove_' + struct.id + '"></button>');
   if (data._collapsed) {
     return $el;
   }
   for (let field of struct.fields) {
-    if ((luck_based || !field.luck_based) && (!field.require || (filter && field.require.includes(data[filter.id])))) {
-      let $field;
-      try {
-        $field = generateComponent(data[field.id], field);
-      } catch (e) {
-        console.error(e);
-        $field = generateError('Failed generating "' + field.id + '" component');
-      }
-      if (field.class) {
-        $field.addClass(field.class);
-      }
+    let $field = generateField(data, field, struct);
+    if ($field !== false) {
       if (field.type === 'array') {
+        console.log('array!');
+        console.log(field.id);
         let color = field.color;
         if (color === undefined) {
           color = components.find(e => e.id === field.values).color;
@@ -262,8 +254,6 @@ function generateObject(data, struct) {
         if (field.button === 'field') {
           $body.append('<button type="button" class="btn btn-' + color + ' mr-3 mt-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
         }
-      } else {
-        $field.attr('data-field', field.id);
       }
       $body.append($field);
     } else {
@@ -272,6 +262,53 @@ function generateObject(data, struct) {
   }
   $body.children().first().removeClass('mt-3');
   return $el;
+}
+
+function generateField(data, field, parent) {
+  if (!luckBased && field.luck_based) {
+    return false;
+  }
+  if (field.require) {
+    let passing = false;
+    let filter = parent.fields.find(e => e.type === 'enum');
+    for (let requirement of field.require) {
+      if (typeof requirement === 'string') {
+        if (requirement === data[filter.id]) {
+          passing = true;
+        }
+      } else {
+        let match = true;
+        for (let id in requirement) {
+          if (requirement.hasOwnProperty(id)) {
+            if (requirement[id] !== data[parent.fields.find(e => e.id === id).id]) {
+              match = false;
+            }
+          }
+        }
+        if (match) {
+          passing = true;
+        }
+      }
+    }
+    if (!passing) {
+      return false;
+    }
+  }
+
+  let $field;
+  try {
+    $field = generateComponent(data[field.id], field);
+  } catch (e) {
+    console.error(e);
+    $field = generateError('Failed generating "' + field.id + '" component');
+  }
+  if (field.class) {
+    $field.addClass(field.class);
+  }
+  if (field.type !== 'array') {
+    $field.attr('data-field', field.id);
+  }
+  return $field;
 }
 
 function preventNewline(e) {

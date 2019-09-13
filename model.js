@@ -5,7 +5,7 @@ $('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
 
 let indentation = 2;
-let luck_based = false;
+let luckBased = false;
 let table = {
   type: "minecraft:generic",
   pools: [
@@ -21,8 +21,8 @@ let table = {
   ]
 };
 let historyBuffer = 100;
-let history = [];
-let historyIndex = -1;
+let history = ['{}'];
+let historyIndex = 0;
 invalidated();
 
 const params = new URLSearchParams(window.location.search);
@@ -82,7 +82,7 @@ function updateTableType() {
 }
 
 function updateLuckBased() {
-  luck_based = $('#luckBased').prop('checked');
+  luckBased = $('#luckBased').prop('checked');
   invalidated();
 }
 

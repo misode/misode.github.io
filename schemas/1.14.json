@@ -329,6 +329,99 @@
           ]
         },
         {
+          "id": "enchantment",
+          "type": "enum",
+          "source": "enchantment",
+          "values": [
+            "minecraft:aqua_affinity",
+            "minecraft:bane_of_arthropods",
+            "minecraft:blast_protection",
+            "minecraft:channeling",
+            "minecraft:binding_curse",
+            "minecraft:vanishing_curse",
+            "minecraft:depth_strider",
+            "minecraft:efficiency",
+            "minecraft:feather_falling",
+            "minecraft:fire_aspect",
+            "minecraft:fire_protection",
+            "minecraft:flame",
+            "minecraft:fortune",
+            "minecraft:frost_walker",
+            "minecraft:impaling",
+            "minecraft:infinity",
+            "minecraft:knockback",
+            "minecraft:looting",
+            "minecraft:loyalty",
+            "minecraft:luck_of_the_sea",
+            "minecraft:lure",
+            "minecraft:mending",
+            "minecraft:multishot",
+            "minecraft:piercing",
+            "minecraft:power",
+            "minecraft:projectile_protection",
+            "minecraft:protection",
+            "minecraft:punch",
+            "minecraft:quick_charge",
+            "minecraft:respiration",
+            "minecraft:riptide",
+            "minecraft:sharpness",
+            "minecraft:silk_touch",
+            "minecraft:smite",
+            "minecraft:sweeping",
+            "minecraft:thorns",
+            "minecraft:unbreaking"
+          ],
+          "require": [
+            "minecraft:apply_bonus"
+          ]
+        },
+        {
+          "id": "formula",
+          "type": "enum",
+          "default": "minecraft:uniform_bonus_count",
+          "values": [
+            "minecraft:uniform_bonus_count",
+            "minecraft:binomial_with_bonus_count",
+            "minecraft:ore_drops"
+          ],
+          "require": [
+            "minecraft:apply_bonus"
+          ]
+        },
+        {
+          "id": "parameters.bonusMultiplier",
+          "type": "float",
+          "default": 1,
+          "require": [
+            {
+              "function": "minecraft:apply_bonus",
+              "formula": "minecraft:uniform_bonus_count"
+            }
+          ]
+        },
+        {
+          "id": "parameters.extra",
+          "type": "int",
+          "default": 0,
+          "require": [
+            {
+              "function": "minecraft:apply_bonus",
+              "formula": "minecraft:binomial_with_bonus_count"
+            }
+          ]
+        },
+        {
+          "id": "parameters.probability",
+          "type": "float",
+          "default": 0.5,
+          "require": [
+            {
+              "function": "minecraft:apply_bonus",
+              "formula": "minecraft:binomial_with_bonus_count"
+            }
+          ]
+        },
+        {
           "id": "conditions",
           "type": "array",
           "values": "condition",
