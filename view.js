@@ -7,11 +7,11 @@ function changeVersion(version) {
     $('#versionLabel').text(version);
     structure = json.root;
     components = json.components;
-    invalidated();
+    updateView();
   });
 }
 
-function invalidated() {
+function updateView() {
   if (structure) {
     generateTable();
     if (i18next.isInitialized) {

@@ -20,6 +20,9 @@ let table = {
     }
   ]
 };
+let historyBuffer = 100;
+let history = [];
+let historyIndex = -1;
 invalidated();
 
 const params = new URLSearchParams(window.location.search);
@@ -32,6 +35,47 @@ if (params.has('q')) {
   window.location = 'https://zws.im/' + short;
 } else {
   $('.container').removeClass('d-none');
+}
+
+$(document).keydown(function(e){
+  if (e.which === 89 && e.ctrlKey ){
+     redo();
+  } else if (e.which === 90 && e.ctrlKey ){
+     undo();
+  }
+});
+
+function undo() {
+  if (historyIndex > 0) {
+    historyIndex -= 1;
+    table = JSON.parse(history[historyIndex]);
+    updateView();
+  }
+}
+
+function redo() {
+  if (historyIndex < history.length - 1) {
+    historyIndex += 1;
+    table = JSON.parse(history[historyIndex]);
+    updateView();
+  }
+}
+
+function invalidated() {
+  if (historyIndex === history.length - 1) {
+    historyIndex += 1;
+    history.push(JSON.stringify(table));
+  } else {
+    historyIndex += 1;
+    history = history.slice(0, historyIndex);
+    history.push(JSON.stringify(table));
+  }
+  if (history.length > historyBuffer) {
+    console.log('remove history');
+    historyIndex -= 1;
+    history.splice(0, 1);
+  }
+  updateView();
 }
 
 function updateTableType() {
