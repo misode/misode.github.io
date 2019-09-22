@@ -245,6 +245,17 @@ function removeFromSet(el, array) {
   }
 }
 
+function toggleCollapseObject(el) {
+  let parent = getSuperParent(el);
+  let field = $(el).closest('[data-field]').attr('data-field');
+  if (!parent[field]) {
+    parent[field] = {};
+  } else {
+    delete parent[field];
+  }
+  invalidated();
+}
+
 function updateField(el) {
   let $field = $(el).closest('[data-field]');
   let fields = $field.attr('data-field');
@@ -349,63 +360,6 @@ function getBooleanValue(oldvalue, newvalue) {
   }
 }
 
-function addEnchantment(el) {
-  let func = getParent(el);
-  let enchantment = $(el).attr('data-ench');
-  if (!func.enchantments) {
-    func.enchantments = [];
-  }
-  func.enchantments.push(enchantment);
-  invalidated();
-}
-
-function removeEnchantment(el) {
-  let func = getParent(el);
-  let ench = $(el).attr('data-ench');
-  let index = func.enchantments.indexOf(ench);
-  if (index > -1) {
-    func.enchantments.splice(index, 1);
-    if (func.enchantments.length === 0) {
-      delete func.enchantments;
-    }
-    invalidated();
-  }
-}
-
-function addModifier(el) {
-  let func = getParent(el);
-  if (!func.modifiers) {
-    func.modifiers = [];
-  }
-  func.modifiers.push({
-    attribute: 'generic.attackDamage',
-    name: 'Attack Damage',
-    amount: 1,
-    operation: 'addition',
-    slot: []
-  });
-  invalidated();
-}
-
-function addModifierSlot(el) {
-  let modifier = getParent(el);
-  if (!modifier.slot) {
-    modifier.slot = [];
-  }
-  modifier.slot.push($(el).attr('data-slot'));
-  invalidated();
-}
-
-function removeModifierSlot(el) {
-  let modifier = getParent(el);
-  let slot = $(el).attr('data-slot');
-  let index = modifier.slot.indexOf(slot);
-  if (index > -1) {
-    modifier.slot.splice(index, 1);
-    invalidated();
-  }
-}
-
 function addScore(el) {
   let condition = getParent(el);
   let objective = $(el).closest('.condition-entity-scores').find('input').val();
@@ -471,25 +425,6 @@ function parseJSONValue(value) {
     }
   }
   return value;
-}
-
-function addOperation(el) {
-  let func = getParent(el);
-  if (!func.ops) {
-    func.ops = [];
-  }
-  func.ops.push({
-    source: '',
-    target: '',
-    op: 'replace'
-  });
-  invalidated();
-}
-
-function removeOperation(el) {
-  let index = parseInt($(el).closest('.operation').attr('data-index'));
-  getSuperParent(el).ops.splice(index, 1);
-  invalidated();
 }
 
 function addBlockProperty(el) {

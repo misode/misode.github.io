@@ -53,7 +53,7 @@ function generateComponent(data, struct) {
     case 'json-list': return generateJsonList(data, struct);
     case 'nbt': return generateNbt(data, struct);
     case 'array': return generateArray(data, struct);
-    case 'object': return generateObject(data, struct);
+    case 'object': return generateObject(data, struct, false);
     default: return generateError('Unknown component type "' + struct.type + '"')};
 }
 
@@ -131,11 +131,7 @@ function generateEnum(data, struct) {
   for (let value of struct.values) {
     $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
   }
-  if (data) {
-    $el.find('select').val(data);
-  } else {
-    $el.find('select').val(struct.default);
-  }
+  $el.find('select').val(data);
   return $el;
 }
 
@@ -220,7 +216,7 @@ function generateArray(data, struct) {
   let $el = $('<div/>').addClass('mt-3');
   let child = components.find(e => e.id === struct.values);
   for (let i = 0; i < data.length; i += 1) {
-    let $child = generateObject(data[i], child);
+    let $child = generateObject(data[i], child, true);
     $child.attr('data-field', struct.id + '[]');
     $child.attr('data-index', i);
     $child.removeAttr('data-type');
@@ -230,25 +226,39 @@ function generateArray(data, struct) {
   return $el;
 }
 
-function generateObject(data, struct) {
+function generateObject(data, struct, header) {
   let $el = $('<div/>').addClass('card bg-' + struct.color + ' mt-3');
-  let $header = $('<div class="card-header pb-1"></div>').appendTo($el);
+  let $header = $('<div class="card-header pb-1"></div>');
+  if (header) {
+    $header.appendTo($el);
+    $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="remove_' + struct.id + '"></button>');
+  }
   let $body = $('<div class="card-body"></div>').appendTo($el);
-  $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="remove_' + struct.id + '"></button>');
-  if (data._collapsed) {
-    return $el;
+  if (!struct.fields) {
+    let child = components.find(e => e.id === struct.value);
+    return generateObject(data, child, false);
   }
   for (let field of struct.fields) {
-    let $field = generateField(data, field, struct);
+    let $field;
+    if (field.collapse) {
+      $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-field="' + field.id + '" data-i18n="' + field.id + '"></button>');
+      if (data[field.id] === undefined) {
+        break;
+      }
+    }
+    try {
+      $field = generateField(data, field, struct);
+    } catch (e) {
+      console.error(e);
+      $field = generateError('Failed generating "' + field.id + '" field');
+    }
     if ($field !== false) {
       if (field.type === 'array') {
-        console.log('array!');
-        console.log(field.id);
         let color = field.color;
         if (color === undefined) {
           color = components.find(e => e.id === field.values).color;
         }
-        if (field.button === 'header') {
+        if (header && field.button === 'header') {
           $header.append('<button type="button" class="btn btn-' + color + ' mr-3 mb-2 float-left" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
         }
         if (field.button === 'field') {
@@ -296,17 +306,26 @@ function generateField(data, field, parent) {
   }
 
   let $field;
+  if (data[field.id] === undefined) {
+    if (field.type === 'object') {
+      data[field.id] = {};
+    } else if (field.type === 'enum' && field.default) {
+      data[field.id] = field.default;
+    }
+  }
   try {
     $field = generateComponent(data[field.id], field);
   } catch (e) {
     console.error(e);
     $field = generateError('Failed generating "' + field.id + '" component');
   }
-  if (field.class) {
-    $field.addClass(field.class);
-  }
-  if (field.type !== 'array') {
-    $field.attr('data-field', field.id);
+  if ($field) {
+    if (field.class) {
+      $field.addClass(field.class);
+    }
+    if (field.type !== 'array') {
+      $field.attr('data-field', field.id);
+    }
   }
   return $field;
 }
