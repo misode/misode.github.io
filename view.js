@@ -154,7 +154,6 @@ function generateSet(data, struct) {
     $el.find('.dropdown-menu').append($item);
   }
   if (data) {
-    console.log(data);
     let $setContainer = $('<div/>');
     for (let option of data) {
       let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2');

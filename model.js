@@ -279,7 +279,6 @@ function updateField(el) {
     }
   } else if(type === 'enum') {
     if (value === 'unset') {
-      console.log('set value to empty');
       value = '';
     }
   } else if (type === 'nbt') {
@@ -308,14 +307,8 @@ function updateField(el) {
     value = getBooleanValue(node[field], ($(el).val() === 'true'));
   }
   if (value === '') {
-    console.log('delete', field);
-    console.log(node);
     deleteField(node, field);
-    console.log(node);
   } else {
-    console.log('set', field);
-    console.log(node);
-    console.log(value);
     setField(node, field, value);
   }
   invalidated();
