@@ -132,10 +132,10 @@ function generateEnum(data, struct) {
   $el.find('[data-name]').attr('data-i18n', struct.id);
   let collection = struct.values;
   if (typeof struct.values === 'string') {
-    collection = collections[struct.values].slice();
+    collection = collections[struct.values];
   }
   if (struct.unset) {
-    collection.splice(0, 0, 'unset');
+    $el.find('select').append(setValueAndName($('<option/>'), 'unset', undefined));
   }
   for (let value of collection) {
     $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
