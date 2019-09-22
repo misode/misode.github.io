@@ -1,5 +1,6 @@
 let structure;
 let components;
+let collections;
 
 changeVersion('1.14');
 function changeVersion(version) {
@@ -7,6 +8,7 @@ function changeVersion(version) {
     $('#versionLabel').text(version);
     structure = json.root;
     components = json.components;
+    collections = json.collections;
     updateView();
   });
 }
@@ -128,7 +130,14 @@ function generateEnum(data, struct) {
   let $el = $('#components').find('[data-type="enum"]').clone();
   $el.attr('data-field', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
-  for (let value of struct.values) {
+  let collection = struct.values;
+  if (typeof struct.values === 'string') {
+    collection = collections[struct.values].slice();
+  }
+  if (struct.unset) {
+    collection.splice(0, 0, 'unset');
+  }
+  for (let value of collection) {
     $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
   }
   $el.find('select').val(data);
