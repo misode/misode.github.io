@@ -154,7 +154,6 @@ function generateEnum(data, struct) {
   }
   for (let value of collection) {
     if (typeof value === 'object') {
-      console.log(value);
       if (value.require.includes(table.type)) {
         $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.source));
       }

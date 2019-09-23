@@ -4,6 +4,7 @@
       {
         "id": "type",
         "type": "enum",
+        "default": "minecraft:generic",
         "values": [
           "minecraft:empty",
           "minecraft:entity",
@@ -11,8 +12,7 @@
           "minecraft:chest",
           "minecraft:fishing",
           "minecraft:generic"
-        ],
-        "default": "minecraft:generic"
+        ]
       },
       {
         "id": "pools",
@@ -26,25 +26,14 @@
       "id": "pool",
       "type": "object",
       "color": "success",
-      "default": {
-        "rolls": 1,
-        "entries": [
-          {
-            "type": "minecraft:item",
-            "name": "minecraft:stone"
-          }
-        ]
-      },
       "fields": [
         {
           "id": "rolls",
-          "type": "random",
-          "default": 1
+          "type": "random"
         },
         {
           "id": "bonus_rolls",
           "type": "random",
-          "default": 1,
           "luck_based": true
         },
         {
@@ -65,15 +54,12 @@
       "id": "entry",
       "type": "object",
       "color": "light",
-      "default": {
-        "type": "minecraft:item",
-        "name": "minecraft:stone"
-      },
       "fields": [
         {
           "id": "type",
           "type": "enum",
           "source": "entry",
+          "default": "minecraft:item",
           "values": [
             "minecraft:empty",
             "minecraft:item",
@@ -83,13 +69,11 @@
             "minecraft:sequence",
             "minecraft:group",
             "minecraft:dynamic"
-          ],
-          "default": "minecraft:item"
+          ]
         },
         {
           "id": "name",
           "type": "string",
-          "default": "minecraft:stone",
           "require": [
             "minecraft:item",
             "minecraft:tag",
@@ -127,15 +111,12 @@
       "id": "function",
       "type": "object",
       "color": "secondary",
-      "default": {
-        "function": "minecraft:set_count",
-        "count": 2
-      },
       "fields": [
         {
           "id": "function",
           "type": "enum",
           "source": "function",
+          "default": "minecraft:set_count",
           "values": [
             "minecraft:set_count",
             "minecraft:set_damage",
@@ -154,13 +135,11 @@
             "minecraft:copy_name",
             "minecraft:copy_nbt",
             "minecraft:apply_bonus"
-          ],
-          "default": "set_count"
+          ]
         },
         {
           "id": "count",
           "type": "random",
-          "default": 2,
           "require": [
             "minecraft:set_count",
             "minecraft:looting_enchant"
@@ -169,7 +148,6 @@
         {
           "id": "damage",
           "type": "random",
-          "default": 1,
           "require": [
             "minecraft:set_damage"
           ]
@@ -315,7 +293,6 @@
         {
           "id": "parameters.bonusMultiplier",
           "type": "float",
-          "default": 1,
           "require": [
             {
               "function": "minecraft:apply_bonus",
@@ -326,7 +303,6 @@
         {
           "id": "parameters.extra",
           "type": "int",
-          "default": 0,
           "require": [
             {
               "function": "minecraft:apply_bonus",
@@ -337,7 +313,6 @@
         {
           "id": "parameters.probability",
           "type": "float",
-          "default": 0.5,
           "require": [
             {
               "function": "minecraft:apply_bonus",
@@ -357,10 +332,6 @@
       "id": "condition",
       "type": "object",
       "color": "info",
-      "default": {
-        "condition": "minecraft:random_chance",
-        "chance": 0.5
-      },
       "fields": [
         {
           "id": "condition",
@@ -483,6 +454,14 @@
           ]
         },
         {
+          "id": "predicate",
+          "type": "object",
+          "value": "item",
+          "require": [
+            "minecraft:match_tool"
+          ]
+        },
+        {
           "id": "term",
           "type": "object",
           "value": "condition",
@@ -506,13 +485,6 @@
       "id": "attribute_modifier",
       "type": "object",
       "color": "dark",
-      "default": {
-        "attribute": "generic.attackDamage",
-        "name": "Attack Damage",
-        "amount": 1,
-        "operation": "addition",
-        "slot": []
-      },
       "fields": [
         {
           "id": "attribute",
@@ -541,8 +513,7 @@
         },
         {
           "id": "amount",
-          "type": "float",
-          "default": 1
+          "type": "float"
         },
         {
           "id": "operation",
@@ -573,9 +544,6 @@
       "id": "nbt_operation",
       "type": "object",
       "color": "dark",
-      "default": {
-        "operation": "replace"
-      },
       "fields": [
         {
           "id": "source",
@@ -649,6 +617,37 @@
           "source": "dimension",
           "unset": true,
           "values": "dimensions"
+        }
+      ]
+    },
+    {
+      "id": "item",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "name",
+          "type": "string"
+        },
+        {
+          "id": "tag",
+          "type": "string"
+        },
+        {
+          "id": "count",
+          "type": "range"
+        },
+        {
+          "id": "durability",
+          "type": "range"
+        },
+        {
+          "id": "potion",
+          "type": "string"
+        },
+        {
+          "id": "nbt",
+          "type": "nbt"
         }
       ]
     }
