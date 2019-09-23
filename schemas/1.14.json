@@ -267,45 +267,7 @@
           "id": "enchantments",
           "type": "set",
           "source": "enchantment",
-          "values": [
-            "minecraft:aqua_affinity",
-            "minecraft:bane_of_arthropods",
-            "minecraft:blast_protection",
-            "minecraft:channeling",
-            "minecraft:binding_curse",
-            "minecraft:vanishing_curse",
-            "minecraft:depth_strider",
-            "minecraft:efficiency",
-            "minecraft:feather_falling",
-            "minecraft:fire_aspect",
-            "minecraft:fire_protection",
-            "minecraft:flame",
-            "minecraft:fortune",
-            "minecraft:frost_walker",
-            "minecraft:impaling",
-            "minecraft:infinity",
-            "minecraft:knockback",
-            "minecraft:looting",
-            "minecraft:loyalty",
-            "minecraft:luck_of_the_sea",
-            "minecraft:lure",
-            "minecraft:mending",
-            "minecraft:multishot",
-            "minecraft:piercing",
-            "minecraft:power",
-            "minecraft:projectile_protection",
-            "minecraft:protection",
-            "minecraft:punch",
-            "minecraft:quick_charge",
-            "minecraft:respiration",
-            "minecraft:riptide",
-            "minecraft:sharpness",
-            "minecraft:silk_touch",
-            "minecraft:smite",
-            "minecraft:sweeping",
-            "minecraft:thorns",
-            "minecraft:unbreaking"
-          ],
+          "values": "enchantments",
           "require": [
             "minecraft:enchant_randomly"
           ]
@@ -409,17 +371,32 @@
             "minecraft:alternative",
             "minecraft:inverted",
             "minecraft:entity_properties",
-            "minecraft:block_state_propery",
-            "minecraft:match_tool",
-            "minecraft:damage_source_properties",
+            {
+              "value": "minecraft:block_state_propery",
+              "require": ["minecraft:block"]
+            },
+            {
+              "value": "minecraft:match_tool",
+              "require": ["minecraft:block", "minecraft:fishing"]
+            },
+            {
+              "value": "minecraft:damage_source_properties",
+              "require": ["minecraft:entity"]
+            },
             "minecraft:location_check",
             "minecraft:weather_check",
             "minecraft:entity_scores",
             "minecraft:random_chance",
             "minecraft:random_chance_with_looting",
-            "minecraft:table_bonus",
+            {
+              "value": "minecraft:table_bonus",
+              "require": ["minecraft:block"]
+            },
             "minecraft:killed_by_player",
-            "minecraft:survives_explosion"
+            {
+              "value": "survives_explosion",
+              "require": ["minecraft:block"]
+            }
           ]
         },
         {

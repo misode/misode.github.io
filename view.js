@@ -5,10 +5,23 @@ let collections;
 changeVersion('1.14');
 function changeVersion(version) {
   $.getJSON('schemas/' + version + '.json', json => {
-    $('#versionLabel').text(version);
     structure = json.root;
     components = json.components;
     collections = json.collections;
+  }).fail((jqXHR, textStatus, errorThrown) => {
+    let message = 'Failed loading ' + version + ' schema';
+    structure = {
+      fields: [
+        {
+          id: 'pools',
+          type: 'error',
+          message: message
+        }
+      ]
+    };
+    console.error(message + '\n' + errorThrown);
+  }).always(() => {
+    $('#versionLabel').text(version);
     updateView();
   });
 }
@@ -56,7 +69,9 @@ function generateComponent(data, struct) {
     case 'nbt': return generateNbt(data, struct);
     case 'array': return generateArray(data, struct);
     case 'object': return generateObject(data, struct, false);
-    default: return generateError('Unknown component type "' + struct.type + '"')};
+    case 'error': return generateError(struct);
+    default: return generateError('Unknown component type "' + struct.type + '"');
+  }
 }
 
 function generateString(data, struct) {
@@ -138,7 +153,14 @@ function generateEnum(data, struct) {
     $el.find('select').append(setValueAndName($('<option/>'), 'unset', undefined));
   }
   for (let value of collection) {
-    $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
+    if (typeof value === 'object') {
+      console.log(value);
+      if (value.require.includes(table.type)) {
+        $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.source));
+      }
+    } else {
+      $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
+    }
   }
   $el.find('select').val(data);
   return $el;
@@ -148,7 +170,11 @@ function generateSet(data, struct) {
   let $el = $('#components').find('[data-type="set"]').clone();
   $el.attr('data-field', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
-  for (let value of struct.values) {
+  let collection = struct.values;
+  if (typeof struct.values === 'string') {
+    collection = collections[struct.values];
+  }
+  for (let value of collection) {
     let $item = $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />');
     setValueAndName($item, value, struct.source);
     $el.find('.dropdown-menu').append($item);
@@ -212,8 +238,14 @@ function generateNbt(data, struct) {
 }
 
 function generateError(error) {
+  let message = 'Unknown Error';
+  if (typeof error === 'object' && typeof error.message === 'string') {
+    message = error.message;
+  } else if (typeof error === 'string'){
+    message = error;
+  }
   let $el = $('#components').find('[data-type="error"]').clone();
-  $el.find('[data-name]').val(error);
+  $el.find('[data-name]').val(message);
   return $el;
 }
 
