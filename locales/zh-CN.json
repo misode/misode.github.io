@@ -86,6 +86,7 @@
 			"group": "组",
 			"dynamic": "动态"
 		},
+		"expand": "展开",
 		"weight": "权重",
 		"quality": "每级幸运对权重的影响"
 	},
