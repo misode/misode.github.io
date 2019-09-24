@@ -82,6 +82,11 @@
           ]
         },
         {
+          "id": "quality",
+          "type": "random",
+          "luck_based": true
+        },
+        {
           "id": "children",
           "type": "array",
           "values": "entry",

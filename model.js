@@ -227,12 +227,13 @@ function removeFromSet(el, array) {
 }
 
 function toggleCollapseObject(el) {
-  let parent = getSuperParent(el);
-  let field = $(el).closest('[data-field]').attr('data-field');
-  if (!parent[field]) {
-    parent[field] = {};
+  let path = getPath(el);
+  let index = path.pop();
+  let node = getNode(path);
+  if (!node[index]) {
+    node[index] = {};
   } else {
-    delete parent[field];
+    delete node[index];
   }
   invalidated();
 }
