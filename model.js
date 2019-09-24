@@ -346,62 +346,6 @@ function getBooleanValue(oldvalue, newvalue) {
   }
 }
 
-function addScore(el) {
-  let condition = getParent(el);
-  let objective = $(el).closest('.condition-entity-scores').find('input').val();
-  if (!objective.length) {
-    return;
-  }
-  if (!condition.scores) {
-    condition.scores = {};
-  }
-  condition.scores[objective] = 1;
-  invalidated();
-}
-
-function removeScore(el) {
-  let objective = $(el).closest('.score').attr('data-objective');
-  delete getParent(el).scores[objective];
-  invalidated();
-}
-
-function updateScoreType(el, type) {
-  let objective = $(el).closest('.score').attr('data-objective');
-  if (type === 'range') {
-    getParent(el).scores[objective] = {};
-  } else if (type === 'binomial') {
-    getParent(el).scores[objective] = {type: "minecraft:binomial"};
-  } else {
-    getParent(el).scores[objective] = 0;
-  }
-  updateScoreField(el);
-}
-
-function updateScoreField(el) {
-  let parent = getParent(el);
-  let objective = $(el).closest('.score').attr('data-objective');
-  let data = parent.scores[objective];
-  let $range = $(el).closest('[data-type="range"]');
-  if (typeof data === 'object') {
-    let min = $range.find('.range.min').val();
-    let max = $range.find('.range.max').val();
-    if (min) {
-      data.min = parseInt(min);
-    } else {
-      delete data.min;
-    }
-    if (max) {
-      data.max = parseInt(max);
-    } else {
-      delete data.max;
-    }
-  } else {
-    data = parseInt($range.find('.exact').val());
-  }
-  parent.scores[objective] = data;
-  invalidated();
-}
-
 function parseJSONValue(value) {
   if (value.startsWith('"') || value.startsWith('{') || value.startsWith('[')) {
     try {
@@ -411,42 +355,4 @@ function parseJSONValue(value) {
     }
   }
   return value;
-}
-
-function addBlockProperty(el) {
-  let func = getParent(el);
-  let blockstate = $(el).closest('.condition-block-properties').find('input').val();
-  if (!func.properties) {
-    func.properties = {};
-  }
-  func.properties[blockstate] = '';
-  invalidated();
-}
-
-function removeBlockProperty(el) {
-  let blockstate = $(el).closest('.block-property').attr('data-blockstate');
-  delete getParent(el).properties[blockstate];
-  invalidated();
-}
-
-function updateBlockPropertyField(el) {
-  let blockstate = $(el).closest('.block-property').attr('data-blockstate');
-  getParent(el).properties[blockstate] = $(el).val();
-  invalidated();
-}
-
-function updateChancesField(el) {
-  let parent = getParent(el);
-  let chances = '[' + $(el).val() + ']';
-  try {
-    parent.chances = JSON.parse(chances);
-    for (let i = 0; i < parent.chances.length; i += 1) {
-      if (parent.chances[i] > 1) {
-        parent.chances[i] = 1;
-      }
-    }
-  } catch(e) {
-    parent.chances = [];
-  }
-  invalidated();
 }
