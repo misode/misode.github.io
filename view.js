@@ -276,6 +276,7 @@ function generateObject(data, struct, header) {
     let child = components.find(e => e.id === struct.value);
     return generateObject(data, child, false);
   }
+  let validFields = [];
   for (let field of struct.fields) {
     let $field;
     if (field.collapse) {
@@ -291,6 +292,7 @@ function generateObject(data, struct, header) {
       $field = generateError('Failed generating "' + field.id + '" field');
     }
     if ($field !== false) {
+      validFields.push(field.id);
       if (field.type === 'array') {
         let color = field.color;
         if (color === undefined) {
@@ -304,8 +306,11 @@ function generateObject(data, struct, header) {
         }
       }
       $body.append($field);
-    } else {
-      delete data[field.id];
+    }
+  }
+  for (let field of Object.keys(data)) {
+    if (!validFields.includes(field)) {
+      delete data[field];
     }
   }
   $body.children().first().removeClass('mt-3');
