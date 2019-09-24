@@ -76,7 +76,7 @@ function generateComponent(data, struct) {
 
 function generateString(data, struct) {
   let $el = $('#components').find('[data-type="string"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   $el.find('input').val(data);
   return $el;
@@ -84,7 +84,7 @@ function generateString(data, struct) {
 
 function generateBoolean(data, struct) {
   let $el = $('#components').find('[data-type="boolean"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   if (data === true) {
     $el.find('[value="true"]').addClass('active');
@@ -96,7 +96,7 @@ function generateBoolean(data, struct) {
 
 function generateRandom(data, struct) {
   let $el = $('#components').find('[data-type="random"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
@@ -117,7 +117,7 @@ function generateRandom(data, struct) {
 
 function generateRange(data, struct) {
   let $el = $('#components').find('[data-type="range"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   if (typeof data === 'object') {
     $el.find('.range').removeClass('d-none');
@@ -132,7 +132,7 @@ function generateRange(data, struct) {
 
 function generateBoundary(data, struct) {
   let $el = $('#components').find('[data-type="boundary"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   if (data) {
     $el.find('.range.min').val(data.min);
@@ -143,7 +143,7 @@ function generateBoundary(data, struct) {
 
 function generateEnum(data, struct) {
   let $el = $('#components').find('[data-type="enum"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   let collection = struct.values;
   if (typeof struct.values === 'string') {
@@ -167,7 +167,7 @@ function generateEnum(data, struct) {
 
 function generateSet(data, struct) {
   let $el = $('#components').find('[data-type="set"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   let collection = struct.values;
   if (typeof struct.values === 'string') {
@@ -198,7 +198,7 @@ function setValueAndName($el, value, source) {
 
 function generateJson(data, struct) {
   let $el = $('#components').find('[data-type="json"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   if (typeof data !== 'string') {
     data = JSON.stringify(data);
@@ -209,7 +209,7 @@ function generateJson(data, struct) {
 
 function generateJsonList(data, struct) {
   let $el = $('#components').find('[data-type="json-list"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   let jsonList = "";
   if (data) {
@@ -230,7 +230,7 @@ function generateJsonList(data, struct) {
 
 function generateNbt(data, struct) {
   let $el = $('#components').find('[data-type="nbt"]').clone();
-  $el.attr('data-field', struct.id);
+  $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   $el.find('textarea').val(data).keydown(e => preventNewline(e));
   return $el;
@@ -256,7 +256,6 @@ function generateArray(data, struct) {
   let child = components.find(e => e.id === struct.values);
   for (let i = 0; i < data.length; i += 1) {
     let $child = generateObject(data[i], child, true);
-    $child.attr('data-field', struct.id + '[]');
     $child.attr('data-index', i);
     $child.removeAttr('data-type');
     $el.append($child);
@@ -280,7 +279,7 @@ function generateObject(data, struct, header) {
   for (let field of struct.fields) {
     let $field;
     if (field.collapse) {
-      $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-field="' + field.id + '" data-i18n="' + field.id + '"></button>');
+      $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.id + '"></button>');
       if (data[field.id] === undefined) {
         break;
       }
@@ -362,9 +361,7 @@ function generateField(data, field, parent) {
     if (field.class) {
       $field.addClass(field.class);
     }
-    if (field.type !== 'array') {
-      $field.attr('data-field', field.id);
-    }
+    $field.attr('data-index', field.id);
   }
   return $field;
 }

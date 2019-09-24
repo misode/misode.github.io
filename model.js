@@ -145,88 +145,69 @@ function copySource(el) {
   document.execCommand('copy');
 }
 
-function getParent(el) {
-  let $node = $(el).closest('[data-field]');
-  let fields = $node.attr('data-field').split('.');
-  if (fields.length === 1 && fields[0] === 'table') {
-    return table;
-  }
-  if ($node.attr('data-type')) {
-    fields = fields.slice(0, -1);
-  }
-  let node = getParent($node.parent());
-  for (let f of fields) {
-    if (f.endsWith('[]')) {
-      f = f.slice(0, -2);
-      let index = $node.attr('data-index');
-      node = node[f][index];
-    } else {
-      if (node[f] === undefined) {
-        node[f] = {};
-      }
-      node = node[f];
+function getPath(el) {
+  let $node = $(el).closest('[data-index]');
+  let index = $node.attr('data-index');
+  if (index === 'pools') return ['pools'];
+  let parent = getPath($node.parent());
+  parent.push(index);
+  return parent;
+}
+
+function getNode(path) {
+  let node = table;
+  for (let index of path) {
+    if (!isNaN(index)) {
+      index = +index;
+    } else if (node[index] === undefined) {
+      node[index] = {};
     }
+    node = node[index];
   }
   return node;
 }
 
+function getType(el) {
+  let $field = $(el).closest('[data-index]');
+  if ($field) {
+    return $field.attr('data-type');
+  }
+}
+
+function getParent(el) {
+  let path = getPath(el);
+  path.pop();
+  return getNode(path);
+}
+
 function getSuperParent(el) {
-  let $parent = $(el).closest('[data-field]');
-  return getParent($parent.parent());
-}
-
-function setField(node, field, value) {
-  let fields = field.split('.');
-  let last = fields.splice(-1)[0];
-  for (let f of fields) {
-    node = node[f];
-  }
-  node[last] = value;
-}
-
-function deleteField(node, field) {
-  let fields = field.split('.');
-  let last = fields.splice(-1)[0];
-  for (let f of fields) {
-    node = node[f];
-  }
-  delete node[last];
-}
-
-function getField(node, field) {
-  let fields = field.split('.');
-  let last = fields.splice(-1)[0];
-  for (let f of fields) {
-    node = node[f];
-  }
-  return node[last];
-}
-
-function getIndex(el) {
-  let $parent = $(el).closest('[data-field]');
-  return parseInt($parent.attr('data-index'));
+  let path = getPath(el);
+  path.pop();
+  path.pop();
+  return getNode(path);
 }
 
 function addComponent(el, array) {
-  let parent = getParent(el);
-  if (!parent[array]) {
-    parent[array] = [];
+  let node = getNode(getPath(el));
+  if (!node[array]) {
+    node[array] = [];
   }
-  parent[array].push({});
+  node[array].push({});
   invalidated();
 }
 
 function removeComponent(el) {
-  let node = getSuperParent(el);
-  let $field = $(el).closest('[data-field]');
-  let index = $field.attr('data-index');
-  let last = $field.attr('data-field').slice(0, -2);
-  node[last].splice(index, 1);
-  if (node[last].length === 0) {
-    delete node[last];
+  let path = getPath(el);
+  let index = path.pop();
+  let array = path.pop();
+  let node = getNode(path);
+  node[array].splice(index, 1);
+  if (node[array].length === 0) {
+    delete node[array];
   }
   invalidated();
 }
+
 function addToSet(el, array) {
   let parent = getParent(el);
   if (!parent[array]) {
@@ -257,11 +238,11 @@ function toggleCollapseObject(el) {
 }
 
 function updateField(el) {
-  let $field = $(el).closest('[data-field]');
-  let fields = $field.attr('data-field');
-  let field = fields.split('.').slice(-1)[0];
-  let type = $field.attr('data-type');
-  let node = getParent(el);
+  let path = getPath(el);
+  let $field = $(el).closest('[data-index]');
+  let field = path.pop();
+  let node = getNode(path);
+  let type = getType(el);
   let value = undefined;
 
   if (type === 'string' || type === 'int' || type === 'float' || type === 'enum' || type === 'json' || type === 'nbt') {
@@ -307,23 +288,24 @@ function updateField(el) {
     value = getBooleanValue(node[field], ($(el).val() === 'true'));
   }
   if (value === '') {
-    deleteField(node, field);
+    delete node[field];
   } else {
-    setField(node, field, value);
+    node[field] = value;
   }
   invalidated();
 }
 
 function updateRangeType(el) {
-  let $field = $(el).closest('[data-field]');
-  let field = $field.attr('data-field');
+  let path = getPath(el);
+  let field = path.pop();
+  let node = getNode(path);
   let type = $(el).attr('value');
   if (type === 'range') {
-    setField(getParent(el), field, {});
+    node[field] = {};
   } else if (type === 'binomial') {
-    setField(getParent(el), field, {type: "minecraft:binomial"});
+    node[field] = {type: "minecraft:binomial"};
   } else {
-    setField(getParent(el), field, 0);
+    node[field] = 0;
   }
   updateField(el);
 }
@@ -453,91 +435,6 @@ function updateBlockPropertyField(el) {
   invalidated();
 }
 
-function addTerm(el) {
-  let condition = getParent(el);
-  if (!condition.terms) {
-    condition.terms = [];
-  }
-  condition.terms.push({
-    condition: "minecraft:random_chance",
-    chance: 0.5
-  });
-  invalidated();
-}
-
-function togglePosition(el) {
-  let parent = getParent(el);
-  if (parent.position) {
-    delete parent.position;
-  } else {
-    parent.position = {};
-  }
-  invalidated();
-}
-
-function toggleEntityLocation(el) {
-  let parent = getParent(el);
-  if (parent.location) {
-    delete parent.location;
-  } else {
-    parent.location = {};
-  }
-  invalidated();
-}
-
-function updateItemType(el, type) {
-  let $predicate = $(el).closest('.predicate');
-  if (type === 'item') {
-    $predicate.find('.item').removeClass('d-none');
-    $predicate.find('.tag').addClass('d-none');
-  } else {
-    $predicate.find('.tag').removeClass('d-none');
-    $predicate.find('.item').addClass('d-none');
-  }
-}
-
-function updateItemField(el, type) {
-  let parent = getParent(el);
-  if (type === 'item') {
-    parent.item = $(el).closest('.predicate').find('input.item').val();
-    delete parent.tag;
-  } else {
-    parent.tag = $(el).closest('.predicate').find('input.tag').val();
-    delete parent.item;
-  }
-  invalidated();
-}
-
-function toggleDamageFlags(el) {
-  let parent = getParent(el);
-  if (parent.type) {
-    delete parent.type;
-  } else {
-    parent.type = {};
-  }
-  invalidated();
-}
-
-function toggleSourceEntity(el) {
-  let parent = getParent(el);
-  if (parent.source_entity) {
-    delete parent.source_entity;
-  } else {
-    parent.source_entity = {};
-  }
-  invalidated();
-}
-
-function toggleDirectEntity(el) {
-  let parent = getParent(el);
-  if (parent.direct_entity) {
-    delete parent.direct_entity;
-  } else {
-    parent.direct_entity = {};
-  }
-  invalidated();
-}
-
 function updateChancesField(el) {
   let parent = getParent(el);
   let chances = '[' + $(el).val() + ']';
@@ -551,17 +448,5 @@ function updateChancesField(el) {
   } catch(e) {
     parent.chances = [];
   }
-  invalidated();
-}
-
-function addConditionEnchantment(el) {
-  let condition = getParent(el);
-  if (!condition.enchantments) {
-    condition.enchantments = [];
-  }
-  condition.enchantments.push({
-    enchantment: 'minecraft:silk_touch',
-    level: 1
-  });
   invalidated();
 }
