@@ -226,6 +226,41 @@ function removeFromSet(el, array) {
   }
 }
 
+function addToMap(el) {
+  let node = getParent(el);
+  let $field = $(el).closest('[data-index]');
+  let key = $field.find('input').val();
+  let map = $field.attr('data-index');
+  let type = $field.attr('data-item-type');
+  if (key.length === 0) {
+    return;
+  }
+  if (!node[map]) {
+    node[map] = {};
+  }
+  if (type === 'int' || type === 'float' || type === 'random' || type === 'range' || type === 'boundary') {
+    node[map][key] = 0;
+  } else if (type === 'boolean') {
+    node[map][key] = false;
+  } else {
+    node[map][key] = "";
+  }
+  invalidated();
+}
+
+function removeFromMap(el) {
+  let path = getPath(el);
+  let key = path.pop();
+  let node = getNode(path);
+  delete node[key];
+  if (Object.keys(node).length === 0) {
+    let field = path.pop();
+    let parent = getNode(path);
+    delete parent[field];
+  }
+  invalidated();
+}
+
 function toggleCollapseObject(el) {
   let path = getPath(el);
   let index = path.pop();

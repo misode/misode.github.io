@@ -65,6 +65,7 @@ function generateComponent(data, struct) {
     case 'boundary': return generateBoundary(data, struct);
     case 'enum': return generateEnum(data, struct);
     case 'set': return generateSet(data, struct);
+    case 'map': return generateMap(data, struct);
     case 'json': return generateJson(data, struct);
     case 'json-list': return generateJsonList(data, struct);
     case 'nbt': return generateNbt(data, struct);
@@ -188,6 +189,22 @@ function generateSet(data, struct) {
       $setContainer.append($item);
     }
     $el.append($setContainer);
+  }
+  return $el;
+}
+
+function generateMap(data, struct) {
+  let $el = $('#components').find('[data-type="map"]').clone();
+  $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
+  $el.find('[data-name="1"]').attr('data-i18n', struct.id);
+  $el.find('[data-name="2"]').attr('data-i18n', 'add_' + struct.id);
+  $el.find('input').keypress((e) => {if (e.which == 13) addToMap(e.target);});
+  if (data) {
+    for (let key of Object.keys(data)) {
+      let $item = generateComponent(data[key], {id: key, type: struct.values.type});
+      $item.append('<div class="input-group-append"><button class="btn btn-outline-danger bg-light" type="button" onclick="removeFromMap(this)" data-i18n="remove"></button></div>');
+      $el.append($item);
+    }
   }
   return $el;
 }

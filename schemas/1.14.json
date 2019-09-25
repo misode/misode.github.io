@@ -443,6 +443,33 @@
           ]
         },
         {
+          "id": "block",
+          "type": "string",
+          "require":  [
+            "minecraft:block_state_propery"
+          ]
+        },
+        {
+          "id": "properties",
+          "type": "map",
+          "values": {
+            "type": "string"
+          },
+          "require":  [
+            "minecraft:block_state_propery"
+          ]
+        },
+        {
+          "id": "scores",
+          "type": "map",
+          "values": {
+            "type": "range"
+          },
+          "require":  [
+            "minecraft:entity_scores"
+          ]
+        },
+        {
           "id": "predicate",
           "type": "object",
           "value": "entity",
