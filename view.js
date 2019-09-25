@@ -58,6 +58,7 @@ function generateComponent(data, struct) {
     case 'string': return generateString(data, struct);
     case 'int': return generateString(data, struct);
     case 'float': return generateString(data, struct);
+    case 'chance-list': return generateString(data, struct);
     case 'boolean': return generateBoolean(data, struct);
     case 'random': return generateRandom(data, struct);
     case 'range': return generateRange(data, struct);
@@ -76,6 +77,7 @@ function generateComponent(data, struct) {
 
 function generateString(data, struct) {
   let $el = $('#components').find('[data-type="string"]').clone();
+  $el.attr('data-type', struct.type);
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.id);
   $el.find('input').val(data);
@@ -282,7 +284,8 @@ function generateObject(data, struct, header) {
     if (field.collapse) {
       $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.id + '"></button>');
       if (data[field.id] === undefined) {
-        break;
+        $body.append('<div/>');
+        continue;
       }
     }
     try {

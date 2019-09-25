@@ -423,7 +423,7 @@
         },
         {
           "id": "chances",
-          "type": "list",
+          "type": "chance-list",
           "require": [
             "minecraft:table_bonus"
           ]
@@ -464,6 +464,14 @@
           "value": "item",
           "require": [
             "minecraft:match_tool"
+          ]
+        },
+        {
+          "id": "predicate",
+          "type": "object",
+          "value": "damage_source",
+          "require": [
+            "minecraft:damage_source_properties"
           ]
         },
         {
@@ -653,6 +661,79 @@
         {
           "id": "nbt",
           "type": "nbt"
+        }
+      ]
+    },
+    {
+      "id": "damage_source",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "dealt",
+          "type": "range"
+        },
+        {
+          "id": "taken",
+          "type": "range"
+        },
+        {
+          "id": "blocked",
+          "type": "boolean"
+        },
+        {
+          "id": "type",
+          "type": "object",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "is_explosion",
+              "type": "boolean"
+            },
+            {
+              "id": "is_projectile",
+              "type": "boolean"
+            },
+            {
+              "id": "is_fire",
+              "type": "boolean"
+            },
+            {
+              "id": "is_lightning",
+              "type": "boolean"
+            },
+            {
+              "id": "is_magic",
+              "type": "boolean"
+            },
+            {
+              "id": "bypasses_magic",
+              "type": "boolean"
+            },
+            {
+              "id": "bypasses_invulnerability",
+              "type": "boolean"
+            },
+            {
+              "id": "bypasses_armor",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "id": "source_entity",
+          "type": "object",
+          "color": "dark",
+          "collapse": true,
+          "value": "entity"
+        },
+        {
+          "id": "direct_entity",
+          "type": "object",
+          "color": "dark",
+          "collapse": true,
+          "value": "entity"
         }
       ]
     }
