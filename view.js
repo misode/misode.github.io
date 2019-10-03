@@ -80,7 +80,7 @@ function generateString(data, struct) {
   let $el = $('#components').find('[data-type="string"]').clone();
   $el.attr('data-type', struct.type);
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('input').val(data);
   return $el;
 }
@@ -88,7 +88,7 @@ function generateString(data, struct) {
 function generateBoolean(data, struct) {
   let $el = $('#components').find('[data-type="boolean"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (data === true) {
     $el.find('[value="true"]').addClass('active');
   } else if (data === false) {
@@ -100,7 +100,7 @@ function generateBoolean(data, struct) {
 function generateRandom(data, struct) {
   let $el = $('#components').find('[data-type="random"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
       $el.find('.binomial').removeClass('d-none');
@@ -121,7 +121,7 @@ function generateRandom(data, struct) {
 function generateRange(data, struct) {
   let $el = $('#components').find('[data-type="range"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (typeof data === 'object') {
     $el.find('.range').removeClass('d-none');
     $el.find('.range.min').val(data.min);
@@ -136,7 +136,7 @@ function generateRange(data, struct) {
 function generateBoundary(data, struct) {
   let $el = $('#components').find('[data-type="boundary"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (data) {
     $el.find('.range.min').val(data.min);
     $el.find('.range.max').val(data.max);
@@ -147,7 +147,7 @@ function generateBoundary(data, struct) {
 function generateEnum(data, struct) {
   let $el = $('#components').find('[data-type="enum"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   let collection = struct.values;
   if (typeof struct.values === 'string') {
     collection = collections[struct.values];
@@ -158,10 +158,10 @@ function generateEnum(data, struct) {
   for (let value of collection) {
     if (typeof value === 'object') {
       if (value.require.includes(table.type)) {
-        $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.source));
+        $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.translateValue));
       }
     } else {
-      $el.find('select').append(setValueAndName($('<option/>'), value, struct.source));
+      $el.find('select').append(setValueAndName($('<option/>'), value, struct.translateValue));
     }
   }
   $el.find('select').val(data);
@@ -171,21 +171,21 @@ function generateEnum(data, struct) {
 function generateSet(data, struct) {
   let $el = $('#components').find('[data-type="set"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   let collection = struct.values;
   if (typeof struct.values === 'string') {
     collection = collections[struct.values];
   }
   for (let value of collection) {
     let $item = $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />');
-    setValueAndName($item, value, struct.source);
+    setValueAndName($item, value, struct.translateValue);
     $el.find('.dropdown-menu').append($item);
   }
   if (data) {
     let $setContainer = $('<div/>');
     for (let option of data) {
       let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2');
-      setValueAndName($item, option, struct.source);
+      setValueAndName($item, option, struct.translateValue);
       $setContainer.append($item);
     }
     $el.append($setContainer);
@@ -196,12 +196,13 @@ function generateSet(data, struct) {
 function generateMap(data, struct) {
   let $el = $('#components').find('[data-type="map"]').clone();
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
-  $el.find('[data-name="1"]').attr('data-i18n', struct.id);
-  $el.find('[data-name="2"]').attr('data-i18n', 'add_' + struct.id);
+  $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
+  $el.find('[data-name="2"]').attr('data-i18n', struct.translateValue + '_add');
   $el.find('input').keypress((e) => {if (e.which == 13) addToMap(e.target);});
   if (data) {
     for (let key of Object.keys(data)) {
-      let $item = generateComponent(data[key], {id: key, type: struct.values.type});
+      console.log(data[key]);
+      let $item = generateComponent(data[key], {id: key, type: struct.values.type, translate: key});
       $item.append('<div class="input-group-append"><button class="btn btn-outline-danger bg-light" type="button" onclick="removeFromMap(this)" data-i18n="remove"></button></div>');
       $el.append($item);
     }
@@ -210,7 +211,8 @@ function generateMap(data, struct) {
 }
 
 function setValueAndName($el, value, source) {
-  let option = value.split(':').slice(-1);
+  let option = value.split(':').slice(-1)[0];
+  option.replace(/\./, '_');
   let name = (source) ? source + '.' + option : option;
   return $el.attr('value', value).attr('data-i18n', name);
 }
@@ -218,7 +220,7 @@ function setValueAndName($el, value, source) {
 function generateJson(data, struct) {
   let $el = $('#components').find('[data-type="json"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (typeof data !== 'string') {
     data = JSON.stringify(data);
   }
@@ -229,7 +231,7 @@ function generateJson(data, struct) {
 function generateJsonList(data, struct) {
   let $el = $('#components').find('[data-type="json-list"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   let jsonList = "";
   if (data) {
     for (let j = 0; j < data.length; j += 1) {
@@ -250,7 +252,7 @@ function generateJsonList(data, struct) {
 function generateNbt(data, struct) {
   let $el = $('#components').find('[data-type="nbt"]').clone();
   $el.attr('data-index', struct.id);
-  $el.find('[data-name]').attr('data-i18n', struct.id);
+  $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('textarea').val(data).keydown(e => preventNewline(e));
   return $el;
 }
@@ -288,7 +290,7 @@ function generateObject(data, struct, header) {
   let $header = $('<div class="card-header pb-1"></div>');
   if (header) {
     $header.appendTo($el);
-    $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="remove_' + struct.id + '"></button>');
+    $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="' + struct.id + '_remove"></button>');
   }
   let $body = $('<div class="card-body"></div>').appendTo($el);
   if (!struct.fields) {
@@ -299,7 +301,7 @@ function generateObject(data, struct, header) {
   for (let field of struct.fields) {
     let $field;
     if (field.collapse) {
-      $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.id + '"></button>');
+      $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button>');
       if (data[field.id] === undefined) {
         $body.append('<div/>');
         continue;
@@ -319,10 +321,10 @@ function generateObject(data, struct, header) {
           color = components.find(e => e.id === field.values).color;
         }
         if (header && field.button === 'header') {
-          $header.append('<button type="button" class="btn btn-' + color + ' mr-3 mb-2 float-left" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
+          $header.append('<button type="button" class="btn btn-' + color + ' mr-3 mb-2 float-left" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
         }
         if (field.button === 'field') {
-          $body.append('<button type="button" class="btn btn-' + color + ' mr-3 mt-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="add_' + field.values + '"></button>');
+          $body.append('<button type="button" class="btn btn-' + color + ' mr-3 mt-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
         }
       }
       $body.append($field);
