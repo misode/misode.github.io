@@ -237,6 +237,11 @@
 	},
 	"$location": {
 		"position": "位置",
+		"$position": {
+			"x": "X 坐标",
+			"y": "Y 坐标",
+			"z": "Z 坐标"
+		},
 		"biome": "生物群系",
 		"feature": "结构",
 		"dimension": "维度"
@@ -281,8 +286,5 @@
 	"tabs": "Tab 缩进",
 	"title": "战利品表生成器",
 	"true": "是",
-	"unset": "未指定",
-	"x": "X 坐标",
-	"y": "Y 坐标",
-	"z": "Z 坐标"
+	"unset": "未指定"
 }

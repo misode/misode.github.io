@@ -712,6 +712,30 @@
       "color": "dark",
       "fields": [
         {
+          "id": "position",
+          "type": "object",
+          "translate": "$location.position",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "x",
+              "type": "boundary",
+              "translate": "$location.$position.x"
+            },
+            {
+              "id": "y",
+              "type": "boundary",
+              "translate": "$location.$position.y"
+            },
+            {
+              "id": "z",
+              "type": "boundary",
+              "translate": "$location.$position.z"
+            }
+          ]
+        },
+        {
           "id": "biome",
           "type": "enum",
           "translate": "$location.biome",

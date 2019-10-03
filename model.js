@@ -275,6 +275,7 @@ function toggleCollapseObject(el) {
 
 function updateField(el) {
   let path = getPath(el);
+  console.log(path);
   let $field = $(el).closest('[data-index]');
   let field = path.pop();
   let node = getNode(path);
@@ -330,7 +331,10 @@ function updateField(el) {
     if (value.length === 0) {
       value = '';
     }
-  } else if (type === 'range' || type === 'random') {
+  } else if (type === 'range' || type === 'random' || type === 'boundary') {
+    if (type === 'boundary' && node[field] === undefined) {
+      node[field] = {};
+    }
     value = getRangeValue($field, node[field]);
   } else if (type === 'checkbox') {
     value = $(el).prop('checked');
@@ -361,6 +365,7 @@ function updateRangeType(el) {
 }
 
 function getRangeValue($field, data) {
+  console.log($field, data);
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
       let n = $field.find('.binomial.n').val();

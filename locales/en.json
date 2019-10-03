@@ -241,6 +241,11 @@
 	},
 	"$location": {
 		"position": "Position",
+		"$position": {
+			"x": "X",
+			"y": "Y",
+			"z": "Z"
+		},
 		"biome": "Biome",
 		"feature": "Feature",
 		"dimension": "Dimension"
@@ -291,8 +296,5 @@
 	"tabs": "Tabs",
 	"title": "Loot Table Generator",
 	"true": "True",
-	"unset": "Unset",
-	"x": "X",
-	"y": "Y",
-	"z": "Z"
+	"unset": "Unset"
 }
