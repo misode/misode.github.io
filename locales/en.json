@@ -248,11 +248,6 @@
 	"$structure": {
 
 	},
-	"$dimension": {
-		"overworld": "Overworld",
-		"the_nether": "The Nether",
-		"the_end": "The End"
-	},
 	"$item": {
 		"name": "Item ID",
 		"tag": "Item Tag",
@@ -293,8 +288,6 @@
 	"term_remove": "Remove Term",
 	"share": "Share",
 	"show_source": "Show Source",
-	"source": "Source",
-	"source_entity": "Source Entity",
 	"tabs": "Tabs",
 	"title": "Loot Table Generator",
 	"true": "True",

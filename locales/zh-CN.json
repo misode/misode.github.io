@@ -1,33 +1,54 @@
 {
 	"$condition": {
-		"alternative": "析取范式",
+		"$type": {
+			"alternative": "析取范式",
+			"inverted": "取反",
+			"entity_properties": "实体属性",
+			"block_state_propery": "方块属性",
+			"match_tool": "工具属性",
+			"damage_source_properties": "伤害源",
+			"location_check": "位置",
+			"weather_check": "天气",
+			"entity_scores": "实体分数",
+			"random_chance": "随机概率",
+			"random_chance_with_looting": "受抢夺附魔影响的随机概率",
+			"table_bonus": "附魔奖励",
+			"killed_by_player": "被玩家击杀",
+			"survives_explosion": "未被爆炸破坏"
+		},
+		"type": "条件",
+		"chance": "机率",
+		"looting_multiplier": "每级抢夺附魔增加的数",
 		"inverted": "取反",
-		"entity_properties": "实体属性",
-		"block_state_propery": "方块属性",
-		"match_tool": "工具属性",
-		"damage_source_properties": "伤害源",
-		"location_check": "位置",
-		"weather_check": "天气",
-		"entity_scores": "实体分数",
-		"random_chance": "随机概率",
-		"random_chance_with_looting": "受抢夺附魔影响的随机概率",
-		"table_bonus": "附魔奖励",
-		"killed_by_player": "被玩家击杀",
-		"survives_explosion": "未被爆炸破坏"
+		"entity": "实体",
+		"enchantment": "附魔",
+		"chances": "机率",
+		"raining": "下雨",
+		"thundering": "雷雨",
+		"block": "方块",
+		"block_state": "方块状态",
+		"block_state_add": "添加方块状态",
+		"block_state_remove": "移除方块状态",
+		"objective": "计分项",
+		"score": "分数",
+		"score_add": "添加分数",
+		"score_remove": "移除分数",
+		"location": "位置",
+		"item": "物品",
+		"damage_source": "损伤值",
+		"term": "条件"
 	},
-	"$damage": {
-		"damage_type": "伤害类型",
-		"projectile": "弹射物",
-		"explosion": "爆炸",
-		"fire": "燃烧",
-		"magic": "魔法",
-		"lightning": "雷击",
-		"starvation": "饥饿",
-		"void": "虚空",
-		"bypass_armor": "破甲",
-		"dealt": "被防御前的伤害",
-		"taken": "实际造成的伤害",
-		"blocked": "被盾牌阻挡"
+	"$damage_source": {
+		"is_projectile": "弹射物",
+		"is_explosion": "爆炸",
+		"is_fire": "燃烧",
+		"is_magic": "魔法",
+		"is_lightning": "雷击",
+		"bypasses_magic": "饥饿",
+		"bypasses_invulnerability": "虚空",
+		"bypasses_armor": "破甲",
+		"direct_entity": "直接来源实体",
+		"source_entity": "根本来源实体"
 	},
 	"$dimension": {
 		"overworld": "主世界",
@@ -74,8 +95,6 @@
 		"unbreaking": "耐久"
 	},
 	"$entry": {
-		"name": "名称",
-		"type": "类型",
 		"$type": {
 			"empty": "空",
 			"item": "物品",
@@ -86,67 +105,77 @@
 			"group": "组",
 			"dynamic": "动态"
 		},
+		"type": "类型",
+		"name": "名称",
 		"expand": "展开",
 		"weight": "权重",
 		"quality": "每级幸运对权重的影响"
 	},
 	"$function": {
-		"set_count": "设置物品数量",
-		"set_damage": "设置损伤值",
-		"set_name": "设置物品名",
-		"set_lore": "设置下标",
-		"set_nbt": "设置 NBT",
-		"set_attributes": "设置属性",
-		"set_contents": "设置内容物",
-		"enchant_randomly": "随机附魔",
-		"enchant_with_levels": "给予等价于经验等级的随机附魔",
-		"looting_enchant": "根据抢夺附魔调整物品数量",
-		"limit_count": "限制堆叠数量",
-		"furnace_smelt": "熔炉熔炼",
-		"explosion_decay": "爆炸损耗",
-		"fill_player_head": "填充玩家头颅",
-		"copy_name": "复制方块实体显示名",
-		"copy_nbt": "复制 NBT",
-		"apply_bonus": "应用奖励公式",
-		"$damage": {
-			"damage": "损伤值"
+		"$type": {
+			"set_count": "设置物品数量",
+			"set_damage": "设置损伤值",
+			"set_name": "设置物品名",
+			"set_lore": "设置下标",
+			"set_nbt": "设置 NBT",
+			"set_attributes": "设置属性",
+			"set_contents": "设置内容物",
+			"enchant_randomly": "随机附魔",
+			"enchant_with_levels": "给予等价于经验等级的随机附魔",
+			"looting_enchant": "根据抢夺附魔调整物品数量",
+			"limit_count": "限制堆叠数量",
+			"furnace_smelt": "熔炉熔炼",
+			"explosion_decay": "爆炸损耗",
+			"fill_player_head": "填充玩家头颅",
+			"copy_name": "复制方块实体显示名",
+			"copy_nbt": "复制 NBT",
+			"apply_bonus": "应用奖励公式"
 		},
-		"$ench_rand": {
-			"ench": "可选附魔"
-		},
-		"$limit": {
-			"limit": "限制"
-		},
-		"$name": {
-			"name": "名称"
-		},
-		"$lore_replace": {
-			"replace": "覆盖"
-		},
-		"$entity": {
-			"entity": "实体"
-		},
-		"$operations": {
-			"add_op": "添加操作"
-		},
+		"type": "函数",
+		"count": "数量",
+		"damage": "损伤值",
+		"name": "名称",
+		"nbt": "NBT",
+		"levels": "等级",
+		"treasure": "宝藏型附魔",
+		"limit": "限制",
+		"entity": "实体",
+		"source": "源",
+		"replace": "覆盖",
+		"enchantments": "可选附魔",
+		"operation_add": "添加操作",
+		"enchantment": "附魔",
+		"formula": "公式",
 		"$formula": {
-			"formula": "公式",
 			"uniform_bonus_count": "带奖励数量的均匀分布",
 			"binomial_with_bonus_count": "带奖励数量的二项分布",
 			"ore_drops": "矿物掉落"
 		},
-		"$bonus_multiplier": {
-			"multiplier": "乘数"
+		"bonusMultiplier": "乘数",
+		"extra": "额外值",
+		"probability": "概率"
+	},
+	"$attribute_modifier": {
+		"attribute": "属性",
+		"name": "名称",
+		"amount": "数额",
+		"operation": "运算模式",
+		"$operation": {
+			"addition": "加减数额",
+			"multiply_base": "乘以数额",
+			"multiply_total": "乘以（数额 + 1）"
 		},
-		"$bonus_extra": {
-			"extra": "额外值"
-		},
-		"$bonus_probability": {
-			"probability": "概率"
+		"slots": "栏位",
+		"$slot": {
+			"mainhand": "主手",
+			"offhand": "副手",
+			"head": "头",
+			"chest": "胸",
+			"legs": "腿",
+			"feet": "脚"
 		}
 	},
-	"$modifier": {
-		"attribute": "属性",
+	"$attribute": {
 		"generic_maxHealth": "最大生命值",
 		"generic_followRange": "追踪范围",
 		"generic_knockbackResistance": "抗击退效果",
@@ -160,17 +189,8 @@
 		"generic_attackKnockback": "击退距离",
 		"generic_flyingSpeed": "飞行速度",
 		"zombie_spawnReinforcements": "连带生成新僵尸的可能性",
-		"name": "名称",
-		"amount": "数额",
-		"operation": "运算模式",
-		"$operation": {
-			"addition": "加减数额",
-			"multiply_base": "乘以数额",
-			"multiply_total": "乘以（数额 + 1）"
-		},
-		"slots": "栏位"
-	},
-	"$operation": {
+	}
+	"$nbt_operation": {
 		"source": "复制源",
 		"target": "复制目标",
 		"operation": "操作类型",
@@ -187,23 +207,11 @@
 	"$range": {
 		"exact": "精确值",
 		"range": "范围",
-		"$range": {
-			"min": "最小值",
-			"max": "最大值"
-		},
+		"min": "最小值",
+		"max": "最大值",
 		"binomial": "二项分布",
-		"$binomial": {
-			"n": "n",
-			"p": "p"
-		}
-	},
-	"$slot": {
-		"mainhand": "主手",
-		"offhand": "副手",
-		"head": "头",
-		"chest": "胸",
-		"legs": "腿",
-		"feet": "脚"
+		"n": "n",
+		"p": "p"
 	},
 	"$source": {
 		"block_entity": "方块实体",
@@ -212,7 +220,6 @@
 		"killer_player": "击杀者玩家"
 	},
 	"$table": {
-		"type": "战利品表类型",
 		"$type": {
 			"empty": "空",
 			"entity": "实体",
@@ -220,11 +227,30 @@
 			"chest": "箱子",
 			"fishing": "钓鱼",
 			"generic": "通用"
-		}
+		},
+		"type": "战利品表类型"
+	},
+	"$entity": {
+		"type": "实体",
+		"nbt": "NBT",
+		"location": "位置"
+	},
+	"$location": {
+		"position": "位置",
+		"biome": "生物群系",
+		"feature": "结构",
+		"dimension": "维度"
+	},
+	"$item": {
+		"name": "名称",
+		"tag": "标签",
+		"count": "数量",
+		"durability": "耐久度",
+		"potion": "药水",
+		"nbt": "NBT"
 	},
 	"2_spaces": "2 空格缩进",
 	"4_spaces": "4 空格缩进",
-	"add_block_state": "添加方块状态",
 	"add_child": "添加子项目",
 	"add_condition": "添加条件",
 	"add_enchantment": "添加附魔",
@@ -233,47 +259,15 @@
 	"add_modifier": "添加属性修饰器",
 	"add_operation": "添加操作",
 	"add_pool": "添加随机池",
-	"add_score": "添加分数",
 	"add_term": "添加条件",
 	"author": "作者 @Misode",
-	"biome": "生物群系",
-	"block": "方块",
-	"block_state": "方块状态",
-	"chance": "机率",
-	"chance_plural": "机率",
-	"child": "子项目",
-	"condition": "条件",
 	"copy": "复制",
-	"count": "数量",
 	"description": "Minecraft 战利品表生成器",
-	"dimension": "维度",
-	"direct_entity": "直接来源实体",
-	"durability": "耐久度",
-	"enchantment": "附魔",
-	"entity": "实体",
-	"entry": "项目",
 	"false": "否",
-	"feature": "结构",
-	"function": "函数",
 	"hide_source": "隐藏源代码",
-	"inverted": "取反",
-	"item": "物品",
-	"level_plural": "等级",
-	"location": "位置",
-	"looting_multiplier": "每级抢夺附魔增加的数",
 	"luck_based": "受幸运等级影响",
-	"modifier": "属性修饰器",
 	"more": "更多选项",
-	"name": "名称",
-	"nbt": "NBT",
-	"objective": "计分项",
-	"operation": "操作",
-	"pool": "随机池",
-	"position": "位置",
-	"potion": "药水",
-	"raining": "下雨",
 	"remove": "移除",
-	"remove_block_state": "移除方块状态",
 	"remove_condition": "移除条件",
 	"remove_enchantment": "移除附魔",
 	"remove_entry": "移除项目",
@@ -281,21 +275,12 @@
 	"remove_modifier": "移除属性修饰器",
 	"remove_operation": "移除操作",
 	"remove_pool": "移除随机池",
-	"remove_score": "移除分数",
 	"remove_term": "移除条件",
-	"score": "分数",
 	"share": "分享",
 	"show_source": "显示源代码",
-	"source": "源",
-	"source_entity": "根本来源实体",
 	"tabs": "Tab 缩进",
-	"tag": "标签",
-	"term": "条件",
-	"thundering": "雷雨",
 	"title": "战利品表生成器",
-	"treasure": "宝藏型附魔",
 	"true": "是",
-	"type": "类型",
 	"unset": "未指定",
 	"x": "X 坐标",
 	"y": "Y 坐标",
