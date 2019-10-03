@@ -232,9 +232,6 @@
 		"type": "Type"
 	},
 	"$entity": {
-		"$type": {
-
-		},
 		"type": "Entity",
 		"nbt": "NBT",
 		"location": "Location"
@@ -250,9 +247,6 @@
 		"feature": "Feature",
 		"dimension": "Dimension"
 	},
-	"$structure": {
-
-	},
 	"$item": {
 		"name": "Item ID",
 		"tag": "Item Tag",
@@ -260,9 +254,6 @@
 		"durability": "Durability",
 		"potion": "Potion",
 		"nbt": "NBT"
-	},
-	"$biome": {
-
 	},
 	"2_spaces": "2 Spaces",
 	"4_spaces": "4 Spaces",

@@ -688,7 +688,7 @@
           "id": "type",
           "type": "enum",
           "translate": "$entity.type",
-          "translateValue": "$entity.$type",
+          "translateValue": "",
           "unset": true,
           "values": "entity_types"
         },
@@ -739,7 +739,7 @@
           "id": "biome",
           "type": "enum",
           "translate": "$location.biome",
-          "translateValue": "$biome",
+          "translateValue": "",
           "unset": true,
           "values": "biomes"
         },
@@ -747,7 +747,7 @@
           "id": "feature",
           "type": "enum",
           "translate": "$location.feature",
-          "translateValue": "$structure",
+          "translateValue": "",
           "unset": true,
           "values": "structures"
         },
