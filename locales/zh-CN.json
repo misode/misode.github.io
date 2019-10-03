@@ -188,8 +188,8 @@
 		"horse_jumpStrength": "弹跳力",
 		"generic_attackKnockback": "击退距离",
 		"generic_flyingSpeed": "飞行速度",
-		"zombie_spawnReinforcements": "连带生成新僵尸的可能性",
-	}
+		"zombie_spawnReinforcements": "连带生成新僵尸的可能性"
+	},
 	"$nbt_operation": {
 		"source": "复制源",
 		"target": "复制目标",
