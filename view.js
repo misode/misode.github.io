@@ -42,14 +42,11 @@ function generateTable() {
   let type = structure.fields.find(e => e.id === 'type');
   if (type) {
     $('.table-type').removeClass('d-none');
-    if (!table.type) {
-      table.type = type.default;
-    }
     $('#tableType').html('');
     for (let option of type.values) {
       $('#tableType').append(setValueAndName($('<option/>'), option, type.translateValue));
     }
-    $('#tableType').val(table.type);
+    $('#tableType').val(table.type ? correctNamespace(table.type) : type.default);
   } else {
     delete table.type;
     $('.table-type').addClass('d-none');
@@ -113,7 +110,7 @@ function generateRandom(data, struct) {
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (typeof data === 'object') {
-    if (data.type && data.type.match(/(minecraft:)?binomial/)) {
+    if (data.type && correctNamespace(data.type) === 'minecraft:binomial') {
       $el.find('.binomial').removeClass('d-none');
       $el.find('.binomial.n').val(data.n);
       $el.find('.binomial.p').val(data.p);
@@ -168,14 +165,14 @@ function generateEnum(data, struct) {
   }
   for (let value of collection) {
     if (typeof value === 'object') {
-      if (value.require.includes(table.type)) {
-        $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.translateValue));
+      if (value.require.includes(correctNamespace(table.type))) {
+        $el.find('select').append(setValueAndName($('<option/>'), correctNamespace(value.value), struct.translateValue));
       }
     } else {
-      $el.find('select').append(setValueAndName($('<option/>'), value, struct.translateValue));
+      $el.find('select').append(setValueAndName($('<option/>'), correctNamespace(value), struct.translateValue));
     }
   }
-  $el.find('select').val(data);
+  $el.find('select').val(correctNamespace(data));
   return $el;
 }
 
@@ -196,7 +193,7 @@ function generateSet(data, struct) {
     let $setContainer = $('<div/>');
     for (let option of data) {
       let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2');
-      setValueAndName($item, option, struct.translateValue);
+      setValueAndName($item, correctNamespace(option), struct.translateValue);
       $setContainer.append($item);
     }
     $el.append($setContainer);
@@ -236,6 +233,11 @@ function setValueAndName($el, value, source) {
   option.replace(/\./, '_');
   let name = (source) ? source + '.' + option : option;
   return $el.attr('value', value).attr('data-i18n', name);
+}
+
+function correctNamespace(s) {
+  if (typeof s === 'string' && !s.includes(':')) return 'minecraft:' + s;
+  return s;
 }
 
 function generateJson(data, struct) {
@@ -369,14 +371,14 @@ function generateField(data, field, parent) {
     let filter = parent.fields.find(e => e.type === 'enum');
     for (let requirement of field.require) {
       if (typeof requirement === 'string') {
-        if (requirement === data[filter.id]) {
+        if (requirement === correctNamespace(data[filter.id])) {
           passing = true;
         }
       } else {
         let match = true;
         for (let id in requirement) {
           if (requirement.hasOwnProperty(id)) {
-            if (requirement[id] !== data[parent.fields.find(e => e.id === id).id]) {
+            if (requirement[id] !== correctNamespace(data[parent.fields.find(e => e.id === id).id])) {
               match = false;
             }
           }

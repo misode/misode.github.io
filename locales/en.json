@@ -113,6 +113,7 @@
 	"$function": {
 		"$type": {
 			"set_count": "Set Count",
+			"set_data": "Set Data",
 			"set_damage": "Set Damage",
 			"set_name": "Set Name",
 			"set_lore": "Set Lore",

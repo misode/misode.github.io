@@ -70,12 +70,12 @@
         },
         {
           "id": "weight",
-          "type": "random",
+          "type": "range",
           "translate": "$entry.weight"
         },
         {
           "id": "quality",
-          "type": "random",
+          "type": "range",
           "translate": "$entry.quality",
           "luckBased": true
         },
@@ -137,7 +137,7 @@
         },
         {
           "id": "damage",
-          "type": "random",
+          "type": "range",
           "translate": "$function.damage",
           "require": [
             "minecraft:set_damage"
@@ -153,7 +153,7 @@
         },
         {
           "id": "levels",
-          "type": "random",
+          "type": "range",
           "translate": "$function.levels",
           "require": [
             "minecraft:enchant_with_levels"
