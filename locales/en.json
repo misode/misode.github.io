@@ -132,6 +132,7 @@
 		},
 		"type": "Function",
 		"count": "Count",
+		"data": "Data",
 		"damage": "Damage",
 		"name": "Name",
 		"lore": "Lore",

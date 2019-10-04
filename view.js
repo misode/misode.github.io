@@ -350,7 +350,7 @@ function generateObject(data, struct, header) {
 }
 
 function generateField(data, field, parent) {
-  if (!luckBased && field.luck_based) {
+  if (!luckBased && field.luckBased) {
     return false;
   }
   if (field.require) {

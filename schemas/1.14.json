@@ -39,7 +39,7 @@
           "id": "bonus_rolls",
           "type": "random",
           "translate": "$pool.bonus_rolls",
-          "luck_based": true
+          "luckBased": true
         },
         {
           "id": "entries",
@@ -99,7 +99,7 @@
           "id": "quality",
           "type": "random",
           "translate": "$entry.quality",
-          "luck_based": true
+          "luckBased": true
         },
         {
           "id": "children",

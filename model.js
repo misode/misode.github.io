@@ -366,7 +366,6 @@ function updateRangeType(el) {
 }
 
 function getRangeValue($field, data) {
-  console.log($field, data);
   if (typeof data === 'object') {
     if (data.type && data.type.match(/(minecraft:)?binomial/)) {
       let n = $field.find('.binomial.n').val();
