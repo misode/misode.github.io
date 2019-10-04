@@ -321,7 +321,7 @@
           "id": "formula",
           "type": "enum",
           "translate": "$function.formula",
-          "translateValues": "$function.$formula",
+          "translateValue": "$function.$formula",
           "default": "minecraft:uniform_bonus_count",
           "values": [
             "minecraft:uniform_bonus_count",

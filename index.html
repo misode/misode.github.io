@@ -34,17 +34,10 @@
       <div class="col-12 col-lg-7 mb-3 structure-container" data-index="table">
         <div class="input-group">
           <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addComponent(this, 'pools')" data-field="table" data-i18n="pool_add"></button>
-          <div class="input-group-prepend">
+          <div class="input-group-prepend table-type">
             <span class="input-group-text rounded-left" data-i18n="$table.type"></span>
           </div>
-          <select id="tableType" class="form-control mr-3 rounded-right" style="max-width: 9em;" onchange="updateTableType(this)">
-            <option value="minecraft:empty" data-i18n="$table.$type.empty"></option>
-            <option value="minecraft:entity" data-i18n="$table.$type.entity"></option>
-            <option value="minecraft:block" data-i18n="$table.$type.block"></option>
-            <option value="minecraft:chest" data-i18n="$table.$type.chest"></option>
-            <option value="minecraft:fishing" data-i18n="$table.$type.fishing"></option>
-            <option value="minecraft:generic" data-i18n="$table.$type.generic"></option>
-          </select>
+          <select id="tableType" class="form-control mr-3 rounded-right table-type" style="max-width: 9em;" onchange="updateTableType(this)"></select>
           <div class="custom-control custom-checkbox mr-3" style="margin: auto 0">
             <input type="checkbox" class="custom-control-input" id="luckBased" onchange="updateLuckBased(this)">
             <label class="custom-control-label" for="luckBased" data-i18n="luck_based"></label>

@@ -39,10 +39,21 @@ function updateView() {
 function generateTable() {
   $('#structure').removeClass('d-none').html('');
 
-  if (!table.type) {
-    table.type = 'minecraft:empty';
+  let type = structure.fields.find(e => e.id === 'type');
+  if (type) {
+    $('.table-type').removeClass('d-none');
+    if (!table.type) {
+      table.type = type.default;
+    }
+    $('#tableType').html('');
+    for (let option of type.values) {
+      $('#tableType').append(setValueAndName($('<option/>'), option, type.translateValue));
+    }
+    $('#tableType').val(table.type);
+  } else {
+    delete table.type;
+    $('.table-type').addClass('d-none');
   }
-  $('#tableType').val(table.type);
 
   if (table.pools) {
     $table = generateComponent(table.pools, structure.fields.find(e => e.id === 'pools'));
