@@ -242,6 +242,8 @@ function addToMap(el) {
     node[map][key] = 0;
   } else if (type === 'boolean') {
     node[map][key] = false;
+  } else if (type === 'object') {
+    node[map][key] = {};
   } else {
     node[map][key] = "";
   }
@@ -275,7 +277,6 @@ function toggleCollapseObject(el) {
 
 function updateField(el) {
   let path = getPath(el);
-  console.log(path);
   let $field = $(el).closest('[data-index]');
   let field = path.pop();
   let node = getNode(path);

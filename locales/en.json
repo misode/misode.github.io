@@ -29,8 +29,7 @@
 		"block_state": "Block State",
 		"block_state_add": "Add Block State",
 		"block_state_remove": "Remove Block State",
-		"objective": "Objective",
-		"score": "Score",
+		"score": "Objective",
 		"score_add": "Add Score",
 		"score_remove": "Remove Score",
 		"location": "Location",
@@ -234,7 +233,10 @@
 	"$entity": {
 		"type": "Entity",
 		"nbt": "NBT",
-		"location": "Location"
+		"location": "Location",
+		"status_effect": "Effects",
+		"status_effect_add": "Add Effect",
+		"status_effect_remove": "Remove Effect"
 	},
 	"$location": {
 		"position": "Position",
@@ -246,6 +248,12 @@
 		"biome": "Biome",
 		"feature": "Feature",
 		"dimension": "Dimension"
+	},
+	"$status_effect": {
+		"amplifier": "Amplifier",
+		"duration": "Duration",
+		"ambient": "Ambient",
+		"visible": "Visible"
 	},
 	"$item": {
 		"name": "Item ID",

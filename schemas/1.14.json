@@ -505,7 +505,6 @@
           "id": "properties",
           "type": "map",
           "translate": "$condition.block_state",
-          "translateValue": "$condition.block_state",
           "values": {
             "type": "string"
           },
@@ -516,8 +515,7 @@
         {
           "id": "scores",
           "type": "map",
-          "translate": "$condition.objective",
-          "translateValue": "$condition.score",
+          "translate": "$condition.score",
           "values": {
             "type": "range"
           },
@@ -703,6 +701,15 @@
           "translate": "$entity.location",
           "value": "location",
           "collapse": true
+        },
+        {
+          "id": "effects",
+          "type": "map",
+          "translate": "$entity.status_effect",
+          "values": {
+            "type": "object",
+            "value": "status_effect"
+          }
         }
       ]
     },
@@ -758,6 +765,33 @@
           "translateValue": "$dimension",
           "unset": true,
           "values": "dimensions"
+        }
+      ]
+    },
+    {
+      "id": "status_effect",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "amplifier",
+          "type": "range",
+          "translate": "$status_effect.amplifier"
+        },
+        {
+          "id": "duration",
+          "type": "range",
+          "translate": "$status_effect.duration"
+        },
+        {
+          "id": "ambient",
+          "type": "boolean",
+          "translate": "$status_effect.ambient"
+        },
+        {
+          "id": "visible",
+          "type": "boolean",
+          "translate": "$status_effect.visible"
         }
       ]
     },
@@ -1104,6 +1138,40 @@
       "minecraft:overworld",
       "minecraft:the_nether",
       "minecraft:the_end"
+    ],
+    "status_effects": [
+      "minecraft:speed",
+      "minecraft:slowness",
+      "minecraft:haste",
+      "minecraft:mining_fatigue",
+      "minecraft:strength",
+      "minecraft:instant_health",
+      "minecraft:instant_damage",
+      "minecraft:jump_boost",
+      "minecraft:nausea",
+      "minecraft:regeneration",
+      "minecraft:resistance",
+      "minecraft:fire_resistance",
+      "minecraft:water_breathing",
+      "minecraft:invisibility",
+      "minecraft:blindness",
+      "minecraft:night_vision",
+      "minecraft:hunger",
+      "minecraft:weakness",
+      "minecraft:poison",
+      "minecraft:wither",
+      "minecraft:health_boost",
+      "minecraft:absorption",
+      "minecraft:saturation",
+      "minecraft:glowing",
+      "minecraft:levitation",
+      "minecraft:luck",
+      "minecraft:unluck",
+      "minecraft:slow_falling",
+      "minecraft:conduit_power",
+      "minecraft:dolphins_grace",
+      "minecraft:bad_omen",
+      "minecraft:hero_of_the_village"
     ]
   }
 }
