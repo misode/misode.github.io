@@ -135,6 +135,7 @@
 		"count": "数量",
 		"damage": "损伤值",
 		"name": "名称",
+		"lore": "下标",
 		"nbt": "NBT",
 		"levels": "等级",
 		"treasure": "宝藏型附魔",
