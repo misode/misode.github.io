@@ -703,6 +703,13 @@
           "collapse": true
         },
         {
+          "id": "distance",
+          "type": "object",
+          "translate": "$entity.distance",
+          "value": "distance",
+          "collapse": true
+        },
+        {
           "id": "effects",
           "type": "map",
           "translate": "$entity.status_effect",
@@ -765,6 +772,38 @@
           "translateValue": "$dimension",
           "unset": true,
           "values": "dimensions"
+        }
+      ]
+    },
+    {
+      "id": "distance",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "x",
+          "type": "boundary",
+          "translate": "$distance.x"
+        },
+        {
+          "id": "y",
+          "type": "boundary",
+          "translate": "$distance.y"
+        },
+        {
+          "id": "z",
+          "type": "boundary",
+          "translate": "$distance.z"
+        },
+        {
+          "id": "absolute",
+          "type": "boundary",
+          "translate": "$distance.absolute"
+        },
+        {
+          "id": "horizontal",
+          "type": "boundary",
+          "translate": "$distance.horizontal"
         }
       ]
     },
