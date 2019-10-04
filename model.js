@@ -148,7 +148,7 @@ function copySource(el) {
 function getPath(el) {
   let $node = $(el).closest('[data-index]');
   let index = $node.attr('data-index');
-  if (index === 'pools') return ['pools'];
+  if (index === 'table') return [];
   let parent = getPath($node.parent());
   parent.push(index);
   return parent;
