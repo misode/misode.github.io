@@ -175,7 +175,8 @@
             "minecraft:copy_name",
             "minecraft:copy_nbt",
             "minecraft:apply_bonus",
-            "minecraft:exploration_map"
+            "minecraft:exploration_map",
+            "minecraft:set_stew_effect"
           ]
         },
         {
@@ -296,6 +297,16 @@
           ]
         },
         {
+          "id": "effects",
+          "type": "array",
+          "translate": "potion_effect",
+          "button": "field",
+          "values": "potion_effect",
+          "require": [
+            "minecraft:set_stew_effect"
+          ]
+        },
+        {
           "id": "entity",
           "type": "enum",
           "translate": "$function.entity",
@@ -360,7 +371,7 @@
         {
           "id": "ops",
           "type": "array",
-          "translate": "$function.operation",
+          "translate": "nbt_operation",
           "button": "field",
           "values": "nbt_operation",
           "require": [
@@ -891,6 +902,23 @@
           "id": "visible",
           "type": "boolean",
           "translate": "$status_effect.visible"
+        }
+      ]
+    },
+    {
+      "id": "potion_effect",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "type",
+          "type": "string",
+          "translate": "$potion_effect.type"
+        },
+        {
+          "id": "duration",
+          "type": "range",
+          "translate": "$potion_effect.duration"
         }
       ]
     },

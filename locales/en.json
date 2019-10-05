@@ -130,7 +130,8 @@
 			"copy_name": "Copy Name",
 			"copy_nbt": "Copy NBT",
 			"apply_bonus": "Apply Bonus",
-			"exploration_map": "Exploration Map Properties"
+			"exploration_map": "Exploration Map Properties",
+			"set_stew_effect": "Set Stew Effect"
 		},
 		"type": "Function",
 		"count": "Count",
@@ -146,7 +147,6 @@
 		"source": "Source",
 		"replace": "Replace",
 		"enchantments": "Optional Enchantments",
-		"operation_add": "Add Operation",
 		"enchantment": "Enchantment",
 		"formula": "Formula",
 		"$formula": {
@@ -271,6 +271,10 @@
 		"ambient": "Ambient",
 		"visible": "Visible"
 	},
+	"$potion_effect": {
+		"type": "Effect",
+		"duration": "Duration"
+	},
 	"$item": {
 		"name": "Item ID",
 		"tag": "Item Tag",
@@ -287,8 +291,9 @@
 	"entry_add": "Add Entry",
 	"function_add": "Add Function",
 	"attribute_modifier_add": "Add Modifier",
-	"operation_add": "Add Operation",
+	"nbt_operation_add": "Add Operation",
 	"pool_add": "Add Pool",
+	"potion_effect_add": "Add Effect",
 	"term_add": "Add Term",
 	"author": "by Misode",
 	"copy": "Copy",
@@ -304,8 +309,9 @@
 	"error": "Error",
 	"function_remove": "Remove Function",
 	"attribute_modifier_remove": "Remove Modifier",
-	"operation_remove": "Remove Operation",
+	"nbt_operation_remove": "Remove Operation",
 	"pool_remove": "Remove Pool",
+	"potion_effect_remove": "Remove Effect",
 	"term_remove": "Remove Term",
 	"share": "Share",
 	"show_source": "Show Source",
