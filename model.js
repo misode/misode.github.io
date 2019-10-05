@@ -150,7 +150,7 @@ function getPath(el) {
   let index = $node.attr('data-index');
   if (index === 'table') return [];
   let parent = getPath($node.parent());
-  parent.push(index);
+  parent = parent.concat(index.split('.'));
   return parent;
 }
 

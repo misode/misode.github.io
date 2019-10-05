@@ -337,7 +337,7 @@ function generateObject(data, struct, header) {
       $field = generateError('Failed generating "' + field.id + '" field');
     }
     if ($field !== false) {
-      validFields.push(field.id);
+      validFields.push(field.id.split('.')[0]);
       if (field.type === 'array') {
         let color = field.color;
         if (color === undefined) {
@@ -394,15 +394,24 @@ function generateField(data, field, parent) {
   }
 
   let $field;
-  if (data[field.id] === undefined) {
+  let componentData = data;
+  let childs = field.id.split('.');
+  if (childs.length > 1) {
+    componentData = componentData[childs[0]];
+    if (componentData === undefined) {
+      componentData = {};
+    }
+    childs.shift();
+  }
+  if (componentData === undefined) {
     if (field.type === 'object') {
-      data[field.id] = {};
+      componentData[childs[0]] = {};
     } else if (field.type === 'enum' && field.default) {
-      data[field.id] = field.default;
+      componentData[childs[0]] = field.default;
     }
   }
   try {
-    $field = generateComponent(data[field.id], field);
+    $field = generateComponent(componentData[childs[0]], field);
   } catch (e) {
     console.error(e);
     $field = generateError('Failed generating "' + field.id + '" component');
