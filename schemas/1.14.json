@@ -705,7 +705,7 @@
           "id": "slots",
           "type": "set",
           "translate": "$attribute_modifier.slots",
-          "translateValue": "$attribute_modifier.$slot",
+          "translateValue": "$slot",
           "values": [
             "mainhand",
             "offhand",
@@ -811,6 +811,63 @@
               "id": "is_baby",
               "type": "boolean",
               "translate": "$entity.isBaby"
+            }
+          ]
+        },
+        {
+          "id": "equipment",
+          "type": "object",
+          "translate": "$entity.equipment",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "mainhand",
+              "type": "object",
+              "translate": "$slot.mainhand",
+              "color": "dark",
+              "collapse": true,
+              "value": "item"
+            },
+            {
+              "id": "offhand",
+              "type": "object",
+              "translate": "$slot.offhand",
+              "color": "dark",
+              "collapse": true,
+              "value": "item"
+            },
+            {
+              "id": "head",
+              "type": "object",
+              "translate": "$slot.head",
+              "color": "dark",
+              "collapse": true,
+              "value": "item"
+            },
+            {
+              "id": "chest",
+              "type": "object",
+              "translate": "$slot.chest",
+              "color": "dark",
+              "collapse": true,
+              "value": "item"
+            },
+            {
+              "id": "legs",
+              "type": "object",
+              "translate": "$slot.legs",
+              "color": "dark",
+              "collapse": true,
+              "value": "item"
+            },
+            {
+              "id": "feet",
+              "type": "object",
+              "translate": "$slot.feet",
+              "color": "dark",
+              "collapse": true,
+              "value": "item"
             }
           ]
         },

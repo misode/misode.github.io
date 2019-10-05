@@ -173,15 +173,15 @@
 			"multiply_base": "Multiply Base",
 			"multiply_total": "Multiply Total"
 		},
-		"slots": "Slots",
-		"$slot": {
-			"mainhand": "Mainhand",
-			"offhand": "Offhand",
-			"head": "Head",
-			"chest": "Chest",
-			"legs": "Legs",
-			"feet": "Feet"
-		}
+		"slots": "Slots"
+	},
+	"$slot": {
+		"mainhand": "Mainhand",
+		"offhand": "Offhand",
+		"head": "Head",
+		"chest": "Chest",
+		"legs": "Legs",
+		"feet": "Feet"
 	},
 	"$attribute": {
 		"generic_maxHealth": "Max Health",
@@ -249,6 +249,7 @@
 		"isSprinting": "Sprinting",
 		"isSwimming": "Swimming",
 		"isBaby": "Baby",
+		"equipment": "Equipment",
 		"status_effect": "Effects",
 		"status_effect_add": "Add Effect",
 		"status_effect_remove": "Remove Effect"
