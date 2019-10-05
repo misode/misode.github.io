@@ -129,7 +129,8 @@
 			"fill_player_head": "Fill Player Head",
 			"copy_name": "Copy Name",
 			"copy_nbt": "Copy NBT",
-			"apply_bonus": "Apply Bonus"
+			"apply_bonus": "Apply Bonus",
+			"exploration_map": "Exploration Map Properties"
 		},
 		"type": "Function",
 		"count": "Count",
@@ -155,7 +156,12 @@
 		},
 		"bonusMultiplier": "Multiplier",
 		"extra": "Extra",
-		"probability": "Propability"
+		"probability": "Propability",
+		"destination": "Destination",
+		"decoration": "Decoration",
+		"zoom": "Zoom",
+		"searchRadius": "Search Radius (Chunks)",
+		"skipExistingChunks": "Skip Existing Chunks"
 	},
 	"$attribute_modifier": {
 		"attribute": "Attribute",
@@ -295,6 +301,7 @@
 	"condition_remove": "Remove Condition",
 	"enchantment_remove": "Remove Enchantment",
 	"entry_remove": "Remove Entry",
+	"error": "Error",
 	"function_remove": "Remove Function",
 	"attribute_modifier_remove": "Remove Modifier",
 	"operation_remove": "Remove Operation",

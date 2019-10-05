@@ -154,7 +154,12 @@
 		},
 		"bonusMultiplier": "乘数",
 		"extra": "额外值",
-		"probability": "概率"
+		"probability": "概率",
+		"destination": "目标",
+		"decoration": "图标",
+		"zoom": "缩放等级",
+		"searchRadius": "搜寻半径",
+		"skipExistingChunks": "跳过已生成区块"
 	},
 	"$attribute_modifier": {
 		"attribute": "属性",

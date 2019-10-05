@@ -174,7 +174,8 @@
             "minecraft:fill_player_head",
             "minecraft:copy_name",
             "minecraft:copy_nbt",
-            "minecraft:apply_bonus"
+            "minecraft:apply_bonus",
+            "minecraft:exploration_map"
           ]
         },
         {
@@ -249,6 +250,49 @@
           "translate": "$function.limit",
           "require": [
             "minecraft:limit_count"
+          ]
+        },
+        {
+          "id": "destination",
+          "type": "enum",
+          "translate": "$function.destination",
+          "values": "structures",
+          "require": [
+            "minecraft:exploration_map"
+          ]
+        },
+        {
+          "id": "decoration",
+          "type": "enum",
+          "translate": "$function.decoration",
+          "values": "map_icons",
+          "require": [
+            "minecraft:exploration_map"
+          ]
+        },
+        {
+          "id": "zoom",
+          "type": "int",
+          "translate": "$function.zoom",
+          "require": [
+            "minecraft:exploration_map"
+          ]
+        },
+        {
+          "id": "search_radius",
+          "type": "int",
+          "translate": "$function.searchRadius",
+          "require": [
+            "minecraft:exploration_map"
+          ]
+        },
+        {
+          "id": "skip_existing_chunks",
+          "type": "boolean",
+          "translate": "$function.skipExistingChunks",
+          "default": true,
+          "require": [
+            "minecraft:exploration_map"
           ]
         },
         {
@@ -1227,6 +1271,35 @@
       "minecraft:dolphins_grace",
       "minecraft:bad_omen",
       "minecraft:hero_of_the_village"
+    ],
+    "map_icons": [
+      "mansion",
+      "monument",
+      "player",
+      "frame",
+      "red_marker",
+      "blue_marker",
+      "target_x",
+      "target_point",
+      "player_off_map",
+      "player_off_limits",
+      "red_x",
+      "banner_white",
+      "banner_orange",
+      "banner_magenta",
+      "banner_light_blue",
+      "banner_yellow",
+      "banner_lime",
+      "banner_pink",
+      "banner_gray",
+      "banner_light_gray",
+      "banner_cyan",
+      "banner_purple",
+      "banner_blue",
+      "banner_brown",
+      "banner_green",
+      "banner_red",
+      "banner_black"
     ]
   }
 }

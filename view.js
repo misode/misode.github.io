@@ -166,13 +166,13 @@ function generateEnum(data, struct) {
   for (let value of collection) {
     if (typeof value === 'object') {
       if (value.require.includes(correctNamespace(table.type))) {
-        $el.find('select').append(setValueAndName($('<option/>'), correctNamespace(value.value), struct.translateValue));
+        $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.translateValue));
       }
     } else {
-      $el.find('select').append(setValueAndName($('<option/>'), correctNamespace(value), struct.translateValue));
+      $el.find('select').append(setValueAndName($('<option/>'), value, struct.translateValue));
     }
   }
-  $el.find('select').val(correctNamespace(data));
+  $el.find('select').val(collection.includes(data) ? data : correctNamespace(data));
   return $el;
 }
 
