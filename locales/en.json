@@ -243,6 +243,12 @@
 		"nbt": "NBT",
 		"location": "Location",
 		"distance": "Distance",
+		"flags": "Flags",
+		"isOnFire": "On Fire",
+		"isSneaking": "Sneaking",
+		"isSprinting": "Sprinting",
+		"isSwimming": "Swimming",
+		"isBaby": "Baby",
 		"status_effect": "Effects",
 		"status_effect_add": "Add Effect",
 		"status_effect_remove": "Remove Effect"

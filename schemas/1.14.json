@@ -781,6 +781,40 @@
           "collapse": true
         },
         {
+          "id": "flags",
+          "type": "object",
+          "translate": "$entity.flags",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "is_on_fire",
+              "type": "boolean",
+              "translate": "$entity.isOnFire"
+            },
+            {
+              "id": "is_sneaking",
+              "type": "boolean",
+              "translate": "$entity.isSneaking"
+            },
+            {
+              "id": "is_sprinting",
+              "type": "boolean",
+              "translate": "$entity.isSprinting"
+            },
+            {
+              "id": "is_swimming",
+              "type": "boolean",
+              "translate": "$entity.isSwimming"
+            },
+            {
+              "id": "is_baby",
+              "type": "boolean",
+              "translate": "$entity.isBaby"
+            }
+          ]
+        },
+        {
           "id": "effects",
           "type": "map",
           "translate": "$entity.status_effect",
