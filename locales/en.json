@@ -19,7 +19,7 @@
 		"type": "Condition",
 		"chance": "Chance",
 		"looting_multiplier": "Looting Multiplier",
-		"inverted": "Inverted",
+		"inverse": "Inverted",
 		"entity": "Entity",
 		"enchantment": "Enchantment",
 		"chances": "Chances",

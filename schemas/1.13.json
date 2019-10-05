@@ -244,7 +244,7 @@
         {
           "id": "inverse",
           "type": "boolean",
-          "translate": "$condition.inverted",
+          "translate": "$condition.inverse",
           "default": false,
           "require": [
             "minecraft:killed_by_player"

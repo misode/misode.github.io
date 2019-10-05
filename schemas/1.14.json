@@ -49,6 +49,13 @@
           "button": "header"
         },
         {
+          "id": "functions",
+          "type": "array",
+          "translate": "function",
+          "values": "function",
+          "button": "header"
+        },
+        {
           "id": "conditions",
           "type": "array",
           "translate": "condition",
@@ -100,6 +107,15 @@
           "type": "random",
           "translate": "$entry.quality",
           "luckBased": true
+        },
+        {
+          "id": "expand",
+          "type": "boolean",
+          "default": "false",
+          "translate": "$entry.expand",
+          "require": [
+            "minecraft:tag"
+          ]
         },
         {
           "id": "children",
@@ -435,9 +451,9 @@
           ]
         },
         {
-          "id": "inverted",
+          "id": "inverse",
           "type": "boolean",
-          "translate": "$condition.inverted",
+          "translate": "$condition.inverse",
           "default": false,
           "require": [
             "minecraft:killed_by_player"

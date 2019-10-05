@@ -19,7 +19,7 @@
 		"type": "Условие",
 		"chance": "Шанс",
 		"looting_multiplier": "Множитель «Добычи»",
-		"inverted": "Инвертировать",
+		"inverse": "Инвертировать",
 		"entity": "Сущность",
 		"enchantment": "Чары",
 		"chances": "Шансы",
