@@ -403,7 +403,7 @@ function generateField(data, field, parent) {
     }
     childs.shift();
   }
-  if (componentData === undefined) {
+  if (componentData[childs[0]] === undefined) {
     if (field.type === 'object') {
       componentData[childs[0]] = {};
     } else if (field.type === 'enum' && field.default) {
