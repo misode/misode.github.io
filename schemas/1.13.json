@@ -1,0 +1,788 @@
+{
+  "root": {
+    "fields": [
+      {
+        "id": "pools",
+        "type": "array",
+        "translate": "pool",
+        "values": "pool"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "pool",
+      "type": "object",
+      "color": "success",
+      "fields": [
+        {
+          "id": "rolls",
+          "type": "range",
+          "translate": "$pool.rolls"
+        },
+        {
+          "id": "bonus_rolls",
+          "type": "range",
+          "translate": "$pool.bonus_rolls",
+          "luckBased": true
+        },
+        {
+          "id": "entries",
+          "type": "array",
+          "translate": "entry",
+          "values": "entry",
+          "button": "header"
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "translate": "condition",
+          "values": "condition",
+          "button": "header"
+        }
+      ]
+    },
+    {
+      "id": "entry",
+      "type": "object",
+      "color": "light",
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "translate": "$entry.type",
+          "translateValue": "$entry.$type",
+          "default": "minecraft:item",
+          "values": [
+            "minecraft:empty",
+            "minecraft:item",
+            "minecraft:loot_table"
+          ]
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "translate": "$entry.name",
+          "require": [
+            "minecraft:item",
+            "minecraft:loot_table"
+          ]
+        },
+        {
+          "id": "weight",
+          "type": "range",
+          "translate": "$entry.weight"
+        },
+        {
+          "id": "quality",
+          "type": "range",
+          "translate": "$entry.quality",
+          "luckBased": true
+        },
+        {
+          "id": "functions",
+          "type": "array",
+          "translate": "function",
+          "values": "function",
+          "button": "header"
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "translate": "condition",
+          "values": "condition",
+          "button": "header"
+        }
+      ]
+    },
+    {
+      "id": "function",
+      "type": "object",
+      "color": "secondary",
+      "fields": [
+        {
+          "id": "function",
+          "type": "enum",
+          "translate": "$function.type",
+          "translateValue": "$function.$type",
+          "default": "minecraft:set_count",
+          "values": [
+            "minecraft:set_count",
+            "minecraft:set_data",
+            "minecraft:set_damage",
+            "minecraft:set_nbt",
+            "minecraft:set_attributes",
+            "minecraft:enchant_randomly",
+            "minecraft:enchant_with_levels",
+            "minecraft:looting_enchant",
+            "minecraft:furnace_smelt"
+          ]
+        },
+        {
+          "id": "count",
+          "type": "range",
+          "translate": "$function.count",
+          "require": [
+            "minecraft:set_count",
+            "minecraft:looting_enchant"
+          ]
+        },
+        {
+          "id": "data",
+          "type": "range",
+          "translate": "$function.data",
+          "require": [
+            "minecraft:set_data"
+          ]
+        },
+        {
+          "id": "damage",
+          "type": "range",
+          "translate": "$function.damage",
+          "require": [
+            "minecraft:set_damage"
+          ]
+        },
+        {
+          "id": "tag",
+          "type": "nbt",
+          "translate": "$function.nbt",
+          "require": [
+            "minecraft:set_nbt"
+          ]
+        },
+        {
+          "id": "levels",
+          "type": "range",
+          "translate": "$function.levels",
+          "require": [
+            "minecraft:enchant_with_levels"
+          ]
+        },
+        {
+          "id": "treasure",
+          "type": "boolean",
+          "translate": "$function.treasure",
+          "default": false,
+          "require": [
+            "minecraft:enchant_with_levels"
+          ]
+        },
+        {
+          "id": "limit",
+          "type": "int",
+          "translate": "$function.limit",
+          "require": [
+            "minecraft:looting_enchant"
+          ]
+        },
+        {
+          "id": "enchantments",
+          "type": "set",
+          "translate": "$function.enchantments",
+          "translateValue": "$enchantment",
+          "values": "enchantments",
+          "require": [
+            "minecraft:enchant_randomly"
+          ]
+        },
+        {
+          "id": "modifiers",
+          "type": "array",
+          "translate": "attribute_modifier",
+          "button": "field",
+          "values": "attribute_modifier",
+          "require": [
+            "minecraft:set_attributes"
+          ]
+        },
+        {
+          "id": "conditions",
+          "type": "array",
+          "translate": "condition",
+          "values": "condition",
+          "button": "header"
+        }
+      ]
+    },
+    {
+      "id": "condition",
+      "type": "object",
+      "color": "info",
+      "fields": [
+        {
+          "id": "condition",
+          "type": "enum",
+          "translate": "$condition.type",
+          "translateValue": "$condition.$type",
+          "default": "minecraft:random_chance",
+          "values": [
+            "minecraft:random_chance",
+            "minecraft:random_chance_with_looting",
+            "minecraft:killed_by_player",
+            "minecraft:entity_properties",
+            "minecraft:entity_scores"
+          ]
+        },
+        {
+          "id": "chance",
+          "type": "float",
+          "translate": "$condition.chance",
+          "require": [
+            "minecraft:random_chance",
+            "minecraft:random_chance_with_looting"
+          ]
+        },
+        {
+          "id": "looting_multiplier",
+          "type": "float",
+          "translate": "$condition.looting_multiplier",
+          "require": [
+            "minecraft:random_chance_with_looting"
+          ]
+        },
+        {
+          "id": "inverse",
+          "type": "boolean",
+          "translate": "$condition.inverse",
+          "default": false,
+          "require": [
+            "minecraft:killed_by_player"
+          ]
+        },
+        {
+          "id": "entity",
+          "type": "enum",
+          "translate": "$condition.entity",
+          "translateValue": "$source",
+          "default": "this",
+          "values": [
+            "this",
+            "killer",
+            "killer_player"
+          ],
+          "require": [
+            "minecraft:entity_properties",
+            "minecraft:entity_scores"
+          ]
+        },
+        {
+          "id": "scores",
+          "type": "map",
+          "translate": "$condition.score",
+          "values": {
+            "type": "range"
+          },
+          "require":  [
+            "minecraft:entity_scores"
+          ]
+        },
+        {
+          "id": "predicate",
+          "type": "object",
+          "translate": "entity",
+          "value": "entity",
+          "require": [
+            "minecraft:entity_properties"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "attribute_modifier",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "attribute",
+          "type": "enum",
+          "translate": "$attribute_modifier.attribute",
+          "translateValue": "$attribute",
+          "default": "generic.attackDamage",
+          "values": [
+            "generic.maxHealth",
+            "generic.followRange",
+            "generic.knockbackResistance",
+            "generic.movementSpeed",
+            "generic.attackDamage",
+            "generic.armor",
+            "generic.armorToughness",
+            "generic.attackSpeed",
+            "generic.luck",
+            "horse.jumpStrength",
+            "generic.attackKnockback",
+            "generic.flyingSpeed",
+            "zombie.spawnReinforcements"
+          ]
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "translate": "$attribute_modifier.name"
+        },
+        {
+          "id": "amount",
+          "type": "float",
+          "translate": "$attribute_modifier.amount"
+        },
+        {
+          "id": "operation",
+          "type": "enum",
+          "translate": "$attribute_modifier.operation",
+          "translateValue": "$attribute_modifier.$operation",
+          "default": "addition",
+          "values": [
+            "addition",
+            "multiply_base",
+            "multiply_total"
+          ]
+        },
+        {
+          "id": "slots",
+          "type": "set",
+          "translate": "$attribute_modifier.slots",
+          "translateValue": "$attribute_modifier.$slot",
+          "values": [
+            "mainhand",
+            "offhand",
+            "head",
+            "chest",
+            "legs",
+            "feet"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "entity",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "translate": "$entity.type",
+          "translateValue": "",
+          "unset": true,
+          "values": "entity_types"
+        },
+        {
+          "id": "nbt",
+          "type": "nbt",
+          "translate": "$entity.nbt"
+        },
+        {
+          "id": "location",
+          "type": "object",
+          "translate": "$entity.location",
+          "value": "location",
+          "collapse": true
+        },
+        {
+          "id": "distance",
+          "type": "object",
+          "translate": "$entity.distance",
+          "value": "distance",
+          "collapse": true
+        },
+        {
+          "id": "effects",
+          "type": "map",
+          "translate": "$entity.status_effect",
+          "values": {
+            "type": "object",
+            "value": "status_effect"
+          }
+        }
+      ]
+    },
+    {
+      "id": "location",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "position",
+          "type": "object",
+          "translate": "$location.position",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "x",
+              "type": "boundary",
+              "translate": "$location.$position.x"
+            },
+            {
+              "id": "y",
+              "type": "boundary",
+              "translate": "$location.$position.y"
+            },
+            {
+              "id": "z",
+              "type": "boundary",
+              "translate": "$location.$position.z"
+            }
+          ]
+        },
+        {
+          "id": "biome",
+          "type": "enum",
+          "translate": "$location.biome",
+          "translateValue": "",
+          "unset": true,
+          "values": "biomes"
+        },
+        {
+          "id": "feature",
+          "type": "enum",
+          "translate": "$location.feature",
+          "translateValue": "",
+          "unset": true,
+          "values": "structures"
+        },
+        {
+          "id": "dimension",
+          "type": "enum",
+          "translate": "$location.dimension",
+          "translateValue": "$dimension",
+          "unset": true,
+          "values": "dimensions"
+        }
+      ]
+    },
+    {
+      "id": "distance",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "x",
+          "type": "boundary",
+          "translate": "$distance.x"
+        },
+        {
+          "id": "y",
+          "type": "boundary",
+          "translate": "$distance.y"
+        },
+        {
+          "id": "z",
+          "type": "boundary",
+          "translate": "$distance.z"
+        },
+        {
+          "id": "absolute",
+          "type": "boundary",
+          "translate": "$distance.absolute"
+        },
+        {
+          "id": "horizontal",
+          "type": "boundary",
+          "translate": "$distance.horizontal"
+        }
+      ]
+    },
+    {
+      "id": "status_effect",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "amplifier",
+          "type": "range",
+          "translate": "$status_effect.amplifier"
+        },
+        {
+          "id": "duration",
+          "type": "range",
+          "translate": "$status_effect.duration"
+        },
+        {
+          "id": "ambient",
+          "type": "boolean",
+          "translate": "$status_effect.ambient"
+        },
+        {
+          "id": "visible",
+          "type": "boolean",
+          "translate": "$status_effect.visible"
+        }
+      ]
+    }
+  ],
+  "collections": {
+    "entity_types": [
+      "minecraft:area_effect_cloud",
+      "minecraft:armor_stand",
+      "minecraft:arrow",
+      "minecraft:bat",
+      "minecraft:blaze",
+      "minecraft:boat",
+      "minecraft:cat",
+      "minecraft:cave_spider",
+      "minecraft:chest_minecart",
+      "minecraft:chicken",
+      "minecraft:cod",
+      "minecraft:command_block_minecart",
+      "minecraft:cow",
+      "minecraft:creeper",
+      "minecraft:dolphin",
+      "minecraft:donkey",
+      "minecraft:dragon_fireball",
+      "minecraft:drowned",
+      "minecraft:egg",
+      "minecraft:elder_guardian",
+      "minecraft:end_crystal",
+      "minecraft:ender_dragon",
+      "minecraft:ender_pearl",
+      "minecraft:enderman",
+      "minecraft:endermite",
+      "minecraft:evoker",
+      "minecraft:evoker_fangs",
+      "minecraft:experience_bottle",
+      "minecraft:experience_orb",
+      "minecraft:eye_of_ender",
+      "minecraft:falling_block",
+      "minecraft:fireball",
+      "minecraft:firework_rocket",
+      "minecraft:fishing_bobber",
+      "minecraft:furnace_minecart",
+      "minecraft:ghast",
+      "minecraft:giant",
+      "minecraft:guardian",
+      "minecraft:hopper_minecart",
+      "minecraft:horse",
+      "minecraft:husk",
+      "minecraft:illusioner",
+      "minecraft:iron_golem",
+      "minecraft:item",
+      "minecraft:item_frame",
+      "minecraft:leash_knot",
+      "minecraft:lightning_bolt",
+      "minecraft:llama",
+      "minecraft:llama_spit",
+      "minecraft:magma_cube",
+      "minecraft:minecart",
+      "minecraft:mooshroom",
+      "minecraft:mule",
+      "minecraft:ocelot",
+      "minecraft:painting",
+      "minecraft:parrot",
+      "minecraft:phantom",
+      "minecraft:pig",
+      "minecraft:player",
+      "minecraft:polar_bear",
+      "minecraft:potion",
+      "minecraft:pufferfish",
+      "minecraft:rabbit",
+      "minecraft:salmon",
+      "minecraft:sheep",
+      "minecraft:shulker",
+      "minecraft:shulker_bullet",
+      "minecraft:silverfish",
+      "minecraft:skeleton",
+      "minecraft:skeleton_horse",
+      "minecraft:slime",
+      "minecraft:small_fireball",
+      "minecraft:snow_golem",
+      "minecraft:snowball",
+      "minecraft:spawner_minecart",
+      "minecraft:spectral_arrow",
+      "minecraft:spider",
+      "minecraft:squid",
+      "minecraft:stray",
+      "minecraft:tnt",
+      "minecraft:tnt_minecart",
+      "minecraft:trader_llama",
+      "minecraft:trident",
+      "minecraft:tropical_fish",
+      "minecraft:turtle",
+      "minecraft:vex",
+      "minecraft:villager",
+      "minecraft:vindicator",
+      "minecraft:wandering_trader",
+      "minecraft:witch",
+      "minecraft:wither",
+      "minecraft:wither_skeleton",
+      "minecraft:wither_skull",
+      "minecraft:wolf",
+      "minecraft:zombie",
+      "minecraft:zombie_horse",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "enchantments": [
+      "minecraft:aqua_affinity",
+      "minecraft:bane_of_arthropods",
+      "minecraft:blast_protection",
+      "minecraft:channeling",
+      "minecraft:binding_curse",
+      "minecraft:vanishing_curse",
+      "minecraft:depth_strider",
+      "minecraft:efficiency",
+      "minecraft:feather_falling",
+      "minecraft:fire_aspect",
+      "minecraft:fire_protection",
+      "minecraft:flame",
+      "minecraft:fortune",
+      "minecraft:frost_walker",
+      "minecraft:impaling",
+      "minecraft:infinity",
+      "minecraft:knockback",
+      "minecraft:looting",
+      "minecraft:loyalty",
+      "minecraft:luck_of_the_sea",
+      "minecraft:lure",
+      "minecraft:mending",
+      "minecraft:multishot",
+      "minecraft:piercing",
+      "minecraft:power",
+      "minecraft:projectile_protection",
+      "minecraft:protection",
+      "minecraft:punch",
+      "minecraft:quick_charge",
+      "minecraft:respiration",
+      "minecraft:riptide",
+      "minecraft:sharpness",
+      "minecraft:silk_touch",
+      "minecraft:smite",
+      "minecraft:sweeping",
+      "minecraft:thorns",
+      "minecraft:unbreaking"
+    ],
+    "biomes": [
+      "minecraft:badlands",
+      "minecraft:badlands_plateau",
+      "minecraft:bamboo_jungle",
+      "minecraft:bamboo_jungle_hills",
+      "minecraft:beach",
+      "minecraft:birch_forest",
+      "minecraft:birch_forest_hills",
+      "minecraft:cold_ocean",
+      "minecraft:dark_forest",
+      "minecraft:dark_forest_hills",
+      "minecraft:deep_cold_ocean",
+      "minecraft:deep_frozen_ocean",
+      "minecraft:deep_lukewarm_ocean",
+      "minecraft:deep_ocean",
+      "minecraft:deep_warm_ocean",
+      "minecraft:desert",
+      "minecraft:desert_hills",
+      "minecraft:desert_lakes",
+      "minecraft:end_barrens",
+      "minecraft:end_highlands",
+      "minecraft:end_midlands",
+      "minecraft:eroded_badlands",
+      "minecraft:flower_forest",
+      "minecraft:forest",
+      "minecraft:frozen_ocean",
+      "minecraft:frozen_river",
+      "minecraft:giant_spruce_taiga",
+      "minecraft:giant_spruce_taiga_hills",
+      "minecraft:giant_tree_taiga",
+      "minecraft:giant_tree_taiga_hills",
+      "minecraft:gravelly_mountains",
+      "minecraft:ice_spikes",
+      "minecraft:jungle",
+      "minecraft:jungle_edge",
+      "minecraft:jungle_hills",
+      "minecraft:lukewarm_ocean",
+      "minecraft:modified_badlands_plateau",
+      "minecraft:modified_gravelly_mountains",
+      "minecraft:modified_jungle",
+      "minecraft:modified_jungle_edge",
+      "minecraft:modified_wooded_badlands_plateau",
+      "minecraft:mountain_edge",
+      "minecraft:mountains",
+      "minecraft:mushroom_field_shore",
+      "minecraft:mushroom_fields",
+      "minecraft:nether",
+      "minecraft:ocean",
+      "minecraft:plains",
+      "minecraft:river",
+      "minecraft:savanna",
+      "minecraft:savanna_plateau",
+      "minecraft:shattered_savanna",
+      "minecraft:shattered_savanna_plateau",
+      "minecraft:small_end_islands",
+      "minecraft:snowy_beach",
+      "minecraft:snowy_mountains",
+      "minecraft:snowy_taiga",
+      "minecraft:snowy_taiga_hills",
+      "minecraft:snowy_taiga_mountains",
+      "minecraft:snowy_tundra",
+      "minecraft:stone_shore",
+      "minecraft:sunflower_plains",
+      "minecraft:swamp",
+      "minecraft:swamp_hills",
+      "minecraft:taiga",
+      "minecraft:taiga_hills",
+      "minecraft:taiga_mountains",
+      "minecraft:tall_birch_forest",
+      "minecraft:tall_birch_hills",
+      "minecraft:the_end",
+      "minecraft:the_void",
+      "minecraft:warm_ocean",
+      "minecraft:wooded_badlands_plateau",
+      "minecraft:wooded_hills",
+      "minecraft:wooded_mountains"
+    ],
+    "structures": [
+      "pillager_outpost",
+      "mineshaft",
+      "mansion",
+      "jungle_pyramid",
+      "desert_pyramid",
+      "igloo",
+      "shipwreck",
+      "swamp_hut",
+      "stronghold",
+      "monument",
+      "ocean_ruin",
+      "fortress",
+      "endcity",
+      "buried_treasure",
+      "village"
+    ],
+    "dimensions": [
+      "minecraft:overworld",
+      "minecraft:the_nether",
+      "minecraft:the_end"
+    ],
+    "status_effects": [
+      "minecraft:speed",
+      "minecraft:slowness",
+      "minecraft:haste",
+      "minecraft:mining_fatigue",
+      "minecraft:strength",
+      "minecraft:instant_health",
+      "minecraft:instant_damage",
+      "minecraft:jump_boost",
+      "minecraft:nausea",
+      "minecraft:regeneration",
+      "minecraft:resistance",
+      "minecraft:fire_resistance",
+      "minecraft:water_breathing",
+      "minecraft:invisibility",
+      "minecraft:blindness",
+      "minecraft:night_vision",
+      "minecraft:hunger",
+      "minecraft:weakness",
+      "minecraft:poison",
+      "minecraft:wither",
+      "minecraft:health_boost",
+      "minecraft:absorption",
+      "minecraft:saturation",
+      "minecraft:glowing",
+      "minecraft:levitation",
+      "minecraft:luck",
+      "minecraft:unluck",
+      "minecraft:slow_falling",
+      "minecraft:conduit_power",
+      "minecraft:dolphins_grace",
+      "minecraft:bad_omen",
+      "minecraft:hero_of_the_village"
+    ]
+  }
+}

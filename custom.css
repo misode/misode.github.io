@@ -64,3 +64,9 @@ textarea.invalid:focus {
   max-height: 300px;
   overflow-x: hidden;
 }
+
+#source {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}
