@@ -314,8 +314,16 @@ function generateObject(data, struct, header) {
   if (header) {
     $header.appendTo($el);
     $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="' + struct.id + '_remove"></button>');
+    let icon = 'https://cdnjs.cloudflare.com/ajax/libs/octicons/8.5.0/svg/chevron-down.svg';
+    if (data._collapse) {
+      icon = 'https://cdnjs.cloudflare.com/ajax/libs/octicons/8.5.0/svg/chevron-right.svg';
+    }
+    $header.append('<button type="button" class="btn btn-outline-dark mr-3 mb-2 float-left" onclick="collapseComponent(this)"><img src="' + icon + '" alt=""></button>');
   }
-  let $body = $('<div class="card-body"></div>').appendTo($el);
+  let $body = $('<div class="card-body"></div>');
+  if (!data._collapse) {
+    $el.append($body);
+  }
   if (!struct.fields) {
     let child = components.find(e => e.id === struct.value);
     return generateObject(data, child, false);
@@ -354,7 +362,7 @@ function generateObject(data, struct, header) {
     }
   }
   for (let field of Object.keys(data)) {
-    if (!validFields.includes(field)) {
+    if (!field.startsWith('_') && !validFields.includes(field)) {
       delete data[field];
     }
   }
