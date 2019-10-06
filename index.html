@@ -16,24 +16,29 @@
   <link rel="stylesheet" href="custom.css">
 </head>
 <body>
-  <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <span class="navbar-brand mb-0 h1" data-i18n="description"></span>
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item dropdown">
-        <a id="versionLabel" class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown"></a>
-        <div id="versionList" class="dropdown-menu">
-          <a class="dropdown-item" onclick="changeVersion('1.13')">1.13</a>
-          <a class="dropdown-item" onclick="changeVersion('1.14')">1.14</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown">
-          Language
-        </a>
-        <div id="lngList" class="dropdown-menu"></div>
-      </li>
-    </ul>
-    <span class="float-right ml-2"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+      <ul class="navbar-nav mr-md-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a id="versionLabel" class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown"></a>
+          <div id="versionList" class="dropdown-menu">
+            <a class="dropdown-item" onclick="changeVersion('1.13')">1.13</a>
+            <a class="dropdown-item" onclick="changeVersion('1.14')">1.14</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown">
+            Language
+          </a>
+          <div id="lngList" class="dropdown-menu"></div>
+        </li>
+      </ul>
+      <span class="ml-0 ml-md-2"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
+    </div>
   </nav>
   <div class="container d-none">
     <div class="row my-4">
