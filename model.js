@@ -325,7 +325,7 @@ function updateField(el) {
   } else if (type === 'json') {
     value = parseJSONValue(value)
   } else if (type === 'json-list') {
-    let value = [];
+    value = [];
     for (let line of $(el).val().split('\n')) {
       value.push(parseJSONValue(line));
     }
