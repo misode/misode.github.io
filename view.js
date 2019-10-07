@@ -28,37 +28,41 @@ function changeVersion(version) {
 
 function updateView() {
   if (structure) {
-    generateTable();
+    let {out: tableOut, component: $table} = generateTable(table, structure);
+    $('#structure').append($table);
     if (i18next.isInitialized) {
       $('html').localize();
     }
+    $('#source').val(JSON.stringify(tableOut, null, indentation));
   }
-  $('#source').val(JSON.stringify(table, null, indentation));
 }
 
-function generateTable() {
+function generateTable(data, struct) {
+  let out = {};
+  let $el = $('<div/>');
   $('#structure').removeClass('d-none').html('');
 
-  let type = structure.fields.find(e => e.id === 'type');
+  let type = struct.fields.find(e => e.id === 'type');
   if (type) {
     $('.table-type').removeClass('d-none');
     $('#tableType').html('');
     for (let option of type.values) {
       $('#tableType').append(setValueAndName($('<option/>'), option, type.translateValue));
     }
-    $('#tableType').val(table.type ? correctNamespace(table.type) : type.default);
+    $('#tableType').val(data.type ? correctNamespace(data.type) : type.default);
+    out.type = data.type;
   } else {
-    delete table.type;
     $('.table-type').addClass('d-none');
   }
 
-  if (table.pools) {
-    $table = generateComponent(table.pools, structure.fields.find(e => e.id === 'pools'));
-    $('#structure').append($table);
+  if (data.pools) {
+    let {out: outValue, component: $table} = generateComponent(data.pools, struct.fields.find(e => e.id === 'pools'));
+    out.pools = outValue;
+    $el.append($table);
   }
 
   $('#luck-based').attr('checked', luckBased);
-
+  return {out: out, component: $el};
 }
 
 function generateComponent(data, struct) {
@@ -90,7 +94,7 @@ function generateString(data, struct) {
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('input').val(data);
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateBoolean(data, struct) {
@@ -102,7 +106,7 @@ function generateBoolean(data, struct) {
   } else if (data === false) {
     $el.find('[value="false"]').addClass('active');
   }
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateRandom(data, struct) {
@@ -123,7 +127,7 @@ function generateRandom(data, struct) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateRange(data, struct) {
@@ -138,7 +142,7 @@ function generateRange(data, struct) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateBoundary(data, struct) {
@@ -149,7 +153,7 @@ function generateBoundary(data, struct) {
     $el.find('.range.min').val(data.min);
     $el.find('.range.max').val(data.max);
   }
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateEnum(data, struct) {
@@ -173,7 +177,7 @@ function generateEnum(data, struct) {
     }
   }
   $el.find('select').val(collection.includes(data) ? data : correctNamespace(data));
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateSet(data, struct) {
@@ -198,7 +202,7 @@ function generateSet(data, struct) {
     }
     $el.append($setContainer);
   }
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateMap(data, struct) {
@@ -225,7 +229,7 @@ function generateMap(data, struct) {
       $el.append($item);
     }
   }
-  return $el;
+  return {out: data, component: $el};
 }
 
 function setValueAndName($el, value, source) {
@@ -248,7 +252,7 @@ function generateJson(data, struct) {
     data = JSON.stringify(data);
   }
   $el.find('textarea').val(data).keydown(e => preventNewline(e));
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateJsonList(data, struct) {
@@ -269,7 +273,7 @@ function generateJsonList(data, struct) {
     }
   }
   $el.find('textarea').val(jsonList);
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateNbt(data, struct) {
@@ -277,7 +281,7 @@ function generateNbt(data, struct) {
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('textarea').val(data).keydown(e => preventNewline(e));
-  return $el;
+  return {out: data, component: $el};
 }
 
 function generateError(error) {
@@ -289,28 +293,32 @@ function generateError(error) {
   }
   let $el = $('#components').find('[data-type="error"]').clone();
   $el.find('[data-name]').val(message);
-  return $el;
+  return {out: undefined, component: $el};
 }
 
 function generateArray(data, struct) {
+  let out = [];
   if (!data || data.length === 0) {
     return undefined;
   }
   let $el = $('<div/>').addClass('mt-3');
   let child = components.find(e => e.id === struct.values);
   for (let i = 0; i < data.length; i += 1) {
-    let $child = generateObject(data[i], child, true);
+    let {out: outValue, component: $child} = generateObject(data[i], child, true);
+    out.push(outValue);
     $child.attr('data-index', i);
     $child.removeAttr('data-type');
     $el.append($child);
   }
   $el.children().first().removeClass('mt-3');
-  return $el;
+  return {out: out, component: $el};
 }
 
 function generateObject(data, struct, header) {
-  let $el = $('<div/>').addClass('card bg-' + struct.color + ' mt-3');
-  let $header = $('<div class="card-header pb-1"></div>');
+  let out = {};
+  let $el = $('<div/>').addClass('mt-3');
+  let $header = $('<div/>');
+  let $body = $('<div/>');
   if (header) {
     $header.appendTo($el);
     $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="' + struct.id + '_remove"></button>');
@@ -320,7 +328,11 @@ function generateObject(data, struct, header) {
     }
     $header.append('<button type="button" class="btn btn-outline-dark mr-3 mb-2 float-left" onclick="collapseComponent(this)"><img src="' + icon + '" alt=""></button>');
   }
-  let $body = $('<div class="card-body"></div>');
+  if (struct.card !== false) {
+    $el.addClass('card bg-' + struct.color);;
+    $header.addClass('card-header pb-1');
+    $body.addClass('card-body');
+  }
   if (!data._collapse) {
     $el.append($body);
   }
@@ -328,9 +340,7 @@ function generateObject(data, struct, header) {
     let child = components.find(e => e.id === struct.value);
     return generateObject(data, child, false);
   }
-  let validFields = [];
   for (let field of struct.fields) {
-    let $field;
     if (field.collapse) {
       $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button>');
       if (data[field.id] === undefined) {
@@ -338,36 +348,29 @@ function generateObject(data, struct, header) {
         continue;
       }
     }
+    let outValue, $field;
     try {
-      $field = generateField(data, field, struct);
+      ({out: outValue, component: $field} = generateField(data, field, struct));
     } catch (e) {
       console.error(e);
-      $field = generateError('Failed generating "' + field.id + '" field');
+      ({out: outValue, component: $field} = generateError('Failed generating "' + field.id + '" field'));
     }
     if ($field !== false) {
-      validFields.push(field.id.split('.')[0]);
+      out[field.id] = outValue;
       if (field.type === 'array') {
-        let color = field.color;
-        if (color === undefined) {
-          color = components.find(e => e.id === field.values).color;
-        }
+        let color = field.color || components.find(e => e.id === field.values).color;
+        let $button = $('<button type="button" class="btn btn-' + color + ' mr-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
         if (header && field.button === 'header') {
-          $header.append('<button type="button" class="btn btn-' + color + ' mr-3 mb-2 float-left" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
-        }
-        if (field.button === 'field') {
-          $body.append('<button type="button" class="btn btn-' + color + ' mr-3 mt-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
+          $header.append($button.addClass('mb-2 float-left'));
+        } else if (field.button === 'field') {
+          $body.append($button.addClass('mt-3'));
         }
       }
       $body.append($field);
     }
   }
-  for (let field of Object.keys(data)) {
-    if (!field.startsWith('_') && !validFields.includes(field)) {
-      delete data[field];
-    }
-  }
   $body.children().first().removeClass('mt-3');
-  return $el;
+  return {out: out, component: $el};
 }
 
 function generateField(data, field, parent) {
@@ -397,40 +400,33 @@ function generateField(data, field, parent) {
       }
     }
     if (!passing) {
-      return false;
+      return {out: undefined, component: false};
     }
   }
 
   let $field;
-  let componentData = data;
-  let childs = field.id.split('.');
-  if (childs.length > 1) {
-    componentData = componentData[childs[0]];
-    if (componentData === undefined) {
-      componentData = {};
-    }
-    childs.shift();
-  }
-  if (componentData[childs[0]] === undefined) {
+  if (data[field.id] === undefined) {
     if (field.type === 'object') {
-      componentData[childs[0]] = {};
+      data[field.id] = {};
     } else if (field.type === 'enum' && field.default) {
-      componentData[childs[0]] = field.default;
+      data[field.id] = field.default;
     }
   }
   try {
-    $field = generateComponent(componentData[childs[0]], field);
+    let result = generateComponent(data[field.id], field);
+    if (result) {
+      let {out: out, component: $field} = result;
+      if (field.class) {
+        $field.addClass(field.class);
+      }
+      $field.attr('data-index', field.id);
+      return {out: out, component: $field};
+    }
   } catch (e) {
     console.error(e);
-    $field = generateError('Failed generating "' + field.id + '" component');
+    return generateError('Failed generating "' + field.id + '" component');
   }
-  if ($field) {
-    if (field.class) {
-      $field.addClass(field.class);
-    }
-    $field.attr('data-index', field.id);
-  }
-  return $field;
+  return false;
 }
 
 function preventNewline(e) {
