@@ -404,35 +404,47 @@
           ]
         },
         {
-          "id": "parameters.bonusMultiplier",
-          "type": "float",
-          "translate": "$function.bonusMultiplier",
+          "id": "parameters",
+          "type": "object",
+          "translate": "$function.parameters",
+          "color": "secondary",
+          "card": false,
           "require": [
             {
               "function": "minecraft:apply_bonus",
               "formula": "minecraft:uniform_bonus_count"
             }
+          ],
+          "fields": [
+            {
+              "id": "bonusMultiplier",
+              "type": "float",
+              "translate": "$function.bonusMultiplier"
+            }
           ]
         },
         {
-          "id": "parameters.extra",
-          "type": "int",
-          "translate": "$function.extra",
+          "id": "parameters",
+          "type": "object",
+          "translate": "$function.parameters",
+          "color": "secondary",
+          "card": false,
           "require": [
             {
               "function": "minecraft:apply_bonus",
               "formula": "minecraft:binomial_with_bonus_count"
             }
-          ]
-        },
-        {
-          "id": "parameters.probability",
-          "type": "float",
-          "translate": "$function.probability",
-          "require": [
+          ],
+          "fields": [
             {
-              "function": "minecraft:apply_bonus",
-              "formula": "minecraft:binomial_with_bonus_count"
+              "id": "extra",
+              "type": "int",
+              "translate": "$function.extra"
+            },
+            {
+              "id": "probability",
+              "type": "float",
+              "translate": "$function.probability"
             }
           ]
         },

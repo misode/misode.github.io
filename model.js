@@ -411,3 +411,15 @@ function parseJSONValue(value) {
   }
   return value;
 }
+
+function collapseComponent(el) {
+  let path = getPath(el);
+  let field = path.pop();
+  let node = getNode(path);
+  if (node[field]._collapse) {
+    delete node[field]._collapse
+  } else {
+    node[field]._collapse = true;
+  }
+  invalidated();
+}
