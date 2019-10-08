@@ -283,7 +283,7 @@ function updateField(el) {
   let type = getType(el);
   let value = undefined;
 
-  if (type === 'string' || type === 'int' || type === 'float' || type === 'enum' || type === 'json' || type === 'nbt' || type === 'chance-list') {
+  if (type === 'string' || type === 'int' || type === 'float' || type === 'enum' || type === 'json' || type === 'nbt' || type === 'string-list' || type === 'chance-list') {
     value = $(el).val();
   }
   if (type === 'int') {
@@ -296,19 +296,21 @@ function updateField(el) {
     if (isNaN(value)) {
       value = '';
     }
-  } else if (type === 'chance-list') {
-    value = '[' + value + ']';
-    try {
-      value = JSON.parse(value);
-      for (let i = 0; i < value.length; i += 1) {
+  } else if (type === 'string-list' || type === 'chance-list') {
+    value = value.split(',');
+    for (let i = 0; i < value.length; i += 1) {
+      value[i] = value[i].trim();
+      if (type === 'chance-list') {
+        if (isNaN(value[i])) {
+          value = [];
+          break;
+        }
         if (value[i] > 1) {
           value[i] = 1;
         } else if (value[i] < 0) {
           value[i] = 0;
         }
       }
-    } catch(e) {
-      value = [];
     }
   } else if (type === 'enum') {
     if (value === 'unset') {

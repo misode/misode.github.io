@@ -129,6 +129,7 @@
 			"fill_player_head": "Fill Player Head",
 			"copy_name": "Copy Name",
 			"copy_nbt": "Copy NBT",
+			"copy_state": "Copy Block States",
 			"apply_bonus": "Apply Bonus",
 			"exploration_map": "Exploration Map Properties",
 			"set_stew_effect": "Set Stew Effect"
@@ -143,6 +144,8 @@
 		"levels": "Levels",
 		"treasure": "Treasure",
 		"limit": "Limit",
+		"block": "Block",
+		"properties": "Properties",
 		"entity": "Entity",
 		"source": "Source",
 		"replace": "Replace",

@@ -70,6 +70,7 @@ function generateComponent(data, struct) {
     case 'string': return generateString(data, struct);
     case 'int': return generateString(data, struct);
     case 'float': return generateString(data, struct);
+    case 'string-list': return generateString(data, struct);
     case 'chance-list': return generateString(data, struct);
     case 'boolean': return generateBoolean(data, struct);
     case 'random': return generateRandom(data, struct);
