@@ -207,6 +207,7 @@ function generateSet(data, struct) {
 
 function generateMap(data, struct) {
   let $el = $('#components').find('[data-type="map"]').clone();
+  let out = {};
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
   $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
@@ -216,7 +217,7 @@ function generateMap(data, struct) {
       let field = struct.values;
       field.id = key;
       field.translate = key;
-      let $item = generateComponent(data[key], field);;
+      let {out: outValue, component: $item} = generateComponent(data[key], field);
       if (field.type === 'object') {
         let $header = $('<div class="card-header pb-1"></div>');
         $header.append(('<span class="input-group-text mr-3 mb-2 float-left" data-i18n="' + field.translate + '"></span>'));
@@ -225,11 +226,12 @@ function generateMap(data, struct) {
       } else {
         $item.append('<div class="input-group-append"><button class="btn btn-outline-danger bg-light" type="button" onclick="removeFromMap(this)" data-i18n="remove"></button></div>');
       }
+      out[field.id] = outValue;
       $item.attr('data-index', field.id);
       $el.append($item);
     }
   }
-  return {out: data, component: $el};
+  return {out: out, component: $el};
 }
 
 function setValueAndName($el, value, source) {
