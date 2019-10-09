@@ -258,7 +258,9 @@
 		"count": "数量",
 		"durability": "耐久度",
 		"potion": "药水",
-		"nbt": "NBT"
+		"nbt": "NBT",
+		"enchantment": "附魔",
+		"levels": "等级"
 	},
 	"2_spaces": "2 空格缩进",
 	"4_spaces": "4 空格缩进",

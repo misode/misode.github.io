@@ -1059,6 +1059,32 @@
           "id": "nbt",
           "type": "nbt",
           "translate": "$item.nbt"
+        },
+        {
+          "id": "enchantments",
+          "type": "array",
+          "translate": "enchantment",
+          "button": "field",
+          "values": "enchantment"
+        }
+      ]
+    },
+    {
+      "id": "enchantment",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "enchantment",
+          "type": "enum",
+          "translate": "$item.enchantment",
+          "translateValue": "$enchantment",
+          "values": "enchantments"
+        },
+        {
+          "id": "levels",
+          "type": "range",
+          "translate": "$item.levels"
         }
       ]
     },

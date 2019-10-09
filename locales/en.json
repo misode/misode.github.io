@@ -291,13 +291,16 @@
 		"count": "Count",
 		"durability": "Durability",
 		"potion": "Potion",
-		"nbt": "NBT"
+		"nbt": "NBT",
+		"enchantment": "Enchantment",
+		"levels": "Levels"
 	},
 	"2_spaces": "2 Spaces",
 	"4_spaces": "4 Spaces",
 	"child_add": "Add Child",
 	"condition_add": "Add Condition",
 	"enchantment_add": "Add Enchantment",
+	"stored_enchantment_add": "Add Stored Enchantment",
 	"entry_add": "Add Entry",
 	"function_add": "Add Function",
 	"attribute_modifier_add": "Add Modifier",
