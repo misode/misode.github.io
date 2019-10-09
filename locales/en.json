@@ -3,6 +3,7 @@
 		"$type": {
 			"alternative": "Alternative",
 			"inverted": "Inverted",
+			"reference": "Reference",
 			"entity_properties": "Entity Properties",
 			"block_state_propery": "Block Properties",
 			"match_tool": "Tool Properties",
@@ -17,6 +18,7 @@
 			"survives_explosion": "Survives Explosion"
 		},
 		"type": "Condition",
+		"name": "Predicate Name",
 		"chance": "Chance",
 		"looting_multiplier": "Looting Multiplier",
 		"inverse": "Inverted",

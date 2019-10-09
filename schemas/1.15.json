@@ -488,6 +488,7 @@
           "values": [
             "minecraft:alternative",
             "minecraft:inverted",
+            "minecraft:reference",
             "minecraft:entity_properties",
             {
               "value": "minecraft:block_state_propery",
@@ -515,6 +516,14 @@
               "value": "survives_explosion",
               "require": ["minecraft:block"]
             }
+          ]
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "translate": "$condition.name",
+          "require": [
+            "minecraft:reference"
           ]
         },
         {
