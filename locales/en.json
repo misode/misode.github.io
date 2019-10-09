@@ -266,7 +266,28 @@
 		},
 		"biome": "Biome",
 		"feature": "Feature",
-		"dimension": "Dimension"
+		"dimension": "Dimension",
+		"light": "Light",
+		"$light": {
+			"light": "Visible Level"
+		},
+		"block": "Block",
+		"$block": {
+			"block": "Block ID",
+			"tag": "Block Tag",
+			"nbt": "NBT",
+			"state": "Block State",
+			"state_add": "Add Block State",
+			"state_remove": "Remove Block State"
+		},
+		"fluid": "Fluid",
+		"$fluid": {
+			"fluid": "Fluid ID",
+			"tag": "Fluid Tag",
+			"state": "Fluid State",
+			"state_add": "Add Fluid State",
+			"state_remove": "Remove Fluid State"
+		}
 	},
 	"$distance": {
 		"x": "X",

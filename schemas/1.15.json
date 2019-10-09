@@ -963,6 +963,78 @@
           "translateValue": "$dimension",
           "unset": true,
           "values": "dimensions"
+        },
+        {
+          "id": "light",
+          "type": "object",
+          "translate": "$location.light",
+          "card": false,
+          "fields": [
+            {
+              "id": "light",
+              "type": "range",
+              "translate": "$location.$light.light"
+            }
+          ]
+        },
+        {
+          "id": "block",
+          "type": "object",
+          "translate": "$location.block",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "block",
+              "type": "string",
+              "translate": "$location.$block.block"
+            },
+            {
+              "id": "tag",
+              "type": "string",
+              "translate": "$location.$block.tag"
+            },
+            {
+              "id": "nbt",
+              "type": "nbt",
+              "translate": "$location.$block.nbt"
+            },
+            {
+              "id": "state",
+              "type": "map",
+              "translate": "$location.$block.state",
+              "values": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "id": "fluid",
+          "type": "object",
+          "translate": "$location.fluid",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "fluid",
+              "type": "string",
+              "translate": "$location.$fluid.fluid"
+            },
+            {
+              "id": "tag",
+              "type": "string",
+              "translate": "$location.$fluid.tag"
+            },
+            {
+              "id": "state",
+              "type": "map",
+              "translate": "$location.$fluid.state",
+              "values": {
+                "type": "string"
+              }
+            }
+          ]
         }
       ]
     },
