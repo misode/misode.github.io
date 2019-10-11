@@ -3,6 +3,7 @@
 		"$type": {
 			"alternative": "Alternative",
 			"inverted": "Inverted",
+			"reference": "Reference",
 			"entity_properties": "Entity Properties",
 			"block_state_propery": "Block Properties",
 			"match_tool": "Tool Properties",
@@ -17,6 +18,7 @@
 			"survives_explosion": "Survives Explosion"
 		},
 		"type": "Condition",
+		"name": "Predicate Name",
 		"chance": "Chance",
 		"looting_multiplier": "Looting Multiplier",
 		"inverse": "Inverted",
@@ -129,6 +131,7 @@
 			"fill_player_head": "Fill Player Head",
 			"copy_name": "Copy Name",
 			"copy_nbt": "Copy NBT",
+			"copy_state": "Copy Block States",
 			"apply_bonus": "Apply Bonus",
 			"exploration_map": "Exploration Map Properties",
 			"set_stew_effect": "Set Stew Effect"
@@ -143,6 +146,8 @@
 		"levels": "Levels",
 		"treasure": "Treasure",
 		"limit": "Limit",
+		"block": "Block",
+		"properties": "Properties",
 		"entity": "Entity",
 		"source": "Source",
 		"replace": "Replace",
@@ -263,7 +268,28 @@
 		},
 		"biome": "Biome",
 		"feature": "Feature",
-		"dimension": "Dimension"
+		"dimension": "Dimension",
+		"light": "Light",
+		"$light": {
+			"light": "Visible Level"
+		},
+		"block": "Block",
+		"$block": {
+			"block": "Block ID",
+			"tag": "Block Tag",
+			"nbt": "NBT",
+			"state": "Block State",
+			"state_add": "Add Block State",
+			"state_remove": "Remove Block State"
+		},
+		"fluid": "Fluid",
+		"$fluid": {
+			"fluid": "Fluid ID",
+			"tag": "Fluid Tag",
+			"state": "Fluid State",
+			"state_add": "Add Fluid State",
+			"state_remove": "Remove Fluid State"
+		}
 	},
 	"$distance": {
 		"x": "X",
@@ -288,13 +314,16 @@
 		"count": "Count",
 		"durability": "Durability",
 		"potion": "Potion",
-		"nbt": "NBT"
+		"nbt": "NBT",
+		"enchantment": "Enchantment",
+		"levels": "Levels"
 	},
 	"2_spaces": "2 Spaces",
 	"4_spaces": "4 Spaces",
 	"child_add": "Add Child",
 	"condition_add": "Add Condition",
 	"enchantment_add": "Add Enchantment",
+	"stored_enchantment_add": "Add Stored Enchantment",
 	"entry_add": "Add Entry",
 	"function_add": "Add Function",
 	"attribute_modifier_add": "Add Modifier",
