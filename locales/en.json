@@ -173,7 +173,7 @@
 			"multiply_base": "Multiply Base",
 			"multiply_total": "Multiply Total"
 		},
-		"slots": "Slots"
+		"slot": "Slots"
 	},
 	"$slot": {
 		"mainhand": "Mainhand",

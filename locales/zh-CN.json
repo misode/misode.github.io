@@ -170,7 +170,7 @@
 			"multiply_base": "乘以数额",
 			"multiply_total": "乘以（数额 + 1）"
 		},
-		"slots": "栏位",
+		"slot": "栏位",
 		"$slot": {
 			"mainhand": "主手",
 			"offhand": "副手",

@@ -338,9 +338,9 @@
           ]
         },
         {
-          "id": "slots",
+          "id": "slot",
           "type": "set",
-          "translate": "$attribute_modifier.slots",
+          "translate": "$attribute_modifier.slot",
           "translateValue": "$attribute_modifier.$slot",
           "values": [
             "mainhand",
