@@ -174,6 +174,7 @@
             "minecraft:fill_player_head",
             "minecraft:copy_name",
             "minecraft:copy_nbt",
+            "minecraft:copy_state",
             "minecraft:apply_bonus",
             "minecraft:exploration_map",
             "minecraft:set_stew_effect"
@@ -307,15 +308,31 @@
           ]
         },
         {
+          "id": "block",
+          "type": "string",
+          "translate": "$function.block",
+          "require":  [
+            "minecraft:copy_state"
+          ]
+        },
+        {
+          "id": "properties",
+          "type": "string-list",
+          "translate": "$function.properties",
+          "require":  [
+            "minecraft:copy_state"
+          ]
+        },
+        {
           "id": "entity",
           "type": "enum",
           "translate": "$function.entity",
           "translateValue": "$source",
-          "default": "this",
+          "default": "minecraft:this",
           "values": [
-            "this",
-            "killer",
-            "killer_player"
+            "minecraft:this",
+            "minecraft:killer",
+            "minecraft:killer_player"
           ],
           "require": [
             "minecraft:set_name",
@@ -328,12 +345,12 @@
           "type": "enum",
           "translate": "$function.source",
           "translateValue": "$source",
-          "default": "this",
+          "default": "minecraft:this",
           "values": [
-            "block_entity",
-            "this",
-            "killer",
-            "killer_player"
+            "minecraft:block_entity",
+            "minecraft:this",
+            "minecraft:killer",
+            "minecraft:killer_player"
           ],
           "require": [
             "minecraft:copy_name",
@@ -471,6 +488,7 @@
           "values": [
             "minecraft:alternative",
             "minecraft:inverted",
+            "minecraft:reference",
             "minecraft:entity_properties",
             {
               "value": "minecraft:block_state_propery",
@@ -498,6 +516,14 @@
               "value": "survives_explosion",
               "require": ["minecraft:block"]
             }
+          ]
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "translate": "$condition.name",
+          "require": [
+            "minecraft:reference"
           ]
         },
         {
@@ -714,9 +740,9 @@
           ]
         },
         {
-          "id": "slot",
+          "id": "slots",
           "type": "set",
-          "translate": "$attribute_modifier.slot",
+          "translate": "$attribute_modifier.slots",
           "translateValue": "$slot",
           "values": [
             "mainhand",
@@ -946,6 +972,78 @@
           "translateValue": "$dimension",
           "unset": true,
           "values": "dimensions"
+        },
+        {
+          "id": "light",
+          "type": "object",
+          "translate": "$location.light",
+          "card": false,
+          "fields": [
+            {
+              "id": "light",
+              "type": "range",
+              "translate": "$location.$light.light"
+            }
+          ]
+        },
+        {
+          "id": "block",
+          "type": "object",
+          "translate": "$location.block",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "block",
+              "type": "string",
+              "translate": "$location.$block.block"
+            },
+            {
+              "id": "tag",
+              "type": "string",
+              "translate": "$location.$block.tag"
+            },
+            {
+              "id": "nbt",
+              "type": "nbt",
+              "translate": "$location.$block.nbt"
+            },
+            {
+              "id": "state",
+              "type": "map",
+              "translate": "$location.$block.state",
+              "values": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "id": "fluid",
+          "type": "object",
+          "translate": "$location.fluid",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "fluid",
+              "type": "string",
+              "translate": "$location.$fluid.fluid"
+            },
+            {
+              "id": "tag",
+              "type": "string",
+              "translate": "$location.$fluid.tag"
+            },
+            {
+              "id": "state",
+              "type": "map",
+              "translate": "$location.$fluid.state",
+              "values": {
+                "type": "string"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1064,6 +1162,13 @@
           "id": "enchantments",
           "type": "array",
           "translate": "enchantment",
+          "button": "field",
+          "values": "enchantment"
+        },
+        {
+          "id": "stored_enchantments",
+          "type": "array",
+          "translate": "stored_enchantment",
           "button": "field",
           "values": "enchantment"
         }
