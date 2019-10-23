@@ -178,6 +178,9 @@ function generateEnum(data, struct) {
     }
   }
   $el.find('select').val(collection.includes(data) ? data : correctNamespace(data));
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translateValue + '.' + data.replace(/.*:/, '')));
+  }
   return {out: data, component: $el};
 }
 
@@ -430,6 +433,12 @@ function generateField(data, field, parent) {
     return generateError('Failed generating "' + field.id + '" component');
   }
   return false;
+}
+
+function generateTooltip(str) {
+  let $el = $('<button type="button" class="btn btn-circle ml-2" data-toggle="tooltip">?</button>');
+  $el.tooltip({title: i18next.t('$help.' + str)});
+  return $el;
 }
 
 function preventNewline(e) {

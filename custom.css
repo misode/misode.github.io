@@ -1,4 +1,18 @@
 
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1;
+    margin: auto;
+    background-color: #E9ECEF;
+    border-width: 1px;
+    border-color: #CED4DA;
+}
+
 .card.bg-info {
   background-color: #91cdd6 !important;
   color: black !important;
