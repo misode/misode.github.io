@@ -1,4 +1,18 @@
 {
+	"$help": {
+		"$entry": {
+			"$type": {
+				"empty": "Adds nothing to the pool",
+				"item": "Adds a single item",
+				"tag": "Adds the contents of an item tag",
+				"loot_table": "Adds the contents of another loot table",
+				"alternatives": "Tests conditions of the child entries and executes the first that can run",
+				"sequence": "Executes child entries until the first one that can't run due to conditions",
+				"group": "Executes all child entries when own conditions pass",
+				"dynamic": "Gets block specific drops"
+			}
+		}
+	},
 	"$condition": {
 		"$type": {
 			"alternative": "Alternative",
