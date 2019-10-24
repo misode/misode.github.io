@@ -47,6 +47,7 @@
 			"match_tool": "Свойства инструмента",
 			"random_chance": "Случайность",
 			"random_chance_with_looting": "Случайность с «Добычей»",
+			"reference": "Reference",
 			"survives_explosion": "Переживает взрыв",
 			"table_bonus": "Бонус таблицы",
 			"weather_check": "Погода"
@@ -64,6 +65,7 @@
 		"item": "Предмет",
 		"location": "Местоположение",
 		"looting_multiplier": "Множитель «Добычи»",
+		"name": "Predicate Name",
 		"objective": "Задача",
 		"raining": "Дождь",
 		"score": "Счёт",
@@ -89,6 +91,13 @@
 		"overworld": "Обычный мир",
 		"the_end": "Энд",
 		"the_nether": "Незер"
+	},
+	"$distance": {
+		"absolute": "Absolute",
+		"horizontal": "Horizontal",
+		"x": "X",
+		"y": "Y",
+		"z": "Z"
 	},
 	"$enchantment": {
 		"aqua_affinity": "Подводник",
@@ -130,8 +139,19 @@
 		"vanishing_curse": "Проклятие утраты"
 	},
 	"$entity": {
+		"distance": "Distance",
+		"equipment": "Equipment",
+		"flags": "Flags",
+		"isBaby": "Baby",
+		"isOnFire": "On Fire",
+		"isSneaking": "Sneaking",
+		"isSprinting": "Sprinting",
+		"isSwimming": "Swimming",
 		"location": "Местоположение",
 		"nbt": "NBT",
+		"status_effect": "Effects",
+		"status_effect_add": "Add Effect",
+		"status_effect_remove": "Remove Effect",
 		"type": "Сущность"
 	},
 	"$entry": {
@@ -161,8 +181,10 @@
 			"apply_bonus": "Применить бонус",
 			"copy_name": "Скопировать имя",
 			"copy_nbt": "Скопировать NBT",
+			"copy_state": "Copy Block States",
 			"enchant_randomly": "Наложить случайные чары",
 			"enchant_with_levels": "Наложить чары с уровнем",
+			"exploration_map": "Exploration Map Properties",
 			"explosion_decay": "Разрушить взрывом",
 			"fill_player_head": "Задать скин голове игрока",
 			"furnace_smelt": "Расплавить в печи",
@@ -172,14 +194,20 @@
 			"set_contents": "Задать содержимое",
 			"set_count": "Задать количество",
 			"set_damage": "Задать повреждение",
+			"set_data": "Set Data",
 			"set_lore": "Задать описание",
 			"set_name": "Задать имя",
-			"set_nbt": "Задать NBT"
+			"set_nbt": "Задать NBT",
+			"set_stew_effect": "Set Stew Effect"
 		},
 		"block": "Блок",
+		"bonusMultiplier": "Multiplier",
 		"bonus_multiplier": "Множитель",
 		"count": "Количество",
 		"damage": "Повреждение",
+		"data": "Data",
+		"decoration": "Decoration",
+		"destination": "Destination",
 		"enchantment": "Чары",
 		"enchantments": "Чары",
 		"entity": "Сущность",
@@ -191,10 +219,14 @@
 		"name": "Имя",
 		"nbt": "NBT",
 		"probability": "Вероятность",
+		"properties": "Properties",
 		"replace": "Заменить старое",
+		"searchRadius": "Search Radius (Chunks)",
+		"skipExistingChunks": "Skip Existing Chunks",
 		"source": "Источник",
 		"treasure": "Чары-сокровища",
-		"type": "Функция"
+		"type": "Функция",
+		"zoom": "Zoom"
 	},
 	"$item": {
 		"count": "Количество",
@@ -207,14 +239,35 @@
 		"tag": "Тег"
 	},
 	"$location": {
+		"$block": {
+			"block": "Block ID",
+			"nbt": "NBT",
+			"state": "Block State",
+			"state_add": "Add Block State",
+			"state_remove": "Remove Block State",
+			"tag": "Block Tag"
+		},
+		"$fluid": {
+			"fluid": "Fluid ID",
+			"state": "Fluid State",
+			"state_add": "Add Fluid State",
+			"state_remove": "Remove Fluid State",
+			"tag": "Fluid Tag"
+		},
+		"$light": {
+			"light": "Visible Level"
+		},
 		"$position": {
 			"x": "X",
 			"y": "Y",
 			"z": "Z"
 		},
 		"biome": "Биом",
+		"block": "Block",
 		"dimension": "Измерение",
 		"feature": "Строение",
+		"fluid": "Fluid",
+		"light": "Light",
 		"position": "Позиция"
 	},
 	"$nbt_operation": {
@@ -231,6 +284,10 @@
 		"bonus_rolls": "Бонусных бросков",
 		"rolls": "Бросков"
 	},
+	"$potion_effect": {
+		"duration": "Duration",
+		"type": "Effect"
+	},
 	"$range": {
 		"binomial": "Биномиальное распределение",
 		"exact": "Число",
@@ -240,11 +297,25 @@
 		"p": "p",
 		"range": "Диапазон"
 	},
+	"$slot": {
+		"chest": "Chest",
+		"feet": "Feet",
+		"head": "Head",
+		"legs": "Legs",
+		"mainhand": "Mainhand",
+		"offhand": "Offhand"
+	},
 	"$source": {
 		"block_entity": "Блок-сущность",
 		"killer": "Убийца",
 		"killer_player": "Игрок-убийца",
 		"this": "Текущая"
+	},
+	"$status_effect": {
+		"ambient": "Ambient",
+		"amplifier": "Amplifier",
+		"duration": "Duration",
+		"visible": "Visible"
 	},
 	"$table": {
 		"$type": {
@@ -271,6 +342,7 @@
 	"enchantment_remove": "Удалить чары",
 	"entry_add": "Добавить запись",
 	"entry_remove": "Удалить запись",
+	"error": "Error",
 	"false": "Нет",
 	"function_add": "Добавить функцию",
 	"function_remove": "Удалить функцию",
@@ -281,9 +353,12 @@
 	"nbt_operation_remove": "Удалить действие",
 	"pool_add": "Добавить пул",
 	"pool_remove": "Удалить пул",
+	"potion_effect_add": "Add Effect",
+	"potion_effect_remove": "Remove Effect",
 	"remove": "Удалить",
 	"share": "Поделиться",
 	"show_source": "Показать источник",
+	"stored_enchantment_add": "Add Stored Enchantment",
 	"tabs": "Табуляция",
 	"term_add": "Добавить выражение",
 	"term_remove": "Удалить выражение",
