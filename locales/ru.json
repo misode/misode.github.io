@@ -1,67 +1,101 @@
 {
+	"$attribute": {
+		"generic_armor": "Броня",
+		"generic_armorToughness": "Твёрдость брони",
+		"generic_attackDamage": "Урон",
+		"generic_attackKnockback": "Отбрасывание",
+		"generic_attackSpeed": "Скорость атаки",
+		"generic_flyingSpeed": "Скорость полёта",
+		"generic_followRange": "Диапазон преследования моба",
+		"generic_knockbackResistance": "Сопротивление отбрасыванию",
+		"generic_luck": "Удача",
+		"generic_maxHealth": "Максимальное здоровье",
+		"generic_movementSpeed": "Скорость",
+		"horse_jumpStrength": "Сила прыжка лошади",
+		"zombie_spawnReinforcements": "Подкрепление зомби"
+	},
+	"$attribute_modifier": {
+		"$operation": {
+			"addition": "Прибавление",
+			"multiply_base": "Умножение базового",
+			"multiply_total": "Умножение общего"
+		},
+		"$slot": {
+			"chest": "Тело",
+			"feet": "Стопы",
+			"head": "Голова",
+			"legs": "Ноги",
+			"mainhand": "Ведущая рука",
+			"offhand": "Вторая рука"
+		},
+		"amount": "Количество",
+		"attribute": "Атрибут",
+		"name": "Имя",
+		"operation": "Действие",
+		"slot": "Ячейки"
+	},
 	"$condition": {
 		"$type": {
 			"alternative": "Выбор",
-			"inverted": "Инвертирование",
-			"entity_properties": "Свойства сущности",
 			"block_state_propery": "Свойства блока",
-			"match_tool": "Свойства инструмента",
 			"damage_source_properties": "Источник урона",
-			"location_check": "Местоположение",
-			"weather_check": "Погода",
+			"entity_properties": "Свойства сущности",
 			"entity_scores": "Счёты сущности",
+			"inverted": "Инвертирование",
+			"killed_by_player": "Убит игроком",
+			"location_check": "Местоположение",
+			"match_tool": "Свойства инструмента",
 			"random_chance": "Случайность",
 			"random_chance_with_looting": "Случайность с «Добычей»",
+			"survives_explosion": "Переживает взрыв",
 			"table_bonus": "Бонус таблицы",
-			"killed_by_player": "Убит игроком",
-			"survives_explosion": "Переживает взрыв"
+			"weather_check": "Погода"
 		},
-		"type": "Условие",
-		"chance": "Шанс",
-		"looting_multiplier": "Множитель «Добычи»",
-		"inverse": "Инвертировать",
-		"entity": "Сущность",
-		"enchantment": "Чары",
-		"chances": "Шансы",
-		"raining": "Дождь",
-		"thundering": "Гроза",
 		"block": "Блок",
 		"block_state": "состояние блока",
 		"block_state_add": "Добавить состояние блока",
 		"block_state_remove": "Удалить состояние блока",
+		"chance": "Шанс",
+		"chances": "Шансы",
+		"damage_source": "Повреждение",
+		"enchantment": "Чары",
+		"entity": "Сущность",
+		"inverse": "Инвертировать",
+		"item": "Предмет",
+		"location": "Местоположение",
+		"looting_multiplier": "Множитель «Добычи»",
 		"objective": "Задача",
+		"raining": "Дождь",
 		"score": "Счёт",
 		"score_add": "Добавить счёт",
 		"score_remove": "Удалить счёт",
-		"location": "Местоположение",
-		"item": "Предмет",
-		"damage_source": "Повреждение",
-		"term": "Выражение"
+		"term": "Выражение",
+		"thundering": "Гроза",
+		"type": "Условие"
 	},
 	"$damage_source": {
-		"is_projectile": "Снаряд",
+		"bypasses_armor": "Обход брони",
+		"bypasses_invulnerability": "Бездна",
+		"bypasses_magic": "Голод",
+		"direct_entity": "Сущность-причина урона",
 		"is_explosion": "Взрыв",
 		"is_fire": "Огонь",
-		"is_magic": "Магия",
 		"is_lightning": "Молния",
-		"bypasses_magic": "Голод",
-		"bypasses_invulnerability": "Бездна",
-		"bypasses_armor": "Обход брони",
-		"direct_entity": "Сущность-причина урона",
+		"is_magic": "Магия",
+		"is_projectile": "Снаряд",
 		"source_entity": "Сущность-источник урона"
 	},
 	"$dimension": {
 		"overworld": "Обычный мир",
-		"the_nether": "Незер",
-		"the_end": "Энд"
+		"the_end": "Энд",
+		"the_nether": "Незер"
 	},
 	"$enchantment": {
 		"aqua_affinity": "Подводник",
 		"bane_of_arthropods": "Бич членистоногих",
+		"binding_curse": "Проклятие несъёмности",
 		"blast_protection": "Взрывоустойчивость",
 		"channeling": "Громовержец",
-		"binding_curse": "Проклятие несъёмности",
-		"vanishing_curse": "Проклятие утраты",
 		"depth_strider": "Подводная ходьба",
 		"efficiency": "Эффективность",
 		"feather_falling": "Невесомость",
@@ -92,201 +126,167 @@
 		"smite": "Небесная кара",
 		"sweeping": "Разящий клинок",
 		"thorns": "Шипы",
-		"unbreaking": "Прочность"
+		"unbreaking": "Прочность",
+		"vanishing_curse": "Проклятие утраты"
+	},
+	"$entity": {
+		"location": "Местоположение",
+		"nbt": "NBT",
+		"type": "Сущность"
 	},
 	"$entry": {
 		"$type": {
-			"empty": "Ничего",
-			"item": "Предмет",
-			"tag": "Тег предметов",
-			"loot_table": "Таблица добычи",
 			"alternatives": "Выбор",
-			"sequence": "Последовательность",
+			"dynamic": "Динамический",
+			"empty": "Ничего",
 			"group": "Группа",
-			"dynamic": "Динамический"
+			"item": "Предмет",
+			"loot_table": "Таблица добычи",
+			"sequence": "Последовательность",
+			"tag": "Тег предметов"
 		},
-		"type": "Тип",
-		"name": "ID",
 		"expand": "Отдельно",
-		"weight": "Вес",
-		"quality": "Качество"
+		"name": "ID",
+		"quality": "Качество",
+		"type": "Тип",
+		"weight": "Вес"
 	},
 	"$function": {
+		"$formula": {
+			"binomial_with_bonus_count": "Биноминальное распределение",
+			"ore_drops": "Добыча руд",
+			"uniform_bonus_count": "Равномерное распределение"
+		},
 		"$type": {
-			"set_count": "Задать количество",
-			"set_damage": "Задать повреждение",
-			"set_name": "Задать имя",
-			"set_lore": "Задать описание",
-			"set_nbt": "Задать NBT",
-			"set_attributes": "Задать атрибуты",
-			"set_contents": "Задать содержимое",
-			"enchant_randomly": "Наложить случайные чары",
-			"enchant_with_levels": "Наложить чары с уровнем",
-			"looting_enchant": "Чары «Добыча»",
-			"limit_count": "Ограничить количество",
-			"furnace_smelt": "Расплавить в печи",
-			"explosion_decay": "Разрушить взрывом",
-			"fill_player_head": "Задать скин голове игрока",
+			"apply_bonus": "Применить бонус",
 			"copy_name": "Скопировать имя",
 			"copy_nbt": "Скопировать NBT",
-			"apply_bonus": "Применить бонус"
+			"enchant_randomly": "Наложить случайные чары",
+			"enchant_with_levels": "Наложить чары с уровнем",
+			"explosion_decay": "Разрушить взрывом",
+			"fill_player_head": "Задать скин голове игрока",
+			"furnace_smelt": "Расплавить в печи",
+			"limit_count": "Ограничить количество",
+			"looting_enchant": "Чары «Добыча»",
+			"set_attributes": "Задать атрибуты",
+			"set_contents": "Задать содержимое",
+			"set_count": "Задать количество",
+			"set_damage": "Задать повреждение",
+			"set_lore": "Задать описание",
+			"set_name": "Задать имя",
+			"set_nbt": "Задать NBT"
 		},
-		"type": "Функция",
+		"block": "Блок",
+		"bonus_multiplier": "Множитель",
 		"count": "Количество",
 		"damage": "Повреждение",
-		"name": "Имя",
-		"lore": "Описание",
-		"nbt": "NBT",
-		"levels": "Уровень",
-		"treasure": "Чары-сокровища",
-		"limit": "Ограничение",
-		"block": "Блок",
-		"entity": "Сущность",
-		"source": "Источник",
-		"replace": "Заменить старое",
-		"enchantments": "Чары",
 		"enchantment": "Чары",
-		"formula": "Формула",
-		"$formula": {
-			"uniform_bonus_count": "Равномерное распределение",
-			"binomial_with_bonus_count": "Биноминальное распределение",
-			"ore_drops": "Добыча руд"
-		},
-		"bonus_multiplier": "Множитель",
+		"enchantments": "Чары",
+		"entity": "Сущность",
 		"extra": "Дополнительное значение",
-		"probability": "Вероятность"
-	},
-	"$attribute_modifier": {
-		"attribute": "Атрибут",
+		"formula": "Формула",
+		"levels": "Уровень",
+		"limit": "Ограничение",
+		"lore": "Описание",
 		"name": "Имя",
-		"amount": "Количество",
-		"operation": "Действие",
-		"$operation": {
-			"addition": "Прибавление",
-			"multiply_base": "Умножение базового",
-			"multiply_total": "Умножение общего"
-		},
-		"slot": "Ячейки",
-		"$slot": {
-			"mainhand": "Ведущая рука",
-			"offhand": "Вторая рука",
-			"head": "Голова",
-			"chest": "Тело",
-			"legs": "Ноги",
-			"feet": "Стопы"
-		}
-	},
-	"$attribute": {
-		"generic_maxHealth": "Максимальное здоровье",
-		"generic_followRange": "Диапазон преследования моба",
-		"generic_knockbackResistance": "Сопротивление отбрасыванию",
-		"generic_movementSpeed": "Скорость",
-		"generic_attackDamage": "Урон",
-		"generic_armor": "Броня",
-		"generic_armorToughness": "Твёрдость брони",
-		"generic_attackSpeed": "Скорость атаки",
-		"generic_luck": "Удача",
-		"horse_jumpStrength": "Сила прыжка лошади",
-		"generic_attackKnockback": "Отбрасывание",
-		"generic_flyingSpeed": "Скорость полёта",
-		"zombie_spawnReinforcements": "Подкрепление зомби"
-	},
-	"$nbt_operation": {
-		"source": "Источник",
-		"target": "Цель",
-		"operation": "Действие",
-		"$operation": {
-			"replace": "Замена",
-			"append": "Добавление",
-			"merge": "Объединение"
-		}
-	},
-	"$pool": {
-		"rolls": "Бросков",
-		"bonus_rolls": "Бонусных бросков"
-	},
-	"$range": {
-		"exact": "Число",
-		"range": "Диапазон",
-		"min": "Мин.",
-		"max": "Макс.",
-		"binomial": "Биномиальное распределение",
-		"n": "n",
-		"p": "p"
-	},
-	"$source": {
-		"block_entity": "Блок-сущность",
-		"this": "Текущая",
-		"killer": "Убийца",
-		"killer_player": "Игрок-убийца"
-	},
-	"$table": {
-		"$type": {
-			"empty": "Ничего",
-			"entity": "Сущность",
-			"block": "Блок",
-			"chest": "Сундук",
-			"fishing": "Рыбалка",
-			"generic": "Общий"
-		},
-		"type": "Тип"
-	},
-	"$entity": {
-		"type": "Сущность",
 		"nbt": "NBT",
-		"location": "Местоположение"
+		"probability": "Вероятность",
+		"replace": "Заменить старое",
+		"source": "Источник",
+		"treasure": "Чары-сокровища",
+		"type": "Функция"
+	},
+	"$item": {
+		"count": "Количество",
+		"durability": "Прочность",
+		"enchantment": "Чары",
+		"levels": "Уровень",
+		"name": "ID",
+		"nbt": "NBT",
+		"potion": "Зелье",
+		"tag": "Тег"
 	},
 	"$location": {
-		"position": "Позиция",
 		"$position": {
 			"x": "X",
 			"y": "Y",
 			"z": "Z"
 		},
 		"biome": "Биом",
+		"dimension": "Измерение",
 		"feature": "Строение",
-		"dimension": "Измерение"
+		"position": "Позиция"
 	},
-	"$item": {
-		"name": "ID",
-		"tag": "Тег",
-		"count": "Количество",
-		"durability": "Прочность",
-		"potion": "Зелье",
-		"nbt": "NBT",
-		"enchantment": "Чары",
-		"levels": "Уровень"
+	"$nbt_operation": {
+		"$operation": {
+			"append": "Добавление",
+			"merge": "Объединение",
+			"replace": "Замена"
+		},
+		"operation": "Действие",
+		"source": "Источник",
+		"target": "Цель"
+	},
+	"$pool": {
+		"bonus_rolls": "Бонусных бросков",
+		"rolls": "Бросков"
+	},
+	"$range": {
+		"binomial": "Биномиальное распределение",
+		"exact": "Число",
+		"max": "Макс.",
+		"min": "Мин.",
+		"n": "n",
+		"p": "p",
+		"range": "Диапазон"
+	},
+	"$source": {
+		"block_entity": "Блок-сущность",
+		"killer": "Убийца",
+		"killer_player": "Игрок-убийца",
+		"this": "Текущая"
+	},
+	"$table": {
+		"$type": {
+			"block": "Блок",
+			"chest": "Сундук",
+			"empty": "Ничего",
+			"entity": "Сущность",
+			"fishing": "Рыбалка",
+			"generic": "Общий"
+		},
+		"type": "Тип"
 	},
 	"2_spaces": "2 пробела",
 	"4_spaces": "4 пробела",
+	"attribute_modifier_add": "Добавить модификатор",
+	"attribute_modifier_remove": "Удалить модификатор",
+	"author": "Автор: Misode",
 	"child_add": "Добавить потомка",
 	"condition_add": "Добавить условие",
-	"enchantment_add": "Добавить чары",
-	"entry_add": "Добавить запись",
-	"function_add": "Добавить функцию",
-	"attribute_modifier_add": "Добавить модификатор",
-	"nbt_operation_add": "Добавить действие",
-	"pool_add": "Добавить пул",
-	"term_add": "Добавить выражение",
-	"author": "Автор: Misode",
+	"condition_remove": "Удалить условие",
 	"copy": "Скопировать",
 	"description": "Генератор таблицы добычи для Minecraft",
+	"enchantment_add": "Добавить чары",
+	"enchantment_remove": "Удалить чары",
+	"entry_add": "Добавить запись",
+	"entry_remove": "Удалить запись",
 	"false": "Нет",
+	"function_add": "Добавить функцию",
+	"function_remove": "Удалить функцию",
 	"hide_source": "Скрыть источник",
 	"luck_based": "Основано на удаче",
 	"more": "Больше",
-	"remove": "Удалить",
-	"condition_remove": "Удалить условие",
-	"enchantment_remove": "Удалить чары",
-	"entry_remove": "Удалить запись",
-	"function_remove": "Удалить функцию",
-	"attribute_modifier_remove": "Удалить модификатор",
+	"nbt_operation_add": "Добавить действие",
 	"nbt_operation_remove": "Удалить действие",
+	"pool_add": "Добавить пул",
 	"pool_remove": "Удалить пул",
-	"term_remove": "Удалить выражение",
+	"remove": "Удалить",
 	"share": "Поделиться",
 	"show_source": "Показать источник",
 	"tabs": "Табуляция",
+	"term_add": "Добавить выражение",
+	"term_remove": "Удалить выражение",
 	"title": "Генератор таблицы добычи",
 	"true": "Да",
 	"unset": "Не задано"
