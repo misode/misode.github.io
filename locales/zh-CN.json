@@ -47,7 +47,7 @@
 			"match_tool": "工具属性",
 			"random_chance": "随机概率",
 			"random_chance_with_looting": "受抢夺附魔影响的随机概率",
-			"reference": "Reference",
+			"reference": "引用断言文件",
 			"survives_explosion": "未被爆炸破坏",
 			"table_bonus": "附魔奖励",
 			"weather_check": "天气"
@@ -65,7 +65,7 @@
 		"item": "物品",
 		"location": "位置",
 		"looting_multiplier": "每级抢夺附魔增加的数",
-		"name": "Predicate Name",
+		"name": "断言 ID",
 		"objective": "计分项",
 		"raining": "下雨",
 		"score": "分数",
@@ -93,8 +93,8 @@
 		"the_nether": "下界"
 	},
 	"$distance": {
-		"absolute": "Absolute",
-		"horizontal": "Horizontal",
+		"absolute": "绝对距离",
+		"horizontal": "水平距离",
 		"x": "X",
 		"y": "Y",
 		"z": "Z"
@@ -139,19 +139,19 @@
 		"vanishing_curse": "消失诅咒"
 	},
 	"$entity": {
-		"distance": "Distance",
-		"equipment": "Equipment",
-		"flags": "Flags",
-		"isBaby": "Baby",
-		"isOnFire": "On Fire",
-		"isSneaking": "Sneaking",
-		"isSprinting": "Sprinting",
-		"isSwimming": "Swimming",
+		"distance": "到执行位置的距离",
+		"equipment": "装备",
+		"flags": "实体特质",
+		"isBaby": "是幼体",
+		"isOnFire": "正在着火",
+		"isSneaking": "正在潜行",
+		"isSprinting": "正在疾跑",
+		"isSwimming": "正在游泳",
 		"location": "位置",
 		"nbt": "NBT",
-		"status_effect": "Effects",
-		"status_effect_add": "Add Effect",
-		"status_effect_remove": "Remove Effect",
+		"status_effect": "状态效果",
+		"status_effect_add": "添加状态效果",
+		"status_effect_remove": "移除状态效果",
 		"type": "实体"
 	},
 	"$entry": {
@@ -181,10 +181,10 @@
 			"apply_bonus": "应用奖励公式",
 			"copy_name": "复制方块实体显示名",
 			"copy_nbt": "复制 NBT",
-			"copy_state": "Copy Block States",
+			"copy_state": "复制方块状态",
 			"enchant_randomly": "随机附魔",
 			"enchant_with_levels": "给予等价于经验等级的随机附魔",
-			"exploration_map": "Exploration Map Properties",
+			"exploration_map": "设置探险地图",
 			"explosion_decay": "爆炸损耗",
 			"fill_player_head": "填充玩家头颅",
 			"furnace_smelt": "熔炉熔炼",
@@ -194,17 +194,17 @@
 			"set_contents": "设置内容物",
 			"set_count": "设置物品数量",
 			"set_damage": "设置损伤值",
-			"set_data": "Set Data",
+			"set_data": "设置数据值",
 			"set_lore": "设置下标",
 			"set_name": "设置物品名",
 			"set_nbt": "设置 NBT",
-			"set_stew_effect": "Set Stew Effect"
+			"set_stew_effect": "设置迷之炖菜状态效果"
 		},
 		"block": "方块",
 		"bonusMultiplier": "乘数",
 		"count": "数量",
 		"damage": "损伤值",
-		"data": "Data",
+		"data": "数据值",
 		"decoration": "图标",
 		"destination": "目标",
 		"enchantment": "附魔",
@@ -218,7 +218,7 @@
 		"name": "名称",
 		"nbt": "NBT",
 		"probability": "概率",
-		"properties": "Properties",
+		"properties": "方块状态",
 		"replace": "覆盖",
 		"searchRadius": "搜寻半径",
 		"skipExistingChunks": "跳过已生成区块",
@@ -239,22 +239,22 @@
 	},
 	"$location": {
 		"$block": {
-			"block": "Block ID",
+			"block": "方块 ID",
 			"nbt": "NBT",
-			"state": "Block State",
-			"state_add": "Add Block State",
-			"state_remove": "Remove Block State",
-			"tag": "Block Tag"
+			"state": "方块状态",
+			"state_add": "添加方块状态",
+			"state_remove": "移除方块状态",
+			"tag": "方块标签"
 		},
 		"$fluid": {
-			"fluid": "Fluid ID",
-			"state": "Fluid State",
-			"state_add": "Add Fluid State",
-			"state_remove": "Remove Fluid State",
-			"tag": "Fluid Tag"
+			"fluid": "流体 ID",
+			"state": "流体状态",
+			"state_add": "添加流体状态",
+			"state_remove": "移除流体状态",
+			"tag": "流体标签"
 		},
 		"$light": {
-			"light": "Visible Level"
+			"light": "可见光等级"
 		},
 		"$position": {
 			"x": "X 坐标",
@@ -262,11 +262,11 @@
 			"z": "Z 坐标"
 		},
 		"biome": "生物群系",
-		"block": "Block",
+		"block": "方块",
 		"dimension": "维度",
 		"feature": "结构",
-		"fluid": "Fluid",
-		"light": "Light",
+		"fluid": "流体",
+		"light": "光照",
 		"position": "位置"
 	},
 	"$nbt_operation": {
@@ -284,8 +284,8 @@
 		"rolls": "抽取次数"
 	},
 	"$potion_effect": {
-		"duration": "Duration",
-		"type": "Effect"
+		"duration": "持续时间",
+		"type": "效果种类"
 	},
 	"$range": {
 		"binomial": "二项分布",
@@ -297,12 +297,12 @@
 		"range": "范围"
 	},
 	"$slot": {
-		"chest": "Chest",
-		"feet": "Feet",
-		"head": "Head",
-		"legs": "Legs",
-		"mainhand": "Mainhand",
-		"offhand": "Offhand"
+		"chest": "胸部",
+		"feet": "脚部",
+		"head": "头部",
+		"legs": "腿部",
+		"mainhand": "主手",
+		"offhand": "副手"
 	},
 	"$source": {
 		"block_entity": "方块实体",
@@ -311,10 +311,10 @@
 		"this": "自身"
 	},
 	"$status_effect": {
-		"ambient": "Ambient",
-		"amplifier": "Amplifier",
-		"duration": "Duration",
-		"visible": "Visible"
+		"ambient": "是否为信标施加",
+		"amplifier": "等级",
+		"duration": "持续时间",
+		"visible": "是否可见"
 	},
 	"$table": {
 		"$type": {
@@ -329,9 +329,9 @@
 	},
 	"2_spaces": "2 空格缩进",
 	"4_spaces": "4 空格缩进",
-	"attribute_modifier_add": "Add Modifier",
-	"attribute_modifier_remove": "Remove Modifier",
-	"author": "作者 @Misode",
+	"attribute_modifier_add": "添加属性修饰器",
+	"attribute_modifier_remove": "移除属性修饰器",
+	"author": "作者 Misode",
 	"child_add": "添加子项目",
 	"condition_add": "添加条件",
 	"condition_remove": "移除条件",
@@ -354,12 +354,12 @@
 	"nbt_operation_remove": "移除操作",
 	"pool_add": "添加随机池",
 	"pool_remove": "移除随机池",
-	"potion_effect_add": "Add Effect",
-	"potion_effect_remove": "Remove Effect",
+	"potion_effect_add": "添加药水效果",
+	"potion_effect_remove": "移除药水效果",
 	"remove": "移除",
 	"share": "分享",
 	"show_source": "显示源代码",
-	"stored_enchantment_add": "Add Stored Enchantment",
+	"stored_enchantment_add": "添加储存的附魔",
 	"tabs": "Tab 缩进",
 	"term_add": "添加条件",
 	"term_remove": "移除条件",
