@@ -47,6 +47,7 @@
 			"match_tool": "工具属性",
 			"random_chance": "随机概率",
 			"random_chance_with_looting": "受抢夺附魔影响的随机概率",
+			"reference": "Reference",
 			"survives_explosion": "未被爆炸破坏",
 			"table_bonus": "附魔奖励",
 			"weather_check": "天气"
@@ -64,6 +65,7 @@
 		"item": "物品",
 		"location": "位置",
 		"looting_multiplier": "每级抢夺附魔增加的数",
+		"name": "Predicate Name",
 		"objective": "计分项",
 		"raining": "下雨",
 		"score": "分数",
@@ -89,6 +91,13 @@
 		"overworld": "主世界",
 		"the_end": "末路之地",
 		"the_nether": "下界"
+	},
+	"$distance": {
+		"absolute": "Absolute",
+		"horizontal": "Horizontal",
+		"x": "X",
+		"y": "Y",
+		"z": "Z"
 	},
 	"$enchantment": {
 		"aqua_affinity": "水下速掘",
@@ -130,8 +139,19 @@
 		"vanishing_curse": "消失诅咒"
 	},
 	"$entity": {
+		"distance": "Distance",
+		"equipment": "Equipment",
+		"flags": "Flags",
+		"isBaby": "Baby",
+		"isOnFire": "On Fire",
+		"isSneaking": "Sneaking",
+		"isSprinting": "Sprinting",
+		"isSwimming": "Swimming",
 		"location": "位置",
 		"nbt": "NBT",
+		"status_effect": "Effects",
+		"status_effect_add": "Add Effect",
+		"status_effect_remove": "Remove Effect",
 		"type": "实体"
 	},
 	"$entry": {
@@ -161,8 +181,10 @@
 			"apply_bonus": "应用奖励公式",
 			"copy_name": "复制方块实体显示名",
 			"copy_nbt": "复制 NBT",
+			"copy_state": "Copy Block States",
 			"enchant_randomly": "随机附魔",
 			"enchant_with_levels": "给予等价于经验等级的随机附魔",
+			"exploration_map": "Exploration Map Properties",
 			"explosion_decay": "爆炸损耗",
 			"fill_player_head": "填充玩家头颅",
 			"furnace_smelt": "熔炉熔炼",
@@ -172,14 +194,17 @@
 			"set_contents": "设置内容物",
 			"set_count": "设置物品数量",
 			"set_damage": "设置损伤值",
+			"set_data": "Set Data",
 			"set_lore": "设置下标",
 			"set_name": "设置物品名",
-			"set_nbt": "设置 NBT"
+			"set_nbt": "设置 NBT",
+			"set_stew_effect": "Set Stew Effect"
 		},
 		"block": "方块",
 		"bonusMultiplier": "乘数",
 		"count": "数量",
 		"damage": "损伤值",
+		"data": "Data",
 		"decoration": "图标",
 		"destination": "目标",
 		"enchantment": "附魔",
@@ -193,6 +218,7 @@
 		"name": "名称",
 		"nbt": "NBT",
 		"probability": "概率",
+		"properties": "Properties",
 		"replace": "覆盖",
 		"searchRadius": "搜寻半径",
 		"skipExistingChunks": "跳过已生成区块",
@@ -212,14 +238,35 @@
 		"tag": "标签"
 	},
 	"$location": {
+		"$block": {
+			"block": "Block ID",
+			"nbt": "NBT",
+			"state": "Block State",
+			"state_add": "Add Block State",
+			"state_remove": "Remove Block State",
+			"tag": "Block Tag"
+		},
+		"$fluid": {
+			"fluid": "Fluid ID",
+			"state": "Fluid State",
+			"state_add": "Add Fluid State",
+			"state_remove": "Remove Fluid State",
+			"tag": "Fluid Tag"
+		},
+		"$light": {
+			"light": "Visible Level"
+		},
 		"$position": {
 			"x": "X 坐标",
 			"y": "Y 坐标",
 			"z": "Z 坐标"
 		},
 		"biome": "生物群系",
+		"block": "Block",
 		"dimension": "维度",
 		"feature": "结构",
+		"fluid": "Fluid",
+		"light": "Light",
 		"position": "位置"
 	},
 	"$nbt_operation": {
@@ -236,6 +283,10 @@
 		"bonus_rolls": "每级幸运增加的抽取次数",
 		"rolls": "抽取次数"
 	},
+	"$potion_effect": {
+		"duration": "Duration",
+		"type": "Effect"
+	},
 	"$range": {
 		"binomial": "二项分布",
 		"exact": "精确值",
@@ -245,11 +296,25 @@
 		"p": "p",
 		"range": "范围"
 	},
+	"$slot": {
+		"chest": "Chest",
+		"feet": "Feet",
+		"head": "Head",
+		"legs": "Legs",
+		"mainhand": "Mainhand",
+		"offhand": "Offhand"
+	},
 	"$source": {
 		"block_entity": "方块实体",
 		"killer": "击杀者",
 		"killer_player": "击杀者玩家",
 		"this": "自身"
+	},
+	"$status_effect": {
+		"ambient": "Ambient",
+		"amplifier": "Amplifier",
+		"duration": "Duration",
+		"visible": "Visible"
 	},
 	"$table": {
 		"$type": {
@@ -264,6 +329,8 @@
 	},
 	"2_spaces": "2 空格缩进",
 	"4_spaces": "4 空格缩进",
+	"attribute_modifier_add": "Add Modifier",
+	"attribute_modifier_remove": "Remove Modifier",
 	"author": "作者 @Misode",
 	"child_add": "添加子项目",
 	"condition_add": "添加条件",
@@ -274,6 +341,7 @@
 	"enchantment_remove": "移除附魔",
 	"entry_add": "添加项目",
 	"entry_remove": "移除项目",
+	"error": "Error",
 	"false": "否",
 	"function_add": "添加函数",
 	"function_remove": "移除函数",
@@ -286,9 +354,12 @@
 	"nbt_operation_remove": "移除操作",
 	"pool_add": "添加随机池",
 	"pool_remove": "移除随机池",
+	"potion_effect_add": "Add Effect",
+	"potion_effect_remove": "Remove Effect",
 	"remove": "移除",
 	"share": "分享",
 	"show_source": "显示源代码",
+	"stored_enchantment_add": "Add Stored Enchantment",
 	"tabs": "Tab 缩进",
 	"term_add": "添加条件",
 	"term_remove": "移除条件",
