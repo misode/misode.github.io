@@ -11,6 +11,9 @@
 				"group": "Executes all child entries when own conditions pass",
 				"dynamic": "Gets block specific drops"
 			}
+		},
+		"$pool": {
+			"rolls": "The amount of entries that are randomly chosen"
 		}
 	},
 	"$condition": {

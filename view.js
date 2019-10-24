@@ -2,6 +2,13 @@ let structure;
 let components;
 let collections;
 
+i18next.on('initialized', () => {
+  $('[data-help]').each(function() {
+    console.log('ahhh');
+    $(this).tooltip({title: i18next.t('$help.' + $(this).attr('data-help'))});
+  });
+});
+
 changeVersion('1.14');
 function changeVersion(version) {
   $.getJSON('schemas/' + version + '.json', json => {
@@ -95,6 +102,9 @@ function generateString(data, struct) {
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('input').val(data);
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -106,6 +116,9 @@ function generateBoolean(data, struct) {
     $el.find('[value="true"]').addClass('active');
   } else if (data === false) {
     $el.find('[value="false"]').addClass('active');
+  }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
   }
   return {out: data, component: $el};
 }
@@ -128,6 +141,9 @@ function generateRandom(data, struct) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -143,6 +159,9 @@ function generateRange(data, struct) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -153,6 +172,9 @@ function generateBoundary(data, struct) {
   if (data) {
     $el.find('.range.min').val(data.min);
     $el.find('.range.max').val(data.max);
+  }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
   }
   return {out: data, component: $el};
 }
@@ -258,6 +280,9 @@ function generateJson(data, struct) {
     data = JSON.stringify(data);
   }
   $el.find('textarea').val(data).keydown(e => preventNewline(e));
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -436,7 +461,7 @@ function generateField(data, field, parent) {
 }
 
 function generateTooltip(str) {
-  let $el = $('<button type="button" class="btn btn-circle ml-2" data-toggle="tooltip">?</button>');
+  let $el = $('<button type="button" class="btn help-tooltip ml-2" data-toggle="tooltip" data-help="' + str + '">?</button>');
   $el.tooltip({title: i18next.t('$help.' + str)});
   return $el;
 }

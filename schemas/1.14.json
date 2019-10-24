@@ -33,7 +33,8 @@
         {
           "id": "rolls",
           "type": "random",
-          "translate": "$pool.rolls"
+          "translate": "$pool.rolls",
+          "help": true
         },
         {
           "id": "bonus_rolls",
