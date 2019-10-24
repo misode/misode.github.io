@@ -449,6 +449,16 @@
           ]
         },
         {
+          "id": "entries",
+          "type": "array",
+          "translate": "entry",
+          "values": "entry",
+          "button": "field",
+          "require": [
+            "minecraft:set_contents"
+          ]
+        },
+        {
           "id": "conditions",
           "type": "array",
           "translate": "condition",
