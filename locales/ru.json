@@ -3,6 +3,7 @@
 		"$type": {
 			"alternative": "Выбор",
 			"inverted": "Инвертирование",
+			"reference": "Предикат",
 			"entity_properties": "Свойства сущности",
 			"block_state_propery": "Свойства блока",
 			"match_tool": "Свойства инструмента",
@@ -17,6 +18,7 @@
 			"survives_explosion": "Переживает взрыв"
 		},
 		"type": "Условие",
+		"name": "ID предиката",
 		"chance": "Шанс",
 		"looting_multiplier": "Множитель «Добычи»",
 		"inverse": "Инвертировать",
@@ -26,11 +28,10 @@
 		"raining": "Дождь",
 		"thundering": "Гроза",
 		"block": "Блок",
-		"block_state": "состояние блока",
+		"block_state": "Состояние блока",
 		"block_state_add": "Добавить состояние блока",
 		"block_state_remove": "Удалить состояние блока",
-		"objective": "Задача",
-		"score": "Счёт",
+		"score": "Задача",
 		"score_add": "Добавить счёт",
 		"score_remove": "Удалить счёт",
 		"location": "Местоположение",
@@ -100,7 +101,7 @@
 			"item": "Предмет",
 			"tag": "Тег предметов",
 			"loot_table": "Таблица добычи",
-			"alternatives": "Выбор",
+			"alternatives": "Альтернатива",
 			"sequence": "Последовательность",
 			"group": "Группа",
 			"dynamic": "Динамический"
@@ -114,6 +115,7 @@
 	"$function": {
 		"$type": {
 			"set_count": "Задать количество",
+			"set_data": "Задать данные",
 			"set_damage": "Задать повреждение",
 			"set_name": "Задать имя",
 			"set_lore": "Задать описание",
@@ -122,17 +124,21 @@
 			"set_contents": "Задать содержимое",
 			"enchant_randomly": "Наложить случайные чары",
 			"enchant_with_levels": "Наложить чары с уровнем",
-			"looting_enchant": "Чары «Добыча»",
+			"looting_enchant": "Применить чары «Добыча»",
 			"limit_count": "Ограничить количество",
 			"furnace_smelt": "Расплавить в печи",
 			"explosion_decay": "Разрушить взрывом",
 			"fill_player_head": "Задать скин голове игрока",
 			"copy_name": "Скопировать имя",
 			"copy_nbt": "Скопировать NBT",
-			"apply_bonus": "Применить бонус"
+			"copy_state": "Скопировать состояния блока",
+			"apply_bonus": "Применить бонус",
+			"exploration_map": "Задать свойства карты исследователя",
+			"set_stew_effect": "Задать эффект загадочного рагу"
 		},
 		"type": "Функция",
 		"count": "Количество",
+		"data": "Данные",
 		"damage": "Повреждение",
 		"name": "Имя",
 		"lore": "Описание",
@@ -141,6 +147,7 @@
 		"treasure": "Чары-сокровища",
 		"limit": "Ограничение",
 		"block": "Блок",
+		"properties": "Свойства",
 		"entity": "Сущность",
 		"source": "Источник",
 		"replace": "Заменить старое",
@@ -152,9 +159,14 @@
 			"binomial_with_bonus_count": "Биноминальное распределение",
 			"ore_drops": "Добыча руд"
 		},
-		"bonus_multiplier": "Множитель",
+		"bonusMultiplier": "Множитель",
 		"extra": "Дополнительное значение",
-		"probability": "Вероятность"
+		"probability": "Вероятность",
+		"destination": "Строение",
+		"decoration": "Значок",
+		"zoom": "Уровень приближения",
+		"searchRadius": "Радиус поиска (в чанках)",
+		"skipExistingChunks": "Пропуск существующих чанков"
 	},
 	"$attribute_modifier": {
 		"attribute": "Атрибут",
@@ -166,15 +178,15 @@
 			"multiply_base": "Умножение базового",
 			"multiply_total": "Умножение общего"
 		},
-		"slot": "Ячейки",
-		"$slot": {
-			"mainhand": "Ведущая рука",
-			"offhand": "Вторая рука",
-			"head": "Голова",
-			"chest": "Тело",
-			"legs": "Ноги",
-			"feet": "Стопы"
-		}
+		"slot": "Ячейки"
+	},
+	"$slot": {
+		"mainhand": "Ведущая рука",
+		"offhand": "Вторая рука",
+		"head": "Голова",
+		"chest": "Тело",
+		"legs": "Ноги",
+		"feet": "Стопы"
 	},
 	"$attribute": {
 		"generic_maxHealth": "Максимальное здоровье",
@@ -234,7 +246,18 @@
 	"$entity": {
 		"type": "Сущность",
 		"nbt": "NBT",
-		"location": "Местоположение"
+		"location": "Местоположение",
+		"distance": "Расстояние",
+		"flags": "Состояние",
+		"isOnFire": "Горит",
+		"isSneaking": "Крадётся",
+		"isSprinting": "Бежит",
+		"isSwimming": "Плывёт",
+		"isBaby": "Ребёнок",
+		"equipment": "Снаряжение",
+		"status_effect": "Эффекты",
+		"status_effect_add": "Добавить эффект",
+		"status_effect_remove": "Удалить эффект"
 	},
 	"$location": {
 		"position": "Позиция",
@@ -245,11 +268,49 @@
 		},
 		"biome": "Биом",
 		"feature": "Строение",
-		"dimension": "Измерение"
+		"dimension": "Измерение",
+		"light": "Освещённость",
+		"$light": {
+			"light": "Уровень освещённости"
+		},
+		"block": "Блок",
+		"$block": {
+			"block": "ID блока",
+			"tag": "Тег блоков",
+			"nbt": "NBT",
+			"state": "Состояние блока",
+			"state_add": "Добавить состояние блока",
+			"state_remove": "Удалить состояние блока"
+		},
+		"fluid": "Жидкость",
+		"$fluid": {
+			"fluid": "ID жидкости",
+			"tag": "Тег жидкостей",
+			"state": "Состояние жидкости",
+			"state_add": "Добавить состояние жидкости",
+			"state_remove": "Удалить состояние жидкости"
+		}
+	},
+	"$distance": {
+		"x": "X",
+		"y": "Y",
+		"z": "Z",
+		"absolute": "Абсолютная",
+		"horizontal": "Горизонтальная"
+	},
+	"$status_effect": {
+		"amplifier": "Уровень",
+		"duration": "Длительность",
+		"ambient": "Из окружения",
+		"visible": "Видимый"
+	},
+	"$potion_effect": {
+		"type": "Эффект",
+		"duration": "Длительность"
 	},
 	"$item": {
-		"name": "ID",
-		"tag": "Тег",
+		"name": "ID предмета",
+		"tag": "Тег предметов",
 		"count": "Количество",
 		"durability": "Прочность",
 		"potion": "Зелье",
@@ -262,11 +323,13 @@
 	"child_add": "Добавить потомка",
 	"condition_add": "Добавить условие",
 	"enchantment_add": "Добавить чары",
+	"stored_enchantment_add": "Добавить книжные чары",
 	"entry_add": "Добавить запись",
 	"function_add": "Добавить функцию",
 	"attribute_modifier_add": "Добавить модификатор",
 	"nbt_operation_add": "Добавить действие",
 	"pool_add": "Добавить пул",
+	"potion_effect_add": "Добавить эффект",
 	"term_add": "Добавить выражение",
 	"author": "Автор: Misode",
 	"copy": "Скопировать",
@@ -279,10 +342,12 @@
 	"condition_remove": "Удалить условие",
 	"enchantment_remove": "Удалить чары",
 	"entry_remove": "Удалить запись",
+	"error": "Ошибка",
 	"function_remove": "Удалить функцию",
 	"attribute_modifier_remove": "Удалить модификатор",
 	"nbt_operation_remove": "Удалить действие",
 	"pool_remove": "Удалить пул",
+	"potion_effect_remove": "Удалить эффект",
 	"term_remove": "Удалить выражение",
 	"share": "Поделиться",
 	"show_source": "Показать источник",
