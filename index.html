@@ -47,7 +47,7 @@
         <div class="input-group">
           <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addComponent(this, 'pools')" data-field="table" data-i18n="pool_add"></button>
           <div class="input-group-prepend table-type">
-            <span class="input-group-text rounded-left" data-i18n="$table.type"></span>
+            <span class="input-group-text rounded-left" data-i18n="table.type"></span>
           </div>
           <select id="tableType" class="form-control mr-3 rounded-right table-type" style="max-width: 9em;" onchange="updateTableType(this)"></select>
           <div class="custom-control custom-checkbox mr-3" style="margin: auto 0">
@@ -107,19 +107,19 @@
           <span class="input-group-text" data-name></span>
           <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
           <div class="dropdown-menu">
-            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
-            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
-            <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="$range.binomial"></a>
+            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="range.exact"></a>
+            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="range.range"></a>
+            <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="range.binomial"></a>
           </div>
         </div>
         <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="$range.min"></span>
+        <span class="input-group-text rounded-0 range d-none" data-i18n="range.min"></span>
         <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="$range.max"></span>
+        <span class="input-group-text rounded-0 range d-none" data-i18n="range.max"></span>
         <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.n"></span>
+        <span class="input-group-text rounded-0 binomial d-none" data-i18n="range.n"></span>
         <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 binomial d-none" data-i18n="$range.p"></span>
+        <span class="input-group-text rounded-0 binomial d-none" data-i18n="range.p"></span>
         <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
       </div>
       <div class="input-group mt-3" data-type="range">
@@ -127,23 +127,23 @@
           <span class="input-group-text" data-name></span>
           <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
           <div class="dropdown-menu">
-            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="$range.exact"></a>
-            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="$range.range"></a>
+            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="range.exact"></a>
+            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="range.range"></a>
           </div>
         </div>
         <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="$range.min"></span>
+        <span class="input-group-text rounded-0 range d-none" data-i18n="range.min"></span>
         <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="$range.max"></span>
+        <span class="input-group-text rounded-0 range d-none" data-i18n="range.max"></span>
         <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
       </div>
       <div class="input-group mt-3" data-type="boundary">
         <div class="input-group-prepend">
           <span class="input-group-text" data-name></span>
         </div>
-        <span class="input-group-text rounded-0 range" data-i18n="$range.min"></span>
+        <span class="input-group-text rounded-0 range" data-i18n="range.min"></span>
         <input type="text" class="form-control range min" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range" data-i18n="$range.max"></span>
+        <span class="input-group-text rounded-0 range" data-i18n="range.max"></span>
         <input type="text" class="form-control range max rounded-right" onchange="updateField(this)" onfocus="this.select()">
       </div>
       <div class="input-group mt-3" data-type="boolean">

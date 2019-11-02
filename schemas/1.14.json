@@ -4,8 +4,8 @@
       {
         "id": "type",
         "type": "enum",
-        "translate": "$table.type",
-        "translateValue": "$table.$type",
+        "translate": "table.type",
+        "translateValue": "table.type",
         "default": "minecraft:generic",
         "values": [
           "minecraft:empty",
@@ -33,12 +33,12 @@
         {
           "id": "rolls",
           "type": "random",
-          "translate": "$pool.rolls"
+          "translate": "pool.rolls"
         },
         {
           "id": "bonus_rolls",
           "type": "random",
-          "translate": "$pool.bonus_rolls",
+          "translate": "pool.bonus_rolls",
           "luckBased": true
         },
         {
@@ -72,8 +72,8 @@
         {
           "id": "type",
           "type": "enum",
-          "translate": "$entry.type",
-          "translateValue": "$entry.$type",
+          "translate": "entry.type",
+          "translateValue": "entry.type",
           "default": "minecraft:item",
           "values": [
             "minecraft:empty",
@@ -89,7 +89,7 @@
         {
           "id": "name",
           "type": "string",
-          "translate": "$entry.name",
+          "translate": "entry.name",
           "require": [
             "minecraft:item",
             "minecraft:tag",
@@ -100,19 +100,19 @@
         {
           "id": "weight",
           "type": "random",
-          "translate": "$entry.weight"
+          "translate": "entry.weight"
         },
         {
           "id": "quality",
           "type": "random",
-          "translate": "$entry.quality",
+          "translate": "entry.quality",
           "luckBased": true
         },
         {
           "id": "expand",
           "type": "boolean",
           "default": "false",
-          "translate": "$entry.expand",
+          "translate": "entry.expand",
           "require": [
             "minecraft:tag"
           ]
@@ -154,8 +154,8 @@
         {
           "id": "function",
           "type": "enum",
-          "translate": "$function.type",
-          "translateValue": "$function.$type",
+          "translate": "function.type",
+          "translateValue": "function.type",
           "default": "minecraft:set_count",
           "values": [
             "minecraft:set_count",
@@ -182,7 +182,7 @@
         {
           "id": "count",
           "type": "random",
-          "translate": "$function.count",
+          "translate": "function.count",
           "require": [
             "minecraft:set_count",
             "minecraft:looting_enchant"
@@ -191,7 +191,7 @@
         {
           "id": "damage",
           "type": "random",
-          "translate": "$function.damage",
+          "translate": "function.damage",
           "require": [
             "minecraft:set_damage"
           ]
@@ -199,7 +199,7 @@
         {
           "id": "name",
           "type": "json",
-          "translate": "$function.name",
+          "translate": "function.name",
           "require": [
             "minecraft:set_name"
           ]
@@ -207,7 +207,7 @@
         {
           "id": "lore",
           "type": "json-list",
-          "translate": "$function.lore",
+          "translate": "function.lore",
           "require": [
             "minecraft:set_lore"
           ]
@@ -215,7 +215,7 @@
         {
           "id": "tag",
           "type": "nbt",
-          "translate": "$function.nbt",
+          "translate": "function.nbt",
           "require": [
             "minecraft:set_nbt"
           ]
@@ -223,7 +223,7 @@
         {
           "id": "levels",
           "type": "random",
-          "translate": "$function.levels",
+          "translate": "function.levels",
           "require": [
             "minecraft:enchant_with_levels"
           ]
@@ -231,7 +231,7 @@
         {
           "id": "treasure",
           "type": "boolean",
-          "translate": "$function.treasure",
+          "translate": "function.treasure",
           "default": false,
           "require": [
             "minecraft:enchant_with_levels"
@@ -240,7 +240,7 @@
         {
           "id": "limit",
           "type": "int",
-          "translate": "$function.limit",
+          "translate": "function.limit",
           "require": [
             "minecraft:looting_enchant"
           ]
@@ -248,7 +248,7 @@
         {
           "id": "limit",
           "type": "boundary",
-          "translate": "$function.limit",
+          "translate": "function.limit",
           "require": [
             "minecraft:limit_count"
           ]
@@ -256,7 +256,7 @@
         {
           "id": "destination",
           "type": "enum",
-          "translate": "$function.destination",
+          "translate": "function.destination",
           "values": "structures",
           "require": [
             "minecraft:exploration_map"
@@ -265,7 +265,7 @@
         {
           "id": "decoration",
           "type": "enum",
-          "translate": "$function.decoration",
+          "translate": "function.decoration",
           "values": "map_icons",
           "require": [
             "minecraft:exploration_map"
@@ -274,7 +274,7 @@
         {
           "id": "zoom",
           "type": "int",
-          "translate": "$function.zoom",
+          "translate": "function.zoom",
           "require": [
             "minecraft:exploration_map"
           ]
@@ -282,7 +282,7 @@
         {
           "id": "search_radius",
           "type": "int",
-          "translate": "$function.searchRadius",
+          "translate": "function.searchRadius",
           "require": [
             "minecraft:exploration_map"
           ]
@@ -290,7 +290,7 @@
         {
           "id": "skip_existing_chunks",
           "type": "boolean",
-          "translate": "$function.skipExistingChunks",
+          "translate": "function.skipExistingChunks",
           "default": true,
           "require": [
             "minecraft:exploration_map"
@@ -309,8 +309,8 @@
         {
           "id": "entity",
           "type": "enum",
-          "translate": "$function.entity",
-          "translateValue": "$source",
+          "translate": "function.entity",
+          "translateValue": "source",
           "default": "this",
           "values": [
             "this",
@@ -326,8 +326,8 @@
         {
           "id": "source",
           "type": "enum",
-          "translate": "$function.source",
-          "translateValue": "$source",
+          "translate": "function.source",
+          "translateValue": "source",
           "default": "this",
           "values": [
             "block_entity",
@@ -343,7 +343,7 @@
         {
           "id": "replace",
           "type": "boolean",
-          "translate": "$function.replace",
+          "translate": "function.replace",
           "require": [
             "minecraft:set_lore"
           ]
@@ -351,8 +351,8 @@
         {
           "id": "enchantments",
           "type": "set",
-          "translate": "$function.enchantments",
-          "translateValue": "$enchantment",
+          "translate": "function.enchantments",
+          "translateValue": "enchantment",
           "values": "enchantments",
           "require": [
             "minecraft:enchant_randomly"
@@ -381,8 +381,8 @@
         {
           "id": "enchantment",
           "type": "enum",
-          "translate": "$function.enchantment",
-          "translateValue": "$enchantment",
+          "translate": "function.enchantment",
+          "translateValue": "enchantment",
           "values": "enchantments",
           "require": [
             "minecraft:apply_bonus"
@@ -391,8 +391,8 @@
         {
           "id": "formula",
           "type": "enum",
-          "translate": "$function.formula",
-          "translateValue": "$function.$formula",
+          "translate": "function.formula",
+          "translateValue": "function.formula",
           "default": "minecraft:uniform_bonus_count",
           "values": [
             "minecraft:uniform_bonus_count",
@@ -406,7 +406,7 @@
         {
           "id": "parameters",
           "type": "object",
-          "translate": "$function.parameters",
+          "translate": "function.parameters",
           "color": "secondary",
           "card": false,
           "require": [
@@ -419,14 +419,14 @@
             {
               "id": "bonusMultiplier",
               "type": "float",
-              "translate": "$function.bonusMultiplier"
+              "translate": "function.bonusMultiplier"
             }
           ]
         },
         {
           "id": "parameters",
           "type": "object",
-          "translate": "$function.parameters",
+          "translate": "function.parameters",
           "color": "secondary",
           "card": false,
           "require": [
@@ -439,12 +439,12 @@
             {
               "id": "extra",
               "type": "int",
-              "translate": "$function.extra"
+              "translate": "function.extra"
             },
             {
               "id": "probability",
               "type": "float",
-              "translate": "$function.probability"
+              "translate": "function.probability"
             }
           ]
         },
@@ -475,8 +475,8 @@
         {
           "id": "condition",
           "type": "enum",
-          "translate": "$condition.type",
-          "translateValue": "$condition.$type",
+          "translate": "condition.type",
+          "translateValue": "condition.type",
           "default": "minecraft:random_chance",
           "values": [
             "minecraft:alternative",
@@ -513,7 +513,7 @@
         {
           "id": "chance",
           "type": "float",
-          "translate": "$condition.chance",
+          "translate": "condition.chance",
           "require": [
             "minecraft:random_chance",
             "minecraft:random_chance_with_looting"
@@ -522,7 +522,7 @@
         {
           "id": "looting_multiplier",
           "type": "float",
-          "translate": "$condition.looting_multiplier",
+          "translate": "condition.looting_multiplier",
           "require": [
             "minecraft:random_chance_with_looting"
           ]
@@ -530,7 +530,7 @@
         {
           "id": "inverse",
           "type": "boolean",
-          "translate": "$condition.inverse",
+          "translate": "condition.inverse",
           "default": false,
           "require": [
             "minecraft:killed_by_player"
@@ -539,8 +539,8 @@
         {
           "id": "entity",
           "type": "enum",
-          "translate": "$condition.entity",
-          "translateValue": "$source",
+          "translate": "condition.entity",
+          "translateValue": "source",
           "default": "this",
           "values": [
             "this",
@@ -555,8 +555,8 @@
         {
           "id": "enchantment",
           "type": "enum",
-          "translate": "$condition.enchantment",
-          "translateValue": "$enchantment",
+          "translate": "condition.enchantment",
+          "translateValue": "enchantment",
           "values": "enchantments",
           "require": [
             "minecraft:table_bonus"
@@ -565,7 +565,7 @@
         {
           "id": "chances",
           "type": "chance-list",
-          "translate": "$condition.chances",
+          "translate": "condition.chances",
           "require": [
             "minecraft:table_bonus"
           ]
@@ -573,7 +573,7 @@
         {
           "id": "raining",
           "type": "boolean",
-          "translate": "$condition.raining",
+          "translate": "condition.raining",
           "require": [
             "minecraft:weather_check"
           ]
@@ -581,7 +581,7 @@
         {
           "id": "thundering",
           "type": "boolean",
-          "translate": "$condition.thundering",
+          "translate": "condition.thundering",
           "require": [
             "minecraft:weather_check"
           ]
@@ -589,7 +589,7 @@
         {
           "id": "block",
           "type": "string",
-          "translate": "$condition.block",
+          "translate": "condition.block",
           "require":  [
             "minecraft:block_state_propery"
           ]
@@ -597,7 +597,7 @@
         {
           "id": "properties",
           "type": "map",
-          "translate": "$condition.block_state",
+          "translate": "condition.block_state",
           "values": {
             "type": "string"
           },
@@ -608,7 +608,7 @@
         {
           "id": "scores",
           "type": "map",
-          "translate": "$condition.score",
+          "translate": "condition.score",
           "values": {
             "type": "range"
           },
@@ -682,8 +682,8 @@
         {
           "id": "attribute",
           "type": "enum",
-          "translate": "$attribute_modifier.attribute",
-          "translateValue": "$attribute",
+          "translate": "attribute_modifier.attribute",
+          "translateValue": "attribute",
           "default": "generic.attackDamage",
           "values": [
             "generic.maxHealth",
@@ -704,18 +704,18 @@
         {
           "id": "name",
           "type": "string",
-          "translate": "$attribute_modifier.name"
+          "translate": "attribute_modifier.name"
         },
         {
           "id": "amount",
           "type": "float",
-          "translate": "$attribute_modifier.amount"
+          "translate": "attribute_modifier.amount"
         },
         {
           "id": "operation",
           "type": "enum",
-          "translate": "$attribute_modifier.operation",
-          "translateValue": "$attribute_modifier.$operation",
+          "translate": "attribute_modifier.operation",
+          "translateValue": "attribute_modifier.operation",
           "default": "addition",
           "values": [
             "addition",
@@ -726,8 +726,8 @@
         {
           "id": "slot",
           "type": "set",
-          "translate": "$attribute_modifier.slot",
-          "translateValue": "$slot",
+          "translate": "attribute_modifier.slot",
+          "translateValue": "slot",
           "values": [
             "mainhand",
             "offhand",
@@ -747,20 +747,20 @@
         {
           "id": "source",
           "type": "string",
-          "translate": "$nbt_operation.source",
+          "translate": "nbt_operation.source",
           "class": "code"
         },
         {
           "id": "target",
           "type": "string",
-          "translate": "$nbt_operation.target",
+          "translate": "nbt_operation.target",
           "class": "code"
         },
         {
           "id": "op",
           "type": "enum",
-          "translate": "$nbt_operation.operation",
-          "translateValue": "$nbt_operation.$operation",
+          "translate": "nbt_operation.operation",
+          "translateValue": "nbt_operation.operation",
           "default": "replace",
           "values": [
             "replace",
@@ -778,7 +778,7 @@
         {
           "id": "type",
           "type": "enum",
-          "translate": "$entity.type",
+          "translate": "entity.type",
           "translateValue": "",
           "unset": true,
           "values": "entity_types"
@@ -786,67 +786,67 @@
         {
           "id": "nbt",
           "type": "nbt",
-          "translate": "$entity.nbt"
+          "translate": "entity.nbt"
         },
         {
           "id": "location",
           "type": "object",
-          "translate": "$entity.location",
+          "translate": "entity.location",
           "value": "location",
           "collapse": true
         },
         {
           "id": "distance",
           "type": "object",
-          "translate": "$entity.distance",
+          "translate": "entity.distance",
           "value": "distance",
           "collapse": true
         },
         {
           "id": "flags",
           "type": "object",
-          "translate": "$entity.flags",
+          "translate": "entity.flags",
           "color": "dark",
           "collapse": true,
           "fields": [
             {
               "id": "is_on_fire",
               "type": "boolean",
-              "translate": "$entity.isOnFire"
+              "translate": "entity.isOnFire"
             },
             {
               "id": "is_sneaking",
               "type": "boolean",
-              "translate": "$entity.isSneaking"
+              "translate": "entity.isSneaking"
             },
             {
               "id": "is_sprinting",
               "type": "boolean",
-              "translate": "$entity.isSprinting"
+              "translate": "entity.isSprinting"
             },
             {
               "id": "is_swimming",
               "type": "boolean",
-              "translate": "$entity.isSwimming"
+              "translate": "entity.isSwimming"
             },
             {
               "id": "is_baby",
               "type": "boolean",
-              "translate": "$entity.isBaby"
+              "translate": "entity.isBaby"
             }
           ]
         },
         {
           "id": "equipment",
           "type": "object",
-          "translate": "$entity.equipment",
+          "translate": "entity.equipment",
           "color": "dark",
           "collapse": true,
           "fields": [
             {
               "id": "mainhand",
               "type": "object",
-              "translate": "$slot.mainhand",
+              "translate": "slot.mainhand",
               "color": "dark",
               "collapse": true,
               "value": "item"
@@ -854,7 +854,7 @@
             {
               "id": "offhand",
               "type": "object",
-              "translate": "$slot.offhand",
+              "translate": "slot.offhand",
               "color": "dark",
               "collapse": true,
               "value": "item"
@@ -862,7 +862,7 @@
             {
               "id": "head",
               "type": "object",
-              "translate": "$slot.head",
+              "translate": "slot.head",
               "color": "dark",
               "collapse": true,
               "value": "item"
@@ -870,7 +870,7 @@
             {
               "id": "chest",
               "type": "object",
-              "translate": "$slot.chest",
+              "translate": "slot.chest",
               "color": "dark",
               "collapse": true,
               "value": "item"
@@ -878,7 +878,7 @@
             {
               "id": "legs",
               "type": "object",
-              "translate": "$slot.legs",
+              "translate": "slot.legs",
               "color": "dark",
               "collapse": true,
               "value": "item"
@@ -886,7 +886,7 @@
             {
               "id": "feet",
               "type": "object",
-              "translate": "$slot.feet",
+              "translate": "slot.feet",
               "color": "dark",
               "collapse": true,
               "value": "item"
@@ -896,7 +896,7 @@
         {
           "id": "effects",
           "type": "map",
-          "translate": "$entity.status_effect",
+          "translate": "entity.status_effect",
           "values": {
             "type": "object",
             "value": "status_effect"
@@ -912,31 +912,31 @@
         {
           "id": "position",
           "type": "object",
-          "translate": "$location.position",
+          "translate": "location.position",
           "color": "dark",
           "collapse": true,
           "fields": [
             {
               "id": "x",
               "type": "boundary",
-              "translate": "$location.$position.x"
+              "translate": "location.position.x"
             },
             {
               "id": "y",
               "type": "boundary",
-              "translate": "$location.$position.y"
+              "translate": "location.position.y"
             },
             {
               "id": "z",
               "type": "boundary",
-              "translate": "$location.$position.z"
+              "translate": "location.position.z"
             }
           ]
         },
         {
           "id": "biome",
           "type": "enum",
-          "translate": "$location.biome",
+          "translate": "location.biome",
           "translateValue": "",
           "unset": true,
           "values": "biomes"
@@ -944,7 +944,7 @@
         {
           "id": "feature",
           "type": "enum",
-          "translate": "$location.feature",
+          "translate": "location.feature",
           "translateValue": "",
           "unset": true,
           "values": "structures"
@@ -952,8 +952,8 @@
         {
           "id": "dimension",
           "type": "enum",
-          "translate": "$location.dimension",
-          "translateValue": "$dimension",
+          "translate": "location.dimension",
+          "translateValue": "dimension",
           "unset": true,
           "values": "dimensions"
         }
@@ -967,27 +967,27 @@
         {
           "id": "x",
           "type": "boundary",
-          "translate": "$distance.x"
+          "translate": "distance.x"
         },
         {
           "id": "y",
           "type": "boundary",
-          "translate": "$distance.y"
+          "translate": "distance.y"
         },
         {
           "id": "z",
           "type": "boundary",
-          "translate": "$distance.z"
+          "translate": "distance.z"
         },
         {
           "id": "absolute",
           "type": "boundary",
-          "translate": "$distance.absolute"
+          "translate": "distance.absolute"
         },
         {
           "id": "horizontal",
           "type": "boundary",
-          "translate": "$distance.horizontal"
+          "translate": "distance.horizontal"
         }
       ]
     },
@@ -999,22 +999,22 @@
         {
           "id": "amplifier",
           "type": "range",
-          "translate": "$status_effect.amplifier"
+          "translate": "status_effect.amplifier"
         },
         {
           "id": "duration",
           "type": "range",
-          "translate": "$status_effect.duration"
+          "translate": "status_effect.duration"
         },
         {
           "id": "ambient",
           "type": "boolean",
-          "translate": "$status_effect.ambient"
+          "translate": "status_effect.ambient"
         },
         {
           "id": "visible",
           "type": "boolean",
-          "translate": "$status_effect.visible"
+          "translate": "status_effect.visible"
         }
       ]
     },
@@ -1026,12 +1026,12 @@
         {
           "id": "type",
           "type": "string",
-          "translate": "$potion_effect.type"
+          "translate": "potion_effect.type"
         },
         {
           "id": "duration",
           "type": "range",
-          "translate": "$potion_effect.duration"
+          "translate": "potion_effect.duration"
         }
       ]
     },
@@ -1043,32 +1043,32 @@
         {
           "id": "name",
           "type": "string",
-          "translate": "$item.name"
+          "translate": "item.name"
         },
         {
           "id": "tag",
           "type": "string",
-          "translate": "$item.tag"
+          "translate": "item.tag"
         },
         {
           "id": "count",
           "type": "range",
-          "translate": "$item.count"
+          "translate": "item.count"
         },
         {
           "id": "durability",
           "type": "range",
-          "translate": "$item.durability"
+          "translate": "item.durability"
         },
         {
           "id": "potion",
           "type": "string",
-          "translate": "$item.potion"
+          "translate": "item.potion"
         },
         {
           "id": "nbt",
           "type": "nbt",
-          "translate": "$item.nbt"
+          "translate": "item.nbt"
         },
         {
           "id": "enchantments",
@@ -1087,14 +1087,14 @@
         {
           "id": "enchantment",
           "type": "enum",
-          "translate": "$item.enchantment",
-          "translateValue": "$enchantment",
+          "translate": "item.enchantment",
+          "translateValue": "enchantment",
           "values": "enchantments"
         },
         {
           "id": "levels",
           "type": "range",
-          "translate": "$item.levels"
+          "translate": "item.levels"
         }
       ]
     },
@@ -1106,47 +1106,47 @@
         {
           "id": "is_explosion",
           "type": "boolean",
-          "translate": "$damage_source.is_explosion"
+          "translate": "damage_source.is_explosion"
         },
         {
           "id": "is_projectile",
           "type": "boolean",
-          "translate": "$damage_source.is_projectile"
+          "translate": "damage_source.is_projectile"
         },
         {
           "id": "is_fire",
           "type": "boolean",
-          "translate": "$damage_source.is_fire"
+          "translate": "damage_source.is_fire"
         },
         {
           "id": "is_lightning",
           "type": "boolean",
-          "translate": "$damage_source.is_lightning"
+          "translate": "damage_source.is_lightning"
         },
         {
           "id": "is_magic",
           "type": "boolean",
-          "translate": "$damage_source.is_magic"
+          "translate": "damage_source.is_magic"
         },
         {
           "id": "bypasses_magic",
           "type": "boolean",
-          "translate": "$damage_source.bypasses_magic"
+          "translate": "damage_source.bypasses_magic"
         },
         {
           "id": "bypasses_invulnerability",
           "type": "boolean",
-          "translate": "$damage_source.bypasses_invulnerability"
+          "translate": "damage_source.bypasses_invulnerability"
         },
         {
           "id": "bypasses_armor",
           "type": "boolean",
-          "translate": "$damage_source.bypasses_armor"
+          "translate": "damage_source.bypasses_armor"
         },
         {
           "id": "source_entity",
           "type": "object",
-          "translate": "$damage_source.source_entity",
+          "translate": "damage_source.source_entity",
           "color": "dark",
           "collapse": true,
           "value": "entity"
@@ -1154,7 +1154,7 @@
         {
           "id": "direct_entity",
           "type": "object",
-          "translate": "$damage_source.direct_entity",
+          "translate": "damage_source.direct_entity",
           "color": "dark",
           "collapse": true,
           "value": "entity"

@@ -12,7 +12,8 @@ i18next
   .init({
     backend: { loadPath: 'locales/{{lng}}.json' },
     fallbackLng: 'en',
-    whitelist: lngs.map(v => v[0])
+    whitelist: lngs.map(v => v[0]),
+    keySeparator: false
   })
   .then(() => {
     jqueryI18next.init(i18next, $, { parseDefaultValueFromContent: false })
