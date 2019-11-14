@@ -206,6 +206,7 @@
     "function.zoom": "Zoom",
     "function_add": "Add Function",
     "function_remove": "Remove Function",
+    "help.entry.expand": "If false, entry will return all contents of tag, otherwise entry will behave as multiple item entries",
 	"help.entry.type.alternatives": "Tests conditions of the child entries and executes the first that can run",
 	"help.entry.type.dynamic": "Gets block specific drops",
     "help.entry.type.empty": "Adds nothing to the pool",
