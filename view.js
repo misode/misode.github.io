@@ -5,7 +5,7 @@ let collections;
 i18next.on('initialized', () => {
   $('[data-help]').each(function() {
     console.log('ahhh');
-    $(this).tooltip({title: i18next.t('$help.' + $(this).attr('data-help'))});
+    $(this).tooltip({title: i18next.t('help.' + $(this).attr('data-help'))});
   });
 });
 
@@ -462,7 +462,7 @@ function generateField(data, field, parent) {
 
 function generateTooltip(str) {
   let $el = $('<button type="button" class="btn help-tooltip ml-2" data-toggle="tooltip" data-help="' + str + '">?</button>');
-  $el.tooltip({title: i18next.t('$help.' + str)});
+  $el.tooltip({title: i18next.t('help.' + str)});
   return $el;
 }
 
