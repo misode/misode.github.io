@@ -99,12 +99,12 @@
         },
         {
           "id": "weight",
-          "type": "random",
+          "type": "int",
           "translate": "entry.weight"
         },
         {
           "id": "quality",
-          "type": "random",
+          "type": "int",
           "translate": "entry.quality",
           "luckBased": true
         },
