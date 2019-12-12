@@ -501,7 +501,7 @@
             "minecraft:reference",
             "minecraft:entity_properties",
             {
-              "value": "minecraft:block_state_propery",
+              "value": "minecraft:block_state_property",
               "require": ["minecraft:block"]
             },
             {
@@ -617,7 +617,7 @@
           "type": "string",
           "translate": "condition.block",
           "require":  [
-            "minecraft:block_state_propery"
+            "minecraft:block_state_property"
           ]
         },
         {
@@ -628,7 +628,7 @@
             "type": "string"
           },
           "require":  [
-            "minecraft:block_state_propery"
+            "minecraft:block_state_property"
           ]
         },
         {

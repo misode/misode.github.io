@@ -48,7 +48,7 @@
     "condition.thundering": "Thundering",
     "condition.type": "Condition",
     "condition.type.alternative": "Alternative",
-    "condition.type.block_state_propery": "Block Properties",
+    "condition.type.block_state_property": "Block Properties",
     "condition.type.damage_source_properties": "Damage Source",
     "condition.type.entity_properties": "Entity Properties",
     "condition.type.entity_scores": "Entity Scores",
