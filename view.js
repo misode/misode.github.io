@@ -188,7 +188,7 @@ function generateEnum(data, struct) {
   }
   for (let value of collection) {
     if (typeof value === 'object') {
-      if (value.require.includes(correctNamespace(table.type))) {
+      if (structure.id === 'predicate' || value.require.includes(correctNamespace(table.type))) {
         $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.translateValue));
       }
     } else {
