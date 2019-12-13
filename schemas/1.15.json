@@ -1,29 +1,41 @@
 {
-  "root": {
-    "fields": [
-      {
-        "id": "type",
-        "type": "enum",
-        "translate": "table.type",
-        "translateValue": "table.type",
-        "default": "minecraft:generic",
-        "values": [
-          "minecraft:empty",
-          "minecraft:entity",
-          "minecraft:block",
-          "minecraft:chest",
-          "minecraft:fishing",
-          "minecraft:generic"
-        ]
-      },
-      {
-        "id": "pools",
-        "type": "array",
-        "translate": "pool",
-        "values": "pool"
-      }
-    ]
-  },
+  "roots": [
+    {
+      "id": "loot-table",
+      "title": "title.loot-table",
+      "description": "description.loot-table",
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "translate": "table.type",
+          "translateValue": "table.type",
+          "default": "minecraft:generic",
+          "values": [
+            "minecraft:empty",
+            "minecraft:entity",
+            "minecraft:block",
+            "minecraft:chest",
+            "minecraft:fishing",
+            "minecraft:generic"
+          ]
+        },
+        {
+          "id": "pools",
+          "type": "array",
+          "translate": "pool",
+          "values": "pool"
+        }
+      ]
+    },
+    {
+      "id": "predicate",
+      "title": "title.predicate",
+      "description": "description.predicate",
+      "type": "object",
+      "value": "condition"
+    }
+  ],
   "components": [
     {
       "id": "pool",

@@ -11,13 +11,13 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title data-i18n="title"></title>
+  <title data-i18n="title.loot-table"></title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <link rel="stylesheet" href="custom.css">
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <span class="navbar-brand mb-0 h1" data-i18n="description"></span>
+    <span id="descriptionSpan" class="navbar-brand mb-0 h1" data-i18n="description.loot-table"></span>
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -43,8 +43,8 @@
   </nav>
   <div class="container d-none">
     <div class="row my-4">
-      <div class="col-12 col-lg-7 mb-3 structure-container" data-index="table">
-        <div class="input-group">
+      <div class="col-12 col-lg-7 mb-3 structure-container" data-index="root">
+        <div id="lootTableToolbar" class="input-group d-none mb-3">
           <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addComponent(this, 'pools')" data-field="table" data-i18n="pool_add"></button>
           <div class="input-group-prepend table-type">
             <span class="input-group-text rounded-left" data-i18n="table.type"></span>
@@ -58,7 +58,7 @@
             <button type="button" class="btn btn-secondary" onclick="showSource()" data-i18n="show_source"></button>
           </div>
         </div>
-        <div id="structure" class="loot-table mt-3" data-index="pools">
+        <div id="structure" class="loot-table" data-index="root">
         </div>
       </div>
       <div class="col-12 col-lg-5 source-container">

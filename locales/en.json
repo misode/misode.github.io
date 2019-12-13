@@ -75,7 +75,8 @@
     "damage_source.is_magic": "Magic",
     "damage_source.is_projectile": "Projectile",
     "damage_source.source_entity": "Source Entity",
-    "description": "Loot Table Generator for Minecraft",
+    "description.loot-table": "Loot Table Generator for Minecraft",
+    "description.predicate": "Predicate Generator for Minecraft",
     "dimension.overworld": "Overworld",
     "dimension.the_end": "The End",
     "dimension.the_nether": "The Nether",
@@ -290,7 +291,8 @@
     "tabs": "Tabs",
     "term_add": "Add Term",
     "term_remove": "Remove Term",
-    "title": "Loot Table Generator",
+    "title.loot-table": "Loot Table Generator",
+    "title.predicate": "Predicate Generator",
     "true": "True",
     "unset": "Unset"
 }
