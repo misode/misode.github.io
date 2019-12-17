@@ -506,7 +506,7 @@
             },
             "minecraft:killed_by_player",
             {
-              "value": "survives_explosion",
+              "value": "minecraft:survives_explosion",
               "require": ["minecraft:block"]
             }
           ]
