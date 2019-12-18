@@ -55,7 +55,7 @@
   "condition.thundering": "Гроза",
   "condition.type": "Условие",
   "condition.type.alternative": "Выбор",
-  "condition.type.block_state_propery": "Свойства блока",
+  "condition.type.block_state_property": "Свойства блока",
   "condition.type.damage_source_properties": "Источник урона",
   "condition.type.entity_properties": "Свойства сущности",
   "condition.type.entity_scores": "Счёты сущности",
@@ -82,7 +82,7 @@
   "damage_source.is_magic": "Магия",
   "damage_source.is_projectile": "Снаряд",
   "damage_source.source_entity": "Сущность-источник урона",
-  "description": "Генератор таблицы добычи для Minecraft",
+  "description.loot-table": "Генератор таблицы добычи для Minecraft",
   "dimension.overworld": "Обычный мир",
   "dimension.the_end": "Энд",
   "dimension.the_nether": "Незер",
@@ -298,7 +298,7 @@
   "tabs": "Табуляция",
   "term_add": "Добавить выражение",
   "term_remove": "Удалить выражение",
-  "title": "Генератор таблицы добычи",
+  "title.loot-table": "Генератор таблицы добычи",
   "true": "Да",
   "unset": "Не задано"
 }

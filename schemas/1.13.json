@@ -1,5 +1,6 @@
 {
   "root": {
+    "id": "loot-table",
     "fields": [
       {
         "id": "pools",
@@ -71,12 +72,12 @@
         },
         {
           "id": "weight",
-          "type": "range",
+          "type": "int",
           "translate": "entry.weight"
         },
         {
           "id": "quality",
-          "type": "range",
+          "type": "int",
           "translate": "entry.quality",
           "luckBased": true
         },

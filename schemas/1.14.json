@@ -1,5 +1,6 @@
 {
   "root": {
+    "id": "loot-table",
     "fields": [
       {
         "id": "type",
@@ -101,12 +102,12 @@
         },
         {
           "id": "weight",
-          "type": "random",
+          "type": "int",
           "translate": "entry.weight"
         },
         {
           "id": "quality",
-          "type": "random",
+          "type": "int",
           "translate": "entry.quality",
           "luckBased": true
         },
@@ -486,7 +487,7 @@
             "minecraft:inverted",
             "minecraft:entity_properties",
             {
-              "value": "minecraft:block_state_propery",
+              "value": "minecraft:block_state_property",
               "require": ["minecraft:block"]
             },
             {
@@ -508,7 +509,7 @@
             },
             "minecraft:killed_by_player",
             {
-              "value": "survives_explosion",
+              "value": "minecraft:survives_explosion",
               "require": ["minecraft:block"]
             }
           ]
@@ -594,7 +595,7 @@
           "type": "string",
           "translate": "condition.block",
           "require":  [
-            "minecraft:block_state_propery"
+            "minecraft:block_state_property"
           ]
         },
         {
@@ -605,7 +606,7 @@
             "type": "string"
           },
           "require":  [
-            "minecraft:block_state_propery"
+            "minecraft:block_state_property"
           ]
         },
         {

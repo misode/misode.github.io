@@ -55,7 +55,7 @@
   "condition.thundering": "雷雨",
   "condition.type": "条件",
   "condition.type.alternative": "析取范式",
-  "condition.type.block_state_propery": "方块属性",
+  "condition.type.block_state_property": "方块属性",
   "condition.type.damage_source_properties": "伤害源",
   "condition.type.entity_properties": "实体属性",
   "condition.type.entity_scores": "实体分数",
@@ -82,7 +82,7 @@
   "damage_source.is_magic": "魔法",
   "damage_source.is_projectile": "弹射物",
   "damage_source.source_entity": "根本来源实体",
-  "description": "Minecraft 战利品表生成器",
+  "description.loot-table": "Minecraft 战利品表生成器",
   "dimension.overworld": "主世界",
   "dimension.the_end": "末路之地",
   "dimension.the_nether": "下界",
@@ -299,7 +299,7 @@
   "tabs": "Tab 缩进",
   "term_add": "添加条件",
   "term_remove": "移除条件",
-  "title": "战利品表生成器",
+  "title.loot-table": "战利品表生成器",
   "true": "是",
   "unset": "未指定"
 }

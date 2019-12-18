@@ -1,29 +1,41 @@
 {
-  "root": {
-    "fields": [
-      {
-        "id": "type",
-        "type": "enum",
-        "translate": "table.type",
-        "translateValue": "table.type",
-        "default": "minecraft:generic",
-        "values": [
-          "minecraft:empty",
-          "minecraft:entity",
-          "minecraft:block",
-          "minecraft:chest",
-          "minecraft:fishing",
-          "minecraft:generic"
-        ]
-      },
-      {
-        "id": "pools",
-        "type": "array",
-        "translate": "pool",
-        "values": "pool"
-      }
-    ]
-  },
+  "roots": [
+    {
+      "id": "loot-table",
+      "title": "title.loot-table",
+      "description": "description.loot-table",
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "translate": "table.type",
+          "translateValue": "table.type",
+          "default": "minecraft:generic",
+          "values": [
+            "minecraft:empty",
+            "minecraft:entity",
+            "minecraft:block",
+            "minecraft:chest",
+            "minecraft:fishing",
+            "minecraft:generic"
+          ]
+        },
+        {
+          "id": "pools",
+          "type": "array",
+          "translate": "pool",
+          "values": "pool"
+        }
+      ]
+    },
+    {
+      "id": "predicate",
+      "title": "title.predicate",
+      "description": "description.predicate",
+      "type": "object",
+      "value": "condition"
+    }
+  ],
   "components": [
     {
       "id": "pool",
@@ -100,12 +112,12 @@
         },
         {
           "id": "weight",
-          "type": "random",
+          "type": "int",
           "translate": "entry.weight"
         },
         {
           "id": "quality",
-          "type": "random",
+          "type": "int",
           "translate": "entry.quality",
           "luckBased": true
         },
@@ -502,7 +514,7 @@
             "minecraft:reference",
             "minecraft:entity_properties",
             {
-              "value": "minecraft:block_state_propery",
+              "value": "minecraft:block_state_property",
               "require": ["minecraft:block"]
             },
             {
@@ -524,7 +536,7 @@
             },
             "minecraft:killed_by_player",
             {
-              "value": "survives_explosion",
+              "value": "minecraft:survives_explosion",
               "require": ["minecraft:block"]
             }
           ]
@@ -618,7 +630,7 @@
           "type": "string",
           "translate": "condition.block",
           "require":  [
-            "minecraft:block_state_propery"
+            "minecraft:block_state_property"
           ]
         },
         {
@@ -629,7 +641,7 @@
             "type": "string"
           },
           "require":  [
-            "minecraft:block_state_propery"
+            "minecraft:block_state_property"
           ]
         },
         {

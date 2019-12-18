@@ -9,10 +9,16 @@ i18next.on('initialized', () => {
   });
 });
 
-changeVersion('1.14');
+changeVersion('1.15');
 function changeVersion(version) {
   $.getJSON('schemas/' + version + '.json', json => {
-    structure = json.root;
+    console.log(json);
+    if (json.root) {
+      structure = json.root;
+    } else if (json.roots) {
+      let id = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
+      structure = json.roots.find(e => e.id === id);
+    }
     components = json.components;
     collections = json.collections;
   }).fail((jqXHR, textStatus, errorThrown) => {
@@ -35,19 +41,31 @@ function changeVersion(version) {
 
 function updateView() {
   if (structure) {
-    let {out: tableOut, component: $table} = generateTable(table, structure);
-    $('#structure').append($table);
+    let {out: sourceOut, component: $component} = generateSourceAndView(table, structure);
+    $('#structure').removeClass('d-none').html('');
+    $('#descriptionSpan').attr('data-i18n', structure.description);
+    $('title').attr('data-i18n', structure.title);
+    $('#structure').append($component);
     if (i18next.isInitialized) {
       $('html').localize();
     }
-    $('#source').val(JSON.stringify(tableOut, null, indentation));
+    $('#source').val(JSON.stringify(sourceOut, null, indentation));
+  }
+}
+
+function generateSourceAndView(data, struct) {
+  if (struct.id === 'loot-table') {
+    $('#lootTableToolbar').removeClass('d-none');
+    $('#structure').attr('data-index', 'pools');
+    return generateTable(data, struct);
+  } else {
+    return generateObject(data, struct, false);
   }
 }
 
 function generateTable(data, struct) {
   let out = {};
   let $el = $('<div/>');
-  $('#structure').removeClass('d-none').html('');
 
   let type = struct.fields.find(e => e.id === 'type');
   if (type) {
@@ -192,7 +210,7 @@ function generateEnum(data, struct) {
   }
   for (let value of collection) {
     if (typeof value === 'object') {
-      if (value.require.includes(correctNamespace(table.type))) {
+      if (structure.id === 'predicate' || value.require.includes(correctNamespace(table.type))) {
         $el.find('select').append(setValueAndName($('<option/>'), value.value, struct.translateValue));
       }
     } else {
