@@ -126,6 +126,7 @@
           "type": "boolean",
           "default": "false",
           "translate": "entry.expand",
+          "help": true,
           "require": [
             "minecraft:tag"
           ]

@@ -2,13 +2,6 @@ let structure;
 let components;
 let collections;
 
-i18next.on('initialized', () => {
-  $('[data-help]').each(function() {
-    console.log('ahhh');
-    $(this).tooltip({title: i18next.t('help.' + $(this).attr('data-help'))});
-  });
-});
-
 changeVersion('1.15');
 function changeVersion(version) {
   $.getJSON('schemas/' + version + '.json', json => {
