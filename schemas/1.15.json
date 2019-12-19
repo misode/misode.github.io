@@ -827,6 +827,11 @@
           "translate": "entity.nbt"
         },
         {
+          "id": "team",
+          "type": "string",
+          "translate": "entity.team"
+        },
+        {
           "id": "location",
           "type": "object",
           "translate": "entity.location",
@@ -928,6 +933,56 @@
               "color": "dark",
               "collapse": true,
               "value": "item"
+            }
+          ]
+        },
+        {
+          "id": "player",
+          "type": "object",
+          "translate": "entity.player",
+          "color": "dark",
+          "collapse": true,
+          "fields": [
+            {
+              "id": "level",
+              "type": "range",
+              "translate": "entity.player.level"
+            },
+            {
+              "id": "gamemode",
+              "type": "enum",
+              "translate": "entity.player.gamemode",
+              "translateValue": "gamemode",
+              "unset": true,
+              "values": [
+                "adventure",
+                "creative",
+                "spectator",
+                "survival"
+              ]
+            },
+            {
+              "id": "advancements",
+              "type": "map",
+              "translate": "entity.player.advancements",
+              "values": {
+                "type": "boolean"
+              }
+            },
+            {
+              "id": "recipes",
+              "type": "map",
+              "translate": "entity.player.recipes",
+              "values": {
+                "type": "boolean"
+              }
+            },
+            {
+              "id": "stats",
+              "type": "array",
+              "button": "field",
+              "translate": "statistic",
+              "values": "statistic"
             }
           ]
         },
@@ -1275,6 +1330,43 @@
           "color": "dark",
           "collapse": true,
           "value": "entity"
+        }
+      ]
+    },
+    {
+      "id": "statistic",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "type",
+          "type": "enum",
+          "translate": "statistic.type",
+          "translateValue": "statistic.type",
+          "default": "minecraft:custom",
+          "values": [
+            "minecraft:broken",
+            "minecraft:crafted",
+            "minecraft:custom",
+            "minecraft:dropped",
+            "minecraft:killed",
+            "minecraft:killed_by",
+            "minecraft:mined",
+            "minecraft:picked_up",
+            "minecraft:used",
+            "killedByTeam",
+            "teamkill"
+          ]
+        },
+        {
+          "id": "stat",
+          "type": "string",
+          "translate": "statistic.stat"
+        },
+        {
+          "id": "value",
+          "type": "range",
+          "translate": "statistic.value"
         }
       ]
     }
