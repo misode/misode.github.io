@@ -270,6 +270,7 @@ function generateMap(data, struct) {
         $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFromMap(this)" data-i18n="' + struct.translate + '_remove"></button>');
         $item.prepend($header);
       } else {
+        $item.addClass("ml-3");
         $item.append('<div class="input-group-append"><button class="btn btn-outline-danger bg-light" type="button" onclick="removeFromMap(this)" data-i18n="remove"></button></div>');
       }
       out[field.id] = outValue;
