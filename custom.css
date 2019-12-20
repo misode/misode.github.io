@@ -98,19 +98,19 @@ body[data-style="dark"] #source {
 body[data-style="dark"] .form-control {
   background-color: #343a40;
   color: #ddd;
-  border-color: #2c3136;
+  border-color: #24282c;
 }
 
 body[data-style="dark"] .input-group-text {
   background-color: #2d3236;
   color: #fff;
-  border-color: #2c3136;
+  border-color: #24282c;
 }
 
 body[data-style="dark"] .btn-outline-secondary {
   background-color: #343a40 !important;
   color: #ddd;
-  border-color: #2c3136;
+  border-color: #24282c;
 }
 
 body[data-style="dark"] .btn-outline-dark {
@@ -172,4 +172,10 @@ body[data-style="dark"] .card.bg-dark .card.bg-dark {
 
 body[data-style="dark"] .card.bg-dark .card.bg-dark .card.bg-dark {
   background-color: #646b72 !important;
+}
+
+body[data-style="dark"] .help-tooltip {
+  background-color: #2d3236;
+  color: #fff;
+  border-color: #24282c;
 }
