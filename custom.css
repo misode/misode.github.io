@@ -49,6 +49,21 @@
   background-color: #4b4f54 !important;
 }
 
+.btn-outline-danger:hover {
+  background-color: #dae0e5 !important;
+  color: black;
+}
+
+.btn-dark {
+  background-color: white !important;
+  color: #149633;
+  border-color: #149633 !important;
+}
+
+.btn-dark:hover {
+  color: black;
+}
+
 .dropdown-item {
   cursor: pointer;
 }
@@ -159,6 +174,20 @@ body[data-style="dark"] .card.bg-info {
 body[data-style="dark"] .card.bg-info .card.bg-info {
   background-color: #3a929e !important;
   color: black !important;
+}
+
+body[data-style="dark"] .btn-outline-danger {
+  background-color: #2d3236 !important;
+}
+
+body[data-style="dark"] .btn-dark {
+  background-color: #2d3236;
+  color: #149633;
+  border-color: #149633;
+}
+
+body[data-style="dark"] .btn-dark:hover {
+  color: white;
 }
 
 body[data-style="dark"] .card.bg-dark {
