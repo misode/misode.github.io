@@ -181,7 +181,7 @@ body[data-style="dark"] .btn-outline-danger {
 }
 
 body[data-style="dark"] .btn-dark {
-  background-color: #2d3236;
+  background-color: #2d3236 !important;
   color: #149633;
   border-color: #149633;
 }
