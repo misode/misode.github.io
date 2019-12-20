@@ -34,7 +34,8 @@
         {
           "id": "rolls",
           "type": "random",
-          "translate": "pool.rolls"
+          "translate": "pool.rolls",
+          "help": true
         },
         {
           "id": "bonus_rolls",
@@ -75,6 +76,7 @@
           "type": "enum",
           "translate": "entry.type",
           "translateValue": "entry.type",
+          "help": true,
           "default": "minecraft:item",
           "values": [
             "minecraft:empty",
@@ -114,6 +116,7 @@
           "type": "boolean",
           "default": "false",
           "translate": "entry.expand",
+          "help": true,
           "require": [
             "minecraft:tag"
           ]

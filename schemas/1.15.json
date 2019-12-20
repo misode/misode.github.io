@@ -86,6 +86,7 @@
           "type": "enum",
           "translate": "entry.type",
           "translateValue": "entry.type",
+          "help": true,
           "default": "minecraft:item",
           "values": [
             "minecraft:empty",
@@ -125,6 +126,7 @@
           "type": "boolean",
           "default": "false",
           "translate": "entry.expand",
+          "help": true,
           "require": [
             "minecraft:tag"
           ]
