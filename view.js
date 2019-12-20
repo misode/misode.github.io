@@ -10,7 +10,7 @@ function changeVersion(version) {
       structure = json.root;
     } else if (json.roots) {
       let id = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
-      structure = json.roots.find(e => e.id === id);
+      structure = json.roots.find(e => e.id === id) || json.roots[0] ;
     }
     components = json.components;
     collections = json.collections;
