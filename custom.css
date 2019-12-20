@@ -70,3 +70,13 @@ textarea.invalid:focus {
   overflow-wrap: normal;
   overflow-x: scroll;
 }
+
+body[data-style="dark"] {
+  background-color: #222529;
+}
+
+body[data-style="dark"] #source {
+  background-color: #181a1d;
+  border-color: #646b72;
+  color: #eee;
+}

@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <link rel="stylesheet" href="custom.css">
 </head>
-<body>
+<body data-style="light">
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <span id="descriptionSpan" class="navbar-brand mb-0 h1" data-i18n="description.loot-table"></span>
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
@@ -32,10 +32,19 @@
           </div>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown">
+          <a class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown">
             🌎 Language
           </a>
           <div id="lngList" class="dropdown-menu"></div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown">
+            Theme
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" onclick="changeTheme('light')">Light</a>
+            <a class="dropdown-item" onclick="changeTheme('dark')">Dark</a>
+          </div>
         </li>
       </ul>
       <span class="ml-0 ml-md-2"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>

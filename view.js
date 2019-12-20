@@ -32,6 +32,10 @@ function changeVersion(version) {
   });
 }
 
+function changeTheme(theme) {
+  $('body').attr('data-style', theme);
+}
+
 function updateView() {
   if (structure) {
     let {out: sourceOut, component: $component} = generateSourceAndView(table, structure);
