@@ -84,3 +84,98 @@ textarea.invalid:focus {
   overflow-wrap: normal;
   overflow-x: scroll;
 }
+
+body[data-style="dark"] {
+  background-color: #222529;
+}
+
+body[data-style="dark"] #source {
+  background-color: #181a1d;
+  border-color: #646b72;
+  color: #ddd;
+}
+
+body[data-style="dark"] .form-control {
+  background-color: #343a40;
+  color: #ddd;
+  border-color: #24282c;
+}
+
+body[data-style="dark"] .input-group-text {
+  background-color: #2d3236;
+  color: #fff;
+  border-color: #24282c;
+}
+
+body[data-style="dark"] .btn-outline-secondary {
+  background-color: #343a40 !important;
+  color: #ddd;
+  border-color: #24282c;
+}
+
+body[data-style="dark"] .btn-outline-dark {
+  filter: invert();
+}
+
+body[data-style="dark"] .custom-control-label {
+  color: #ddd;
+}
+
+body[data-style="dark"] .dropdown-menu {
+  background-color: #343a40;
+  color: #ddd;
+}
+
+body[data-style="dark"] .dropdown-item:hover {
+  background-color: #2d3236;
+}
+
+body[data-style="dark"] .card.bg-success {
+  background-color: #2f693e !important;
+  color: white !important;
+}
+
+body[data-style="dark"] .card.bg-light {
+  background-color: #32373c !important;
+  color: white !important;
+}
+
+body[data-style="dark"] .btn-light {
+  background-color: #282d31 !important;
+  color: white !important;
+  border-color: #282d31 !important;
+}
+
+body[data-style="dark"] .card.bg-secondary {
+  background-color: #707579 !important;
+  color: white !important;
+}
+
+body[data-style="dark"] .card.bg-info {
+  background-color: #2a707a !important;
+  color: black !important;
+}
+
+body[data-style="dark"] .card.bg-info .card.bg-info {
+  background-color: #3a929e !important;
+  color: black !important;
+}
+
+body[data-style="dark"] .card.bg-dark {
+  background-color: #4b4f54 !important;
+  color: white !important;
+}
+
+body[data-style="dark"] .card.bg-dark .card.bg-dark {
+  background-color: #565b60 !important;
+}
+
+body[data-style="dark"] .card.bg-dark .card.bg-dark .card.bg-dark {
+  background-color: #646b72 !important;
+}
+
+body[data-style="dark"] .help-tooltip {
+  background-color: #2d3236;
+  color: #fff;
+  border-color: #24282c;
+}

@@ -32,6 +32,15 @@ function changeVersion(version) {
   });
 }
 
+changeTheme(localStorage.getItem('theme'))
+function changeTheme(theme) {
+  if (theme === null) {
+    theme = 'light';
+  }
+  $('body').attr('data-style', theme);
+  localStorage.setItem('theme', theme);
+}
+
 function updateView() {
   if (structure) {
     let {out: sourceOut, component: $component} = generateSourceAndView(table, structure);
