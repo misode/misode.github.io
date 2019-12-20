@@ -53,6 +53,7 @@
           "type": "enum",
           "translate": "entry.type",
           "translateValue": "entry.type",
+          "help": true,
           "default": "minecraft:item",
           "values": [
             "minecraft:empty",

@@ -32,10 +32,17 @@
           </div>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown">
+          <a class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown">
             🌎 Language
           </a>
           <div id="lngList" class="dropdown-menu"></div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown" data-i18n="theme"></a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" onclick="changeTheme('light')" data-i18n="theme.light"></a>
+            <a class="dropdown-item" onclick="changeTheme('dark')" data-i18n="theme.dark"></a>
+          </div>
         </li>
       </ul>
       <span class="ml-0 ml-md-2"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="author"></a></span>
