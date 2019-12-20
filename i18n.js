@@ -17,11 +17,11 @@ i18next
   })
   .then(() => {
     jqueryI18next.init(i18next, $, { parseDefaultValueFromContent: false })
-    $('html').localize()
+    updateView()
   })
 
 function changeLng(code) {
   i18next.changeLanguage(code).then(() => {
-    $('html').localize()
+    updateView()
   })
 }

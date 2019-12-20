@@ -122,6 +122,9 @@ function generateString(data, struct) {
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('input').val(data);
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -133,6 +136,9 @@ function generateBoolean(data, struct) {
     $el.find('[value="true"]').addClass('active');
   } else if (data === false) {
     $el.find('[value="false"]').addClass('active');
+  }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
   }
   return {out: data, component: $el};
 }
@@ -155,6 +161,9 @@ function generateRandom(data, struct) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -170,6 +179,9 @@ function generateRange(data, struct) {
     $el.find('.exact').removeClass('d-none');
     $el.find('.exact').val(data);
   }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -180,6 +192,9 @@ function generateBoundary(data, struct) {
   if (data) {
     $el.find('.range.min').val(data.min);
     $el.find('.range.max').val(data.max);
+  }
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
   }
   return {out: data, component: $el};
 }
@@ -205,6 +220,9 @@ function generateEnum(data, struct) {
     }
   }
   $el.find('select').val(collection.includes(data) ? data : correctNamespace(data));
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translateValue + '.' + data.replace(/.*:/, '')));
+  }
   return {out: data, component: $el};
 }
 
@@ -282,6 +300,9 @@ function generateJson(data, struct) {
     data = JSON.stringify(data);
   }
   $el.find('textarea').val(data).keydown(e => preventNewline(e));
+  if (struct.help) {
+    $el.append(generateTooltip(struct.translate));
+  }
   return {out: data, component: $el};
 }
 
@@ -457,6 +478,12 @@ function generateField(data, field, parent) {
     return generateError('Failed generating "' + field.id + '" component');
   }
   return false;
+}
+
+function generateTooltip(str) {
+  let $el = $('<button type="button" class="btn help-tooltip ml-2" data-toggle="tooltip" data-help="' + str + '">?</button>');
+  $el.tooltip({title: i18next.t('help.' + str)});
+  return $el;
 }
 
 function preventNewline(e) {
