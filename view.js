@@ -253,13 +253,14 @@ function generateSet(data, struct) {
 
 function generateMap(data, struct) {
   let $el = $('#components').find('[data-type="map"]').clone();
-  let out = {};
+  let out;
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
   $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
   $el.find('input').keypress((e) => {if (e.which == 13) addToMap(e.target);});
   if (data) {
     for (let key of Object.keys(data)) {
+      out = out || {}
       let field = struct.values;
       field.id = key;
       field.translate = key;
