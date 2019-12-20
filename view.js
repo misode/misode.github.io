@@ -32,8 +32,13 @@ function changeVersion(version) {
   });
 }
 
+changeTheme(localStorage.getItem('theme'))
 function changeTheme(theme) {
+  if (theme === null) {
+    theme = 'light';
+  }
   $('body').attr('data-style', theme);
+  localStorage.setItem('theme', theme);
 }
 
 function updateView() {
