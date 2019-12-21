@@ -318,10 +318,10 @@ function updateField(el) {
     }
   } else if (type === 'nbt') {
 
-    if (!value.startsWith('{')) {
+    if (!value.startsWith('{') && value.length > 0) {
       value = '{' + value;
     }
-    if (!value.endsWith('}')) {
+    if (!value.endsWith('}') && value.length > 0) {
       value = value + '}';
     }
   } else if (type === 'json') {
