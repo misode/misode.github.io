@@ -395,8 +395,10 @@ function generateObject(data, struct, header) {
   }
   for (let field of struct.fields) {
     if (field.collapse) {
-      $body.append('<button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button>');
-      if (data[field.id] === undefined) {
+      let hasNoValue = data[field.id] === undefined
+      let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
+      $body.append('<span class="' + arrowDirection + '"><button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      if (hasNoValue) {
         $body.append('<div/>');
         continue;
       }
