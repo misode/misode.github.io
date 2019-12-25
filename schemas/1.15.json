@@ -638,6 +638,7 @@
           "id": "properties",
           "type": "map",
           "translate": "condition.block_state",
+          "translatePlaceholder": "placeholder.block_state",
           "values": {
             "type": "string"
           },
@@ -649,6 +650,7 @@
           "id": "scores",
           "type": "map",
           "translate": "condition.score",
+          "translatePlaceholder": "placeholder.objective",
           "values": {
             "type": "range"
           },
@@ -967,6 +969,7 @@
               "id": "advancements",
               "type": "map",
               "translate": "entity.player.advancements",
+              "translatePlaceholder": "placeholder.advancement",
               "values": {
                 "type": "boolean"
               }
@@ -975,6 +978,7 @@
               "id": "recipes",
               "type": "map",
               "translate": "entity.player.recipes",
+              "translatePlaceholder": "placeholder.recipe",
               "values": {
                 "type": "boolean"
               }
@@ -992,6 +996,7 @@
           "id": "effects",
           "type": "map",
           "translate": "entity.status_effect",
+          "translatePlaceholder": "placeholder.effect",
           "values": {
             "type": "object",
             "value": "status_effect"
@@ -1091,6 +1096,7 @@
               "id": "state",
               "type": "map",
               "translate": "location.block.state",
+              "translatePlaceholder": "placeholder.block_state",
               "values": {
                 "type": "string"
               }
@@ -1118,6 +1124,7 @@
               "id": "state",
               "type": "map",
               "translate": "location.fluid.state",
+              "translatePlaceholder": "placeholder.fluid_state",
               "values": {
                 "type": "string"
               }
