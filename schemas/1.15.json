@@ -659,6 +659,30 @@
           ]
         },
         {
+          "id": "offsetX",
+          "type": "int",
+          "translate": "condition.offsetX",
+          "require": [
+            "minecraft:location_check"
+          ]
+        },
+        {
+          "id": "offsetY",
+          "type": "int",
+          "translate": "condition.offsetY",
+          "require": [
+            "minecraft:location_check"
+          ]
+        },
+        {
+          "id": "offsetZ",
+          "type": "int",
+          "translate": "condition.offsetZ",
+          "require": [
+            "minecraft:location_check"
+          ]
+        },
+        {
           "id": "predicate",
           "type": "object",
           "translate": "entity",
