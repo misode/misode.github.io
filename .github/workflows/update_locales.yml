@@ -2,7 +2,7 @@ name: Update Locales
 
 on:
   schedule:
-    - cron: '0 0 0 0 0'
+    - cron: '*/5 0 0 0 0'
 
 jobs:
   update:
