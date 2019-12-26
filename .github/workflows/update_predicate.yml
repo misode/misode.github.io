@@ -1,0 +1,14 @@
+name: Update Predicate
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        repository: misode/predicate
+        github_token: ${{ secrets.PREDICATE_TOKEN }}
