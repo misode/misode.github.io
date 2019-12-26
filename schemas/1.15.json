@@ -342,11 +342,11 @@
           "type": "enum",
           "translate": "function.entity",
           "translateValue": "source",
-          "default": "minecraft:this",
+          "default": "this",
           "values": [
-            "minecraft:this",
-            "minecraft:killer",
-            "minecraft:killer_player"
+            "this",
+            "killer",
+            "killer_player"
           ],
           "require": [
             "minecraft:set_name",
@@ -359,12 +359,12 @@
           "type": "enum",
           "translate": "function.source",
           "translateValue": "source",
-          "default": "minecraft:this",
+          "default": "this",
           "values": [
-            "minecraft:block_entity",
-            "minecraft:this",
-            "minecraft:killer",
-            "minecraft:killer_player"
+            "block_entity",
+            "this",
+            "killer",
+            "killer_player"
           ],
           "require": [
             "minecraft:copy_name",
