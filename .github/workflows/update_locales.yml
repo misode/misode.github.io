@@ -14,7 +14,7 @@ jobs:
           python-version: '10.x'
       - name: Fetch changes from Tabula
         run: |
-          format_script=""let obj = JSON.parse(process.argv[1]); JSON.stringify(obj, Object.keys(obj).sort(), 4);"
+          format_script="let obj = JSON.parse(process.argv[1]); JSON.stringify(obj, Object.keys(obj).sort(), 4);"
           node -p "$format_script" "$(curl 'https://tabulas.herokuapp.com/api/loot-table/en/')" > "locales/en.json"
           node -p "$format_script" "$(curl 'https://tabulas.herokuapp.com/api/loot-table/ru/')" > "locales/ru.json"
           node -p "$format_script" "$(curl 'https://tabulas.herokuapp.com/api/loot-table/zh-CN/')" > "locales/zh-CN.json"
