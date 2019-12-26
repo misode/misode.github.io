@@ -1,0 +1,17 @@
+name: Update Tabula
+
+on:
+  push:
+    paths:
+      - 'locales/*.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Push changes to Tabula
+      run: |
+        curl "https://tabulas.herokuapp.com/api/loot-table/en/${{ secrets.TABULA_TOKEN}}/" -d "@locales/en.json" -H 'Content-Type: application/json'
+        curl "https://tabulas.herokuapp.com/api/loot-table/ru/${{ secrets.TABULA_TOKEN}}/" -d "@locales/ru.json" -H 'Content-Type: application/json'
+        curl "https://tabulas.herokuapp.com/api/loot-table/zh-CN/${{ secrets.TABULA_TOKEN}}/" -d "@locales/zh-CN.json" -H 'Content-Type: application/json'
