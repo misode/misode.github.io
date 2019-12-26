@@ -2,21 +2,22 @@ name: Update Locales
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-node@v1.1.0
         with:
-          python-version: '3.x'
+          python-version: '10.x'
       - name: Fetch changes from Tabula
         run: |
-          curl "https://tabulas.herokuapp.com/api/loot-table/en/" | python -m json.tool --sort-keys > "locales/en.json"
-          curl "https://tabulas.herokuapp.com/api/loot-table/ru/" | python -m json.tool --sort-keys > "locales/en.json"
-          curl "https://tabulas.herokuapp.com/api/loot-table/zh-CN/" | python -m json.tool --sort-keys > "locales/zh-CN.json"
+          format_script=""let obj = JSON.parse(process.argv[1]); JSON.stringify(obj, Object.keys(obj).sort(), 4);"
+          node -p "$format_script" "$(curl 'https://tabulas.herokuapp.com/api/loot-table/en/')" > "locales/en.json"
+          node -p "$format_script" "$(curl 'https://tabulas.herokuapp.com/api/loot-table/ru/')" > "locales/ru.json"
+          node -p "$format_script" "$(curl 'https://tabulas.herokuapp.com/api/loot-table/zh-CN/')" > "locales/zh-CN.json"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v1
         with:
