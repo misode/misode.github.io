@@ -17,16 +17,13 @@ jobs:
           curl "https://tabulas.herokuapp.com/api/loot-table/en/" | python -m json.tool --sort-keys > "locales/en.json"
           curl "https://tabulas.herokuapp.com/api/loot-table/ru/" | python -m json.tool --sort-keys > "locales/en.json"
           curl "https://tabulas.herokuapp.com/api/loot-table/zh-CN/" | python -m json.tool --sort-keys > "locales/zh-CN.json"
-      - name: Commit changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -A
-          git commit -m "Update locales"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update locales
+          title: Update locales
           author-name: Github Action
           author-email: action@github.com
-          title: Update locales
+          branch: locales
+          branch-suffix: short-commit-hash
