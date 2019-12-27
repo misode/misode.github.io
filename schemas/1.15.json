@@ -528,6 +528,7 @@
             },
             "minecraft:location_check",
             "minecraft:weather_check",
+            "minecraft:time_check",
             "minecraft:entity_scores",
             "minecraft:random_chance",
             "minecraft:random_chance_with_looting",
@@ -624,6 +625,23 @@
           "translate": "condition.thundering",
           "require": [
             "minecraft:weather_check"
+          ]
+        },
+        {
+          "id": "value",
+          "type": "range",
+          "translate": "condition.time_value",
+          "require": [
+            "minecraft:time_check"
+          ]
+        },
+        {
+          "id": "period",
+          "type": "range",
+          "translate": "condition.time_period",
+          "help": true,
+          "require": [
+            "minecraft:time_check"
           ]
         },
         {
