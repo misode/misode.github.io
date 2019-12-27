@@ -2,15 +2,24 @@ let structure;
 let components;
 let collections;
 
+const generators = {
+  'advancement': ['1.15'],
+  'loot-table': ['1.13', '1.14', '1.15'],
+  'predicate': ['1.15']
+}
+
+const generator = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
+generators[generator].forEach(v => {
+  $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
+});
+
 changeVersion('1.15');
 function changeVersion(version) {
   $.getJSON('schemas/' + version + '.json', json => {
-    console.log(json);
     if (json.root) {
       structure = json.root;
     } else if (json.roots) {
-      let id = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
-      structure = json.roots.find(e => e.id === id) || json.roots[0] ;
+      structure = json.roots.find(e => e.id === generator) || json.roots[0] ;
     }
     components = json.components;
     collections = json.collections;
@@ -56,7 +65,7 @@ function updateView() {
 }
 
 function generateSourceAndView(data, struct) {
-  if (struct.id === 'loot-table') {
+  if (generator === 'loot-table') {
     $('#lootTableToolbar').removeClass('d-none');
     $('#structure').attr('data-index', 'pools');
     return generateTable(data, struct);
