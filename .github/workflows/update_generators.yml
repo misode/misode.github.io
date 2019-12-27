@@ -1,0 +1,19 @@
+name: Update Generators
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Update predicate
+      uses: ad-m/github-push-action@master
+      with:
+        repository: misode/predicate
+        github_token: ${{ secrets.GENERATORS_TOKEN }}
+    - name: Update advancement
+      uses: ad-m/github-push-action@master
+      with:
+        repository: misode/advancement
+        github_token: ${{ secrets.GENERATORS_TOKEN }}
