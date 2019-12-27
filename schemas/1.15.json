@@ -637,7 +637,7 @@
         },
         {
           "id": "period",
-          "type": "range",
+          "type": "int",
           "translate": "condition.time_period",
           "help": true,
           "require": [
