@@ -810,7 +810,7 @@
         {
           "id": "slots",
           "type": "set",
-          "translate": "attribute_modifier.slots",
+          "translate": "attribute_modifier.slot",
           "translateValue": "slot",
           "values": [
             "mainhand",
