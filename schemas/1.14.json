@@ -486,32 +486,17 @@
             "minecraft:alternative",
             "minecraft:inverted",
             "minecraft:entity_properties",
-            {
-              "value": "minecraft:block_state_property",
-              "require": ["minecraft:block"]
-            },
-            {
-              "value": "minecraft:match_tool",
-              "require": ["minecraft:block", "minecraft:fishing"]
-            },
-            {
-              "value": "minecraft:damage_source_properties",
-              "require": ["minecraft:entity"]
-            },
+            "minecraft:block_state_property",
+            "minecraft:match_tool",
+            "minecraft:damage_source_properties",
             "minecraft:location_check",
             "minecraft:weather_check",
             "minecraft:entity_scores",
             "minecraft:random_chance",
             "minecraft:random_chance_with_looting",
-            {
-              "value": "minecraft:table_bonus",
-              "require": ["minecraft:block"]
-            },
+            "minecraft:table_bonus",
             "minecraft:killed_by_player",
-            {
-              "value": "minecraft:survives_explosion",
-              "require": ["minecraft:block"]
-            }
+            "minecraft:survives_explosion"
           ]
         },
         {

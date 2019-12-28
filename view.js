@@ -394,6 +394,7 @@ function generateObject(data, struct, options) {
     }
     $header.append('<button type="button" class="btn btn-outline-dark mr-3 mb-2 float-left" onclick="collapseComponent(this)"><img src="' + icon + '" alt=""></button>');
   }
+  let parentFilter = options ? options.filter : undefined;
   if (struct.card !== false) {
     $el.addClass('card bg-' + struct.color);;
     $header.addClass('card-header pb-1');
@@ -406,19 +407,25 @@ function generateObject(data, struct, options) {
     let child = components.find(e => e.id === struct.value);
     return generateObject(data, child);
   }
-  let filterField = struct.fields.find(e => e.type === 'enum');
+  ;
   let filter;
-  if (filterField) {
-    filter = data[filterField.id];
-  }
-  if (filter === undefined && options) {
-    filter = options.filter;
-  }
   for (let field of struct.fields) {
+    if (filter === undefined) {
+      filterField = struct.fields.find(e => e.type === 'enum');
+      if (filterField) {
+        filter = data[filterField.id];
+      }
+    }
+    if (!luckBased && field.luckBased) {
+      continue;
+    }
+    if (field.require && !field.require.includes(filter || parentFilter)) {
+      continue;
+    }
     if (field.collapse) {
       let hasNoValue = data[field.id] === undefined;
       let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
-      $body.append('<span class="mt-3 ' + arrowDirection + '"><button type="button" class="btn btn-light dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      $body.append('<span class="' + arrowDirection + '"><button type="button" class="mt-3 btn btn-light dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
       if (field.help) {
         $body.find('span').append(generateTooltip(field.translate));
       }
@@ -448,41 +455,12 @@ function generateObject(data, struct, options) {
       $body.append($field);
     }
   }
+  $body.children().first().children('button').removeClass('mt-3');
   $body.children().first().removeClass('mt-3');
   return {out: out, component: $el};
 }
 
 function generateField(data, field, parent, filter) {
-  if (!luckBased && field.luckBased) {
-    return false;
-  }
-  if (field.require) {
-    let passing = false;
-    for (let requirement of field.require) {
-      if (typeof requirement === 'string') {
-        if (requirement === correctNamespace(filter)) {
-          passing = true;
-        }
-      } else {
-        let match = true;
-        for (let id in requirement) {
-          if (requirement.hasOwnProperty(id)) {
-            if (requirement[id] !== correctNamespace(data[parent.fields.find(e => e.id === id).id])) {
-              match = false;
-            }
-          }
-        }
-        if (match) {
-          passing = true;
-        }
-      }
-    }
-    if (!passing) {
-      return {out: undefined, component: false};
-    }
-  }
-
-  let $field;
   if (data[field.id] === undefined) {
     if (field.type === 'object') {
       data[field.id] = {};
