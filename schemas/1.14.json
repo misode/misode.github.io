@@ -1045,7 +1045,7 @@
       "color": "dark",
       "fields": [
         {
-          "id": "name",
+          "id": "item",
           "type": "string",
           "translate": "item.name"
         },
