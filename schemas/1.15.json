@@ -1314,6 +1314,23 @@
       ]
     },
     {
+      "id": "simple_status_effect",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "amplifier",
+          "type": "range",
+          "translate": "status_effect.amplifier"
+        },
+        {
+          "id": "duration",
+          "type": "range",
+          "translate": "status_effect.duration"
+        }
+      ]
+    },
+    {
       "id": "potion_effect",
       "type": "object",
       "color": "dark",
@@ -1397,6 +1414,36 @@
           "id": "levels",
           "type": "range",
           "translate": "item.levels"
+        }
+      ]
+    },
+    {
+      "id": "damage",
+      "type": "object",
+      "color": "dark",
+      "fields": [
+        {
+          "id": "source_entity",
+          "type": "object",
+          "translate": "damage.source_entity",
+          "color": "dark",
+          "collapse": true,
+          "value": "entity"
+        },
+        {
+          "id": "direct_entity",
+          "type": "object",
+          "translate": "damage.direct_entity",
+          "color": "dark",
+          "collapse": true,
+          "value": "entity"
+        },
+        {
+          "id": "type",
+          "translate": "damage.type",
+          "type": "object",
+          "color": "dark",
+          "value": "damage_source"
         }
       ]
     },
@@ -1560,12 +1607,353 @@
           "fields": [
             {
               "id": "block",
-              "translate": "block",
+              "translate": "criteria.block",
               "type": "string",
+              "require": [
+                "minecraft:bee_nest_destroyed",
+                "minecraft:enter_block",
+                "minecraft:placed_block",
+                "minecraft:slide_down_block"
+              ]
+            },
+            {
+              "id": "num_bees_inside",
+              "translate": "criteria.num_bees_inside",
+              "type": "int",
               "require": [
                 "minecraft:bee_nest_destroyed"
               ]
+            },
+            {
+              "id": "child",
+              "translate": "criteria.child",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:bred_animals"
+              ]
+            },
+            {
+              "id": "parent",
+              "translate": "criteria.parent",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:bred_animals"
+              ]
+            },
+            {
+              "id": "partner",
+              "translate": "criteria.partner",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:bred_animals"
+              ]
+            },
+            {
+              "id": "potion",
+              "translate": "criteria.potion",
+              "type": "string",
+              "require": [
+                "minecraft:brewed_potion"
+              ]
+            },
+            {
+              "id": "from",
+              "translate": "criteria.from_dimension",
+              "type": "enum",
+              "unset": true,
+              "values": "dimensions",
+              "require": [
+                "minecraft:changed_dimension"
+              ]
+            },
+            {
+              "id": "to",
+              "translate": "criteria.to_dimension",
+              "type": "enum",
+              "unset": true,
+              "values": "dimensions",
+              "require": [
+                "minecraft:changed_dimension"
+              ]
+            },
+            {
+              "id": "level",
+              "translate": "criteria.beacon_level",
+              "type": "range",
+              "require": [
+                "minecraft:construct_beacon"
+              ]
+            },
+            {
+              "id": "villager",
+              "translate": "criteria.villager",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:cured_zombie_villager",
+                "minecraft:villager_trade"
+              ]
+            },
+            {
+              "id": "zombie",
+              "translate": "criteria.zombie",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:cured_zombie_villager"
+              ]
+            },
+            {
+              "id": "effects",
+              "translate": "criteria.effects",
+              "type": "map",
+              "button": "field",
+              "values": {
+                "type": "object",
+                "value": "simple_status_effect"
+              },
+              "require": [
+                "minecraft:effects_changed"
+              ]
+            },
+            {
+              "id": "state",
+              "translate": "criteria.state",
+              "type": "map",
+              "values": {
+                "type": "string"
+              },
+              "require": [
+                "minecraft:enter_block",
+                "minecraft:placed_block"
+              ]
+            },
+            {
+              "id": "levels",
+              "translate": "criteria.xp_levels",
+              "type": "range",
+              "require": [
+                "minecraft:enchanted_item"
+              ]
+            },
+            {
+              "id": "damage",
+              "translate": "criteria.damage",
+              "type": "object",
+              "collapse": true,
+              "value": "damage",
+              "require": [
+                "minecraft:entity_hurt_player",
+                "minecraft:player_hurt_entity"
+              ]
+            },
+            {
+              "id": "entity",
+              "translate": "criteria.source_entity",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:entity_killed_player"
+              ]
+            },
+            {
+              "id": "entity",
+              "translate": "criteria.victim_entity",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:player_hurt_entity",
+                "minecraft:player_killed_entity"
+              ]
+            },
+            {
+              "id": "killing_blow",
+              "translate": "criteria.killing_blow",
+              "type": "object",
+              "collapse": true,
+              "value": "damage_source",
+              "require": [
+                "minecraft:entity_killed_player",
+                "minecraft:player_killed_entity"
+              ]
+            },
+            {
+              "id": "entity",
+              "translate": "criteria.pulled_entity",
+              "type": "object",
+              "collapse": true,
+              "value": "entity",
+              "require": [
+                "minecraft:fishing_rod_hooked"
+              ]
+            },
+            {
+              "id": "rod",
+              "translate": "criteria.rod",
+              "type": "object",
+              "collapse": true,
+              "value": "item",
+              "require": [
+                "minecraft:fishing_rod_hooked"
+              ]
+            },
+            {
+              "id": "slots",
+              "translate": "criteria.slots",
+              "type": "object",
+              "color": "dark",
+              "fields": [
+                {
+                  "id": "empty",
+                  "translate": "criteria.slots.empty",
+                  "type": "range"
+                },
+                {
+                  "id": "occupied",
+                  "translate": "criteria.slots.occupied",
+                  "type": "range"
+                },
+                {
+                  "id": "full",
+                  "translate": "criteria.slots.full",
+                  "type": "range"
+                }
+              ],
+              "require": [
+                "minecraft:inventory_changed"
+              ]
+            },
+            {
+              "id": "items",
+              "translate": "criteria.items",
+              "type": "array",
+              "button": "field",
+              "values": "item",
+              "require": [
+                "minecraft:inventory_changed"
+              ]
+            },
+            {
+              "id": "delta",
+              "translate": "criteria.delta",
+              "type": "range",
+              "require": [
+                "minecraft:item_durability_changed"
+              ]
+            },
+            {
+              "id": "durability",
+              "translate": "criteria.durability",
+              "type": "range",
+              "require": [
+                "minecraft:item_durability_changed"
+              ]
+            },
+            {
+              "id": "item",
+              "translate": "criteria.item",
+              "type": "object",
+              "collapse": true,
+              "value": "item",
+              "require": [
+                "minecraft:bee_nest_destroyed",
+                "minecraft:consume_item",
+                "minecraft:enchanted_item",
+                "minecraft:fishing_rod_hooked",
+                "minecraft:item_durability_changed",
+                "minecraft:placed_block",
+                "minecraft:used_totem",
+                "minecraft:villager_trade"
+              ]
+            },
+            {
+              "id": "unique_entity_types",
+              "translate": "criteria.unique_entity_types",
+              "type": "range",
+              "require": [
+                "minecraft:killed_by_crossbow"
+              ]
+            },
+            {
+              "id": "victims",
+              "translate": "criteria.victims",
+              "type": "array",
+              "button": "field",
+              "values": "entity",
+              "require": [
+                "minecraft:channeled_lightning",
+                "minecraft:killed_by_crossbow"
+              ]
+            },
+            {
+              "id": "distance",
+              "translate": "criteria.distance",
+              "collapse": true,
+              "value": "distance",
+              "require": [
+                "minecraft:levitation",
+                "minecraft:nether_travel",
+                "minecraft:used_ender_eye"
+              ]
+            },
+            {
+              "id": "duration",
+              "translate": "criteria.duration",
+              "type": "range",
+              "require": [
+                "minecraft:levitation"
+              ]
+            },
+            {
+              "id": "location",
+              "translate": "criteria.location",
+              "type": "object",
+              "collapse": true,
+              "value": "location",
+              "require": [
+                "minecraft:placed_block",
+                "minecraft:slept_in_bed"
+              ]
+            },
+            {
+              "id": "recipe",
+              "translate": "criteria.recipe",
+              "type": "string",
+              "require": [
+                "minecraft:recipe_unlocked"
+              ]
+            },
+            {
+              "id": "entity",
+              "translate": "criteria.entity",
+              "type": "object",
+              "value": "entity",
+              "require": [
+                "minecraft:summoned_entity",
+                "minecraft:tame_entity"
+              ]
             }
+          ]
+        },
+        {
+          "id": "conditions",
+          "translate": "criteria.location",
+          "type": "object",
+          "value": "location",
+          "require": [
+            "minecraft:hero_of_the_village",
+            "minecraft:location",
+            "minecraft:voluntary_exile"
           ]
         }
       ]
