@@ -47,6 +47,7 @@
           "translate": "display",
           "type": "object",
           "collapse": true,
+          "help": true,
           "color": "dark",
           "fields": [
             {

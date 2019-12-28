@@ -244,6 +244,7 @@
     "gamemode.spectator": "Spectator",
     "gamemode.survival": "Survival",
     "help.condition.time_period": "If present, time will be modulo-divided by this value. For example, if set to 24000, value will operate on a time period of days.",
+    "help.display": "If present, advancement will be visible in the advancement tabs.",
     "help.entry.expand": "If false, entry will return all contents of tag, otherwise entry will behave as multiple item entries",
     "help.entry.type.alternatives": "Tests conditions of the child entries and executes the first that can run",
     "help.entry.type.dynamic": "Gets block specific drops",

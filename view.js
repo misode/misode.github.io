@@ -70,7 +70,9 @@ function generateSourceAndView(data, struct) {
     $('#structure').attr('data-index', 'pools');
     return generateTable(data, struct);
   } else {
-    return generateObject(data, struct, false);
+    let {out: sourceOut, component: $component} = generateObject(data, struct, false);
+    $component.removeClass('mt-3');
+    return {out: sourceOut, component: $component};
   }
 }
 
@@ -406,9 +408,12 @@ function generateObject(data, struct, header) {
   }
   for (let field of struct.fields) {
     if (field.collapse) {
-      let hasNoValue = data[field.id] === undefined
+      let hasNoValue = data[field.id] === undefined;
       let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
-      $body.append('<span class="' + arrowDirection + '"><button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      $body.append('<span class="mt-3 ' + arrowDirection + '"><button type="button" class="btn btn-light dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      if (field.help) {
+        $body.find('span').append(generateTooltip(field.translate));
+      }
       if (hasNoValue) {
         $body.append('<div/>');
         continue;
