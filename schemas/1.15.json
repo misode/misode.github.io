@@ -1566,6 +1566,22 @@
             "minecraft:villager_trade",
             "minecraft:voluntary_exile"
           ]
+        },
+        {
+          "id": "conditions",
+          "translate": "criteria.conditions",
+          "type": "object",
+          "card": false,
+          "fields": [
+            {
+              "id": "block",
+              "translate": "block",
+              "type": "string",
+              "require": [
+                "minecraft:bee_nest_destroyed"
+              ]
+            }
+          ]
         }
       ]
     }
