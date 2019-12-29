@@ -81,7 +81,7 @@
             {
               "id": "frame",
               "translate": "display.frame",
-              "translateValue": "",
+              "translateValue": "display.frame",
               "type": "enum",
               "unset": true,
               "values": [
@@ -116,6 +116,35 @@
           "id": "parent",
           "translate": "parent",
           "type": "string"
+        },
+        {
+          "id": "rewards",
+          "translate": "rewards",
+          "type": "object",
+          "collapse": true,
+          "color": "secondary",
+          "fields": [
+            {
+              "id": "function",
+              "translate": "rewards.function",
+              "type": "string"
+            },
+            {
+              "id": "loot",
+              "translate": "rewards.loot",
+              "type": "string-list"
+            },
+            {
+              "id": "recipes",
+              "translate": "rewards.recipes",
+              "type": "string-list"
+            },
+            {
+              "id": "experience",
+              "translate": "rewards.experience",
+              "type": "int"
+            }
+          ]
         },
         {
           "id": "criteria",

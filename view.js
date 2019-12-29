@@ -370,7 +370,7 @@ function generateArray(data, struct) {
   let $el = $('<div/>').addClass('mt-3');
   let child = components.find(e => e.id === struct.values);
   for (let i = 0; i < data.length; i += 1) {
-    let {out: outValue, component: $child} = generateObject(data[i], child, {header: true});
+    let {out: outValue, component: $child} = generateComponent(data[i], child, {header: true});
     out.push(outValue);
     $child.attr('data-index', i);
     $child.removeAttr('data-type');
