@@ -407,12 +407,14 @@ function generateObject(data, struct, options) {
     let child = components.find(e => e.id === struct.value);
     return generateObject(data, child, options);
   }
+  console.warn(struct.id);
   let filter;
   for (let field of struct.fields) {
     if (filter === undefined) {
       filterField = struct.fields.find(e => e.type === 'enum' && e.filter === true);
       if (filterField) {
         filter = data[filterField.id];
+        console.log(filter);
       }
     }
     if (!luckBased && field.luckBased) {

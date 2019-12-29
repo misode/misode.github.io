@@ -549,7 +549,6 @@
           "type": "enum",
           "translate": "function.formula",
           "translateValue": "function.formula",
-          "filter": true,
           "default": "minecraft:uniform_bonus_count",
           "values": [
             "minecraft:uniform_bonus_count",
@@ -567,32 +566,14 @@
           "color": "secondary",
           "card": false,
           "require": [
-            {
-              "function": "minecraft:apply_bonus",
-              "formula": "minecraft:uniform_bonus_count"
-            }
+            "minecraft:apply_bonus"
           ],
           "fields": [
             {
               "id": "bonusMultiplier",
               "type": "float",
               "translate": "function.bonusMultiplier"
-            }
-          ]
-        },
-        {
-          "id": "parameters",
-          "type": "object",
-          "translate": "function.parameters",
-          "color": "secondary",
-          "card": false,
-          "require": [
-            {
-              "function": "minecraft:apply_bonus",
-              "formula": "minecraft:binomial_with_bonus_count"
-            }
-          ],
-          "fields": [
+            },
             {
               "id": "extra",
               "type": "int",
