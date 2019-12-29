@@ -1,29 +1,66 @@
 
+let indentation = 2;
+let luckBased = false;
+let historyBuffer = 100;
+let history = ['{}'];
+let historyIndex = 0;
+
+let structure;
+let components;
+let collections;
+let table = {};
+let listeners = [];
+
+const generators = {
+  'advancement': ['1.15'],
+  'loot-table': ['1.13', '1.14', '1.15'],
+  'predicate': ['1.15']
+}
+
+function addListener(listener) {
+  listeners.push(listener);
+  listener();
+}
+
+loadGenerator($('[data-generator]').attr('data-generator'));
+function loadGenerator(generator) {
+  if (!generator) return;
+  const versions = generators[generator] || [];
+  versions.forEach(v => {
+    $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
+  });
+  const promises = [initShared(), initLng(), loadVersion(generator, '1.15')];
+  Promise.all(promises).then(() => {
+    invalidated()
+  });
+}
+
+function loadVersion(generator, version) {
+  return $.getJSON('../schemas/' + version + '.json', json => {
+    structure = json.roots.find(e => e.id === generator);
+    table = structure.default;
+    components = json.components;
+    collections = json.collections;
+  }).fail((jqXHR, textStatus, errorThrown) => {
+    let message = 'Failed loading ' + version + ' schema';
+    structure = {};
+    console.error(message + '\n' + errorThrown);
+  }).always(() => {
+    $('#versionLabel').text(version);
+  });
+}
+
+async function initShared() {
+  const components = await fetch('../components.html').then(r => r.text());
+  const shared = await fetch('../shared.html').then(r => r.text());
+  $('body').append(components);
+  $('div.container').append(shared);
+}
+
 $("#source").val('');
 $('#luckBased').prop('checked', false);
 $('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
-
-let indentation = 2;
-let luckBased = false;
-let table = {
-  type: "minecraft:generic",
-  pools: [
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:stone"
-        }
-      ]
-    }
-  ]
-};
-let historyBuffer = 100;
-let history = ['{}'];
-let historyIndex = 0;
-invalidated();
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('q')) {
@@ -49,7 +86,7 @@ function undo() {
   if (historyIndex > 0) {
     historyIndex -= 1;
     table = JSON.parse(history[historyIndex]);
-    updateView();
+    listeners.forEach(l => l());
   }
 }
 
@@ -57,7 +94,7 @@ function redo() {
   if (historyIndex < history.length - 1) {
     historyIndex += 1;
     table = JSON.parse(history[historyIndex]);
-    updateView();
+    listeners.forEach(l => l());
   }
 }
 
@@ -73,7 +110,7 @@ function invalidated() {
     history = history.slice(0, historyIndex);
     history.push(JSON.stringify(table));
   }
-  updateView();
+  listeners.forEach(l => l());
 }
 
 function updateTableType() {
@@ -219,10 +256,7 @@ function addToSet(el, array) {
 
 function removeFromSet(el, array) {
   let parent = getParent(el);
-  console.warn(parent[array]);
-  console.log($(el).attr('value'));
   let index = parent[array].indexOf($(el).attr('value'));
-  console.log(parent, index);
   if (index > -1) {
     parent[array].splice(index, 1);
     invalidated();
