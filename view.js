@@ -2,15 +2,24 @@ let structure;
 let components;
 let collections;
 
+const generators = {
+  'advancement': ['1.15'],
+  'loot-table': ['1.13', '1.14', '1.15'],
+  'predicate': ['1.15']
+}
+
+const generator = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
+generators[generator].forEach(v => {
+  $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
+});
+
 changeVersion('1.15');
 function changeVersion(version) {
   $.getJSON('schemas/' + version + '.json', json => {
-    console.log(json);
     if (json.root) {
       structure = json.root;
     } else if (json.roots) {
-      let id = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
-      structure = json.roots.find(e => e.id === id) || json.roots[0] ;
+      structure = json.roots.find(e => e.id === generator) || json.roots[0] ;
     }
     components = json.components;
     collections = json.collections;
@@ -56,12 +65,14 @@ function updateView() {
 }
 
 function generateSourceAndView(data, struct) {
-  if (struct.id === 'loot-table') {
+  if (generator === 'loot-table') {
     $('#lootTableToolbar').removeClass('d-none');
     $('#structure').attr('data-index', 'pools');
     return generateTable(data, struct);
   } else {
-    return generateObject(data, struct, false);
+    let {out: sourceOut, component: $component} = generateObject(data, struct);
+    $component.removeClass('mt-3');
+    return {out: sourceOut, component: $component};
   }
 }
 
@@ -92,26 +103,26 @@ function generateTable(data, struct) {
   return {out: out, component: $el};
 }
 
-function generateComponent(data, struct) {
+function generateComponent(data, struct, options) {
   switch (struct.type) {
-    case 'string': return generateString(data, struct);
-    case 'int': return generateString(data, struct);
-    case 'float': return generateString(data, struct);
-    case 'string-list': return generateString(data, struct);
-    case 'chance-list': return generateString(data, struct);
-    case 'boolean': return generateBoolean(data, struct);
-    case 'random': return generateRandom(data, struct);
-    case 'range': return generateRange(data, struct);
-    case 'boundary': return generateBoundary(data, struct);
-    case 'enum': return generateEnum(data, struct);
-    case 'set': return generateSet(data, struct);
-    case 'map': return generateMap(data, struct);
-    case 'json': return generateJson(data, struct);
-    case 'json-list': return generateJsonList(data, struct);
-    case 'nbt': return generateNbt(data, struct);
-    case 'array': return generateArray(data, struct);
-    case 'object': return generateObject(data, struct, false);
-    case 'error': return generateError(struct);
+    case 'string': return generateString(data, struct, options);
+    case 'int': return generateString(data, struct, options);
+    case 'float': return generateString(data, struct, options);
+    case 'string-list': return generateString(data, struct, options);
+    case 'chance-list': return generateString(data, struct, options);
+    case 'boolean': return generateBoolean(data, struct, options);
+    case 'random': return generateRandom(data, struct, options);
+    case 'range': return generateRange(data, struct, options);
+    case 'boundary': return generateBoundary(data, struct, options);
+    case 'enum': return generateEnum(data, struct, options);
+    case 'set': return generateSet(data, struct, options);
+    case 'map': return generateMap(data, struct, options);
+    case 'json': return generateJson(data, struct, options);
+    case 'json-list': return generateJsonList(data, struct, options);
+    case 'nbt': return generateNbt(data, struct, options);
+    case 'array': return generateArray(data, struct, options);
+    case 'object': return generateObject(data, struct, options);
+    case 'error': return generateError(struct, options);
     default: return generateError('Unknown component type "' + struct.type + '"');
   }
 }
@@ -235,6 +246,7 @@ function generateSet(data, struct) {
     collection = collections[struct.values];
   }
   for (let value of collection) {
+    if (data && (data.includes(value))) continue;
     let $item = $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />');
     setValueAndName($item, value, struct.translateValue);
     $el.find('.dropdown-menu').append($item);
@@ -243,7 +255,7 @@ function generateSet(data, struct) {
     let $setContainer = $('<div/>');
     for (let option of data) {
       let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2');
-      setValueAndName($item, correctNamespace(option), struct.translateValue);
+      setValueAndName($item, option, struct.translateValue);
       $setContainer.append($item);
     }
     $el.append($setContainer);
@@ -359,7 +371,7 @@ function generateArray(data, struct) {
   let $el = $('<div/>').addClass('mt-3');
   let child = components.find(e => e.id === struct.values);
   for (let i = 0; i < data.length; i += 1) {
-    let {out: outValue, component: $child} = generateObject(data[i], child, true);
+    let {out: outValue, component: $child} = generateComponent(data[i], child, {header: true});
     out.push(outValue);
     $child.attr('data-index', i);
     $child.removeAttr('data-type');
@@ -369,12 +381,12 @@ function generateArray(data, struct) {
   return {out: out, component: $el};
 }
 
-function generateObject(data, struct, header) {
+function generateObject(data, struct, options) {
   let out = {};
   let $el = $('<div/>').addClass('mt-3');
   let $header = $('<div/>');
   let $body = $('<div/>');
-  if (header) {
+  if (options && options.header) {
     $header.appendTo($el);
     $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeComponent(this)" data-i18n="' + struct.id + '_remove"></button>');
     let icon = 'https://cdnjs.cloudflare.com/ajax/libs/octicons/8.5.0/svg/chevron-down.svg';
@@ -383,6 +395,7 @@ function generateObject(data, struct, header) {
     }
     $header.append('<button type="button" class="btn btn-outline-dark mr-3 mb-2 float-left" onclick="collapseComponent(this)"><img src="' + icon + '" alt=""></button>');
   }
+  let parentFilter = options ? options.filter : undefined;
   if (struct.card !== false) {
     $el.addClass('card bg-' + struct.color);;
     $header.addClass('card-header pb-1');
@@ -393,13 +406,29 @@ function generateObject(data, struct, header) {
   }
   if (!struct.fields) {
     let child = components.find(e => e.id === struct.value);
-    return generateObject(data, child, false);
+    return generateObject(data, child, options);
   }
+  let filter;
   for (let field of struct.fields) {
+    if (filter === undefined) {
+      filterField = struct.fields.find(e => e.type === 'enum' && e.filter === true);
+      if (filterField) {
+        filter = data[filterField.id];
+      }
+    }
+    if (!luckBased && field.luckBased) {
+      continue;
+    }
+    if (field.require && !field.require.includes(filter || parentFilter)) {
+      continue;
+    }
     if (field.collapse) {
-      let hasNoValue = data[field.id] === undefined
+      let hasNoValue = data[field.id] === undefined;
       let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
-      $body.append('<span class="' + arrowDirection + '"><button type="button" class="btn btn-light mt-3 dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      $body.append('<span class="' + arrowDirection + '"><button type="button" class="mt-3 btn btn-light dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      if (field.help) {
+        $body.find('span').append(generateTooltip(field.translate));
+      }
       if (hasNoValue) {
         $body.append('<div/>');
         continue;
@@ -407,7 +436,7 @@ function generateObject(data, struct, header) {
     }
     let outValue, $field;
     try {
-      ({out: outValue, component: $field} = generateField(data, field, struct));
+      ({out: outValue, component: $field} = generateField(data, field, struct, filter));
     } catch (e) {
       console.error(e);
       ({out: outValue, component: $field} = generateError('Failed generating "' + field.id + '" field'));
@@ -417,7 +446,7 @@ function generateObject(data, struct, header) {
       if (field.type === 'array') {
         let color = field.color || components.find(e => e.id === field.values).color;
         let $button = $('<button type="button" class="btn btn-' + color + ' mr-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
-        if (header && field.button === 'header') {
+        if (options && options.header && field.button === 'header') {
           $header.append($button.addClass('mb-2 float-left'));
         } else if (field.button === 'field') {
           $body.append($button.addClass('mt-3'));
@@ -426,42 +455,12 @@ function generateObject(data, struct, header) {
       $body.append($field);
     }
   }
+  $body.children().first().children('button').removeClass('mt-3');
   $body.children().first().removeClass('mt-3');
   return {out: out, component: $el};
 }
 
-function generateField(data, field, parent) {
-  if (!luckBased && field.luckBased) {
-    return false;
-  }
-  if (field.require) {
-    let passing = false;
-    let filter = parent.fields.find(e => e.type === 'enum');
-    for (let requirement of field.require) {
-      if (typeof requirement === 'string') {
-        if (requirement === correctNamespace(data[filter.id])) {
-          passing = true;
-        }
-      } else {
-        let match = true;
-        for (let id in requirement) {
-          if (requirement.hasOwnProperty(id)) {
-            if (requirement[id] !== correctNamespace(data[parent.fields.find(e => e.id === id).id])) {
-              match = false;
-            }
-          }
-        }
-        if (match) {
-          passing = true;
-        }
-      }
-    }
-    if (!passing) {
-      return {out: undefined, component: false};
-    }
-  }
-
-  let $field;
+function generateField(data, field, parent, filter) {
   if (data[field.id] === undefined) {
     if (field.type === 'object') {
       data[field.id] = {};
@@ -470,7 +469,7 @@ function generateField(data, field, parent) {
     }
   }
   try {
-    let result = generateComponent(data[field.id], field);
+    let result = generateComponent(data[field.id], field, {filter});
     if (result) {
       let {out: out, component: $field} = result;
       if (field.class) {

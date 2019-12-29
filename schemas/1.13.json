@@ -55,6 +55,7 @@
           "translate": "entry.type",
           "translateValue": "entry.type",
           "help": true,
+          "filter": true,
           "default": "minecraft:item",
           "values": [
             "minecraft:empty",
@@ -106,6 +107,7 @@
         {
           "id": "function",
           "type": "enum",
+          "filter": true,
           "translate": "function.type",
           "translateValue": "function.type",
           "default": "minecraft:set_count",
@@ -216,6 +218,7 @@
         {
           "id": "condition",
           "type": "enum",
+          "filter": true,
           "translate": "condition.type",
           "translateValue": "condition.type",
           "default": "minecraft:random_chance",

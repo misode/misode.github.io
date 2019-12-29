@@ -111,7 +111,7 @@ body[data-style="dark"] #source {
 }
 
 body[data-style="dark"] .form-control {
-  background-color: #343a40;
+  background-color: #343a40 !important;
   color: #ddd;
   border-color: #24282c;
 }

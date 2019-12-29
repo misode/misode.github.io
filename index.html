@@ -25,11 +25,7 @@
       <ul class="navbar-nav mr-md-auto mb-2 mb-md-0">
         <li class="nav-item dropdown">
           <a id="versionLabel" class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown"></a>
-          <div id="versionList" class="dropdown-menu">
-            <a class="dropdown-item" onclick="changeVersion('1.13')">1.13</a>
-            <a class="dropdown-item" onclick="changeVersion('1.14')">1.14</a>
-            <a class="dropdown-item" onclick="changeVersion('1.15')">1.15</a>
-          </div>
+          <div id="versionList" class="dropdown-menu"></div>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown">
@@ -166,7 +162,7 @@
         <div class="input-group-prepend">
           <span class="input-group-text" data-name></span>
         </div>
-        <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 0px"></textarea>
+        <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 38px"></textarea>
       </div>
       <div class="input-group mt-3" data-type="json-list">
         <textarea class="form-control code" onchange="updateField(this)" rows=3></textarea>
@@ -175,7 +171,7 @@
         <div class="input-group-prepend">
           <span class="input-group-text" data-name></span>
         </div>
-        <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 0px"></textarea>
+        <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 38px"></textarea>
       </div>
       <div class="input-group mt-3" data-type="error">
         <div class="input-group-prepend">
