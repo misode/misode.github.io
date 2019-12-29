@@ -28,7 +28,7 @@ function loadGenerator(generator) {
   versions.forEach(v => {
     $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
   });
-  const promises = [initLng(), loadVersion(generator, '1.15')];
+  const promises = [initShared(), initLng(), loadVersion(generator, '1.15')];
   Promise.all(promises).then(() => {
     invalidated()
   });
@@ -46,6 +46,13 @@ function loadVersion(generator, version) {
   }).always(() => {
     $('#versionLabel').text(version);
   });
+}
+
+async function initShared() {
+  const components = await fetch('../components.html').then(r => r.text());
+  const shared = await fetch('../shared.html').then(r => r.text());
+  $('body').append(components);
+  $('div.container').append(shared);
 }
 
 $("#source").val('');
