@@ -1456,6 +1456,21 @@
       "color": "dark",
       "fields": [
         {
+          "id": "dealt",
+          "translate": "damage.dealt",
+          "type": "range"
+        },
+        {
+          "id": "taken",
+          "translate": "damage.taken",
+          "type": "range"
+        },
+        {
+          "id": "blocked",
+          "translate": "damage.blocked",
+          "type": "boolean"
+        },
+        {
           "id": "source_entity",
           "type": "object",
           "translate": "damage_source.source_entity",
@@ -1476,6 +1491,7 @@
           "translate": "damage.type",
           "type": "object",
           "color": "dark",
+          "collapse": true,
           "value": "damage_source"
         }
       ]
