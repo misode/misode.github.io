@@ -16,7 +16,34 @@
   <title data-i18n="title.loot-table">Loot Table Generator Minecraft 1.15</title>
 </head>
 <body>
-  
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <span id="descriptionSpan" class="navbar-brand mb-0 h1" data-i18n="description.loot-table"></span>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+      <ul class="navbar-nav mr-md-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a id="versionLabel" class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown"></a>
+          <div id="versionList" class="dropdown-menu"></div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown">
+            🌎 Language
+          </a>
+          <div id="lngList" class="dropdown-menu"></div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown" data-i18n="theme"></a>
+          <div id="themeList" class="dropdown-menu"></div>
+        </li>
+      </ul>
+      <span class="ml-0 ml-md-2"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="credit"></a></span>
+    </div>
+  </nav>
+
+  <div class="container" data-generator="loot-table"></div>
+
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
@@ -25,7 +52,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-xhr-backend/3.0.0/i18nextXHRBackend.min.js" integrity="sha384-dK+VwLEvPDbpKM7G7D/LtbW6W2zlt99nuVTwoYIkMulAedST9Vj9OCRkv2xV8GjD" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-i18next/1.2.1/jquery-i18next.min.js" integrity="sha384-fLTSt6zHOb152KeFkj7kSiXdkyjKf6fjk5bdzWYLDPDo9evwd9PVs3TKoYYaaxdl" crossorigin="anonymous"></script>
   <script src="../js/i18n.js" charset="utf-8"></script>
-  <script src="../js/view.js" charset="utf-8"></script>
   <script src="../js/model.js" charset="utf-8"></script>
+  <script src="../js/view.js" charset="utf-8"></script>
 </body>
 </html>

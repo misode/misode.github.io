@@ -1,45 +1,9 @@
-let structure;
-let components;
-let collections;
 
-const generators = {
-  'advancement': ['1.15'],
-  'loot-table': ['1.13', '1.14', '1.15'],
-  'predicate': ['1.15']
-}
+const themes = ["light", "dark"];
 
-const generator = window.location.pathname.replace(/\/$/, '').replace(/^\//, '');
-generators[generator].forEach(v => {
-  $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
-});
+themes.forEach(v => $('#themeList').append(`<a class="dropdown-item" onclick="changeTheme('${v}')" data-i18n="theme.${v}"></a>`));
 
-changeVersion('1.15');
-function changeVersion(version) {
-  $.getJSON('../schemas/' + version + '.json', json => {
-    if (json.root) {
-      structure = json.root;
-    } else if (json.roots) {
-      structure = json.roots.find(e => e.id === generator) || json.roots[0] ;
-    }
-    components = json.components;
-    collections = json.collections;
-  }).fail((jqXHR, textStatus, errorThrown) => {
-    let message = 'Failed loading ' + version + ' schema';
-    structure = {
-      fields: [
-        {
-          id: 'pools',
-          type: 'error',
-          message: message
-        }
-      ]
-    };
-    console.error(message + '\n' + errorThrown);
-  }).always(() => {
-    $('#versionLabel').text(version);
-    updateView();
-  });
-}
+addListener(updateView);
 
 changeTheme(localStorage.getItem('theme'))
 function changeTheme(theme) {
@@ -65,7 +29,7 @@ function updateView() {
 }
 
 function generateSourceAndView(data, struct) {
-  if (generator === 'loot-table') {
+  if (struct.id === 'loot-table') {
     $('#lootTableToolbar').removeClass('d-none');
     $('#structure').attr('data-index', 'pools');
     return generateTable(data, struct);
