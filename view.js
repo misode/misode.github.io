@@ -246,6 +246,7 @@ function generateSet(data, struct) {
     collection = collections[struct.values];
   }
   for (let value of collection) {
+    if (data && (data.includes(value))) continue;
     let $item = $('<a class="dropdown-item" onclick="addToSet(this, \'' + struct.id + '\')" />');
     setValueAndName($item, value, struct.translateValue);
     $el.find('.dropdown-menu').append($item);
@@ -254,7 +255,7 @@ function generateSet(data, struct) {
     let $setContainer = $('<div/>');
     for (let option of data) {
       let $item = $('<button type="button"  onclick="removeFromSet(this, \'' + struct.id + '\')" />').addClass('btn btn-outline-danger bg-light btn-sm mr-2 mt-2');
-      setValueAndName($item, correctNamespace(option), struct.translateValue);
+      setValueAndName($item, option, struct.translateValue);
       $setContainer.append($item);
     }
     $el.append($setContainer);

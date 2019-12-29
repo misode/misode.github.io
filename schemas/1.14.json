@@ -159,6 +159,7 @@
         {
           "id": "function",
           "type": "enum",
+          "filter": true,
           "translate": "function.type",
           "translateValue": "function.type",
           "default": "minecraft:set_count",
