@@ -26,14 +26,31 @@
           "translate": "pool",
           "values": "pool"
         }
-      ]
+      ],
+      "default": {
+        "pools": [
+          {
+            "rolls": 1,
+            "entries": [
+              {
+                "type": "minecraft:item",
+                "name": "minecraft:stone"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "predicate",
       "title": "title.predicate",
       "description": "description.predicate",
       "type": "object",
-      "value": "condition"
+      "value": "condition",
+      "default": {
+        "condition": "minecraft:entity_properties",
+        "predicate": {}
+      }
     },
     {
       "id": "advancement",
@@ -156,7 +173,15 @@
             "value": "criterion"
           }
         }
-      ]
+      ],
+      "default": {
+        "criteria": {
+          "requirement": {
+            "trigger": "minecraft:location",
+            "conditions": {}
+          }
+        }
+      }
     }
   ],
   "components": [

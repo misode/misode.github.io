@@ -23,6 +23,10 @@ function initLng() {
 
 function changeLng(code) {
   i18next.changeLanguage(code).then(() => {
-    updateView()
+    if ('listeners' in window) {
+      listeners.forEach(l => l());
+    } else {
+      $('html').localize();
+    }
   })
 }

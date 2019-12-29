@@ -100,6 +100,15 @@ textarea.invalid:focus {
   overflow-x: scroll;
 }
 
+.card a {
+  color: #000 !important;
+}
+
+.card a:hover {
+  color: #333 !important;
+  text-decoration: none;
+}
+
 body[data-style="dark"] {
   background-color: #222529;
 }
@@ -207,4 +216,12 @@ body[data-style="dark"] .help-tooltip {
   background-color: #2d3236;
   color: #fff;
   border-color: #24282c;
+}
+
+body[data-style="dark"] .card a {
+  color: #fff !important;
+}
+
+body[data-style="dark"] .card a:hover {
+  color: #ccc !important;
 }

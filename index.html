@@ -11,196 +11,53 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title data-i18n="title.loot-table"></title>
+  <title data-i18n="title">Minecraft Generators 1.13 1.14 1.15</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <link rel="stylesheet" href="custom.css">
+  <link rel="stylesheet" href="css/custom.css">
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <span id="descriptionSpan" class="navbar-brand mb-0 h1" data-i18n="description.loot-table"></span>
+    <span id="descriptionSpan" class="navbar-brand mb-0 h1" data-i18n="description"></span>
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
       <ul class="navbar-nav mr-md-auto mb-2 mb-md-0">
         <li class="nav-item dropdown">
-          <a id="versionLabel" class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown"></a>
-          <div id="versionList" class="dropdown-menu"></div>
-        </li>
-        <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown">
             🌎 Language
           </a>
           <div id="lngList" class="dropdown-menu"></div>
         </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown" data-i18n="theme"></a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" onclick="changeTheme('light')" data-i18n="theme.light"></a>
-            <a class="dropdown-item" onclick="changeTheme('dark')" data-i18n="theme.dark"></a>
-          </div>
-        </li>
       </ul>
       <span class="ml-0 ml-md-2"><a href="https://github.com/misode/loot-table" style="color: #ddd;" data-i18n="credit"></a></span>
     </div>
   </nav>
-  <div class="container d-none">
-    <div class="row my-4">
-      <div class="col-12 col-lg-7 mb-3 structure-container" data-index="root">
-        <div id="lootTableToolbar" class="input-group d-none mb-3">
-          <button type="button" class="btn btn-success d-block mr-3 float-left" onclick="addComponent(this, 'pools')" data-field="table" data-i18n="pool_add"></button>
-          <div class="input-group-prepend table-type">
-            <span class="input-group-text rounded-left" data-i18n="table.type"></span>
+  <div class="container mt-4">
+    <div class="card-group">
+      <div class="card bg-success mb-3">
+        <a href="loot-table">
+          <div class="card-body">
+            <h5 class="card-title" data-i18n="title.loot-table"></h5>
+            <p class="card-subtitle">Minecraft 1.13, 1.14, 1.15</p>
           </div>
-          <select id="tableType" class="form-control mr-3 rounded-right table-type" style="max-width: 9em;" onchange="updateTableType(this)"></select>
-          <div class="custom-control custom-checkbox mr-3" style="margin: auto 0">
-            <input type="checkbox" class="custom-control-input" id="luckBased" onchange="updateLuckBased(this)">
-            <label class="custom-control-label" for="luckBased" data-i18n="luck_based"></label>
+        </a>
+      </div>
+      <div class="card bg-secondary mb-3">
+        <a href="advancement">
+          <div class="card-body">
+            <h5 class="card-title" data-i18n="title.advancement"></h5>
+            <p class="card-subtitle">Minecraft 1.15</p>
           </div>
-          <div id="showSourceButton" class="ml-auto d-none">
-            <button type="button" class="btn btn-secondary" onclick="showSource()" data-i18n="show_source"></button>
+        </a>
+      </div>
+      <div class="card bg-info mb-3">
+        <a href="predicate">
+          <div class="card-body">
+            <h5 class="card-title" data-i18n="title.predicate"></h5>
+            <p class="card-subtitle">Minecraft 1.15</p>
           </div>
-        </div>
-        <div id="structure" class="loot-table" data-index="root">
-        </div>
-      </div>
-      <div class="col-12 col-lg-5 source-container">
-        <div class="mb-3 float-lg-right source-menu">
-          <div class="input-group">
-            <div class="btn-group">
-              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-i18n="more"></button>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" onclick="updateIndentation(2)" data-i18n="2_spaces"></a>
-                <a class="dropdown-item" onclick="updateIndentation(4)" data-i18n="4_spaces"></a>
-                <a class="dropdown-item" onclick="updateIndentation('\t')" data-i18n="tabs"></a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" onclick="hideSource()" data-i18n="hide_source"></a>
-              </div>
-            </div>
-            <button id="linkSource" type="button" class="btn btn-secondary ml-3" onclick="linkSource()" data-i18n="share"></button>
-            <button type="button" class="btn btn-secondary ml-3" onclick="copySource()" data-i18n="copy"></button>
-          </div>
-        </div>
-        <div id="copyContainer" class="mb-3 d-none">
-          <input id="copyTextarea" rows="1" class="form-control"></input>
-          <button id="copy" type="button" class="btn btn-block btn-secondary mt-2" onclick="copyLink()" data-i18n="copy"></button>
-        </div>
-        <textarea id="source" class="form-control code" onchange="updateSource()" rows="19" spellcheck="false"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <div class="d-none">
-    <div id="components">
-      <div class="input-group mt-3" data-type="string">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-        </div>
-        <input type="text" class="form-control" onchange="updateField(this)" onfocus="this.select()">
-      </div>
-      <div class="input-group mt-3" data-type="enum">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-        </div>
-        <select class="form-control" onchange="updateField(this)">
-        </select>
-      </div>
-      <div class="input-group mt-3" data-type="random">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-          <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="range.exact"></a>
-            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="range.uniform"></a>
-            <a class="dropdown-item" value="binomial" onclick="updateRangeType(this)" data-i18n="range.binomial"></a>
-          </div>
-        </div>
-        <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="range.min"></span>
-        <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="range.max"></span>
-        <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 binomial d-none" data-i18n="range.n"></span>
-        <input type="text" class="form-control binomial n d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 binomial d-none" data-i18n="range.p"></span>
-        <input type="text" class="form-control binomial p d-none rounded-right" value="0.5" onchange="updateField(this)" onfocus="this.select()">
-      </div>
-      <div class="input-group mt-3" data-type="range">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-          <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" value="exact" onclick="updateRangeType(this)" data-i18n="range.exact"></a>
-            <a class="dropdown-item" value="range" onclick="updateRangeType(this)" data-i18n="range.range"></a>
-          </div>
-        </div>
-        <input type="text" class="form-control exact d-none rounded-right" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="range.min"></span>
-        <input type="text" class="form-control range min d-none" value="1" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range d-none" data-i18n="range.max"></span>
-        <input type="text" class="form-control range max d-none rounded-right" value="2" onchange="updateField(this)" onfocus="this.select()">
-      </div>
-      <div class="input-group mt-3" data-type="boundary">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-        </div>
-        <span class="input-group-text rounded-0 range" data-i18n="range.min"></span>
-        <input type="text" class="form-control range min" onchange="updateField(this)" onfocus="this.select()">
-        <span class="input-group-text rounded-0 range" data-i18n="range.max"></span>
-        <input type="text" class="form-control range max rounded-right" onchange="updateField(this)" onfocus="this.select()">
-      </div>
-      <div class="input-group mt-3" data-type="boolean">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-        </div>
-        <div class="btn-group">
-          <button type="button" value="false" class="btn btn-secondary rounded-0" onclick="updateField(this)" data-i18n="false"></button>
-          <button type="button" value="true" class="btn btn-secondary" onclick="updateField(this)" data-i18n="true"></button>
-        </div>
-      </div>
-      <div class="input-group mt-3" data-type="json">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-        </div>
-        <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 38px"></textarea>
-      </div>
-      <div class="input-group mt-3" data-type="json-list">
-        <textarea class="form-control code" onchange="updateField(this)" rows=3></textarea>
-      </div>
-      <div class="input-group mt-3" data-type="nbt">
-        <div class="input-group-prepend">
-          <span class="input-group-text" data-name></span>
-        </div>
-        <textarea type="text" class="form-control code" onchange="updateField(this)" onfocus="this.select()" style="height: 38px"></textarea>
-      </div>
-      <div class="input-group mt-3" data-type="error">
-        <div class="input-group-prepend">
-          <span class="input-group-text text-danger" data-i18n="error"></span>
-        </div>
-        <input type="text" class="form-control bg-light text-danger" data-name readonly></input>
-      </div>
-      <div class="mt-3" data-type="set">
-        <div class="input-group">
-          <div class="input-group-prepend">
-            <span class="input-group-text" data-name></span>
-          </div>
-          <div class="input-group-append">
-            <button type="button" class="btn btn-outline-secondary bg-light dropdown-toggle dropdown-toggle-split rounded-right" data-toggle="dropdown"></button>
-            <div class="dropdown-menu scrollable-menu">
-            </div>
-          </div>
-        </div>
-      </div>
-      <div data-type="map">
-        <div class="input-group mt-3">
-          <div class="input-group-prepend">
-            <label class="input-group-text" data-name="1"></label>
-          </div>
-          <input type="text" class="form-control">
-          <div class="input-group-append">
-            <button class="btn btn-dark" type="button" onclick="addToMap(this)" data-name="2"></button>
-          </div>
-        </div>
+        </a>
       </div>
     </div>
   </div>
@@ -212,8 +69,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-browser-languagedetector/3.0.1/i18nextBrowserLanguageDetector.min.js" integrity="sha384-14ws1HmRivxp+u6W816e62Gs33Y19jhG4zSJb6pL0pB+gYc+CgFXXp4ZnGXcaOww" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-xhr-backend/3.0.0/i18nextXHRBackend.min.js" integrity="sha384-dK+VwLEvPDbpKM7G7D/LtbW6W2zlt99nuVTwoYIkMulAedST9Vj9OCRkv2xV8GjD" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-i18next/1.2.1/jquery-i18next.min.js" integrity="sha384-fLTSt6zHOb152KeFkj7kSiXdkyjKf6fjk5bdzWYLDPDo9evwd9PVs3TKoYYaaxdl" crossorigin="anonymous"></script>
-  <script src="i18n.js" charset="utf-8"></script>
-  <script src="view.js" charset="utf-8"></script>
-  <script src="model.js" charset="utf-8"></script>
+  <script src="js/i18n.js" charset="utf-8"></script>
+  <script src="js/model.js" charset="utf-8"></script>
+  <script src="js/view.js" charset="utf-8"></script>
+  <script>initLng().then(() => { $('html').localize(); });</script>
 </body>
 </html>

@@ -24,6 +24,7 @@ function addListener(listener) {
 
 loadGenerator($('[data-generator]').attr('data-generator'));
 function loadGenerator(generator) {
+  if (!generator) return;
   const versions = generators[generator] || [];
   versions.forEach(v => {
     $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
@@ -37,6 +38,7 @@ function loadGenerator(generator) {
 function loadVersion(generator, version) {
   return $.getJSON('../schemas/' + version + '.json', json => {
     structure = json.roots.find(e => e.id === generator);
+    table = structure.default;
     components = json.components;
     collections = json.collections;
   }).fail((jqXHR, textStatus, errorThrown) => {

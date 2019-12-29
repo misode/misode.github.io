@@ -7,6 +7,7 @@ addListener(updateView);
 
 changeTheme(localStorage.getItem('theme'))
 function changeTheme(theme) {
+  console.log(theme);
   if (theme === null) {
     theme = 'light';
   }
