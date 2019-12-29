@@ -10,7 +10,7 @@ i18next
   .use(i18nextBrowserLanguageDetector)
   .use(i18nextXHRBackend)
   .init({
-    backend: { loadPath: 'locales/{{lng}}.json' },
+    backend: { loadPath: '../locales/{{lng}}.json' },
     fallbackLng: 'en',
     whitelist: lngs.map(v => v[0]),
     keySeparator: false

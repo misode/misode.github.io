@@ -15,7 +15,7 @@ generators[generator].forEach(v => {
 
 changeVersion('1.15');
 function changeVersion(version) {
-  $.getJSON('schemas/' + version + '.json', json => {
+  $.getJSON('../schemas/' + version + '.json', json => {
     if (json.root) {
       structure = json.root;
     } else if (json.roots) {

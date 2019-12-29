@@ -219,10 +219,7 @@ function addToSet(el, array) {
 
 function removeFromSet(el, array) {
   let parent = getParent(el);
-  console.warn(parent[array]);
-  console.log($(el).attr('value'));
   let index = parent[array].indexOf($(el).attr('value'));
-  console.log(parent, index);
   if (index > -1) {
     parent[array].splice(index, 1);
     invalidated();
