@@ -405,13 +405,12 @@ function generateObject(data, struct, options) {
   }
   if (!struct.fields) {
     let child = components.find(e => e.id === struct.value);
-    return generateObject(data, child);
+    return generateObject(data, child, options);
   }
-  ;
   let filter;
   for (let field of struct.fields) {
     if (filter === undefined) {
-      filterField = struct.fields.find(e => e.type === 'enum');
+      filterField = struct.fields.find(e => e.type === 'enum' && e.filter === true);
       if (filterField) {
         filter = data[filterField.id];
       }

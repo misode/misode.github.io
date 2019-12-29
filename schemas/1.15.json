@@ -181,6 +181,7 @@
           "translate": "entry.type",
           "translateValue": "entry.type",
           "help": true,
+          "filter": true,
           "default": "minecraft:item",
           "values": [
             "minecraft:empty",
@@ -264,6 +265,7 @@
           "type": "enum",
           "translate": "function.type",
           "translateValue": "function.type",
+          "filter": true,
           "default": "minecraft:set_count",
           "values": [
             "minecraft:set_count",
@@ -518,6 +520,7 @@
           "type": "enum",
           "translate": "function.formula",
           "translateValue": "function.formula",
+          "filter": true,
           "default": "minecraft:uniform_bonus_count",
           "values": [
             "minecraft:uniform_bonus_count",
@@ -602,6 +605,7 @@
           "type": "enum",
           "translate": "condition.type",
           "translateValue": "condition.type",
+          "filter": true,
           "default": "minecraft:random_chance",
           "values": [
             "minecraft:alternative",
@@ -1425,7 +1429,7 @@
         {
           "id": "source_entity",
           "type": "object",
-          "translate": "damage.source_entity",
+          "translate": "damage_source.source_entity",
           "color": "dark",
           "collapse": true,
           "value": "entity"
@@ -1433,7 +1437,7 @@
         {
           "id": "direct_entity",
           "type": "object",
-          "translate": "damage.direct_entity",
+          "translate": "damage_source.direct_entity",
           "color": "dark",
           "collapse": true,
           "value": "entity"
@@ -1557,6 +1561,7 @@
           "translate": "criteria.trigger",
           "translateValue": "trigger",
           "type": "enum",
+          "filter": true,
           "default": "minecraft:inventory_changed",
           "values": [
             "minecraft:bee_nest_destroyed",
@@ -1665,6 +1670,7 @@
             {
               "id": "from",
               "translate": "criteria.from_dimension",
+              "translateValue": "dimension",
               "type": "enum",
               "unset": true,
               "values": "dimensions",
@@ -1675,6 +1681,7 @@
             {
               "id": "to",
               "translate": "criteria.to_dimension",
+              "translateValue": "dimension",
               "type": "enum",
               "unset": true,
               "values": "dimensions",
@@ -1812,6 +1819,7 @@
               "translate": "criteria.slots",
               "type": "object",
               "color": "dark",
+              "card": false,
               "fields": [
                 {
                   "id": "empty",
@@ -1869,9 +1877,11 @@
                 "minecraft:bee_nest_destroyed",
                 "minecraft:consume_item",
                 "minecraft:enchanted_item",
+                "minecraft:filled_bucket",
                 "minecraft:fishing_rod_hooked",
                 "minecraft:item_durability_changed",
                 "minecraft:placed_block",
+                "minecraft:shot_crossbow",
                 "minecraft:used_totem",
                 "minecraft:villager_trade"
               ]
@@ -1898,6 +1908,7 @@
             {
               "id": "distance",
               "translate": "criteria.distance",
+              "type": "object",
               "collapse": true,
               "value": "distance",
               "require": [
@@ -1937,10 +1948,11 @@
               "id": "entity",
               "translate": "criteria.entity",
               "type": "object",
+              "collapse": true,
               "value": "entity",
               "require": [
                 "minecraft:summoned_entity",
-                "minecraft:tame_entity"
+                "minecraft:tame_animal"
               ]
             }
           ]
