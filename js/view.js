@@ -242,11 +242,10 @@ function generateMap(data, struct) {
       out = out || {};
       let field = struct.values;
       field.id = key;
-      field.translate = key;
       let {out: outValue, component: $item} = generateComponent(data[key], field);
       if (field.type === 'object') {
         let $header = $('<div class="card-header pb-1"></div>');
-        $header.append(('<span class="input-group-text mr-3 mb-2 float-left" data-i18n="' + field.translate + '"></span>'));
+        $header.append('<span class="input-group-text mr-3 mb-2 float-left" onclick="renameMapKey(this)" style="cursor: pointer;">' + key + '</span>');
         $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFromMap(this)" data-i18n="' + struct.translate + '_remove"></button>');
         $item.prepend($header);
       } else {

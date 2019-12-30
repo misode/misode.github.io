@@ -287,6 +287,31 @@ function addToMap(el) {
   invalidated();
 }
 
+function renameMapKey(el) {
+  let key = $(el).text();
+  let $textarea = $('<textarea type="text" class="form-control mr-3 mb-2 float-left" style="max-height: 1em; max-width: 16em; overflow: hidden; display: inline;"></textarea>')
+    .val(key)
+    .keydown(e => {
+      if (e.which === 13) {
+        $(e.target).trigger('blur');
+        e.preventDefault();
+      }
+    })
+    .on('blur', e => {
+      let newKey = $(e.target).val();
+      let path = getPath($(e.target));
+      let oldKey = path.pop();
+      if (newKey !== oldKey && newKey.length > 0){
+        let node = getNode(path);
+        node[newKey] = node[oldKey];
+        delete node[oldKey];
+      }
+      invalidated();
+    });
+  $(el).replaceWith($textarea);
+  $textarea.focus();
+}
+
 function removeFromMap(el) {
   let path = getPath(el);
   let key = path.pop();
