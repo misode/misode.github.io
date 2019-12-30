@@ -421,7 +421,7 @@ function generateObject(data, struct, options) {
           for (let term of outValue) {
             out.term.terms.push({
               condition: 'minecraft:inverted',
-              term: outValue
+              term: term
             });
           }
         }
