@@ -481,9 +481,9 @@ function generateTooltip(str) {
   return $el;
 }
 
-function preventNewline(e) {
+function preventNewline(e, event = 'change') {
   if (e.which === 13) {
-    $(e.target).trigger('change');
+    $(e.target).trigger(event);
     e.preventDefault();
   }
 }

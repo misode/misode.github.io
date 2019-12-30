@@ -295,12 +295,7 @@ function renameMapKey(el) {
   let key = $(el).text();
   let $textarea = $('<textarea type="text" class="form-control mr-3 mb-2 float-left" style="max-height: 1em; max-width: 16em; overflow: hidden; display: inline;"></textarea>')
     .val(key)
-    .keydown(e => {
-      if (e.which === 13) {
-        $(e.target).trigger('blur');
-        e.preventDefault();
-      }
-    })
+    .keydown(e => preventNewline(e, 'blur'))
     .on('blur', e => {
       let newKey = $(e.target).val();
       let path = getPath($(e.target));
