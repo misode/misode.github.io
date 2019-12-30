@@ -263,13 +263,17 @@ function removeFromSet(el, array) {
   }
 }
 
+function isValidMapKey(key) {
+  return key.length > 0
+}
+
 function addToMap(el) {
   let node = getParent(el);
   let $field = $(el).closest('[data-index]');
   let key = $field.find('input').val();
   let map = $field.attr('data-index');
   let type = $field.attr('data-item-type');
-  if (key.length === 0) {
+  if (!isValidMapKey(key)) {
     return;
   }
   if (!node[map]) {
@@ -301,7 +305,7 @@ function renameMapKey(el) {
       let newKey = $(e.target).val();
       let path = getPath($(e.target));
       let oldKey = path.pop();
-      if (newKey !== oldKey && newKey.length > 0){
+      if (newKey !== oldKey && isValidMapKey(newKey)){
         let node = getNode(path);
         node[newKey] = node[oldKey];
         delete node[oldKey];
