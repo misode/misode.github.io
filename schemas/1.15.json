@@ -645,6 +645,7 @@
           "default": "minecraft:random_chance",
           "values": [
             "minecraft:alternative",
+            "minecraft:requirements",
             "minecraft:inverted",
             "minecraft:reference",
             "minecraft:entity_properties",
@@ -872,7 +873,8 @@
           "values": "condition",
           "button": "field",
           "require": [
-            "minecraft:alternative"
+            "minecraft:alternative",
+            "minecraft:requirements"
           ]
         }
       ]
