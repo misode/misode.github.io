@@ -87,6 +87,8 @@
     "criteria.villager": "Villager",
     "criteria.zombie": "Zombie",
     "criteria.effects": "Effects",
+    "criteria.effects_add": "Add Effect",
+    "criteria.effects_remove": "Remove Effect",
     "criteria.state": "States",
     "criteria.state_add": "Add State",
     "criteria.xp_levels": "XP Level",
