@@ -263,8 +263,8 @@ function removeFromSet(el, array) {
   }
 }
 
-function isValidMapKey(key) {
-  return key.length > 0
+function isValidMapKey(key, node) {
+  return key.length > 0 && !(key in node)
 }
 
 function addToMap(el) {
@@ -273,11 +273,11 @@ function addToMap(el) {
   let key = $field.find('input').val();
   let map = $field.attr('data-index');
   let type = $field.attr('data-item-type');
-  if (!isValidMapKey(key)) {
-    return;
-  }
   if (!node[map]) {
     node[map] = {};
+  }
+  if (!isValidMapKey(key, node[map])) {
+    return;
   }
   if (type === 'int' || type === 'float' || type === 'random' || type === 'range' || type === 'boundary') {
     node[map][key] = 0;
@@ -305,8 +305,8 @@ function renameMapKey(el) {
       let newKey = $(e.target).val();
       let path = getPath($(e.target));
       let oldKey = path.pop();
-      if (newKey !== oldKey && isValidMapKey(newKey)){
-        let node = getNode(path);
+      let node = getNode(path);
+      if (newKey !== oldKey && isValidMapKey(newKey, node)){
         node[newKey] = node[oldKey];
         delete node[oldKey];
       }
