@@ -440,6 +440,12 @@ function generateObject(data, struct, options) {
       $body.append($field);
     }
   }
+  if (struct.card === false) {
+    // Note: JSON.parse(JSON.stringify(out)) can remove undefined values in the out object.
+    if (Object.keys(JSON.parse(JSON.stringify(out))).length === 0) {
+      out = undefined
+    }
+  }
   $body.children().first().children('button').removeClass('mt-3');
   $body.children().first().removeClass('mt-3');
   return {out: out, component: $el};
