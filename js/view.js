@@ -348,6 +348,15 @@ function generateArray(data, struct) {
 
 function generateObject(data, struct, options) {
   let out = {};
+  if (struct.id === 'condition' && data.condition === 'minecraft:requirements') {
+    out = {
+      condition: "minecraft:inverted",
+      term: {
+        condition: "minecraft:alternative",
+        terms: []
+      }
+    };
+  }
   let $el = $('<div/>').addClass('mt-3');
   let $header = $('<div/>');
   let $body = $('<div/>');
@@ -407,7 +416,18 @@ function generateObject(data, struct, options) {
       ({out: outValue, component: $field} = generateError('Failed generating "' + field.id + '" field'));
     }
     if ($field !== false) {
-      out[field.id] = outValue;
+      if (struct.id === 'condition' && data.condition === 'minecraft:requirements') {
+        if (field.id === 'terms' && outValue) {
+          for (let term of outValue) {
+            out.term.terms.push({
+              condition: 'minecraft:inverted',
+              term: outValue
+            });
+          }
+        }
+      } else {
+        out[field.id] = outValue;
+      }
       if (field.type === 'array') {
         let color = field.color || components.find(e => e.id === field.values).color;
         let $button = $('<button type="button" class="btn btn-' + color + ' mr-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
