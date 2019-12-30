@@ -440,7 +440,7 @@ function generateObject(data, struct, options) {
       $body.append($field);
     }
   }
-  if (struct.card === false) {
+  if (!struct.collapse) {
     // Note: JSON.parse(JSON.stringify(out)) can remove undefined values in the out object.
     if (Object.keys(JSON.parse(JSON.stringify(out))).length === 0) {
       out = undefined
