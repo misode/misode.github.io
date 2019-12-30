@@ -416,17 +416,17 @@
           "fields": [
             {
               "id": "x",
-              "type": "boundary",
+              "type": "range",
               "translate": "location.position.x"
             },
             {
               "id": "y",
-              "type": "boundary",
+              "type": "range",
               "translate": "location.position.y"
             },
             {
               "id": "z",
-              "type": "boundary",
+              "type": "range",
               "translate": "location.position.z"
             }
           ]
@@ -464,27 +464,27 @@
       "fields": [
         {
           "id": "x",
-          "type": "boundary",
+          "type": "range",
           "translate": "distance.x"
         },
         {
           "id": "y",
-          "type": "boundary",
+          "type": "range",
           "translate": "distance.y"
         },
         {
           "id": "z",
-          "type": "boundary",
+          "type": "range",
           "translate": "distance.z"
         },
         {
           "id": "absolute",
-          "type": "boundary",
+          "type": "range",
           "translate": "distance.absolute"
         },
         {
           "id": "horizontal",
-          "type": "boundary",
+          "type": "range",
           "translate": "distance.horizontal"
         }
       ]
