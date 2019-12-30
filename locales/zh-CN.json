@@ -83,6 +83,8 @@
     "criteria.durability": "耐久度",
     "criteria.duration": "持续时间",
     "criteria.effects": "状态效果",
+    "criteria.effects_add": "添加状态效果",
+    "criteria.effects_remove": "移除状态效果",
     "criteria.entity": "实体",
     "criteria.from_dimension": "出发维度",
     "criteria.item": "物品",
