@@ -103,6 +103,7 @@
     "criteria.slots.occupied": "已用栏位的数量",
     "criteria.source_entity": "源实体",
     "criteria.state": "方块状态",
+    "criteria.state_add": "添加方块状态",
     "criteria.to_dimension": "到达维度",
     "criteria.trigger": "触发器",
     "criteria.unique_entity_types": "实体种类的数量",

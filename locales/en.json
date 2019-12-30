@@ -88,6 +88,7 @@
     "criteria.zombie": "Zombie",
     "criteria.effects": "Effects",
     "criteria.state": "States",
+    "criteria.state_add": "Add State",
     "criteria.xp_levels": "XP Level",
     "criteria.damage": "Damage",
     "criteria.source_entity": "Source Entity",

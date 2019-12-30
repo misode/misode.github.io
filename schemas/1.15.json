@@ -166,7 +166,7 @@
         {
           "id": "criteria",
           "translate": "criteria",
-          "translatePlaceholder": "placeholder.criteria",
+          "translatePlaceholder": "criteria",
           "type": "map",
           "values": {
             "type": "object",
@@ -776,7 +776,7 @@
           "id": "properties",
           "type": "map",
           "translate": "condition.block_state",
-          "translatePlaceholder": "placeholder.block_state",
+          "translatePlaceholder": "block_state",
           "values": {
             "type": "string"
           },
@@ -788,7 +788,7 @@
           "id": "scores",
           "type": "map",
           "translate": "condition.score",
-          "translatePlaceholder": "placeholder.objective",
+          "translatePlaceholder": "objective",
           "values": {
             "type": "range"
           },
@@ -1132,7 +1132,7 @@
               "id": "advancements",
               "type": "map",
               "translate": "entity.player.advancements",
-              "translatePlaceholder": "placeholder.advancement",
+              "translatePlaceholder": "advancement",
               "values": {
                 "type": "boolean"
               }
@@ -1141,7 +1141,7 @@
               "id": "recipes",
               "type": "map",
               "translate": "entity.player.recipes",
-              "translatePlaceholder": "placeholder.recipe",
+              "translatePlaceholder": "recipe",
               "values": {
                 "type": "boolean"
               }
@@ -1159,7 +1159,7 @@
           "id": "effects",
           "type": "map",
           "translate": "entity.status_effect",
-          "translatePlaceholder": "placeholder.effect",
+          "translatePlaceholder": "effect",
           "values": {
             "type": "object",
             "value": "status_effect"
@@ -1259,7 +1259,7 @@
               "id": "state",
               "type": "map",
               "translate": "location.block.state",
-              "translatePlaceholder": "placeholder.block_state",
+              "translatePlaceholder": "block_state",
               "values": {
                 "type": "string"
               }
@@ -1287,7 +1287,7 @@
               "id": "state",
               "type": "map",
               "translate": "location.fluid.state",
-              "translatePlaceholder": "placeholder.fluid_state",
+              "translatePlaceholder": "fluid_state",
               "values": {
                 "type": "string"
               }
@@ -1788,6 +1788,7 @@
             {
               "id": "state",
               "translate": "criteria.state",
+              "translatePlaceholder": "block_state",
               "type": "map",
               "values": {
                 "type": "string"
