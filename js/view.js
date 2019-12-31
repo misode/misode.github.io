@@ -235,18 +235,18 @@ function generateMap(data, struct) {
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
   $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
-  $input.attr('data-i18n', `[placeholder]${struct.translatePlaceholder}`);
+  $input.attr('data-i18n', `[placeholder]placeholder.${struct.translatePlaceholder}`);
   $input.keypress((e) => {if (e.which == 13) addToMap(e.target);});
   if (data) {
     for (let key of Object.keys(data)) {
-      out = out || {}
+      out = out || {};
       let field = struct.values;
       field.id = key;
       field.translate = key;
       let {out: outValue, component: $item} = generateComponent(data[key], field);
       if (field.type === 'object') {
         let $header = $('<div class="card-header pb-1"></div>');
-        $header.append(('<span class="input-group-text mr-3 mb-2 float-left" data-i18n="' + field.translate + '"></span>'));
+        $header.append('<span class="input-group-text mr-3 mb-2 float-left" onclick="renameMapKey(this)" style="cursor: pointer;">' + key + '</span>');
         $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFromMap(this)" data-i18n="' + struct.translate + '_remove"></button>');
         $item.prepend($header);
       } else {
@@ -443,7 +443,7 @@ function generateObject(data, struct, options) {
   if (struct.card === false) {
     // Note: JSON.parse(JSON.stringify(out)) can remove undefined values in the out object.
     if (Object.keys(JSON.parse(JSON.stringify(out))).length === 0) {
-      out = undefined
+      out = undefined;
     }
   }
   $body.children().first().children('button').removeClass('mt-3');
@@ -482,9 +482,9 @@ function generateTooltip(str) {
   return $el;
 }
 
-function preventNewline(e) {
+function preventNewline(e, event = 'change') {
   if (e.which === 13) {
-    $(e.target).trigger('change');
+    $(e.target).trigger(event);
     e.preventDefault();
   }
 }

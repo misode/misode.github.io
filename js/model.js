@@ -187,7 +187,7 @@ function getPath(el) {
   let index = $node.attr('data-index');
   if (index === 'root') return [];
   let parent = getPath($node.parent());
-  parent = parent.concat(index.split('.'));
+  parent.push(index);
   return parent;
 }
 
@@ -263,17 +263,21 @@ function removeFromSet(el, array) {
   }
 }
 
+function isValidMapKey(key, node) {
+  return key.length > 0 && !(key in node)
+}
+
 function addToMap(el) {
   let node = getParent(el);
   let $field = $(el).closest('[data-index]');
   let key = $field.find('input').val();
   let map = $field.attr('data-index');
   let type = $field.attr('data-item-type');
-  if (key.length === 0) {
-    return;
-  }
   if (!node[map]) {
     node[map] = {};
+  }
+  if (!isValidMapKey(key, node[map])) {
+    return;
   }
   if (type === 'int' || type === 'float' || type === 'random' || type === 'range' || type === 'boundary') {
     node[map][key] = 0;
@@ -285,6 +289,26 @@ function addToMap(el) {
     node[map][key] = "";
   }
   invalidated();
+}
+
+function renameMapKey(el) {
+  let key = $(el).text();
+  let $textarea = $('<textarea type="text" class="form-control mr-3 mb-2 float-left" style="max-height: 1em; max-width: 16em; overflow: hidden; display: inline;"></textarea>')
+    .val(key)
+    .keydown(e => preventNewline(e, 'blur'))
+    .on('blur', e => {
+      let newKey = $(e.target).val();
+      let path = getPath($(e.target));
+      let oldKey = path.pop();
+      let node = getNode(path);
+      if (newKey !== oldKey && isValidMapKey(newKey, node)){
+        node[newKey] = node[oldKey];
+        delete node[oldKey];
+      }
+      invalidated();
+    });
+  $(el).replaceWith($textarea);
+  $textarea.focus();
 }
 
 function removeFromMap(el) {
