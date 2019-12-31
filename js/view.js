@@ -242,6 +242,7 @@ function generateMap(data, struct) {
       out = out || {};
       let field = struct.values;
       field.id = key;
+      field.translate = key;
       let {out: outValue, component: $item} = generateComponent(data[key], field);
       if (field.type === 'object') {
         let $header = $('<div class="card-header pb-1"></div>');
