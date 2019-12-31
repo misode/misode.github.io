@@ -187,7 +187,7 @@ function getPath(el) {
   let index = $node.attr('data-index');
   if (index === 'root') return [];
   let parent = getPath($node.parent());
-  parent = parent.concat(index.split('.'));
+  parent.push(index);
   return parent;
 }
 
