@@ -235,18 +235,18 @@ function generateMap(data, struct) {
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
   $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
-  $input.attr('data-i18n', `[placeholder]${struct.translatePlaceholder}`);
+  $input.attr('data-i18n', `[placeholder]placeholder.${struct.translatePlaceholder}`);
   $input.keypress((e) => {if (e.which == 13) addToMap(e.target);});
   if (data) {
     for (let key of Object.keys(data)) {
-      out = out || {}
+      out = out || {};
       let field = struct.values;
       field.id = key;
       field.translate = key;
       let {out: outValue, component: $item} = generateComponent(data[key], field);
       if (field.type === 'object') {
         let $header = $('<div class="card-header pb-1"></div>');
-        $header.append(('<span class="input-group-text mr-3 mb-2 float-left" data-i18n="' + field.translate + '"></span>'));
+        $header.append('<span class="input-group-text mr-3 mb-2 float-left" onclick="renameMapKey(this)" style="cursor: pointer;">' + key + '</span>');
         $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFromMap(this)" data-i18n="' + struct.translate + '_remove"></button>');
         $item.prepend($header);
       } else {
@@ -348,6 +348,15 @@ function generateArray(data, struct) {
 
 function generateObject(data, struct, options) {
   let out = {};
+  if (struct.id === 'condition' && data.condition === 'minecraft:requirements') {
+    out = {
+      condition: "minecraft:inverted",
+      term: {
+        condition: "minecraft:alternative",
+        terms: []
+      }
+    };
+  }
   let $el = $('<div/>').addClass('mt-3');
   let $header = $('<div/>');
   let $body = $('<div/>');
@@ -407,7 +416,18 @@ function generateObject(data, struct, options) {
       ({out: outValue, component: $field} = generateError('Failed generating "' + field.id + '" field'));
     }
     if ($field !== false) {
-      out[field.id] = outValue;
+      if (struct.id === 'condition' && data.condition === 'minecraft:requirements') {
+        if (field.id === 'terms' && outValue) {
+          for (let term of outValue) {
+            out.term.terms.push({
+              condition: 'minecraft:inverted',
+              term: term
+            });
+          }
+        }
+      } else {
+        out[field.id] = outValue;
+      }
       if (field.type === 'array') {
         let color = field.color || components.find(e => e.id === field.values).color;
         let $button = $('<button type="button" class="btn btn-' + color + ' mr-3" onclick="addComponent(this, \'' + field.id + '\')" data-i18n="' + field.translate + '_add"></button>');
@@ -418,6 +438,12 @@ function generateObject(data, struct, options) {
         }
       }
       $body.append($field);
+    }
+  }
+  if (struct.card === false) {
+    // Note: JSON.parse(JSON.stringify(out)) can remove undefined values in the out object.
+    if (Object.keys(JSON.parse(JSON.stringify(out))).length === 0) {
+      out = undefined;
     }
   }
   $body.children().first().children('button').removeClass('mt-3');
@@ -456,9 +482,9 @@ function generateTooltip(str) {
   return $el;
 }
 
-function preventNewline(e) {
+function preventNewline(e, event = 'change') {
   if (e.which === 13) {
-    $(e.target).trigger('change');
+    $(e.target).trigger(event);
     e.preventDefault();
   }
 }
