@@ -17,6 +17,12 @@ const generators = {
   'predicate': ['1.15']
 }
 
+const params = new URLSearchParams(window.location.search);
+if (params.has('s')) {
+  let short = params.get('s').slice(0, -7);
+  window.location = 'https://zws.im/' + short;
+}
+
 function addListener(listener) {
   listeners.push(listener);
   listener();
@@ -31,6 +37,10 @@ function loadGenerator(generator) {
   });
   const promises = [initShared(), initLng(), loadVersion(generator, '1.15')];
   Promise.all(promises).then(() => {
+    if (params.has('q')) {
+      $('#source').val(atob(params.get('q')));
+      updateSource();
+    }
     invalidated()
   });
 }
@@ -62,17 +72,6 @@ $('#luckBased').prop('checked', false);
 $('#tableType').val("minecraft:generic");
 $('#indentationSelect').val("2");
 
-const params = new URLSearchParams(window.location.search);
-if (params.has('q')) {
-  $('#source').val(atob(params.get('q')));
-  updateSource();
-  $('.container').removeClass('d-none');
-} else if (params.has('s')) {
-  let short = params.get('s').slice(0, -7);
-  window.location = 'https://zws.im/' + short;
-} else {
-  $('.container').removeClass('d-none');
-}
 
 $(document).keydown(function(e){
   if (e.which === 89 && e.ctrlKey ){
