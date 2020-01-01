@@ -27,18 +27,19 @@ function loadGenerator(generator) {
   if (!generator) return;
   const versions = generators[generator] || [];
   versions.forEach(v => {
-    $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${v}')">${v}</a>`)
+    $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${generator}', '${v}')">${v}</a>`)
   });
   const promises = [initShared(), initLng(), loadVersion(generator, '1.15')];
   Promise.all(promises).then(() => {
+    table = structure.default;
     invalidated()
   });
 }
 
 function loadVersion(generator, version) {
+  console.warn(generator, version);
   return $.getJSON('../schemas/' + version + '.json', json => {
-    structure = json.roots.find(e => e.id === generator);
-    table = structure.default;
+    structure = json.root || json.roots.find(e => e.id === generator);
     components = json.components;
     collections = json.collections;
   }).fail((jqXHR, textStatus, errorThrown) => {
@@ -47,6 +48,12 @@ function loadVersion(generator, version) {
     console.error(message + '\n' + errorThrown);
   }).always(() => {
     $('#versionLabel').text(version);
+  });
+}
+
+function changeVersion(generator, version) {
+  loadVersion(generator, version).then(() => {
+    invalidated();
   });
 }
 
