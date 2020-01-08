@@ -51,7 +51,7 @@
     "condition.time_value": "Значение",
     "condition.time_period": "Период",
     "condition.type": "Условие",
-    "condition.type.alternative": "Алтернатива (ИЛИ)",
+    "condition.type.alternative": "Альтернатива (ИЛИ)",
     "condition.type.block_state_property": "Свойства блока",
     "condition.type.damage_source_properties": "Источник урона",
     "condition.type.entity_properties": "Свойства сущности",
