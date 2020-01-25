@@ -419,10 +419,14 @@ function generateObject(data, struct, options) {
       if (struct.id === 'condition' && data.condition === 'minecraft:requirements') {
         if (field.id === 'terms' && outValue) {
           for (let term of outValue) {
-            out.term.terms.push({
-              condition: 'minecraft:inverted',
-              term: term
-            });
+            if (term && term.condition === 'minecraft:inverted') {
+              out.term.terms.push(term.term);
+            } else {
+              out.term.terms.push({
+                condition: 'minecraft:inverted',
+                term: term
+              });
+            }
           }
         }
       } else {
@@ -448,6 +452,13 @@ function generateObject(data, struct, options) {
   }
   $body.children().first().children('button').removeClass('mt-3');
   $body.children().first().removeClass('mt-3');
+
+  if (struct.id === 'condition' && out.condition === 'minecraft:inverted') {
+    if (out.term.condition === 'minecraft:inverted') {
+      out = out.term.term;
+    }
+  }
+
   return {out: out, component: $el};
 }
 
