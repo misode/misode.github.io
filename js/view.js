@@ -277,10 +277,13 @@ function generateJson(data, struct) {
   let $el = $('#components').find('[data-type="json"]').clone();
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
+  let raw;
   if (typeof data !== 'string') {
-    data = JSON.stringify(data);
+    raw = JSON.stringify(data);
+  } else {
+    raw = data;
   }
-  $el.find('textarea').val(data).keydown(e => preventNewline(e));
+  $el.find('textarea').val(raw).keydown(e => preventNewline(e));
   if (struct.help) {
     $el.append(generateTooltip(struct.translate));
   }
