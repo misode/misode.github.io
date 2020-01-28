@@ -277,6 +277,7 @@ function generateJson(data, struct) {
   let $el = $('#components').find('[data-type="json"]').clone();
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
+  let raw;
   if (typeof data !== 'string') {
     raw = JSON.stringify(data);
   } else {
