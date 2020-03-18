@@ -35,7 +35,7 @@ function loadGenerator(generator) {
   versions.forEach(v => {
     $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${generator}', '${v}')">${v}</a>`)
   });
-  const promises = [initShared(), initLng(), loadVersion(generator, '1.15')];
+  const promises = [initShared(), initLng(), loadVersion(generator, '1.16')];
   Promise.all(promises).then(() => {
     if (params.has('q')) {
       $('#source').val(atob(params.get('q')));
