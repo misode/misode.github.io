@@ -200,6 +200,8 @@
     "entity.distance": "到执行位置的距离",
     "entity.equipment": "装备",
     "entity.flags": "实体特质",
+    "entity.fishing_hook": "鱼钩",
+    "entity.fishing_hook.in_open_water": "位于开阔水域",
     "entity.isBaby": "是幼体",
     "entity.isOnFire": "正在着火",
     "entity.isSneaking": "正在潜行",

@@ -199,6 +199,8 @@
     "enchantment_remove": "Remove Enchantment",
     "entity.distance": "Distance",
     "entity.equipment": "Equipment",
+    "entity.fishing_hook": "Fishing Hook",
+    "entity.fishing_hook.in_open_water": "In Open Water",
     "entity.flags": "Flags",
     "entity.isBaby": "Baby",
     "entity.isOnFire": "On Fire",

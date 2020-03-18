@@ -12,9 +12,9 @@ let table = {};
 let listeners = [];
 
 const generators = {
-  'advancement': ['1.15'],
-  'loot-table': ['1.13', '1.14', '1.15'],
-  'predicate': ['1.15']
+  'advancement': ['1.15', '1.16'],
+  'loot-table': ['1.13', '1.14', '1.15', '1.16'],
+  'predicate': ['1.15', '1.16']
 }
 
 const params = new URLSearchParams(window.location.search);
