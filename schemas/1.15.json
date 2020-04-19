@@ -913,7 +913,7 @@
         },
         {
           "id": "amount",
-          "type": "float",
+          "type": "random",
           "translate": "attribute_modifier.amount"
         },
         {
