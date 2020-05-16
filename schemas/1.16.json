@@ -2032,9 +2032,12 @@
               "collapse": true,
               "value": "location",
               "require": [
+                "minecraft:hero_of_the_village",
                 "minecraft:item_used_on_block",
+                "minecraft:location",
                 "minecraft:placed_block",
-                "minecraft:slept_in_bed"
+                "minecraft:slept_in_bed",
+                "minecraft:voluntary_exile"
               ]
             },
             {
@@ -2065,17 +2068,6 @@
                 "minecraft:thrown_item_picked_up_by_entity"
               ]
             }
-          ]
-        },
-        {
-          "id": "conditions",
-          "translate": "criteria.location",
-          "type": "object",
-          "value": "location",
-          "require": [
-            "minecraft:hero_of_the_village",
-            "minecraft:location",
-            "minecraft:voluntary_exile"
           ]
         }
       ]
