@@ -1651,21 +1651,23 @@
             "minecraft:impossible",
             "minecraft:inventory_changed",
             "minecraft:item_durability_changed",
+            "minecraft:item_used_on_block",
             "minecraft:killed_by_crossbow",
             "minecraft:levitation",
             "minecraft:location",
             "minecraft:nether_travel",
             "minecraft:placed_block",
+            "minecraft:player_generates_container_loot",
             "minecraft:player_hurt_entity",
             "minecraft:player_killed_entity",
             "minecraft:recipe_unlocked",
-            "minecraft:safely_harvest_honey",
             "minecraft:shot_crossbow",
             "minecraft:slept_in_bed",
             "minecraft:slide_down_block",
             "minecraft:summoned_entity",
             "minecraft:tame_animal",
             "minecraft:tick",
+            "minecraft:thrown_item_picked_up_by_entity",
             "minecraft:used_ender_eye",
             "minecraft:used_totem",
             "minecraft:villager_trade",
@@ -1678,6 +1680,13 @@
           "type": "object",
           "card": false,
           "fields": [
+            {
+              "id": "player",
+              "translate": "criteria.player",
+              "type": "object",
+              "collapse": true,
+              "value": "entity"
+            },
             {
               "id": "block",
               "translate": "criteria.block",
@@ -1950,8 +1959,10 @@
                 "minecraft:filled_bucket",
                 "minecraft:fishing_rod_hooked",
                 "minecraft:item_durability_changed",
+                "minecraft:item_used_on_block",
                 "minecraft:placed_block",
                 "minecraft:shot_crossbow",
+                "minecraft:thrown_item_picked_up_by_entity",
                 "minecraft:used_totem",
                 "minecraft:villager_trade"
               ]
@@ -2002,6 +2013,7 @@
               "collapse": true,
               "value": "location",
               "require": [
+                "minecraft:item_used_on_block",
                 "minecraft:placed_block",
                 "minecraft:slept_in_bed"
               ]
@@ -2015,6 +2027,14 @@
               ]
             },
             {
+              "id": "loot_table",
+              "translate": "criteria.loot_table",
+              "type": "string",
+              "require": [
+                "minecraft:player_generates_container_loot"
+              ]
+            },
+            {
               "id": "entity",
               "translate": "criteria.entity",
               "type": "object",
@@ -2022,7 +2042,8 @@
               "value": "entity",
               "require": [
                 "minecraft:summoned_entity",
-                "minecraft:tame_animal"
+                "minecraft:tame_animal",
+                "minecraft:thrown_item_picked_up_by_entity"
               ]
             }
           ]
