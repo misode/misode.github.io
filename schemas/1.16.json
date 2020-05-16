@@ -1104,6 +1104,20 @@
           ]
         },
         {
+          "id": "vehicle",
+          "type": "object",
+          "translate": "entity.vehicle",
+          "collapse": true,
+          "value": "entity"
+        },
+        {
+          "id": "targeted_entity",
+          "type": "object",
+          "translate": "entity.targeted_entity",
+          "collapse": true,
+          "value": "entity"
+        },
+        {
           "id": "player",
           "type": "object",
           "translate": "entity.player",
@@ -1246,6 +1260,11 @@
               "translate": "location.light.light"
             }
           ]
+        },
+        {
+          "id": "smokey",
+          "type": "boolean",
+          "translate": "location.smokey"
         },
         {
           "id": "block",
