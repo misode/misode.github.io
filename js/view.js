@@ -396,8 +396,11 @@ function generateObject(data, struct, options) {
     if (!luckBased && field.luckBased) {
       continue;
     }
-    if (field.require && !field.require.includes(filter || parentFilter)) {
-      continue;
+    if (field.require) {
+      const includes = field.require.includes(filter || parentFilter)
+      if (!!field.invertRequire === includes) {
+        continue;
+      }
     }
     if (field.collapse) {
       let hasNoValue = data[field.id] === undefined;

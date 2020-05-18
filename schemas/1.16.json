@@ -1704,7 +1704,11 @@
               "translate": "criteria.player",
               "type": "object",
               "collapse": true,
-              "value": "entity"
+              "value": "entity",
+              "invertRequire": true,
+              "require": [
+                "minecraft:impossible"
+              ]
             },
             {
               "id": "block",
