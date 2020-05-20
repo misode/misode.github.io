@@ -89,6 +89,7 @@
             {
               "id": "type",
               "translate": "generator.type",
+              "translateValue": "generator.type",
               "type": "enum",
               "values": [
                 "minecraft:noise",
@@ -109,6 +110,7 @@
                 {
                   "id": "type",
                   "translate": "biome_source.type",
+                  "translateValue": "biome_source.type",
                   "type": "enum",
                   "values": [
                     "minecraft:fixed",
@@ -150,7 +152,7 @@
             {
               "id": "settings",
               "translate": "generator.settings",
-              "translateValue": "dimension",
+              "translateValue": "generator.settings.presets",
               "type": "object",
               "color": "dark",
               "collapse": true,

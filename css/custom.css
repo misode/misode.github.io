@@ -225,3 +225,18 @@ body[data-style="dark"] .card a {
 body[data-style="dark"] .card a:hover {
   color: #ccc !important;
 }
+
+body[data-style="dark"] .alert-danger {
+  background-color: #6d2126;
+  border-color: #5e1b20;
+  color: #dfc4c7;
+}
+
+body[data-style="dark"] .alert-danger svg {
+  fill: #dfc4c7;
+}
+
+.alert-danger svg {
+  fill: #6d2126;
+  margin-right: 5px;
+}
