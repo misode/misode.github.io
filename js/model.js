@@ -14,7 +14,8 @@ let listeners = [];
 const generators = {
   'advancement': ['1.15', '1.16'],
   'loot-table': ['1.13', '1.14', '1.15', '1.16'],
-  'predicate': ['1.15', '1.16']
+  'predicate': ['1.15', '1.16'],
+  'worldgen': ['worldgen']
 }
 
 const params = new URLSearchParams(window.location.search);
@@ -35,7 +36,7 @@ function loadGenerator(generator) {
   versions.forEach(v => {
     $('#versionList').append(`<a class="dropdown-item" onclick="changeVersion('${generator}', '${v}')">${v}</a>`)
   });
-  const promises = [initShared(), initLng(), loadVersion(generator, '1.16')];
+  const promises = [initShared(), initLng(), loadVersion(generator, versions[versions.length - 1])];
   Promise.all(promises).then(() => {
     if (params.has('q')) {
       $('#source').val(atob(params.get('q')));

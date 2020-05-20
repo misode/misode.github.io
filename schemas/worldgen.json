@@ -1,0 +1,157 @@
+{
+  "root": {
+    "id": "worldgen",
+    "card": false,
+    "fields": [
+      {
+        "id": "generate_features",
+        "type": "boolean",
+        "translate": "world.generate_features"
+      },
+      {
+        "id": "bonus_chest",
+        "type": "boolean",
+        "translate": "world.bonus_chest"
+      },
+      {
+        "id": "seed",
+        "translate": "world.seed",
+        "type": "int"
+      },
+      {
+        "id": "dimensions",
+        "translate": "dimension",
+        "translatePlaceholder": "dimension",
+        "type": "map",
+        "values": {
+          "type": "object",
+          "value": "dimension"
+        }
+      }
+    ],
+    "default": {
+      "seed": -1464245863,
+      "generate_features": true,
+      "bonus_chest": false,
+      "dimensions": {
+        "minecraft:overworld": {
+          "generator": {
+            "biome_source": {
+              "seed": -1464245863,
+              "large_biomes": false,
+              "type": "minecraft:vanilla_layered"
+            },
+            "seed": -1464245863,
+            "settings": "minecraft:overworld",
+            "type": "minecraft:noise"
+          },
+          "type": "minecraft:overworld"
+        },
+        "minecraft:the_nether": {
+          "generator": {
+            "biome_source": {
+              "seed": -1464245863,
+              "preset": "minecraft:nether",
+              "type": "minecraft:multi_noise"
+            },
+            "seed": -1464245863,
+            "settings": "minecraft:nether",
+            "type": "minecraft:noise"
+          },
+          "type": "minecraft:the_nether"
+        },
+        "minecraft:the_end": {
+          "generator": {
+            "biome_source": {
+              "seed": -1464245863,
+              "type": "minecraft:the_end"
+            },
+            "seed": -1464245863,
+            "settings": "minecraft:end",
+            "type": "minecraft:noise"
+          },
+          "type": "minecraft:the_end"
+        }
+      }
+    }
+  },
+  "components": [
+    {
+      "id": "dimension",
+      "type": "object",
+      "color": "success",
+      "fields": [
+        {
+          "id": "generator",
+          "type": "object",
+          "card": false,
+          "fields": [
+            {
+              "id": "type",
+              "translate": "generator.type",
+              "type": "enum",
+              "values": [
+                "minecraft:noise",
+                "minecraft:flat",
+                "minecraft:debug"
+              ]
+            },
+            {
+              "id": "seed",
+              "translate": "generator.seed",
+              "type": "int"
+            },
+            {
+              "id": "settings",
+              "translate": "generator.settings",
+              "type": "enum",
+              "values": [
+                "minecraft:overworld",
+                "minecraft:nether",
+                "minecraft:end"
+              ]
+            },
+            {
+              "id": "biome_source",
+              "type": "object",
+              "color": "dark",
+              "fields": [
+                {
+                  "id": "type",
+                  "translate": "biome_source.type",
+                  "type": "enum",
+                  "values": [
+                    "minecraft:fixed",
+                    "minecraft:multi_noise",
+                    "minecraft:checkerboard",
+                    "minecraft:vanilla_layered",
+                    "minecraft:the_end"
+                  ]
+                },
+                {
+                  "id": "seed",
+                  "translate": "biome_source.seed",
+                  "type": "int"
+                },
+                {
+                  "id": "preset",
+                  "translate": "biome_source.preset",
+                  "type": "enum",
+                  "unset": true,
+                  "values": [
+                    "minecraft:nether"
+                  ]
+                },
+                {
+                  "id": "large_biomes",
+                  "translate": "biome_source.large_biomes",
+                  "type": "boolean"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

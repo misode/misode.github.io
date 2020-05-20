@@ -11,66 +11,38 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title data-i18n="title">Minecraft Generators 1.13 1.14 1.15</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/custom.css">
+  <link rel="stylesheet" href="../css/custom.css">
+  <title data-i18n="title.worldgen">Worldgen Settings Generator Minecraft</title>
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <span id="descriptionSpan" class="navbar-brand mb-0 h1" data-i18n="description"></span>
+    <a id="descriptionSpan" class="navbar-brand mb-0 h1" href="../" data-i18n="description.worldgen"></a>
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
       <ul class="navbar-nav mr-md-auto mb-2 mb-md-0">
         <li class="nav-item dropdown">
+          <a id="versionLabel" class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown"></a>
+          <div id="versionList" class="dropdown-menu"></div>
+        </li>
+        <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle mr-2" href="" role="button" data-toggle="dropdown">
             🌎 Language
           </a>
           <div id="lngList" class="dropdown-menu"></div>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="" role="button" data-toggle="dropdown" data-i18n="theme"></a>
+          <div id="themeList" class="dropdown-menu"></div>
+        </li>
       </ul>
       <span class="ml-0 ml-md-2"><a href="https://github.com/misode/misode.github.io" style="color: #ddd;" data-i18n="credit"></a></span>
     </div>
   </nav>
-  <div class="container mt-4">
-    <div class="card-group">
-      <div class="card bg-success mb-3">
-        <a href="loot-table">
-          <div class="card-body">
-            <h5 class="card-title" data-i18n="title.loot-table"></h5>
-            <p class="card-subtitle">Minecraft 1.13, 1.14, 1.15, 1.16</p>
-          </div>
-        </a>
-      </div>
-      <div class="card bg-secondary mb-3">
-        <a href="advancement">
-          <div class="card-body">
-            <h5 class="card-title" data-i18n="title.advancement"></h5>
-            <p class="card-subtitle">Minecraft 1.15, 1.16</p>
-          </div>
-        </a>
-      </div>
-      <div class="card bg-info mb-3">
-        <a href="predicate">
-          <div class="card-body">
-            <h5 class="card-title" data-i18n="title.predicate"></h5>
-            <p class="card-subtitle">Minecraft 1.15, 1.16</p>
-          </div>
-        </a>
-      </div>
-    </div>
-    <div class="card bg-secondary mb-3" style="max-width: 400px;">
-      <a href="worldgen">
-        <div class="card-body">
-          <span class="badge badge-danger">Experimental</span>
-          <span class="badge badge-danger">Unstable</span>
-          <h5 class="card-title" data-i18n="title.worldgen"></h5>
-          <p class="card-subtitle">Minecraft 1.16</p>
-        </div>
-      </a>
-    </div>
-  </div>
+
+  <div class="container" data-generator="worldgen"></div>
 
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
@@ -79,9 +51,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-browser-languagedetector/3.0.1/i18nextBrowserLanguageDetector.min.js" integrity="sha384-14ws1HmRivxp+u6W816e62Gs33Y19jhG4zSJb6pL0pB+gYc+CgFXXp4ZnGXcaOww" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-xhr-backend/3.0.0/i18nextXHRBackend.min.js" integrity="sha384-dK+VwLEvPDbpKM7G7D/LtbW6W2zlt99nuVTwoYIkMulAedST9Vj9OCRkv2xV8GjD" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-i18next/1.2.1/jquery-i18next.min.js" integrity="sha384-fLTSt6zHOb152KeFkj7kSiXdkyjKf6fjk5bdzWYLDPDo9evwd9PVs3TKoYYaaxdl" crossorigin="anonymous"></script>
-  <script src="js/i18n.js" charset="utf-8"></script>
-  <script src="js/model.js" charset="utf-8"></script>
-  <script src="js/view.js" charset="utf-8"></script>
-  <script>initLng().then(() => { $('html').localize(); });</script>
+  <script src="../js/i18n.js" charset="utf-8"></script>
+  <script src="../js/model.js" charset="utf-8"></script>
+  <script src="../js/view.js" charset="utf-8"></script>
 </body>
 </html>
