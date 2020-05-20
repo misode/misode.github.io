@@ -22,6 +22,9 @@ function updateView() {
     $('#descriptionSpan').attr('data-i18n', structure.description);
     $('title').attr('data-i18n', structure.title);
     $('#structure').append($component);
+    if (structure.id === 'worldgen') {
+      $('#versionLabel').addClass('d-none')
+    }
     if (i18next.isInitialized) {
       $('html').localize();
     }
@@ -403,14 +406,30 @@ function generateObject(data, struct, options) {
       }
     }
     if (field.collapse) {
-      let hasNoValue = data[field.id] === undefined;
+      let hasNoValue = typeof data[field.id] !== 'object';
       let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
       $body.append('<span class="' + arrowDirection + '"><button type="button" class="mt-3 btn btn-light dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
       if (field.help) {
         $body.find('span').append(generateTooltip(field.translate));
       }
       if (hasNoValue) {
-        $body.append('<div/>');
+        if (field.values) {
+          let outValue, $field;
+          ({out: outValue, component: $field} = generateEnum(data[field.id], field));
+          out[field.id] = outValue;
+          const $selection = $($field.children()[1]);
+          const $dropdown = $body.children().last();
+          $selection.addClass('mt-3');
+          $dropdown.addClass('input-group');
+          $($dropdown.children()[0])
+            .css('border-top-right-radius', '0')
+            .css('border-bottom-right-radius', '0');
+          $selection.attr('data-type', 'enum');
+          $selection.attr('data-index', field.id);
+          $dropdown.append($selection);
+        } else {
+          $body.append('<div/>');
+        }
         continue;
       }
     }

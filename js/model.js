@@ -336,7 +336,7 @@ function toggleCollapseObject(el) {
   let path = getPath(el);
   let index = path.pop();
   let node = getNode(path);
-  if (!node[index]) {
+  if (typeof node[index] !== 'object') {
     node[index] = {};
   } else {
     delete node[index];

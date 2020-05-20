@@ -102,16 +102,6 @@
               "type": "int"
             },
             {
-              "id": "settings",
-              "translate": "generator.settings",
-              "type": "enum",
-              "values": [
-                "minecraft:overworld",
-                "minecraft:nether",
-                "minecraft:end"
-              ]
-            },
-            {
               "id": "biome_source",
               "type": "object",
               "color": "dark",
@@ -136,6 +126,7 @@
                 {
                   "id": "preset",
                   "translate": "biome_source.preset",
+                  "translateValue": "dimension",
                   "type": "enum",
                   "unset": true,
                   "values": [
@@ -148,6 +139,117 @@
                   "type": "boolean"
                 }
               ]
+            },
+            {
+              "id": "settings",
+              "translate": "generator.settings",
+              "translateValue": "dimension",
+              "type": "object",
+              "color": "dark",
+              "collapse": true,
+              "values": [
+                "minecraft:overworld",
+                "minecraft:nether",
+                "minecraft:end"
+              ],
+              "fields": [
+                {
+                  "id": "bedrock_roof_position",
+                  "translate": "generator.settings.bedrock_roof_position",
+                  "type": "int"
+                },
+                {
+                  "id": "bedrock_floor_position",
+                  "translate": "generator.settings.bedrock_floor_position",
+                  "type": "int"
+                },
+                {
+                  "id": "sea_level",
+                  "translate": "generator.settings.sea_level",
+                  "type": "int"
+                },
+                {
+                  "id": "disable_mob_generation",
+                  "translate": "generator.settings.disable_mob_generation",
+                  "type": "boolean"
+                },
+                {
+                  "id": "default_block",
+                  "type": "object",
+                  "card": false,
+                  "fields": [
+                    {
+                      "id": "Name",
+                      "translate": "generator.settings.default_block",
+                      "type": "string"
+                    }
+                  ]
+                },
+                {
+                  "id": "default_fluid",
+                  "type": "object",
+                  "card": false,
+                  "fields": [
+                    {
+                      "id": "Name",
+                      "translate": "generator.settings.default_fluid",
+                      "type": "string"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "type",
+          "translate": "dimension.type",
+          "translateValue": "dimension",
+          "type": "object",
+          "color": "dark",
+          "collapse": true,
+          "values": [
+            "minecraft:overworld",
+            "minecraft:the_nether",
+            "minecraft:the_end"
+          ],
+          "fields": [
+            {
+              "id": "ultrawarm",
+              "translate": "dimension.type.ultrawarm",
+              "type": "boolean",
+              "help": true
+            },
+            {
+              "id": "natural",
+              "translate": "dimension.type.natural",
+              "type": "boolean"
+            },
+            {
+              "id": "shrunk",
+              "translate": "dimension.type.shrunk",
+              "type": "boolean",
+              "help": true
+            },
+            {
+              "id": "ambient_light",
+              "translate": "dimension.type.ambient_light",
+              "type": "float"
+            },
+            {
+              "id": "fixed_time",
+              "translate": "dimension.type.fixed_time",
+              "type": "int"
+            },
+            {
+              "id": "has_skylight",
+              "translate": "dimension.type.has_skylight",
+              "type": "boolean"
+            },
+            {
+              "id": "has_ceiling",
+              "translate": "dimension.type.has_ceiling",
+              "type": "boolean"
             }
           ]
         }
