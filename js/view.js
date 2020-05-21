@@ -9,7 +9,6 @@ addListener(updateView);
 
 changeTheme(localStorage.getItem('theme'))
 function changeTheme(theme) {
-  console.log(theme);
   if (theme === null) {
     theme = 'dark';
   }
@@ -529,6 +528,12 @@ function generateObject(data, struct, options) {
 function generateField(data, field, parent, filter) {
   if (data[field.id] === undefined && field.type === 'object') {
     data[field.id] = {};
+  }
+  if (field.type === 'enum' && data._changed) {
+    for (const f of field.clear || []) {
+      delete data[f];
+    }
+    delete data._changed;
   }
   try {
     let result = generateComponent(data[field.id], field, {filter});

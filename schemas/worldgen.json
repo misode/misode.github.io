@@ -127,6 +127,9 @@
                     "minecraft:checkerboard",
                     "minecraft:vanilla_layered",
                     "minecraft:the_end"
+                  ],
+                  "clear": [
+                    "biomes"
                   ]
                 },
                 {
@@ -164,7 +167,16 @@
                   "values": "biome",
                   "button": "field",
                   "require": [
-                    "minecraft:multi_noise",
+                    "minecraft:multi_noise"
+                  ]
+                },
+                {
+                  "id": "biomes",
+                  "translate": "biome_source.biomes",
+                  "type": "set",
+                  "values": "biomes",
+                  "button": "field",
+                  "require": [
                     "minecraft:checkerboard"
                   ]
                 },

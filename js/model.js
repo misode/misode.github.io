@@ -416,6 +416,9 @@ function updateField(el) {
   if (value === '') {
     delete node[field];
   } else {
+    if (type === 'enum') {
+      node._changed = true;
+    }
     node[field] = value;
   }
   invalidated();
