@@ -412,25 +412,28 @@ function generateObject(data, struct, options) {
       let hasNoValue = typeof data[field.id] !== 'object';
       let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
       $body.append('<span class="' + arrowDirection + '"><button type="button" class="mt-3 btn btn-light dropdown-toggle" onclick="toggleCollapseObject(this)" data-index="' + field.id + '" data-i18n="' + field.translate + '"></button></span>');
+      if (hasNoValue && field.values) {
+        let outValue, $field;
+        ({out: outValue, component: $field} = generateEnum(data[field.id], field));
+        out[field.id] = outValue;
+        const $selection = $($field.children()[1]);
+        const $dropdown = $body.children().last();
+        $selection.addClass('mt-3');
+        $dropdown.addClass('input-group');
+        $($dropdown.children()[0])
+          .css('border-top-right-radius', '0')
+          .css('border-bottom-right-radius', '0');
+        $selection.attr('data-type', 'enum');
+        $selection.attr('data-index', field.id);
+        $dropdown.append($selection);
+      }
       if (field.help) {
-        $body.find('span').append(generateTooltip(field.translate));
+        const $tooltip = generateTooltip(field.translate)
+        $tooltip.addClass('mt-3')
+        $body.children().last().append($tooltip);
       }
       if (hasNoValue) {
-        if (field.values) {
-          let outValue, $field;
-          ({out: outValue, component: $field} = generateEnum(data[field.id], field));
-          out[field.id] = outValue;
-          const $selection = $($field.children()[1]);
-          const $dropdown = $body.children().last();
-          $selection.addClass('mt-3');
-          $dropdown.addClass('input-group');
-          $($dropdown.children()[0])
-            .css('border-top-right-radius', '0')
-            .css('border-bottom-right-radius', '0');
-          $selection.attr('data-type', 'enum');
-          $selection.attr('data-index', field.id);
-          $dropdown.append($selection);
-        } else {
+        if (!field.values) {
           $body.append('<div/>');
         }
         continue;

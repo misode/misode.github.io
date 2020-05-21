@@ -91,6 +91,7 @@
               "translate": "generator.type",
               "translateValue": "generator.type",
               "type": "enum",
+              "filter": true,
               "values": [
                 "minecraft:noise",
                 "minecraft:flat",
@@ -112,6 +113,7 @@
                   "translate": "biome_source.type",
                   "translateValue": "biome_source.type",
                   "type": "enum",
+                  "filter": true,
                   "values": [
                     "minecraft:fixed",
                     "minecraft:multi_noise",
@@ -133,20 +135,44 @@
                   "unset": true,
                   "values": [
                     "minecraft:nether"
+                  ],
+                  "require": [
+                    "minecraft:multi_noise"
                   ]
                 },
                 {
                   "id": "large_biomes",
                   "translate": "biome_source.large_biomes",
-                  "type": "boolean"
+                  "type": "boolean",
+                  "require": [
+                    "minecraft:vanilla_layered",
+                    "minecraft:multi_noise",
+                    "minecraft:the_end"
+                  ]
                 },
                 {
                   "id": "biomes",
                   "translate": "biome",
                   "type": "array",
                   "values": "biome",
-                  "button": "field"
+                  "button": "field",
+                  "require": [
+                    "minecraft:multi_noise",
+                    "minecraft:checkerboard"
+                  ]
+                },
+                {
+                  "id": "biome",
+                  "translate": "biome_source.biome",
+                  "type": "enum",
+                  "values": "biomes",
+                  "require": [
+                    "minecraft:fixed"
+                  ]
                 }
+              ],
+              "require": [
+                "minecraft:noise"
               ]
             },
             {
@@ -338,6 +364,51 @@
                     }
                   ]
                 }
+              ],
+              "require": [
+                "minecraft:noise"
+              ]
+            },
+            {
+              "id": "settings",
+              "translate": "generator.settings",
+              "type": "object",
+              "color": "dark",
+              "collapse": true,
+              "fields": [
+                {
+                  "id": "biome",
+                  "translate": "biome_source.biome",
+                  "type": "enum",
+                  "values": "biomes"
+                },
+                {
+                  "id": "layers",
+                  "translate": "generator.settings.layers",
+                  "type": "array",
+                  "values": "layer",
+                  "button": "field"
+                },
+                {
+                  "id": "structures",
+                  "type": "object",
+                  "card": false,
+                  "fields": [
+                    {
+                      "id": "structures",
+                      "translate": "generator.settings.structures",
+                      "translatePlaceholder": "structure",
+                      "type": "map",
+                      "values": {
+                        "type": "object",
+                        "value": "structure"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "require": [
+                "minecraft:flat"
               ]
             }
           ]
@@ -461,6 +532,23 @@
         {
           "id": "salt",
           "translate": "structure.salt",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "id": "layer",
+      "type": "object",
+      "color": "info",
+      "fields": [
+        {
+          "id": "block",
+          "translate": "layer.block",
+          "type": "string"
+        },
+        {
+          "id": "height",
+          "translate": "layer.height",
           "type": "int"
         }
       ]
