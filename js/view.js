@@ -436,8 +436,7 @@ function generateObject(data, struct, options) {
       }
     }
     if (data[field.id] === undefined && field.default !== undefined) {
-      console.warn(`Set ${field.id} to default ${field.default}`)
-      data[field.id] = field.default;
+      data[field.id] = JSON.parse(JSON.stringify(field.default));
     }
     if (field.collapse) {
       let hasNoValue = typeof data[field.id] !== 'object';
