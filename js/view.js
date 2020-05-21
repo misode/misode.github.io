@@ -1,7 +1,7 @@
 
 const themes = ["light", "dark"];
 
-let preventDuplicateDimensionType = [false, false, false, false];
+let preventDuplicateDimensionType;
 
 themes.forEach(v => $('#themeList').append(`<a class="dropdown-item" onclick="changeTheme('${v}')" data-i18n="theme.${v}"></a>`));
 
@@ -43,6 +43,7 @@ function generateSourceAndView(data, struct) {
     $('#structure').attr('data-index', 'pools');
     return generateTable(data, struct);
   } else {
+    preventDuplicateDimensionType = [false, false, false, false];
     let {out: sourceOut, component: $component} = generateObject(data, struct);
     $component.removeClass('mt-3');
     return {out: sourceOut, component: $component};
@@ -210,7 +211,7 @@ function generateEnum(data, struct) {
   let out = data;
   if (struct.translate === 'dimension.type') {
     const i = struct.values.indexOf(data)
-    if (i !== -1 ) {
+    if (i > 0) {
       if (preventDuplicateDimensionType[i]) {
         data = 'minecraft:default';
       } else {
