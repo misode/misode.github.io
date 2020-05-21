@@ -463,12 +463,13 @@
         {
           "id": "type",
           "translate": "dimension.type",
-          "translateValue": "dimension",
+          "translateValue": "dimension.type.presets",
           "type": "object",
           "color": "dark",
           "collapse": true,
-          "default": "minecraft:overworld",
+          "default": "minecraft:default",
           "values": [
+            "minecraft:default",
             "minecraft:overworld",
             "minecraft:the_nether",
             "minecraft:the_end"
@@ -498,7 +499,7 @@
               "id": "ambient_light",
               "translate": "dimension.type.ambient_light",
               "type": "float",
-              "default": 0.5
+              "default": 0
             },
             {
               "id": "fixed_time",

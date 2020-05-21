@@ -1,6 +1,8 @@
 
 const themes = ["light", "dark"];
 
+let preventDuplicateDimensionType = [false, false, false, false];
+
 themes.forEach(v => $('#themeList').append(`<a class="dropdown-item" onclick="changeTheme('${v}')" data-i18n="theme.${v}"></a>`));
 
 addListener(updateView);
@@ -205,7 +207,28 @@ function generateEnum(data, struct) {
   if (struct.help) {
     $el.append(generateTooltip(struct.translateValue + '.' + data.replace(/.*:/, '')));
   }
-  return {out: data, component: $el};
+  let out = data;
+  if (struct.translate === 'dimension.type') {
+    const i = struct.values.indexOf(data)
+    if (i !== -1 ) {
+      if (preventDuplicateDimensionType[i]) {
+        data = 'minecraft:default';
+      } else {
+        preventDuplicateDimensionType[i] = true;
+      }
+    }
+    if (data === 'minecraft:default') {
+      out = {
+        "ultrawarm": false,
+        "natural": true,
+        "shrunk": false,
+        "ambient_light": 0,
+        "has_skylight": true,
+        "has_ceiling": false
+      };
+    }
+  }
+  return {out: out, component: $el};
 }
 
 function generateSet(data, struct) {
