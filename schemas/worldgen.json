@@ -239,30 +239,51 @@
                 {
                   "id": "default_block",
                   "type": "object",
-                  "card": false,
+                  "color": "dark",
                   "default": {
                     "Name": "minecraft:stone"
                   },
                   "fields": [
                     {
                       "id": "Name",
-                      "translate": "generator.settings.default_block",
+                      "translate": "generator.settings.default_block.name",
                       "type": "string"
+                    },
+                    {
+                      "id": "Properties",
+                      "translate": "generator.settings.block_states",
+                      "translatePlaceholder": "block_state",
+                      "type": "map",
+                      "default": {},
+                      "values": {
+                        "type": "string"
+                      }
                     }
                   ]
                 },
                 {
                   "id": "default_fluid",
                   "type": "object",
-                  "card": false,
+                  "color": "dark",
                   "default": {
-                    "Name": "minecraft:air"
+                    "Name": "minecraft:water",
+                    "Properties": {}
                   },
                   "fields": [
                     {
                       "id": "Name",
-                      "translate": "generator.settings.default_fluid",
+                      "translate": "generator.settings.default_fluid.name",
                       "type": "string"
+                    },
+                    {
+                      "id": "Properties",
+                      "translate": "generator.settings.fluid_states",
+                      "translatePlaceholder": "fluid_state",
+                      "type": "map",
+                      "default": {},
+                      "values": {
+                        "type": "string"
+                      }
                     }
                   ]
                 },
