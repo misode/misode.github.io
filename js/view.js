@@ -265,6 +265,9 @@ function generateMap(data, struct) {
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
   $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
+  if (struct.help) {
+    $el.find('.input-group').append(generateTooltip(struct.translate));
+  }
   $input.attr('data-i18n', `[placeholder]placeholder.${struct.translatePlaceholder}`);
   $input.keypress((e) => {if (e.which == 13) addToMap(e.target);});
   if (JSON.stringify(struct.default) === '{}') {

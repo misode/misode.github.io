@@ -26,6 +26,7 @@
         "translate": "dimension",
         "translatePlaceholder": "dimension",
         "type": "map",
+        "help": true,
         "values": {
           "type": "object",
           "value": "dimension"
@@ -410,6 +411,7 @@
                       "translate": "generator.settings.structures",
                       "translatePlaceholder": "structure",
                       "type": "map",
+                      "help": true,
                       "default": {},
                       "values": {
                         "type": "object",
@@ -457,6 +459,7 @@
                       "translate": "generator.settings.structures",
                       "translatePlaceholder": "structure",
                       "type": "map",
+                      "help": true,
                       "default": {},
                       "values": {
                         "type": "object",
