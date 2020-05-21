@@ -145,9 +145,7 @@
                   "translate": "biome_source.large_biomes",
                   "type": "boolean",
                   "require": [
-                    "minecraft:vanilla_layered",
-                    "minecraft:multi_noise",
-                    "minecraft:the_end"
+                    "minecraft:vanilla_layered"
                   ]
                 },
                 {
@@ -185,7 +183,10 @@
               "values": [
                 "minecraft:overworld",
                 "minecraft:nether",
-                "minecraft:end"
+                "minecraft:end",
+                "minecraft:amplified",
+                "minecraft:caves",
+                "minecraft:floating_islands"
               ],
               "fields": [
                 {
