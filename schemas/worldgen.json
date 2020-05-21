@@ -209,13 +209,13 @@
                   "id": "bedrock_floor_position",
                   "translate": "generator.settings.bedrock_floor_position",
                   "type": "int",
-                  "default": -10
+                  "default": 0
                 },
                 {
                   "id": "sea_level",
                   "translate": "generator.settings.sea_level",
                   "type": "int",
-                  "default": 0
+                  "default": 63
                 },
                 {
                   "id": "disable_mob_generation",
@@ -261,28 +261,40 @@
                   "color": "dark",
                   "fields": [
                     {
-                      "id": "island_noise_override",
-                      "translate": "generator.settings.noise.island_noise_override",
-                      "type": "boolean",
-                      "default": false
-                    },
-                    {
                       "id": "density_factor",
                       "translate": "generator.settings.noise.density_factor",
                       "type": "float",
-                      "default": 0
+                      "default": 1
                     },
                     {
                       "id": "density_offset",
                       "translate": "generator.settings.noise.density_offset",
                       "type": "float",
-                      "default": 0
+                      "default": -0.46875
                     },
                     {
                       "id": "simplex_surface_noise",
                       "translate": "generator.settings.noise.simplex_surface_noise",
                       "type": "boolean",
                       "default": true
+                    },
+                    {
+                      "id": "random_density_offset",
+                      "translate": "generator.settings.noise.random_density_offset",
+                      "type": "boolean",
+                      "default": true
+                    },
+                    {
+                      "id": "island_noise_override",
+                      "translate": "generator.settings.noise.island_noise_override",
+                      "type": "boolean",
+                      "default": false
+                    },
+                    {
+                      "id": "amplified",
+                      "translate": "generator.settings.noise.amplified",
+                      "type": "boolean",
+                      "default": false
                     },
                     {
                       "id": "size_horizontal",
@@ -294,7 +306,7 @@
                       "id": "size_vertical",
                       "translate": "generator.settings.noise.size_vertical",
                       "type": "int",
-                      "default": 1
+                      "default": 2
                     },
                     {
                       "id": "height",
@@ -311,25 +323,25 @@
                           "id": "xz_scale",
                           "translate": "generator.settings.noise.sampling.xz_scale",
                           "type": "float",
-                          "default": 0
+                          "default": 1
                         },
                         {
                           "id": "y_scale",
                           "translate": "generator.settings.noise.sampling.y_scale",
                           "type": "float",
-                          "default": 0
+                          "default": 1
                         },
                         {
                           "id": "xz_factor",
                           "translate": "generator.settings.noise.sampling.xz_factor",
                           "type": "float",
-                          "default": 0
+                          "default": 80
                         },
                         {
                           "id": "y_factor",
                           "translate": "generator.settings.noise.sampling.y_factor",
                           "type": "float",
-                          "default": 0
+                          "default": 160
                         }
                       ]
                     },
@@ -342,7 +354,7 @@
                           "id": "target",
                           "translate": "generator.settings.noise.bottom_slide.target",
                           "type": "int",
-                          "default": 0
+                          "default": -30
                         },
                         {
                           "id": "size",
@@ -367,13 +379,13 @@
                           "id": "target",
                           "translate": "generator.settings.noise.top_slide.target",
                           "type": "int",
-                          "default": 0
+                          "default": -10
                         },
                         {
                           "id": "size",
                           "translate": "generator.settings.noise.top_slide.size",
                           "type": "int",
-                          "default": 0
+                          "default": 3
                         },
                         {
                           "id": "offset",
