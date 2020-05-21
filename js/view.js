@@ -243,6 +243,9 @@ function generateMap(data, struct) {
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
   $input.attr('data-i18n', `[placeholder]placeholder.${struct.translatePlaceholder}`);
   $input.keypress((e) => {if (e.which == 13) addToMap(e.target);});
+  if (JSON.stringify(struct.default) === '{}') {
+    out = {}
+  }
   if (data) {
     for (let key of Object.keys(data)) {
       out = out || {};
@@ -408,6 +411,10 @@ function generateObject(data, struct, options) {
         continue;
       }
     }
+    if (data[field.id] === undefined && field.default !== undefined) {
+      console.warn(`Set ${field.id} to default ${field.default}`)
+      data[field.id] = field.default;
+    }
     if (field.collapse) {
       let hasNoValue = typeof data[field.id] !== 'object';
       let arrowDirection = hasNoValue ? 'dropright' : 'dropdown'
@@ -494,12 +501,8 @@ function generateObject(data, struct, options) {
 }
 
 function generateField(data, field, parent, filter) {
-  if (data[field.id] === undefined) {
-    if (field.type === 'object') {
-      data[field.id] = {};
-    } else if (field.type === 'enum' && field.default) {
-      data[field.id] = field.default;
-    }
+  if (data[field.id] === undefined && field.type === 'object') {
+    data[field.id] = {};
   }
   try {
     let result = generateComponent(data[field.id], field, {filter});

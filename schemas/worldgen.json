@@ -5,18 +5,21 @@
     "fields": [
       {
         "id": "generate_features",
+        "translate": "world.generate_features",
         "type": "boolean",
-        "translate": "world.generate_features"
+        "default": true
       },
       {
         "id": "bonus_chest",
+        "translate": "world.bonus_chest",
         "type": "boolean",
-        "translate": "world.bonus_chest"
+        "default": false
       },
       {
         "id": "seed",
         "translate": "world.seed",
-        "type": "int"
+        "type": "int",
+        "default": 0
       },
       {
         "id": "dimensions",
@@ -92,6 +95,7 @@
               "translateValue": "generator.type",
               "type": "enum",
               "filter": true,
+              "default": "minecraft:noise",
               "values": [
                 "minecraft:noise",
                 "minecraft:flat",
@@ -101,7 +105,8 @@
             {
               "id": "seed",
               "translate": "generator.seed",
-              "type": "int"
+              "type": "int",
+              "default": 0
             },
             {
               "id": "biome_source",
@@ -114,6 +119,7 @@
                   "translateValue": "biome_source.type",
                   "type": "enum",
                   "filter": true,
+                  "default": "minecraft:multi_noise",
                   "values": [
                     "minecraft:fixed",
                     "minecraft:multi_noise",
@@ -125,7 +131,8 @@
                 {
                   "id": "seed",
                   "translate": "biome_source.seed",
-                  "type": "int"
+                  "type": "int",
+                  "default": 0
                 },
                 {
                   "id": "preset",
@@ -144,6 +151,7 @@
                   "id": "large_biomes",
                   "translate": "biome_source.large_biomes",
                   "type": "boolean",
+                  "default": false,
                   "require": [
                     "minecraft:vanilla_layered"
                   ]
@@ -163,6 +171,7 @@
                   "id": "biome",
                   "translate": "biome_source.biome",
                   "type": "enum",
+                  "default": "minecraft:plains",
                   "values": "biomes",
                   "require": [
                     "minecraft:fixed"
@@ -180,6 +189,7 @@
               "type": "object",
               "color": "dark",
               "collapse": true,
+              "default": "minecraft:overworld",
               "values": [
                 "minecraft:overworld",
                 "minecraft:nether",
@@ -192,27 +202,34 @@
                 {
                   "id": "bedrock_roof_position",
                   "translate": "generator.settings.bedrock_roof_position",
-                  "type": "int"
+                  "type": "int",
+                  "default": -10
                 },
                 {
                   "id": "bedrock_floor_position",
                   "translate": "generator.settings.bedrock_floor_position",
-                  "type": "int"
+                  "type": "int",
+                  "default": -10
                 },
                 {
                   "id": "sea_level",
                   "translate": "generator.settings.sea_level",
-                  "type": "int"
+                  "type": "int",
+                  "default": 0
                 },
                 {
                   "id": "disable_mob_generation",
                   "translate": "generator.settings.disable_mob_generation",
-                  "type": "boolean"
+                  "type": "boolean",
+                  "default": false
                 },
                 {
                   "id": "default_block",
                   "type": "object",
                   "card": false,
+                  "default": {
+                    "Name": "minecraft:stone"
+                  },
                   "fields": [
                     {
                       "id": "Name",
@@ -225,6 +242,9 @@
                   "id": "default_fluid",
                   "type": "object",
                   "card": false,
+                  "default": {
+                    "Name": "minecraft:air"
+                  },
                   "fields": [
                     {
                       "id": "Name",
@@ -243,37 +263,44 @@
                     {
                       "id": "island_noise_override",
                       "translate": "generator.settings.noise.island_noise_override",
-                      "type": "boolean"
+                      "type": "boolean",
+                      "default": false
                     },
                     {
                       "id": "density_factor",
                       "translate": "generator.settings.noise.density_factor",
-                      "type": "float"
+                      "type": "float",
+                      "default": 0
                     },
                     {
                       "id": "density_offset",
                       "translate": "generator.settings.noise.density_offset",
-                      "type": "float"
+                      "type": "float",
+                      "default": 0
                     },
                     {
                       "id": "simplex_surface_noise",
                       "translate": "generator.settings.noise.simplex_surface_noise",
-                      "type": "boolean"
+                      "type": "boolean",
+                      "default": true
                     },
                     {
                       "id": "size_horizontal",
                       "translate": "generator.settings.noise.size_horizontal",
-                      "type": "int"
+                      "type": "int",
+                      "default": 2
                     },
                     {
                       "id": "size_vertical",
                       "translate": "generator.settings.noise.size_vertical",
-                      "type": "int"
+                      "type": "int",
+                      "default": 1
                     },
                     {
                       "id": "height",
                       "translate": "generator.settings.noise.height",
-                      "type": "int"
+                      "type": "int",
+                      "default": 256
                     },
                     {
                       "id": "sampling",
@@ -283,22 +310,26 @@
                         {
                           "id": "xz_scale",
                           "translate": "generator.settings.noise.sampling.xz_scale",
-                          "type": "float"
+                          "type": "float",
+                          "default": 0
                         },
                         {
                           "id": "y_scale",
                           "translate": "generator.settings.noise.sampling.y_scale",
-                          "type": "float"
+                          "type": "float",
+                          "default": 0
                         },
                         {
                           "id": "xz_factor",
                           "translate": "generator.settings.noise.sampling.xz_factor",
-                          "type": "float"
+                          "type": "float",
+                          "default": 0
                         },
                         {
                           "id": "y_factor",
                           "translate": "generator.settings.noise.sampling.y_factor",
-                          "type": "float"
+                          "type": "float",
+                          "default": 0
                         }
                       ]
                     },
@@ -310,17 +341,20 @@
                         {
                           "id": "target",
                           "translate": "generator.settings.noise.bottom_slide.target",
-                          "type": "int"
+                          "type": "int",
+                          "default": 0
                         },
                         {
                           "id": "size",
                           "translate": "generator.settings.noise.bottom_slide.size",
-                          "type": "int"
+                          "type": "int",
+                          "default": 0
                         },
                         {
                           "id": "offset",
                           "translate": "generator.settings.noise.bottom_slide.offset",
-                          "type": "int"
+                          "type": "int",
+                          "default": 0
                         }
                       ]
                     },
@@ -332,17 +366,20 @@
                         {
                           "id": "target",
                           "translate": "generator.settings.noise.top_slide.target",
-                          "type": "int"
+                          "type": "int",
+                          "default": 0
                         },
                         {
                           "id": "size",
                           "translate": "generator.settings.noise.top_slide.size",
-                          "type": "int"
+                          "type": "int",
+                          "default": 0
                         },
                         {
                           "id": "offset",
                           "translate": "generator.settings.noise.top_slide.offset",
-                          "type": "int"
+                          "type": "int",
+                          "default": 0
                         }
                       ]
                     }
@@ -352,12 +389,16 @@
                   "id": "structures",
                   "type": "object",
                   "card": false,
+                  "default": {
+                    "structures": {}
+                  },
                   "fields": [
                     {
                       "id": "structures",
                       "translate": "generator.settings.structures",
                       "translatePlaceholder": "structure",
                       "type": "map",
+                      "default": {},
                       "values": {
                         "type": "object",
                         "value": "structure"
@@ -381,6 +422,7 @@
                   "id": "biome",
                   "translate": "biome_source.biome",
                   "type": "enum",
+                  "default": "minecraft:plains",
                   "values": "biomes"
                 },
                 {
@@ -394,12 +436,16 @@
                   "id": "structures",
                   "type": "object",
                   "card": false,
+                  "default": {
+                    "structures": {}
+                  },
                   "fields": [
                     {
                       "id": "structures",
                       "translate": "generator.settings.structures",
                       "translatePlaceholder": "structure",
                       "type": "map",
+                      "default": {},
                       "values": {
                         "type": "object",
                         "value": "structure"
@@ -421,6 +467,7 @@
           "type": "object",
           "color": "dark",
           "collapse": true,
+          "default": "minecraft:overworld",
           "values": [
             "minecraft:overworld",
             "minecraft:the_nether",
@@ -431,23 +478,27 @@
               "id": "ultrawarm",
               "translate": "dimension.type.ultrawarm",
               "type": "boolean",
+              "default": false,
               "help": true
             },
             {
               "id": "natural",
               "translate": "dimension.type.natural",
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             },
             {
               "id": "shrunk",
               "translate": "dimension.type.shrunk",
               "type": "boolean",
+              "default": false,
               "help": true
             },
             {
               "id": "ambient_light",
               "translate": "dimension.type.ambient_light",
-              "type": "float"
+              "type": "float",
+              "default": 0.5
             },
             {
               "id": "fixed_time",
@@ -457,12 +508,14 @@
             {
               "id": "has_skylight",
               "translate": "dimension.type.has_skylight",
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             },
             {
               "id": "has_ceiling",
               "translate": "dimension.type.has_ceiling",
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           ]
         }
@@ -477,39 +530,45 @@
           "id": "biome",
           "translate": "biome",
           "type": "enum",
+          "default": "minecraft:plains",
           "values": "biomes"
         },
         {
           "id": "parameters",
           "translate": "biome.parameters",
           "type": "object",
-          "collapse": true,
           "color": "info",
+          "default": {},
           "fields": [
             {
               "id": "altitude",
               "translate": "biome.parameters.altitude",
-              "type": "float"
+              "type": "float",
+              "default": 0
             },
             {
               "id": "weirdness",
               "translate": "biome.parameters.weirdness",
-              "type": "float"
+              "type": "float",
+              "default": 0
             },
             {
               "id": "offset",
               "translate": "biome.parameters.offset",
-              "type": "float"
+              "type": "float",
+              "default": 0
             },
             {
               "id": "temparature",
               "translate": "biome.parameters.temperature",
-              "type": "float"
+              "type": "float",
+              "default": 0
             },
             {
               "id": "humidity",
               "translate": "biome.parameters.humidity",
-              "type": "float"
+              "type": "float",
+              "default": 0
             }
           ]
         }
@@ -523,17 +582,20 @@
         {
           "id": "spacing",
           "translate": "structure.spacing",
-          "type": "int"
+          "type": "int",
+          "default": 10
         },
         {
           "id": "separation",
           "translate": "structure.separation",
-          "type": "int"
+          "type": "int",
+          "default": 10
         },
         {
           "id": "salt",
           "translate": "structure.salt",
-          "type": "int"
+          "type": "int",
+          "default": 0
         }
       ]
     },
@@ -545,12 +607,14 @@
         {
           "id": "block",
           "translate": "layer.block",
-          "type": "string"
+          "type": "string",
+          "default": "minecraft:stone"
         },
         {
           "id": "height",
           "translate": "layer.height",
-          "type": "int"
+          "type": "int",
+          "default": 1
         }
       ]
     }
