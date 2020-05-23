@@ -93,6 +93,7 @@
         {
           "id": "name",
           "type": "string",
+          "resource": true,
           "translate": "entry.name",
           "require": [
             "minecraft:item",
@@ -563,6 +564,7 @@
         {
           "id": "block",
           "type": "string",
+          "resource": true,
           "translate": "condition.block",
           "require":  [
             "minecraft:block_state_property"
@@ -571,6 +573,7 @@
         {
           "id": "properties",
           "type": "map",
+          "resource": true,
           "translate": "condition.block_state",
           "values": {
             "type": "string"
@@ -870,6 +873,7 @@
         {
           "id": "effects",
           "type": "map",
+          "resource": true,
           "translate": "entity.status_effect",
           "values": {
             "type": "object",
@@ -1000,6 +1004,7 @@
         {
           "id": "type",
           "type": "string",
+          "resource": true,
           "translate": "potion_effect.type"
         },
         {
@@ -1017,11 +1022,13 @@
         {
           "id": "item",
           "type": "string",
+          "resource": true,
           "translate": "item.name"
         },
         {
           "id": "tag",
           "type": "string",
+          "resource": true,
           "translate": "item.tag"
         },
         {
@@ -1037,6 +1044,7 @@
         {
           "id": "potion",
           "type": "string",
+          "resource": true,
           "translate": "item.potion"
         },
         {

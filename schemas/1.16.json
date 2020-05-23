@@ -76,7 +76,8 @@
                 {
                   "id": "item",
                   "translate": "display.icon.item",
-                  "type": "string"
+                  "type": "string",
+                  "resource": true
                 },
                 {
                   "id": "nbt",
@@ -132,7 +133,8 @@
         {
           "id": "parent",
           "translate": "parent",
-          "type": "string"
+          "type": "string",
+          "resource": true
         },
         {
           "id": "rewards",
@@ -144,7 +146,8 @@
             {
               "id": "function",
               "translate": "rewards.function",
-              "type": "string"
+              "type": "string",
+              "resource": true
             },
             {
               "id": "loot",
@@ -252,6 +255,7 @@
         {
           "id": "name",
           "type": "string",
+          "resource": true,
           "translate": "entry.name",
           "require": [
             "minecraft:item",
@@ -475,6 +479,7 @@
         {
           "id": "block",
           "type": "string",
+          "resource": true,
           "translate": "function.block",
           "require":  [
             "minecraft:copy_state"
@@ -666,6 +671,7 @@
         {
           "id": "name",
           "type": "string",
+          "resource": true,
           "translate": "condition.name",
           "require": [
             "minecraft:reference"
@@ -767,6 +773,7 @@
         {
           "id": "block",
           "type": "string",
+          "resource": true,
           "translate": "condition.block",
           "require":  [
             "minecraft:block_state_property"
@@ -775,6 +782,7 @@
         {
           "id": "properties",
           "type": "map",
+          "resource": true,
           "translate": "condition.block_state",
           "translatePlaceholder": "block_state",
           "values": {
@@ -1145,6 +1153,7 @@
             {
               "id": "advancements",
               "type": "map",
+              "resource": true,
               "translate": "entity.player.advancements",
               "translatePlaceholder": "advancement",
               "values": {
@@ -1154,6 +1163,7 @@
             {
               "id": "recipes",
               "type": "map",
+              "resource": true,
               "translate": "entity.player.recipes",
               "translatePlaceholder": "recipe",
               "values": {
@@ -1186,6 +1196,7 @@
         {
           "id": "effects",
           "type": "map",
+          "resource": true,
           "translate": "entity.status_effect",
           "translatePlaceholder": "effect",
           "values": {
@@ -1276,6 +1287,7 @@
             {
               "id": "block",
               "type": "string",
+              "resource": true,
               "translate": "location.block.block"
             },
             {
@@ -1291,6 +1303,7 @@
             {
               "id": "state",
               "type": "map",
+              "resource": true,
               "translate": "location.block.state",
               "translatePlaceholder": "block_state",
               "values": {
@@ -1309,6 +1322,7 @@
             {
               "id": "fluid",
               "type": "string",
+              "resource": true,
               "translate": "location.fluid.fluid"
             },
             {
@@ -1319,6 +1333,7 @@
             {
               "id": "state",
               "type": "map",
+              "resource": true,
               "translate": "location.fluid.state",
               "translatePlaceholder": "fluid_state",
               "values": {
@@ -1413,6 +1428,7 @@
         {
           "id": "type",
           "type": "string",
+          "resource": true,
           "translate": "potion_effect.type"
         },
         {
@@ -1430,11 +1446,13 @@
         {
           "id": "item",
           "type": "string",
+          "resource": true,
           "translate": "item.name"
         },
         {
           "id": "tag",
           "type": "string",
+          "resource": true,
           "translate": "item.tag"
         },
         {
@@ -1450,6 +1468,7 @@
         {
           "id": "potion",
           "type": "string",
+          "resource": true,
           "translate": "item.potion"
         },
         {
@@ -1629,6 +1648,7 @@
         {
           "id": "stat",
           "type": "string",
+          "resource": true,
           "translate": "statistic.stat"
         },
         {
@@ -1714,6 +1734,7 @@
               "id": "block",
               "translate": "criteria.block",
               "type": "string",
+              "resource": true,
               "require": [
                 "minecraft:bee_nest_destroyed",
                 "minecraft:enter_block",
@@ -1763,6 +1784,7 @@
               "id": "potion",
               "translate": "criteria.potion",
               "type": "string",
+              "resource": true,
               "require": [
                 "minecraft:brewed_potion"
               ]
@@ -1823,6 +1845,7 @@
               "translate": "criteria.effects",
               "translatePlaceholder": "effect",
               "type": "map",
+              "resource": true,
               "button": "field",
               "values": {
                 "type": "object",
@@ -1837,6 +1860,7 @@
               "translate": "criteria.state",
               "translatePlaceholder": "block_state",
               "type": "map",
+              "resource": true,
               "values": {
                 "type": "string"
               },

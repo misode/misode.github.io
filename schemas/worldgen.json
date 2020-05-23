@@ -26,6 +26,7 @@
         "translate": "dimension",
         "translatePlaceholder": "dimension",
         "type": "map",
+        "resource": true,
         "help": true,
         "values": {
           "type": "object",
@@ -258,6 +259,7 @@
                       "translate": "generator.settings.block_states",
                       "translatePlaceholder": "block_state",
                       "type": "map",
+                      "resource": true,
                       "default": {},
                       "values": {
                         "type": "string"
@@ -284,6 +286,7 @@
                       "translate": "generator.settings.fluid_states",
                       "translatePlaceholder": "fluid_state",
                       "type": "map",
+                      "resource": true,
                       "default": {},
                       "values": {
                         "type": "string"
@@ -453,6 +456,7 @@
                       "translate": "generator.settings.structures",
                       "translatePlaceholder": "structure",
                       "type": "map",
+                      "resource": true,
                       "help": true,
                       "default": {},
                       "values": {
@@ -501,6 +505,7 @@
                       "translate": "generator.settings.structures",
                       "translatePlaceholder": "structure",
                       "type": "map",
+                      "resource": true,
                       "help": true,
                       "default": {},
                       "values": {

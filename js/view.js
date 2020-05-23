@@ -104,6 +104,7 @@ function generateString(data, struct) {
   let $el = $('#components').find('[data-type="string"]').clone();
   $el.attr('data-type', struct.type);
   $el.attr('data-index', struct.id);
+  $el.attr('data-resource', struct.resource);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   $el.find('input').val(data);
   if (struct.help) {
@@ -262,6 +263,7 @@ function generateMap(data, struct) {
   let $input = $el.find('input')
   let out;
   $el.attr('data-index', struct.id).attr('data-item-type', struct.values.type);
+  $el.attr('data-resource', struct.resource);
   $el.find('[data-name="1"]').attr('data-i18n', struct.translate);
   $el.find('[data-name="2"]').attr('data-i18n', struct.translate + '_add');
   if (struct.help) {

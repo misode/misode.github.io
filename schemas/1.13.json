@@ -66,6 +66,7 @@
         {
           "id": "name",
           "type": "string",
+          "resource": true,
           "translate": "entry.name",
           "require": [
             "minecraft:item",
@@ -394,6 +395,7 @@
         {
           "id": "effects",
           "type": "map",
+          "resource": true,
           "translate": "entity.status_effect",
           "values": {
             "type": "object",

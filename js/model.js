@@ -49,7 +49,6 @@ function loadGenerator(generator) {
 }
 
 function loadVersion(generator, version) {
-  console.warn(generator, version);
   return $.getJSON('../schemas/' + version + '.json', json => {
     structure = json.root || json.roots.find(e => e.id === generator);
     components = json.components;
@@ -287,6 +286,9 @@ function addToMap(el) {
   if (!isValidMapKey(key, node[map])) {
     return;
   }
+  if ($field.attr('data-resource')) {
+    key = fixResource(key)
+  }
   if (type === 'int' || type === 'float' || type === 'random' || type === 'range' || type === 'boundary') {
     node[map][key] = 0;
   } else if (type === 'boolean') {
@@ -413,6 +415,11 @@ function updateField(el) {
   } else if (type === 'boolean') {
     value = getBooleanValue(node[field], ($(el).val() === 'true'));
   }
+
+  if ($field.attr('data-resource')) {
+    value = fixResource(value)
+  }
+
   if (value === '') {
     delete node[field];
   } else {
@@ -422,6 +429,17 @@ function updateField(el) {
     node[field] = value;
   }
   invalidated();
+}
+
+function fixResource(value) {
+  const test = /^([a-z0-9_.-]*:)?[a-z0-9/_.-]+$/;
+  if (value.match(test) === null) {
+    value = value.toLowerCase();
+    if (value.match(test) === null) {
+      value = value.replace(/[^a-z0-9_.-]/g, '')
+    }
+  }
+  return value;
 }
 
 function updateRangeType(el) {
