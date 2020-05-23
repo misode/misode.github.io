@@ -119,6 +119,7 @@
                   "translate": "biome_source.type",
                   "translateValue": "biome_source.type",
                   "type": "enum",
+                  "help": true,
                   "filter": true,
                   "default": "minecraft:multi_noise",
                   "values": [
@@ -141,7 +142,7 @@
                 {
                   "id": "preset",
                   "translate": "biome_source.preset",
-                  "translateValue": "dimension",
+                  "translateValue": "biome_source.preset",
                   "type": "enum",
                   "unset": true,
                   "values": [
@@ -216,13 +217,15 @@
                   "id": "bedrock_roof_position",
                   "translate": "generator.settings.bedrock_roof_position",
                   "type": "int",
-                  "default": -10
+                  "default": -10,
+                  "help": true
                 },
                 {
                   "id": "bedrock_floor_position",
                   "translate": "generator.settings.bedrock_floor_position",
                   "type": "int",
-                  "default": 0
+                  "default": 0,
+                  "help": true
                 },
                 {
                   "id": "sea_level",
@@ -234,7 +237,8 @@
                   "id": "disable_mob_generation",
                   "translate": "generator.settings.disable_mob_generation",
                   "type": "boolean",
-                  "default": false
+                  "default": false,
+                  "help": true
                 },
                 {
                   "id": "default_block",
@@ -298,13 +302,15 @@
                       "id": "density_factor",
                       "translate": "generator.settings.noise.density_factor",
                       "type": "float",
-                      "default": 1
+                      "default": 1,
+                      "help": true
                     },
                     {
                       "id": "density_offset",
                       "translate": "generator.settings.noise.density_offset",
                       "type": "float",
-                      "default": -0.46875
+                      "default": -0.46875,
+                      "help": true
                     },
                     {
                       "id": "simplex_surface_noise",
@@ -322,7 +328,8 @@
                       "id": "island_noise_override",
                       "translate": "generator.settings.noise.island_noise_override",
                       "type": "boolean",
-                      "default": false
+                      "default": false,
+                      "help": true
                     },
                     {
                       "id": "amplified",
@@ -334,13 +341,15 @@
                       "id": "size_horizontal",
                       "translate": "generator.settings.noise.size_horizontal",
                       "type": "int",
-                      "default": 2
+                      "default": 2,
+                      "help": true
                     },
                     {
                       "id": "size_vertical",
                       "translate": "generator.settings.noise.size_vertical",
                       "type": "int",
-                      "default": 2
+                      "default": 2,
+                      "help": true
                     },
                     {
                       "id": "height",
@@ -534,7 +543,8 @@
               "id": "natural",
               "translate": "dimension.type.natural",
               "type": "boolean",
-              "default": true
+              "default": true,
+              "help": true
             },
             {
               "id": "shrunk",
@@ -547,12 +557,14 @@
               "id": "ambient_light",
               "translate": "dimension.type.ambient_light",
               "type": "float",
-              "default": 0
+              "default": 0,
+              "help": true
             },
             {
               "id": "fixed_time",
               "translate": "dimension.type.fixed_time",
-              "type": "int"
+              "type": "int",
+              "help": true
             },
             {
               "id": "has_skylight",
@@ -593,7 +605,8 @@
               "id": "altitude",
               "translate": "biome.parameters.altitude",
               "type": "float",
-              "default": 0
+              "default": 0,
+              "help": true
             },
             {
               "id": "weirdness",
@@ -632,13 +645,15 @@
           "id": "spacing",
           "translate": "structure.spacing",
           "type": "int",
-          "default": 10
+          "default": 10,
+          "help": true
         },
         {
           "id": "separation",
           "translate": "structure.separation",
           "type": "int",
-          "default": 10
+          "default": 8,
+          "help": true
         },
         {
           "id": "salt",
