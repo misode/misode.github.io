@@ -1,0 +1,21 @@
+{
+  "name": "generators",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack -p",
+    "start": "webpack-dev-server -d --content-base ./public"
+  },
+  "keywords": [],
+  "author": "Misode",
+  "license": "MIT",
+  "dependencies": {
+    "ts-loader": "^7.0.4",
+    "typescript": "^3.9.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
