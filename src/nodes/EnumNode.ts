@@ -1,7 +1,7 @@
 import { AbstractNode, NodeMods } from './AbstractNode'
 
 export class EnumNode extends AbstractNode<string> {
-  private options: string[]
+  protected options: string[]
 
   constructor(options: string[], mods?: NodeMods<string>) {
     super(mods)
