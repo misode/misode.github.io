@@ -12,7 +12,7 @@ export class DataModel {
 
   constructor(schema: RootNode) {
     this.schema = schema
-    this.data = schema.default
+    this.data = schema.default()
     this.listeners = []
   }
 
@@ -32,7 +32,18 @@ export class DataModel {
       }
       node = node[index]
     }
-    node[path.last()] = value
+
+    console.log('Set', path.toString(), JSON.stringify(value))
+
+    if (value === undefined) {
+      if (typeof path.last() === 'number') {
+        node.splice(path.last(), 1)
+      } else {
+        delete node[path.last()]
+      }
+    } else {
+      node[path.last()] = value
+    }
 
     this.invalidate()
   }

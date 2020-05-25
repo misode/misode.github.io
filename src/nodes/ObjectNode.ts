@@ -1,4 +1,4 @@
-import { AbstractNode, NodeChildren, NodeMods } from './AbstractNode'
+import { AbstractNode, NodeChildren, NodeMods, RenderOptions } from './AbstractNode'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 
@@ -27,12 +27,15 @@ export class ObjectNode extends AbstractNode<IObject> {
     return res;
   }
 
-  render(path: Path, value: IObject, view: TreeView) {
+  render(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
     if (value === undefined) return ``
-    return this.wrap(path, view, `<span>${path.last()}:</span><div style="padding-left:8px">
+    return this.wrap(path, view, `
+    ${options?.hideLabel ? `` : `<label>${path.last()}:</label>
+    <div style="padding-left:8px">
+    `}
       ${Object.keys(this.fields).map(f => {
         return this.fields[f].render(path.push(f), value[f], view)
       }).join('')}
-    </div>`)
+    ${options?.hideLabel ? `` : `</div>`}`)
   }
 }

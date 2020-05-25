@@ -31,6 +31,12 @@ export class TreeView implements ModelListener {
     return id
   }
 
+  registerClick(callback: (el: Element) => void): string {
+    return this.register(el => {
+      el.addEventListener('click', _ => callback(el))
+    })
+  }
+
   render() {
     this.target.innerHTML = this.model.schema.render(new Path(), this.model.data, this)
     for (const id in this.registry) {

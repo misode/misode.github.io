@@ -5,6 +5,7 @@ import { StringNode } from '../nodes/StringNode'
 import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { SourceView } from '../view/SourceView'
+import { ListNode } from '../nodes/ListNode'
 
 const EntityCollection = ['sheep', 'pig']
 
@@ -15,9 +16,24 @@ const predicateTree = new RootNode('predicate', {
   predicate: new ObjectNode({
     type: new EnumNode(EntityCollection),
     nbt: new StringNode()
-  })
+  }),
+  effects: new ListNode(
+    new ObjectNode({
+      type: new EnumNode(EntityCollection),
+      nbt: new StringNode()
+    }, {
+      default: () => ({
+        type: 'sheep'
+      })
+    })
+  )
 }, {
-  default: () => ({ condition: 'foo', predicate: { nbt: 'hi' } })
+  default: () => ({
+    condition: 'foo',
+    predicate: {
+      nbt: 'hi'
+    }
+  })
 });
 
 const model = new DataModel(predicateTree)

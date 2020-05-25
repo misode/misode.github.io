@@ -1,4 +1,4 @@
-import { AbstractNode, NodeMods } from './AbstractNode'
+import { AbstractNode, NodeMods, RenderOptions } from './AbstractNode'
 import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
@@ -15,9 +15,10 @@ export class EnumNode extends AbstractNode<string> {
     model.set(path, el.querySelector('select')?.value)
   }
 
-  render(path: Path, value: string, view: TreeView) {
+  render(path: Path, value: string, view: TreeView, options?: RenderOptions) {
     const id = view.register(el => (el as HTMLInputElement).value = value)
-    return this.wrap(path, view, `<span>${path.last()}</span>
+    return this.wrap(path, view, `
+    ${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
     <select data-id=${id}>
       ${this.options.map(o => `<option value="${o}">${o}</option>`).join('')}
     </select>`)

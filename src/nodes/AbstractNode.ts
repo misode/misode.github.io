@@ -4,8 +4,13 @@ import { TreeView } from "../view/TreeView"
 
 export interface INode<T> {
   setParent: (parent: INode<any>) => void
+  default: () => T | null
   transform: (value: T) => any
-  render: (path: Path, value: T, view: TreeView) => string
+  render: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
+}
+
+export type RenderOptions = {
+  hideLabel?: boolean
 }
 
 export type NodeChildren = {
@@ -19,11 +24,11 @@ export type NodeMods<T> = {
 
 export abstract class AbstractNode<T> implements INode<T> {
   parent?: INode<any>
-  default?: T
+  default: () => T | null = () => null
   transformMod = (v: T) => v
 
   constructor(mods?: NodeMods<T>) {
-    if (mods?.default) this.default = mods.default()
+    if (mods?.default) this.default = mods.default
     if (mods?.transform) this.transformMod = mods.transform
   }
 
@@ -39,7 +44,10 @@ export abstract class AbstractNode<T> implements INode<T> {
   }
 
   mounted(el: Element, path: Path, view: TreeView) {
-    el.addEventListener('change', evt => this.updateModel(el, path, view.model))
+    el.addEventListener('change', evt => {
+      this.updateModel(el, path, view.model)
+      evt.stopPropagation()
+    })
   }
 
   updateModel(el: Element, path: Path, model: DataModel) {}
@@ -48,5 +56,5 @@ export abstract class AbstractNode<T> implements INode<T> {
     return this.transformMod(value)
   }
 
-  abstract render(path: Path, value: T, view: TreeView): string  
+  abstract render(path: Path, value: T, view: TreeView, options?: any): string  
 }
