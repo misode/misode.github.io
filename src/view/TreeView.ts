@@ -1,4 +1,4 @@
-import { DataModel } from "../model/DataModel"
+import { DataModel, ModelListener } from "../model/DataModel"
 import { Path } from "../model/Path"
 
 type Registry = {
@@ -14,12 +14,15 @@ export function getId() {
   return Array.from(arr, dec2hex).join('')
 }
 
-export class TreeView {
+export class TreeView implements ModelListener {
   model: DataModel
+  target: HTMLElement
   registry: Registry = {}
 
-  constructor(model: DataModel) {
+  constructor(model: DataModel, target: HTMLElement) {
     this.model = model
+    this.target = target
+    model.addListener(this)
   }
 
   register(callback: (el: Element) => void): string {
@@ -28,11 +31,15 @@ export class TreeView {
     return id
   }
 
-  render(target: HTMLElement) {
-    target.innerHTML = this.model.schema.render(new Path(), this.model.data, this)
+  render() {
+    this.target.innerHTML = this.model.schema.render(new Path(), this.model.data, this)
     for (const id in this.registry) {
-      const element = target.querySelector(`[data-id="${id}"]`)
+      const element = this.target.querySelector(`[data-id="${id}"]`)
       if (element !== null) this.registry[id](element)
     }
+  }
+
+  invalidated(model: DataModel) {
+    this.render()
   }
 }

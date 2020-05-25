@@ -4,6 +4,7 @@
     "module": "esnext",
     "strict": true,
     "esModuleInterop": true,
+    "downlevelIteration": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": [

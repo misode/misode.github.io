@@ -1,7 +1,7 @@
 
 type PathElement = (string | number)
 
-export class Path {
+export class Path implements Iterable<PathElement> {
   private arr: PathElement[]
 
   constructor(arr?: PathElement[]) {
@@ -22,5 +22,15 @@ export class Path {
 
   copy(): Path {
     return new Path([...this.arr])
+  }
+
+  toString(): string {
+    return `[${this.arr.map(e => e.toString()).join(', ')}]`
+  }
+
+  *[Symbol.iterator]() {
+    for (const e of this.arr) {
+      yield e
+    }
   }
 }

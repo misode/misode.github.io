@@ -1,14 +1,20 @@
-import { DataModel } from "../model/DataModel"
-import { Path } from "../model/Path"
+import { DataModel, ModelListener } from "../model/DataModel"
 
-export class SourceView {
+export class SourceView implements ModelListener {
   model: DataModel
+  target: HTMLElement
 
-  constructor(model: DataModel) {
+  constructor(model: DataModel, target: HTMLElement) {
     this.model = model
+    this.target = target
+    model.addListener(this)
   }
 
-  render(target: HTMLElement) {
-    target.textContent = this.model.schema.transform(this.model.data)
+  render() {
+    this.target.textContent = this.model.schema.transform(this.model.data)
+  }
+
+  invalidated() {
+    this.render()
   }
 }

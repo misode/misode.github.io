@@ -33,7 +33,6 @@ export abstract class AbstractNode<T> implements INode<T> {
 
   wrap(path: Path, view: TreeView, renderResult: string): string {
     const id = view.register(el => {
-      console.log(`Callback ${id} -> ${path.last()}`)
       this.mounted(el, path, view)
     })
     return `<div data-id="${id}">${renderResult}</div>`

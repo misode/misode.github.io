@@ -21,8 +21,8 @@ const predicateTree = new RootNode('predicate', {
 });
 
 const model = new DataModel(predicateTree)
-const treeView = new TreeView(model)
-const sourceView = new SourceView(model)
 
-treeView.render(document!.getElementById('view')!)
-sourceView.render(document!.getElementById('source')!)
+new TreeView(model, document!.getElementById('view')!)
+new SourceView(model, document!.getElementById('source')!)
+
+model.invalidate()

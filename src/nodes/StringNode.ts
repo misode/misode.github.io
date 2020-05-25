@@ -9,6 +9,7 @@ export class StringNode extends AbstractNode<string> {
   }
 
   updateModel(el: Element, path: Path, model: DataModel) {
+    model.set(path, el.querySelector('input')?.value)
   }
 
   render(path: Path, value: string, view: TreeView) {
