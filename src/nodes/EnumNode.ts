@@ -1,5 +1,6 @@
 import { AbstractNode, NodeMods } from './AbstractNode'
 import { DataModel } from '../model/DataModel'
+import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 
 export class EnumNode extends AbstractNode<string> {
@@ -13,8 +14,8 @@ export class EnumNode extends AbstractNode<string> {
   updateModel(el: Element, path: Path, model: DataModel) {
   }
 
-  render(path: Path, value: string, model: DataModel) {
-    return this.wrap(path, model, `<span>${path.last()}</span>
+  render(path: Path, value: string, view: TreeView) {
+    return this.wrap(path, view, `<span>${path.last()}</span>
     <select value="${value}">
       ${this.options.map(o => `<option>${o}</option>`)}
     </select>`)

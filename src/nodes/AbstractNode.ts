@@ -1,10 +1,11 @@
-import { DataModel, getId } from "../model/DataModel"
+import { DataModel } from "../model/DataModel"
 import { Path } from "../model/Path"
+import { TreeView } from "../view/TreeView"
 
 export interface INode<T> {
   setParent: (parent: INode<any>) => void
   transform: (value: T) => any
-  render: (path: Path, value: T, model: DataModel) => string
+  render: (path: Path, value: T, view: TreeView) => string
 }
 
 export type NodeChildren = {
@@ -30,17 +31,16 @@ export abstract class AbstractNode<T> implements INode<T> {
     this.parent = parent
   }
 
-  wrap(path: Path, model: DataModel, renderResult: string): string {
-    const id = getId()
-    model.register(id, el => {
+  wrap(path: Path, view: TreeView, renderResult: string): string {
+    const id = view.register(el => {
       console.log(`Callback ${id} -> ${path.last()}`)
-      this.mounted(el, path, model)
+      this.mounted(el, path, view)
     })
     return `<div data-id="${id}">${renderResult}</div>`
   }
 
-  mounted(el: Element, path: Path, model: DataModel) {
-    el.addEventListener('change', evt => this.updateModel(el, path, model))
+  mounted(el: Element, path: Path, view: TreeView) {
+    el.addEventListener('change', evt => this.updateModel(el, path, view.model))
   }
 
   updateModel(el: Element, path: Path, model: DataModel) {}
@@ -49,5 +49,5 @@ export abstract class AbstractNode<T> implements INode<T> {
     return this.transformMod(value)
   }
 
-  abstract render(path: Path, value: T, model: DataModel): string  
+  abstract render(path: Path, value: T, view: TreeView): string  
 }

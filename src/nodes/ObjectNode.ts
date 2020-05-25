@@ -1,5 +1,5 @@
 import { AbstractNode, NodeChildren, NodeMods } from './AbstractNode'
-import { DataModel } from '../model/DataModel'
+import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 
 export interface IObject {
@@ -27,11 +27,11 @@ export class ObjectNode extends AbstractNode<IObject> {
     return res;
   }
 
-  render(path: Path, value: IObject, model: DataModel) {
+  render(path: Path, value: IObject, view: TreeView) {
     if (value === undefined) return ``
-    return this.wrap(path, model, `<span>${path.last()}:</span><div style="padding-left:8px">
+    return this.wrap(path, view, `<span>${path.last()}:</span><div style="padding-left:8px">
       ${Object.keys(this.fields).map(f => {
-        return this.fields[f].render(path.push(f), value[f], model)
+        return this.fields[f].render(path.push(f), value[f], view)
       }).join('')}
     </div>`)
   }
