@@ -6,6 +6,7 @@ import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { SourceView } from '../view/SourceView'
 import { ListNode } from '../nodes/ListNode'
+import { BooleanNode } from '../nodes/BooleanNode'
 
 const EntityCollection = ['sheep', 'pig']
 
@@ -15,7 +16,8 @@ const predicateTree = new RootNode('predicate', {
   }),
   predicate: new ObjectNode({
     type: new EnumNode(EntityCollection),
-    nbt: new StringNode()
+    nbt: new StringNode(),
+    test: new BooleanNode()
   }),
   effects: new ListNode(
     new ObjectNode({
