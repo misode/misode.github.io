@@ -7,40 +7,39 @@ export interface INode<T> {
   default: () => T | null
   transform: (value: T) => any
   render: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
+  renderRaw: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
+}
+
+export interface StateNode<T> extends INode<T> {
+  getState: (el: Element) => T
 }
 
 export type RenderOptions = {
   hideLabel?: boolean
+  syncModel?: boolean
 }
 
 export type NodeChildren = {
   [name: string]: INode<any>
 }
 
-export type NodeMods<T> = {
+export interface NodeMods<T> {
   default?: () => T
   transform?: (value: T) => any
 }
 
 export abstract class AbstractNode<T> implements INode<T> {
   parent?: INode<any>
-  default: () => T | null = () => null
-  transformMod = (v: T) => v
+  defaultMod: () => T | null
+  transformMod: (v: T) => T
 
-  constructor(mods?: NodeMods<T>) {
-    if (mods?.default) this.default = mods.default
-    if (mods?.transform) this.transformMod = mods.transform
+  constructor(mods?: NodeMods<T>, def?: () => T | null) {
+    this.defaultMod = mods?.default ? mods.default : def ? def : () => null
+    this.transformMod = mods?.transform ? mods.transform : (v: T) => v
   }
 
   setParent(parent: INode<any>) {
     this.parent = parent
-  }
-
-  wrap(path: Path, view: TreeView, renderResult: string): string {
-    const id = view.register(el => {
-      this.mounted(el, path, view)
-    })
-    return `<div data-id="${id}">${renderResult}</div>`
   }
 
   mounted(el: Element, path: Path, view: TreeView) {
@@ -52,9 +51,20 @@ export abstract class AbstractNode<T> implements INode<T> {
 
   updateModel(el: Element, path: Path, model: DataModel) {}
 
+  default(): T | null {
+    return this.defaultMod()
+  }
+
   transform(value: T) {
     return this.transformMod(value)
   }
 
-  abstract render(path: Path, value: T, view: TreeView, options?: any): string  
+  render(path: Path, value: T, view: TreeView, options?: RenderOptions): string {
+    const id = view.register(el => {
+      this.mounted(el, path, view)
+    })
+    return `<div data-id="${id}">${this.renderRaw(path, value, view, options)}</div>`
+  }
+
+  abstract renderRaw(path: Path, value: T, view: TreeView, options?: RenderOptions): string
 }

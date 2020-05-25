@@ -2,7 +2,7 @@ import { AbstractNode, NodeChildren, NodeMods, RenderOptions } from './AbstractN
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 
-export interface IObject {
+export type IObject = {
   [name: string]: any
 }
 
@@ -10,7 +10,7 @@ export class ObjectNode extends AbstractNode<IObject> {
   protected fields: NodeChildren
 
   constructor(fields: NodeChildren, mods?: NodeMods<IObject>) {
-    super(mods)
+    super(mods, () => ({}))
     this.fields = fields
     Object.values(fields).forEach(child => {
       child.setParent(this)
@@ -27,15 +27,13 @@ export class ObjectNode extends AbstractNode<IObject> {
     return res;
   }
 
-  render(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
+  renderRaw(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
     if (value === undefined) return ``
-    return this.wrap(path, view, `
-    ${options?.hideLabel ? `` : `<label>${path.last()}:</label>
-    <div style="padding-left:8px">
-    `}
+    return `${options?.hideLabel ? `` : `<label>${path.last()}:</label>
+    <div style="padding-left:8px">`}
       ${Object.keys(this.fields).map(f => {
         return this.fields[f].render(path.push(f), value[f], view)
       }).join('')}
-    ${options?.hideLabel ? `` : `</div>`}`)
+    ${options?.hideLabel ? `` : `</div>`}`
   }
 }
