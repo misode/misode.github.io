@@ -1,4 +1,6 @@
 import { AbstractNode, NodeChildren, NodeMods } from './AbstractNode'
+import { DataModel } from '../model/DataModel'
+import { Path } from '../model/Path'
 
 export interface IObject {
   [name: string]: any
@@ -15,10 +17,6 @@ export class ObjectNode extends AbstractNode<IObject> {
     })
   }
 
-  getFields() {
-    return this.fields
-  }
-
   transform(value: IObject) {
     if (value === undefined) return undefined
     value = value || {}
@@ -29,12 +27,12 @@ export class ObjectNode extends AbstractNode<IObject> {
     return res;
   }
 
-  render(field: string, value: IObject) {
+  render(path: Path, value: IObject, model: DataModel) {
     if (value === undefined) return ``
-    return `<span>${field}:</span><div style="padding-left:8px">
+    return this.wrap(path, model, `<span>${path.last()}:</span><div style="padding-left:8px">
       ${Object.keys(this.fields).map(f => {
-        return this.fields[f].render(f, value[f])
-      }).join('<br>')}
-    </div>`
+        return this.fields[f].render(path.push(f), value[f], model)
+      }).join('')}
+    </div>`)
   }
 }

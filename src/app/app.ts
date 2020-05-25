@@ -2,6 +2,8 @@ import { RootNode } from '../nodes/RootNode'
 import { EnumNode } from '../nodes/EnumNode'
 import { ObjectNode } from '../nodes/ObjectNode'
 import { StringNode } from '../nodes/StringNode'
+import { DataModel } from '../model/DataModel'
+
 
 const EntityCollection = ['sheep', 'pig']
 
@@ -13,14 +15,12 @@ const predicateTree = new RootNode('predicate', {
     type: new EnumNode(EntityCollection, {}),
     nbt: new StringNode()
   })
+}, {
+  default: () => ({ condition: 'foo', predicate: { nbt: 'hi' } })
 });
 
-let dummyData = {
-  condition: 'foo',
-  predicate: {
-    nbt: 'hi'
-  }
-}
+const model = new DataModel(predicateTree)
 
-document!.getElementById('view')!.innerHTML = predicateTree.render('', dummyData)
-document!.getElementById('source')!.textContent = predicateTree.transform(dummyData)
+model.render(document!.getElementById('view')!)
+
+// document!.getElementById('source')!.textContent = predicateTree.transform(dummyData)
