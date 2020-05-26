@@ -8,6 +8,7 @@ import { SourceView } from '../view/SourceView'
 import { ListNode } from '../nodes/ListNode'
 import { BooleanNode } from '../nodes/BooleanNode'
 import { MapNode } from '../nodes/MapNode'
+import { NumberNode } from '../nodes/NumberNode'
 
 const EntityCollection = ['sheep', 'pig']
 
@@ -15,6 +16,7 @@ const predicateTree = new RootNode('predicate', {
   condition: new EnumNode(['foo', 'bar'], {
     transform: (s: string) => (s === 'foo') ? {test: 'baz'} : s
   }),
+  number: new NumberNode({integer: false, min: 0}),
   predicate: new ObjectNode({
     type: new EnumNode(EntityCollection),
     nbt: new StringNode(),

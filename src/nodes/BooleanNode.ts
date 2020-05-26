@@ -10,7 +10,7 @@ export class BooleanNode extends AbstractNode<boolean> {
   force: boolean
 
   constructor(mods?: BooleanNodeMods) {
-    super(mods, () => false)
+    super(() => false, mods)
     this.force = (mods?.force === true)
   }
 

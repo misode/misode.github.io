@@ -4,7 +4,7 @@ import { TreeView } from "../view/TreeView"
 
 export interface INode<T> {
   setParent: (parent: INode<any>) => void
-  default: () => T | null
+  default: () => T
   transform: (value: T) => any
   render: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
   renderRaw: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
@@ -30,11 +30,11 @@ export interface NodeMods<T> {
 
 export abstract class AbstractNode<T> implements INode<T> {
   parent?: INode<any>
-  defaultMod: () => T | null
+  defaultMod: () => T
   transformMod: (v: T) => T
 
-  constructor(mods?: NodeMods<T>, def?: () => T | null) {
-    this.defaultMod = mods?.default ? mods.default : def ? def : () => null
+  constructor(def: () => T, mods?: NodeMods<T>) {
+    this.defaultMod = mods?.default ? mods.default : def
     this.transformMod = mods?.transform ? mods.transform : (v: T) => v
   }
 
@@ -51,7 +51,7 @@ export abstract class AbstractNode<T> implements INode<T> {
 
   updateModel(el: Element, path: Path, model: DataModel) {}
 
-  default(): T | null {
+  default(): T {
     return this.defaultMod()
   }
 

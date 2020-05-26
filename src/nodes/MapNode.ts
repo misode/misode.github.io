@@ -13,7 +13,7 @@ export class MapNode extends AbstractNode<IMap> {
   protected values: INode<any>
 
   constructor(keys: StateNode<string>, values: INode<any>, mods?: NodeMods<IMap>) {
-    super(mods, () => ({}))
+    super(() => ({}), mods)
     this.keys = keys
     this.values = values
   }

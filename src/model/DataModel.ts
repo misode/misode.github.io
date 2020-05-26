@@ -21,6 +21,7 @@ export class DataModel {
   }
 
   invalidate() {
+    console.log(this.data)
     this.listeners.forEach(listener => listener.invalidated(this))
   }
 
@@ -35,7 +36,7 @@ export class DataModel {
 
     console.log('Set', path.toString(), JSON.stringify(value))
 
-    if (value === undefined) {
+    if (value === undefined || (typeof value === 'number' && isNaN(value))) {
       if (typeof path.last() === 'number') {
         node.splice(path.last(), 1)
       } else {
