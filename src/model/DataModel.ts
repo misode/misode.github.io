@@ -21,7 +21,6 @@ export class DataModel {
   }
 
   invalidate() {
-    console.log(this.data)
     this.listeners.forEach(listener => listener.invalidated(this))
   }
 

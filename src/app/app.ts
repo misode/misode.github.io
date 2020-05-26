@@ -9,6 +9,7 @@ import { ListNode } from '../nodes/ListNode'
 import { BooleanNode } from '../nodes/BooleanNode'
 import { MapNode } from '../nodes/MapNode'
 import { NumberNode } from '../nodes/NumberNode'
+import { RangeNode } from '../nodes/custom/RangeNode'
 
 const EntityCollection = ['sheep', 'pig']
 
@@ -17,15 +18,15 @@ const predicateTree = new RootNode('predicate', {
     transform: (s: string) => (s === 'foo') ? {test: 'baz'} : s
   }),
   number: new NumberNode({integer: false, min: 0}),
+  range: new RangeNode(),
   predicate: new ObjectNode({
     type: new EnumNode(EntityCollection),
     nbt: new StringNode(),
     test: new BooleanNode(),
     recipes: new MapNode(
       new StringNode(),
-      new ObjectNode({
-        duration: new StringNode(),
-        flag: new BooleanNode()
+      new RangeNode({
+        default: (v) => RangeNode.isExact(v) ? 2 : v
       })
     )
   }),

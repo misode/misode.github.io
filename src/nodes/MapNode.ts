@@ -1,5 +1,4 @@
 import { AbstractNode, NodeMods, INode, StateNode } from './AbstractNode'
-import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 import { IObject } from './ObjectNode'
@@ -13,7 +12,9 @@ export class MapNode extends AbstractNode<IMap> {
   protected values: INode<any>
 
   constructor(keys: StateNode<string>, values: INode<any>, mods?: NodeMods<IMap>) {
-    super(() => ({}), mods)
+    super(mods, {
+      default: () => ({})
+    })
     this.keys = keys
     this.values = values
   }

@@ -8,7 +8,9 @@ export class ListNode extends AbstractNode<IObject[]> {
   protected children: INode<any>
 
   constructor(values: INode<any>, mods?: NodeMods<IObject[]>) {
-    super(() => [], mods)
+    super(mods, {
+      default: () => []
+    })
     this.children = values
   }
 

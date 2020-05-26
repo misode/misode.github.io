@@ -5,7 +5,7 @@ import { TreeView } from '../view/TreeView'
 
 export class StringNode extends AbstractNode<string> implements StateNode<string> {
   constructor(mods?: NodeMods<string>) {
-    super(() => '', mods)
+    super(mods)
   }
 
   getState(el: Element) {

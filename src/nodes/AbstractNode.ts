@@ -2,9 +2,12 @@ import { DataModel } from "../model/DataModel"
 import { Path } from "../model/Path"
 import { TreeView } from "../view/TreeView"
 
+export type IDefault<T> = (value?: T) => T | undefined
+export type ITransform<T> = (value: T) => any
+
 export interface INode<T> {
   setParent: (parent: INode<any>) => void
-  default: () => T
+  default: IDefault<T>
   transform: (value: T) => any
   render: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
   renderRaw: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
@@ -24,18 +27,20 @@ export type NodeChildren = {
 }
 
 export interface NodeMods<T> {
-  default?: () => T
+  default?: IDefault<T>
   transform?: (value: T) => any
 }
 
 export abstract class AbstractNode<T> implements INode<T> {
   parent?: INode<any>
-  defaultMod: () => T
-  transformMod: (v: T) => T
+  defaultMod: IDefault<T>
+  transformMod: ITransform<T>
 
-  constructor(def: () => T, mods?: NodeMods<T>) {
-    this.defaultMod = mods?.default ? mods.default : def
-    this.transformMod = mods?.transform ? mods.transform : (v: T) => v
+  constructor(mods?: NodeMods<T>, defaultMods?: NodeMods<T>, ) {
+    this.defaultMod = mods?.default ? mods.default :
+      defaultMods?.default ? defaultMods.default : (v) => v
+    this.transformMod = mods?.transform ? mods.transform :
+      defaultMods?.transform ? defaultMods.transform : (v) => v
   }
 
   setParent(parent: INode<any>) {
@@ -51,8 +56,8 @@ export abstract class AbstractNode<T> implements INode<T> {
 
   updateModel(el: Element, path: Path, model: DataModel) {}
 
-  default(): T {
-    return this.defaultMod()
+  default(value?: T) {
+    return this.defaultMod(value)
   }
 
   transform(value: T) {

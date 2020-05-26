@@ -31,13 +31,21 @@ export class TreeView implements ModelListener {
     return id
   }
 
-  registerClick(callback: (el: Element) => void): string {
+  registerEvent(type: string, callback: (el: Element) => void): string {
     return this.register(el => {
-      el.addEventListener('click', evt => {
+      el.addEventListener(type, evt => {
         callback(el)
         evt.stopPropagation()
       })
     })
+  }
+
+  registerChange(callback: (el: Element) => void): string {
+    return this.registerEvent('change', callback)
+  }
+
+  registerClick(callback: (el: Element) => void): string {
+    return this.registerEvent('click', callback)
   }
 
   render() {

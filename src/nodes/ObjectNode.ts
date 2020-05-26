@@ -10,7 +10,9 @@ export class ObjectNode extends AbstractNode<IObject> {
   protected fields: NodeChildren
 
   constructor(fields: NodeChildren, mods?: NodeMods<IObject>) {
-    super(() => ({}), mods)
+    super(mods, {
+      default: () => ({})
+    })
     this.fields = fields
     Object.values(fields).forEach(child => {
       child.setParent(this)

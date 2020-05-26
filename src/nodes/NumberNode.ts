@@ -15,8 +15,9 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
   max: number
 
   constructor(mods?: NumberNodeMods) {
-    super(() => 0, mods)
-    console.log(mods)
+    super(mods, {
+      default: () => 0
+    })
     this.integer = mods?.integer ? mods.integer : false
     this.min = mods?.min !== undefined ? mods.min : -Infinity
     this.max = mods?.max !== undefined ? mods.max : Infinity
@@ -25,7 +26,6 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
   getState(el: Element) {
     const value = el.querySelector('input')!.value
     const parsed = this.integer ? parseInt(value) : parseFloat(value)
-    console.log(this.min)
     if (parsed < this.min) return this.min
     if (parsed > this.max) return this.max
     return parsed
