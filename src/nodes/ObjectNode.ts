@@ -21,7 +21,7 @@ export class ObjectNode extends AbstractNode<IObject> {
 
   transform(path: Path, value: IObject) {
     if (value === undefined) return undefined
-    value = value || {}
+    value = value ?? {}
     let res: any = {}
     Object.keys(this.fields).forEach(f =>
       res[f] = this.fields[f].transform(path.push(f), value[f])

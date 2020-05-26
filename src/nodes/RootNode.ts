@@ -12,7 +12,7 @@ export class RootNode extends ObjectNode {
   }
 
   render(path: Path, value: IObject, view: TreeView) {
-    value = value || {}
+    value = value ?? {}
     return `<div>
       ${Object.keys(this.fields).map(f => {
         return this.fields[f].render(path.push(f), value[f], view)

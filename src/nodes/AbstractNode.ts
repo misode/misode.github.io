@@ -44,10 +44,10 @@ export abstract class AbstractNode<T> implements INode<T> {
   forceMod: IForce
 
   constructor(mods?: NodeMods<T>) {
-    this.defaultMod = mods?.default ? mods.default : (v) => v
-    this.transformMod = mods?.transform ? mods.transform : (v) => v
-    this.enableMod = mods?.enable ? mods.enable : () => true
-    this.forceMod = mods?.force ? mods.force : () => false
+    this.defaultMod = mods?.default ?? ((v) => v)
+    this.transformMod = mods?.transform ?? ((v) => v)
+    this.enableMod = mods?.enable ?? (() => true)
+    this.forceMod = mods?.force ?? (() => false)
   }
 
   setParent(parent: INode<any>) {

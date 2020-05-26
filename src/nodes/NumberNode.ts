@@ -18,9 +18,9 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
     super({
       default: () => 0,
       ...mods})
-    this.integer = mods?.integer ? mods.integer : false
-    this.min = mods?.min !== undefined ? mods.min : -Infinity
-    this.max = mods?.max !== undefined ? mods.max : Infinity
+    this.integer = mods?.integer ?? false
+    this.min = mods?.min ?? -Infinity
+    this.max = mods?.max ?? Infinity
   }
 
   getState(el: Element) {
@@ -37,6 +37,6 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
 
   renderRaw(path: Path, value: number, view: TreeView, options?: RenderOptions) {
     return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
-      <input value="${value === undefined ? '' : value}"></input>`
+      <input value="${value ?? ''}"></input>`
   }
 }

@@ -20,7 +20,7 @@ export class MapNode extends AbstractNode<IMap> {
   }
 
   renderRaw(path: Path, value: IMap, view: TreeView) {
-    value = value || []
+    value = value ?? []
     const button = view.registerClick(el => {
       const key = this.keys.getState(el.parentElement!)
       view.model.set(path.push(key), this.values.default())

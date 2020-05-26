@@ -7,7 +7,7 @@ export class Path implements Iterable<PathElement> {
   model?: DataModel
 
   constructor(arr?: PathElement[], model?: DataModel) {
-    this.arr = arr || []
+    this.arr = arr ?? []
     this.model = model
   }
 

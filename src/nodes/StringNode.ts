@@ -12,7 +12,7 @@ export class StringNode extends AbstractNode<string> implements StateNode<string
 
   constructor(mods?: StringNodeMods) {
     super(mods)
-    this.allowEmpty = (mods?.allowEmpty === true)
+    this.allowEmpty = mods?.allowEmpty ?? false
   }
 
   getState(el: Element) {
@@ -26,6 +26,6 @@ export class StringNode extends AbstractNode<string> implements StateNode<string
 
   renderRaw(path: Path, value: string, view: TreeView, options?: RenderOptions) {
     return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
-      <input value="${value || ''}"></input>`
+      <input value="${value ?? ''}"></input>`
   }
 } 
