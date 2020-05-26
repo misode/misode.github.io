@@ -6,8 +6,8 @@ import { Path } from '../model/Path'
 export class EnumNode extends AbstractNode<string> implements StateNode<string> {
   protected options: string[]
 
-  constructor(options: string[], mods?: NodeMods<string>) {
-    super(mods)
+  constructor(options: string[], mods?: NodeMods<string> | string) {
+    super(typeof mods === 'string' ? {default: () => mods} : mods)
     this.options = options
   }
 

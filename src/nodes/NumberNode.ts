@@ -15,9 +15,9 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
   max: number
 
   constructor(mods?: NumberNodeMods) {
-    super(mods, {
-      default: () => 0
-    })
+    super({
+      default: () => 0,
+      ...mods})
     this.integer = mods?.integer ? mods.integer : false
     this.min = mods?.min !== undefined ? mods.min : -Infinity
     this.max = mods?.max !== undefined ? mods.max : Infinity

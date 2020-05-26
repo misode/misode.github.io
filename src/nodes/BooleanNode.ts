@@ -3,16 +3,16 @@ import { Path } from "../model/Path";
 import { TreeView } from "../view/TreeView";
 
 export interface BooleanNodeMods extends NodeMods<boolean> {
-  force: boolean
+  force?: boolean
 }
 
 export class BooleanNode extends AbstractNode<boolean> {
   force: boolean
 
   constructor(mods?: BooleanNodeMods) {
-    super(mods, {
-      default: () => false
-    })
+    super({
+      default: () => false,
+      ...mods})
     this.force = (mods?.force === true)
   }
 
