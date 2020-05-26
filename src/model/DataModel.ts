@@ -1,5 +1,6 @@
 import { RootNode } from "../nodes/RootNode"
 import { Path } from "./Path"
+import { INode } from "../nodes/AbstractNode"
 
 export interface ModelListener {
   invalidated(model: DataModel): void
@@ -7,10 +8,10 @@ export interface ModelListener {
 
 export class DataModel {
   data: any
-  schema: RootNode
+  schema: INode<any>
   listeners: ModelListener[]
 
-  constructor(schema: RootNode) {
+  constructor(schema: INode<any>) {
     this.schema = schema
     this.data = schema.default()
     this.listeners = []

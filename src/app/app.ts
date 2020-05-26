@@ -1,61 +1,31 @@
-import { RootNode } from '../nodes/RootNode'
-import { EnumNode } from '../nodes/EnumNode'
-import { ObjectNode } from '../nodes/ObjectNode'
-import { StringNode } from '../nodes/StringNode'
 import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { SourceView } from '../view/SourceView'
-import { ListNode } from '../nodes/ListNode'
-import { BooleanNode } from '../nodes/BooleanNode'
-import { MapNode } from '../nodes/MapNode'
-import { NumberNode } from '../nodes/NumberNode'
-import { RangeNode } from '../nodes/custom/RangeNode'
-import { ResourceNode } from '../nodes/custom/ResourceNode'
+import { PredicateSchema } from '../schemas/PredicateSchema'
+import { SandboxSchema } from '../schemas/SandboxSchema'
 
-const EntityCollection = ['sheep', 'pig']
+const predicateModel = new DataModel(PredicateSchema)
+const sandboxModel = new DataModel(SandboxSchema)
 
-const predicateTree = new RootNode('predicate', {
-  condition: new EnumNode(['foo', 'bar'], {
-    default: () => 'bar',
-    transform: (s: string) => (s === 'foo') ? {test: 'baz'} : s
-  }),
-  number: new NumberNode({integer: false, min: 0}),
-  range: new RangeNode({
-    enable: (path) => path.push('condition').get() === 'foo'
-  }),
-  predicate: new ObjectNode({
-    type: new EnumNode(EntityCollection),
-    nbt: new ResourceNode({
-      default: (v) => "hahaha"
-    }),
-    test: new BooleanNode({force: () => true}),
-    recipes: new MapNode(
-      new StringNode(),
-      new RangeNode({
-        default: (v) => RangeNode.isExact(v) ? 2 : v
-      })
-    )
-  }),
-  effects: new ListNode(
-    new ObjectNode({
-      type: new EnumNode(EntityCollection),
-      nbt: new StringNode()
-    }, {
-      default: () => ({
-        type: 'sheep'
-      })
-    })
-  )
-}, {
-  default: () => ({
-    condition: 'foo',
-    predicate: {
-      nbt: 'hi'
-    }
-  })
-});
+let model = predicateModel
 
-const model = new DataModel(predicateTree)
+const modelSelector = document.createElement('select')
+modelSelector.value = 'predicate'
+modelSelector.innerHTML = `
+  <option value="predicate">Predicate</option>
+  <option value="sandbox">Sandbox</option>`
+modelSelector.addEventListener('change', evt => {
+  console.log("hello?")
+  if (modelSelector.value === 'sandbox') {
+    model = sandboxModel
+  } else {
+    model = predicateModel
+  }
+  new TreeView(model, document!.getElementById('view')!)
+  new SourceView(model, document!.getElementById('source')!)
+  model.invalidate()
+})
+document.getElementById('header')?.append(modelSelector)
 
 new TreeView(model, document!.getElementById('view')!)
 new SourceView(model, document!.getElementById('source')!)
