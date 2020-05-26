@@ -24,6 +24,15 @@ export class DataModel {
     this.listeners.forEach(listener => listener.invalidated(this))
   }
 
+  get(path: Path) {
+    let node = this.data;
+    for (let index of path) {
+      if (node === undefined) return node
+      node = node[index]
+    }
+    return node
+  }
+
   set(path: Path, value: any) {
     let node = this.data;
     for (let index of path.pop()) {

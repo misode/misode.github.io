@@ -20,13 +20,15 @@ const predicateTree = new RootNode('predicate', {
     transform: (s: string) => (s === 'foo') ? {test: 'baz'} : s
   }),
   number: new NumberNode({integer: false, min: 0}),
-  range: new RangeNode(),
+  range: new RangeNode({
+    enable: (path) => path.push('condition').get() === 'foo'
+  }),
   predicate: new ObjectNode({
     type: new EnumNode(EntityCollection),
     nbt: new ResourceNode({
       default: (v) => "hahaha"
     }),
-    test: new BooleanNode(),
+    test: new BooleanNode({force: () => true}),
     recipes: new MapNode(
       new StringNode(),
       new RangeNode({

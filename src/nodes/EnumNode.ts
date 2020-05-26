@@ -7,7 +7,10 @@ export class EnumNode extends AbstractNode<string> implements StateNode<string> 
   protected options: string[]
 
   constructor(options: string[], mods?: NodeMods<string> | string) {
-    super(typeof mods === 'string' ? {default: () => mods} : mods)
+    super(typeof mods === 'string' ? {
+        default: () => mods,
+        force: () => true
+      } : mods)
     this.options = options
   }
 

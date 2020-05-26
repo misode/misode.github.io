@@ -1,11 +1,14 @@
+import { DataModel } from "./DataModel"
 
 type PathElement = (string | number)
 
 export class Path implements Iterable<PathElement> {
   private arr: PathElement[]
+  model?: DataModel
 
-  constructor(arr?: PathElement[]) {
+  constructor(arr?: PathElement[], model?: DataModel) {
     this.arr = arr || []
+    this.model = model
   }
 
   last(): PathElement {
@@ -13,15 +16,23 @@ export class Path implements Iterable<PathElement> {
   }
 
   pop(): Path {
-    return new Path(this.arr.slice(0, -1))
+    return new Path(this.arr.slice(0, -1), this.model)
   }
 
   push(element: PathElement): Path {
-    return new Path([...this.arr, element])
+    return new Path([...this.arr, element], this.model)
   }
 
   copy(): Path {
-    return new Path([...this.arr])
+    return new Path([...this.arr], this.model)
+  }
+
+  withModel(model: DataModel): Path {
+    return new Path([...this.arr], model)
+  }
+
+  get(): any {
+    return this.model?.get(this)
   }
 
   toString(): string {

@@ -1,4 +1,5 @@
 import { DataModel, ModelListener } from "../model/DataModel"
+import { Path } from "../model/Path"
 
 export class SourceView implements ModelListener {
   model: DataModel
@@ -11,7 +12,8 @@ export class SourceView implements ModelListener {
   }
 
   render() {
-    this.target.textContent = this.model.schema.transform(this.model.data)
+    const transformed = this.model.schema.transform(new Path([], this.model), this.model.data)
+    this.target.textContent = JSON.stringify(transformed)
   }
 
   invalidated() {

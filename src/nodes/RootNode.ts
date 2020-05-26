@@ -11,10 +11,6 @@ export class RootNode extends ObjectNode {
     this.id = id
   }
 
-  transform(value: IObject) {
-    return JSON.stringify(super.transform(value))
-  }
-
   render(path: Path, value: IObject, view: TreeView) {
     value = value || {}
     return `<div>

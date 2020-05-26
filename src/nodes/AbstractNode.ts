@@ -5,7 +5,8 @@ import { TreeView } from "../view/TreeView"
 export interface INode<T> {
   setParent: (parent: INode<any>) => void
   default: IDefault<T>
-  transform: (value: T) => any
+  transform: (path: Path, value: T) => any
+  enabled: (path: Path, model: DataModel) => boolean
   render: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
   renderRaw: (path: Path, value: T, view: TreeView, options?: RenderOptions) => string
 }
@@ -25,20 +26,28 @@ export type NodeChildren = {
 
 export type IDefault<T> = (value?: T) => T | undefined
 export type ITransform<T> = (value: T) => any
+export type IEnable = (path: Path) => boolean
+export type IForce = () => boolean
 
 export interface NodeMods<T> {
   default?: IDefault<T>
   transform?: ITransform<T>
+  enable?: IEnable
+  force?: IForce
 }
 
 export abstract class AbstractNode<T> implements INode<T> {
   parent?: INode<any>
   defaultMod: IDefault<T>
   transformMod: ITransform<T>
+  enableMod: IEnable
+  forceMod: IForce
 
   constructor(mods?: NodeMods<T>) {
     this.defaultMod = mods?.default ? mods.default : (v) => v
     this.transformMod = mods?.transform ? mods.transform : (v) => v
+    this.enableMod = mods?.enable ? mods.enable : () => true
+    this.forceMod = mods?.force ? mods.force : () => false
   }
 
   setParent(parent: INode<any>) {
@@ -58,11 +67,24 @@ export abstract class AbstractNode<T> implements INode<T> {
     return this.defaultMod(value)
   }
 
-  transform(value: T) {
+  transform(path: Path, value: T) {
+    if (!this.enabled(path)) return undefined
+    if (this.force()) value = this.default(value)!
     return this.transformMod(value)
   }
 
+  enabled(path: Path, model?: DataModel) {
+    if (model) path = path.withModel(model)
+    return this.enableMod(path.pop())
+  }
+
+  force(): boolean {
+    return this.forceMod()
+  }
+
   render(path: Path, value: T, view: TreeView, options?: RenderOptions): string {
+    if (!this.enabled(path, view.model)) return ''
+    
     const id = view.register(el => {
       this.mounted(el, path, view)
     })
