@@ -69,7 +69,7 @@ export abstract class AbstractNode<T> implements INode<T> {
 
   transform(path: Path, value: T) {
     if (!this.enabled(path)) return undefined
-    if (this.force()) value = this.default(value)!
+    if (value === undefined && this.force()) value = this.default(value)!
     return this.transformMod(value)
   }
 

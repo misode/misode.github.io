@@ -1,10 +1,10 @@
 import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { SourceView } from '../view/SourceView'
-import { PredicateSchema } from '../schemas/PredicateSchema'
+import { ConditionSchema } from '../schemas/ConditionSchema'
 import { SandboxSchema } from '../schemas/SandboxSchema'
 
-const predicateModel = new DataModel(PredicateSchema)
+const predicateModel = new DataModel(ConditionSchema)
 const sandboxModel = new DataModel(SandboxSchema)
 
 let model = predicateModel

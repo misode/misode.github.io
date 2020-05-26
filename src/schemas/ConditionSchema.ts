@@ -7,76 +7,20 @@ import { ListNode } from '../nodes/ListNode';
 import { RangeNode } from '../nodes/custom/RangeNode';
 import { MapNode } from '../nodes/MapNode';
 import { StringNode } from '../nodes/StringNode';
-import { INode } from '../nodes/AbstractNode';
+import { ReferenceNode } from '../nodes/ReferenceNode';
+import { SchemaRegistry } from './SchemaRegistry';
 
-const conditions = [
-  'alternative',
-  'requirements',
-  'inverted',
-  'reference',
-  'entity_properties',
-  'block_state_property',
-  'match_tool',
-  'damage_source_properties',
-  'location_check',
-  'weather_check',
-  'time_check',
-  'entity_scores',
-  'random_chance',
-  'random_chance_with_looting',
-  'table_bonus',
-  'killed_by_player',
-  'survives_explosion'
-]
-
-const enchantments = [
-  'aqua_affinity',
-  'bane_of_arthropods',
-  'blast_protection',
-  'channeling',
-  'binding_curse',
-  'vanishing_curse',
-  'depth_strider',
-  'efficiency',
-  'feather_falling',
-  'fire_aspect',
-  'fire_protection',
-  'flame',
-  'fortune',
-  'frost_walker',
-  'impaling',
-  'infinity',
-  'knockback',
-  'looting',
-  'loyalty',
-  'luck_of_the_sea',
-  'lure',
-  'mending',
-  'multishot',
-  'piercing',
-  'power',
-  'projectile_protection',
-  'protection',
-  'punch',
-  'quick_charge',
-  'respiration',
-  'riptide',
-  'sharpness',
-  'silk_touch',
-  'smite',
-  'sweeping',
-  'thorns',
-  'unbreaking'
-]
+import { conditions, enchantments } from './Collections'
 
 const entitySources = ['this', 'killer', 'killer_player']
 
-export let PredicateSchema: FilteredNode
-PredicateSchema = new FilteredNode('condition', {
+export const ConditionSchema = new FilteredNode('condition', {
   condition: new EnumNode(conditions, 'random_chance'),
   [Switch]: {
     'alternative': {
-      // terms: new ListNode(PredicateSchema()),
+      terms: new ListNode(
+        new ReferenceNode('condition')
+      ),
     },
     'block_state_property': {
       block: new ResourceNode(),
@@ -100,7 +44,7 @@ PredicateSchema = new FilteredNode('condition', {
       )
     },
     'inverted': {
-      // term: PredicateSchema,
+      term: new ReferenceNode('condition')
     },
     'killed_by_player': {
       inverse: new BooleanNode()
@@ -120,6 +64,11 @@ PredicateSchema = new FilteredNode('condition', {
     'random_chance_with_looting': {
       chance: new NumberNode({min: 0, max: 1}),
       looting_multiplier: new NumberNode(),
+    },
+    'requirements': {
+      terms: new ListNode(
+        new ReferenceNode('condition')
+      ),
     },
     'reference': {
       name: new StringNode(),
@@ -145,3 +94,5 @@ PredicateSchema = new FilteredNode('condition', {
     chance: 0.5
   })
 })
+
+SchemaRegistry.register('condition', ConditionSchema)
