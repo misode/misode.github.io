@@ -34,8 +34,8 @@ export abstract class AbstractNode<T> implements INode<T> {
   transformMod: (v: T) => T
 
   constructor(def: () => T, mods?: NodeMods<T>) {
-    this.defaultMod = mods?.default ? mods.default : def
-    this.transformMod = mods?.transform ? mods.transform : (v: T) => v
+    this.defaultMod = mods?.default ?? def
+    this.transformMod = mods?.transform ?? ((v: T) => v)
   }
 
   setParent(parent: INode<any>) {
