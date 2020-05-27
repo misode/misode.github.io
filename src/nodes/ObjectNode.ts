@@ -1,40 +1,59 @@
-import { AbstractNode, NodeChildren, NodeMods, RenderOptions } from './AbstractNode'
-import { TreeView } from '../view/TreeView'
+import { NodeMods, INode, NodeChildren, AbstractNode, RenderOptions } from './AbstractNode'
 import { Path } from '../model/Path'
+import { TreeView } from '../view/TreeView'
+
+export const Switch = Symbol('switch')
+export const Case = Symbol('case')
+
+export type NestedNodeChildren = {
+  [name: string]: NodeChildren
+}
 
 export type IObject = {
   [name: string]: any
 }
 
-export class ObjectNode extends AbstractNode<IObject> {
-  protected fields: NodeChildren
+export type FilteredChildren = {
+  [name: string]: INode<any>
+  [Switch]?: string
+  [Case]?: NestedNodeChildren
+}
 
-  constructor(fields: NodeChildren, mods?: NodeMods<IObject>) {
+export class ObjectNode extends AbstractNode<IObject> {
+  fields: NodeChildren
+  cases: NestedNodeChildren
+  filter?: string
+
+  constructor(fields: FilteredChildren, mods?: NodeMods<IObject>) {
     super({
       default: () => ({}),
       ...mods})
-    this.fields = fields
-    Object.values(fields).forEach(child => {
-      child.setParent(this)
-    })
+    const {[Switch]: _switch, [Case]: _case, ..._fields} = fields
+    this.fields = _fields
+    this.cases = _case ?? {}
+    this.filter = _switch
   }
 
   transform(path: Path, value: IObject) {
     if (value === undefined) return undefined
     value = value ?? {}
+    const activeCase = this.filter ? this.cases[value[this.filter]] : {};
+    const activeFields = {...this.fields, ...activeCase}
     let res: any = {}
-    Object.keys(this.fields).forEach(f =>
-      res[f] = this.fields[f].transform(path.push(f), value[f])
+    Object.keys(activeFields).forEach(f =>
+      res[f] = activeFields[f].transform(path.push(f), value[f])
     )
     return res;
   }
 
   renderRaw(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
     value = value ?? {}
+    const activeCase = this.filter ? this.cases[value[this.filter]] : {};
+    const activeFields = {...this.fields, ...activeCase}
     return `${options?.hideLabel ? `` : `<label>${path.last()}:</label>
     <div style="padding-left:8px">`}
-      ${Object.keys(this.fields).map(f => {
-        return this.fields[f].render(path.push(f), value[f], view)
+      ${Object.keys(activeFields).map(f => {
+        return activeFields[f].render(path.push(f), value[f], view)
       }).join('')}
     ${options?.hideLabel ? `` : `</div>`}`
   }

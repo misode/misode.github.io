@@ -2,7 +2,7 @@ import { EnumNode } from '../nodes/EnumNode';
 import { ResourceNode } from '../nodes/custom/ResourceNode';
 import { NumberNode } from '../nodes/NumberNode';
 import { BooleanNode } from '../nodes/BooleanNode';
-import { FilteredNode, Switch } from '../nodes/FilteredNode';
+import { ObjectNode, Switch, Case } from '../nodes/ObjectNode';
 import { ListNode } from '../nodes/ListNode';
 import { RangeNode } from '../nodes/custom/RangeNode';
 import { MapNode } from '../nodes/MapNode';
@@ -15,9 +15,10 @@ import './Predicates'
 
 const entitySources = ['this', 'killer', 'killer_player']
 
-export const ConditionSchema = SchemaRegistry.register('condition', new FilteredNode('condition', {
+export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNode({
   condition: new EnumNode(conditions, 'random_chance'),
-  [Switch]: {
+  [Switch]: 'condition',
+  [Case]: {
     'alternative': {
       terms: new ListNode(
         new ReferenceNode('condition')
