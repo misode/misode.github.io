@@ -20,7 +20,7 @@ import {
 } from './Collections'
 
 SchemaRegistry.register('item-predicate', new ObjectNode({
-  item: new ResourceNode(),
+  item: new ResourceNode({registry: 'minecraft:item'}),
   tag: new StringNode(),
   count: new RangeNode(),
   durability: new RangeNode(),
@@ -32,12 +32,12 @@ SchemaRegistry.register('item-predicate', new ObjectNode({
 }))
 
 SchemaRegistry.register('enchantment-predicate', new ObjectNode({
-  enchantment: new EnumNode(enchantments),
+  enchantment: new ResourceNode({options: enchantments}),
   levels: new RangeNode()
 }))
 
 SchemaRegistry.register('block-predicate', new ObjectNode({
-  block: new ResourceNode(),
+  block: new ResourceNode({registry: 'minecraft:block'}),
   tag: new StringNode(),
   nbt: new StringNode(),
   state: new MapNode(
@@ -47,7 +47,7 @@ SchemaRegistry.register('block-predicate', new ObjectNode({
 }))
 
 SchemaRegistry.register('fluid-predicate', new ObjectNode({
-  fluid: new ResourceNode(),
+  fluid: new ResourceNode({registry: 'minecraft:fluid'}),
   tag: new StringNode(),
   nbt: new StringNode(),
   state: new MapNode(
@@ -62,9 +62,9 @@ SchemaRegistry.register('location-predicate', new ObjectNode({
     y: new RangeNode(),
     z: new RangeNode()
   }),
-  biome: new EnumNode(biomes),
+  biome: new ResourceNode({options: biomes}),
   feature: new EnumNode(structures),
-  dimension: new EnumNode(dimensions),
+  dimension: new ResourceNode({options: dimensions, additional: true}),
   light: new ObjectNode({
     light: new RangeNode()
   }),
@@ -134,7 +134,7 @@ SchemaRegistry.register('entity-predicate', new ObjectNode({
     in_open_water: new BooleanNode()
   }),
   effects: new MapNode(
-    new EnumNode(statusEffects),
+    new ResourceNode({options: statusEffects}),
     new ReferenceNode('status-effect-predicate')
   )
 }))

@@ -26,6 +26,6 @@ export class StringNode extends AbstractNode<string> implements StateNode<string
 
   renderRaw(path: Path, value: string, view: TreeView, options?: RenderOptions) {
     return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
-      <input value="${value ?? ''}"></input>`
+      <input value="${value ?? ''}">`
   }
 } 

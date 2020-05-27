@@ -37,6 +37,6 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
 
   renderRaw(path: Path, value: number, view: TreeView, options?: RenderOptions) {
     return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
-      <input value="${value ?? ''}"></input>`
+      <input value="${value ?? ''}">`
   }
 }

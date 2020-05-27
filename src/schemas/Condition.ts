@@ -16,7 +16,7 @@ import './Predicates'
 const entitySources = ['this', 'killer', 'killer_player']
 
 export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNode({
-  condition: new EnumNode(conditions, 'random_chance'),
+  condition: new ResourceNode({options: conditions, default: () => 'random_chance'}),
   [Switch]: 'condition',
   [Case]: {
     'alternative': {
@@ -25,7 +25,7 @@ export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNo
       )
     },
     'block_state_property': {
-      block: new ResourceNode(),
+      block: new ResourceNode({registry: 'minecraft:block'}),
       properties: new MapNode(
         new StringNode(),
         new StringNode()
@@ -76,7 +76,7 @@ export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNo
       name: new StringNode()
     },
     'table_bonus': {
-      enchantment: new EnumNode(enchantments),
+      enchantment: new ResourceNode({options: enchantments}),
       chances: new ListNode(
         new NumberNode({min: 0, max: 1})
       )

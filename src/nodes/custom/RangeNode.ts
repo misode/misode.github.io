@@ -54,19 +54,19 @@ export class RangeNode extends AbstractNode<IRange> implements StateNode<IRange>
     let input = ''
     if (value === undefined || typeof value === 'number') {
       curType = 'exact'
-      input = `<input value=${value === undefined ? '' : value}></input>`
+      input = `<input value=${value === undefined ? '' : value}>`
     } else if (value.type === 'binomial') {
       curType = 'binomial'
       input = `<label>n</label>
-        <input value=${value.n === undefined ? '' : value.n}></input>
+        <input value=${value.n === undefined ? '' : value.n}>
         <label>p</label>
-        <input value=${value.p === undefined ? '' : value.p}></input>`
+        <input value=${value.p === undefined ? '' : value.p}>`
     } else {
       curType = 'range'
       input = `<label>Min</label>
-        <input value=${value.min === undefined ? '' : value.min}></input>
+        <input value=${value.min === undefined ? '' : value.min}>
         <label>Max</label>
-        <input value=${value.max === undefined ? '' : value.max}></input>`
+        <input value=${value.max === undefined ? '' : value.max}>`
     }
     const id = view.register(el => {
       (el as HTMLInputElement).value = curType
