@@ -19,6 +19,15 @@ export class MapNode extends AbstractNode<IMap> {
     this.values = values
   }
 
+  transform(path: Path, value: IMap) {
+    if (value === undefined) return undefined
+    let res: any = {}
+    Object.keys(value).forEach(f =>
+      res[f] = this.values.transform(path.push(f), value[f])
+    )
+    return this.transformMod(res);
+  }
+
   renderRaw(path: Path, value: IMap, view: TreeView) {
     value = value ?? []
     const button = view.registerClick(el => {

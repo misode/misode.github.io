@@ -49,7 +49,8 @@ export class TreeView implements ModelListener {
   }
 
   render() {
-    this.target.innerHTML = this.model.schema.render(new Path(), this.model.data, this)
+    this.target.innerHTML = this.model.schema.render(
+      new Path(), this.model.data, this, {hideLabel: true})
     for (const id in this.registry) {
       const element = this.target.querySelector(`[data-id="${id}"]`)
       if (element !== null) this.registry[id](element)

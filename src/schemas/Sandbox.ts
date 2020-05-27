@@ -1,9 +1,7 @@
 import { ObjectNode } from '../nodes/ObjectNode';
 import { EnumNode } from '../nodes/EnumNode';
-import { ResourceNode } from '../nodes/custom/ResourceNode';
 import { NumberNode } from '../nodes/NumberNode';
 import { BooleanNode } from '../nodes/BooleanNode';
-import { RootNode } from '../nodes/RootNode';
 import { RangeNode } from '../nodes/custom/RangeNode';
 import { MapNode } from '../nodes/MapNode';
 import { StringNode } from '../nodes/StringNode';
@@ -11,10 +9,9 @@ import { ListNode } from '../nodes/ListNode';
 
 const EntityCollection = ['sheep', 'pig']
 
-export const SandboxSchema = new RootNode('predicate', {
+export const SandboxSchema = new ObjectNode({
   condition: new EnumNode(['foo', 'bar'], {
-    default: () => 'bar',
-    transform: (s: string) => (s === 'foo') ? {test: 'baz'} : s
+    default: () => 'bar'
   }),
   number: new NumberNode({integer: false, min: 0}),
   range: new RangeNode({
@@ -22,14 +19,18 @@ export const SandboxSchema = new RootNode('predicate', {
   }),
   predicate: new ObjectNode({
     type: new EnumNode(EntityCollection),
-    nbt: new ResourceNode({
+    nbt: new StringNode({
       default: (v) => 'hahaha'
     }),
     test: new BooleanNode({force: () => true}),
     recipes: new MapNode(
       new StringNode(),
       new RangeNode({
-        default: (v) => RangeNode.isExact(v) ? 2 : v
+        default: (v) => RangeNode.isExact(v) ? 2 : v,
+        transform: (v: any) => RangeNode.isRange(v) ? ({
+          min: v?.min ?? -2147483648,
+          max: v?.max ?? 2147483647
+        }) : v
       })
     )
   }),
@@ -49,5 +50,6 @@ export const SandboxSchema = new RootNode('predicate', {
     predicate: {
       nbt: 'hi'
     }
-  })
+  }),
+  transform: (v) => v?.condition === 'foo' ? ({...v, test: 'hello'}) : v
 });

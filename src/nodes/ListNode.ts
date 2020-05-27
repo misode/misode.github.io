@@ -14,6 +14,14 @@ export class ListNode extends AbstractNode<IObject[]> {
     this.children = values
   }
 
+  transform(path: Path, value: IObject[]) {
+    if (!(value instanceof Array)) return undefined
+    const res = value.map((obj, index) => 
+      this.children.transform(path.push(index), obj)
+    )
+    return this.transformMod(res)
+  }
+
   updateModel(el: Element, path: Path, model: DataModel) {
     model.set(path, el.querySelector('select')?.value)
   }

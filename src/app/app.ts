@@ -15,7 +15,6 @@ modelSelector.innerHTML = `
   <option value="predicate">Predicate</option>
   <option value="sandbox">Sandbox</option>`
 modelSelector.addEventListener('change', evt => {
-  console.log("hello?")
   if (modelSelector.value === 'sandbox') {
     model = sandboxModel
   } else {

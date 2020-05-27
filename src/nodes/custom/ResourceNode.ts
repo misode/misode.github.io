@@ -17,7 +17,7 @@ export class ResourceNode extends EnumNode {
     const options = mods?.options ?? [] // TODO: Support registry using `github.com/Arcensoth/mcdata`
     super(options, {
       transform: (v) => {
-        if (v === undefined) return undefined
+        if (v === undefined || v.length === 0) return undefined
         return v.startsWith('minecraft:') ? v : 'minecraft:' + v
       }, ...mods})
     this.additional = mods?.additional ?? false

@@ -1,4 +1,3 @@
-import { RootNode } from "../nodes/RootNode"
 import { Path } from "./Path"
 import { INode } from "../nodes/AbstractNode"
 
@@ -23,6 +22,11 @@ export class DataModel {
 
   invalidate() {
     this.listeners.forEach(listener => listener.invalidated(this))
+  }
+
+  reset(value: any) {
+    this.data = value
+    this.invalidate()
   }
 
   get(path: Path) {

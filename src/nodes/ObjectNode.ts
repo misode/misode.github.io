@@ -36,14 +36,14 @@ export class ObjectNode extends AbstractNode<IObject> {
 
   transform(path: Path, value: IObject) {
     if (value === undefined) return undefined
-    value = value ?? {}
     const activeCase = this.filter ? this.cases[value[this.filter]] : {};
     const activeFields = {...this.fields, ...activeCase}
     let res: any = {}
-    Object.keys(activeFields).forEach(f =>
-      res[f] = activeFields[f].transform(path.push(f), value[f])
-    )
-    return res;
+    Object.keys(activeFields).forEach(f => {
+      console.log(f)
+      return res[f] = activeFields[f].transform(path.push(f), value[f])
+    })
+    return this.transformMod(res);
   }
 
   renderRaw(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
