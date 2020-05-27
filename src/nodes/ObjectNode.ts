@@ -30,7 +30,7 @@ export class ObjectNode extends AbstractNode<IObject> {
   }
 
   renderRaw(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
-    if (value === undefined) return ``
+    value = value ?? {}
     return `${options?.hideLabel ? `` : `<label>${path.last()}:</label>
     <div style="padding-left:8px">`}
       ${Object.keys(this.fields).map(f => {

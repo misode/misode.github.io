@@ -9,32 +9,33 @@ import { MapNode } from '../nodes/MapNode';
 import { StringNode } from '../nodes/StringNode';
 import { ReferenceNode } from '../nodes/ReferenceNode';
 import { SchemaRegistry } from './SchemaRegistry';
-
 import { conditions, enchantments } from './Collections'
+
+import './Predicates'
 
 const entitySources = ['this', 'killer', 'killer_player']
 
-export const ConditionSchema = new FilteredNode('condition', {
+export const ConditionSchema = SchemaRegistry.register('condition', new FilteredNode('condition', {
   condition: new EnumNode(conditions, 'random_chance'),
   [Switch]: {
     'alternative': {
       terms: new ListNode(
         new ReferenceNode('condition')
-      ),
+      )
     },
     'block_state_property': {
       block: new ResourceNode(),
       properties: new MapNode(
         new StringNode(),
         new StringNode()
-      ),
+      )
     },
     'damage_source_properties': {
-      // predicate: DamageSchema,
+      predicate: new ReferenceNode('damage-source-predicate')
     },
     'entity_properties': {
       entity: new EnumNode(entitySources, 'this'),
-      // predicate: EntitySchema,
+      predicate: new ReferenceNode('entity-predicate')
     },
     'entity_scores': {
       entity: new EnumNode(entitySources, 'this'),
@@ -53,17 +54,17 @@ export const ConditionSchema = new FilteredNode('condition', {
       offsetX: new NumberNode({integer: true}),
       offsetY: new NumberNode({integer: true}),
       offsetZ: new NumberNode({integer: true}),
-      // predicate: LocationSchema,
+      predicate: new ReferenceNode('location-predicate')
     },
     'match_tool': {
-      // predicate: ItemSchema,
+      predicate: new ReferenceNode('item-predicate')
     },
     'random_chance': {
-      chance: new NumberNode({min: 0, max: 1}),
+      chance: new NumberNode({min: 0, max: 1})
     },
     'random_chance_with_looting': {
       chance: new NumberNode({min: 0, max: 1}),
-      looting_multiplier: new NumberNode(),
+      looting_multiplier: new NumberNode()
     },
     'requirements': {
       terms: new ListNode(
@@ -71,21 +72,21 @@ export const ConditionSchema = new FilteredNode('condition', {
       ),
     },
     'reference': {
-      name: new StringNode(),
+      name: new StringNode()
     },
     'table_bonus': {
       enchantment: new EnumNode(enchantments),
       chances: new ListNode(
         new NumberNode({min: 0, max: 1})
-      ),
+      )
     },
     'time_check': {
       value: new RangeNode(),
-      period: new NumberNode(),
+      period: new NumberNode()
     },
     'weather_check': {
       raining: new BooleanNode(),
-      thrundering: new BooleanNode(),
+      thrundering: new BooleanNode()
     }
   }
 }, {
@@ -93,6 +94,4 @@ export const ConditionSchema = new FilteredNode('condition', {
     condition: 'random_chance',
     chance: 0.5
   })
-})
-
-SchemaRegistry.register('condition', ConditionSchema)
+}))

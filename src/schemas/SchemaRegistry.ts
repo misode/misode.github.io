@@ -1,4 +1,4 @@
-import { INode } from "../nodes/AbstractNode";
+import { INode } from '../nodes/AbstractNode';
 
 type Registry = {
   [id: string]: INode<any>
@@ -9,6 +9,7 @@ export class SchemaRegistry {
 
   static register(id: string, node: INode<any>) {
     SchemaRegistry.registery[id] = node
+    return node
   }
 
   static get(id: string): INode<any> {

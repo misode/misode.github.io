@@ -12,7 +12,11 @@ export class ReferenceNode extends AbstractNode<any> {
   }
 
   get(): INode<any> {
-    return SchemaRegistry.get(this.reference)
+    const node = SchemaRegistry.get(this.reference)
+    if (node === undefined) {
+      console.error(`Invalid schema reference "${this.reference}"`)
+    }
+    return node 
   }
 
   default(value?: any) {
@@ -20,14 +24,14 @@ export class ReferenceNode extends AbstractNode<any> {
   }
 
   transform(path: Path, value: any) {
-    return this.get().transform(path, value)
+    return this.get()?.transform(path, value)
   }
 
   render(path: Path, value: any, view: TreeView, options?: RenderOptions) {
-    return this.get().render(path, value, view, options)
+    return this.get()?.render(path, value, view, options)
   }
 
   renderRaw(path: Path, value: any, view: TreeView, options?: RenderOptions) {
-    return this.get().renderRaw(path, value, view, options)
+    return this.get()?.renderRaw(path, value, view, options)
   }
 }
