@@ -3,7 +3,6 @@ import { Path } from "../model/Path"
 import { TreeView } from "../view/TreeView"
 
 export interface INode<T> {
-  setParent: (parent: INode<any>) => void
   default: IDefault<T>
   transform: (path: Path, value: T) => any
   enabled: (path: Path, model: DataModel) => boolean
@@ -37,7 +36,6 @@ export interface NodeMods<T> {
 }
 
 export abstract class AbstractNode<T> implements INode<T> {
-  parent?: INode<any>
   defaultMod: IDefault<T>
   transformMod: ITransform<T>
   enableMod: IEnable
@@ -48,10 +46,6 @@ export abstract class AbstractNode<T> implements INode<T> {
     this.transformMod = mods?.transform ?? ((v) => v)
     this.enableMod = mods?.enable ?? (() => true)
     this.forceMod = mods?.force ?? (() => false)
-  }
-
-  setParent(parent: INode<any>) {
-    this.parent = parent
   }
 
   mounted(el: Element, path: Path, view: TreeView) {
