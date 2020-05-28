@@ -40,7 +40,6 @@ export class ObjectNode extends AbstractNode<IObject> {
     const activeFields = {...this.fields, ...activeCase}
     let res: any = {}
     Object.keys(activeFields).forEach(f => {
-      console.log(f)
       return res[f] = activeFields[f].transform(path.push(f), value[f])
     })
     return this.transformMod(res);

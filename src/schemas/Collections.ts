@@ -1,4 +1,6 @@
-export const conditions = [
+import { COLLECTIONS } from './Registries'
+
+COLLECTIONS.register('conditions', [
   'alternative',
   'requirements',
   'inverted',
@@ -16,9 +18,9 @@ export const conditions = [
   'table_bonus',
   'killed_by_player',
   'survives_explosion'
-]
+])
 
-export const enchantments = [
+COLLECTIONS.register('enchantments', [
   'aqua_affinity',
   'bane_of_arthropods',
   'blast_protection',
@@ -56,9 +58,9 @@ export const enchantments = [
   'sweeping',
   'thorns',
   'unbreaking'
-]
+])
 
-export const biomes = [
+COLLECTIONS.register('biomes', [
   'badlands',
   'badlands_plateau',
   'bamboo_jungle',
@@ -134,9 +136,9 @@ export const biomes = [
   'wooded_badlands_plateau',
   'wooded_hills',
   'wooded_mountains'
-]
+])
 
-export const structures = [
+COLLECTIONS.register('structures', [
   'pillager_outpost',
   'mineshaft',
   'mansion',
@@ -152,24 +154,24 @@ export const structures = [
   'endcity',
   'buried_treasure',
   'village'
-]
+])
 
-export const dimensions = [
+COLLECTIONS.register('dimensions', [
   'overworld',
   'the_nether',
   'the_end'
-]
+])
 
-export const slots = [
+COLLECTIONS.register('slots', [
   'mainhand',
   'offhand',
   'head',
   'chest',
   'legs',
   'feet'
-]
+])
 
-export const statusEffects = [
+COLLECTIONS.register('status-effects', [
   'speed',
   'slowness',
   'haste',
@@ -202,16 +204,16 @@ export const statusEffects = [
   'dolphins_grace',
   'bad_omen',
   'hero_of_the_village'
-]
+])
 
-export const gameModes = [
+COLLECTIONS.register('gamemodes', [
   'survival',
   'creative',
   'adventure',
   'spectator'
-]
+])
 
-export const statisticTypes = [
+COLLECTIONS.register('statistic-types', [
   'minecraft:broken',
   'minecraft:crafted',
   'minecraft:custom',
@@ -223,4 +225,10 @@ export const statisticTypes = [
   'minecraft:used',
   'killedByTeam',
   'teamkill'
-]
+])
+
+COLLECTIONS.register('entity-sources', [
+  'this',
+  'killer',
+  'killer_player'
+])

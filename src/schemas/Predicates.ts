@@ -5,22 +5,14 @@ import { ListNode } from '../nodes/ListNode';
 import { RangeNode } from '../nodes/custom/RangeNode';
 import { StringNode } from '../nodes/StringNode';
 import { ReferenceNode } from '../nodes/ReferenceNode';
-import { SchemaRegistry } from './SchemaRegistry';
 import { BooleanNode } from '../nodes/BooleanNode';
 import { MapNode } from '../nodes/MapNode';
-import {
-  enchantments,
-  biomes,
-  structures,
-  dimensions,
-  slots,
-  statusEffects,
-  gameModes,
-  statisticTypes
-} from './Collections'
+import { SCHEMAS, COLLECTIONS } from './Registries';
 
-SchemaRegistry.register('item-predicate', new ObjectNode({
-  item: new ResourceNode({registry: 'minecraft:item'}),
+import './Collections'
+
+SCHEMAS.register('item-predicate', new ObjectNode({
+  item: new ResourceNode(COLLECTIONS.get('items')),
   tag: new StringNode(),
   count: new RangeNode(),
   durability: new RangeNode(),
@@ -31,13 +23,13 @@ SchemaRegistry.register('item-predicate', new ObjectNode({
   )
 }))
 
-SchemaRegistry.register('enchantment-predicate', new ObjectNode({
-  enchantment: new ResourceNode({options: enchantments}),
+SCHEMAS.register('enchantment-predicate', new ObjectNode({
+  enchantment: new ResourceNode(COLLECTIONS.get('enchantments')),
   levels: new RangeNode()
 }))
 
-SchemaRegistry.register('block-predicate', new ObjectNode({
-  block: new ResourceNode({registry: 'minecraft:block'}),
+SCHEMAS.register('block-predicate', new ObjectNode({
+  block: new ResourceNode(COLLECTIONS.get('blocks')),
   tag: new StringNode(),
   nbt: new StringNode(),
   state: new MapNode(
@@ -46,8 +38,8 @@ SchemaRegistry.register('block-predicate', new ObjectNode({
   )
 }))
 
-SchemaRegistry.register('fluid-predicate', new ObjectNode({
-  fluid: new ResourceNode({registry: 'minecraft:fluid'}),
+SCHEMAS.register('fluid-predicate', new ObjectNode({
+  fluid: new ResourceNode(COLLECTIONS.get('fluids')),
   tag: new StringNode(),
   nbt: new StringNode(),
   state: new MapNode(
@@ -56,15 +48,15 @@ SchemaRegistry.register('fluid-predicate', new ObjectNode({
   )
 }))
 
-SchemaRegistry.register('location-predicate', new ObjectNode({
+SCHEMAS.register('location-predicate', new ObjectNode({
   position: new ObjectNode({
     x: new RangeNode(),
     y: new RangeNode(),
     z: new RangeNode()
   }),
-  biome: new ResourceNode({options: biomes}),
-  feature: new EnumNode(structures),
-  dimension: new ResourceNode({options: dimensions, additional: true}),
+  biome: new ResourceNode(COLLECTIONS.get('biomes')),
+  feature: new EnumNode(COLLECTIONS.get('structures')),
+  dimension: new ResourceNode(COLLECTIONS.get('dimensions'), {additional: true}),
   light: new ObjectNode({
     light: new RangeNode()
   }),
@@ -73,14 +65,14 @@ SchemaRegistry.register('location-predicate', new ObjectNode({
   fluid: new ReferenceNode('fluid-predicate')
 }))
 
-SchemaRegistry.register('statistic-predicat', new ObjectNode({
-  type: new EnumNode(statisticTypes),
+SCHEMAS.register('statistic-predicate', new ObjectNode({
+  type: new EnumNode(COLLECTIONS.get('statistic-types')),
   stat: new StringNode(),
   value: new RangeNode()
 }))
 
-SchemaRegistry.register('player-predicate', new ObjectNode({
-  gamemode: new EnumNode(gameModes),
+SCHEMAS.register('player-predicate', new ObjectNode({
+  gamemode: new EnumNode(COLLECTIONS.get('gamemodes')),
   level: new RangeNode(),
   advancements: new MapNode(
     new StringNode(),
@@ -95,14 +87,14 @@ SchemaRegistry.register('player-predicate', new ObjectNode({
   )
 }))
 
-SchemaRegistry.register('status-effect', new ObjectNode({
+SCHEMAS.register('status-effect', new ObjectNode({
   amplifier: new RangeNode(),
   duration: new RangeNode(),
   ambient: new BooleanNode(),
   visible: new BooleanNode()
 }))
 
-SchemaRegistry.register('distance-predicate', new ObjectNode({
+SCHEMAS.register('distance-predicate', new ObjectNode({
   x: new RangeNode(),
   y: new RangeNode(),
   z: new RangeNode(),
@@ -110,7 +102,7 @@ SchemaRegistry.register('distance-predicate', new ObjectNode({
   horizontal: new RangeNode()
 }))
 
-SchemaRegistry.register('entity-predicate', new ObjectNode({
+SCHEMAS.register('entity-predicate', new ObjectNode({
   type: new StringNode(),
   nbt: new StringNode(),
   team: new StringNode(),
@@ -124,7 +116,7 @@ SchemaRegistry.register('entity-predicate', new ObjectNode({
     is_baby: new BooleanNode()
   }),
   equipment: new MapNode(
-    new EnumNode(slots),
+    new EnumNode(COLLECTIONS.get('slots')),
     new ReferenceNode('item-predicate')
   ),
   // vehicle: new ReferenceNode('entity-predicate'),
@@ -134,7 +126,7 @@ SchemaRegistry.register('entity-predicate', new ObjectNode({
     in_open_water: new BooleanNode()
   }),
   effects: new MapNode(
-    new ResourceNode({options: statusEffects}),
+    new ResourceNode(COLLECTIONS.get('status-effects')),
     new ReferenceNode('status-effect-predicate')
   )
 }))

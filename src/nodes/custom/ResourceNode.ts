@@ -1,20 +1,16 @@
 import { NodeMods, RenderOptions } from '../AbstractNode'
 import { EnumNode } from '../EnumNode'
 import { Path } from '../../model/Path'
-import { DataModel } from '../../model/DataModel'
 import { TreeView, getId } from '../../view/TreeView'
 
 export interface ResourceNodeMods extends NodeMods<string> {
-  options?: string[]
-  registry?: string
   additional?: boolean
 }
 
 export class ResourceNode extends EnumNode {
   additional: boolean
 
-  constructor(mods?: ResourceNodeMods) {
-    const options = mods?.options ?? [] // TODO: Support registry using `github.com/Arcensoth/mcdata`
+  constructor(options: string[], mods?: ResourceNodeMods) {
     super(options, {
       transform: (v) => {
         if (v === undefined || v.length === 0) return undefined

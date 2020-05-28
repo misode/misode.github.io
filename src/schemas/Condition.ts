@@ -8,15 +8,12 @@ import { RangeNode } from '../nodes/custom/RangeNode';
 import { MapNode } from '../nodes/MapNode';
 import { StringNode } from '../nodes/StringNode';
 import { ReferenceNode } from '../nodes/ReferenceNode';
-import { SchemaRegistry } from './SchemaRegistry';
-import { conditions, enchantments } from './Collections'
+import { SCHEMAS, COLLECTIONS } from './Registries';
 
 import './Predicates'
 
-const entitySources = ['this', 'killer', 'killer_player']
-
-export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNode({
-  condition: new ResourceNode({options: conditions, default: () => 'random_chance'}),
+SCHEMAS.register('condition', new ObjectNode({
+  condition: new ResourceNode(COLLECTIONS.get('conditions'), {default: () => 'random_chance'}),
   [Switch]: 'condition',
   [Case]: {
     'alternative': {
@@ -25,7 +22,7 @@ export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNo
       )
     },
     'block_state_property': {
-      block: new ResourceNode({registry: 'minecraft:block'}),
+      block: new ResourceNode(COLLECTIONS.get('blocks')),
       properties: new MapNode(
         new StringNode(),
         new StringNode()
@@ -35,11 +32,11 @@ export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNo
       predicate: new ReferenceNode('damage-source-predicate')
     },
     'entity_properties': {
-      entity: new EnumNode(entitySources, 'this'),
+      entity: new EnumNode(COLLECTIONS.get('entity-sources'), 'this'),
       predicate: new ReferenceNode('entity-predicate')
     },
     'entity_scores': {
-      entity: new EnumNode(entitySources, 'this'),
+      entity: new EnumNode(COLLECTIONS.get('entity-sources'), 'this'),
       scores: new MapNode(
         new StringNode(),
         new RangeNode()
@@ -76,7 +73,7 @@ export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNo
       name: new StringNode()
     },
     'table_bonus': {
-      enchantment: new ResourceNode({options: enchantments}),
+      enchantment: new ResourceNode(COLLECTIONS.get('enchantments')),
       chances: new ListNode(
         new NumberNode({min: 0, max: 1})
       )
@@ -96,3 +93,5 @@ export const ConditionSchema = SchemaRegistry.register('condition', new ObjectNo
     chance: 0.5
   })
 }))
+
+export const ConditionSchema = SCHEMAS.get('condition')

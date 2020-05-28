@@ -1,37 +1,29 @@
-import { AbstractNode, NodeChildren, NodeMods, RenderOptions, INode } from './AbstractNode'
+import { AbstractNode, NodeMods, RenderOptions, INode } from './AbstractNode'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
-import { SchemaRegistry } from '../schemas/SchemaRegistry'
+import { SCHEMAS } from '../schemas/Registries'
 
 export class ReferenceNode extends AbstractNode<any> {
-  protected reference: string
+  protected reference: () => INode<any>
 
-  constructor(reference: string, mods?: NodeMods<any>) {
+  constructor(id: string, mods?: NodeMods<any>) {
     super(mods)
-    this.reference = reference
-  }
-
-  get(): INode<any> {
-    const node = SchemaRegistry.get(this.reference)
-    if (node === undefined) {
-      console.error(`Invalid schema reference "${this.reference}"`)
-    }
-    return node 
+    this.reference = () => SCHEMAS.get(id)
   }
 
   default(value?: any) {
-    return this.get().default(value)
+    return this.reference().default(value)
   }
 
   transform(path: Path, value: any) {
-    return this.get()?.transform(path, value)
+    return this.reference()?.transform(path, value)
   }
 
   render(path: Path, value: any, view: TreeView, options?: RenderOptions) {
-    return this.get()?.render(path, value, view, options)
+    return this.reference()?.render(path, value, view, options)
   }
 
   renderRaw(path: Path, value: any, view: TreeView, options?: RenderOptions) {
-    return this.get()?.renderRaw(path, value, view, options)
+    return this.reference()?.renderRaw(path, value, view, options)
   }
 }
