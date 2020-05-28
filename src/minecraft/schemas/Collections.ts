@@ -1,4 +1,4 @@
-import { COLLECTIONS } from './Registries'
+import { COLLECTIONS } from '../../Registries'
 
 COLLECTIONS.register('conditions', [
   'alternative',

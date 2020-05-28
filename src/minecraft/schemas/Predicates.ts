@@ -1,13 +1,13 @@
-import { ObjectNode } from '../nodes/ObjectNode';
-import { ResourceNode } from '../nodes/custom/ResourceNode';
-import { EnumNode } from '../nodes/EnumNode';
-import { ListNode } from '../nodes/ListNode';
-import { RangeNode } from '../nodes/custom/RangeNode';
-import { StringNode } from '../nodes/StringNode';
-import { ReferenceNode } from '../nodes/ReferenceNode';
-import { BooleanNode } from '../nodes/BooleanNode';
-import { MapNode } from '../nodes/MapNode';
-import { SCHEMAS, COLLECTIONS } from './Registries';
+import { ObjectNode } from '../../nodes/ObjectNode';
+import { ResourceNode } from '../nodes/ResourceNode';
+import { EnumNode } from '../../nodes/EnumNode';
+import { ListNode } from '../../nodes/ListNode';
+import { RangeNode } from '../nodes/RangeNode';
+import { StringNode } from '../../nodes/StringNode';
+import { ReferenceNode } from '../../nodes/ReferenceNode';
+import { BooleanNode } from '../../nodes/BooleanNode';
+import { MapNode } from '../../nodes/MapNode';
+import { SCHEMAS, COLLECTIONS } from '../../Registries';
 
 import './Collections'
 

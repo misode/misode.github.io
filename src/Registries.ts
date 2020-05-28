@@ -1,4 +1,4 @@
-import { INode } from "../nodes/AbstractNode"
+import { INode } from "./nodes/AbstractNode"
 
 export interface Registry<T> {
   register(id: string, value: T): void

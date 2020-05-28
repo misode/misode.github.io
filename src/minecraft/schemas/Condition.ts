@@ -1,14 +1,14 @@
-import { EnumNode } from '../nodes/EnumNode';
-import { ResourceNode } from '../nodes/custom/ResourceNode';
-import { NumberNode } from '../nodes/NumberNode';
-import { BooleanNode } from '../nodes/BooleanNode';
-import { ObjectNode, Switch, Case } from '../nodes/ObjectNode';
-import { ListNode } from '../nodes/ListNode';
-import { RangeNode } from '../nodes/custom/RangeNode';
-import { MapNode } from '../nodes/MapNode';
-import { StringNode } from '../nodes/StringNode';
-import { ReferenceNode } from '../nodes/ReferenceNode';
-import { SCHEMAS, COLLECTIONS } from './Registries';
+import { EnumNode } from '../../nodes/EnumNode';
+import { ResourceNode } from '../nodes/ResourceNode';
+import { NumberNode } from '../../nodes/NumberNode';
+import { BooleanNode } from '../../nodes/BooleanNode';
+import { ObjectNode, Switch, Case } from '../../nodes/ObjectNode';
+import { ListNode } from '../../nodes/ListNode';
+import { RangeNode } from '../nodes/RangeNode';
+import { MapNode } from '../../nodes/MapNode';
+import { StringNode } from '../../nodes/StringNode';
+import { ReferenceNode } from '../../nodes/ReferenceNode';
+import { SCHEMAS, COLLECTIONS } from '../../Registries';
 
 import './Predicates'
 

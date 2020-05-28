@@ -1,5 +1,5 @@
-import { NodeMods, RenderOptions } from '../AbstractNode'
-import { EnumNode } from '../EnumNode'
+import { NodeMods, RenderOptions } from '../../nodes/AbstractNode'
+import { EnumNode } from '../../nodes/EnumNode'
 import { Path } from '../../model/Path'
 import { TreeView, getId } from '../../view/TreeView'
 

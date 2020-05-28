@@ -1,4 +1,4 @@
-import { AbstractNode, NodeMods, RenderOptions, StateNode } from '../AbstractNode'
+import { AbstractNode, NodeMods, RenderOptions, StateNode } from '../../nodes/AbstractNode'
 import { Path } from '../../model/Path'
 import { DataModel } from '../../model/DataModel'
 import { TreeView } from '../../view/TreeView'

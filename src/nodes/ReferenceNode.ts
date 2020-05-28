@@ -1,7 +1,7 @@
 import { AbstractNode, NodeMods, RenderOptions, INode } from './AbstractNode'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
-import { SCHEMAS } from '../schemas/Registries'
+import { SCHEMAS } from '../Registries'
 
 export class ReferenceNode extends AbstractNode<any> {
   protected reference: () => INode<any>
