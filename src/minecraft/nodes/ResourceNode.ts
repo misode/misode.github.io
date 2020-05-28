@@ -37,4 +37,8 @@ export class ResourceNode extends EnumNode {
       return super.renderRaw(path, value, view, options)
     }
   }
+
+  getClassName() {
+    return 'enum-node'
+  }
 }

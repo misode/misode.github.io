@@ -1,0 +1,35 @@
+
+.node {
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif
+}
+
+.list-entry:not(:last-child),
+.map-entry:not(:last-child),
+.object-node:not(:last-child) > .object-fields {
+  margin-bottom: 0.3rem;
+}
+
+.list-entry,
+.map-entry,
+.object-fields {
+  padding-left: 0.7rem;
+}
+
+.list-entry {
+  border-left: 2px solid #0b552a;
+}
+
+.map-fields {
+  border-left: 2px solid #066fb4;
+}
+
+.object-fields {
+  border-left: 2px solid #b9b9b9;
+}
+.object-node > label {
+  user-select: none;
+}
+.object-node > label.collapse {
+  cursor: pointer;
+}

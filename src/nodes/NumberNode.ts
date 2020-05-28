@@ -39,4 +39,8 @@ export class NumberNode extends AbstractNode<number> implements StateNode<number
     return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
       <input value="${value ?? ''}">`
   }
+
+  getClassName() {
+    return 'number-node'
+  }
 }

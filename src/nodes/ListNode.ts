@@ -33,7 +33,7 @@ export class ListNode extends AbstractNode<IObject[]> {
     })
     return `<label>${path.last()}:</label>
     <button data-id="${button}">Add</button>
-    <div style="padding-left:8px">
+    <div class="list-fields">
       ${value.map((obj, index) => {
         return this.renderEntry(path.push(index), obj, view)
       }).join('')}
@@ -44,8 +44,12 @@ export class ListNode extends AbstractNode<IObject[]> {
     const button = view.registerClick(el => {
       view.model.set(path, undefined)
     })
-    return `<div><button data-id="${button}">Remove</button>
+    return `<div class="list-entry"><button data-id="${button}">Remove</button>
       ${this.children.render(path, value, view, {hideLabel: true})}
     </div>`
+  }
+
+  getClassName() {
+    return 'list-node'
   }
 }

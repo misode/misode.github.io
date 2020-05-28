@@ -21,4 +21,8 @@ export class BooleanNode extends AbstractNode<boolean> {
       <button${value === false ? ' style="font-weight: bold"' : ' '} data-id="${falseButton}">False</button>
       <button${value === true ? ' style="font-weight: bold"' : ' '} data-id="${trueButton}">True</button>`
   }
+
+  getClassName() {
+    return 'boolean-node'
+  }
 }

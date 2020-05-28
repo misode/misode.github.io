@@ -28,4 +28,8 @@ export class StringNode extends AbstractNode<string> implements StateNode<string
     return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
       <input value="${value ?? ''}">`
   }
+
+  getClassName() {
+    return 'string-node'
+  }
 } 

@@ -19,15 +19,21 @@ export type FilteredChildren = {
   [Case]?: NestedNodeChildren
 }
 
+export interface ObjectNodeMods extends NodeMods<object> {
+  collapse?: boolean
+}
+
 export class ObjectNode extends AbstractNode<IObject> {
   fields: NodeChildren
   cases: NestedNodeChildren
   filter?: string
+  collapse?: boolean
 
-  constructor(fields: FilteredChildren, mods?: NodeMods<IObject>) {
+  constructor(fields: FilteredChildren, mods?: ObjectNodeMods) {
     super({
       default: () => ({}),
       ...mods})
+    this.collapse = mods?.collapse ?? false
     const {[Switch]: _switch, [Case]: _case, ..._fields} = fields
     this.fields = _fields
     this.cases = _case ?? {}
@@ -46,14 +52,38 @@ export class ObjectNode extends AbstractNode<IObject> {
   }
 
   renderRaw(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
-    value = value ?? {}
     const activeCase = this.filter ? this.cases[value[this.filter]] : {};
     const activeFields = {...this.fields, ...activeCase}
-    return `${options?.hideLabel ? `` : `<label>${path.last()}:</label>
-    <div style="padding-left:8px">`}
-      ${Object.keys(activeFields).map(f => {
-        return activeFields[f].render(path.push(f), value[f], view)
-      }).join('')}
-    ${options?.hideLabel ? `` : `</div>`}`
+    if (options?.hideLabel) {
+      value = value ?? {}
+      return this.renderFields(path, value, view, activeFields)
+    } else if (this.collapse || options?.collapse) {
+      if (value === undefined) {
+        const id = view.registerClick(() => view.model.set(path, this.default()))
+        return `<label class="collapse closed" data-id="${id}">${path.last()}</label>`
+      } else {
+        const id = view.registerClick(() => view.model.set(path, undefined))
+        return `<label class="collapse open" data-id="${id}">${path.last()}</label>
+        <div class="object-fields">
+        ${this.renderFields(path, value, view, activeFields)}
+        </div>`
+      }
+    } else {
+      value = value ?? {}
+      return `<label>${path.last()}</label>
+      <div class="object-fields">
+      ${this.renderFields(path, value, view, activeFields)}
+      </div>`
+    }
+  }
+
+  renderFields(path: Path, value: IObject, view: TreeView, activeFields: NodeChildren) {
+    return Object.keys(activeFields).map(f => {
+      return activeFields[f].render(path.push(f), value[f], view)
+    }).join('')
+  }
+
+  getClassName() {
+    return 'object-node'
   }
 }

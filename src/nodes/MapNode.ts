@@ -37,7 +37,7 @@ export class MapNode extends AbstractNode<IMap> {
     return `<label>${path.last()}:</label>
     ${this.keys.renderRaw(path, '', view, {hideLabel: true, syncModel: false})}
     <button data-id="${button}">Add</button>
-    <div style="padding-left:8px">
+    <div class="map-fields">
       ${Object.keys(value).map(key => {
         return this.renderEntry(path.push(key), value[key], view)
       }).join('')}
@@ -48,8 +48,12 @@ export class MapNode extends AbstractNode<IMap> {
     const button = view.registerClick(el => {
       view.model.set(path, undefined)
     })
-    return `<div><button data-id="${button}">Remove</button>
+    return `<div class="map-entry"><button data-id="${button}">Remove</button>
       ${this.values.render(path, value, view)}
     </div>`
+  }
+
+  getClassName() {
+    return 'map-node'
   }
 }

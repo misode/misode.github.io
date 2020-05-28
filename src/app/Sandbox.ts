@@ -51,5 +51,5 @@ export const SandboxSchema = new ObjectNode({
       nbt: 'hi'
     }
   }),
-  transform: (v) => v?.condition === 'foo' ? ({...v, test: 'hello'}) : v
+  transform: (v: any) => v?.condition === 'foo' ? ({...v, test: 'hello'}) : v
 });

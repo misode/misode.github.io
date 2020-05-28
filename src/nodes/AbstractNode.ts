@@ -17,6 +17,7 @@ export interface StateNode<T> extends INode<T> {
 export type RenderOptions = {
   hideLabel?: boolean
   syncModel?: boolean
+  collapse?: boolean
 }
 
 export type NodeChildren = {
@@ -82,8 +83,12 @@ export abstract class AbstractNode<T> implements INode<T> {
     const id = view.register(el => {
       this.mounted(el, path, view)
     })
-    return `<div data-id="${id}">${this.renderRaw(path, value, view, options)}</div>`
+    return `<div data-id="${id}" class="node ${this.getClassName()}">
+      ${this.renderRaw(path, value, view, options)}
+    </div>`
   }
 
   abstract renderRaw(path: Path, value: T, view: TreeView, options?: RenderOptions): string
+
+  abstract getClassName(): string
 }

@@ -53,7 +53,7 @@ SCHEMAS.register('location-predicate', new ObjectNode({
     x: new RangeNode(),
     y: new RangeNode(),
     z: new RangeNode()
-  }),
+  }, {collapse: true}),
   biome: new ResourceNode(COLLECTIONS.get('biomes')),
   feature: new EnumNode(COLLECTIONS.get('structures')),
   dimension: new ResourceNode(COLLECTIONS.get('dimensions'), {additional: true}),
@@ -61,8 +61,8 @@ SCHEMAS.register('location-predicate', new ObjectNode({
     light: new RangeNode()
   }),
   smokey: new BooleanNode(),
-  block: new ReferenceNode('block-predicate'),
-  fluid: new ReferenceNode('fluid-predicate')
+  block: new ReferenceNode('block-predicate', {collapse: true}),
+  fluid: new ReferenceNode('fluid-predicate', {collapse: true})
 }))
 
 SCHEMAS.register('statistic-predicate', new ObjectNode({
@@ -87,7 +87,7 @@ SCHEMAS.register('player-predicate', new ObjectNode({
   )
 }))
 
-SCHEMAS.register('status-effect', new ObjectNode({
+SCHEMAS.register('status-effect-predicate', new ObjectNode({
   amplifier: new RangeNode(),
   duration: new RangeNode(),
   ambient: new BooleanNode(),
@@ -106,22 +106,22 @@ SCHEMAS.register('entity-predicate', new ObjectNode({
   type: new StringNode(),
   nbt: new StringNode(),
   team: new StringNode(),
-  location: new ReferenceNode('location-predicate'),
-  distance: new ReferenceNode('distance-predicate'),
+  location: new ReferenceNode('location-predicate', {collapse: true}),
+  distance: new ReferenceNode('distance-predicate', {collapse: true}),
   flags: new ObjectNode({
     is_on_fire: new BooleanNode(),
     is_sneaking: new BooleanNode(),
     is_sprinting: new BooleanNode(),
     is_swimming: new BooleanNode(),
     is_baby: new BooleanNode()
-  }),
+  }, {collapse: true}),
   equipment: new MapNode(
     new EnumNode(COLLECTIONS.get('slots')),
     new ReferenceNode('item-predicate')
   ),
-  // vehicle: new ReferenceNode('entity-predicate'),
-  // targeted_entity: new ReferenceNode('entity-predicate'),
-  player: new ReferenceNode('player-predicate'),
+  vehicle: new ReferenceNode('entity-predicate', {collapse: true}),
+  targeted_entity: new ReferenceNode('entity-predicate', {collapse: true}),
+  player: new ReferenceNode('player-predicate', {collapse: true}),
   fishing_hook: new ObjectNode({
     in_open_water: new BooleanNode()
   }),

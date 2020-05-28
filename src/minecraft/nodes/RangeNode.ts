@@ -87,6 +87,10 @@ export class RangeNode extends AbstractNode<IRange> implements StateNode<IRange>
       ${input}`
   }
 
+  getClassName() {
+    return 'range-node'
+  }
+
   static isExact(v?: IRange) {
     return v === undefined || typeof v === 'number'
   }
