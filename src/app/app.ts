@@ -30,7 +30,7 @@ document.getElementById('header')?.append(modelSelector)
 new TreeView(model, document!.getElementById('view')!)
 new SourceView(model, document!.getElementById('source')!)
 
-fetch('./build/locales/en.json')
+fetch('build/locales/en.json')
   .then(r => r.json())
   .then(l => {
     LOCALES.register('en', l)

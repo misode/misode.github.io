@@ -1,9 +1,10 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
-module.exports = {
+module.exports = (env, argv) => ({
   entry: './src/app/app.ts',
   output: {
     path: __dirname + '/public',
+    publicPath: argv.mode === 'production' ? '/dev/' : '/',
     filename: 'build/bundle.js'
   },
   resolve: {
@@ -21,4 +22,4 @@ module.exports = {
       ]
     })
   ]
-}
+})
