@@ -2,6 +2,7 @@ import { AbstractNode, NodeMods, RenderOptions, StateNode } from './AbstractNode
 import { Path } from '../model/Path'
 import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
+import { locale } from '../Registries'
 
 export interface StringNodeMods extends NodeMods<string> {
   allowEmpty?: boolean
@@ -25,7 +26,7 @@ export class StringNode extends AbstractNode<string> implements StateNode<string
   }
 
   renderRaw(path: Path, value: string, view: TreeView, options?: RenderOptions) {
-    return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
+    return `${options?.hideLabel ? `` : `<label>${locale(path)}</label>`}
       <input value="${value ?? ''}">`
   }
 

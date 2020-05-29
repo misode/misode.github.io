@@ -1,6 +1,6 @@
 import { DataModel } from "./DataModel"
 
-type PathElement = (string | number)
+export type PathElement = (string | number)
 
 export class Path implements Iterable<PathElement> {
   private arr: PathElement[]
@@ -25,6 +25,10 @@ export class Path implements Iterable<PathElement> {
 
   copy(): Path {
     return new Path([...this.arr], this.model)
+  }
+
+  getArray(): PathElement[] {
+    return this.arr
   }
 
   withModel(model: DataModel): Path {

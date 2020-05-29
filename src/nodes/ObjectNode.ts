@@ -1,6 +1,7 @@
 import { NodeMods, INode, NodeChildren, AbstractNode, RenderOptions } from './AbstractNode'
 import { Path } from '../model/Path'
 import { TreeView } from '../view/TreeView'
+import { locale } from '../Registries'
 
 export const Switch = Symbol('switch')
 export const Case = Symbol('case')
@@ -52,32 +53,31 @@ export class ObjectNode extends AbstractNode<IObject> {
   }
 
   renderRaw(path: Path, value: IObject, view: TreeView, options?: RenderOptions) {
-    const activeCase = this.filter ? this.cases[value[this.filter]] : {};
-    const activeFields = {...this.fields, ...activeCase}
     if (options?.hideLabel) {
-      value = value ?? {}
-      return this.renderFields(path, value, view, activeFields)
+      return this.renderFields(path, value, view)
     } else if (this.collapse || options?.collapse) {
       if (value === undefined) {
         const id = view.registerClick(() => view.model.set(path, this.default()))
-        return `<label class="collapse closed" data-id="${id}">${path.last()}</label>`
+        return `<label class="collapse closed" data-id="${id}">${locale(path)}</label>`
       } else {
         const id = view.registerClick(() => view.model.set(path, undefined))
-        return `<label class="collapse open" data-id="${id}">${path.last()}</label>
+        return `<label class="collapse open" data-id="${id}">${locale(path)}</label>
         <div class="object-fields">
-        ${this.renderFields(path, value, view, activeFields)}
+        ${this.renderFields(path, value, view)}
         </div>`
       }
     } else {
-      value = value ?? {}
-      return `<label>${path.last()}</label>
+      return `<label>${locale(path)}</label>
       <div class="object-fields">
-      ${this.renderFields(path, value, view, activeFields)}
+      ${this.renderFields(path, value, view)}
       </div>`
     }
   }
 
-  renderFields(path: Path, value: IObject, view: TreeView, activeFields: NodeChildren) {
+  renderFields(path: Path, value: IObject, view: TreeView) {
+    value = value ?? {}
+    const activeCase = this.filter ? this.cases[value[this.filter]] : {};
+    const activeFields = {...this.fields, ...activeCase}
     return Object.keys(activeFields).map(f => {
       return activeFields[f].render(path.push(f), value[f], view)
     }).join('')

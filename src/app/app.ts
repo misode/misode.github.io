@@ -3,6 +3,7 @@ import { TreeView } from '../view/TreeView'
 import { SourceView } from '../view/SourceView'
 import { ConditionSchema } from '../minecraft/schemas/Condition'
 import { SandboxSchema } from './Sandbox'
+import { LOCALES, locale } from '../Registries'
 
 const predicateModel = new DataModel(ConditionSchema)
 const sandboxModel = new DataModel(SandboxSchema)
@@ -29,4 +30,11 @@ document.getElementById('header')?.append(modelSelector)
 new TreeView(model, document!.getElementById('view')!)
 new SourceView(model, document!.getElementById('source')!)
 
-model.invalidate()
+fetch('../build/locales/en.json')
+  .then(r => r.json())
+  .then(l => {
+    LOCALES.register('en', l)
+    LOCALES.language = 'en'
+
+    model.invalidate()
+  })

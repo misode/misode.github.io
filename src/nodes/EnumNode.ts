@@ -2,6 +2,7 @@ import { AbstractNode, NodeMods, RenderOptions, StateNode } from './AbstractNode
 import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
+import { locale } from '../Registries'
 
 export class EnumNode extends AbstractNode<string> implements StateNode<string> {
   protected options: string[]
@@ -25,9 +26,11 @@ export class EnumNode extends AbstractNode<string> implements StateNode<string> 
 
   renderRaw(path: Path, value: string, view: TreeView, options?: RenderOptions) {
     const id = view.register(el => (el as HTMLInputElement).value = value)
-    return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
+    return `${options?.hideLabel ? `` : `<label>${locale(path)}</label>`}
     <select data-id=${id}>
-      ${this.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+      ${this.options.map(o => 
+        `<option value="${o}">${locale(path.push(o))}</option>`
+      ).join('')}
     </select>`
   }
 

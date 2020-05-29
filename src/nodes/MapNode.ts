@@ -2,6 +2,7 @@ import { AbstractNode, NodeMods, INode, StateNode } from './AbstractNode'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 import { IObject } from './ObjectNode'
+import { locale } from '../Registries'
 
 export type IMap = {
   [name: string]: IObject
@@ -34,9 +35,9 @@ export class MapNode extends AbstractNode<IMap> {
       const key = this.keys.getState(el.parentElement!)
       view.model.set(path.push(key), this.values.default())
     })
-    return `<label>${path.last()}:</label>
+    return `<label>${locale(path)}:</label>
     ${this.keys.renderRaw(path, '', view, {hideLabel: true, syncModel: false})}
-    <button data-id="${button}">Add</button>
+    <button data-id="${button}">${locale('add')}</button>
     <div class="map-fields">
       ${Object.keys(value).map(key => {
         return this.renderEntry(path.push(key), value[key], view)
@@ -48,7 +49,7 @@ export class MapNode extends AbstractNode<IMap> {
     const button = view.registerClick(el => {
       view.model.set(path, undefined)
     })
-    return `<div class="map-entry"><button data-id="${button}">Remove</button>
+    return `<div class="map-entry"><button data-id="${button}">${locale('remove')}</button>
       ${this.values.render(path, value, view)}
     </div>`
   }

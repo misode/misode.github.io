@@ -2,6 +2,7 @@ import { AbstractNode, NodeMods, RenderOptions, StateNode } from '../../nodes/Ab
 import { Path } from '../../model/Path'
 import { DataModel } from '../../model/DataModel'
 import { TreeView } from '../../view/TreeView'
+import { locale } from '../../Registries'
 
 export type IRange = number
   | { min?: number, max?: number, type?: 'uniform' }
@@ -57,15 +58,15 @@ export class RangeNode extends AbstractNode<IRange> implements StateNode<IRange>
       input = `<input value=${value === undefined ? '' : value}>`
     } else if (value.type === 'binomial') {
       curType = 'binomial'
-      input = `<label>n</label>
+      input = `<label>${locale('range.n')}</label>
         <input value=${value.n === undefined ? '' : value.n}>
-        <label>p</label>
+        <label>${locale('range.p')}</label>
         <input value=${value.p === undefined ? '' : value.p}>`
     } else {
       curType = 'range'
-      input = `<label>Min</label>
+      input = `<label>${locale('range.min')}</label>
         <input value=${value.min === undefined ? '' : value.min}>
-        <label>Max</label>
+        <label>${locale('range.max')}</label>
         <input value=${value.max === undefined ? '' : value.max}>`
     }
     const id = view.register(el => {
@@ -78,11 +79,11 @@ export class RangeNode extends AbstractNode<IRange> implements StateNode<IRange>
         evt.stopPropagation()
       })
     })
-    return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
+    return `${options?.hideLabel ? `` : `<label>${locale(path)}</label>`}
       <select data-id="${id}">
-        <option value="exact">Exact</option>
-        <option value="range">Range</option>
-        <option value="binomial">Binomial</option>
+        <option value="exact">${locale('range.exact')}</option>
+        <option value="range">${locale('range.range')}</option>
+        <option value="binomial">${locale('range.binomial')}</option>
       </select>
       ${input}`
   }

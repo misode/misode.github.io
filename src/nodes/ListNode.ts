@@ -3,6 +3,7 @@ import { DataModel } from '../model/DataModel'
 import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 import { IObject } from './ObjectNode'
+import { locale } from '../Registries'
 
 export class ListNode extends AbstractNode<IObject[]> {
   protected children: INode<any>
@@ -31,8 +32,8 @@ export class ListNode extends AbstractNode<IObject[]> {
     const button = view.registerClick(el => {
       view.model.set(path, [...value, this.children.default()])
     })
-    return `<label>${path.last()}:</label>
-    <button data-id="${button}">Add</button>
+    return `<label>${locale(path)}:</label>
+    <button data-id="${button}">${locale('add')}</button>
     <div class="list-fields">
       ${value.map((obj, index) => {
         return this.renderEntry(path.push(index), obj, view)
@@ -44,7 +45,7 @@ export class ListNode extends AbstractNode<IObject[]> {
     const button = view.registerClick(el => {
       view.model.set(path, undefined)
     })
-    return `<div class="list-entry"><button data-id="${button}">Remove</button>
+    return `<div class="list-entry"><button data-id="${button}">${locale('remove')}</button>
       ${this.children.render(path, value, view, {hideLabel: true})}
     </div>`
   }

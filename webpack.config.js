@@ -1,3 +1,5 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+
 module.exports = {
   entry: './src/app/app.ts',
   output: {
@@ -11,5 +13,12 @@ module.exports = {
     rules: [
       { test: /\.ts$/, loader: 'ts-loader' }
     ]
-  }
+  },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'src/locales', to: 'build/locales'}
+      ]
+    })
+  ]
 }

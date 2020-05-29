@@ -2,6 +2,7 @@ import { NodeMods, RenderOptions } from '../../nodes/AbstractNode'
 import { EnumNode } from '../../nodes/EnumNode'
 import { Path } from '../../model/Path'
 import { TreeView, getId } from '../../view/TreeView'
+import { locale } from '../../Registries'
 
 export interface ResourceNodeMods extends NodeMods<string> {
   additional?: boolean
@@ -30,9 +31,11 @@ export class ResourceNode extends EnumNode {
   renderRaw(path: Path, value: string, view: TreeView, options?: RenderOptions) {
     if (this.additional) {
       const id = `datalist-${getId()}`
-      return `${options?.hideLabel ? `` : `<label>${path.last()}</label>`}
+      return `${options?.hideLabel ? `` : `<label>${locale(path)}</label>`}
       <input list=${id} value="${value ?? ''}">
-      <datalist id=${id}>${this.options.map(o => `<option value="${o}">`).join('')}</datalist>`
+      <datalist id=${id}>${this.options.map(o => 
+        `<option value="${o}">${locale(path.push(o))}</option>`
+      ).join('')}</datalist>`
     } else {
       return super.renderRaw(path, value, view, options)
     }

@@ -12,6 +12,7 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
+    "copy-webpack-plugin": "^6.0.1",
     "ts-loader": "^7.0.4",
     "typescript": "^3.9.3",
     "webpack": "^4.43.0",
