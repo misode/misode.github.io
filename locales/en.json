@@ -388,7 +388,7 @@
     "generator.settings.structures_add": "Add Structure",
     "generator.settings.structures_remove": "Remove Structure",
     "help.biome.parameters.altitude": "These parameters determine the placement of the biome. Every biome must have a unique combination of them. Biomes with similar values will generate next to each other.",
-    "help.biome_source.type.fixed": "One biome fro the whole world",
+    "help.biome_source.type.fixed": "One biome for the whole world",
     "help.biome_source.type.multi_noise": "Custom biome distribution with configurable parameters",
     "help.biome_source.type.checkerboard": "Biomes generating in a checkerboard chunk pattern",
     "help.biome_source.type.vanilla_layered": "Biome distribution for the overworld",
