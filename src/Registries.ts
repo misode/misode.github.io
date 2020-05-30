@@ -6,6 +6,9 @@ export interface Registry<T> {
   get(id: string): T
 }
 
+/**
+ * Registry for schemas
+ */
 class SchemaRegistry implements Registry<INode<any>> {
   private registry: { [id: string]: INode<any> } = {}
 
@@ -22,6 +25,9 @@ class SchemaRegistry implements Registry<INode<any>> {
   }
 }
 
+/**
+ * Registry for collections
+ */
 class CollectionRegistry implements Registry<string[]> {
   private registry: { [id: string]: string[] } = {}
 
@@ -38,6 +44,9 @@ class CollectionRegistry implements Registry<string[]> {
   }
 }
 
+/**
+ * Registry for locales
+ */
 export interface Locale {
   [key: string]: string
 }
@@ -46,6 +55,11 @@ class LocaleRegistry implements Registry<Locale> {
   private registry: { [id: string]: Locale } = {}
   language: string = ''
 
+  /**
+   * 
+   * @param id locale identifier
+   * @param locale object mapping keys to translations
+   */
   register(id: string, locale: Locale): void {
     this.registry[id] = locale
   }
@@ -67,6 +81,14 @@ export const SCHEMAS = new SchemaRegistry()
 export const COLLECTIONS = new CollectionRegistry()
 export const LOCALES = new LocaleRegistry()
 
+/**
+ * Gets the locale of a key from the locale registry.
+ * 
+ * @param key string or path that refers to a locale ID.
+ *    If a string is given, an exact match is required.
+ *    If a path is given, it finds the longest match at the end.
+ * @returns undefined if the key isn't found for the selected language
+ */
 export const locale = (key: string | Path) => {
   if (typeof key === 'string') {
     return LOCALES.getLocale(key) ?? key

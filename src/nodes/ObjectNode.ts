@@ -16,20 +16,31 @@ export type IObject = {
 
 export type FilteredChildren = {
   [name: string]: INode<any>
+  /** The field to filter on */
   [Switch]?: string
+  /** Map of filter values to node fields */
   [Case]?: NestedNodeChildren
 }
 
 export interface ObjectNodeMods extends NodeMods<object> {
+  /** Whether the object can be collapsed. Necessary when recursively nesting. */
   collapse?: boolean
 }
 
+/**
+ * Object node containing fields with different types.
+ * Has the ability to filter fields based on a switch field.
+ */
 export class ObjectNode extends AbstractNode<IObject> {
   fields: NodeChildren
   cases: NestedNodeChildren
   filter?: string
   collapse?: boolean
 
+  /**
+   * @param fields children containing the optional switch and case
+   * @param mods optional node modifiers
+   */
   constructor(fields: FilteredChildren, mods?: ObjectNodeMods) {
     super({
       default: () => ({}),

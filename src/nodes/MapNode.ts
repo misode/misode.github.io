@@ -8,10 +8,19 @@ export type IMap = {
   [name: string]: IObject
 }
 
+/**
+ * Map nodes similar to list nodes, but a string key is required to add children
+ */
 export class MapNode extends AbstractNode<IMap> {
   protected keys: StateNode<string>
   protected values: INode<any>
 
+  /**
+   * 
+   * @param keys node used for the string key
+   * @param values node used for the map values
+   * @param mods optional node modifiers
+   */
   constructor(keys: StateNode<string>, values: INode<any>, mods?: NodeMods<IMap>) {
     super({
       default: () => ({}),

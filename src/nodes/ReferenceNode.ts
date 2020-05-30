@@ -7,10 +7,17 @@ export interface AnyNodeMods extends NodeMods<any> {
   [name: string]: any
 }
 
+/**
+ * Reference node. Must be used when recursively adding nodes.
+ */
 export class ReferenceNode extends AbstractNode<any> {
   protected reference: () => INode<any>
   options: RenderOptions
 
+  /**
+   * @param id schema id that was registered
+   * @param mods optional node modifiers
+   */
   constructor(id: string, mods?: AnyNodeMods) {
     super(mods)
     this.options = {

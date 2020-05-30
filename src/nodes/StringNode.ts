@@ -5,12 +5,19 @@ import { TreeView } from '../view/TreeView'
 import { locale } from '../Registries'
 
 export interface StringNodeMods extends NodeMods<string> {
+  /** Whether the string can also be empty */
   allowEmpty?: boolean
 }
 
+/**
+ * Simple string node with one text field
+ */
 export class StringNode extends AbstractNode<string> implements StateNode<string> {
   allowEmpty: boolean
 
+  /**
+   * @param mods optional node modifiers
+   */
   constructor(mods?: StringNodeMods) {
     super(mods)
     this.allowEmpty = mods?.allowEmpty ?? false

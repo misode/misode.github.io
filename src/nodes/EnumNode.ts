@@ -4,10 +4,17 @@ import { TreeView } from '../view/TreeView'
 import { Path } from '../model/Path'
 import { locale } from '../Registries'
 
+/**
+ * Enum node that shows a list of options to choose from
+ */
 export class EnumNode extends AbstractNode<string> implements StateNode<string> {
   protected options: string[]
   static className = 'enum-node'
 
+  /**
+   * @param options options to choose from in the select
+   * @param mods optional node modifiers or a string to be the default value
+   */
   constructor(options: string[], mods?: NodeMods<string> | string) {
     super(typeof mods === 'string' ? {
         default: () => mods,

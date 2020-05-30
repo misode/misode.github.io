@@ -5,9 +5,16 @@ import { Path } from '../model/Path'
 import { IObject } from './ObjectNode'
 import { locale } from '../Registries'
 
+/**
+ * List node where children can be added and removed from
+ */
 export class ListNode extends AbstractNode<IObject[]> {
   protected children: INode<any>
 
+  /**
+   * @param values node used for its children
+   * @param mods optional node modifiers
+   */
   constructor(values: INode<any>, mods?: NodeMods<IObject[]>) {
     super({
       default: () => [],

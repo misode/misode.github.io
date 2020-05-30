@@ -3,8 +3,14 @@ import { Path } from "../model/Path";
 import { TreeView } from "../view/TreeView";
 import { locale } from "../Registries";
 
+/**
+ * Boolean node with two buttons for true/false
+ */
 export class BooleanNode extends AbstractNode<boolean> {
 
+  /**
+   * @param mods optional node modifiers
+   */
   constructor(mods?: NodeMods<boolean>) {
     super({
       default: () => false,

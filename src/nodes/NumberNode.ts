@@ -5,16 +5,25 @@ import { TreeView } from '../view/TreeView'
 import { locale } from '../Registries'
 
 export interface NumberNodeMods extends NodeMods<number> {
+  /** Whether numbers should be converted to integers on input */
   integer?: boolean
+  /** If specified, number will be capped at this minimum */
   min?: number
+  /** If specified, number will be capped at this maximum */
   max?: number
 }
 
+/**
+ * Configurable number node with one text field
+ */
 export class NumberNode extends AbstractNode<number> implements StateNode<number> {
   integer: boolean
   min: number
   max: number
 
+  /**
+   * @param mods optional node modifiers
+   */
   constructor(mods?: NumberNodeMods) {
     super({
       default: () => 0,
