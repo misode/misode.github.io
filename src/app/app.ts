@@ -1,10 +1,13 @@
-import { DataModel } from '../model/DataModel'
-import { TreeView } from '../view/TreeView'
-import { SourceView } from '../view/SourceView'
-import { ConditionSchema } from '../minecraft/schemas/Condition'
-import { LootTableSchema } from '../minecraft/schemas/LootTable'
+import {
+  DataModel,
+  TreeView,
+  SourceView,
+  ConditionSchema,
+  LootTableSchema,
+  LOCALES
+} from 'minecraft-schemas'
+
 import { SandboxSchema } from './Sandbox'
-import { LOCALES } from '../Registries'
 
 const predicateModel = new DataModel(ConditionSchema)
 const lootTableModel = new DataModel(LootTableSchema)

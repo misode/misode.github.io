@@ -1,11 +1,14 @@
-import { ObjectNode } from '../nodes/ObjectNode';
-import { EnumNode } from '../nodes/EnumNode';
-import { NumberNode } from '../nodes/NumberNode';
-import { BooleanNode } from '../nodes/BooleanNode';
-import { RangeNode } from '../minecraft/nodes/RangeNode';
-import { MapNode } from '../nodes/MapNode';
-import { StringNode } from '../nodes/StringNode';
-import { ListNode } from '../nodes/ListNode';
+import {
+  ObjectNode,
+  EnumNode,
+  StringNode,
+  NumberNode,
+  BooleanNode,
+  RangeNode,
+  MapNode,
+  ListNode,
+  SCHEMAS
+} from 'minecraft-schemas'
 
 const EntityCollection = ['sheep', 'pig']
 
