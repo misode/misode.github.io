@@ -20,6 +20,40 @@ COLLECTIONS.register('conditions', [
   'survives_explosion'
 ])
 
+COLLECTIONS.register('loot-entries', [
+  'empty',
+  'item',
+  'tag',
+  'loot_table',
+  'alternatives',
+  'sequence',
+  'group',
+  'dynamic'
+])
+
+COLLECTIONS.register('loot-functions', [
+  'set_count',
+  'set_damage',
+  'set_name',
+  'set_lore',
+  'set_nbt',
+  'set_attributes',
+  'set_contents',
+  'enchant_randomly',
+  'enchant_with_levels',
+  'looting_enchant',
+  'limit_count',
+  'furnace_smelt',
+  'explosion_decay',
+  'fill_player_head',
+  'copy_name',
+  'copy_nbt',
+  'copy_state',
+  'apply_bonus',
+  'exploration_map',
+  'set_stew_effect'
+])
+
 COLLECTIONS.register('enchantments', [
   'aqua_affinity',
   'bane_of_arthropods',
@@ -231,4 +265,57 @@ COLLECTIONS.register('entity-sources', [
   'this',
   'killer',
   'killer_player'
+])
+
+COLLECTIONS.register('copy-sources', [
+  'block_entity',
+  'this',
+  'killer',
+  'killer_player'
+])
+
+COLLECTIONS.register('attributes', [
+  'generic.max_health',
+  'generic.follow_range',
+  'generic.knockback_resistance',
+  'generic.movement_speed',
+  'generic.attack_damage',
+  'generic.armor',
+  'generic.armor_toughness',
+  'generic.attack_speed',
+  'generic.luck',
+  'horse.jump_strength',
+  'generic.attack_knockback',
+  'generic.flying_speed',
+  'zombie.spawn_reinforcements'
+])
+
+COLLECTIONS.register('map-decorations', [
+  'mansion',
+  'monument',
+  'player',
+  'frame',
+  'red_marker',
+  'blue_marker',
+  'target_x',
+  'target_point',
+  'player_off_map',
+  'player_off_limits',
+  'red_x',
+  'banner_white',
+  'banner_orange',
+  'banner_magenta',
+  'banner_light_blue',
+  'banner_yellow',
+  'banner_lime',
+  'banner_pink',
+  'banner_gray',
+  'banner_light_gray',
+  'banner_cyan',
+  'banner_purple',
+  'banner_blue',
+  'banner_brown',
+  'banner_green',
+  'banner_red',
+  'banner_black'
 ])
