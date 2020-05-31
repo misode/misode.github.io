@@ -541,6 +541,7 @@
           "id": "chances",
           "type": "chance-list",
           "translate": "condition.chances",
+          "help": true,
           "require": [
             "minecraft:table_bonus"
           ]

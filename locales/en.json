@@ -393,6 +393,7 @@
     "help.biome_source.type.checkerboard": "Biomes generating in a checkerboard chunk pattern",
     "help.biome_source.type.vanilla_layered": "Biome distribution for the overworld",
     "help.biome_source.type.the_end": "Biome distrubution for the end",
+    "help.condition.chances": "List of floats between 0 and 1 separated by commas",
     "help.condition.time_period": "If present, time will be modulo-divided by this value. For example, if set to 24000, value will operate on a time period of days.",
     "help.dimension": "The identifier used for \"/execute in\". Must be all lowercase.",
     "help.dimension.type.ultrawarm": "If true, water will evaporate and sponges will dry",

@@ -372,6 +372,7 @@ function updateField(el) {
     for (let i = 0; i < value.length; i += 1) {
       value[i] = value[i].trim();
       if (type === 'chance-list') {
+        value[i] = parseFloat(value[i]);
         if (isNaN(value[i])) {
           value = [];
           break;
