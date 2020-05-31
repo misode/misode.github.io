@@ -6,8 +6,7 @@ import {
   BooleanNode,
   RangeNode,
   MapNode,
-  ListNode,
-  SCHEMAS
+  ListNode
 } from 'minecraft-schemas'
 
 const EntityCollection = ['sheep', 'pig']

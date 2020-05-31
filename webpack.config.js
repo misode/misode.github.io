@@ -18,7 +18,14 @@ module.exports = (env, argv) => ({
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'src/locales', to: 'build/locales'}
+        {
+          from: 'src/locales',
+          to: 'build/locales'
+        },
+        {
+          from: 'node_modules/minecraft-schemas/src/locales',
+          to: 'build/locales-schema'
+        }
       ]
     })
   ]
