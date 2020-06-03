@@ -1,5 +1,6 @@
 import {
   DataModel,
+  IView,
   TreeView,
   SourceView,
   ConditionSchema,
@@ -7,41 +8,46 @@ import {
   AdvancementSchema,
   LOCALES
 } from 'minecraft-schemas'
+import Split from 'split.js'
 
 import { SandboxSchema } from './Sandbox'
 
-const predicateModel = new DataModel(ConditionSchema)
-const lootTableModel = new DataModel(LootTableSchema)
-const advancementModel = new DataModel(AdvancementSchema)
-const sandboxModel = new DataModel(SandboxSchema)
+const models: {
+  [key: string]: DataModel
+} = {
+  'loot-table': new DataModel(LootTableSchema),
+  'predicate': new DataModel(ConditionSchema),
+  'advancement': new DataModel(AdvancementSchema),
+  'sandbox': new DataModel(SandboxSchema)
+}
 
-let model = lootTableModel
+let model = models["loot-table"]
 
-let sourceView = new SourceView(model, document.getElementById('source')!, {indentation: 2})
-let treeView = new TreeView(model, document.getElementById('view')!)
+let treeViewEl = document.getElementById('tree-view')!
+let sourceviewEl = document.getElementById('source-view')!
+Split([treeViewEl, sourceviewEl], {
+  sizes: [66, 34]
+})
 
-const modelSelector = document.createElement('select')
-modelSelector.value = 'predicate'
-modelSelector.innerHTML = `
-  <option value="advancement">Advancement</option>
-  <option value="loot-table">Loot Table</option>
-  <option value="predicate">Predicate</option>
-  <option value="sandbox">Sandbox</option>`
+const views: {
+  [key: string]: IView
+} = {
+  'tree': new TreeView(model, treeViewEl),
+  'source': new SourceView(model, sourceviewEl.getElementsByTagName('textarea')[0], {indentation: 2})
+}
+
+const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
 modelSelector.addEventListener('change', evt => {
-  if (modelSelector.value === 'sandbox') {
-    model = sandboxModel
-  } else if (modelSelector.value === 'loot-table') {
-    model = lootTableModel
-  }  else if (modelSelector.value === 'advancement') {
-    model = advancementModel
-  } else {
-    model = predicateModel
+  model = models[modelSelector.value]
+  for (const v in views) {
+    views[v].setModel(model)
   }
-  sourceView.setModel(model)
-  treeView.setModel(model)
   model.invalidate()
 })
-document.getElementById('header')?.append(modelSelector)
+
+setTimeout(() => {
+  window.scroll(0, 0)
+}, 1000)
 
 fetch('build/locales-schema/en.json')
   .then(r => r.json())

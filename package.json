@@ -12,8 +12,10 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
+    "@types/split.js": "^1.4.0",
     "copy-webpack-plugin": "^6.0.1",
     "minecraft-schemas": "^0.1.2",
+    "split.js": "^1.5.11",
     "ts-loader": "^7.0.4",
     "typescript": "^3.9.3",
     "webpack": "^4.43.0",

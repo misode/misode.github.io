@@ -4,14 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <link rel="stylesheet" href="./styles/global.css">
   <link rel="stylesheet" href="./styles/nodes.css">
 </head>
 <body>
-  <div id="header"></div>
-  <hr>
-  <div id="view"></div>
-  <hr>
-  <div id="source" style="font-family: monospace;"></div>
+  <div class="container">
+    <div class="header">
+      <select id="model-selector" class="dropdown">
+        <option value="loot-table">Loot Table</option>
+        <option value="predicate">Predicate</option>
+        <option value="advancement">Advancement</option>
+        <option value="sandbox">Sandbox</option>
+      </select>
+    </div>
+    <div class="content">
+      <div class="tree" id="tree-view"></div>
+      <div class="source" id="source-view">
+        <div class="source-controls">
+          <button class="btn">Copy</button>
+        </div>
+        <textarea spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+      </div>
+    </div>
+  </div>
   <script src="./build/bundle.js"></script>
 </body>
 </html>
