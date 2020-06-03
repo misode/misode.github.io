@@ -21,8 +21,10 @@ const models: {
   'sandbox': new DataModel(SandboxSchema)
 }
 
+const modelFromPath = (p: string) => p.split('/').filter(e => e.length !== 0).pop() ?? ''
+
 const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
-const defaultModel = location.pathname.replace(/^\//, '')
+const defaultModel = modelFromPath(location.pathname)
 let model = models[defaultModel]
 
 const treeViewEl = document.getElementById('tree-view')!
@@ -58,8 +60,7 @@ modelSelector.addEventListener('change', evt => {
 })
 
 window.onpopstate = (evt: PopStateEvent) => {
-  const newModel = location.pathname.replace(/^\//, '')
-  updateModel(newModel)
+  updateModel(modelFromPath(location.pathname))
 }
 
 const sourceControlsToggle = document.getElementById('source-controls-toggle')!
