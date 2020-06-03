@@ -21,7 +21,9 @@ const models: {
   'sandbox': new DataModel(SandboxSchema)
 }
 
-let model = models["loot-table"]
+const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
+const defaultModel = location.pathname.replace(/^\//, '')
+let model = models[defaultModel]
 
 const treeViewEl = document.getElementById('tree-view')!
 const sourceviewEl = document.getElementById('source-view')!
@@ -37,14 +39,28 @@ const views: {
   'source': new SourceView(model, sourceviewEl.getElementsByTagName('textarea')[0], {indentation: 2})
 }
 
-const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
-modelSelector.addEventListener('change', evt => {
-  model = models[modelSelector.value]
+const updateModel = (newModel: string) => {
+  model = models[newModel]
   for (const v in views) {
     views[v].setModel(model)
   }
+  modelSelector.innerHTML = Object.keys(models)
+    .map(m => `<option value=${m}${m === newModel ? ' selected' : ''}>${m}</option>`)
+    .join('')
   model.invalidate()
+}
+updateModel(defaultModel)
+
+modelSelector.addEventListener('change', evt => {
+  const newModel = modelSelector.value
+  updateModel(newModel)
+  history.pushState({model: newModel}, newModel, `../${newModel}`)
 })
+
+window.onpopstate = (evt: PopStateEvent) => {
+  const newModel = location.pathname.replace(/^\//, '')
+  updateModel(newModel)
+}
 
 const sourceControlsToggle = document.getElementById('source-controls-toggle')!
 const sourceControlsMenu = document.getElementById('source-controls-menu')!
@@ -82,11 +98,7 @@ sourceControlsDownload.addEventListener('click', evt => {
   downloadAnchor.click()
 })
 
-setTimeout(() => {
-  window.scroll(0, 0)
-}, 1000)
-
-fetch('build/locales-schema/en.json')
+fetch('locales/schema/en.json')
   .then(r => r.json())
   .then(l => {
     LOCALES.register('en', l)

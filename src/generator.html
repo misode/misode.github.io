@@ -3,19 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minecraft Generators</title>
-  <link rel="stylesheet" href="./styles/global.css">
-  <link rel="stylesheet" href="./styles/nodes.css">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="../styles/nodes.css">
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <select id="model-selector" class="btn">
-        <option value="loot-table">Loot Table</option>
-        <option value="predicate">Predicate</option>
-        <option value="advancement">Advancement</option>
-        <option value="sandbox">Sandbox</option>
-      </select>
+      <select id="model-selector" class="btn"></select>
     </div>
     <div class="content">
       <div class="tree" id="tree-view"></div>
@@ -42,6 +37,5 @@
       </div>
     </div>
   </div>
-  <script src="./build/bundle.js"></script>
 </body>
 </html>

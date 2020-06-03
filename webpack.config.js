@@ -1,11 +1,12 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = (env, argv) => ({
   entry: './src/app/app.ts',
   output: {
-    path: __dirname + '/public',
+    path: __dirname + '/dist',
     publicPath: argv.mode === 'production' ? '/dev/' : '/',
-    filename: 'build/bundle.js'
+    filename: 'js/bundle.js'
   },
   resolve: {
     extensions: ['.ts', '.js']
@@ -20,13 +21,42 @@ module.exports = (env, argv) => ({
       patterns: [
         {
           from: 'src/locales',
-          to: 'build/locales'
+          to: 'locales/app'
         },
         {
           from: 'node_modules/minecraft-schemas/src/locales',
-          to: 'build/locales-schema'
+          to: 'locales/schema'
+        },
+        {
+          from: 'src/styles',
+          to: 'styles'
         }
       ]
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Minecraft Generators',
+      filename: 'index.html',
+      template: 'src/home.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Loot Table Generator Minecraft',
+      filename: 'loot-table/index.html',
+      template: 'src/generator.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Predicate Generator Minecraft',
+      filename: 'predicate/index.html',
+      template: 'src/generator.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Advancement Generator Minecraft',
+      filename: 'advancement/index.html',
+      template: 'src/generator.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Sandbox Generator Minecraft',
+      filename: 'sandbox/index.html',
+      template: 'src/generator.html'
     })
   ]
 })
