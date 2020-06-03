@@ -30,8 +30,8 @@
 
 .source textarea {
   width: 100%;
-  height: calc(100vh - 56px - 30px - 13px);
-  padding: 0.4rem;
+  height: calc(100vh - 56px);
+  padding: 1.3rem 0.4rem;
   border: none;
   white-space: pre;
   overflow-wrap: normal;
@@ -48,9 +48,31 @@
 }
 
 .source-controls {
-  padding: 0.4rem;
   display: flex;
   flex-direction: row-reverse;
+  position: absolute;
+  right: 17px;
+  top: 56px;
+  padding: 5px;
+}
+
+.source-controls .btn:not(:first-child) {
+  margin-right: 5px;
+}
+
+.source-controls-more {
+  display: flex;
+  visibility: hidden;
+  flex-direction: column;
+  position: absolute;
+  right: 17px;
+  top: 91px;
+  padding: 5px;
+}
+
+.source-controls .btn,
+.source-controls-more .btn {
+  background: #1f2020a6;
 }
 
 .gutter.gutter-horizontal {
@@ -59,34 +81,28 @@
   cursor: ew-resize;
 }
 
-
 .btn {
-  display: inline;
+  display: flex;
+  align-items: center;
   border: none;
   color: #ffffff;
-  background: #5c615f;
-  padding: 7px 20px;
+  fill: #ffffff;
+  background-color: #1f2020a6;
+  padding: 7px 11px;
   cursor: pointer;
   outline: none;
   transition: background-color 0.2s;
+}
+
+.btn.check {
+  fill: #97fa55;
+  color: #97fa55;
+}
+
+.btn svg:not(:last-child) {
+  margin-right: 5px;
 }
 
 .btn:hover {
-  background: #787c7b;
-}
-
-.dropdown {
-  display: inline;
-  border: none;
-  color: #ffffff;
-  background: #5c615f;
-  padding: 7px 7px;
-  cursor: pointer;
-  outline: none;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
-
-.dropdown:hover {
-  background: #787c7b;
+  background-color: #5d5f5fa6;
 }
