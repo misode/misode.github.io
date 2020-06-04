@@ -1,2 +1,9 @@
 {
+  "generator.loot-table": "Loot Table",
+  "generator.predicate": "Predicate",
+  "generator.advancement": "Advancement",
+  "generator.sandbox": "Sandbox",
+  "copy": "Copy",
+  "download": "Download",
+  "share": "Share"
 }

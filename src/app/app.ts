@@ -6,76 +6,15 @@ import {
   ConditionSchema,
   LootTableSchema,
   AdvancementSchema,
-  LOCALES
+  LOCALES,
+  locale
 } from 'minecraft-schemas'
 import Split from 'split.js'
 
 import { SandboxSchema } from './Sandbox'
 
-const models: {
-  [key: string]: DataModel
-} = {
-  'loot-table': new DataModel(LootTableSchema),
-  'predicate': new DataModel(ConditionSchema),
-  'advancement': new DataModel(AdvancementSchema),
-  'sandbox': new DataModel(SandboxSchema)
-}
 
 const modelFromPath = (p: string) => p.split('/').filter(e => e.length !== 0).pop() ?? ''
-
-const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
-const defaultModel = modelFromPath(location.pathname)
-let model = models[defaultModel]
-
-const treeViewEl = document.getElementById('tree-view')!
-const sourceviewEl = document.getElementById('source-view')!
-const sourceviewOut = document.getElementById('source-view-output')!
-Split([treeViewEl, sourceviewEl], {
-  sizes: [66, 34]
-})
-
-const views: {
-  [key: string]: IView
-} = {
-  'tree': new TreeView(model, treeViewEl),
-  'source': new SourceView(model, sourceviewEl.getElementsByTagName('textarea')[0], {indentation: 2})
-}
-
-const updateModel = (newModel: string) => {
-  model = models[newModel]
-  for (const v in views) {
-    views[v].setModel(model)
-  }
-  modelSelector.innerHTML = Object.keys(models)
-    .map(m => `<option value=${m}${m === newModel ? ' selected' : ''}>${m}</option>`)
-    .join('')
-  model.invalidate()
-}
-updateModel(defaultModel)
-
-modelSelector.addEventListener('change', evt => {
-  const newModel = modelSelector.value
-  updateModel(newModel)
-  history.pushState({model: newModel}, newModel, `../${newModel}`)
-})
-
-window.onpopstate = (evt: PopStateEvent) => {
-  updateModel(modelFromPath(location.pathname))
-}
-
-const sourceControlsToggle = document.getElementById('source-controls-toggle')!
-const sourceControlsMenu = document.getElementById('source-controls-menu')!
-sourceControlsToggle.addEventListener('click', evt => {
-  sourceControlsMenu.style.visibility = 'visible'
-
-  document.body.addEventListener('click', evt => {
-    sourceControlsMenu.style.visibility = 'hidden'
-  }, { capture: true, once: true })
-})
-
-const sourceControlsCopy = document.getElementById('source-controls-copy')!
-const sourceControlsDownload = document.getElementById('source-controls-download')!
-const sourceControlsShare = document.getElementById('source-controls-share')!
 
 const addChecked = (el: HTMLElement) => {
   el.classList.add('check')
@@ -84,26 +23,88 @@ const addChecked = (el: HTMLElement) => {
   }, 2000)
 }
 
-sourceControlsCopy.addEventListener('click', evt => {
-  (sourceviewOut as HTMLTextAreaElement).select()
-  document.execCommand('copy');
-  addChecked(sourceControlsCopy)
-})
+Promise.all([
+  fetch('../locales/schema/en.json').then(r => r.json()),
+  fetch('../locales/app/en.json').then(r => r.json())
+]).then(responses => {
+  LOCALES.register('en', {...responses[0], ...responses[1]})
+  LOCALES.language = 'en'
 
-sourceControlsDownload.addEventListener('click', evt => {
-  const fileContents = encodeURIComponent(JSON.stringify(model.data, null, 2) + "\n")
-  const dataString = "data:text/json;charset=utf-8," + fileContents
-  const downloadAnchor = document.getElementById('source-controls-download-anchor')!
-  downloadAnchor.setAttribute("href", dataString)
-  downloadAnchor.setAttribute("download", "data.json")
-  downloadAnchor.click()
-})
+  const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
+  const treeViewEl = document.getElementById('tree-view')!
+  const sourceViewEl = document.getElementById('source-view')!
+  const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
+  const sourceControlsToggle = document.getElementById('source-controls-toggle')!
+  const sourceControlsMenu = document.getElementById('source-controls-menu')!
+  const sourceControlsCopy = document.getElementById('source-controls-copy')!
+  const sourceControlsDownload = document.getElementById('source-controls-download')!
 
-fetch('../locales/schema/en.json')
-  .then(r => r.json())
-  .then(l => {
-    LOCALES.register('en', l)
-    LOCALES.language = 'en'
+  let selected = modelFromPath(location.pathname)
 
-    model.invalidate()
+  const models: { [key: string]: DataModel } = {
+    'loot-table': new DataModel(LootTableSchema),
+    'predicate': new DataModel(ConditionSchema),
+    'advancement': new DataModel(AdvancementSchema),
+    'sandbox': new DataModel(SandboxSchema)
+  }
+
+  const views: { [key: string]: IView } = {
+    'tree': new TreeView(models[selected], treeViewEl),
+    'source': new SourceView(models[selected], sourceViewOutput, {indentation: 2})
+  }
+
+  const updateModel = (newModel: string) => {
+    selected = newModel
+    for (const v in views) {
+      views[v].setModel(models[selected])
+    }
+    modelSelector.innerHTML = Object.keys(models)
+      .map(m => `<option value=${m}${m === selected ? ' selected' : ''}>
+        ${locale(`generator.${m}`)}</option>`)
+      .join('')
+    models[selected].invalidate()
+  }
+  updateModel(selected)
+
+  Split([treeViewEl, sourceViewEl], {
+    sizes: [66, 34]
   })
+
+  modelSelector.addEventListener('change', evt => {
+    const newModel = modelSelector.value
+    updateModel(newModel)
+    history.pushState({model: newModel}, newModel, `../${newModel}`)
+  })
+
+  window.onpopstate = (evt: PopStateEvent) => {
+    updateModel(modelFromPath(location.pathname))
+  }
+
+  sourceControlsToggle.addEventListener('click', evt => {
+    sourceControlsMenu.style.visibility = 'visible'
+    document.body.addEventListener('click', evt => {
+      sourceControlsMenu.style.visibility = 'hidden'
+    }, { capture: true, once: true })
+  })
+
+  sourceControlsCopy.addEventListener('click', evt => {
+    sourceViewOutput.select()
+    document.execCommand('copy');
+    addChecked(sourceControlsCopy)
+  })
+
+  sourceControlsDownload.addEventListener('click', evt => {
+    const fileContents = encodeURIComponent(JSON.stringify(models[selected].data, null, 2) + "\n")
+    const dataString = "data:text/json;charset=utf-8," + fileContents
+    const downloadAnchor = document.getElementById('source-controls-download-anchor')!
+    downloadAnchor.setAttribute("href", dataString)
+    downloadAnchor.setAttribute("download", "data.json")
+    downloadAnchor.click()
+  })
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
+  })
+
+  document.body.style.visibility = 'initial'
+})
