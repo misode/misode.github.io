@@ -99,7 +99,7 @@ sourceControlsDownload.addEventListener('click', evt => {
   downloadAnchor.click()
 })
 
-fetch('locales/schema/en.json')
+fetch('../locales/schema/en.json')
   .then(r => r.json())
   .then(l => {
     LOCALES.register('en', l)
