@@ -20,7 +20,6 @@ body {
   align-items: center;
   padding: 10px;
   height: 56px;
-  /* background: #2e2e2e; */
   border-bottom: 2px #ccc solid;
   color: #343a40
 }
@@ -31,7 +30,6 @@ body {
 
 .header-title h2 {
   margin-right: 10px;
-  /* white-space: nowrap; */
 }
 
 .header-title .model-selector {
@@ -89,9 +87,8 @@ body {
   left: 0;
   margin-top: 10px;
   z-index: 10;
-  font-size: 1rem;
   border-radius: 3px;
-  background-color: #ffffff;
+  background-color: #ffffff83;
 }
 
 .content {
@@ -143,7 +140,7 @@ body {
   flex-direction: column;
   position: absolute;
   right: 17px;
-  top: 91px;
+  top: 93px;
   padding: 5px;
 }
 
@@ -241,6 +238,6 @@ body {
 
   .source.toggled .source-controls-menu {
     right: 17px;
-    top: 35px;
+    top: 37px;
   }
 }
