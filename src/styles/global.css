@@ -4,17 +4,80 @@
   padding: 0;
 }
 
+body {
+  font-size: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 .container {
   background-color: #ffffff;
 }
 
 .header {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px;
   height: 56px;
   /* background: #2e2e2e; */
   border-bottom: 2px #ccc solid;
   color: #343a40
+}
+
+.header-title {
+  display: flex;
+}
+
+.header-title h2 {
+  margin-right: 10px;
+}
+
+.header-title .model-selector {
+  padding: 2px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  fill: #343a40;
+  cursor: pointer;
+  margin-left: 32px;
+  user-select: none;
+}
+
+.nav-item:hover {
+  fill: #565d64;
+}
+
+.nav-item .inactive {
+  display: none;
+}
+
+.nav-item span {
+  font-size: 1.1em;
+}
+
+.nav-selector {
+  position: relative;
+}
+
+.nav-selector-menu {
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 10px;
+  z-index: 10;
+  font-size: 1rem;
+  border-radius: 3px;
+  background-color: #ffffff;
 }
 
 .content {
@@ -60,7 +123,7 @@
   margin-right: 5px;
 }
 
-.source-controls-more {
+.source-controls-menu {
   display: flex;
   visibility: hidden;
   flex-direction: column;
@@ -68,11 +131,6 @@
   right: 17px;
   top: 91px;
   padding: 5px;
-}
-
-.source-controls .btn,
-.source-controls-more .btn {
-  background: #1f2020a6;
 }
 
 .gutter.gutter-horizontal {
@@ -85,18 +143,20 @@
   display: flex;
   align-items: center;
   border: none;
+  border-radius: 3px;
   color: #ffffff;
   fill: #ffffff;
   background-color: #1f2020a6;
   padding: 7px 11px;
   cursor: pointer;
   outline: none;
+  font-size: 1rem;
   transition: background-color 0.2s;
 }
 
 .btn.check {
-  fill: #97fa55;
-  color: #97fa55;
+  fill: #a5e77a;
+  color: #a5e77a;
 }
 
 .btn svg:not(:last-child) {
@@ -105,4 +165,14 @@
 
 .btn:hover {
   background-color: #5d5f5fa6;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.btn-group .btn:not(:first-child) {
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
 }

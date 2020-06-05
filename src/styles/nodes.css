@@ -1,9 +1,4 @@
 
-.node {
-  font-size: 18px;
-  font-family: Arial, Helvetica, sans-serif
-}
-
 .list-entry:not(:last-child),
 .map-entry:not(:last-child),
 .object-node:not(:last-child) > .object-fields {

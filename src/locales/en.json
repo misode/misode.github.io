@@ -1,8 +1,9 @@
 {
-  "generator.loot-table": "Loot Table",
-  "generator.predicate": "Predicate",
-  "generator.advancement": "Advancement",
-  "generator.sandbox": "Sandbox",
+  "generator.loot-table": "Loot Table Generator",
+  "generator.predicate": "Predicate Generator",
+  "generator.advancement": "Advancement Generator",
+  "generator.sandbox": "Sandbox Generator",
+  "language": "Language",
   "copy": "Copy",
   "download": "Download",
   "share": "Share"

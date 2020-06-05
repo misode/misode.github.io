@@ -23,14 +23,26 @@ const addChecked = (el: HTMLElement) => {
   }, 2000)
 }
 
+const languages: { [key: string]: string } = {
+  'en': 'English',
+  'pt': 'Português',
+  'ru': 'Русский',
+  'zh-CN': '简体中文'
+}
+
 Promise.all([
   fetch('../locales/schema/en.json').then(r => r.json()),
   fetch('../locales/app/en.json').then(r => r.json())
 ]).then(responses => {
   LOCALES.register('en', {...responses[0], ...responses[1]})
-  LOCALES.language = 'en'
 
+  const selectedModel = document.getElementById('selected-model')!
   const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
+  const modelSelectorMenu = document.getElementById('model-selector-menu')!
+  const languageSelector = document.getElementById('language-selector')!
+  const languageSelectorMenu = document.getElementById('language-selector-menu')!
+  const themeSelector = document.getElementById('theme-selector')!
+  const githubLink = document.getElementById('github-link')!
   const treeViewEl = document.getElementById('tree-view')!
   const sourceViewEl = document.getElementById('source-view')!
   const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
@@ -58,27 +70,76 @@ Promise.all([
     for (const v in views) {
       views[v].setModel(models[selected])
     }
-    modelSelector.innerHTML = Object.keys(models)
-      .map(m => `<option value=${m}${m === selected ? ' selected' : ''}>
-        ${locale(`generator.${m}`)}</option>`)
-      .join('')
+    selectedModel.textContent = locale(`generator.${selected}`)
     models[selected].invalidate()
   }
-  updateModel(selected)
+
+  const updateLanguage = (key: string) => {
+    LOCALES.language = key
+  
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
+    })
+    updateModel(selected)
+  }
+  updateLanguage('en')
 
   Split([treeViewEl, sourceViewEl], {
     sizes: [66, 34]
   })
+  
+  modelSelectorMenu.innerHTML = ''
+  Object.keys(models).forEach(m => {
+    modelSelectorMenu.insertAdjacentHTML('beforeend', 
+      `<div class="btn${m === selected ? ' selected' : ''}">${locale(`generator.${m}`)}</div>`)
+    modelSelectorMenu.lastChild?.addEventListener('click', evt => {
+      updateModel(m)
+      history.pushState({model: m}, m, `../${m}`)
+      modelSelectorMenu.style.visibility = 'hidden'
+    })
+  })
 
-  modelSelector.addEventListener('change', evt => {
-    const newModel = modelSelector.value
-    updateModel(newModel)
-    history.pushState({model: newModel}, newModel, `../${newModel}`)
+  modelSelector.addEventListener('click', evt => {
+    modelSelectorMenu.style.visibility = 'visible'
+    document.body.addEventListener('click', evt => {
+      modelSelectorMenu.style.visibility = 'hidden'
+    }, { capture: true, once: true })
   })
 
   window.onpopstate = (evt: PopStateEvent) => {
     updateModel(modelFromPath(location.pathname))
   }
+
+  languageSelectorMenu.innerHTML = ''
+  Object.keys(languages).forEach(key => {
+    languageSelectorMenu.insertAdjacentHTML('beforeend',
+      `<div class="btn${key === LOCALES.language ? ' selected' : ''}">${languages[key]}</div>`)
+    languageSelectorMenu.lastChild?.addEventListener('click', evt => {
+      updateLanguage(key)
+      languageSelectorMenu.style.visibility = 'hidden'
+    })
+  })
+
+  languageSelector.addEventListener('click', evt => {
+    languageSelectorMenu.style.visibility = 'visible'
+    document.body.addEventListener('click', evt => {
+      languageSelectorMenu.style.visibility = 'hidden'
+    }, { capture: true, once: true })
+  })
+
+  themeSelector.addEventListener('click', evt => {
+    Array.from(themeSelector.children).forEach(el => {
+      if (el.classList.contains('inactive')) {
+        el.classList.remove('inactive')
+      } else {
+        el.classList.add('inactive')
+      }
+    })
+  })
+
+  githubLink.addEventListener('click', evt => {
+    location.href = 'https://github.com/misode/misode.github.io'
+  })
 
   sourceControlsToggle.addEventListener('click', evt => {
     sourceControlsMenu.style.visibility = 'visible'
@@ -100,10 +161,6 @@ Promise.all([
     downloadAnchor.setAttribute("href", dataString)
     downloadAnchor.setAttribute("download", "data.json")
     downloadAnchor.click()
-  })
-
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
   })
 
   document.body.style.visibility = 'initial'
