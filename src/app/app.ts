@@ -50,6 +50,7 @@ Promise.all([
   const sourceControlsMenu = document.getElementById('source-controls-menu')!
   const sourceControlsCopy = document.getElementById('source-controls-copy')!
   const sourceControlsDownload = document.getElementById('source-controls-download')!
+  const sourceToggle = document.getElementById('source-toggle')!
 
   let selected = modelFromPath(location.pathname)
 
@@ -109,6 +110,18 @@ Promise.all([
   window.onpopstate = (evt: PopStateEvent) => {
     updateModel(modelFromPath(location.pathname))
   }
+
+  sourceToggle.addEventListener('click', evt => {
+    if (sourceViewEl.classList.contains('toggled')) {
+      sourceViewEl.classList.remove('toggled')
+      sourceToggle.children[0].classList.remove('inactive')
+      sourceToggle.children[1].classList.add('inactive')
+    } else {
+      sourceViewEl.classList.add('toggled')
+      sourceToggle.children[0].classList.add('inactive')
+      sourceToggle.children[1].classList.remove('inactive')
+    }
+  })
 
   languageSelectorMenu.innerHTML = ''
   Object.keys(languages).forEach(key => {

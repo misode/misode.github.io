@@ -11,6 +11,7 @@ body {
 
 .container {
   background-color: #ffffff;
+  overflow-x: hidden;
 }
 
 .header {
@@ -30,6 +31,7 @@ body {
 
 .header-title h2 {
   margin-right: 10px;
+  /* white-space: nowrap; */
 }
 
 .header-title .model-selector {
@@ -46,7 +48,7 @@ body {
   align-items: center;
   fill: #343a40;
   cursor: pointer;
-  margin-left: 32px;
+  margin: 0 16px;
   user-select: none;
 }
 
@@ -60,6 +62,18 @@ body {
 
 .nav-item span {
   font-size: 1.1em;
+}
+
+.nav-item#github-link {
+  fill: #9fa2a7
+}
+
+.nav-item#github-link:hover {
+  fill: #bcbfc3
+}
+
+.nav-item#source-toggle {
+  display: none;
 }
 
 .nav-selector {
@@ -175,4 +189,58 @@ body {
 .btn-group .btn:not(:first-child) {
   border-top-right-radius: 0px;
   border-top-left-radius: 0px;
+}
+
+@media screen and (max-width: 560px) {
+  body {
+    overflow-y: hidden;
+  }
+
+  .header {
+    flex-direction: column;
+    height: 92px;
+  }
+
+  .nav {
+    align-self: flex-end;
+  }
+
+  .content,
+  .source textarea {
+    height: calc(100vh - 92px);
+  }
+
+  .source,
+  .gutter.gutter-horizontal {
+    display: none;
+  }
+
+  .tree {
+    width: 100% !important;
+    height: 100%;
+  }
+
+  .nav-item#source-toggle {
+    display: flex;
+    position: absolute;
+    left: 10px;
+  }
+
+  .source.toggled {
+    display: initial;
+    position: absolute;
+    width: 100% !important;
+    height: 100%;
+    z-index: 5;
+  }
+
+  .source.toggled .source-controls {
+    right: 17px;
+    top: 0px;
+  }
+
+  .source.toggled .source-controls-menu {
+    right: 17px;
+    top: 35px;
+  }
 }
