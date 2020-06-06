@@ -1,30 +1,158 @@
 
-.list-entry:not(:last-child),
-.map-entry:not(:last-child),
-.object-node:not(:last-child) > .object-fields {
-  margin-bottom: 0.3rem;
+.tree > .object-node > .node-body {
+  border-left: none;
+  padding-left: 0;
 }
 
-.list-entry,
-.map-entry,
-.object-fields {
+.node {
+  margin: 2px 0;
+}
+
+.node-body > .node:first-child {
+  margin-top: 4px;
+}
+
+.list-node:last-child,
+.map-node:last-child,
+.object-node:last-child {
+  margin-bottom: 0;
+}
+
+.list-node > .node-body,
+.map-node > .node-body,
+.object-node > .node-body {
+  border-left: 3px solid;
+}
+
+.node-header > label,
+.node-header > button {
+  user-select: none;
+}
+.object-node > .node-header > label.collapse {
+  cursor: pointer;
+}
+
+.node input,
+.node select {
+  font-size: 18px;
+}
+
+.node-header {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.node-header > * {
+  height: 24px;
+  border: 1px solid;
+}
+
+.node-header > button {
+  cursor: pointer;
+}
+
+.node-header > input {
+  padding-left: 4px;
+}
+
+.node-header > label,
+.node-header > button {
+  padding: 0 3px;
+}
+
+.node-header > *:first-child {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.node-header > *:last-child {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.node-header > *:not(:last-child) {
+  margin-right: -1px;
+}
+
+.object-node > .node-header > *:first-child,
+.map-node > .node-header > *:first-child,
+.list-node > .node-header > *:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 0;
+}
+
+.node-header > label.collapse.closed {
+  border-bottom-left-radius: 3px;
+}
+
+label.collapse::before {
+  padding-right: 5px;
+  position: relative;
+  top: 3px;
+}
+
+label.collapse.closed::before,
+button.add::after {
+  content: url('./images/plus.svg')
+}
+
+label.collapse.open::before,
+button.remove::before {
+  content: url('./images/trash.svg');
+}
+
+.node-body {
+  display: flex;
+  flex-direction: column;
   padding-left: 0.7rem;
 }
 
-.list-entry {
-  border-left: 2px solid #0b552a;
+.node-entry {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2px;
 }
 
-.map-fields {
-  border-left: 2px solid #066fb4;
+/* COLORS */
+
+.node-header > * {
+  border-color: #bcbfc3;
 }
 
-.object-fields {
-  border-left: 2px solid #b9b9b9;
+.node-header > label {
+  background-color: #e4e4e4;
 }
-.object-node > label {
-  user-select: none;
+
+.node-header > button.add {
+  border-color: #54911b;
+  background-color: #add38a;
 }
-.object-node > label.collapse {
-  cursor: pointer;
+
+.node-header > button.selected {
+  background-color: #f0e65e;
+  border-color: #b9a327
+}
+
+.node-header > label.collapse.closed {
+  border-color: #54911b;
+  background-color: #add38a;
+}
+
+.node-header > label.collapse.open,
+button.remove {
+  border-color: #be4b2e;
+  background-color: #e2917c;
+}
+
+.list-node > .node-body {
+  border-color: #72a543;
+}
+
+.map-node > .node-body {
+  border-color: #066fb4;
+}
+
+.object-node > .node-body {
+  border-color: #b9b9b9;
 }
