@@ -72,7 +72,19 @@ Promise.all([
     for (const v in views) {
       views[v].setModel(models[selected])
     }
-    selectedModel.textContent = locale(`generator.${selected}`)
+    selectedModel.textContent = locale(`title.${selected}`)
+  
+    modelSelectorMenu.innerHTML = ''
+    Object.keys(models).forEach(m => {
+      modelSelectorMenu.insertAdjacentHTML('beforeend', 
+        `<div class="btn${m === selected ? ' selected' : ''}">${locale(m)}</div>`)
+      modelSelectorMenu.lastChild?.addEventListener('click', evt => {
+        updateModel(m)
+        history.pushState({model: m}, m, publicPath + m)
+        modelSelectorMenu.style.visibility = 'hidden'
+      })
+    })
+
     models[selected].invalidate()
   }
 
@@ -82,23 +94,23 @@ Promise.all([
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
     })
+
+    languageSelectorMenu.innerHTML = ''
+    Object.keys(languages).forEach(key => {
+      languageSelectorMenu.insertAdjacentHTML('beforeend',
+        `<div class="btn${key === LOCALES.language ? ' selected' : ''}">${languages[key]}</div>`)
+      languageSelectorMenu.lastChild?.addEventListener('click', evt => {
+        updateLanguage(key)
+        languageSelectorMenu.style.visibility = 'hidden'
+      })
+    })
+
     updateModel(selected)
   }
   updateLanguage('en')
 
   Split([treeViewEl, sourceViewEl], {
     sizes: [66, 34]
-  })
-  
-  modelSelectorMenu.innerHTML = ''
-  Object.keys(models).forEach(m => {
-    modelSelectorMenu.insertAdjacentHTML('beforeend', 
-      `<div class="btn${m === selected ? ' selected' : ''}">${locale(`generator.${m}`)}</div>`)
-    modelSelectorMenu.lastChild?.addEventListener('click', evt => {
-      updateModel(m)
-      history.pushState({model: m}, m, publicPath + m)
-      modelSelectorMenu.style.visibility = 'hidden'
-    })
   })
 
   modelSelector.addEventListener('click', evt => {
@@ -122,16 +134,6 @@ Promise.all([
       sourceToggle.children[0].classList.add('inactive')
       sourceToggle.children[1].classList.remove('inactive')
     }
-  })
-
-  languageSelectorMenu.innerHTML = ''
-  Object.keys(languages).forEach(key => {
-    languageSelectorMenu.insertAdjacentHTML('beforeend',
-      `<div class="btn${key === LOCALES.language ? ' selected' : ''}">${languages[key]}</div>`)
-    languageSelectorMenu.lastChild?.addEventListener('click', evt => {
-      updateLanguage(key)
-      languageSelectorMenu.style.visibility = 'hidden'
-    })
   })
 
   languageSelector.addEventListener('click', evt => {

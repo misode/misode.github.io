@@ -26,6 +26,7 @@ body {
 
 .header-title {
   display: flex;
+  align-items: flex-start;
 }
 
 .header-title h2 {
@@ -170,6 +171,11 @@ body {
   color: #a5e77a;
 }
 
+.btn.selected {
+  fill: #a5e77a;
+  color: #a5e77a;
+}
+
 .btn svg:not(:last-child) {
   margin-right: 5px;
 }
@@ -239,5 +245,10 @@ body {
   .source.toggled .source-controls-menu {
     right: 17px;
     top: 37px;
+  }
+
+  .nav-selector-menu {
+    right: 0;
+    left: initial;
   }
 }
