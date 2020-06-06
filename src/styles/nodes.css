@@ -58,7 +58,7 @@
 
 .node-header > label,
 .node-header > button {
-  padding: 0 3px;
+  padding: 0 5px;
 }
 
 .node-header > *:first-child {
@@ -124,17 +124,13 @@ button.remove::before {
   background-color: #e4e4e4;
 }
 
-.node-header > button.add {
-  border-color: #54911b;
-  background-color: #add38a;
-}
-
-.node-header > button.selected {
+button.selected {
   background-color: #f0e65e;
   border-color: #b9a327
 }
 
-.node-header > label.collapse.closed {
+.node-header > label.collapse.closed,
+button.add {
   border-color: #54911b;
   background-color: #add38a;
 }
@@ -155,4 +151,51 @@ button.remove {
 
 .object-node > .node-body {
   border-color: #b9b9b9;
+}
+
+/* DARK MODE */
+
+body[data-style=dark] .node-header > * {
+  border-color: #4e4e4e;
+}
+
+body[data-style=dark] .node-header > label {
+  background-color: #1b1b1b;
+  color: #dadada;
+}
+
+body[data-style=dark] .node-header > input,
+body[data-style=dark] .node-header > select,
+body[data-style=dark] .node-header > button {
+  background-color: #272727;
+  color: #dadada;
+}
+
+body[data-style=dark] button.selected {
+  background-color: #726d28;
+  border-color: #867e0e
+}
+
+body[data-style=dark] .node-header > label.collapse.closed,
+body[data-style=dark] button.add {
+  border-color: #3b6e0c;
+  background-color: #688f40;
+}
+
+body[data-style=dark] .node-header > label.collapse.open,
+body[data-style=dark] button.remove {
+  border-color: #7e1d05;
+  background-color: #ad472d;
+}
+
+.list-node > .node-body {
+  border-color: #72a543;
+}
+
+body[data-style=dark] .map-node > .node-body {
+  border-color: #4d99cc;
+}
+
+body[data-style=dark] .object-node > .node-body {
+  border-color: #8a8a8a;
 }

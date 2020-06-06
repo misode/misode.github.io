@@ -10,7 +10,6 @@ body {
 }
 
 .container {
-  background-color: #ffffff;
   overflow-x: hidden;
 }
 
@@ -20,8 +19,7 @@ body {
   align-items: center;
   padding: 10px;
   height: 56px;
-  border-bottom: 2px #ccc solid;
-  color: #343a40
+  border-bottom: 2px solid;
 }
 
 .header-title {
@@ -45,33 +43,24 @@ body {
 .nav-item {
   display: flex;
   align-items: center;
-  fill: #343a40;
   cursor: pointer;
   margin: 0 16px;
   user-select: none;
-}
-
-.nav-item:hover {
-  fill: #565d64;
-}
-
-.nav-item .inactive {
-  display: none;
 }
 
 .nav-item span {
   font-size: 1.1em;
 }
 
-.nav-item#github-link {
-  fill: #9fa2a7
-}
-
-.nav-item#github-link:hover {
-  fill: #bcbfc3
-}
-
 .nav-item#source-toggle {
+  display: none;
+}
+
+.toggle:not(.toggled) svg:nth-child(1) {
+  display: none;
+}
+
+.toggle.toggled svg:nth-child(2) {
   display: none;
 }
 
@@ -89,7 +78,6 @@ body {
   margin-top: 10px;
   z-index: 10;
   border-radius: 3px;
-  background-color: #ffffff83;
 }
 
 .content {
@@ -118,10 +106,6 @@ body {
   outline: none;
 }
 
-.source textarea::selection {
-  background-color: rgba(103, 134, 221, 0.6);
-}
-
 .source-controls {
   display: flex;
   flex-direction: row-reverse;
@@ -146,7 +130,7 @@ body {
 }
 
 .gutter.gutter-horizontal {
-  border-left: 2px solid #ccc;
+  border-left: 2px solid;
   float: left;
   cursor: ew-resize;
 }
@@ -156,9 +140,6 @@ body {
   align-items: center;
   border: none;
   border-radius: 3px;
-  color: #ffffff;
-  fill: #ffffff;
-  background-color: #1f2020a6;
   padding: 7px 11px;
   cursor: pointer;
   outline: none;
@@ -166,22 +147,8 @@ body {
   transition: background-color 0.2s;
 }
 
-.btn.check {
-  fill: #a5e77a;
-  color: #a5e77a;
-}
-
-.btn.selected {
-  fill: #a5e77a;
-  color: #a5e77a;
-}
-
 .btn svg:not(:last-child) {
   margin-right: 5px;
-}
-
-.btn:hover {
-  background-color: #5d5f5fa6;
 }
 
 .btn-group .btn:not(:last-child) {
@@ -229,20 +196,19 @@ body {
     left: 10px;
   }
 
-  .source.toggled {
+  .source.active {
     display: initial;
     position: absolute;
     width: 100% !important;
     height: 100%;
-    z-index: 5;
   }
 
-  .source.toggled .source-controls {
+  .source.active .source-controls {
     right: 17px;
     top: 0px;
   }
 
-  .source.toggled .source-controls-menu {
+  .source.active .source-controls-menu {
     right: 17px;
     top: 37px;
   }
@@ -251,4 +217,115 @@ body {
     right: 0;
     left: initial;
   }
+}
+
+/* COLORS */
+
+.container {
+  background-color: #ffffff;
+}
+
+.header,
+.nav-item {
+  fill: #343a40;
+  color: #343a40;
+}
+
+.nav-item:hover {
+  fill: #565d64;
+}
+
+.nav-item#github-link {
+  fill: #9fa2a7;
+}
+
+.nav-item#github-link:hover {
+  fill: #bcbfc3;
+}
+
+.source textarea::selection {
+  background-color: rgba(103, 134, 221, 0.6);
+}
+
+.gutter.gutter-horizontal,
+.header {
+  border-color: #cccccc;
+}
+
+.nav-selector-menu {
+  background-color: #ffffff83;
+}
+
+.btn {
+  background-color: #1f2020a6;
+  color: #ffffff;
+  fill: #ffffff;
+}
+
+.btn.check,
+.btn.selected {
+  fill: #a5e77a;
+  color: #a5e77a;
+}
+
+.btn:hover {
+  background-color: #5d5f5fa6;
+}
+
+/* DARK MODE */
+
+body[data-style=dark] .container,
+body[data-style=dark] textarea {
+  background-color: #222222;
+}
+
+body[data-style=dark] textarea {
+  color: #ffffff;
+}
+
+body[data-style=dark] .header-title,
+body[data-style=dark] .nav-item {
+  fill: #91908f;
+  color: #91908f;
+}
+
+body[data-style=dark] .nav-item:hover {
+  fill: #b4b3b0;
+}
+
+body[data-style=dark] .nav-item#github-link {
+  fill: #4d4c4c;
+}
+
+body[data-style=dark] .nav-item#github-link:hover {
+  fill: #6e6e6e;
+}
+
+body[data-style=dark] .source textarea::selection {
+  background-color: rgba(103, 134, 221, 0.6);
+}
+
+body[data-style=dark] .gutter.gutter-horizontal,
+body[data-style=dark] .header {
+  border-color: #3d3d3d;
+}
+
+body[data-style=dark] .nav-selector-menu {
+  background-color: #00000083;
+}
+
+body[data-style=dark] .btn {
+  background-color: #0a0a0aa6;
+  color: #ffffff;
+  fill: #ffffff;
+}
+
+body[data-style=dark] .btn.check,
+body[data-style=dark] .btn.selected {
+  fill: #a5e77a;
+  color: #a5e77a;
+}
+
+body[data-style=dark] .btn:hover {
+  background-color: #383838a6;
 }

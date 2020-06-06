@@ -125,14 +125,12 @@ Promise.all([
   }
 
   sourceToggle.addEventListener('click', evt => {
-    if (sourceViewEl.classList.contains('toggled')) {
-      sourceViewEl.classList.remove('toggled')
-      sourceToggle.children[0].classList.remove('inactive')
-      sourceToggle.children[1].classList.add('inactive')
+    if (sourceViewEl.classList.contains('active')) {
+      sourceViewEl.classList.remove('active')
+      sourceToggle.classList.remove('toggled')
     } else {
-      sourceViewEl.classList.add('toggled')
-      sourceToggle.children[0].classList.add('inactive')
-      sourceToggle.children[1].classList.remove('inactive')
+      sourceViewEl.classList.add('active')
+      sourceToggle.classList.add('toggled')
     }
   })
 
@@ -144,13 +142,13 @@ Promise.all([
   })
 
   themeSelector.addEventListener('click', evt => {
-    Array.from(themeSelector.children).forEach(el => {
-      if (el.classList.contains('inactive')) {
-        el.classList.remove('inactive')
-      } else {
-        el.classList.add('inactive')
-      }
-    })
+    if (document.body.getAttribute('data-style') === 'dark') {
+      document.body.setAttribute('data-style', 'light')
+      themeSelector.classList.remove('toggled')
+    } else {
+      document.body.setAttribute('data-style', 'dark')
+      themeSelector.classList.add('toggled')
+    }
   })
 
   githubLink.addEventListener('click', evt => {
