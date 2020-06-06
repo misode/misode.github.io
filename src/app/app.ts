@@ -13,6 +13,7 @@ import Split from 'split.js'
 
 import { SandboxSchema } from './Sandbox'
 
+const LOCAL_STORAGE_THEME = 'theme'
 
 const modelFromPath = (p: string) => p.split('/').filter(e => e.length !== 0).pop() ?? ''
 
@@ -141,13 +142,25 @@ Promise.all([
     }, { capture: true, once: true })
   })
 
-  themeSelector.addEventListener('click', evt => {
-    if (document.body.getAttribute('data-style') === 'dark') {
-      document.body.setAttribute('data-style', 'light')
-      themeSelector.classList.remove('toggled')
-    } else {
+  const updateTheme = (theme: string | null) => {
+    if (theme === null) return
+    if (theme === 'dark') {
       document.body.setAttribute('data-style', 'dark')
       themeSelector.classList.add('toggled')
+      localStorage.setItem(LOCAL_STORAGE_THEME, 'dark')
+    } else {
+      document.body.setAttribute('data-style', 'light')
+      themeSelector.classList.remove('toggled')
+      localStorage.setItem(LOCAL_STORAGE_THEME, 'light')
+    }
+  }
+  updateTheme(localStorage.getItem(LOCAL_STORAGE_THEME))
+
+  themeSelector.addEventListener('click', evt => {
+    if (document.body.getAttribute('data-style') === 'dark') {
+      updateTheme('light')
+    } else {
+      updateTheme('dark')
     }
   })
 
