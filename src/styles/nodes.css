@@ -118,6 +118,7 @@ button.remove::before {
 
 .node-header > * {
   border-color: #bcbfc3;
+  transition:all var(--style-transition);
 }
 
 .node-header > label {
@@ -143,14 +144,17 @@ button.remove {
 
 .list-node > .node-body {
   border-color: #72a543;
+  transition: border-color var(--style-transition);
 }
 
 .map-node > .node-body {
   border-color: #066fb4;
+  transition: border-color var(--style-transition);
 }
 
 .object-node > .node-body {
   border-color: #b9b9b9;
+  transition: border-color var(--style-transition);
 }
 
 /* DARK MODE */

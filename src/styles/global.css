@@ -2,6 +2,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  --style-transition: 0.3s;
 }
 
 body {
@@ -11,6 +12,7 @@ body {
 
 .container {
   overflow-x: hidden;
+  transition: background-color 0.2s;
 }
 
 .header {
@@ -221,14 +223,21 @@ body {
 
 /* COLORS */
 
-.container {
+.container,
+.source textarea {
   background-color: #ffffff;
+  transition: background-color var(--style-transition);
+}
+
+.source textarea {
+  transition:all var(--style-transition);
 }
 
 .header,
 .nav-item {
   fill: #343a40;
   color: #343a40;
+  transition: color, fill var(--style-transition);
 }
 
 .nav-item:hover {
@@ -250,6 +259,7 @@ body {
 .gutter.gutter-horizontal,
 .header {
   border-color: #cccccc;
+  transition: border-color var(--style-transition);
 }
 
 .nav-selector-menu {
@@ -275,11 +285,11 @@ body {
 /* DARK MODE */
 
 body[data-style=dark] .container,
-body[data-style=dark] textarea {
+body[data-style=dark] .source textarea {
   background-color: #222222;
 }
 
-body[data-style=dark] textarea {
+body[data-style=dark] .source textarea {
   color: #ffffff;
 }
 
