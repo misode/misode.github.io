@@ -30,9 +30,10 @@ const languages: { [key: string]: string } = {
   'zh-CN': '简体中文'
 }
 
+const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 Promise.all([
-  fetch('../locales/schema/en.json').then(r => r.json()),
-  fetch('../locales/app/en.json').then(r => r.json())
+  fetch(publicPath + 'locales/schema/en.json').then(r => r.json()),
+  fetch(publicPath + 'locales/app/en.json').then(r => r.json())
 ]).then(responses => {
   LOCALES.register('en', {...responses[0], ...responses[1]})
 
@@ -95,7 +96,7 @@ Promise.all([
       `<div class="btn${m === selected ? ' selected' : ''}">${locale(`generator.${m}`)}</div>`)
     modelSelectorMenu.lastChild?.addEventListener('click', evt => {
       updateModel(m)
-      history.pushState({model: m}, m, `../${m}`)
+      history.pushState({model: m}, m, publicPath + m)
       modelSelectorMenu.style.visibility = 'hidden'
     })
   })
@@ -151,7 +152,7 @@ Promise.all([
   })
 
   githubLink.addEventListener('click', evt => {
-    location.href = 'https://github.com/misode/misode.github.io'
+    location.href = 'https://github.com/misode/minecraft-schemas'
   })
 
   sourceControlsToggle.addEventListener('click', evt => {
