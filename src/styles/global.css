@@ -26,7 +26,7 @@ body {
 
 .header-title {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .header-title h2 {
@@ -168,7 +168,7 @@ body {
   border-top-left-radius: 0px;
 }
 
-@media screen and (max-width: 560px) {
+@media screen and (max-width: 580px) {
   body {
     overflow-y: hidden;
   }
@@ -226,6 +226,12 @@ body {
   }
 }
 
+
+@media screen and (max-width: 410px) {
+  .header-title h2 {
+    font-size: 18px;
+  }
+}
 /* COLORS */
 
 .container,

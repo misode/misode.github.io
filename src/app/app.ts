@@ -46,7 +46,6 @@ Promise.all([
   const languageSelector = document.getElementById('language-selector')!
   const languageSelectorMenu = document.getElementById('language-selector-menu')!
   const themeSelector = document.getElementById('theme-selector')!
-  const githubLink = document.getElementById('github-link')!
   const treeViewEl = document.getElementById('tree-view')!
   const sourceViewEl = document.getElementById('source-view')!
   const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
@@ -166,10 +165,6 @@ Promise.all([
     } else {
       updateTheme('dark')
     }
-  })
-
-  githubLink.addEventListener('click', evt => {
-    location.href = 'https://github.com/misode/minecraft-schemas'
   })
 
   sourceControlsToggle.addEventListener('click', evt => {
