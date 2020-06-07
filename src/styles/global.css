@@ -233,7 +233,7 @@ body {
   transition:all var(--style-transition);
 }
 
-.header,
+.header-title h2,
 .nav-item {
   fill: #343a40;
   color: #343a40;
@@ -293,7 +293,7 @@ body[data-style=dark] .source textarea {
   color: #ffffff;
 }
 
-body[data-style=dark] .header-title,
+body[data-style=dark] .header-title h2,
 body[data-style=dark] .nav-item {
   fill: #91908f;
   color: #91908f;
