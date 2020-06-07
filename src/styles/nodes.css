@@ -123,7 +123,7 @@ button.remove::before {
 .node-body {
   display: flex;
   flex-direction: column;
-  padding-left: 0.7rem;
+  padding-left: 14px;
 }
 
 .node-entry > .object-node > .node-body {
@@ -244,16 +244,13 @@ body[data-style=dark] .node-body {
 }
 
 body[data-style=dark] [data-category=predicate] > .node-header > label,
-body[data-style=dark] [data-category=predicate] > .node-header > label {
-  background-color: #1e1f1f !important;
-}
-
 body[data-style=dark] [data-category=predicate] > .node-body > .node.node-header > *:first-child,
 body[data-style=dark] [data-category=predicate] > .node-body > .node > .node-header > *:first-child {
   background-color: #306163 !important;
 }
 
 body[data-style=dark] [data-category=predicate] > .node-body,
+body[data-style=dark] [data-category=predicate] > .node-header > label,
 body[data-style=dark] [data-category=predicate] > .node-body > .node.node-header > *:not(button),
 body[data-style=dark] [data-category=predicate] > .node-body > .node > .node-header > *:not(button) {
   border-color: #224849 !important;
