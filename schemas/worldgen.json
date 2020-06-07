@@ -626,7 +626,7 @@
               "default": 0
             },
             {
-              "id": "temparature",
+              "id": "temperature",
               "translate": "biome.parameters.temperature",
               "type": "float",
               "default": 0
