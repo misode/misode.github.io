@@ -223,8 +223,8 @@ body[data-style=dark] .node-header > button {
 }
 
 body[data-style=dark] button.selected {
-  background-color: #726d28;
-  border-color: #867e0e
+  background-color: #9e9843;
+  border-color: #a59c18
 }
 
 body[data-style=dark] .node-header > label.collapse.closed,

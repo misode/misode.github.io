@@ -6,6 +6,8 @@ import {
   ConditionSchema,
   LootTableSchema,
   AdvancementSchema,
+  DimensionSchema,
+  DimensionTypeSchema,
   LOCALES,
   locale
 } from 'minecraft-schemas'
@@ -60,6 +62,8 @@ Promise.all([
     'loot-table': new DataModel(LootTableSchema),
     'predicate': new DataModel(ConditionSchema),
     'advancement': new DataModel(AdvancementSchema),
+    'dimension': new DataModel(DimensionSchema),
+    'dimension-type': new DataModel(DimensionTypeSchema),
     'sandbox': new DataModel(SandboxSchema)
   }
 

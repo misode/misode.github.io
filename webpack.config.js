@@ -54,6 +54,16 @@ module.exports = (env, argv) => ({
       template: 'src/generator.html'
     }),
     new HtmlWebpackPlugin({
+      title: 'Dimension Generator Minecraft',
+      filename: 'dimension/index.html',
+      template: 'src/generator.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Dimension Type Generator Minecraft',
+      filename: 'dimension-type/index.html',
+      template: 'src/generator.html'
+    }),
+    new HtmlWebpackPlugin({
       title: 'Sandbox Generator Minecraft',
       filename: 'sandbox/index.html',
       template: 'src/generator.html'

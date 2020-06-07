@@ -82,6 +82,10 @@ body {
   border-radius: 3px;
 }
 
+.nav-selector-menu .btn {
+  white-space: nowrap;
+}
+
 .content {
   display: flex;
   height: calc(100vh - 56px);
@@ -91,6 +95,7 @@ body {
 .tree {
   padding: 1rem;
   overflow-y: auto;
+  padding-bottom: 50vh;
 }
 
 .source textarea {
