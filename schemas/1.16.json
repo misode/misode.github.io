@@ -1641,9 +1641,7 @@
             "minecraft:killed_by",
             "minecraft:mined",
             "minecraft:picked_up",
-            "minecraft:used",
-            "killedByTeam",
-            "teamkill"
+            "minecraft:used"
           ]
         },
         {
