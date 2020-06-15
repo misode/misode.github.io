@@ -1,3 +1,4 @@
+import { RegistryFetcher } from './RegistryFetcher'
 import {
   DataModel,
   IView,
@@ -9,7 +10,8 @@ import {
   DimensionSchema,
   DimensionTypeSchema,
   LOCALES,
-  locale
+  locale,
+  COLLECTIONS
 } from 'minecraft-schemas'
 import Split from 'split.js'
 
@@ -33,10 +35,27 @@ const languages: { [key: string]: string } = {
   'zh-CN': '简体中文'
 }
 
+const registries = [
+  'attribute',
+  'biome',
+  'biome_source',
+  'block',
+  'enchantment',
+  'entity_type',
+  'fluid',
+  'item',
+  'loot_condition_type',
+  'loot_function_type',
+  'loot_pool_entry_type',
+  'stat_type',
+  'structure_feature'
+]
+
 const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 Promise.all([
   fetch(publicPath + 'locales/schema/en.json').then(r => r.json()),
-  fetch(publicPath + 'locales/app/en.json').then(r => r.json())
+  fetch(publicPath + 'locales/app/en.json').then(r => r.json()),
+  RegistryFetcher(COLLECTIONS, registries)
 ]).then(responses => {
   LOCALES.register('en', {...responses[0], ...responses[1]})
 
