@@ -182,11 +182,11 @@ Promise.all([
   const updateTheme = (theme: string | null) => {
     if (theme === null) return
     if (theme === 'dark') {
-      document.body.setAttribute('data-style', 'dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
       themeSelector.classList.add('toggled')
       localStorage.setItem(LOCAL_STORAGE_THEME, 'dark')
     } else {
-      document.body.setAttribute('data-style', 'light')
+      document.documentElement.setAttribute('data-theme', 'light')
       themeSelector.classList.remove('toggled')
       localStorage.setItem(LOCAL_STORAGE_THEME, 'light')
     }
@@ -194,7 +194,7 @@ Promise.all([
   updateTheme(localStorage.getItem(LOCAL_STORAGE_THEME))
 
   themeSelector.addEventListener('click', evt => {
-    if (document.body.getAttribute('data-style') === 'dark') {
+    if (document.documentElement.getAttribute('data-theme') === 'dark') {
       updateTheme('light')
     } else {
       updateTheme('dark')

@@ -1,8 +1,41 @@
+:root {
+  --background: #ffffff;
+  --text: #000000;
+  --nav: #343a40;
+  --nav-hover: #565d64;
+  --nav-faded: #9fa2a7;
+  --nav-faded-hover: #bcbfc3;
+  --selection: rgba(103, 134, 221, 0.6);
+  --border: #cccccc;
+  --nav-menu: #ffffff83;
+  --btn-background: #1f2020a6;
+  --btn-hover: #5d5f5fa6;
+  --btn-text: #ffffff;
+  --btn-active: #a5e77a;
+  --errors-background: #f13000c5;
+  --errors-text: #000000cc;
+  
+  --style-transition: 0.3s;
+}
+
+:root[data-theme=dark] {
+  --background: #222222;
+  --text: #ffffff;
+  --nav: #91908f;
+  --nav-hover: #b4b3b0;
+  --nav-faded: #4d4c4c;
+  --nav-faded-hover: #6e6e6e;
+  --border: #3d3d3d;
+  --nav-menu: #00000083;
+  --btn-background: #0a0a0aa6;
+  --btn-hover: #383838a6;
+  --errors-text: #ffffffcc;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  --style-transition: 0.3s;
 }
 
 body {
@@ -12,7 +45,8 @@ body {
 
 .container {
   overflow-x: hidden;
-  transition: background-color 0.2s;
+  background-color: var(--background);
+  transition: background-color var(--style-transition);
 }
 
 .header {
@@ -21,7 +55,8 @@ body {
   align-items: center;
   padding: 10px;
   height: 56px;
-  border-bottom: 2px solid;
+  border-bottom: 2px solid var(--border);
+  transition: border-color var(--style-transition);
 }
 
 .header-title {
@@ -31,6 +66,8 @@ body {
 
 .header-title h2 {
   margin-right: 10px;
+  color: var(--nav);
+  transition: color var(--style-transition);
 }
 
 .header-title .model-selector {
@@ -48,6 +85,12 @@ body {
   cursor: pointer;
   margin: 0 16px;
   user-select: none;
+  fill: var(--nav);
+  transition: fill var(--style-transition);
+}
+
+.nav-item:hover {
+  fill: var(--nav-hover);
 }
 
 .nav-item span {
@@ -56,6 +99,14 @@ body {
 
 .nav-item#source-toggle {
   display: none;
+}
+
+.nav-item#github-link {
+  fill: var(--nav-faded);
+}
+
+.nav-item#github-link:hover {
+  fill: var(--nav-faded-hover);
 }
 
 .toggle:not(.toggled) svg:nth-child(1) {
@@ -80,6 +131,7 @@ body {
   margin-top: 10px;
   z-index: 10;
   border-radius: 3px;
+  background-color: var(--nav-menu);
 }
 
 .nav-selector-menu .btn {
@@ -112,8 +164,14 @@ body {
   -webkit-tab-size: 4;
   outline: none;
   resize: none;
+  background-color: var(--background);
+  color: var(--text);
+  transition:all var(--style-transition);
 }
 
+.source textarea::selection {
+  background-color: var(--selection);
+}
 .source-controls {
   display: flex;
   flex-direction: row-reverse;
@@ -141,6 +199,8 @@ body {
   border-left: 2px solid;
   float: left;
   cursor: ew-resize;
+  border-color: var(--border);
+  transition: border-color var(--style-transition);
 }
 
 .btn {
@@ -152,7 +212,14 @@ body {
   cursor: pointer;
   outline: none;
   font-size: 1rem;
-  transition: background-color 0.2s;
+  background-color: var(--btn-background);
+  color: var(--btn-text);
+  fill: var(--btn-text);
+  transition: background-color var(--style-transition);
+}
+
+.btn:hover {
+  background-color: var(--btn-hover);
 }
 
 .btn svg:not(:last-child) {
@@ -169,12 +236,21 @@ body {
   border-top-left-radius: 0px;
 }
 
+.btn.check,
+.btn.selected {
+  fill: var(--btn-active);
+  color: var(--btn-active);
+}
+
 .errors {
   position: absolute;
-  bottom: 0;
+  bottom: 17px;
   right: 17px;
   margin: 5px;
   border-radius: 3px;
+  background-color: var(--errors-background);
+  color: var(--errors-text);
+  fill: var(--errors-text);
 }
 
 .errors.hidden .error-list {
@@ -267,134 +343,4 @@ body {
   .header-title h2 {
     font-size: 18px;
   }
-}
-/* COLORS */
-
-.container,
-.source textarea {
-  background-color: #ffffff;
-  transition: background-color var(--style-transition);
-}
-
-.source textarea {
-  transition:all var(--style-transition);
-}
-
-.header-title h2,
-.nav-item {
-  fill: #343a40;
-  color: #343a40;
-  transition: color, fill var(--style-transition);
-}
-
-.nav-item:hover {
-  fill: #565d64;
-}
-
-.nav-item#github-link {
-  fill: #9fa2a7;
-}
-
-.nav-item#github-link:hover {
-  fill: #bcbfc3;
-}
-
-.source textarea::selection {
-  background-color: rgba(103, 134, 221, 0.6);
-}
-
-.gutter.gutter-horizontal,
-.header {
-  border-color: #cccccc;
-  transition: border-color var(--style-transition);
-}
-
-.nav-selector-menu {
-  background-color: #ffffff83;
-}
-
-.btn {
-  background-color: #1f2020a6;
-  color: #ffffff;
-  fill: #ffffff;
-}
-
-.btn.check,
-.btn.selected {
-  fill: #a5e77a;
-  color: #a5e77a;
-}
-
-.btn:hover {
-  background-color: #5d5f5fa6;
-}
-
-.errors {
-  background-color: #f13000c5;
-  color: #000000cc;
-  fill: #000000cc;
-}
-
-/* DARK MODE */
-
-body[data-style=dark] .container,
-body[data-style=dark] .source textarea {
-  background-color: #222222;
-}
-
-body[data-style=dark] .source textarea {
-  color: #ffffff;
-}
-
-body[data-style=dark] .header-title h2,
-body[data-style=dark] .nav-item {
-  fill: #91908f;
-  color: #91908f;
-}
-
-body[data-style=dark] .nav-item:hover {
-  fill: #b4b3b0;
-}
-
-body[data-style=dark] .nav-item#github-link {
-  fill: #4d4c4c;
-}
-
-body[data-style=dark] .nav-item#github-link:hover {
-  fill: #6e6e6e;
-}
-
-body[data-style=dark] .source textarea::selection {
-  background-color: rgba(103, 134, 221, 0.6);
-}
-
-body[data-style=dark] .gutter.gutter-horizontal,
-body[data-style=dark] .header {
-  border-color: #3d3d3d;
-}
-
-body[data-style=dark] .nav-selector-menu {
-  background-color: #00000083;
-}
-
-body[data-style=dark] .btn {
-  background-color: #0a0a0aa6;
-  color: #ffffff;
-  fill: #ffffff;
-}
-
-body[data-style=dark] .btn.check,
-body[data-style=dark] .btn.selected {
-  fill: #a5e77a;
-  color: #a5e77a;
-}
-
-body[data-style=dark] .btn:hover {
-  background-color: #383838a6;
-}
-
-body[data-style=dark] .errors {
-  background-color: #f13000c5;
-  color: #ffffffcc;
-  fill: #ffffffcc;
 }
