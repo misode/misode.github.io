@@ -67,7 +67,8 @@
   border-bottom-left-radius: 3px;
 }
 
-.node-header > *:last-child {
+.node-header > *:last-child,
+.node-header[data-error] > *:nth-last-child(2) {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
@@ -118,6 +119,13 @@ button.add::after {
 label.collapse.open::before,
 button.remove::before {
   content: url('./images/trash.svg');
+}
+
+.node-header[data-error] > svg {
+  border: none;
+  height: 34px;
+  width: 34px;
+  padding: 6px;
 }
 
 .node-body {
@@ -173,6 +181,10 @@ button.add {
 button.remove {
   border-color: #be4b2e;
   background-color: #e76f51;
+}
+
+.node-header[data-error] > svg {
+  fill: #e76f51;
 }
 
 .node-body {
@@ -237,6 +249,10 @@ body[data-style=dark] .node-header > label.collapse.open,
 body[data-style=dark] button.remove {
   border-color: #7e1d05;
   background-color: #b64023;
+}
+
+body[data-style=dark] .node-header[data-error] > svg {
+  fill: #b64023;
 }
 
 body[data-style=dark] .node-body {

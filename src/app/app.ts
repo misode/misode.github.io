@@ -16,6 +16,7 @@ import {
 import Split from 'split.js'
 
 import { SandboxSchema } from './Sandbox'
+import { ErrorsView } from './ErrorsView'
 
 const LOCAL_STORAGE_THEME = 'theme'
 
@@ -51,6 +52,12 @@ const registries = [
   'structure_feature'
 ]
 
+const treeViewObserver = (el: HTMLElement) => {
+  el.querySelectorAll('.node-header[data-error]').forEach(e => {
+    e.insertAdjacentHTML('beforeend', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"></path></svg>`)
+  })
+}
+
 const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 Promise.all([
   fetch(publicPath + 'locales/schema/en.json').then(r => r.json()),
@@ -60,13 +67,15 @@ Promise.all([
   LOCALES.register('en', {...responses[0], ...responses[1]})
 
   const selectedModel = document.getElementById('selected-model')!
-  const modelSelector = (document.getElementById('model-selector') as HTMLInputElement)
+  const modelSelector = document.getElementById('model-selector')!
   const modelSelectorMenu = document.getElementById('model-selector-menu')!
   const languageSelector = document.getElementById('language-selector')!
   const languageSelectorMenu = document.getElementById('language-selector-menu')!
   const themeSelector = document.getElementById('theme-selector')!
   const treeViewEl = document.getElementById('tree-view')!
   const sourceViewEl = document.getElementById('source-view')!
+  const errorsViewEl = document.getElementById('errors-view')!
+  const errorsToggle = document.getElementById('errors-toggle')!
   const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
   const sourceControlsToggle = document.getElementById('source-controls-toggle')!
   const sourceControlsMenu = document.getElementById('source-controls-menu')!
@@ -86,8 +95,14 @@ Promise.all([
   }
 
   const views: { [key: string]: IView } = {
-    'tree': new TreeView(models[selected], treeViewEl),
-    'source': new SourceView(models[selected], sourceViewOutput, {indentation: 2})
+    'tree': new TreeView(models[selected], treeViewEl, {
+      showErrors: true,
+      observer: treeViewObserver
+    }),
+    'source': new SourceView(models[selected], sourceViewOutput, {
+      indentation: 2
+    }),
+    'errors': new ErrorsView(models[selected], errorsViewEl)
   }
 
   const updateModel = (newModel: string) => {
@@ -206,6 +221,16 @@ Promise.all([
     downloadAnchor.setAttribute("href", dataString)
     downloadAnchor.setAttribute("download", "data.json")
     downloadAnchor.click()
+  })
+
+  errorsToggle.addEventListener('click', evt => {
+    if (errorsViewEl.classList.contains('hidden')) {
+      errorsViewEl.classList.remove('hidden')
+      errorsToggle.classList.remove('toggled')
+    } else {
+      errorsViewEl.classList.add('hidden')
+      errorsToggle.classList.add('toggled')
+    }
   })
 
   document.body.style.visibility = 'initial'

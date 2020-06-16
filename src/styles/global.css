@@ -111,6 +111,7 @@ body {
   -o-tab-size: 4;
   -webkit-tab-size: 4;
   outline: none;
+  resize: none;
 }
 
 .source-controls {
@@ -166,6 +167,41 @@ body {
 .btn-group .btn:not(:first-child) {
   border-top-right-radius: 0px;
   border-top-left-radius: 0px;
+}
+
+.errors {
+  position: absolute;
+  bottom: 0;
+  right: 17px;
+  margin: 5px;
+  border-radius: 3px;
+}
+
+.errors.hidden .error-list {
+  display: none;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  padding: 7px;
+}
+
+.error span {
+  padding-left: 11px;
+}
+
+.errors .toggle {
+  padding: 2px;
+  width: 36px;
+  height: 36px;
+  align-self: flex-end;
+  cursor: pointer;
+  user-select: none;
+}
+
+.errors .toggle.toggled {
+  padding: 6px;
 }
 
 @media screen and (max-width: 580px) {
@@ -293,6 +329,12 @@ body {
   background-color: #5d5f5fa6;
 }
 
+.errors {
+  background-color: #f13000c5;
+  color: #000000cc;
+  fill: #000000cc;
+}
+
 /* DARK MODE */
 
 body[data-style=dark] .container,
@@ -349,4 +391,10 @@ body[data-style=dark] .btn.selected {
 
 body[data-style=dark] .btn:hover {
   background-color: #383838a6;
+}
+
+body[data-style=dark] .errors {
+  background-color: #f13000c5;
+  color: #ffffffcc;
+  fill: #ffffffcc;
 }
