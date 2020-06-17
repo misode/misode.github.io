@@ -1,6 +1,13 @@
-import { AbstractView, Path, locale } from "minecraft-schemas";
+import { AbstractView, Path, locale, DataModel } from "minecraft-schemas";
 
 export class ErrorsView extends AbstractView {
+  target: HTMLElement
+
+  constructor(model: DataModel, target: HTMLElement) {
+    super(model)
+    this.target = target
+  }
+
   render(): void {
     this.target.style.display = this.model.errors.count() > 0 ? 'flex' : 'none'
     

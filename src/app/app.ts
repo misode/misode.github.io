@@ -95,6 +95,8 @@ Promise.all([
   const treeControlsVersionToggle = document.getElementById('tree-controls-version-toggle')!
   const treeControlsVersionMenu = document.getElementById('tree-controls-version-menu')!
   const treeControlsReset = document.getElementById('tree-controls-reset')!
+  const treeControlsUndo = document.getElementById('tree-controls-undo')!
+  const treeControlsRedo = document.getElementById('tree-controls-redo')!
 
   let selected = modelFromPath(location.pathname)
 
@@ -251,6 +253,22 @@ Promise.all([
   treeControlsReset.addEventListener('click', evt => {
     models[selected].reset(models[selected].schema.default())
     addChecked(treeControlsReset)
+  })
+
+  treeControlsUndo.addEventListener('click', evt => {
+    models[selected].undo()
+  })
+
+  treeControlsRedo.addEventListener('click', evt => {
+    models[selected].redo()
+  })
+
+  document.addEventListener('keyup', evt => {
+    if (evt.ctrlKey && evt.key === 'z') {
+      models[selected].undo()
+    } else if (evt.ctrlKey && evt.key === 'y') {
+      models[selected].redo()
+    }
   })
 
   errorsToggle.addEventListener('click', evt => {
