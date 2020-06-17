@@ -48,6 +48,7 @@ const registries = [
   'loot_condition_type',
   'loot_function_type',
   'loot_pool_entry_type',
+  'mob_effect',
   'stat_type',
   'structure_feature'
 ]

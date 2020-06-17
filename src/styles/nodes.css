@@ -21,8 +21,8 @@
   --node-background-label: #1b1b1b;
   --node-background-input: #272727;
   --node-text: #dadada;
-  --node-selected: #9e9843;
-  --node-selected-border: #837d2a;
+  --node-selected: #ad9715;
+  --node-selected-border: #8d7a0d;
   --node-add: #5a961e;
   --node-add-border: #3b6e0c;
   --node-remove: #b64023;
@@ -34,7 +34,8 @@
   --category-function-border: #6b6b6b;
 }
 
-.tree > .object-node > .node-body {
+.tree > .object-node > .node-body,
+.choice-node > .object-node > .node-body {
   border-left: none;
   padding-left: 0;
 }
@@ -108,7 +109,9 @@
 }
 
 .node-header > *:last-child,
-.node-header[data-error] > *:nth-last-child(2) {
+.node-header > input[list]:nth-last-child(2),
+.node-header[data-error] > *:nth-last-child(2),
+.node-header[data-error] > input[list]:nth-last-child(3) {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
@@ -211,6 +214,15 @@ button.remove::before {
   display: flex;
   flex-direction: column;
   margin-top: 2px;
+}
+
+.range-node select {
+  width: 20px;
+}
+
+.number-node input,
+.range-node input {
+  width: 100px;
 }
 
 [data-category=predicate] > .node-header > label,

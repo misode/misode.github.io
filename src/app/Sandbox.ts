@@ -35,7 +35,7 @@ SCHEMAS.register('foo', ObjectNode({
   recursive: ListNode(
     Reference('foo')
   ),
-  [Switch]: path => path.push('foo').get(),
+  [Switch]: path => path.push('foo'),
   [Case]: {
     'blah': {
       haha: StringNode()
