@@ -172,27 +172,41 @@ body {
 .source textarea::selection {
   background-color: var(--selection);
 }
+
+.tree,
+.source {
+  position: relative;
+}
+
+.tree-controls,
 .source-controls {
   display: flex;
   flex-direction: row-reverse;
   position: absolute;
-  right: 17px;
-  top: 56px;
+  right: 0;
+  top: 0;
   padding: 5px;
 }
 
+.tree-controls .btn:not(:first-child),
 .source-controls .btn:not(:first-child) {
   margin-right: 5px;
 }
 
+.tree-controls-menu,
 .source-controls-menu {
   display: flex;
   visibility: hidden;
   flex-direction: column;
   position: absolute;
-  right: 17px;
-  top: 93px;
+  right: 0;
+  top: 37px;
   padding: 5px;
+}
+
+.source-controls,
+.source-controls-menu {
+  right: 17px
 }
 
 .gutter.gutter-horizontal {

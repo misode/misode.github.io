@@ -1,4 +1,4 @@
-import { RegistryFetcher } from './RegistryFetcher'
+import Split from 'split.js'
 import {
   DataModel,
   IView,
@@ -13,8 +13,7 @@ import {
   locale,
   COLLECTIONS
 } from 'minecraft-schemas'
-import Split from 'split.js'
-
+import { RegistryFetcher } from './RegistryFetcher'
 import { SandboxSchema } from './Sandbox'
 import { ErrorsView } from './ErrorsView'
 
@@ -57,6 +56,13 @@ const treeViewObserver = (el: HTMLElement) => {
   el.querySelectorAll('.node-header[data-error]').forEach(e => {
     e.insertAdjacentHTML('beforeend', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"></path></svg>`)
   })
+  el.querySelectorAll('.collapse.closed, button.add').forEach(e => {
+    e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.75 4.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"></path></svg>`)
+  })
+  el.querySelectorAll('.collapse.open, button.remove').forEach(e => {
+    e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>
+    `)
+  })
 }
 
 const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
@@ -78,11 +84,17 @@ Promise.all([
   const errorsViewEl = document.getElementById('errors-view')!
   const errorsToggle = document.getElementById('errors-toggle')!
   const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
+  const treeViewOutput = document.getElementById('tree-view-output')!
   const sourceControlsToggle = document.getElementById('source-controls-toggle')!
   const sourceControlsMenu = document.getElementById('source-controls-menu')!
   const sourceControlsCopy = document.getElementById('source-controls-copy')!
   const sourceControlsDownload = document.getElementById('source-controls-download')!
   const sourceToggle = document.getElementById('source-toggle')!
+  const treeControlsToggle = document.getElementById('tree-controls-toggle')!
+  const treeControlsMenu = document.getElementById('tree-controls-menu')!
+  const treeControlsVersionToggle = document.getElementById('tree-controls-version-toggle')!
+  const treeControlsVersionMenu = document.getElementById('tree-controls-version-menu')!
+  const treeControlsReset = document.getElementById('tree-controls-reset')!
 
   let selected = modelFromPath(location.pathname)
 
@@ -95,22 +107,20 @@ Promise.all([
     'sandbox': new DataModel(SandboxSchema)
   }
 
-  const views: { [key: string]: IView } = {
-    'tree': new TreeView(models[selected], treeViewEl, {
+  const views: IView[] = [
+    new TreeView(models[selected], treeViewOutput, {
       showErrors: true,
       observer: treeViewObserver
     }),
-    'source': new SourceView(models[selected], sourceViewOutput, {
+    new SourceView(models[selected], sourceViewOutput, {
       indentation: 2
     }),
-    'errors': new ErrorsView(models[selected], errorsViewEl)
-  }
+    new ErrorsView(models[selected], errorsViewEl)
+  ]
 
   const updateModel = (newModel: string) => {
     selected = newModel
-    for (const v in views) {
-      views[v].setModel(models[selected])
-    }
+    views.forEach(v => v.setModel(models[selected]))
     selectedModel.textContent = locale(`title.${selected}`)
   
     modelSelectorMenu.innerHTML = ''
@@ -222,6 +232,25 @@ Promise.all([
     downloadAnchor.setAttribute("href", dataString)
     downloadAnchor.setAttribute("download", "data.json")
     downloadAnchor.click()
+  })
+
+  treeControlsToggle.addEventListener('click', evt => {
+    treeControlsMenu.style.visibility = 'visible'
+    document.body.addEventListener('click', evt => {
+      treeControlsMenu.style.visibility = 'hidden'
+    }, { capture: true, once: true })
+  })
+
+  treeControlsVersionToggle.addEventListener('click', evt => {
+    treeControlsVersionMenu.style.visibility = 'visible'
+    document.body.addEventListener('click', evt => {
+      treeControlsVersionMenu.style.visibility = 'hidden'
+    }, { capture: true, once: true })
+  })
+
+  treeControlsReset.addEventListener('click', evt => {
+    models[selected].reset(models[selected].schema.default())
+    addChecked(treeControlsReset)
   })
 
   errorsToggle.addEventListener('click', evt => {

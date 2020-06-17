@@ -29,7 +29,7 @@ SCHEMAS.register('foo', ObjectNode({
     })
   ),
   map: MapNode(
-    EnumNode(['pig', 'sheep']),
+    EnumNode(['pig', 'sheep'], 'pig'),
     Resource(StringNode())
   ),
   recursive: ListNode(

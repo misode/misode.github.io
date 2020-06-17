@@ -12,6 +12,8 @@
   "dimension-type": "Dimension Type",
   "sandbox": "Sandbox",
   "language": "Language",
+  "reset": "Reset",
+  "classic_theme": "Classic Theme",
   "copy": "Copy",
   "download": "Download",
   "share": "Share"
