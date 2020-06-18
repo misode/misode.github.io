@@ -74,6 +74,10 @@ body {
   padding: 2px;
 }
 
+.header-title .nav-item {
+  margin: 0 8px;
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -294,6 +298,39 @@ body {
   padding: 6px;
 }
 
+.home {
+  padding: 20px;
+}
+
+.home-generators {
+  display: flex;
+  flex-direction: column;
+  margin: 0 20px;
+}
+
+.home-generator-card {
+  margin: 5px 0;
+  padding: 8px 15px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 3px;
+  background-color: var(--nav-faded);
+  color: var(--text);
+  fill: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.2s;
+}
+
+.home-generator-card:hover {
+  background-color: var(--nav-faded-hover);
+}
+
+.home-generator-card svg {
+  margin-left: 10px;
+}
+
 @media screen and (max-width: 580px) {
   body {
     overflow-y: hidden;
@@ -351,7 +388,6 @@ body {
     left: initial;
   }
 }
-
 
 @media screen and (max-width: 410px) {
   .header-title h2 {

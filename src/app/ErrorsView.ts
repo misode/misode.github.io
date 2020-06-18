@@ -1,19 +1,14 @@
-import { IView, locale, DataModel, ModelListener } from "minecraft-schemas";
+import { locale, DataModel, ModelListener } from "minecraft-schemas";
 import { Errors } from "minecraft-schemas/lib/model/Errors";
 
-export class ErrorsView implements ModelListener, IView {
+export class ErrorsView implements ModelListener {
   model: DataModel
   target: HTMLElement
 
   constructor(model: DataModel, target: HTMLElement) {
     this.model = model
     this.target = target
-  }
-
-  setModel(newModel: DataModel) {
-    this.model.removeListener(this)
-    this.model = newModel
-    this.model.addListener(this)
+    model.addListener(this)
   }
 
   errors(errors: Errors): void {

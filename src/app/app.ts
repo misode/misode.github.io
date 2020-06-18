@@ -1,7 +1,6 @@
 import Split from 'split.js'
 import {
   DataModel,
-  IView,
   TreeView,
   SourceView,
   ConditionSchema,
@@ -11,13 +10,16 @@ import {
   DimensionTypeSchema,
   LOCALES,
   locale,
-  COLLECTIONS
+  COLLECTIONS,
+  ModelListener
 } from 'minecraft-schemas'
 import { RegistryFetcher } from './RegistryFetcher'
 import { SandboxSchema } from './Sandbox'
 import { ErrorsView } from './ErrorsView'
 
 const LOCAL_STORAGE_THEME = 'theme'
+
+const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 
 const modelFromPath = (p: string) => p.split('/').filter(e => e.length !== 0).pop() ?? ''
 
@@ -33,6 +35,15 @@ const languages: { [key: string]: string } = {
   'pt': 'Português',
   'ru': 'Русский',
   'zh-CN': '简体中文'
+}
+
+const models: { [key: string]: DataModel } = {
+  'loot-table': new DataModel(LootTableSchema),
+  'predicate': new DataModel(ConditionSchema),
+  'advancement': new DataModel(AdvancementSchema),
+  'dimension': new DataModel(DimensionSchema),
+  'dimension-type': new DataModel(DimensionTypeSchema),
+  'sandbox': new DataModel(SandboxSchema)
 }
 
 const registries = [
@@ -60,12 +71,9 @@ const treeViewObserver = (el: HTMLElement) => {
     e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.75 4.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"></path></svg>`)
   })
   el.querySelectorAll('.collapse.open, button.remove').forEach(e => {
-    e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>
-    `)
+    e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>`)
   })
 }
-
-const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 Promise.all([
   fetch(publicPath + 'locales/schema/en.json').then(r => r.json()),
   fetch(publicPath + 'locales/app/en.json').then(r => r.json()),
@@ -73,6 +81,8 @@ Promise.all([
 ]).then(responses => {
   LOCALES.register('en', {...responses[0], ...responses[1]})
 
+  const homeLink = document.getElementById('home-link')!
+  const homeGenerators = document.getElementById('home-generators')!
   const selectedModel = document.getElementById('selected-model')!
   const modelSelector = document.getElementById('model-selector')!
   const modelSelectorMenu = document.getElementById('model-selector-menu')!
@@ -82,6 +92,7 @@ Promise.all([
   const treeViewEl = document.getElementById('tree-view')!
   const sourceViewEl = document.getElementById('source-view')!
   const errorsViewEl = document.getElementById('errors-view')!
+  const homeViewEl = document.getElementById('home-view')!
   const errorsToggle = document.getElementById('errors-toggle')!
   const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
   const treeViewOutput = document.getElementById('tree-view-output')!
@@ -98,48 +109,33 @@ Promise.all([
   const treeControlsUndo = document.getElementById('tree-controls-undo')!
   const treeControlsRedo = document.getElementById('tree-controls-redo')!
 
-  let selected = modelFromPath(location.pathname)
-  if (selected.length === 0) {
-    selected = 'loot-table'
-  }
+  let selected = ''
 
-  const models: { [key: string]: DataModel } = {
-    'loot-table': new DataModel(LootTableSchema),
-    'predicate': new DataModel(ConditionSchema),
-    'advancement': new DataModel(AdvancementSchema),
-    'dimension': new DataModel(DimensionSchema),
-    'dimension-type': new DataModel(DimensionTypeSchema),
-    'sandbox': new DataModel(SandboxSchema)
-  }
+  const updateModel = () => {
+    if (models[selected] === undefined) {
+      selectedModel.textContent = locale(`title.home`)
+    } else {
+      selectedModel.textContent = locale(`title.${selected}`)
+      new TreeView(models[selected], treeViewOutput, {
+        showErrors: true,
+        observer: treeViewObserver
+      }),
+      new SourceView(models[selected], sourceViewOutput, {
+        indentation: 2
+      }),
+      new ErrorsView(models[selected], errorsViewEl)
 
-  const views: IView[] = [
-    new TreeView(models[selected], treeViewOutput, {
-      showErrors: true,
-      observer: treeViewObserver
-    }),
-    new SourceView(models[selected], sourceViewOutput, {
-      indentation: 2
-    }),
-    new ErrorsView(models[selected], errorsViewEl)
-  ]
+      models[selected].invalidate()
+    }
 
-  const updateModel = (newModel: string) => {
-    selected = newModel
-    views.forEach(v => v.setModel(models[selected]))
-    selectedModel.textContent = locale(`title.${selected}`)
-  
     modelSelectorMenu.innerHTML = ''
     Object.keys(models).forEach(m => {
       modelSelectorMenu.insertAdjacentHTML('beforeend', 
         `<div class="btn${m === selected ? ' selected' : ''}">${locale(m)}</div>`)
       modelSelectorMenu.lastChild?.addEventListener('click', evt => {
-        updateModel(m)
-        history.pushState({model: m}, m, publicPath + m)
-        modelSelectorMenu.style.visibility = 'hidden'
+        reload(publicPath + m)
       })
     })
-
-    models[selected].invalidate()
   }
 
   const updateLanguage = (key: string) => {
@@ -159,12 +155,15 @@ Promise.all([
       })
     })
 
-    updateModel(selected)
+    updateModel()
   }
-  updateLanguage('en')
 
   Split([treeViewEl, sourceViewEl], {
     sizes: [66, 34]
+  })
+
+  homeLink.addEventListener('click', evt => {
+    reload(publicPath)
   })
 
   modelSelector.addEventListener('click', evt => {
@@ -175,7 +174,7 @@ Promise.all([
   })
 
   window.onpopstate = (evt: PopStateEvent) => {
-    updateModel(modelFromPath(location.pathname))
+    reload(location.pathname)
   }
 
   sourceToggle.addEventListener('click', evt => {
@@ -284,5 +283,38 @@ Promise.all([
     }
   })
 
+  const reload = (target: string) => {
+    selected = modelFromPath(target) ?? ''
+    if (target) {
+      history.pushState(target, 'Change Page', target)
+    }
+
+    const panels = [treeViewEl, sourceViewEl, errorsViewEl]
+    if (models[selected] === undefined) {
+      homeViewEl.style.display = '';
+      (document.querySelector('.gutter') as HTMLElement).style.display = 'none'
+      modelSelector.style.display = 'none'
+      panels.forEach(v => v.style.display = 'none')
+      homeGenerators.innerHTML = ''
+      Object.keys(models).forEach(m => {
+        homeGenerators.insertAdjacentHTML('beforeend', 
+          `<div class="home-generator-card">
+            ${locale(m)}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"></path></svg>
+          </div>`)
+          homeGenerators.lastChild?.addEventListener('click', evt => {
+          reload(publicPath + m)
+        })
+      })
+    } else {
+      homeViewEl.style.display = 'none';
+      (document.querySelector('.gutter') as HTMLElement).style.display = ''
+      modelSelector.style.display = ''
+      panels.forEach(v => v.style.display = '')
+    }
+    updateModel()
+    updateLanguage('en')
+  }
+  reload(location.pathname)
   document.body.style.visibility = 'initial'
 })
