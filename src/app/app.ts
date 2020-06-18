@@ -99,6 +99,9 @@ Promise.all([
   const treeControlsRedo = document.getElementById('tree-controls-redo')!
 
   let selected = modelFromPath(location.pathname)
+  if (selected.length === 0) {
+    selected = 'loot-table'
+  }
 
   const models: { [key: string]: DataModel } = {
     'loot-table': new DataModel(LootTableSchema),
