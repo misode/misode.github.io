@@ -18,7 +18,7 @@ import { ErrorsView } from './ErrorsView'
 
 const LOCAL_STORAGE_THEME = 'theme'
 
-const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
+const publicPath = process.env.NODE_ENV === 'production' ? '/alpha/' : '/';
 
 const modelFromPath = (p: string) => p.split('/').filter(e => e.length !== 0).pop() ?? ''
 

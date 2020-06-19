@@ -5,7 +5,7 @@ module.exports = (env, argv) => ({
   entry: './src/app/app.ts',
   output: {
     path: __dirname + '/dist',
-    publicPath: argv.mode === 'production' ? '/dev/' : '/',
+    publicPath: argv.mode === 'production' ? '/alpha/' : '/',
     filename: 'js/bundle.js'
   },
   resolve: {
