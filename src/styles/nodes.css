@@ -177,6 +177,7 @@ button.add svg {
   border: none;
   height: 34px;
   width: 34px;
+  min-width: 34px;
   padding-left: 6px;
   fill: var(--node-remove);
 }
@@ -209,7 +210,7 @@ button.add svg {
 }
 
 .range-node select {
-  width: 20px;
+  width: 25px;
 }
 
 .number-node input,

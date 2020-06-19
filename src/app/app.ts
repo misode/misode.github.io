@@ -10,8 +10,7 @@ import {
   DimensionTypeSchema,
   LOCALES,
   locale,
-  COLLECTIONS,
-  ModelListener
+  COLLECTIONS
 } from 'minecraft-schemas'
 import { RegistryFetcher } from './RegistryFetcher'
 import { SandboxSchema } from './Sandbox'
@@ -253,7 +252,7 @@ Promise.all([
   })
 
   treeControlsReset.addEventListener('click', evt => {
-    models[selected].reset(models[selected].schema.default())
+    models[selected].reset(models[selected].schema.default(), true)
     addChecked(treeControlsReset)
   })
 
