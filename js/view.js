@@ -1,8 +1,6 @@
 
 const themes = ["light", "dark"];
 
-let preventDuplicateDimensionType;
-
 themes.forEach(v => $('#themeList').append(`<a class="dropdown-item" onclick="changeTheme('${v}')" data-i18n="theme.${v}"></a>`));
 
 addListener(updateView);
@@ -42,7 +40,6 @@ function generateSourceAndView(data, struct) {
     $('#structure').attr('data-index', 'pools');
     return generateTable(data, struct);
   } else {
-    preventDuplicateDimensionType = [false, false, false, false];
     let {out: sourceOut, component: $component} = generateObject(data, struct);
     $component.removeClass('mt-3');
     return {out: sourceOut, component: $component};
@@ -208,28 +205,7 @@ function generateEnum(data, struct) {
   if (struct.help) {
     $el.append(generateTooltip(struct.translateValue + '.' + data.replace(/.*:/, '')));
   }
-  let out = data;
-  if (struct.translate === 'dimension.type') {
-    const i = struct.values.indexOf(data)
-    if (i > 0) {
-      if (preventDuplicateDimensionType[i]) {
-        data = 'minecraft:default';
-      } else {
-        preventDuplicateDimensionType[i] = true;
-      }
-    }
-    if (data === 'minecraft:default') {
-      out = {
-        "ultrawarm": false,
-        "natural": true,
-        "shrunk": false,
-        "ambient_light": 0,
-        "has_skylight": true,
-        "has_ceiling": false
-      };
-    }
-  }
-  return {out: out, component: $el};
+  return {out: data, component: $el};
 }
 
 function generateSet(data, struct) {
@@ -287,7 +263,7 @@ function generateMap(data, struct) {
         $header.append('<button type="button" class="btn btn-danger mb-2 float-right" onclick="removeFromMap(this)" data-i18n="' + struct.translate + '_remove"></button>');
         $item.prepend($header);
       } else {
-        $item.addClass("ml-3");
+        $item.addClass("pl-3");
         $item.append('<div class="input-group-append"><button class="btn btn-outline-danger bg-light" type="button" onclick="removeFromMap(this)" data-i18n="remove"></button></div>');
       }
       out[field.id] = outValue;

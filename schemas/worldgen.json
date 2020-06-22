@@ -122,7 +122,7 @@
                   "type": "enum",
                   "help": true,
                   "filter": true,
-                  "default": "minecraft:multi_noise",
+                  "default": "minecraft:fixed",
                   "values": [
                     "minecraft:fixed",
                     "minecraft:multi_noise",
@@ -204,6 +204,7 @@
               "type": "object",
               "color": "dark",
               "collapse": true,
+              "help": true,
               "default": "minecraft:overworld",
               "values": [
                 "minecraft:overworld",
@@ -273,7 +274,9 @@
                   "color": "dark",
                   "default": {
                     "Name": "minecraft:water",
-                    "Properties": {}
+                    "Properties": {
+                      "level": "0"
+                    }
                   },
                   "fields": [
                     {
@@ -298,7 +301,6 @@
                   "id": "noise",
                   "translate": "generator.settings.noise",
                   "type": "object",
-                  "collapse": true,
                   "color": "dark",
                   "fields": [
                     {
@@ -529,14 +531,20 @@
           "type": "object",
           "color": "dark",
           "collapse": true,
-          "default": "minecraft:default",
+          "default": "minecraft:overworld",
+          "help": true,
           "values": [
-            "minecraft:default",
             "minecraft:overworld",
             "minecraft:the_nether",
             "minecraft:the_end"
           ],
           "fields": [
+            {
+              "id": "name",
+              "translate": "dimension.type.name",
+              "type": "string",
+              "help": true
+            },
             {
               "id": "ultrawarm",
               "translate": "dimension.type.ultrawarm",
@@ -559,6 +567,42 @@
               "help": true
             },
             {
+              "id": "piglin_safe",
+              "translate": "dimension.type.piglin_safe",
+              "type": "boolean",
+              "default": true
+            },
+            {
+              "id": "respawn_anchor_works",
+              "translate": "dimension.type.respawn_anchor_works",
+              "type": "boolean",
+              "default": false
+            },
+            {
+              "id": "bed_works",
+              "translate": "dimension.type.bed_works",
+              "type": "boolean",
+              "default": false
+            },
+            {
+              "id": "has_raids",
+              "translate": "dimension.type.has_raids",
+              "type": "boolean",
+              "default": true
+            },
+            {
+              "id": "has_skylight",
+              "translate": "dimension.type.has_skylight",
+              "type": "boolean",
+              "default": true
+            },
+            {
+              "id": "has_ceiling",
+              "translate": "dimension.type.has_ceiling",
+              "type": "boolean",
+              "default": false
+            },
+            {
               "id": "ambient_light",
               "translate": "dimension.type.ambient_light",
               "type": "float",
@@ -572,16 +616,16 @@
               "help": true
             },
             {
-              "id": "has_skylight",
-              "translate": "dimension.type.has_skylight",
-              "type": "boolean",
-              "default": true
+              "id": "logical_height",
+              "translate": "dimension.type.logical_height",
+              "type": "int",
+              "default": 256
             },
             {
-              "id": "has_ceiling",
-              "translate": "dimension.type.has_ceiling",
-              "type": "boolean",
-              "default": false
+              "id": "infiniburn",
+              "translate": "dimension.type.infiniburn",
+              "type": "string",
+              "default": "minecraft:infiniburn_overworld"
             }
           ]
         }
