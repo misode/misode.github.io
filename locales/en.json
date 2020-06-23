@@ -362,7 +362,6 @@
     "generator.settings.block_states_add": "Add Block State",
     "generator.settings.fluid_states": "Fluid States",
     "generator.settings.fluid_states_add": "Add Fluid State",
-    "generator.settings.properties_add": "Add Property",
     "generator.settings.layers_add": "Add Layer",
     "generator.settings.noise": "Noise Options",
     "generator.settings.noise.density_factor": "Density Factor",
