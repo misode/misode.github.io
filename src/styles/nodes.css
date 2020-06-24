@@ -99,7 +99,7 @@
   background-color: var(--node-background-input);
 }
 
-.object-node > .node-header > label.collapse {
+.object-node > .node-header > .collapse {
   cursor: pointer;
 }
 
@@ -127,7 +127,7 @@
   border-bottom-left-radius: 0;
 }
 
-.node-header > label.collapse.closed {
+.node-header > .collapse.closed {
   border-bottom-left-radius: 3px;
 }
 
@@ -136,24 +136,23 @@ button.selected {
   border-color: var(--node-selected-border);
 }
 
-label.collapse {
+.collapse {
   display: inline-flex;
   align-items: center;
 }
 
-label.collapse svg {
-  margin-right: 5px;
+.collapse svg {
   fill: var(--node-text);
   transition: fill var(--style-transition);
 }
 
-label.collapse.closed,
+.collapse.closed,
 button.add {
   background-color: var(--node-add);
   border-color: var(--node-add-border);
 }
 
-label.collapse.open,
+.collapse.open,
 button.remove {
   background-color: var(--node-remove);
   border-color: var(--node-remove-border);
@@ -231,12 +230,14 @@ button.add svg {
   border-color: var(--category-predicate-border) !important;
 }
 
+[data-category=function] > .node-header > label,
 [data-category=function] > .node-body > .node.node-header > *:first-child,
 [data-category=function] > .node-body > .node > .node-header > *:first-child {
   background-color: var(--category-function) !important;
 }
 
 [data-category=function] > .node-body,
+[data-category=function] > .node-header > label,
 [data-category=function] > .node-body > .node.node-header > *:not(button),
 [data-category=function] > .node-body > .node > .node-header > *:not(button) {
   border-color: var(--category-function-border) !important;

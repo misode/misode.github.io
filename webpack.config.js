@@ -1,5 +1,6 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MergeJsonWebpackPlugin = require("merge-jsons-webpack-plugin");
 
 module.exports = (env, argv) => ({
   entry: './src/app/app.ts',
@@ -20,18 +21,21 @@ module.exports = (env, argv) => ({
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'src/locales',
-          to: 'locales/app'
-        },
-        {
-          from: 'node_modules/minecraft-schemas/src/locales',
-          to: 'locales/schema'
-        },
-        {
           from: 'src/styles',
           to: 'styles'
         }
       ]
+    }),
+    new MergeJsonWebpackPlugin({
+      debug: true,
+      output: {
+        groupBy: [ 'de', 'en', 'fr', 'it', 'ja', 'pt', 'ru', 'zh-cn' ].map(code => (
+          {
+            pattern: `{./src/locales/${code}.json,./node_modules/minecraft-schemas/src/locales/${code}.json}`,
+            fileName: `./locales/${code}.json`
+          }
+        ))
+      }
     }),
     new HtmlWebpackPlugin({
       title: 'Minecraft Generators',

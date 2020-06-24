@@ -17,6 +17,7 @@ import { SandboxSchema } from './Sandbox'
 import { ErrorsView } from './ErrorsView'
 
 const LOCAL_STORAGE_THEME = 'theme'
+const LOCAL_STORAGE_LANGUAGE = 'language'
 
 const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 
@@ -33,7 +34,7 @@ const languages: { [key: string]: string } = {
   'en': 'English',
   'pt': 'Português',
   'ru': 'Русский',
-  'zh-CN': '简体中文'
+  'zh-cn': '简体中文'
 }
 
 const models: { [key: string]: DataModel } = {
@@ -73,12 +74,18 @@ const treeViewObserver = (el: HTMLElement) => {
     e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>`)
   })
 }
+
+const fetchLocale = async (id: string) => {
+  const response = await fetch(publicPath + `locales/${id}.json`)
+  LOCALES.register(id, await response.json())
+}
+LOCALES.language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE)?.toLowerCase() ?? 'en'
+
 Promise.all([
-  fetch(publicPath + 'locales/schema/en.json').then(r => r.json()),
-  fetch(publicPath + 'locales/app/en.json').then(r => r.json()),
+  fetchLocale(LOCALES.language),
+  ...(LOCALES.language === 'en' ? [] : [fetchLocale('en')]),
   RegistryFetcher(COLLECTIONS, registries)
 ]).then(responses => {
-  LOCALES.register('en', {...responses[0], ...responses[1]})
 
   const homeLink = document.getElementById('home-link')!
   const homeGenerators = document.getElementById('home-generators')!
@@ -137,9 +144,12 @@ Promise.all([
     })
   }
 
-  const updateLanguage = (key: string) => {
-    LOCALES.language = key
-  
+  const updateLanguage = (id: string, store = false) => {
+    LOCALES.language = id
+    if (store) {
+      localStorage.setItem(LOCAL_STORAGE_LANGUAGE, id)
+    }
+
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
     })
@@ -149,12 +159,18 @@ Promise.all([
       languageSelectorMenu.insertAdjacentHTML('beforeend',
         `<div class="btn${key === LOCALES.language ? ' selected' : ''}">${languages[key]}</div>`)
       languageSelectorMenu.lastChild?.addEventListener('click', evt => {
-        updateLanguage(key)
+        updateLanguage(key, true)
         languageSelectorMenu.style.visibility = 'hidden'
       })
     })
 
-    updateModel()
+    if (LOCALES.has(id)) {
+      updateModel()
+    } else {
+      fetchLocale(id).then(r => {
+        updateModel()
+      })
+    }
   }
 
   Split([treeViewEl, sourceViewEl], {
@@ -311,8 +327,7 @@ Promise.all([
       modelSelector.style.display = ''
       panels.forEach(v => v.style.display = '')
     }
-    updateModel()
-    updateLanguage('en')
+    updateLanguage(LOCALES.language)
   }
   reload(location.pathname)
   document.body.style.visibility = 'initial'
