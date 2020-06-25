@@ -1,17 +1,15 @@
 import Split from 'split.js'
 import {
+  AbstractView,
+  Base,
+  COLLECTIONS,
   DataModel,
-  TreeView,
-  SourceView,
-  ConditionSchema,
-  LootTableSchema,
-  AdvancementSchema,
-  DimensionSchema,
-  DimensionTypeSchema,
-  LOCALES,
   locale,
-  COLLECTIONS
-} from 'minecraft-schemas'
+  LOCALES,
+  SourceView,
+  TreeView,
+} from '@mcschema/core'
+import { schemas } from '@mcschema/java-1.16'
 import { RegistryFetcher } from './RegistryFetcher'
 import { SandboxSchema } from './Sandbox'
 import { ErrorsView } from './ErrorsView'
@@ -38,11 +36,11 @@ const languages: { [key: string]: string } = {
 }
 
 const models: { [key: string]: DataModel } = {
-  'loot-table': new DataModel(LootTableSchema),
-  'predicate': new DataModel(ConditionSchema),
-  'advancement': new DataModel(AdvancementSchema),
-  'dimension': new DataModel(DimensionSchema),
-  'dimension-type': new DataModel(DimensionTypeSchema),
+  'loot-table': new DataModel(schemas['loot-table']),
+  'predicate': new DataModel(schemas['predicate']),
+  'advancement': new DataModel(schemas['advancement']),
+  'dimension': new DataModel(schemas['dimension']),
+  'dimension-type': new DataModel(schemas['dimension-type']),
   'sandbox': new DataModel(SandboxSchema)
 }
 
@@ -81,39 +79,52 @@ const fetchLocale = async (id: string) => {
 }
 LOCALES.language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE)?.toLowerCase() ?? 'en'
 
+const homeLink = document.getElementById('home-link')!
+const homeGenerators = document.getElementById('home-generators')!
+const selectedModel = document.getElementById('selected-model')!
+const modelSelector = document.getElementById('model-selector')!
+const modelSelectorMenu = document.getElementById('model-selector-menu')!
+const languageSelector = document.getElementById('language-selector')!
+const languageSelectorMenu = document.getElementById('language-selector-menu')!
+const themeSelector = document.getElementById('theme-selector')!
+const treeViewEl = document.getElementById('tree-view')!
+const sourceViewEl = document.getElementById('source-view')!
+const errorsViewEl = document.getElementById('errors-view')!
+const homeViewEl = document.getElementById('home-view')!
+const errorsToggle = document.getElementById('errors-toggle')!
+const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
+const treeViewOutput = document.getElementById('tree-view-output')!
+const sourceControlsToggle = document.getElementById('source-controls-toggle')!
+const sourceControlsMenu = document.getElementById('source-controls-menu')!
+const sourceControlsCopy = document.getElementById('source-controls-copy')!
+const sourceControlsDownload = document.getElementById('source-controls-download')!
+const sourceToggle = document.getElementById('source-toggle')!
+const treeControlsToggle = document.getElementById('tree-controls-toggle')!
+const treeControlsMenu = document.getElementById('tree-controls-menu')!
+const treeControlsVersionToggle = document.getElementById('tree-controls-version-toggle')!
+const treeControlsVersionMenu = document.getElementById('tree-controls-version-menu')!
+const treeControlsReset = document.getElementById('tree-controls-reset')!
+const treeControlsUndo = document.getElementById('tree-controls-undo')!
+const treeControlsRedo = document.getElementById('tree-controls-redo')!
+
+const dummyModel = new DataModel(Base)
+
+const views: {[key: string]: AbstractView} = {
+  'tree': new TreeView(dummyModel, treeViewOutput, {
+    showErrors: true,
+    observer: treeViewObserver
+  }),
+  'source': new SourceView(dummyModel, sourceViewOutput, {
+    indentation: 2
+  }),
+  'errors': new ErrorsView(dummyModel, errorsViewEl)
+}
+
 Promise.all([
   fetchLocale(LOCALES.language),
   ...(LOCALES.language === 'en' ? [] : [fetchLocale('en')]),
   RegistryFetcher(COLLECTIONS, registries)
 ]).then(responses => {
-
-  const homeLink = document.getElementById('home-link')!
-  const homeGenerators = document.getElementById('home-generators')!
-  const selectedModel = document.getElementById('selected-model')!
-  const modelSelector = document.getElementById('model-selector')!
-  const modelSelectorMenu = document.getElementById('model-selector-menu')!
-  const languageSelector = document.getElementById('language-selector')!
-  const languageSelectorMenu = document.getElementById('language-selector-menu')!
-  const themeSelector = document.getElementById('theme-selector')!
-  const treeViewEl = document.getElementById('tree-view')!
-  const sourceViewEl = document.getElementById('source-view')!
-  const errorsViewEl = document.getElementById('errors-view')!
-  const homeViewEl = document.getElementById('home-view')!
-  const errorsToggle = document.getElementById('errors-toggle')!
-  const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
-  const treeViewOutput = document.getElementById('tree-view-output')!
-  const sourceControlsToggle = document.getElementById('source-controls-toggle')!
-  const sourceControlsMenu = document.getElementById('source-controls-menu')!
-  const sourceControlsCopy = document.getElementById('source-controls-copy')!
-  const sourceControlsDownload = document.getElementById('source-controls-download')!
-  const sourceToggle = document.getElementById('source-toggle')!
-  const treeControlsToggle = document.getElementById('tree-controls-toggle')!
-  const treeControlsMenu = document.getElementById('tree-controls-menu')!
-  const treeControlsVersionToggle = document.getElementById('tree-controls-version-toggle')!
-  const treeControlsVersionMenu = document.getElementById('tree-controls-version-menu')!
-  const treeControlsReset = document.getElementById('tree-controls-reset')!
-  const treeControlsUndo = document.getElementById('tree-controls-undo')!
-  const treeControlsRedo = document.getElementById('tree-controls-redo')!
 
   let selected = ''
 
@@ -122,15 +133,7 @@ Promise.all([
       selectedModel.textContent = locale(`title.home`)
     } else {
       selectedModel.textContent = locale(`title.${selected}`)
-      new TreeView(models[selected], treeViewOutput, {
-        showErrors: true,
-        observer: treeViewObserver
-      }),
-      new SourceView(models[selected], sourceViewOutput, {
-        indentation: 2
-      }),
-      new ErrorsView(models[selected], errorsViewEl)
-
+      Object.values(views).forEach(v => v.setModel(models[selected]))
       models[selected].invalidate()
     }
 

@@ -1,4 +1,4 @@
-import { CollectionRegistry } from "minecraft-schemas";
+import { CollectionRegistry } from '@mcschema/core'
 
 export const mcdata = (version: string, registry: string) => `https://raw.githubusercontent.com/Arcensoth/mcdata/${version}/processed/reports/registries/${registry}/${registry}.min.json`
 

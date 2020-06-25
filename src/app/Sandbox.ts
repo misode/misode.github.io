@@ -13,7 +13,7 @@ import {
   RangeNode,
   Resource,
   SCHEMAS
-} from 'minecraft-schemas'
+} from '@mcschema/core'
 
 SCHEMAS.register('foo', ObjectNode({
   foo: StringNode(),

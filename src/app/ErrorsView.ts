@@ -1,14 +1,16 @@
-import { locale, DataModel, ModelListener } from "minecraft-schemas";
-import { Errors } from "minecraft-schemas/lib/model/Errors";
+import {
+  AbstractView,
+  DataModel,
+  Errors,
+  locale,
+} from '@mcschema/core'
 
-export class ErrorsView implements ModelListener {
-  model: DataModel
+export class ErrorsView extends AbstractView {
   target: HTMLElement
 
   constructor(model: DataModel, target: HTMLElement) {
-    this.model = model
+    super(model)
     this.target = target
-    model.addListener(this)
   }
 
   errors(errors: Errors): void {
