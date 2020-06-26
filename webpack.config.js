@@ -31,7 +31,7 @@ module.exports = (env, argv) => ({
       output: {
         groupBy: [ 'de', 'en', 'fr', 'it', 'ja', 'pt', 'ru', 'zh-cn' ].map(code => (
           {
-            pattern: `{./src/locales/${code}.json,./node_modules/minecraft-schemas/src/locales/${code}.json}`,
+            pattern: `{./src/locales/${code}.json,./node_modules/@mcschema/core/locales/${code}.json}`,
             fileName: `./locales/${code}.json`
           }
         ))
