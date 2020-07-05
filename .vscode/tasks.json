@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+     {
+       "label": "Start",
+       "type": "shell",
+       "command": "rm -r \"./node_modules/@mcschema\" && npm link @mcschema/core && npm link @mcschema/java-1.16 && npm start"
+    }
+  ]
+}

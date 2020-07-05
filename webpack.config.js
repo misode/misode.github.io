@@ -27,7 +27,6 @@ module.exports = (env, argv) => ({
       ]
     }),
     new MergeJsonWebpackPlugin({
-      debug: true,
       output: {
         groupBy: [ 'de', 'en', 'fr', 'it', 'ja', 'pt', 'ru', 'zh-cn' ].map(code => (
           {
