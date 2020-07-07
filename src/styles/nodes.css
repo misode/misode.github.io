@@ -34,10 +34,13 @@
   --category-function-border: #6b6b6b;
 }
 
-.tree > div > .object-node > .node-body,
-.choice-node > .object-node > .node-body {
+.tree > div > .object-node > .node-body {
   border-left: none;
   padding-left: 0;
+}
+
+.tree > div > .node > .node-body {
+  margin-top: -5px; /* no idea why this is necessary */
 }
 
 .node {
@@ -56,6 +59,8 @@
   border-left: 3px solid var(--node-indent-border);
   transition: border-color var(--style-transition);
 }
+
+/* Node headers */
 
 .node-header {
   display: inline-flex;
@@ -103,6 +108,8 @@
   cursor: pointer;
 }
 
+/** Rounded corners */
+
 .node-header > *:first-child {
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
@@ -130,6 +137,8 @@
 .node-header > .collapse.closed {
   border-bottom-left-radius: 3px;
 }
+
+/* Buttons */
 
 button.selected {
   background-color: var(--node-selected);
@@ -181,6 +190,8 @@ button.add svg {
   fill: var(--node-remove);
 }
 
+/* Node body and list entry */
+
 .node-body {
   display: flex;
   flex-direction: column;
@@ -208,6 +219,8 @@ button.add svg {
   margin-top: 2px;
 }
 
+/* Node type specifics */
+
 .range-node select {
   width: 25px;
 }
@@ -216,6 +229,8 @@ button.add svg {
 .range-node input {
   width: 100px;
 }
+
+/* Color categories */
 
 [data-category=predicate] > .node-header > label,
 [data-category=predicate] > .node-body > .node.node-header > *:first-child,
