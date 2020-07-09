@@ -12,8 +12,8 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
-    "@mcschema/core": "^0.3.0",
-    "@mcschema/java-1.16": "^0.1.1",
+    "@mcschema/core": "^0.3.1",
+    "@mcschema/java-1.16": "^0.1.2",
     "@types/split.js": "^1.4.0",
     "copy-webpack-plugin": "^6.0.1",
     "html-webpack-plugin": "^4.3.0",

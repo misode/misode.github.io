@@ -37,7 +37,7 @@ module.exports = (env, argv) => ({
       }
     }),
     new HtmlWebpackPlugin({
-      title: 'Minecraft Generators',
+      title: 'Data Pack Generators Minecraft',
       filename: 'index.html',
       template: 'src/index.html'
     }),
@@ -67,8 +67,13 @@ module.exports = (env, argv) => ({
       template: 'src/index.html'
     }),
     new HtmlWebpackPlugin({
-      title: 'Sandbox Generator Minecraft',
-      filename: 'sandbox/index.html',
+      title: 'Biome Generator Minecraft',
+      filename: 'worldgen/biome/index.html',
+      template: 'src/index.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Feature Generator Minecraft',
+      filename: 'worldgen/feature/index.html',
       template: 'src/index.html'
     })
   ]

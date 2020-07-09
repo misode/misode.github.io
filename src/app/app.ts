@@ -11,7 +11,6 @@ import {
 } from '@mcschema/core'
 import { schemas } from '@mcschema/java-1.16'
 import { RegistryFetcher } from './RegistryFetcher'
-import { SandboxSchema } from './Sandbox'
 import { ErrorsView } from './ErrorsView'
 
 const LOCAL_STORAGE_THEME = 'theme'
@@ -19,7 +18,7 @@ const LOCAL_STORAGE_LANGUAGE = 'language'
 
 const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
 
-const modelFromPath = (p: string) => p.split('/').filter(e => e.length !== 0).pop() ?? ''
+const modelFromPath = (p: string) => p.replace(publicPath, '').replace(/\/$/, '')
 
 const addChecked = (el: HTMLElement) => {
   el.classList.add('check')
@@ -41,13 +40,12 @@ const models: { [key: string]: DataModel } = {
   'advancement': new DataModel(schemas['advancement']),
   'dimension': new DataModel(schemas['dimension']),
   'dimension-type': new DataModel(schemas['dimension-type']),
-  'sandbox': new DataModel(SandboxSchema)
+  'worldgen/biome': new DataModel(schemas['biome']),
+  'worldgen/feature': new DataModel(schemas['feature'])
 }
 
 const registries = [
   'attribute',
-  'biome',
-  'biome_source',
   'block',
   'enchantment',
   'entity_type',
@@ -58,7 +56,11 @@ const registries = [
   'loot_pool_entry_type',
   'mob_effect',
   'stat_type',
-  'structure_feature'
+  'worldgen/biome_source',
+  'worldgen/carver',
+  'worldgen/decorator',
+  'worldgen/feature',
+  'worldgen/surface_builder'
 ]
 
 const treeViewObserver = (el: HTMLElement) => {
@@ -127,15 +129,19 @@ Promise.all([
 ]).then(responses => {
 
   let selected = ''
+  Object.values(models).forEach(m => m.validate(true))
 
   const updateModel = () => {
+    let title = ''
     if (models[selected] === undefined) {
-      selectedModel.textContent = locale(`title.home`)
+      title = locale(`title.home`)
     } else {
-      selectedModel.textContent = locale(`title.${selected}`)
+      title = locale(`title.${selected}`)
       Object.values(views).forEach(v => v.setModel(models[selected]))
       models[selected].invalidate()
     }
+    selectedModel.textContent = title
+    document.title = title
 
     modelSelectorMenu.innerHTML = ''
     Object.keys(models).forEach(m => {
