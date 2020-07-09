@@ -328,7 +328,7 @@
     "function.lore": "Lore",
     "function.name": "Name",
     "function.nbt": "NBT",
-    "function.probability": "Propability",
+    "function.probability": "Probability",
     "function.properties": "Properties",
     "function.replace": "Replace",
     "function.searchRadius": "Search Radius (Chunks)",
