@@ -115,9 +115,9 @@ function generateBoolean(data, struct) {
   $el.attr('data-index', struct.id);
   $el.find('[data-name]').attr('data-i18n', struct.translate);
   if (data === true) {
-    $el.find('[value="true"]').addClass('active');
+    $el.find('[value="true"]').addClass('active bg-success');
   } else if (data === false) {
-    $el.find('[value="false"]').addClass('active');
+    $el.find('[value="false"]').addClass('active bg-danger');
   }
   if (struct.help) {
     $el.append(generateTooltip(struct.translate));
