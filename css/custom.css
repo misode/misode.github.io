@@ -98,6 +98,7 @@ textarea.invalid:focus {
   white-space: pre;
   overflow-wrap: normal;
   overflow-x: scroll;
+  resize: both;
 }
 
 .card a {
