@@ -41,40 +41,23 @@ module.exports = (env, argv) => ({
       filename: 'index.html',
       template: 'src/index.html'
     }),
-    new HtmlWebpackPlugin({
-      title: 'Loot Table Generator Minecraft',
-      filename: 'loot-table/index.html',
+    ...[
+      [ 'loot-table', 'Loot Table' ],
+      [ 'predicate', 'Predicate' ],
+      [ 'advancement', 'Advancement' ],
+      [ 'dimension', 'Dimension' ],
+      [ 'dimension-type', 'Dimension Type' ],
+      [ 'worldgen/biome', 'Biome' ],
+      [ 'worldgen/carver', 'Carver' ],
+      [ 'worldgen/feature', 'Feature' ],
+      [ 'worldgen/structure-feature', 'Structure Feature' ],
+      [ 'worldgen/surface-builder', 'Surface Builder' ],
+      [ 'worldgen/processor-list', 'Processor List' ],
+      [ 'worldgen/template-pool', 'Template Pool' ],
+    ].map(page => new HtmlWebpackPlugin({
+      title: `${page[1]} Generators Minecraft`,
+      filename: `${page[0]}/index.html`,
       template: 'src/index.html'
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Predicate Generator Minecraft',
-      filename: 'predicate/index.html',
-      template: 'src/index.html'
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Advancement Generator Minecraft',
-      filename: 'advancement/index.html',
-      template: 'src/index.html'
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Dimension Generator Minecraft',
-      filename: 'dimension/index.html',
-      template: 'src/index.html'
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Dimension Type Generator Minecraft',
-      filename: 'dimension-type/index.html',
-      template: 'src/index.html'
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Biome Generator Minecraft',
-      filename: 'worldgen/biome/index.html',
-      template: 'src/index.html'
-    }),
-    new HtmlWebpackPlugin({
-      title: 'Feature Generator Minecraft',
-      filename: 'worldgen/feature/index.html',
-      template: 'src/index.html'
-    })
+    }))
   ]
 })

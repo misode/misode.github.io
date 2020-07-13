@@ -8,8 +8,9 @@ import {
   LOCALES,
   SourceView,
   TreeView,
+  SCHEMAS,
 } from '@mcschema/core'
-import { schemas } from '@mcschema/java-1.16'
+import '@mcschema/java-1.16'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
 
@@ -35,13 +36,18 @@ const languages: { [key: string]: string } = {
 }
 
 const models: { [key: string]: DataModel } = {
-  'loot-table': new DataModel(schemas['loot-table']),
-  'predicate': new DataModel(schemas['predicate']),
-  'advancement': new DataModel(schemas['advancement']),
-  'dimension': new DataModel(schemas['dimension']),
-  'dimension-type': new DataModel(schemas['dimension-type']),
-  'worldgen/biome': new DataModel(schemas['biome']),
-  'worldgen/feature': new DataModel(schemas['feature'])
+  'loot-table': new DataModel(SCHEMAS.get('loot_table')),
+  'predicate': new DataModel(SCHEMAS.get('predicate')),
+  'advancement': new DataModel(SCHEMAS.get('advancement')),
+  'dimension': new DataModel(SCHEMAS.get('dimension')),
+  'dimension-type': new DataModel(SCHEMAS.get('dimension_type')),
+  'worldgen/biome': new DataModel(SCHEMAS.get('biome')),
+  'worldgen/carver': new DataModel(SCHEMAS.get('configured_carver')),
+  'worldgen/feature': new DataModel(SCHEMAS.get('configured_feature')),
+  'worldgen/structure-feature': new DataModel(SCHEMAS.get('configured_structure_feature')),
+  'worldgen/surface-builder': new DataModel(SCHEMAS.get('configured_surface_builder')),
+  'worldgen/processor-list': new DataModel(SCHEMAS.get('processor_list')),
+  'worldgen/template-pool': new DataModel(SCHEMAS.get('template_pool'))
 }
 
 const registries = [
@@ -56,11 +62,21 @@ const registries = [
   'loot_pool_entry_type',
   'mob_effect',
   'stat_type',
+  'worldgen/block_state_provider_type',
+  'worldgen/block_placer_type',
   'worldgen/biome_source',
   'worldgen/carver',
+  'worldgen/chunk_generator',
   'worldgen/decorator',
   'worldgen/feature',
-  'worldgen/surface_builder'
+  'worldgen/feature_size_type',
+  'worldgen/foliage_placer_type',
+  'worldgen/structure_feature',
+  'worldgen/structure_pool_element',
+  'worldgen/structure_processor',
+  'worldgen/surface_builder',
+  'worldgen/tree_decorator_type',
+  'worldgen/trunk_placer_type'
 ]
 
 const treeViewObserver = (el: HTMLElement) => {
@@ -134,9 +150,9 @@ Promise.all([
   const updateModel = () => {
     let title = ''
     if (models[selected] === undefined) {
-      title = locale(`title.home`)
+      title = locale('title.home')
     } else {
-      title = locale(`title.${selected}`)
+      title = locale('title.generator', [locale(selected)])
       Object.values(views).forEach(v => v.setModel(models[selected]))
       models[selected].invalidate()
     }
@@ -316,7 +332,8 @@ Promise.all([
     const panels = [treeViewEl, sourceViewEl, errorsViewEl]
     if (models[selected] === undefined) {
       homeViewEl.style.display = '';
-      (document.querySelector('.gutter') as HTMLElement).style.display = 'none'
+      (document.querySelector('.gutter') as HTMLElement).style.display = 'none';
+      (document.querySelector('.content') as HTMLElement).style.overflowY = 'initial'
       modelSelector.style.display = 'none'
       panels.forEach(v => v.style.display = 'none')
       homeGenerators.innerHTML = ''
