@@ -96,6 +96,8 @@
     "loot_function_type",
     "loot_pool_entry_type",
     "mob_effect",
+    "rule_test",
+    "pos_rule_test",
     "stat_type",
     "worldgen/block_state_provider_type",
     "worldgen/block_placer_type",
