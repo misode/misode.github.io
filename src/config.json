@@ -1,0 +1,116 @@
+{
+  "languages": [
+    {
+      "code": "en",
+      "name": "English"
+    },
+    {
+      "code": "pt",
+      "name": "Português"
+    },
+    {
+      "code": "ru",
+      "name": "Русский"
+    },
+    {
+      "code": "zh-cn",
+      "name": "简体中文"
+    }
+  ],
+  "models": [
+    {
+      "id": "loot-table",
+      "name": "Loot Table",
+      "schema": "loot_table"
+    },
+    {
+      "id": "predicate",
+      "name": "Predicate",
+      "schema": "predicate"
+    },
+    {
+      "id": "advancement",
+      "name": "Advancement",
+      "schema": "advancement"
+    },
+    {
+      "id": "dimension",
+      "name": "Dimension",
+      "schema": "dimension"
+    },
+    {
+      "id": "dimension-type",
+      "name": "Dimension Type",
+      "schema": "dimension_type"
+    },
+    {
+      "id": "worldgen",
+      "name": "Worldgen",
+      "children": [
+        {
+          "id": "worldgen/biome",
+          "name": "Biome",
+          "schema": "biome"
+        },
+        {
+          "id": "worldgen/carver",
+          "name": "Carver",
+          "schema": "configured_carver"
+        },
+        {
+          "id": "worldgen/feature",
+          "name": "Feature",
+          "schema": "configured_feature"
+        },
+        {
+          "id": "worldgen/structure-feature",
+          "name": "Structure Feature",
+          "schema": "configured_structure_feature"
+        },
+        {
+          "id": "worldgen/surface-builder",
+          "name": "Surface Builder",
+          "schema": "configured_surface_builder"
+        },
+        {
+          "id": "worldgen/processor-list",
+          "name": "Processor List",
+          "schema": "processor_list"
+        },
+        {
+          "id": "worldgen/template-pool",
+          "name": "Template Pool",
+          "schema": "template_pool"
+        }
+      ]
+    }
+  ],
+  "registries": [
+    "attribute",
+    "block",
+    "enchantment",
+    "entity_type",
+    "fluid",
+    "item",
+    "loot_condition_type",
+    "loot_function_type",
+    "loot_pool_entry_type",
+    "mob_effect",
+    "stat_type",
+    "worldgen/block_state_provider_type",
+    "worldgen/block_placer_type",
+    "worldgen/biome_source",
+    "worldgen/carver",
+    "worldgen/chunk_generator",
+    "worldgen/decorator",
+    "worldgen/feature",
+    "worldgen/feature_size_type",
+    "worldgen/foliage_placer_type",
+    "worldgen/structure_feature",
+    "worldgen/structure_pool_element",
+    "worldgen/structure_processor",
+    "worldgen/surface_builder",
+    "worldgen/tree_decorator_type",
+    "worldgen/trunk_placer_type"
+  ]
+}

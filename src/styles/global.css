@@ -299,16 +299,17 @@ body {
 }
 
 .home {
+  display: flex;
   padding: 20px;
 }
 
-.home-generators {
+.generators-list {
   display: flex;
   flex-direction: column;
   margin: 0 20px;
 }
 
-.home-generator-card {
+.generators-card {
   margin: 5px 0;
   padding: 8px 15px;
   cursor: pointer;
@@ -321,13 +322,17 @@ body {
   align-items: center;
   justify-content: space-between;
   transition: background-color 0.2s;
+  transition: margin 0.2s;
 }
 
-.home-generator-card:hover {
+.generators-card:hover,
+.generators-card.selected {
   background-color: var(--nav-faded-hover);
+  margin-left: 8px;
+  margin-right: -8px;
 }
 
-.home-generator-card svg {
+.generators-card svg {
   margin-left: 10px;
 }
 

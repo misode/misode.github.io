@@ -13,6 +13,7 @@ import {
 import '@mcschema/java-1.16'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
+import config from '../config.json'
 
 const LOCAL_STORAGE_THEME = 'theme'
 const LOCAL_STORAGE_LANGUAGE = 'language'
@@ -28,56 +29,16 @@ const addChecked = (el: HTMLElement) => {
   }, 2000)
 }
 
-const languages: { [key: string]: string } = {
-  'en': 'English',
-  'pt': 'Português',
-  'ru': 'Русский',
-  'zh-cn': '简体中文'
+const buildModel = (model: any) => {
+  if (model.schema) {
+    models[model.id] = new DataModel(SCHEMAS.get(model.schema))
+  } else if (model.children) {
+    model.children.forEach(buildModel)
+  }
 }
 
-const models: { [key: string]: DataModel } = {
-  'loot-table': new DataModel(SCHEMAS.get('loot_table')),
-  'predicate': new DataModel(SCHEMAS.get('predicate')),
-  'advancement': new DataModel(SCHEMAS.get('advancement')),
-  'dimension': new DataModel(SCHEMAS.get('dimension')),
-  'dimension-type': new DataModel(SCHEMAS.get('dimension_type')),
-  'worldgen/biome': new DataModel(SCHEMAS.get('biome')),
-  'worldgen/carver': new DataModel(SCHEMAS.get('configured_carver')),
-  'worldgen/feature': new DataModel(SCHEMAS.get('configured_feature')),
-  'worldgen/structure-feature': new DataModel(SCHEMAS.get('configured_structure_feature')),
-  'worldgen/surface-builder': new DataModel(SCHEMAS.get('configured_surface_builder')),
-  'worldgen/processor-list': new DataModel(SCHEMAS.get('processor_list')),
-  'worldgen/template-pool': new DataModel(SCHEMAS.get('template_pool'))
-}
-
-const registries = [
-  'attribute',
-  'block',
-  'enchantment',
-  'entity_type',
-  'fluid',
-  'item',
-  'loot_condition_type',
-  'loot_function_type',
-  'loot_pool_entry_type',
-  'mob_effect',
-  'stat_type',
-  'worldgen/block_state_provider_type',
-  'worldgen/block_placer_type',
-  'worldgen/biome_source',
-  'worldgen/carver',
-  'worldgen/chunk_generator',
-  'worldgen/decorator',
-  'worldgen/feature',
-  'worldgen/feature_size_type',
-  'worldgen/foliage_placer_type',
-  'worldgen/structure_feature',
-  'worldgen/structure_pool_element',
-  'worldgen/structure_processor',
-  'worldgen/surface_builder',
-  'worldgen/tree_decorator_type',
-  'worldgen/trunk_placer_type'
-]
+let models: { [key: string]: DataModel } = {}
+config.models.forEach(buildModel)
 
 const treeViewObserver = (el: HTMLElement) => {
   el.querySelectorAll('.node-header[data-error]').forEach(e => {
@@ -99,6 +60,7 @@ LOCALES.language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE)?.toLowerCase() ?
 
 const homeLink = document.getElementById('home-link')!
 const homeGenerators = document.getElementById('home-generators')!
+const categoryGenerators = document.getElementById('category-generators')!
 const selectedModel = document.getElementById('selected-model')!
 const modelSelector = document.getElementById('model-selector')!
 const modelSelectorMenu = document.getElementById('model-selector-menu')!
@@ -141,7 +103,7 @@ const views: {[key: string]: AbstractView} = {
 Promise.all([
   fetchLocale(LOCALES.language),
   ...(LOCALES.language === 'en' ? [] : [fetchLocale('en')]),
-  RegistryFetcher(COLLECTIONS, registries)
+  RegistryFetcher(COLLECTIONS, config.registries)
 ]).then(responses => {
 
   let selected = ''
@@ -180,11 +142,11 @@ Promise.all([
     })
 
     languageSelectorMenu.innerHTML = ''
-    Object.keys(languages).forEach(key => {
+    config.languages.forEach(lang => {
       languageSelectorMenu.insertAdjacentHTML('beforeend',
-        `<div class="btn${key === LOCALES.language ? ' selected' : ''}">${languages[key]}</div>`)
+        `<div class="btn${lang.code === LOCALES.language ? ' selected' : ''}">${lang.name}</div>`)
       languageSelectorMenu.lastChild?.addEventListener('click', evt => {
-        updateLanguage(key, true)
+        updateLanguage(lang.code, true)
         languageSelectorMenu.style.visibility = 'hidden'
       })
     })
@@ -336,17 +298,23 @@ Promise.all([
       (document.querySelector('.content') as HTMLElement).style.overflowY = 'initial'
       modelSelector.style.display = 'none'
       panels.forEach(v => v.style.display = 'none')
-      homeGenerators.innerHTML = ''
-      Object.keys(models).forEach(m => {
-        homeGenerators.insertAdjacentHTML('beforeend', 
-          `<div class="home-generator-card">
-            ${locale(m)}
+
+      const addGen = (output: HTMLElement) => (m: any) => {
+        output.insertAdjacentHTML('beforeend', 
+          `<div class="generators-card${m.id === selected ? ' selected' : ''}">
+            ${locale(m.name)}
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"></path></svg>
           </div>`)
-          homeGenerators.lastChild?.addEventListener('click', evt => {
-          reload(publicPath + m)
+          output.lastChild?.addEventListener('click', evt => {
+          reload(publicPath + m.id)
         })
-      })
+      }
+
+      homeGenerators.innerHTML = ''
+      categoryGenerators.innerHTML = ''
+      config.models.forEach(addGen(homeGenerators))
+      config.models.find(m => m.id === selected)?.children?.forEach(addGen(categoryGenerators))
+      
     } else {
       homeViewEl.style.display = 'none';
       (document.querySelector('.gutter') as HTMLElement).style.display = ''
