@@ -288,7 +288,7 @@ Promise.all([
 
   const reload = (target: string, track=true) => {
     if (track) {
-      ga('set', 'page', target)
+      ga('set', 'page', target.replace(/^\/dev/, ''))
       ga('send', 'pageview');
     }
     selected = modelFromPath(target) ?? ''
