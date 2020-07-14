@@ -261,7 +261,7 @@ body {
 }
 
 .errors {
-  position: absolute;
+  position: fixed;
   bottom: 17px;
   right: 17px;
   margin: 5px;
@@ -394,8 +394,14 @@ body {
   }
 }
 
-@media screen and (max-width: 410px) {
+@media screen and (max-width: 480px) {
   .header-title h2 {
     font-size: 18px;
+  }
+}
+
+@media screen and (min-width: 581px) and (max-width: 640px) {
+  .header-title h2 {
+    font-size: 22px;
   }
 }
