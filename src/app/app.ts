@@ -197,6 +197,7 @@ Promise.all([
   })
 
   const updateTheme = (theme: string | null) => {
+    ga('set', 'dimension1', theme ?? 'default');
     if (theme === null) return
     if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark')
