@@ -287,6 +287,9 @@ Promise.all([
   })
 
   const reload = (target: string, track=true) => {
+    if (!target.endsWith('/')) {
+      target = `${target}/`
+    }
     if (track) {
       ga('set', 'page', target.replace(/^\/dev/, ''))
       ga('send', 'pageview');
