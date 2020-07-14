@@ -285,7 +285,11 @@ Promise.all([
     }
   })
 
-  const reload = (target: string) => {
+  const reload = (target: string, track=true) => {
+    if (track) {
+      ga('set', 'page', target)
+      ga('send', 'pageview');
+    }
     selected = modelFromPath(target) ?? ''
     if (target) {
       history.pushState(target, 'Change Page', target)
@@ -323,6 +327,6 @@ Promise.all([
     }
     updateLanguage(LOCALES.language)
   }
-  reload(location.pathname)
+  reload(location.pathname, false)
   document.body.style.visibility = 'initial'
 })
