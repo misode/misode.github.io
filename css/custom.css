@@ -237,6 +237,11 @@ body[data-style="dark"] .alert-danger svg {
   fill: #dfc4c7;
 }
 
+
+body[data-style="dark"] .card-group ~ div svg {
+  fill: #fff;
+}
+
 .alert-danger svg {
   fill: #6d2126;
   margin-right: 5px;
