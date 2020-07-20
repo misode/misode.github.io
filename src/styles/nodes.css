@@ -80,6 +80,7 @@
   padding: 0 9px;
   line-height: 1.94rem;
   user-select: none;
+  white-space: nowrap;
   background-color: var(--node-background-label);
 }
 
