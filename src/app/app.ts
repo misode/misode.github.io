@@ -293,11 +293,9 @@ Promise.all([
     if (track) {
       ga('set', 'page', target.replace(/^\/dev/, ''))
       ga('send', 'pageview');
-    }
-    selected = modelFromPath(target) ?? ''
-    if (target) {
       history.pushState(target, 'Change Page', target)
     }
+    selected = modelFromPath(target) ?? ''
 
     const panels = [treeViewEl, sourceViewEl, errorsViewEl]
     if (models[selected] === undefined) {
