@@ -334,6 +334,7 @@
             "minecraft:set_nbt",
             "minecraft:set_attributes",
             "minecraft:set_contents",
+            "minecraft:set_loot_table",
             "minecraft:enchant_randomly",
             "minecraft:enchant_with_levels",
             "minecraft:looting_enchant",
@@ -625,6 +626,23 @@
           "button": "field",
           "require": [
             "minecraft:set_contents"
+          ]
+        },
+        {
+          "id": "name",
+          "type": "string",
+          "translate": "function.name",
+          "resource": true,
+          "require": [
+            "minecraft:set_loot_table"
+          ]
+        },
+        {
+          "id": "seed",
+          "type": "int",
+          "translate": "function.seed",
+          "require": [
+            "minecraft:set_loot_table"
           ]
         },
         {
