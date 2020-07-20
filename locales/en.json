@@ -158,6 +158,8 @@
     "criteria.entity": "Entity",
     "criteria.loot_table": "Loot Table",
     "criteria.player": "Player",
+    "criteria.entered": "Entered Location",
+    "criteria.exited": "Exited Location",
     "criteria_add": "Add Criterion",
     "criteria_remove": "Remove Criterion",
     "damage.blocked": "Blocked",

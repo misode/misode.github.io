@@ -2086,6 +2086,26 @@
               ]
             },
             {
+              "id": "entered",
+              "translate": "criteria.entered",
+              "type": "object",
+              "collapse": true,
+              "value": "location",
+              "require": [
+                "minecraft:nether_travel"
+              ]
+            },
+            {
+              "id": "exited",
+              "translate": "criteria.exited",
+              "type": "object",
+              "collapse": true,
+              "value": "location",
+              "require": [
+                "minecraft:nether_travel"
+              ]
+            },
+            {
               "id": "recipe",
               "translate": "criteria.recipe",
               "type": "string",
