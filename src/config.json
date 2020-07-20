@@ -63,6 +63,11 @@
           "schema": "configured_feature"
         },
         {
+          "id": "worldgen/noise-settings",
+          "name": "Noise Settings",
+          "schema": "noise_settings"
+        },
+        {
           "id": "worldgen/structure-feature",
           "name": "Structure Feature",
           "schema": "configured_structure_feature"
@@ -98,6 +103,7 @@
     "mob_effect",
     "rule_test",
     "pos_rule_test",
+    "sound_event",
     "stat_type",
     "worldgen/block_state_provider_type",
     "worldgen/block_placer_type",

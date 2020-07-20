@@ -9,6 +9,7 @@
   "worldgen/biome": "Biome",
   "worldgen/carver": "Carver",
   "worldgen/feature": "Feature",
+  "worldgen/noise-settings": "Noise Settings",
   "worldgen/structure-feature": "Structure Feature",
   "worldgen/surface-builder": "Surface Builder",
   "worldgen/processor-list": "Processor List",

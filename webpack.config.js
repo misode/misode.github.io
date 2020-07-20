@@ -30,7 +30,7 @@ module.exports = (env, argv) => ({
     new MergeJsonWebpackPlugin({
       output: {
         groupBy: config.languages.map(lang => ({
-          pattern: `{./src/locales/${lang.code}.json,./node_modules/@mcschema/core/locales/${lang.code}.json}`,
+          pattern: `{./src/locales/${lang.code}.json,./node_modules/@mcschema/locales/src/${lang.code}.json}`,
           fileName: `./locales/${lang.code}.json`
         }))
       }
