@@ -13,8 +13,8 @@
   "license": "MIT",
   "dependencies": {
     "@mcschema/core": "^0.5.0",
-    "@mcschema/locales": "^0.1.1",
-    "@mcschema/java-1.16": "^0.2.8",
+    "@mcschema/locales": "^0.1.2",
+    "@mcschema/java-1.16": "^0.2.11",
     "@types/google.analytics": "0.0.40",
     "@types/split.js": "^1.4.0",
     "copy-webpack-plugin": "^6.0.1",
