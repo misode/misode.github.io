@@ -10,6 +10,7 @@
   --node-remove: #e76f51;
   --node-remove-border: #be4b2e;
   --node-indent-border: #b9b9b9;
+  --node-popup: #1f2020e6;
   --category-predicate: #65b5b8;
   --category-predicate-border: #187e81;
   --category-function: #979fa7;
@@ -28,6 +29,7 @@
   --node-remove: #b64023;
   --node-remove-border: #7e1d05;
   --node-indent-border: #454749;
+  --node-popup: #0a0a0ae6;
   --category-predicate: #306163;
   --category-predicate-border: #224849;
   --category-function: #838383;
@@ -118,8 +120,12 @@
 
 .node-header > *:last-child,
 .node-header > input[list]:nth-last-child(2),
+.node-header[data-help] > *:nth-last-child(2),
+.node-header[data-help] > input[list]:nth-last-child(3),
 .node-header[data-error] > *:nth-last-child(2),
-.node-header[data-error] > input[list]:nth-last-child(3) {
+.node-header[data-error] > input[list]:nth-last-child(3),
+.node-header[data-help][data-error] > *:nth-last-child(3),
+.node-header[data-help][data-error] > input[list]:nth-last-child(4) {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
@@ -182,12 +188,59 @@ button.add svg {
   border-bottom-right-radius: 6px;
 }
 
-.node-header[data-error] > svg {
+.node-icon {
   border: none;
+  position: relative;
+  display: inline-block;
+}
+
+.node-icon svg {
+  cursor: pointer;
+}
+
+.node-icon .icon-popup {
+  visibility: hidden;
+  width: 240px;
+  background-color: var(--node-popup);
+  color: var(--node-text);
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 4px;
+  position: absolute;
+  z-index: 1;
+  top: 125%;
+  left: 50%;
+  margin-left: -120px;
+}
+
+.node-icon .icon-popup::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -3px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--node-popup) transparent;
+}
+
+.node-icon:hover .icon-popup,
+.node-icon .icon-popup.show {
+  visibility: visible;
+}
+
+.node-icon > svg {
   height: 34px;
   width: 34px;
   min-width: 34px;
-  padding-left: 6px;
+  margin-left: 6px;
+}
+
+.node-header svg.node-help {
+  fill: var(--node-border);
+}
+
+.node-header svg.node-error {
   fill: var(--node-remove);
 }
 
