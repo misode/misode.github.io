@@ -10,7 +10,8 @@
   --node-remove: #e76f51;
   --node-remove-border: #be4b2e;
   --node-indent-border: #b9b9b9;
-  --node-popup: #1f2020e6;
+  --node-popup-background: #1f2020e6;
+  --node-popup-text: #dadada;
   --category-predicate: #65b5b8;
   --category-predicate-border: #187e81;
   --category-function: #979fa7;
@@ -29,7 +30,8 @@
   --node-remove: #b64023;
   --node-remove-border: #7e1d05;
   --node-indent-border: #454749;
-  --node-popup: #0a0a0ae6;
+  --node-popup-background: #0a0a0ae6;
+  --node-popup-text: #dadada;
   --category-predicate: #306163;
   --category-predicate-border: #224849;
   --category-function: #838383;
@@ -201,8 +203,8 @@ button.add svg {
 .node-icon .icon-popup {
   visibility: hidden;
   width: 240px;
-  background-color: var(--node-popup);
-  color: var(--node-text);
+  background-color: var(--node-popup-background);
+  color: var(--node-popup-text);
   text-align: center;
   border-radius: 6px;
   padding: 8px 4px;
@@ -221,7 +223,7 @@ button.add svg {
   margin-left: -3px;
   border-width: 5px;
   border-style: solid;
-  border-color: transparent transparent var(--node-popup) transparent;
+  border-color: transparent transparent var(--node-popup-background) transparent;
 }
 
 .node-icon:hover .icon-popup,
@@ -234,6 +236,7 @@ button.add svg {
   width: 34px;
   min-width: 34px;
   margin-left: 6px;
+  transition: fill var(--style-transition);
 }
 
 .node-header svg.node-help {
