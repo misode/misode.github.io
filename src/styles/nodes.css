@@ -176,8 +176,7 @@ button.remove {
   border-color: var(--node-remove-border);
 }
 
-button.remove svg,
-button.add svg {
+.node-header > button svg {
   display: inline-block;
   position: relative;
   top: 2px;

@@ -152,11 +152,23 @@ body {
   padding: 1rem;
   overflow-y: auto;
   padding-bottom: 50vh;
+  position: relative;
+}
+
+.source {
+  position: relative;
+}
+
+.source-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .source textarea {
   width: 100%;
-  height: calc(100vh - 56px);
+  /* height: calc(100vh - 56px); */
+  height: 100%;
   padding: 1.3rem 0.4rem;
   border: none;
   white-space: pre;
@@ -170,16 +182,11 @@ body {
   resize: none;
   background-color: var(--background);
   color: var(--text);
-  transition:all var(--style-transition);
+  /* transition:all var(--style-transition); */
 }
 
 .source textarea::selection {
   background-color: var(--selection);
-}
-
-.tree,
-.source {
-  position: relative;
 }
 
 .tree-controls,
@@ -213,12 +220,36 @@ body {
   right: 17px
 }
 
+.gutter {
+  border-color: var(--border) !important;
+  transition: border-color var(--style-transition);
+}
+
+.gutter.gutter-vertical {
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  cursor: ns-resize;  
+}
+
 .gutter.gutter-horizontal {
   border-left: 2px solid;
-  float: left;
+  border-right: 2px solid;
   cursor: ew-resize;
-  border-color: var(--border);
-  transition: border-color var(--style-transition);
+}
+
+.source canvas {
+  width: 100%;
+  max-width: 100%;
+  /* position: absolute; */
+  /* bottom: 0; */
+  background-color: var(--nav-faded);
+  display: block;
+  image-rendering: optimizeSpeed;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -o-crisp-edges;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
 }
 
 .btn {

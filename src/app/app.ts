@@ -2,14 +2,16 @@ import Split from 'split.js'
 import {
   AbstractView,
   Base,
-  CollectionRegistry,
   DataModel,
   locale,
   LOCALES,
+  ModelPath,
   SourceView,
   TreeView,
+  Path,
 } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
+import { VisualizerView } from './visualization/VisualizerView'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
@@ -61,6 +63,20 @@ const treeViewObserver = (el: HTMLElement) => {
   })
 }
 
+const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
+  return Object.keys(VisualizerView.visualizers)
+    .map(id => VisualizerView.visualizers[id])
+    .filter(v => path.equals(v.path()))
+    .filter(v => v.active(path.getModel()))
+    .map(v => {
+      const id = view.registerClick(() => {
+        views.visualizer.set(v)
+      })
+      return `<button data-id=${id}>${locale('visualize')} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zM6.379 5.227A.25.25 0 006 5.442v5.117a.25.25 0 00.379.214l4.264-2.559a.25.25 0 000-.428L6.379 5.227z"></path></svg></button>`
+    })
+    .join('')
+}
+
 const fetchLocale = async (id: string) => {
   const response = await fetch(publicPath + `locales/${id}.json`)
   LOCALES.register(id, await response.json())
@@ -95,18 +111,30 @@ const treeControlsVersionMenu = document.getElementById('tree-controls-version-m
 const treeControlsReset = document.getElementById('tree-controls-reset')!
 const treeControlsUndo = document.getElementById('tree-controls-undo')!
 const treeControlsRedo = document.getElementById('tree-controls-redo')!
+const visualizerOutput = document.getElementById('visualizer-output')!
+
+Split([treeViewEl, sourceViewEl], {
+  sizes: [66, 34]
+})
+
+Split([sourceViewOutput, visualizerOutput], {
+  sizes: [60, 40],
+  direction: 'vertical'
+})
 
 const dummyModel = new DataModel(Base)
 
-const views: {[key: string]: AbstractView} = {
+const views = {
   'tree': new TreeView(dummyModel, treeViewOutput, {
     showErrors: true,
-    observer: treeViewObserver
+    observer: treeViewObserver,
+    nodeInjector: treeViewNodeInjector
   }),
   'source': new SourceView(dummyModel, sourceViewOutput, {
     indentation: 2
   }),
-  'errors': new ErrorsView(dummyModel, errorsViewEl)
+  'errors': new ErrorsView(dummyModel, errorsViewEl),
+  'visualizer': new VisualizerView(dummyModel, visualizerOutput as HTMLCanvasElement)
 }
 
 const COLLECTIONS = getCollections()
@@ -183,10 +211,6 @@ Promise.all([
       })
     }
   }
-
-  Split([treeViewEl, sourceViewEl], {
-    sizes: [66, 34]
-  })
 
   homeLink.addEventListener('click', evt => {
     reload(publicPath)
