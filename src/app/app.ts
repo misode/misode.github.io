@@ -2,15 +2,14 @@ import Split from 'split.js'
 import {
   AbstractView,
   Base,
-  COLLECTIONS,
+  CollectionRegistry,
   DataModel,
   locale,
   LOCALES,
   SourceView,
   TreeView,
-  SCHEMAS,
 } from '@mcschema/core'
-import '@mcschema/java-1.16'
+import { getCollections, getSchemas } from '@mcschema/java-1.16'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
@@ -28,17 +27,6 @@ const addChecked = (el: HTMLElement) => {
     el.classList.remove('check')
   }, 2000)
 }
-
-const buildModel = (model: any) => {
-  if (model.schema) {
-    models[model.id] = new DataModel(SCHEMAS.get(model.schema))
-  } else if (model.children) {
-    model.children.forEach(buildModel)
-  }
-}
-
-let models: { [key: string]: DataModel } = {}
-config.models.forEach(buildModel)
 
 const treeViewObserver = (el: HTMLElement) => {
   el.querySelectorAll('.node-header[data-help]').forEach(e => {
@@ -121,11 +109,26 @@ const views: {[key: string]: AbstractView} = {
   'errors': new ErrorsView(dummyModel, errorsViewEl)
 }
 
+const COLLECTIONS = getCollections()
+
 Promise.all([
   fetchLocale(LOCALES.language),
   ...(LOCALES.language === 'en' ? [] : [fetchLocale('en')]),
   RegistryFetcher(COLLECTIONS, config.registries)
 ]).then(responses => {
+
+  const SCHEMAS = getSchemas(COLLECTIONS)
+
+  let models: { [key: string]: DataModel } = {}  
+  const buildModel = (model: any) => {
+    if (model.schema) {
+      models[model.id] = new DataModel(SCHEMAS.get(model.schema))
+    } else if (model.children) {
+      model.children.forEach(buildModel)
+    }
+  }
+  config.models.forEach(buildModel)
+  
 
   let selected = ''
   Object.values(models).forEach(m => m.validate(true))
