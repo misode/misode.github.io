@@ -244,6 +244,7 @@ body {
   /* bottom: 0; */
   background-color: var(--nav-faded);
   display: block;
+  cursor: grab;
   image-rendering: optimizeSpeed;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-optimize-contrast;

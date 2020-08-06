@@ -7,6 +7,8 @@ export class BiomeNoiseVisualizer implements Visualizer {
   static readonly noiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
   private noise: SimplexNoise[]
   private biomeSource: any
+  private offsetX: number = 0
+  private offsetY: number = 0
 
   constructor() {
     this.noise = BiomeNoiseVisualizer.noiseMaps.map(e => new SimplexNoise())
@@ -22,8 +24,13 @@ export class BiomeNoiseVisualizer implements Visualizer {
       && model.get(biomeSource.push('type')) === 'minecraft:multi_noise'
   }
 
+  dirty(model: DataModel) {
+    return JSON.stringify(this.biomeSource)
+      !== JSON.stringify(model.get(new Path(['generator', 'biome_source'])))
+  }
+
   draw(model: DataModel, img: ImageData) {
-    this.biomeSource = model.get(new Path(['generator', 'biome_source']))
+    this.biomeSource = JSON.parse(JSON.stringify(model.get(new Path(['generator', 'biome_source']))))
     const data = img.data
     for (let x = 0; x < 200; x += 1) {
       for (let y = 0; y < 100; y += 1) {
@@ -36,6 +43,12 @@ export class BiomeNoiseVisualizer implements Visualizer {
         data[i + 3] = 255
       }
     }
+  }
+
+  onDrag(from: number[], to: number[]) {
+    this.offsetX += (to[0] - from[0]) / 128
+    this.offsetY += (to[1] - from[1]) / 128
+    this.biomeSource = {}
   }
 
   private closestBiome(x: number, y: number): string {
@@ -65,7 +78,8 @@ export class BiomeNoiseVisualizer implements Visualizer {
       let n = 0
       let scale = 2**config.firstOctave
       for (let i = 0; i < config.amplitudes.length; i++) {
-        n += this.noise[index].noise2D(x*scale, y*scale + i) * config.amplitudes[i] * 128 / scale
+        n += this.noise[index].noise2D(x*scale - this.offsetX, y*scale + i - this.offsetY)
+          * config.amplitudes[i] * 128 / scale
         scale *= 2
       }
       return n
