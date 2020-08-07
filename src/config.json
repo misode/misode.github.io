@@ -1,12 +1,24 @@
 {
   "languages": [
     {
+      "code": "de",
+      "name": "Deutsch"
+    },
+    {
       "code": "en",
       "name": "English"
     },
     {
       "code": "fr",
       "name": "Français"
+    },
+    {
+      "code": "it",
+      "name": "Italiano"
+    },
+    {
+      "code": "ja",
+      "name": "日本語"
     },
     {
       "code": "pt",
@@ -19,6 +31,10 @@
     {
       "code": "zh-cn",
       "name": "简体中文"
+    },
+    {
+      "code": "zh-tw",
+      "name": "正體中文"
     }
   ],
   "models": [
