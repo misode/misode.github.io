@@ -1,1 +1,23 @@
-{}
+{
+    "worldgen/template-pool": "模板池",
+    "worldgen/surface-builder": "地表生成器",
+    "worldgen/structure-feature": "结构地物",
+    "worldgen/processor-list": "处理器列表",
+    "worldgen/noise-settings": "噪声设置",
+    "worldgen/feature": "地物",
+    "worldgen/carver": "地形雕刻器",
+    "worldgen/biome": "生物群系",
+    "visualize": "可视化",
+    "title.home": "数据包生成器",
+    "title.generator": "%0% 生成器",
+    "share": "分享",
+    "reset": "重置",
+    "predicate": "断言",
+    "loot-table": "战利品表",
+    "language": "语言",
+    "download": "下载",
+    "dimension": "维度",
+    "dimension-type": "维度类型",
+    "copy": "复制",
+    "advancement": "进度"
+}
