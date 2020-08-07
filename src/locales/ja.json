@@ -1,1 +1,14 @@
-{}
+{
+    "worldgen/biome": "バイオーム",
+    "title.home": "データパックジェネレーター",
+    "title.generator": "%0%ジェネレーター",
+    "share": "共有",
+    "reset": "リセット",
+    "predicate": "条件",
+    "loot-table": "ルートテーブル",
+    "language": "言語設定",
+    "download": "ダウンロード",
+    "dimension": "ディメンション",
+    "copy": "コピー",
+    "advancement": "進捗"
+}
