@@ -1,13 +1,7 @@
-import { AbstractView, DataModel, Path } from "@mcschema/core";
-import { BiomeNoiseVisualizer } from "./BiomeNoiseVisualizer";
-
-export interface Visualizer {
-  path(): Path
-  active(model: DataModel): boolean
-  dirty(model: DataModel): boolean
-  draw(model: DataModel, img: ImageData): void
-  onDrag?(from: number[], to: number[]): void
-}
+import { AbstractView, DataModel, Path } from "@mcschema/core"
+import { BiomeNoiseVisualizer } from "./BiomeNoiseVisualizer"
+import { NoiseSettingsVisualizer } from "./NoiseSettingsVisualizer"
+import { Visualizer } from "./Visualizer"
 
 export class VisualizerView extends AbstractView {
   ctx: CanvasRenderingContext2D
@@ -34,9 +28,10 @@ export class VisualizerView extends AbstractView {
       if (this.dragStart === undefined) return
       if (this.visualizer?.onDrag) {
         this.visualizer.onDrag(this.dragStart, [evt.offsetX, evt.offsetY])
+        this.visualizer.state = {}
+        this.invalidated()
       }
       this.dragStart = [evt.offsetX, evt.offsetY]
-      this.invalidated()
     })
     canvas.addEventListener('mouseup', evt => {
       this.dragStart = undefined
@@ -44,9 +39,13 @@ export class VisualizerView extends AbstractView {
   }
 
   invalidated() {
-    if (this.active && this.visualizer && this.visualizer.active(this.model)) {
+    let newState: any
+    if (this.active && this.visualizer
+        && this.visualizer.active(this.model)
+        && (newState = this.visualizer.getState(this.model))) {
       if (this.visualizer.dirty(this.model)) {
         const img = this.ctx.createImageData(200, 100)
+        this.visualizer.state = JSON.parse(JSON.stringify(newState))
         this.visualizer.draw(this.model, img)
         this.ctx.putImageData(img, 0, 0)
       }
@@ -68,10 +67,7 @@ export class VisualizerView extends AbstractView {
   set(visualizer: Visualizer) {
     this.active = true
     this.visualizer = visualizer
+    this.visualizer.state = undefined
     this.invalidated()
-  }
-
-  static visualizers: {[key: string]: Visualizer} = {
-    'biome-noise': new BiomeNoiseVisualizer()
   }
 }

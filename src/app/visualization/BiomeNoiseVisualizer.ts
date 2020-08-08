@@ -1,36 +1,34 @@
 import SimplexNoise from 'simplex-noise'
-import { DataModel, Path } from "@mcschema/core";
-import { Visualizer } from './VisualizerView';
+import { DataModel, Path } from "@mcschema/core"
+import { Visualizer } from './Visualizer'
 
 
-export class BiomeNoiseVisualizer implements Visualizer {
+export class BiomeNoiseVisualizer extends Visualizer {
   static readonly noiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
+  static readonly path = new Path(['generator', 'biome_source'])
   private noise: SimplexNoise[]
-  private biomeSource: any
   private offsetX: number = 0
   private offsetY: number = 0
 
   constructor() {
+    super()
     this.noise = BiomeNoiseVisualizer.noiseMaps.map(e => new SimplexNoise())
   }
 
-  path() {
-    return new Path(['generator', 'biome_source'])
+  onPath(path: Path) {
+    return path.equals(BiomeNoiseVisualizer.path)
   }
 
   active(model: DataModel) {
-    const biomeSource = new Path(['generator', 'biome_source'])
-    return model.get(biomeSource) !== undefined
-      && model.get(biomeSource.push('type')) === 'minecraft:multi_noise'
+    return model.get(BiomeNoiseVisualizer.path) !== undefined
+      && model.get(BiomeNoiseVisualizer.path.push('type')) === 'minecraft:multi_noise'
   }
 
-  dirty(model: DataModel) {
-    return JSON.stringify(this.biomeSource)
-      !== JSON.stringify(model.get(new Path(['generator', 'biome_source'])))
+  getState(model: DataModel) {
+    return model.get(BiomeNoiseVisualizer.path)
   }
 
   draw(model: DataModel, img: ImageData) {
-    this.biomeSource = JSON.parse(JSON.stringify(model.get(new Path(['generator', 'biome_source']))))
     const data = img.data
     for (let x = 0; x < 200; x += 1) {
       for (let y = 0; y < 100; y += 1) {
@@ -48,14 +46,13 @@ export class BiomeNoiseVisualizer implements Visualizer {
   onDrag(from: number[], to: number[]) {
     this.offsetX += (to[0] - from[0]) / 128
     this.offsetY += (to[1] - from[1]) / 128
-    this.biomeSource = {}
   }
 
   private closestBiome(x: number, y: number): string {
     const noise = this.getNoise(x, y)
-    if (!this.biomeSource.biomes) return ''
+    if (!this.state.biomes) return ''
 
-    return this.biomeSource.biomes
+    return this.state.biomes
       .map((b: any) => ({
         biome: b.biome ?? '',
         distance: this.distance([...noise, 0], [...BiomeNoiseVisualizer.noiseMaps.map(s => b.parameters[s]), b.parameters.offset])
@@ -74,7 +71,7 @@ export class BiomeNoiseVisualizer implements Visualizer {
 
   private getNoise(x: number, y: number): number[] {
     return BiomeNoiseVisualizer.noiseMaps.map((id, index) => {
-      const config = this.biomeSource[`${id}_noise`]
+      const config = this.state[`${id}_noise`]
       let n = 0
       let scale = 2**config.firstOctave
       for (let i = 0; i < config.amplitudes.length; i++) {

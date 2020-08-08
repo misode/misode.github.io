@@ -1,6 +1,5 @@
 import Split from 'split.js'
 import {
-  AbstractView,
   Base,
   DataModel,
   locale,
@@ -8,10 +7,10 @@ import {
   ModelPath,
   SourceView,
   TreeView,
-  Path,
 } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
 import { VisualizerView } from './visualization/VisualizerView'
+import { Visualizer } from './visualization/Visualizer'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
@@ -64,9 +63,8 @@ const treeViewObserver = (el: HTMLElement) => {
 }
 
 const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
-  return Object.keys(VisualizerView.visualizers)
-    .map(id => VisualizerView.visualizers[id])
-    .filter(v => path.equals(v.path()))
+  return Visualizer.visualizers
+    .filter(v => v.onPath(path))
     .filter(v => v.active(path.getModel()))
     .map(v => {
       const id = view.registerClick(() => {
