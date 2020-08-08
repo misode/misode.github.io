@@ -10,7 +10,6 @@ import {
 } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
 import { VisualizerView } from './visualization/VisualizerView'
-import { Visualizer } from './visualization/Visualizer'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
@@ -63,7 +62,7 @@ const treeViewObserver = (el: HTMLElement) => {
 }
 
 const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
-  return Visualizer.visualizers
+  return VisualizerView.visualizers
     .filter(v => v.onPath(path))
     .filter(v => v.active(path.getModel()))
     .map(v => {

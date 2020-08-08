@@ -70,4 +70,9 @@ export class VisualizerView extends AbstractView {
     this.visualizer.state = undefined
     this.invalidated()
   }
+  
+  static visualizers: Visualizer[] = [
+    new BiomeNoiseVisualizer(),
+    new NoiseSettingsVisualizer()
+  ]
 }

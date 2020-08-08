@@ -18,9 +18,4 @@ export abstract class Visualizer {
   abstract draw(model: DataModel, img: ImageData): void
 
   onDrag(from: number[], to: number[]): void {}
-
-  static visualizers: Visualizer[] = [
-    new BiomeNoiseVisualizer(),
-    new NoiseSettingsVisualizer()
-  ]
 }
