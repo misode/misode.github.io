@@ -103,8 +103,6 @@ const sourceControlsDownload = document.getElementById('source-controls-download
 const sourceToggle = document.getElementById('source-toggle')!
 const treeControlsToggle = document.getElementById('tree-controls-toggle')!
 const treeControlsMenu = document.getElementById('tree-controls-menu')!
-const treeControlsVersionToggle = document.getElementById('tree-controls-version-toggle')!
-const treeControlsVersionMenu = document.getElementById('tree-controls-version-menu')!
 const treeControlsReset = document.getElementById('tree-controls-reset')!
 const treeControlsUndo = document.getElementById('tree-controls-undo')!
 const treeControlsRedo = document.getElementById('tree-controls-redo')!
@@ -290,13 +288,6 @@ Promise.all([
     treeControlsMenu.style.visibility = 'visible'
     document.body.addEventListener('click', evt => {
       treeControlsMenu.style.visibility = 'hidden'
-    }, { capture: true, once: true })
-  })
-
-  treeControlsVersionToggle.addEventListener('click', evt => {
-    treeControlsVersionMenu.style.visibility = 'visible'
-    document.body.addEventListener('click', evt => {
-      treeControlsVersionMenu.style.visibility = 'hidden'
     }, { capture: true, once: true })
   })
 
