@@ -303,7 +303,7 @@ body {
   fill: var(--errors-text);
 }
 
-.errors.hidden .error-list {
+.errors:not(.active) .error-list {
   display: none;
 }
 
@@ -318,7 +318,7 @@ body {
 }
 
 .errors .toggle {
-  padding: 2px;
+  padding: 6px;
   width: 36px;
   height: 36px;
   align-self: flex-end;
@@ -326,8 +326,8 @@ body {
   user-select: none;
 }
 
-.errors .toggle.toggled {
-  padding: 6px;
+.errors.active .toggle {
+  padding: 2px;
 }
 
 .home {

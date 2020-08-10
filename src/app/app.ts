@@ -313,11 +313,11 @@ Promise.all([
   })
 
   errorsToggle.addEventListener('click', evt => {
-    if (errorsViewEl.classList.contains('hidden')) {
-      errorsViewEl.classList.remove('hidden')
+    if (errorsViewEl.classList.contains('active')) {
+      errorsViewEl.classList.remove('active')
       errorsToggle.classList.remove('toggled')
     } else {
-      errorsViewEl.classList.add('hidden')
+      errorsViewEl.classList.add('active')
       errorsToggle.classList.add('toggled')
     }
   })
