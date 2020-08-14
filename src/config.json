@@ -64,6 +64,11 @@
       "schema": "dimension_type"
     },
     {
+      "id": "world",
+      "name": "World Settings",
+      "schema": "world_settings"
+    },
+    {
       "id": "worldgen",
       "name": "Worldgen",
       "children": [
@@ -108,11 +113,6 @@
           "schema": "template_pool"
         }
       ]
-    },
-    {
-      "id": "world",
-      "name": "Import World Settings",
-      "schema": "world_settings"
     }
   ],
   "registries": [
