@@ -1,4 +1,4 @@
-import { AbstractView, DataModel, Path } from "@mcschema/core"
+import { AbstractView, DataModel, Path, ModelPath } from "@mcschema/core"
 import { BiomeNoiseVisualizer } from "./BiomeNoiseVisualizer"
 import { NoiseSettingsVisualizer } from "./NoiseSettingsVisualizer"
 import { Visualizer } from "./Visualizer"
@@ -7,6 +7,7 @@ export class VisualizerView extends AbstractView {
   ctx: CanvasRenderingContext2D
   visualizer?: Visualizer
   active: boolean
+  path?: ModelPath
   canvas: HTMLElement
   sourceView: HTMLElement
   gutter: HTMLElement
@@ -39,11 +40,12 @@ export class VisualizerView extends AbstractView {
   }
 
   invalidated() {
+    this.path = this.path?.withModel(this.model)
     let newState: any
-    if (this.active && this.visualizer
-        && this.visualizer.active(this.model)
-        && (newState = this.visualizer.getState(this.model))) {
-      if (this.visualizer.dirty(this.model)) {
+    if (this.active && this.visualizer && this.path
+        && this.visualizer.active(this.path)
+        && (newState = this.path.get())) {
+      if (newState && this.visualizer.dirty(this.path)) {
         const img = this.ctx.createImageData(200, 100)
         this.visualizer.state = JSON.parse(JSON.stringify(newState))
         this.visualizer.draw(this.model, img)
@@ -60,13 +62,13 @@ export class VisualizerView extends AbstractView {
       this.gutter.style.display = 'none'
       this.lastHeight = this.sourceView.style.height
       this.sourceView.style.height = '100%'
-      this.ctx.clearRect(0, 0, 200, 100)
     }
   }
 
-  set(visualizer: Visualizer) {
+  set(visualizer: Visualizer, path: ModelPath) {
     this.active = true
     this.visualizer = visualizer
+    this.path = path
     this.visualizer.state = undefined
     this.invalidated()
   }

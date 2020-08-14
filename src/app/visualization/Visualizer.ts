@@ -1,20 +1,13 @@
-import { DataModel, Path } from "@mcschema/core"
-import { BiomeNoiseVisualizer } from "./BiomeNoiseVisualizer"
-import { NoiseSettingsVisualizer } from "./NoiseSettingsVisualizer"
+import { DataModel, ModelPath } from "@mcschema/core"
 
 export abstract class Visualizer {
   state: any
 
-  dirty(model: DataModel): boolean {
-    return JSON.stringify(this.state) !== JSON.stringify(this.getState(model))
+  dirty(path: ModelPath): boolean {
+    return JSON.stringify(this.state) !== JSON.stringify(path.get())
   }
 
-  active(model: DataModel): boolean {
-    return true
-  }
-
-  abstract onPath(path: Path): boolean
-  abstract getState(model: DataModel): any
+  abstract active(path: ModelPath): boolean
   abstract draw(model: DataModel, img: ImageData): void
 
   onDrag(from: number[], to: number[]): void {}

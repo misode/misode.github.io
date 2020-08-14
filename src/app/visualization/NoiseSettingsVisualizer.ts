@@ -1,5 +1,5 @@
 import SimplexNoise from 'simplex-noise'
-import { DataModel, Path } from "@mcschema/core"
+import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Visualizer } from './Visualizer'
 
 const debug = false
@@ -14,22 +14,8 @@ export class NoiseSettingsVisualizer extends Visualizer {
     this.offsetX = 0
   }
 
-  onPath(path: Path) {
-    return path.equals(new Path(['generator', 'settings', 'noise']))
-      || path.equals(new Path(['noise']))
-  }
-
-  active(model: DataModel) {
-    return true
-  }
-
-  getState(model: DataModel) {
-    return model.get(new Path(['generator', 'settings', 'noise']))
-      ?? model.get(new Path(['noise']))
-  }
-
-  onDrag(from: number[], to: number[]) {
-    this.offsetX += (to[0] - from[0])
+  active(path: ModelPath) {
+    return path.endsWith(new Path(['noise']))
   }
 
   draw(model: DataModel, img: ImageData) {
@@ -45,6 +31,10 @@ export class NoiseSettingsVisualizer extends Visualizer {
         data[i + 3] = 255
       }
     }
+  }
+
+  onDrag(from: number[], to: number[]) {
+    this.offsetX += (to[0] - from[0])
   }
 
   private getColor(densities: number[], y: number): number {

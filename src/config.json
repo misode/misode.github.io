@@ -108,6 +108,11 @@
           "schema": "template_pool"
         }
       ]
+    },
+    {
+      "id": "world",
+      "name": "Import World Settings",
+      "schema": "world_settings"
     }
   ],
   "registries": [

@@ -1,11 +1,10 @@
 import SimplexNoise from 'simplex-noise'
-import { DataModel, Path } from "@mcschema/core"
+import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Visualizer } from './Visualizer'
 
 
 export class BiomeNoiseVisualizer extends Visualizer {
   static readonly noiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
-  static readonly path = new Path(['generator', 'biome_source'])
   private noise: SimplexNoise[]
   private offsetX: number = 0
   private offsetY: number = 0
@@ -15,17 +14,9 @@ export class BiomeNoiseVisualizer extends Visualizer {
     this.noise = BiomeNoiseVisualizer.noiseMaps.map(e => new SimplexNoise())
   }
 
-  onPath(path: Path) {
-    return path.equals(BiomeNoiseVisualizer.path)
-  }
-
-  active(model: DataModel) {
-    return model.get(BiomeNoiseVisualizer.path) !== undefined
-      && model.get(BiomeNoiseVisualizer.path.push('type')) === 'minecraft:multi_noise'
-  }
-
-  getState(model: DataModel) {
-    return model.get(BiomeNoiseVisualizer.path)
+  active(path: ModelPath) {
+    return path.endsWith(new Path(['generator', 'biome_source']))
+      && path.push('type').get() === 'minecraft:multi_noise'
   }
 
   draw(model: DataModel, img: ImageData) {
