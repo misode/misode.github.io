@@ -12,9 +12,9 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
-    "@mcschema/core": "^0.6.4",
-    "@mcschema/java-1.16": "^0.3.5",
-    "@mcschema/locales": "^0.1.8",
+    "@mcschema/core": "^0.8.0",
+    "@mcschema/java-1.16": "^0.5.0",
+    "@mcschema/locales": "^0.1.9",
     "@types/google.analytics": "0.0.40",
     "@types/split.js": "^1.4.0",
     "copy-webpack-plugin": "^6.0.1",
