@@ -278,7 +278,7 @@
         {
           "id": "expand",
           "type": "boolean",
-          "default": "false",
+          "default": false,
           "translate": "entry.expand",
           "help": true,
           "require": [
