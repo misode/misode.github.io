@@ -93,6 +93,10 @@
   background-color: var(--node-background-input);
 }
 
+.node-header > input[type="color"] {
+  padding: 0 2px;
+}
+
 .node-header > select {
   font-size: 18px;
   padding-left: 6px;

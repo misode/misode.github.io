@@ -12,7 +12,7 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
-    "@mcschema/core": "^0.8.1",
+    "@mcschema/core": "^0.8.2",
     "@mcschema/java-1.16": "^0.5.1",
     "@mcschema/locales": "^0.1.9",
     "@types/google.analytics": "0.0.40",
