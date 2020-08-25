@@ -149,10 +149,14 @@ body {
 }
 
 .tree {
-  padding: 1rem;
+  position: relative;
+}
+
+.tree-content {
   overflow-y: auto;
   padding-bottom: 50vh;
-  position: relative;
+  height: 100%;
+  padding: 1rem;
 }
 
 .source {
@@ -167,7 +171,6 @@ body {
 
 .source textarea {
   width: 100%;
-  /* height: calc(100vh - 56px); */
   height: 100%;
   padding: 1.3rem 0.4rem;
   border: none;
@@ -182,7 +185,7 @@ body {
   resize: none;
   background-color: var(--background);
   color: var(--text);
-  /* transition:all var(--style-transition); */
+  transition: background-color var(--style-transition), color var(--style-transition)
 }
 
 .source textarea::selection {
@@ -194,7 +197,7 @@ body {
   display: flex;
   flex-direction: row-reverse;
   position: absolute;
-  right: 0;
+  right: 17px;
   top: 0;
   padding: 5px;
 }
@@ -210,14 +213,9 @@ body {
   visibility: hidden;
   flex-direction: column;
   position: absolute;
-  right: 0;
+  right: 17px;
   top: 37px;
   padding: 5px;
-}
-
-.source-controls,
-.source-controls-menu {
-  right: 17px
 }
 
 .gutter {
@@ -301,6 +299,7 @@ body {
   background-color: var(--errors-background);
   color: var(--errors-text);
   fill: var(--errors-text);
+  transition: fill var(--style-transition);
 }
 
 .errors:not(.active) .error-list {

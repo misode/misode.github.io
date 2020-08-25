@@ -38,12 +38,12 @@
   --category-function-border: #6b6b6b;
 }
 
-.tree > div > .object-node > .node-body {
+#tree-view-output > .object-node > .node-body {
   border-left: none;
   padding-left: 0;
 }
 
-.tree > div > .node > .node-body {
+#tree-view-output > .node > .node-body {
   margin-top: -5px; /* no idea why this is necessary */
 }
 
