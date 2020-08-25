@@ -13,7 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@mcschema/core": "^0.8.3",
-    "@mcschema/java-1.16": "^0.5.2",
+    "@mcschema/java-1.16": "^0.5.3",
     "@mcschema/locales": "^0.1.10",
     "@types/google.analytics": "0.0.40",
     "@types/split.js": "^1.4.0",
