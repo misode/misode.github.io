@@ -8,10 +8,15 @@ export class BiomeNoiseVisualizer extends Visualizer {
   private noise: SimplexNoise[]
   private offsetX: number = 0
   private offsetY: number = 0
+  private biomeColors: {[id: string]: number[]} = {}
 
   constructor() {
     super()
     this.noise = BiomeNoiseVisualizer.noiseMaps.map(e => new SimplexNoise())
+  }
+
+  getName() {
+    return 'biome-noise'
   }
 
   active(path: ModelPath) {
@@ -25,7 +30,7 @@ export class BiomeNoiseVisualizer extends Visualizer {
       for (let y = 0; y < 100; y += 1) {
         const i = (y * (img.width * 4)) + (x * 4)
         const b = this.closestBiome(x, y)
-        const color = this.colorFromBiome(b)
+        const color = this.getBiomeColor(b)
         data[i] = color[0]
         data[i + 1] = color[1]
         data[i + 2] = color[2]
@@ -35,8 +40,8 @@ export class BiomeNoiseVisualizer extends Visualizer {
   }
 
   onDrag(from: number[], to: number[]) {
-    this.offsetX += (to[0] - from[0]) / 128
-    this.offsetY += (to[1] - from[1]) / 128
+    this.offsetX += to[0] - from[0]
+    this.offsetY += to[1] - from[1]
   }
 
   private closestBiome(x: number, y: number): string {
@@ -66,12 +71,28 @@ export class BiomeNoiseVisualizer extends Visualizer {
       let n = 0
       let scale = 2**config.firstOctave
       for (let i = 0; i < config.amplitudes.length; i++) {
-        n += this.noise[index].noise2D(x*scale - this.offsetX, y*scale + i - this.offsetY)
+        n += this.noise[index].noise2D((x - this.offsetX)*scale, (y- this.offsetY)*scale + i)
           * config.amplitudes[i] * 128 / scale
         scale *= 2
       }
       return n
     })
+  }
+
+  getBiomeColor(biome: string): number[] {
+    const color = this.biomeColors[biome]
+    if (color === undefined) {
+      return this.colorFromBiome(biome)
+    }
+    return color
+  }
+
+  setBiomeColor(biome: string, value: string) {
+    this.biomeColors[biome] = [parseInt(value.slice(1, 3), 16), parseInt(value.slice(3, 5), 16), parseInt(value.slice(5, 7), 16)]
+  }
+
+  getBiomeHex(biome: string): string {
+    return '#' + this.getBiomeColor(biome).map(e => e.toString(16).padStart(2, '0')).join('')
   }
 
   private colorFromBiome(biome: string): number[] {
@@ -80,6 +101,6 @@ export class BiomeNoiseVisualizer extends Visualizer {
   }
 
   private hash(s: string) {
-    return s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+    return (s ?? '').split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
   }
 }

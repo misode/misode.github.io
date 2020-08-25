@@ -7,6 +7,7 @@ export abstract class Visualizer {
     return JSON.stringify(this.state) !== JSON.stringify(path.get())
   }
 
+  abstract getName(): string
   abstract active(path: ModelPath): boolean
   abstract draw(model: DataModel, img: ImageData): void
 

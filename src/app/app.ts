@@ -7,12 +7,14 @@ import {
   ModelPath,
   SourceView,
   TreeView,
+  Path,
 } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
 import { VisualizerView } from './visualization/VisualizerView'
 import { RegistryFetcher } from './RegistryFetcher'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
+import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
 
 const LOCAL_STORAGE_THEME = 'theme'
 const LOCAL_STORAGE_LANGUAGE = 'language'
@@ -62,7 +64,7 @@ const treeViewObserver = (el: HTMLElement) => {
 }
 
 const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
-  return VisualizerView.visualizers
+  let res = VisualizerView.visualizers
     .filter(v => v.active(path))
     .map(v => {
       const id = view.registerClick(() => {
@@ -71,6 +73,20 @@ const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
       return `<button data-id=${id}>${locale('visualize')} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zM6.379 5.227A.25.25 0 006 5.442v5.117a.25.25 0 00.379.214l4.264-2.559a.25.25 0 000-.428L6.379 5.227z"></path></svg></button>`
     })
     .join('')
+  if (views.visualizer.active && views.visualizer.visualizer?.getName() === 'biome-noise') {
+    if (path.startsWith(new Path(['generator', 'biome_source', 'biomes'])) && path.getArray().length === 4) {
+      const biomeVisualizer = views.visualizer.visualizer as BiomeNoiseVisualizer
+      const biome = path.push('biome').get()
+      const id = view.registerChange(el => {
+        biomeVisualizer.setBiomeColor(biome, (el as HTMLInputElement).value)
+        views.visualizer.visualizer!.state = {}
+        views.visualizer.invalidated()
+      })
+      console.log("hello?")
+      res += `<input type="color" value="${biomeVisualizer.getBiomeHex(biome)}" data-id=${id}></input>`
+    }
+  }
+  return res
 }
 
 const fetchLocale = async (id: string) => {

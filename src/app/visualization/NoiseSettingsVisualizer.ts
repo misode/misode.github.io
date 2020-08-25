@@ -14,6 +14,10 @@ export class NoiseSettingsVisualizer extends Visualizer {
     this.offsetX = 0
   }
 
+  getName() {
+    return 'noise-settings'
+  }
+
   active(path: ModelPath) {
     return path.endsWith(new Path(['noise']))
   }
