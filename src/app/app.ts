@@ -74,7 +74,7 @@ const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
     })
     .join('')
   if (views.visualizer.active && views.visualizer.visualizer?.getName() === 'biome-noise') {
-    if (path.startsWith(new Path(['generator', 'biome_source', 'biomes'])) && path.getArray().length === 4) {
+    if (path.pop().endsWith(new Path(['generator', 'biome_source', 'biomes']))) {
       const biomeVisualizer = views.visualizer.visualizer as BiomeNoiseVisualizer
       const biome = path.push('biome').get()
       const id = view.registerChange(el => {
