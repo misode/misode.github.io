@@ -154,9 +154,9 @@ body {
 
 .tree-content {
   overflow-y: auto;
-  padding-bottom: 50vh;
   height: 100%;
   padding: 1rem;
+  padding-bottom: 50vh;
 }
 
 .source {
