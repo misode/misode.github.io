@@ -37,8 +37,8 @@ export class NoiseSettingsVisualizer extends Visualizer {
     }
   }
 
-  onDrag(from: number[], to: number[]) {
-    this.offsetX += (to[0] - from[0])
+  onDrag(fromX: number, fromY: number, toX: number, toY: number) {
+    this.offsetX += toX - fromX
   }
 
   private getColor(densities: number[], y: number): number {

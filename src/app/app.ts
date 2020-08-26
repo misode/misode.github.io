@@ -120,13 +120,13 @@ const treeControlsMenu = document.getElementById('tree-controls-menu')!
 const treeControlsReset = document.getElementById('tree-controls-reset')!
 const treeControlsUndo = document.getElementById('tree-controls-undo')!
 const treeControlsRedo = document.getElementById('tree-controls-redo')!
-const visualizerOutput = document.getElementById('visualizer-output')!
+const visualizerContent = document.getElementById('visualizer-content')!
 
 Split([treeViewEl, sourceViewEl], {
   sizes: [66, 34]
 })
 
-Split([sourceViewOutput, visualizerOutput], {
+Split([sourceViewOutput, visualizerContent], {
   sizes: [60, 40],
   direction: 'vertical'
 })
@@ -143,7 +143,7 @@ const views = {
     indentation: 2
   }),
   'errors': new ErrorsView(dummyModel, errorsViewEl),
-  'visualizer': new VisualizerView(dummyModel, visualizerOutput as HTMLCanvasElement)
+  'visualizer': new VisualizerView(dummyModel, visualizerContent)
 }
 
 const COLLECTIONS = getCollections()

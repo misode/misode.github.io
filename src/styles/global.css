@@ -193,7 +193,8 @@ body {
 }
 
 .tree-controls,
-.source-controls {
+.source-controls,
+.visualizer-controls {
   display: flex;
   flex-direction: row-reverse;
   position: absolute;
@@ -203,7 +204,8 @@ body {
 }
 
 .tree-controls .btn:not(:first-child),
-.source-controls .btn:not(:first-child) {
+.source-controls .btn:not(:first-child),
+.visualizer-controls .btn:not(:first-child) {
   margin-right: 5px;
 }
 
@@ -235,11 +237,19 @@ body {
   cursor: ew-resize;
 }
 
-.source canvas {
+.visualizer-content {
   width: 100%;
   max-width: 100%;
-  /* position: absolute; */
-  /* bottom: 0; */
+  position: relative;
+}
+
+.visualizer-controls {
+  right: 0;
+}
+
+.visualizer-content canvas {
+  width: 100%;
+  height: 100%;
   background-color: var(--nav-faded);
   display: block;
   cursor: grab;

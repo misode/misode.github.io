@@ -8,35 +8,45 @@ export class VisualizerView extends AbstractView {
   visualizer?: Visualizer
   active: boolean
   path?: ModelPath
-  canvas: HTMLElement
+  el: HTMLElement
+  canvas: HTMLCanvasElement
   sourceView: HTMLElement
   gutter: HTMLElement
+  controls: HTMLElement
   lastHeight?: string
   dragStart?: number[]
 
-  constructor(model: DataModel, canvas: HTMLCanvasElement) {
+  constructor(model: DataModel, el: HTMLElement) {
     super(model)
-    this.ctx = canvas.getContext('2d')!
+    this.el = el
+    this.canvas = el.querySelector('canvas') as HTMLCanvasElement
+    this.ctx = this.canvas.getContext('2d')!
     this.active = false
-    this.canvas = canvas
-    this.gutter = canvas.parentElement!.querySelector('.gutter') as HTMLElement
-    this.sourceView = canvas.parentElement!.getElementsByTagName('textarea')[0] as HTMLElement
+    this.gutter = el.parentElement!.querySelector('.gutter') as HTMLElement
+    this.sourceView = el.parentElement!.getElementsByTagName('textarea')[0] as HTMLElement
+    this.controls = el.querySelector('.visualizer-controls') as HTMLElement
 
-    canvas.addEventListener('mousedown', evt => {
+    this.canvas.addEventListener('mousedown', evt => {
       this.dragStart = [evt.offsetX, evt.offsetY]
     })
-    canvas.addEventListener('mousemove', evt => {
+    this.canvas.addEventListener('mousemove', evt => {
       if (this.dragStart === undefined) return
       if (this.visualizer?.onDrag) {
-        this.visualizer.onDrag(this.dragStart, [evt.offsetX, evt.offsetY])
-        this.visualizer.state = {}
-        this.invalidated()
+        this.visualizer.onDrag(this.dragStart[0], this.dragStart[1], evt.offsetX, evt.offsetY)
+        this.redraw()
       }
       this.dragStart = [evt.offsetX, evt.offsetY]
     })
-    canvas.addEventListener('mouseup', evt => {
+    this.canvas.addEventListener('mouseup', evt => {
       this.dragStart = undefined
     })
+  }
+
+  redraw() {
+    if (this.active && this.visualizer) {
+      this.visualizer.state = {}
+      this.invalidated()
+    }
   }
 
   invalidated() {
@@ -51,14 +61,14 @@ export class VisualizerView extends AbstractView {
         this.visualizer.draw(this.model, img)
         this.ctx.putImageData(img, 0, 0)
       }
-      this.canvas.style.display = 'block'
+      this.el.style.display = 'block'
       this.gutter.style.display = 'block'
       if (this.lastHeight) {
         this.sourceView.style.height = this.lastHeight
         this.lastHeight = undefined
       }
     } else {
-      this.canvas.style.display = 'none'
+      this.el.style.display = 'none'
       this.gutter.style.display = 'none'
       this.lastHeight = this.sourceView.style.height
       this.sourceView.style.height = '100%'
@@ -70,7 +80,9 @@ export class VisualizerView extends AbstractView {
     this.visualizer = visualizer
     this.path = path
     this.visualizer.state = undefined
-    this.invalidated()
+    this.controls.innerHTML = ''
+    this.visualizer.addControls(this.controls, this)
+    this.redraw()
   }
   
   static visualizers: Visualizer[] = [
