@@ -82,7 +82,6 @@ const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
         views.visualizer.visualizer!.state = {}
         views.visualizer.invalidated()
       })
-      console.log("hello?")
       res += `<input type="color" value="${biomeVisualizer.getBiomeHex(biome)}" data-id=${id}></input>`
     }
   }
