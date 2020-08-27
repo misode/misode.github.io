@@ -3,6 +3,7 @@ import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Visualizer } from './Visualizer'
 import { VisualizerView } from './VisualizerView'
 
+const LOCAL_STORAGE_BIOME_COLORS = 'biome_colors'
 
 export class BiomeNoiseVisualizer extends Visualizer {
   static readonly noiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
@@ -10,10 +11,11 @@ export class BiomeNoiseVisualizer extends Visualizer {
   private offsetX: number = 0
   private offsetY: number = 0
   private viewScale: number = 0
-  private biomeColors: {[id: string]: number[]} = {}
+  private biomeColors: {[id: string]: number[]}
 
   constructor() {
     super()
+    this.biomeColors = JSON.parse(localStorage.getItem(LOCAL_STORAGE_BIOME_COLORS) ?? '{}')
     this.noise = BiomeNoiseVisualizer.noiseMaps.map(e => new SimplexNoise())
   }
 
@@ -106,6 +108,7 @@ export class BiomeNoiseVisualizer extends Visualizer {
 
   setBiomeColor(biome: string, value: string) {
     this.biomeColors[biome] = [parseInt(value.slice(1, 3), 16), parseInt(value.slice(3, 5), 16), parseInt(value.slice(5, 7), 16)]
+    localStorage.setItem(LOCAL_STORAGE_BIOME_COLORS, JSON.stringify(this.biomeColors))
   }
 
   getBiomeHex(biome: string): string {
