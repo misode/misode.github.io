@@ -91,10 +91,10 @@ export class BiomeNoiseVisualizer extends Visualizer {
       let scale = 2**config.firstOctave
       for (let i = 0; i < config.amplitudes.length; i++) {
         n += this.noise[index].noise2D(x * scale, y * scale + i)
-        * config.amplitudes[i] / (2**scale)
+        * config.amplitudes[i] / (scale * 256)
         scale *= 2
       }
-      return n / config.amplitudes.length
+      return n
     })
   }
 
