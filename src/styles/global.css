@@ -220,6 +220,19 @@ body {
   padding: 5px;
 }
 
+.source-controls input {
+  margin-right: 5px;
+  background: var(--background);
+  color: var(--text);
+  font-size: 17px;
+  border: none;
+  transition: background-color var(--style-transition), color var(--style-transition);
+}
+
+.source-controls input::selection {
+  background-color: var(--selection);
+}
+
 .gutter {
   border-color: var(--border) !important;
   transition: border-color var(--style-transition);

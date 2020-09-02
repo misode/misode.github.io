@@ -115,6 +115,7 @@ const sourceControlsToggle = document.getElementById('source-controls-toggle')!
 const sourceControlsMenu = document.getElementById('source-controls-menu')!
 const sourceControlsCopy = document.getElementById('source-controls-copy')!
 const sourceControlsDownload = document.getElementById('source-controls-download')!
+const sourceControlsShare = document.getElementById('source-controls-share')!
 const sourceToggle = document.getElementById('source-toggle')!
 const treeControlsToggle = document.getElementById('tree-controls-toggle')!
 const treeControlsMenu = document.getElementById('tree-controls-menu')!
@@ -299,6 +300,19 @@ Promise.all([
     downloadAnchor.click()
   })
 
+  sourceControlsShare.addEventListener('click', evt => {
+    const data = btoa(JSON.stringify(JSON.parse(views.source.target.value)));
+    const url = window.location.origin + window.location.pathname + '?q=' + data
+    const shareInput = document.getElementById('source-controls-share-input') as HTMLInputElement
+    shareInput.value = url
+    shareInput.style.display = 'inline-block'
+    document.body.addEventListener('click', evt => {
+      shareInput.style.display = 'none'
+    }, { capture: true, once: true })
+    shareInput.select()
+    document.execCommand('copy');
+  })
+
   treeControlsToggle.addEventListener('click', evt => {
     treeControlsMenu.style.visibility = 'visible'
     document.body.addEventListener('click', evt => {
@@ -348,6 +362,8 @@ Promise.all([
     }
     selected = modelFromPath(target) ?? ''
 
+    const params = new URLSearchParams(window.location.search);
+
     const panels = [treeViewEl, sourceViewEl, errorsViewEl]
     if (models[selected] === undefined) {
       homeViewEl.style.display = '';
@@ -377,7 +393,13 @@ Promise.all([
       (document.querySelector('.gutter') as HTMLElement).style.display = ''
       modelSelector.style.display = ''
       panels.forEach(v => v.style.display = '')
+      
+      if (params.has('q')) {
+        const data = atob(params.get('q')!)
+        models[selected].reset(JSON.parse(data))
+      }
     }
+
     updateLanguage(LOCALES.language)
   }
   reload(location.pathname, false)
