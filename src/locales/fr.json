@@ -1,1 +1,24 @@
-{}
+{
+  "advancement": "Progrès",
+  "copy": "Copie",
+  "dimension": "Dimension",
+  "dimension-type": "Type de la Dimension",
+  "download": "Télécharger",
+  "language": "Langage",
+  "loot-table": "Table de butin",
+  "predicate": "Prédicat",
+  "reset": "Réinitialiser",
+  "share": "Partager",
+  "title.generator": "%0% Générateur",
+  "title.home": "Générateur data-pack",
+  "visualize": "Visualiser",
+  "world": "Paramètres du monde",
+  "worldgen/biome": "Biome",
+  "worldgen/carver": "Sculpteur",
+  "worldgen/feature": "Caractéristiques",
+  "worldgen/noise-settings": "Paramètres de forme du terrain",
+  "worldgen/processor-list": "Liste de processeurs",
+  "worldgen/structure-feature": "Fonctionnalités de structures",
+  "worldgen/surface-builder": "Générateur de la surface",
+  "worldgen/template-pool": "Pool modèle"
+}
