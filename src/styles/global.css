@@ -70,12 +70,12 @@ body {
   transition: color var(--style-transition);
 }
 
-.header-title .model-selector {
-  padding: 2px;
+.home-link.nav-item {
+  margin: 0 8px 0 0;
 }
 
-.header-title .nav-item {
-  margin: 0 8px;
+.home-link svg {
+  padding: 2px;
 }
 
 .nav {

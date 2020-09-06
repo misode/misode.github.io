@@ -99,8 +99,6 @@ const homeLink = document.getElementById('home-link')!
 const homeGenerators = document.getElementById('home-generators')!
 const categoryGenerators = document.getElementById('category-generators')!
 const selectedModel = document.getElementById('selected-model')!
-const modelSelector = document.getElementById('model-selector')!
-const modelSelectorMenu = document.getElementById('model-selector-menu')!
 const languageSelector = document.getElementById('language-selector')!
 const languageSelectorMenu = document.getElementById('language-selector-menu')!
 const themeSelector = document.getElementById('theme-selector')!
@@ -183,15 +181,6 @@ Promise.all([
     }
     selectedModel.textContent = title
     document.title = title
-
-    modelSelectorMenu.innerHTML = ''
-    Object.keys(models).forEach(m => {
-      modelSelectorMenu.insertAdjacentHTML('beforeend', 
-        `<div class="btn${m === selected ? ' selected' : ''}">${locale(m)}</div>`)
-      modelSelectorMenu.lastChild?.addEventListener('click', evt => {
-        reload(publicPath + m)
-      })
-    })
   }
 
   const updateLanguage = (id: string, store = false) => {
@@ -225,13 +214,6 @@ Promise.all([
 
   homeLink.addEventListener('click', evt => {
     reload(publicPath)
-  })
-
-  modelSelector.addEventListener('click', evt => {
-    modelSelectorMenu.style.visibility = 'visible'
-    document.body.addEventListener('click', evt => {
-      modelSelectorMenu.style.visibility = 'hidden'
-    }, { capture: true, once: true })
   })
 
   window.onpopstate = (evt: PopStateEvent) => {
@@ -369,7 +351,6 @@ Promise.all([
       homeViewEl.style.display = '';
       (document.querySelector('.gutter') as HTMLElement).style.display = 'none';
       (document.querySelector('.content') as HTMLElement).style.overflowY = 'initial'
-      modelSelector.style.display = 'none'
       panels.forEach(v => v.style.display = 'none')
 
       const addGen = (output: HTMLElement) => (m: any) => {
@@ -391,7 +372,6 @@ Promise.all([
     } else {
       homeViewEl.style.display = 'none';
       (document.querySelector('.gutter') as HTMLElement).style.display = ''
-      modelSelector.style.display = ''
       panels.forEach(v => v.style.display = '')
       
       if (params.has('q')) {
