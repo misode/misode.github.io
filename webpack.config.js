@@ -40,6 +40,11 @@ module.exports = (env, argv) => ({
       filename: 'index.html',
       template: 'src/index.html'
     }),
+    new HtmlWebpackPlugin({
+      title: 'Data Pack Generators Minecraft',
+      filename: '404.html',
+      template: 'src/index.html'
+    }),
     ...config.models.flatMap(buildModel)
   ]
 })

@@ -337,8 +337,14 @@ Promise.all([
     if (!target.endsWith('/')) {
       target = `${target}/`
     }
+
+    if (target.startsWith('/dev/')) {
+      reload(target.slice(4))
+      return
+    }
+
     if (track) {
-      ga('set', 'page', target.replace(/^\/dev/, ''))
+      ga('set', 'page', target)
       ga('send', 'pageview');
       history.pushState(target, 'Change Page', target)
     }
