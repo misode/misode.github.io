@@ -121,6 +121,7 @@ const treeControlsReset = document.getElementById('tree-controls-reset')!
 const treeControlsUndo = document.getElementById('tree-controls-undo')!
 const treeControlsRedo = document.getElementById('tree-controls-redo')!
 const visualizerContent = document.getElementById('visualizer-content')!
+const githubLink = document.getElementById('github-link')!
 
 Split([treeViewEl, sourceViewEl], {
   sizes: [66, 34]
@@ -331,6 +332,10 @@ Promise.all([
       errorsViewEl.classList.add('active')
       errorsToggle.classList.add('toggled')
     }
+  })
+
+  githubLink.addEventListener('click', () => {
+    window.open('https://github.com/misode/misode.github.io', '_blank')
   })
 
   const reload = (target: string, track=true) => {
