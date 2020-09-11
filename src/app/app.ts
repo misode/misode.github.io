@@ -19,7 +19,7 @@ import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
 const LOCAL_STORAGE_THEME = 'theme'
 const LOCAL_STORAGE_LANGUAGE = 'language'
 
-const publicPath = process.env.NODE_ENV === 'production' ? '/dev/' : '/';
+const publicPath = '/';
 
 const modelFromPath = (p: string) => p.replace(publicPath, '').replace(/\/$/, '')
 
