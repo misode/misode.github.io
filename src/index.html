@@ -9,6 +9,7 @@
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
     ga('create', 'UA-73024255-2', 'auto');
     ga('set', 'page', location.pathname.replace(/^\/dev/, ''))
+    ga('set', 'dimension1', localStorage.getItem('theme') ?? 'default');
     ga('set', 'dimension2', 'v2');
     ga('send', 'pageview');
   </script>
