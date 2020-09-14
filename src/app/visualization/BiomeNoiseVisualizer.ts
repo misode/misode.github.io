@@ -87,15 +87,32 @@ export class BiomeNoiseVisualizer extends Visualizer {
   private getNoise(x: number, y: number): number[] {
     return BiomeNoiseVisualizer.noiseMaps.map((id, index) => {
       const config = this.state[`${id}_noise`]
-      let n = 0
-      let scale = 2**config.firstOctave
+
+      let min = +Infinity
+      let max = -Infinity
+      config.amplitudes
+        .filter((a: number) => a !== 0)
+        .forEach((a: number) => {
+          min = Math.min(min, a)
+          max = Math.max(max, a)
+        })
+      const expectedDeviation = 0.1 * (1 + 1 / (max - min + 1))
+      const factor = (1/6) / expectedDeviation
+
+      let value = 0
+      let inputF = Math.pow(2, config.firstOctave)
+      let valueF = Math.pow(2, config.amplitudes.length - 1) / (Math.pow(2, config.amplitudes.length) - 1)
       for (let i = 0; i < config.amplitudes.length; i++) {
-        n += this.noise[index].noise2D(x * scale, y * scale + i)
-        * config.amplitudes[i] / (scale * 256)
-        scale *= 2
+        value += config.amplitudes[i] * this.noise[index].noise2D(this.wrap(x * inputF), this.wrap(y * inputF) + i) * valueF
+        inputF *= 2
+        valueF /= 2
       }
-      return n
+      return 2 * value * factor
     })
+  }
+
+  private wrap(value: number) {
+    return value - Math.floor(value / 3.3554432E7 + 0.5) * 3.3554432E7
   }
 
   getBiomeColor(biome: string): number[] {
