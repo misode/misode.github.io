@@ -36,6 +36,11 @@ export class BiomeNoiseVisualizer extends Visualizer {
       return new NormalNoise(this.seed + i, config.firstOctave, config.amplitudes)
     })
 
+    const biomeColorCache: {[key: string]: number[]} = {}
+    this.state.biomes.forEach((b: any) => {
+      biomeColorCache[b.biome] = this.getBiomeColor(b.biome)
+    })
+
     const data = img.data
     const s = (2 ** this.viewScale)
     for (let x = 0; x < 200; x += 1) {
@@ -44,7 +49,7 @@ export class BiomeNoiseVisualizer extends Visualizer {
         const xx = (x - this.offsetX) * s - 100 * s
         const yy = (y - this.offsetY) * s - 50 * s
         const b = this.closestBiome(xx, yy)
-        const color = this.getBiomeColor(b)
+        const color = biomeColorCache[b]
         data[i] = color[0]
         data[i + 1] = color[1]
         data[i + 2] = color[2]
@@ -71,24 +76,22 @@ export class BiomeNoiseVisualizer extends Visualizer {
   }
 
   private closestBiome(x: number, y: number): string {
-    const noise = this.noise.map(n => n.getValue(x, y))
     if (!this.state.biomes) return ''
-
-    return this.state.biomes
-      .map((b: any) => ({
-        biome: b.biome ?? '',
-        distance: this.distance([...noise, 0], [...BiomeNoiseVisualizer.noiseMaps.map(s => b.parameters[s]), b.parameters.offset])
-      }))
-      .sort((a: any, b: any) => a.distance - b.distance)
-    [0].biome
+    const noise = this.noise.map(n => n.getValue(x, y))
+    let minDist = Infinity
+    let minBiome = ''
+    for (const b of this.state.biomes) {
+      const dist = this.fitness(b.parameters, {altitude: noise[0], temperature: noise[1], humidity: noise[2], weirdness: noise[3], offset: 0})
+      if (dist < minDist) {
+        minDist = dist
+        minBiome = b.biome
+      }
+    }
+    return minBiome
   }
 
-  private distance(a: number[], b: number[]) {
-    let d = 0
-    for (let i = 0; i < a.length; i++) {
-      d += (a[i] - b[i]) * (a[i] - b[i])
-    }
-    return d
+  private fitness(a: any, b: any) {
+    return (a.altitude - b.altitude) * (a.altitude - b.altitude) + (a.temperature - b.temperature) * (a.temperature - b.temperature) + (a.humidity - b.humidity) * (a.humidity - b.humidity) + (a.weirdness - b.weirdness) * (a.weirdness - b.weirdness) + (a.offset - b.offset) * (a.offset - b.offset)
   }
 
   getBiomeColor(biome: string): number[] {

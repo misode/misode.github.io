@@ -31,9 +31,11 @@ export class NormalNoise {
     let inputF = this.lowestFreqInputFactor
     let valueF = this.lowestFreqValueFactor
     for (let i = 0; i < this.amplitudes.length; i += 1) {
-      value += this.amplitudes[i] * this.noiseLevels[i].noise2D(this.wrap(x * inputF), this.wrap(y * inputF) + i) * valueF
-      inputF *= 2
-      valueF /= 2
+      if (this.amplitudes[i] !== 0) {
+        value += this.amplitudes[i] * this.noiseLevels[i].noise2D(this.wrap(x * inputF), this.wrap(y * inputF) + i) * valueF
+        inputF *= 2
+        valueF /= 2
+      }
     }
     return 2 * value * this.valueFactor
   }
