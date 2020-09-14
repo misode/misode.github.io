@@ -1,5 +1,5 @@
-import SimplexNoise from 'simplex-noise'
 import { DataModel, Path, ModelPath } from "@mcschema/core"
+import { NormalNoise } from './NormalNoise'
 import { Visualizer } from './Visualizer'
 import { VisualizerView } from './VisualizerView'
 
@@ -7,16 +7,18 @@ const LOCAL_STORAGE_BIOME_COLORS = 'biome_colors'
 
 export class BiomeNoiseVisualizer extends Visualizer {
   static readonly noiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
-  private noise: SimplexNoise[]
+  private seed: string
+  private noise: NormalNoise[]
   private offsetX: number = 0
   private offsetY: number = 0
   private viewScale: number = 0
-  private biomeColors: {[id: string]: number[]}
+  private biomeColors: { [id: string]: number[] }
 
   constructor() {
     super()
+    this.seed = this.hexId()
     this.biomeColors = JSON.parse(localStorage.getItem(LOCAL_STORAGE_BIOME_COLORS) ?? '{}')
-    this.noise = BiomeNoiseVisualizer.noiseMaps.map(e => new SimplexNoise())
+    this.noise = []
   }
 
   getName() {
@@ -29,13 +31,18 @@ export class BiomeNoiseVisualizer extends Visualizer {
   }
 
   draw(model: DataModel, img: ImageData) {
+    this.noise = BiomeNoiseVisualizer.noiseMaps.map((id, i) => {
+      const config = this.state[`${id}_noise`]
+      return new NormalNoise(this.seed + i, config.firstOctave, config.amplitudes)
+    })
+
     const data = img.data
     const s = (2 ** this.viewScale)
     for (let x = 0; x < 200; x += 1) {
       for (let y = 0; y < 100; y += 1) {
         const i = (y * (img.width * 4)) + (x * 4)
         const xx = (x - this.offsetX) * s - 100 * s
-        const yy = (y- this.offsetY) * s - 50 * s
+        const yy = (y - this.offsetY) * s - 50 * s
         const b = this.closestBiome(xx, yy)
         const color = this.getBiomeColor(b)
         data[i] = color[0]
@@ -64,7 +71,7 @@ export class BiomeNoiseVisualizer extends Visualizer {
   }
 
   private closestBiome(x: number, y: number): string {
-    const noise = this.getNoise(x, y)
+    const noise = this.noise.map(n => n.getValue(x, y))
     if (!this.state.biomes) return ''
 
     return this.state.biomes
@@ -73,46 +80,15 @@ export class BiomeNoiseVisualizer extends Visualizer {
         distance: this.distance([...noise, 0], [...BiomeNoiseVisualizer.noiseMaps.map(s => b.parameters[s]), b.parameters.offset])
       }))
       .sort((a: any, b: any) => a.distance - b.distance)
-      [0].biome
+    [0].biome
   }
 
   private distance(a: number[], b: number[]) {
     let d = 0
-    for (let i = 0; i < a.length; i ++) {
-      d += (a[i]-b[i]) * (a[i]-b[i])
+    for (let i = 0; i < a.length; i++) {
+      d += (a[i] - b[i]) * (a[i] - b[i])
     }
     return d
-  }
-
-  private getNoise(x: number, y: number): number[] {
-    return BiomeNoiseVisualizer.noiseMaps.map((id, index) => {
-      const config = this.state[`${id}_noise`]
-
-      let min = +Infinity
-      let max = -Infinity
-      config.amplitudes
-        .filter((a: number) => a !== 0)
-        .forEach((a: number) => {
-          min = Math.min(min, a)
-          max = Math.max(max, a)
-        })
-      const expectedDeviation = 0.1 * (1 + 1 / (max - min + 1))
-      const factor = (1/6) / expectedDeviation
-
-      let value = 0
-      let inputF = Math.pow(2, config.firstOctave)
-      let valueF = Math.pow(2, config.amplitudes.length - 1) / (Math.pow(2, config.amplitudes.length) - 1)
-      for (let i = 0; i < config.amplitudes.length; i++) {
-        value += config.amplitudes[i] * this.noise[index].noise2D(this.wrap(x * inputF), this.wrap(y * inputF) + i) * valueF
-        inputF *= 2
-        valueF /= 2
-      }
-      return 2 * value * factor
-    })
-  }
-
-  private wrap(value: number) {
-    return value - Math.floor(value / 3.3554432E7 + 0.5) * 3.3554432E7
   }
 
   getBiomeColor(biome: string): number[] {
@@ -138,6 +114,16 @@ export class BiomeNoiseVisualizer extends Visualizer {
   }
 
   private hash(s: string) {
-    return (s ?? '').split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+    return (s ?? '').split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)
+  }
+
+  private dec2hex(dec: number) {
+    return ('0' + dec.toString(16)).substr(-2)
+  }
+
+  private hexId(length = 12) {
+    var arr = new Uint8Array(length / 2)
+    window.crypto.getRandomValues(arr)
+    return Array.from(arr, this.dec2hex).join('')
   }
 }
