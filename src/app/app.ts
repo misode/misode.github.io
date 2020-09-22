@@ -180,7 +180,6 @@ Promise.all([
       Object.values(views).forEach(v => v.setModel(models[selected]))
       models[selected].invalidate()
     }
-    selectedModel.textContent = title
   }
 
   const updateLanguage = (id: string, store = false) => {

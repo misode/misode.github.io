@@ -50,7 +50,7 @@ module.exports = (env, argv) => ({
 
 function buildModel(model) {
   const page = new HtmlWebpackPlugin({
-    title: `${model.name} Generators Minecraft`,
+    title: `${model.name} Generator Minecraft`,
     filename: `${model.id}/index.html`,
     template: 'src/index.html'
   })
