@@ -368,6 +368,7 @@ body {
   padding: 8px 15px;
   cursor: pointer;
   user-select: none;
+  text-decoration: none;
   border-radius: 3px;
   background-color: var(--nav-faded);
   color: var(--text);
