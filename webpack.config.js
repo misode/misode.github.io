@@ -20,10 +20,8 @@ module.exports = (env, argv) => ({
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        {
-          from: 'src/styles',
-          to: 'styles'
-        }
+        { from: 'src/styles', to: 'styles' },
+        { from: 'src/sitemap.txt', to: 'sitemap.txt' }
       ]
     }),
     new MergeJsonWebpackPlugin({
