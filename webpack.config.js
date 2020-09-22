@@ -35,12 +35,12 @@ module.exports = (env, argv) => ({
       }
     }),
     new HtmlWebpackPlugin({
-      title: 'Data Pack Generators Minecraft',
+      title: 'Data Pack Generators Minecraft 1.16',
       filename: 'index.html',
       template: 'src/index.html'
     }),
     new HtmlWebpackPlugin({
-      title: 'Data Pack Generators Minecraft',
+      title: 'Data Pack Generators Minecraft 1.16',
       filename: '404.html',
       template: 'src/index.html'
     }),
@@ -50,7 +50,7 @@ module.exports = (env, argv) => ({
 
 function buildModel(model) {
   const page = new HtmlWebpackPlugin({
-    title: `${model.name} Generator Minecraft`,
+    title: `${model.name} Generator Minecraft 1.16`,
     filename: `${model.id}/index.html`,
     template: 'src/index.html'
   })
