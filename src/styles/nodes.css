@@ -14,8 +14,10 @@
   --node-popup-text: #dadada;
   --category-predicate: #65b5b8;
   --category-predicate-border: #187e81;
+  --category-predicate-background: #95c5c7;
   --category-function: #979fa7;
   --category-function-border: #788086;
+  --category-function-background: #dce0e4;
 }
 
 :root[data-theme=dark] {
@@ -34,8 +36,10 @@
   --node-popup-text: #dadada;
   --category-predicate: #306163;
   --category-predicate-border: #224849;
+  --category-predicate-background: #1d3333;
   --category-function: #838383;
   --category-function-border: #6b6b6b;
+  --category-function-background: #414141;
 }
 
 #tree-view-output > .object-node > .node-body {
@@ -254,7 +258,7 @@ button.remove {
 .node-body {
   display: flex;
   flex-direction: column;
-  padding-left: 14px;
+  padding-left: 18px;
 }
 
 .node-entry > .object-node > .node-body {
@@ -276,6 +280,24 @@ button.remove {
   display: flex;
   flex-direction: column;
   margin-top: 2px;
+}
+
+.node-entry > .object-node[data-category] {
+  width: 100%;
+  padding: 5px;
+  padding-left: 0px;
+  margin-top: 8px;
+  border: 2px solid var(--node-border);
+  border-radius: 3px;
+  transition: background-color var(--style-transition);
+}
+
+.node-entry:first-child > .object-node[data-category] {
+  margin-top: 4px;
+}
+
+.node-entry > .node.object-node[data-category] > .node-body {
+  border: none;
 }
 
 /* Node type specifics */
@@ -304,6 +326,11 @@ button.remove {
   border-color: var(--category-predicate-border) !important;
 }
 
+.node-entry > .node.object-node[data-category=predicate] {
+  background-color: var(--category-predicate-background);
+  border-color: var(--category-predicate-border);
+}
+
 [data-category=function] > .node-header > label,
 [data-category=function] > .node-body > .node.node-header > label,
 [data-category=function] > .node-body > .node > .node-header > label {
@@ -315,4 +342,9 @@ button.remove {
 [data-category=function] > .node-body > .node.node-header > *:not(.selected),
 [data-category=function] > .node-body > .node > .node-header > *:not(.selected) {
   border-color: var(--category-function-border) !important;
+}
+
+.node-entry > .node.object-node[data-category=function] {
+  background-color: var(--category-function-background);
+  border-color: var(--category-function-border);
 }
