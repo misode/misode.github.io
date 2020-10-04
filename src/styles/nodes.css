@@ -284,6 +284,7 @@ button.remove {
 
 .node-entry > .object-node[data-category] {
   width: 100%;
+  min-width: max-content;
   padding: 5px;
   padding-left: 0px;
   margin-top: 8px;
