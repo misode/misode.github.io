@@ -32,7 +32,7 @@ const addChecked = (el: HTMLElement) => {
 }
 
 const treeViewObserver = (el: HTMLElement) => {
-  el.querySelectorAll('.node-header[data-help]').forEach(e => {
+  el.querySelectorAll('.node[data-help]').forEach(e => {
     const div = document.createElement('div')
     div.className = 'node-icon'
     div.addEventListener('click', evt => {
@@ -42,9 +42,9 @@ const treeViewObserver = (el: HTMLElement) => {
       }, { capture: true, once: true })
     })
     div.insertAdjacentHTML('beforeend', `<span class="icon-popup">${e.getAttribute('data-help')}</span><svg class="node-help" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>`)
-    e.appendChild(div)
+    e.querySelector('.node-header')?.appendChild(div)
   })
-  el.querySelectorAll('.node-header[data-error]').forEach(e => {
+  el.querySelectorAll('.node[data-error]').forEach(e => {
     const div = document.createElement('div')
     div.className = 'node-icon'
     div.addEventListener('click', evt => {
@@ -54,7 +54,7 @@ const treeViewObserver = (el: HTMLElement) => {
       }, { capture: true, once: true })
     })
     div.insertAdjacentHTML('beforeend', `<span class="icon-popup">${e.getAttribute('data-error')}</span><svg class="node-error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"></path></svg>`)
-    e.appendChild(div)
+    e.querySelector('.node-header')?.appendChild(div)
   })
   el.querySelectorAll('.collapse.closed, button.add').forEach(e => {
     e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.75 4.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"></path></svg>`)
