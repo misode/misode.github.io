@@ -38,8 +38,17 @@ export class TreeView extends AbstractView {
    */
   invalidated() {
     const mounter = new Mounter({nodeInjector: this.nodeInjector})
-    const rendered = this.model.schema.render(new ModelPath(this.model), this.model.data, mounter)
-    this.target.innerHTML = rendered[2];
+    const path = new ModelPath(this.model)
+    const rendered = this.model.schema.render(path, this.model.data, mounter)
+    const category = this.model.schema.category(path)
+    if (rendered[1]) {
+      this.target.innerHTML = `<div class="node ${this.model.schema.type(path)}-node" ${category ? `data-category="${category}"` : ''}>
+        <div class="node-header">${rendered[1]}</div>
+        <div class="node-body">${rendered[2]}</div>
+      </div>`
+    } else {
+      this.target.innerHTML = rendered[2]
+    }
     mounter.mount(this.target);
     this.observer(this.target)
   }
