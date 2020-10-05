@@ -1,9 +1,9 @@
 import {
-  AbstractView,
   DataModel,
   Errors,
   locale,
 } from '@mcschema/core'
+import { AbstractView } from './AbstractView'
 
 export class ErrorsView extends AbstractView {
   target: HTMLElement

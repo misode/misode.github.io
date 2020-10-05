@@ -1,4 +1,5 @@
-import { AbstractView, DataModel, Path, ModelPath } from "@mcschema/core"
+import { DataModel, ModelPath } from "@mcschema/core"
+import { AbstractView } from "../AbstractView"
 import { BiomeNoiseVisualizer } from "./BiomeNoiseVisualizer"
 import { NoiseSettingsVisualizer } from "./NoiseSettingsVisualizer"
 import { Visualizer } from "./Visualizer"

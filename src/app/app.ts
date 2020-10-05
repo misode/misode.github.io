@@ -5,13 +5,14 @@ import {
   locale,
   LOCALES,
   ModelPath,
-  SourceView,
-  TreeView,
+  Mounter,
   Path,
 } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
 import { VisualizerView } from './visualization/VisualizerView'
 import { RegistryFetcher } from './RegistryFetcher'
+import { TreeView } from './TreeView'
+import { SourceView } from './SourceView'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
 import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
@@ -63,11 +64,11 @@ const treeViewObserver = (el: HTMLElement) => {
   })
 }
 
-const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
+const treeViewNodeInjector = (path: ModelPath, mounter: Mounter) => {
   let res = VisualizerView.visualizers
     .filter(v => v.active(path))
     .map(v => {
-      const id = view.registerClick(() => {
+      const id = mounter.registerClick(() => {
         views.visualizer.set(v, path)
         views.visualizer.model.invalidate()
       })
@@ -78,7 +79,7 @@ const treeViewNodeInjector = (path: ModelPath, view: TreeView) => {
     if (path.pop().endsWith(new Path(['generator', 'biome_source', 'biomes']))) {
       const biomeVisualizer = views.visualizer.visualizer as BiomeNoiseVisualizer
       const biome = path.push('biome').get()
-      const id = view.registerChange(el => {
+      const id = mounter.registerChange(el => {
         biomeVisualizer.setBiomeColor(biome, (el as HTMLInputElement).value)
         views.visualizer.visualizer!.state = {}
         views.visualizer.invalidated()
@@ -166,7 +167,6 @@ Promise.all([
     }
   }
   config.models.forEach(buildModel)
-  
 
   let selected = ''
   Object.values(models).forEach(m => m.validate(true))
