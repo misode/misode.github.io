@@ -1,5 +1,7 @@
-import { DataModel, ModelPath, Mounter } from '@mcschema/core'
+import { DataModel, ModelPath } from '@mcschema/core'
 import { AbstractView } from './AbstractView'
+import { Mounter } from './Mounter'
+import { renderHtml } from './hooks/renderHtml'
 
 type Registry = {
   [id: string]: (el: Element) => void
@@ -39,7 +41,7 @@ export class TreeView extends AbstractView {
   invalidated() {
     const mounter = new Mounter({nodeInjector: this.nodeInjector})
     const path = new ModelPath(this.model)
-    const rendered = this.model.schema.render(path, this.model.data, mounter)
+    const rendered = this.model.schema.hook(renderHtml, path, this.model.data, mounter)
     const category = this.model.schema.category(path)
     if (rendered[1]) {
       this.target.innerHTML = `<div class="node ${this.model.schema.type(path)}-node" ${category ? `data-category="${category}"` : ''}>

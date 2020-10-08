@@ -1,5 +1,6 @@
 import { DataModel, Path, ModelPath } from '@mcschema/core'
 import { AbstractView } from './AbstractView'
+import { transformOutput } from './hooks/transformOutput'
 
 type SourceViewOptions = {
   indentation?: number | string,
@@ -27,7 +28,7 @@ export class SourceView extends AbstractView {
   }
 
   invalidated() {
-    const transformed = this.model.schema.transform(new ModelPath(this.model), this.model.data)
+    const transformed = this.model.schema.hook(transformOutput, new ModelPath(this.model), this.model.data)
     this.target.value = JSON.stringify(transformed, null, this.options?.indentation)
   }
 

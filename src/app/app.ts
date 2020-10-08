@@ -5,7 +5,6 @@ import {
   locale,
   LOCALES,
   ModelPath,
-  Mounter,
   Path,
 } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
@@ -16,6 +15,7 @@ import { SourceView } from './SourceView'
 import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
 import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
+import { Mounter } from './Mounter'
 
 const LOCAL_STORAGE_THEME = 'theme'
 const LOCAL_STORAGE_LANGUAGE = 'language'
