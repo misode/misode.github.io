@@ -12,8 +12,8 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
-    "@mcschema/core": "^0.10.0-beta.6",
-    "@mcschema/java-1.16": "^0.5.9-beta.1",
+    "@mcschema/core": "^0.11.0",
+    "@mcschema/java-1.16": "^0.5.12",
     "@mcschema/locales": "^0.1.11",
     "@types/google.analytics": "0.0.40",
     "@types/split.js": "^1.4.0",

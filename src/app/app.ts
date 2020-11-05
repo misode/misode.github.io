@@ -1,12 +1,5 @@
 import Split from 'split.js'
-import {
-  Base,
-  DataModel,
-  locale,
-  LOCALES,
-  ModelPath,
-  Path,
-} from '@mcschema/core'
+import { Base, DataModel, ModelPath, Path } from '@mcschema/core'
 import { getCollections, getSchemas } from '@mcschema/java-1.16'
 import { VisualizerView } from './visualization/VisualizerView'
 import { RegistryFetcher } from './RegistryFetcher'
@@ -16,6 +9,7 @@ import { ErrorsView } from './ErrorsView'
 import config from '../config.json'
 import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
 import { Mounter } from './Mounter'
+import { getLanguage, hasLocale, locale, registerLocale, setLanguage } from './locales'
 
 const LOCAL_STORAGE_THEME = 'theme'
 const LOCAL_STORAGE_LANGUAGE = 'language'
@@ -92,9 +86,9 @@ const treeViewNodeInjector = (path: ModelPath, mounter: Mounter) => {
 
 const fetchLocale = async (id: string) => {
   const response = await fetch(publicPath + `locales/${id}.json`)
-  LOCALES.register(id, await response.json())
+  registerLocale(id, await response.json())
 }
-LOCALES.language = localStorage.getItem(LOCAL_STORAGE_LANGUAGE)?.toLowerCase() ?? 'en'
+setLanguage(localStorage.getItem(LOCAL_STORAGE_LANGUAGE)?.toLowerCase())
 
 const homeLink = document.getElementById('home-link')!
 const homeGenerators = document.getElementById('home-generators')!
@@ -151,8 +145,8 @@ const views = {
 const COLLECTIONS = getCollections()
 
 Promise.all([
-  fetchLocale(LOCALES.language),
-  ...(LOCALES.language === 'en' ? [] : [fetchLocale('en')]),
+  fetchLocale(getLanguage()),
+  ...(getLanguage() === 'en' ? [] : [fetchLocale('en')]),
   RegistryFetcher(COLLECTIONS, config.registries)
 ]).then(responses => {
 
@@ -182,29 +176,29 @@ Promise.all([
     }
     selectedModel.textContent = title
     document.title = title
-  }
-
-  const updateLanguage = (id: string, store = false) => {
-    LOCALES.language = id
-    if (store) {
-      localStorage.setItem(LOCAL_STORAGE_LANGUAGE, id)
-    }
 
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
     })
+  }
+
+  const updateLanguage = (id: string, store = false) => {
+    setLanguage(id)
+    if (store) {
+      localStorage.setItem(LOCAL_STORAGE_LANGUAGE, id)
+    }
 
     languageSelectorMenu.innerHTML = ''
     config.languages.forEach(lang => {
       languageSelectorMenu.insertAdjacentHTML('beforeend',
-        `<div class="btn${lang.code === LOCALES.language ? ' selected' : ''}">${lang.name}</div>`)
+        `<div class="btn${lang.code === getLanguage() ? ' selected' : ''}">${lang.name}</div>`)
       languageSelectorMenu.lastChild?.addEventListener('click', evt => {
         updateLanguage(lang.code, true)
         languageSelectorMenu.style.visibility = 'hidden'
       })
     })
 
-    if (LOCALES.has(id)) {
+    if (hasLocale(id)) {
       updateModel()
     } else {
       fetchLocale(id).then(r => {
@@ -392,7 +386,7 @@ Promise.all([
       }
     }
 
-    updateLanguage(LOCALES.language)
+    updateLanguage(getLanguage())
   }
   reload(location.pathname, false)
   document.body.style.visibility = 'initial'

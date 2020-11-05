@@ -1,4 +1,5 @@
-import { locale, Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
+import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
+import { errorLocale, helpLocale, locale, pathLocale, segmentedLocale } from '../locales'
 import { Mounter } from '../Mounter'
 import { hexId } from '../utils'
 
@@ -39,12 +40,12 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     const pathWithChoiceContext = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
     const inject = choices.map(c => {
       if (c.type === choice.type) {
-        return `<button class="selected" disabled>${pathWithChoiceContext.push(c.type).locale()}</button>`
+        return `<button class="selected" disabled>${pathLocale(pathWithChoiceContext.push(c.type))}</button>`
       }
       const buttonId = mounter.registerClick(el => {
         path.model.set(path, c.change ? c.change(value) : c.node.default())
       })
-      return `<button data-id="${buttonId}">${pathWithChoiceContext.push(c.type).locale()}</button>`
+      return `<button data-id="${buttonId}">${pathLocale(pathWithChoiceContext.push(c.type))}</button>`
     }).join('')
 
     const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, mounter)
@@ -67,14 +68,14 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     if (Array.isArray(value)) {
       body = value.map((childValue, index) => {
         const removeId = mounter.registerClick(el => path.model.set(path.push(index), undefined))
-        const childPath = path.push(index).localePush('entry')
+        const childPath = path.push(index).contextPush('entry')
         const category = children.category(childPath)
         const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, mounter)
-        return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${childPath.error()} ${childPath.help()}>
+        return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${errorLocale(childPath)} ${helpLocale(childPath)}>
           <div class="node-header">
             <button class="remove" data-id="${removeId}"></button>
             ${cPrefix}
-            <label>${path.localePush('entry').locale([`${index}`])}</label>
+            <label>${pathLocale(path.contextPush('entry'), [`${index}`])}</label>
             ${cSuffix}
           </div>
           ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -109,7 +110,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = path.modelPush(key)
           const category = children.category(childPath)
           const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], mounter)
-          return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${childPath.error()} ${childPath.help()}>
+          return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${errorLocale(childPath)} ${helpLocale(childPath)}>
             <div class="node-header">
               <button class="remove" data-id="${removeId}"></button>
               ${cPrefix}
@@ -159,10 +160,10 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = getChildModelPath(path, k)
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
-          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${childPath.error()} ${childPath.help()}>
+          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${errorLocale(childPath)} ${helpLocale(childPath)}>
             <div class="node-header">
               ${cPrefix}
-              <label>${childPath.locale()}</label>
+              <label>${pathLocale(childPath)}</label>
               ${cSuffix}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -207,7 +208,7 @@ function rawString({ node, getValues, config }: { node: INode } & StringHookPara
     && typeof config.params.pool === 'string'
     && values.length > 0) {
     const contextPath = new Path(path.getArray(), [config.params.pool])
-    if (contextPath.localePush(values[0]).strictLocale()) {
+    if (segmentedLocale(contextPath.contextPush(values[0]).getContext())) {
       return selectRaw(node, contextPath, values, inputId)
     }
   }
@@ -225,7 +226,7 @@ function selectRaw(node: INode, contextPath: Path, values: string[], inputId?: s
   return `<select data-id="${inputId}">
     ${node.optional() ? `<option value="">${locale('unset')}</option>` : ''}
     ${values.map(v =>
-    `<option value="${v}">${contextPath.localePush(v).locale()}</option>`
+    `<option value="${v}">${pathLocale(contextPath.contextPush(v))}</option>`
   ).join('')}
   </select>`
 }
