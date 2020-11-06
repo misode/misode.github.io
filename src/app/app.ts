@@ -236,6 +236,7 @@ Promise.all([
 
       treeVersionLabel.textContent = id
       version = id
+      ga('set', 'dimension3', version);
       updateModel()
     })
   }
