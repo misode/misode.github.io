@@ -179,7 +179,6 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       (el as HTMLSelectElement).value = value ?? ''
       el.addEventListener('change', evt => {
         const newValue = (el as HTMLSelectElement).value
-        console.log("UPDATING NEW VALUE!", path.toString(), newValue)
         path.model.set(path, newValue.length === 0 ? undefined : newValue)
         evt.stopPropagation()
       })

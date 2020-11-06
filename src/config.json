@@ -41,6 +41,16 @@
       "name": "正體中文"
     }
   ],
+  "versions": [
+    {
+      "id": "1.17",
+      "mcdata_ref": "master"
+    },
+    {
+      "id": "1.16",
+      "mcdata_ref": "1.16.4"
+    }
+  ],
   "models": [
     {
       "id": "loot-table",
@@ -148,6 +158,10 @@
     "worldgen/structure_processor",
     "worldgen/surface_builder",
     "worldgen/tree_decorator_type",
-    "worldgen/trunk_placer_type"
+    "worldgen/trunk_placer_type",
+    {
+      "id": "worldgen/biome",
+      "path": "/processed/reports/biomes/data.min.json"
+    }
   ]
 }

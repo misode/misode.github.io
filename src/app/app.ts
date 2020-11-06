@@ -1,6 +1,7 @@
 import Split from 'split.js'
-import { Base, DataModel, ModelPath, Path } from '@mcschema/core'
-import { getCollections, getSchemas } from '@mcschema/java-1.16'
+import { Base, CollectionRegistry, DataModel, ModelPath, Path, SchemaRegistry } from '@mcschema/core'
+import * as java16 from '@mcschema/java-1.16'
+import * as java17 from '@mcschema/java-1.17'
 import { VisualizerView } from './visualization/VisualizerView'
 import { RegistryFetcher } from './RegistryFetcher'
 import { TreeView } from './TreeView'
@@ -11,8 +12,19 @@ import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
 import { Mounter } from './Mounter'
 import { getLanguage, hasLocale, locale, registerLocale, setLanguage } from './locales'
 
+const versionSchemas: {
+  [versionId: string]: {
+    getCollections: () => CollectionRegistry,
+    getSchemas: (collections: CollectionRegistry) => SchemaRegistry,
+  }
+} = {
+  '1.16': java16,
+  '1.17': java17
+}
+
 const LOCAL_STORAGE_THEME = 'theme'
 const LOCAL_STORAGE_LANGUAGE = 'language'
+const LOCAL_STORAGE_VERSION = 'schema_version'
 
 const publicPath = '/';
 
@@ -112,6 +124,9 @@ const sourceControlsShare = document.getElementById('source-controls-share')!
 const sourceToggle = document.getElementById('source-toggle')!
 const treeControlsToggle = document.getElementById('tree-controls-toggle')!
 const treeControlsMenu = document.getElementById('tree-controls-menu')!
+const treeVersionToggle = document.getElementById('tree-version-toggle')!
+const treeVersionMenu = document.getElementById('tree-version-menu')!
+const treeVersionLabel = document.getElementById('tree-version-label')!
 const treeControlsReset = document.getElementById('tree-controls-reset')!
 const treeControlsUndo = document.getElementById('tree-controls-undo')!
 const treeControlsRedo = document.getElementById('tree-controls-redo')!
@@ -142,15 +157,18 @@ const views = {
   'visualizer': new VisualizerView(dummyModel, visualizerContent)
 }
 
-const COLLECTIONS = getCollections()
+let version = localStorage.getItem(LOCAL_STORAGE_VERSION) ?? config.versions[0].id
+treeVersionLabel.textContent = version
+
+let COLLECTIONS = versionSchemas[version].getCollections()
 
 Promise.all([
   fetchLocale(getLanguage()),
   ...(getLanguage() === 'en' ? [] : [fetchLocale('en')]),
-  RegistryFetcher(COLLECTIONS, config.registries)
-]).then(responses => {
+  RegistryFetcher(COLLECTIONS, version)
+]).then(() => {
 
-  const SCHEMAS = getSchemas(COLLECTIONS)
+  let SCHEMAS = versionSchemas[version].getSchemas(COLLECTIONS)
 
   let models: { [key: string]: DataModel } = {}  
   const buildModel = (model: any) => {
@@ -205,6 +223,21 @@ Promise.all([
         updateModel()
       })
     }
+  }
+
+  const updateVersion = (id: string) => {
+    localStorage.setItem(LOCAL_STORAGE_VERSION, id)
+    if (id === version) return
+
+    const newCollections = versionSchemas[id].getCollections()
+    RegistryFetcher(COLLECTIONS, id).then(() => {
+      SCHEMAS = versionSchemas[id].getSchemas(COLLECTIONS)
+      COLLECTIONS = newCollections
+
+      treeVersionLabel.textContent = id
+      version = id
+      updateModel()
+    })
   }
 
   homeLink.addEventListener('click', evt => {
@@ -295,6 +328,21 @@ Promise.all([
     document.body.addEventListener('click', evt => {
       treeControlsMenu.style.visibility = 'hidden'
     }, { capture: true, once: true })
+  })
+
+  treeVersionToggle.addEventListener('click', evt => {
+    treeVersionMenu.style.visibility = 'visible'
+    document.body.addEventListener('click', evt => {
+      treeVersionMenu.style.visibility = 'hidden'
+    }, { capture: true, once: true })
+  })
+
+  config.versions.forEach(v => {
+    const entry = document.createElement('button')
+    entry.classList.add('btn')
+    entry.textContent = v.id
+    entry.addEventListener('click', () => updateVersion(v.id))
+    treeVersionMenu.append(entry)
   })
 
   treeControlsReset.addEventListener('click', evt => {
