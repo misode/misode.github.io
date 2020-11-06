@@ -75,6 +75,7 @@ const treeViewNodeInjector = (path: ModelPath, mounter: Mounter) => {
     .filter(v => v.active(path))
     .map(v => {
       const id = mounter.registerClick(() => {
+        ga('send', 'event', 'Preview', 'set-preview', v.getName())
         views.visualizer.set(v, path)
         views.visualizer.model.invalidate()
       })
@@ -213,6 +214,7 @@ Promise.all([
       languageSelectorMenu.lastChild?.addEventListener('click', evt => {
         updateLanguage(lang.code, true)
         languageSelectorMenu.style.visibility = 'hidden'
+        ga('send', 'event', 'Generator', 'set-language', lang.code)
       })
     })
 
@@ -287,6 +289,7 @@ Promise.all([
     } else {
       updateTheme('dark')
     }
+    ga('send', 'event', 'Generator', 'set-theme', document.documentElement.getAttribute('data-theme'))
   })
 
   sourceControlsToggle.addEventListener('click', evt => {
@@ -300,6 +303,7 @@ Promise.all([
     sourceViewOutput.select()
     document.execCommand('copy');
     addChecked(sourceControlsCopy)
+    ga('send', 'event', 'JsonOutput', 'copy')
   })
 
   sourceControlsDownload.addEventListener('click', evt => {
@@ -309,6 +313,7 @@ Promise.all([
     downloadAnchor.setAttribute("href", dataString)
     downloadAnchor.setAttribute("download", "data.json")
     downloadAnchor.click()
+    ga('send', 'event', 'JsonOutput', 'download')
   })
 
   sourceControlsShare.addEventListener('click', evt => {
@@ -322,6 +327,7 @@ Promise.all([
     }, { capture: true, once: true })
     shareInput.select()
     document.execCommand('copy');
+    ga('send', 'event', 'JsonOutput', 'share')
   })
 
   treeControlsToggle.addEventListener('click', evt => {
@@ -342,21 +348,27 @@ Promise.all([
     const entry = document.createElement('button')
     entry.classList.add('btn')
     entry.textContent = v.id
-    entry.addEventListener('click', () => updateVersion(v.id))
+    entry.addEventListener('click', () => {
+      updateVersion(v.id)
+      ga('send', 'event', 'Generator', 'set-version', version)
+    })
     treeVersionMenu.append(entry)
   })
 
   treeControlsReset.addEventListener('click', evt => {
     models[selected].reset(models[selected].schema.default(), true)
     addChecked(treeControlsReset)
+    ga('send', 'event', 'Generator', 'reset', version)
   })
 
   treeControlsUndo.addEventListener('click', evt => {
     models[selected].undo()
+    ga('send', 'event', 'Generator', 'undo')
   })
 
   treeControlsRedo.addEventListener('click', evt => {
     models[selected].redo()
+    ga('send', 'event', 'Generator', 'redo')
   })
 
   document.addEventListener('keyup', evt => {
@@ -375,6 +387,7 @@ Promise.all([
       errorsViewEl.classList.add('active')
       errorsToggle.classList.add('toggled')
     }
+    ga('send', 'event', 'Errors', 'toggle', errorsViewEl.classList.contains('active') ? 'visible' : 'hidden')
   })
 
   githubLink.addEventListener('click', () => {
