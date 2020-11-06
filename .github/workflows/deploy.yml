@@ -12,10 +12,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
+    - name: Get latest mcdata commit hash
+      uses: octokit/request-action@v2.x
+      id: get_mcdata_hash
+      with:
+        route: GET /repos/Arcensoth/mcdata/branches/master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build
       run: |
         npm install
-        npm run build
+        "npm run build -- --env.hash=${{ steps.get_mcdata_hash.outputs.data.commit.sha }}"
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@releases/v3

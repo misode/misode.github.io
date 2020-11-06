@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MergeJsonWebpackPlugin = require("merge-jsons-webpack-plugin");
+const webpack = require('webpack');
 const config = require('./src/config.json')
 
 module.exports = (env, argv) => ({
@@ -18,6 +19,9 @@ module.exports = (env, argv) => ({
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      __MCDATA_MASTER_HASH__: JSON.stringify(env ? env.hash : '')
+    }),
     new CopyWebpackPlugin({
       patterns: [
         { from: 'src/styles', to: 'styles' },
