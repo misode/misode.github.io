@@ -203,6 +203,7 @@ Promise.all([
 
   const updateLanguage = (id: string, store = false) => {
     setLanguage(id)
+    ga('set', 'dimension4', id);
     if (store) {
       localStorage.setItem(LOCAL_STORAGE_LANGUAGE, id)
     }
@@ -358,7 +359,7 @@ Promise.all([
   treeControlsReset.addEventListener('click', evt => {
     models[selected].reset(models[selected].schema.default(), true)
     addChecked(treeControlsReset)
-    ga('send', 'event', 'Generator', 'reset', version)
+    ga('send', 'event', 'Generator', 'reset')
   })
 
   treeControlsUndo.addEventListener('click', evt => {
