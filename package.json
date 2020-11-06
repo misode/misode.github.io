@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -p",
+    "build": "webpack-cli -p",
     "start": "webpack-dev-server -d --content-base ./public"
   },
   "keywords": [],
@@ -26,7 +26,7 @@
     "split.js": "^1.5.11",
     "ts-loader": "^7.0.4",
     "typescript": "^3.9.3",
-    "webpack": "^4.43.0",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"
   }
