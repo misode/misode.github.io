@@ -130,20 +130,11 @@
   border-bottom-left-radius: 0;
 }
 
-.node-header > .collapse.closed {
-  border-bottom-left-radius: 3px;
-}
-
 /* Buttons */
 
 button.selected {
   background-color: var(--node-selected);
   border-color: var(--node-selected-border);
-}
-
-.collapse {
-  display: inline-flex;
-  align-items: center;
 }
 
 .collapse svg {
@@ -171,6 +162,7 @@ button.remove {
   transition: fill var(--style-transition);
 }
 
+.node-header > button.collapse:last-child,
 .node-header > button.add:last-child {
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
