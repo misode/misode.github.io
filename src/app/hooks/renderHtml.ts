@@ -34,7 +34,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
   },
 
   choice({ choices, config, switchNode }, path, value, mounter) {
-    const choice = switchNode.activeCase(path) ?? choices[0]
+    const choice = switchNode.activeCase(path, true)
     const pathWithContext = (config?.context) ?
       new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
     const pathWithChoiceContext = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
