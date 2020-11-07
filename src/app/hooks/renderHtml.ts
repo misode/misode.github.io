@@ -141,7 +141,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       const hex = (value?.toString(16).padStart(6, '0') ?? '000000')
       return ['', `<input type="color" data-id="${onChange}" value="#${hex}">`, '']
     }
-    return ['', `<input data-id="${onChange}" value="${value}">`, '']
+    return ['', `<input data-id="${onChange}" value="${value ?? ''}">`, '']
   },
 
   object({ node, getActiveFields, getChildModelPath }, path, value, mounter) {
