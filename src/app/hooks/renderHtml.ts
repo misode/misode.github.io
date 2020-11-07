@@ -1,5 +1,5 @@
 import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
-import { errorLocale, helpLocale, locale, pathLocale, segmentedLocale } from '../locales'
+import { locale, pathLocale, segmentedLocale } from '../locales'
 import { Mounter } from '../Mounter'
 import { hexId } from '../utils'
 
@@ -28,9 +28,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       path.model.set(path, node.optional() && value === true ? undefined : true)
     })
     return ['', `<button${value === false ? ' class="selected"' : ' '} 
-        data-id="${onFalse}">${locale('false')}</button>
+        data-id="${onFalse}">${htmlEncode(locale('false'))}</button>
       <button${value === true ? ' class="selected"' : ' '} 
-        data-id="${onTrue}">${locale('true')}</button>`, '']
+        data-id="${onTrue}">${htmlEncode(locale('true'))}</button>`, '']
   },
 
   choice({ choices, config, switchNode }, path, value, mounter) {
@@ -40,12 +40,16 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     const pathWithChoiceContext = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
     const inject = choices.map(c => {
       if (c.type === choice.type) {
-        return `<button class="selected" disabled>${pathLocale(pathWithChoiceContext.push(c.type))}</button>`
+        return `<button class="selected" disabled>
+          ${htmlEncode(pathLocale(pathWithChoiceContext.push(c.type)))}
+        </button>`
       }
       const buttonId = mounter.registerClick(el => {
         path.model.set(path, c.change ? c.change(value) : c.node.default())
       })
-      return `<button data-id="${buttonId}">${pathLocale(pathWithChoiceContext.push(c.type))}</button>`
+      return `<button data-id="${buttonId}">
+        ${htmlEncode(pathLocale(pathWithChoiceContext.push(c.type)))}
+      </button>`
     }).join('')
 
     const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, mounter)
@@ -71,11 +75,11 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         const childPath = path.push(index).contextPush('entry')
         const category = children.category(childPath)
         const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, mounter)
-        return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${errorLocale(childPath)} ${helpLocale(childPath)}>
+        return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''} ${error(childPath)} ${help(childPath)}>
           <div class="node-header">
             <button class="remove" data-id="${removeId}"></button>
             ${cPrefix}
-            <label>${pathLocale(path.contextPush('entry'), [`${index}`])}</label>
+            <label>${htmlEncode(pathLocale(path.contextPush('entry'), [`${index}`]))}</label>
             ${cSuffix}
           </div>
           ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -110,11 +114,11 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = path.modelPush(key)
           const category = children.category(childPath)
           const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], mounter)
-          return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${errorLocale(childPath)} ${helpLocale(childPath)}>
+          return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''} ${error(childPath)} ${help(childPath)}>
             <div class="node-header">
               <button class="remove" data-id="${removeId}"></button>
               ${cPrefix}
-              <label>${key}</label>
+              <label>${htmlEncode(key)}</label>
               ${cSuffix}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -137,7 +141,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       const hex = (value?.toString(16).padStart(6, '0') ?? '000000')
       return ['', `<input type="color" data-id="${onChange}" value="#${hex}">`, '']
     }
-    return ['', `<input data-id="${onChange}" value="${value ?? ''}">`, '']
+    return ['', `<input data-id="${onChange}" value="${value}">`, '']
   },
 
   object({ node, getActiveFields, getChildModelPath }, path, value, mounter) {
@@ -160,10 +164,10 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = getChildModelPath(path, k)
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
-          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${category}"` : ''} ${errorLocale(childPath)} ${helpLocale(childPath)}>
+          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''} ${error(childPath)} ${help(childPath)}>
             <div class="node-header">
               ${cPrefix}
-              <label>${pathLocale(childPath)}</label>
+              <label>${htmlEncode(pathLocale(childPath))}</label>
               ${cSuffix}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -171,7 +175,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         })
         .join('')
     }
-    return [prefix, suffix, body]
+    return ['', prefix + suffix, body]
   },
 
   string(params, path, value, mounter) {
@@ -216,20 +220,20 @@ function rawString({ node, getValues, config }: { node: INode } & StringHookPara
   ${values.length === 0 ? '' :
       `<datalist id="${datalistId}">
     ${values.map(v =>
-        `<option value="${v}">`
+        `<option value="${htmlEncode(v)}">`
       ).join('')}
   </datalist>`}`
 }
 
 function selectRaw(node: INode, contextPath: Path, values: string[], inputId?: string) {
   return `<select data-id="${inputId}">
-    ${node.optional() ? `<option value="">${locale('unset')}</option>` : ''}
-    ${values.map(v =>
-    `<option value="${v}">${pathLocale(contextPath.contextPush(v))}</option>`
-  ).join('')}
+    ${node.optional() ? `<option value="">${htmlEncode(locale('unset'))}</option>` : ''}
+    ${values.map(v => `<option value="${htmlEncode(v)}">
+      ${htmlEncode(pathLocale(contextPath.contextPush(v)))}
+    </option>`).join('')}
   </select>`
 }
-
+  
 function hashString(str: string) {
   var hash = 0, i, chr;
   for (i = 0; i < str.length; i++) {
@@ -238,4 +242,21 @@ function hashString(str: string) {
     hash |= 0;
   }
   return hash;
+}
+
+function error(p: ModelPath, exact = true) {
+  const errors = p.model.errors.get(p, exact)
+  if (errors.length === 0) return ''
+  return `data-error="${htmlEncode(locale(errors[0].error, errors[0].params))}"`
+}
+
+function help(path: ModelPath) {
+  const message = segmentedLocale(path.contextPush('help').getContext(), [], 6)
+  if (message === undefined) return ''
+  return `data-help="${htmlEncode(message)}"`
+}
+
+function htmlEncode(str: string) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
 }

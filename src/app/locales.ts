@@ -58,15 +58,3 @@ export function pathLocale(path: Path, params?: string[]): string {
   return segmentedLocale(path.getContext(), params)
     ?? path.getContext()[path.getContext().length - 1] ?? ''
 }
-
-export function errorLocale(p: ModelPath, exact = true): string {
-  const errors = p.model.errors.get(p, exact)
-  if (errors.length === 0) return ''
-  return `data-error="${locale(errors[0].error, errors[0].params)}"`
-}
-
-export function helpLocale(path: ModelPath): string {
-  const res = segmentedLocale(path.contextPush('help').getContext(), [], 6)
-  if (res === undefined) return ''
-  return `data-help="${res}"`
-}
