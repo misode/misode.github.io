@@ -364,19 +364,21 @@ Promise.all([
 
   treeControlsUndo.addEventListener('click', evt => {
     models[selected].undo()
-    ga('send', 'event', 'Generator', 'undo')
+    ga('send', 'event', 'Generator', 'undo', 'Menu')
   })
 
   treeControlsRedo.addEventListener('click', evt => {
     models[selected].redo()
-    ga('send', 'event', 'Generator', 'redo')
+    ga('send', 'event', 'Generator', 'redo', 'Menu')
   })
 
   document.addEventListener('keyup', evt => {
     if (evt.ctrlKey && evt.key === 'z') {
       models[selected].undo()
+      ga('send', 'event', 'Generator', 'undo', 'Hotkey')
     } else if (evt.ctrlKey && evt.key === 'y') {
       models[selected].redo()
+      ga('send', 'event', 'Generator', 'redo', 'Hotkey')
     }
   })
 
