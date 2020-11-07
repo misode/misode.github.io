@@ -25,7 +25,8 @@ module.exports = (env, argv) => ({
     new CopyWebpackPlugin({
       patterns: [
         { from: 'src/styles', to: 'styles' },
-        { from: 'src/sitemap.txt', to: 'sitemap.txt' }
+        { from: 'src/sitemap.txt', to: 'sitemap.txt' },
+        { from: 'src/favicon-32.png', to: 'favicon-32.png' }
       ]
     }),
     new MergeJsonWebpackPlugin({
