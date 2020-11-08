@@ -38,19 +38,19 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     const pathWithContext = (config?.context) ?
       new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
     const pathWithChoiceContext = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
-    const inject = choices.map(c => {
-      if (c.type === choice.type) {
-        return `<button class="selected" disabled>
-          ${htmlEncode(pathLocale(pathWithChoiceContext.push(c.type)))}
-        </button>`
-      }
-      const buttonId = mounter.registerClick(el => {
+
+    const inputId = mounter.register(el => {
+      (el as HTMLSelectElement).value = choice.type
+      el.addEventListener('change', () => {
+        const c = choices.find(c => c.type === (el as HTMLSelectElement).value) ?? choice
         path.model.set(path, c.change ? c.change(value) : c.node.default())
       })
-      return `<button data-id="${buttonId}">
+    })
+    const inject = `<select data-id="${inputId}">
+      ${choices.map(c => `<option value="${htmlEncode(c.type)}">
         ${htmlEncode(pathLocale(pathWithChoiceContext.push(c.type)))}
-      </button>`
-    }).join('')
+      </option>`).join('')}
+    </select>`
 
     const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, mounter)
     return [prefix, inject + suffix, body]
