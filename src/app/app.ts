@@ -233,14 +233,24 @@ Promise.all([
     if (id === version) return
 
     const newCollections = versionSchemas[id].getCollections()
-    RegistryFetcher(COLLECTIONS, id).then(() => {
-      SCHEMAS = versionSchemas[id].getSchemas(COLLECTIONS)
-      COLLECTIONS = newCollections
+    RegistryFetcher(newCollections, id).then(() => {
+
+      const newSchemas = versionSchemas[id].getSchemas(newCollections)
+
+      const fixModel = (model: any) => {
+        if (model.schema) {
+          models[model.id].schema = newSchemas.get(model.schema)
+          models[model.id].validate()
+          models[model.id].invalidate()
+        } else if (model.children) {
+          model.children.forEach(fixModel)
+        }
+      }
+      config.models.forEach(fixModel)
 
       treeVersionLabel.textContent = id
       version = id
       ga('set', 'dimension3', version);
-      updateModel()
     })
   }
 

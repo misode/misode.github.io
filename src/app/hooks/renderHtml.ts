@@ -35,9 +35,13 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
 
   choice({ choices, config, switchNode }, path, value, mounter) {
     const choice = switchNode.activeCase(path, true)
-    const pathWithContext = (config?.context) ?
-      new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
+    const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
     const pathWithChoiceContext = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
+
+    const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, mounter)
+    if (choices.length === 1) {
+      return [prefix, suffix, body]
+    }
 
     const inputId = mounter.register(el => {
       (el as HTMLSelectElement).value = choice.type
@@ -52,7 +56,6 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       </option>`).join('')}
     </select>`
 
-    const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, mounter)
     return [prefix, inject + suffix, body]
   },
 
