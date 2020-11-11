@@ -7,7 +7,14 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@mcschema/*": [
+        "node_modules/@mcschema/*",
+        "*"
+      ]
+    }
   },
   "include": [
     "src"
