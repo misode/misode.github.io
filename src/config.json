@@ -63,6 +63,12 @@
       "schema": "predicate"
     },
     {
+      "id": "item-modifier",
+      "name": "Item Modifier",
+      "schema": "item_modifier",
+      "minVersion": "1.17"
+    },
+    {
       "id": "advancement",
       "name": "Advancement",
       "schema": "advancement"

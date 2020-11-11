@@ -12,6 +12,14 @@ import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
 import { Mounter } from './Mounter'
 import { getLanguage, hasLocale, locale, registerLocale, setLanguage } from './locales'
 
+type ModelConfig = {
+  id: string
+  name: string
+  schema?: string
+  minVersion?: string
+  children?: ModelConfig[]
+}
+
 const versionSchemas: {
   [versionId: string]: {
     getCollections: () => CollectionRegistry,
@@ -29,6 +37,8 @@ const LOCAL_STORAGE_VERSION = 'schema_version'
 const publicPath = '/';
 
 const modelFromPath = (p: string) => p.replace(publicPath, '').replace(/\/$/, '')
+
+const modelConfig = (id: string): ModelConfig => config.models.find(m => m.id === id) ?? config.models.filter(m => m.children).reduce((acc: any, cur: any) => [...acc, ...cur.children], []).find(m => m.id === id)
 
 const addChecked = (el: HTMLElement) => {
   el.classList.add('check')
@@ -174,7 +184,10 @@ Promise.all([
   let models: { [key: string]: DataModel } = {}  
   const buildModel = (model: any) => {
     if (model.schema) {
-      models[model.id] = new DataModel(SCHEMAS.get(model.schema))
+      const schema = SCHEMAS.get(model.schema)
+      if (schema) {
+        models[model.id] = new DataModel(schema)
+      }
     } else if (model.children) {
       model.children.forEach(buildModel)
     }
@@ -198,6 +211,21 @@ Promise.all([
 
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
+    })
+
+    treeVersionMenu.innerHTML = ''
+    const m = modelConfig(selected)
+    const minVersion = config.versions.findIndex(v => v.id === (m?.minVersion ?? '1.16'))
+    config.versions.forEach((v, i) => {
+      if (i > minVersion) return
+      const entry = document.createElement('button')
+      entry.classList.add('btn')
+      entry.textContent = v.id
+      entry.addEventListener('click', () => {
+        updateVersion(v.id)
+        ga('send', 'event', 'Generator', 'set-version', version)
+      })
+      treeVersionMenu.append(entry)
     })
   }
 
@@ -228,30 +256,38 @@ Promise.all([
     }
   }
 
-  const updateVersion = (id: string) => {
+  const updateVersion = async (id: string) => {
     localStorage.setItem(LOCAL_STORAGE_VERSION, id)
     if (id === version) return
 
     const newCollections = versionSchemas[id].getCollections()
-    RegistryFetcher(newCollections, id).then(() => {
+    await RegistryFetcher(newCollections, id)
+    const newSchemas = versionSchemas[id].getSchemas(newCollections)
 
-      const newSchemas = versionSchemas[id].getSchemas(newCollections)
-
-      const fixModel = (model: any) => {
-        if (model.schema) {
-          models[model.id].schema = newSchemas.get(model.schema)
+    const fixModel = (model: ModelConfig) => {
+      if (model.schema) {
+        const minVersion = config.versions.findIndex(v => v.id === (model.minVersion ?? '1.16'))
+        const targetVersion = config.versions.findIndex(v => v.id === id)
+        if (minVersion >= targetVersion) {
+          const schema = newSchemas.get(model.schema)
+          if (models[model.id] === undefined) {
+            models[model.id] = new DataModel(schema)
+          } else {
+            models[model.id].schema = schema
+          }
           models[model.id].validate()
           models[model.id].invalidate()
-        } else if (model.children) {
-          model.children.forEach(fixModel)
+        } else {
+          delete models[model.id]
         }
+      } else if (model.children) {
+        model.children.forEach(fixModel)
       }
-      config.models.forEach(fixModel)
-
-      treeVersionLabel.textContent = id
-      version = id
-      ga('set', 'dimension3', version);
-    })
+    }
+    config.models.forEach(fixModel)
+    treeVersionLabel.textContent = id
+    version = id
+    ga('set', 'dimension3', version);
   }
 
   homeLink.addEventListener('click', evt => {
@@ -355,17 +391,6 @@ Promise.all([
     }, { capture: true, once: true })
   })
 
-  config.versions.forEach(v => {
-    const entry = document.createElement('button')
-    entry.classList.add('btn')
-    entry.textContent = v.id
-    entry.addEventListener('click', () => {
-      updateVersion(v.id)
-      ga('send', 'event', 'Generator', 'set-version', version)
-    })
-    treeVersionMenu.append(entry)
-  })
-
   treeControlsReset.addEventListener('click', evt => {
     models[selected].reset(models[selected].schema.default(), true)
     addChecked(treeControlsReset)
@@ -427,7 +452,7 @@ Promise.all([
     const params = new URLSearchParams(window.location.search);
 
     const panels = [treeViewEl, sourceViewEl, errorsViewEl]
-    if (models[selected] === undefined) {
+    if (['', 'worldgen'].includes(selected)) {
       homeViewEl.style.display = '';
       (document.querySelector('.gutter') as HTMLElement).style.display = 'none';
       (document.querySelector('.content') as HTMLElement).style.overflowY = 'initial'
@@ -454,7 +479,16 @@ Promise.all([
       homeViewEl.style.display = 'none';
       (document.querySelector('.gutter') as HTMLElement).style.display = ''
       panels.forEach(v => v.style.display = '')
-      
+      if (models[selected] === undefined) {
+        const m = modelConfig(selected)
+        const loadedVersion = config.versions.findIndex(v => v.id === version)
+        const minVersion = config.versions.findIndex(v => v.id === m.minVersion)
+        if (minVersion < loadedVersion) {
+          updateVersion(m.minVersion!).then(() => {
+            updateModel()
+          })
+        }
+      }
       if (params.has('q')) {
         const data = atob(params.get('q')!)
         models[selected].reset(JSON.parse(data))
