@@ -164,6 +164,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         .filter(k => activeFields[k].enabled(path))
         .map(k => {
           const field = activeFields[k]
+          if (field.hidden && field.hidden()) return ''
           const childPath = getChildModelPath(path, k)
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
