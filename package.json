@@ -14,8 +14,8 @@
   "dependencies": {
     "@mcschema/core": "^0.11.5",
     "@mcschema/java-1.16": "^0.5.15",
-    "@mcschema/java-1.17": "^0.1.6",
-    "@mcschema/locales": "^0.1.12",
+    "@mcschema/java-1.17": "^0.1.7",
+    "@mcschema/locales": "^0.1.13",
     "@types/google.analytics": "0.0.40",
     "@types/split.js": "^1.4.0",
     "copy-webpack-plugin": "^6.0.1",
