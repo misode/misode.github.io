@@ -38,18 +38,19 @@
   padding: 0;
 }
 
+a svg {
+  pointer-events: none;
+}
+
 body {
   font-size: 18px;
   font-family: Arial, Helvetica, sans-serif;
-}
-
-.container {
   overflow-x: hidden;
   background-color: var(--background);
   transition: background-color var(--style-transition);
 }
 
-.header {
+header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -65,114 +66,133 @@ body {
 }
 
 .header-title h2 {
-  margin-right: 10px;
   color: var(--nav);
   transition: color var(--style-transition);
 }
 
-.home-link.nav-item {
+.home-link {
   margin: 0 8px 0 0;
+  height: 32px;
+  fill: var(--nav);
+  transition: fill var(--style-transition);
 }
 
 .home-link svg {
+  width: 32px;
+  height: 32px;
   padding: 2px;
 }
 
-.nav {
+nav ul {
   display: flex;
   align-items: center;
 }
 
-.nav-item {
+nav > .toggle,
+nav li {
   display: flex;
   align-items: center;
   cursor: pointer;
   margin: 0 16px;
   user-select: none;
+}
+
+.home-link:hover svg,
+header .toggle:hover svg,
+nav li:hover svg {
+  fill: var(--nav-hover);
+}
+
+nav > .toggle {
+  display: none;
+}
+
+nav li.dimmed svg {
+  fill: var(--nav-faded);
+}
+
+nav li.dimmed:hover svg {
+  fill: var(--nav-faded-hover);
+}
+
+nav > .toggle svg,
+nav li > *,
+nav li svg {
+  width: 24px;
+  height: 24px;
   fill: var(--nav);
   transition: fill var(--style-transition);
 }
 
-.nav-item:hover {
-  fill: var(--nav-hover);
+nav > .toggle span {
+  color: var(--nav);
+  margin-left: 5px;
 }
 
-.nav-item span {
-  font-size: 1.1em;
-}
-
-.nav-item#source-toggle {
-  display: none;
-}
-
-.nav-item#github-link {
-  fill: var(--nav-faded);
-}
-
-.nav-item#github-link:hover {
-  fill: var(--nav-faded-hover);
-}
-
-.toggle:not(.toggled) svg:nth-child(1) {
-  display: none;
-}
-
-.toggle.toggled svg:nth-child(2) {
-  display: none;
-}
-
-.nav-selector {
+.dropdown {
   position: relative;
 }
 
-.nav-selector-menu {
-  display: flex;
-  flex-direction: column;
-  visibility: hidden;
+.dropdown > * {
   position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 10px;
-  z-index: 10;
-  border-radius: 3px;
-  background-color: var(--nav-menu);
+  width: 24px;
+  height: 24px;
 }
 
-.nav-selector-menu .btn {
-  white-space: nowrap;
+.dropdown > *:not(select) {
+  pointer-events: none;
+}
+
+.dropdown select {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: transparent;
+  outline: none;
+}
+
+.dropdown option {
+  color: var(--text);
+  background-color: var(--background);
+  font-size: 130%;
+  border: none;
 }
 
 .content {
   display: flex;
   height: calc(100vh - 56px);
   overflow-y: hidden;
+  color: var(--text);
+  fill: var(--text);
+}
+
+.split-group {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.split-group.vertical {
+  flex-direction: column;
+}
+
+.panel {
+  position: relative;
+  height: 100%;
+  overflow: hidden;  
 }
 
 .tree {
-  position: relative;
-}
-
-.tree-content {
-  overflow-y: auto;
+  display: flow-root;
+  padding: 16px 16px 50vh;
   height: 100%;
-  padding: 1rem;
-  padding-bottom: 50vh;
+  overflow: auto;
 }
 
 .source {
-  position: relative;
-}
-
-.source-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.source textarea {
   width: 100%;
   height: 100%;
-  padding: 1.3rem 0.4rem;
+  padding: 32px 8px;
   border: none;
   white-space: pre;
   overflow-wrap: normal;
@@ -188,39 +208,48 @@ body {
   transition: background-color var(--style-transition), color var(--style-transition)
 }
 
-.source textarea::selection {
+.source::selection {
   background-color: var(--selection);
 }
 
-.tree-controls,
-.source-controls,
-.visualizer-controls {
+.panel-controls {
   display: flex;
-  flex-direction: row-reverse;
   position: absolute;
-  right: 17px;
-  top: 0;
-  padding: 5px;
+  right: 22px;
+  top: 5px;;
+  z-index: 1;
 }
 
-.tree-controls .btn:not(:first-child),
-.source-controls .btn:not(:first-child),
-.visualizer-controls .btn:not(:first-child) {
+.preview-panel .panel-controls {
+  right: 5px;
+}
+
+.panel-controls > *:not(:last-child) {
   margin-right: 5px;
 }
 
-.tree-controls-menu,
-.source-controls-menu {
-  display: flex;
-  visibility: hidden;
-  flex-direction: column;
-  position: absolute;
-  right: 17px;
-  top: 37px;
-  padding: 5px;
+.panel-menu {
+  position: relative;
 }
 
-.source-controls input {
+.panel-menu > .btn {
+  height: 100%;
+}
+
+.panel-menu-list {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 5px;
+}
+
+.panel-menu .btn.active ~ .panel-menu-list {
+  display: flex;
+}
+
+.panel-controls input {
   margin-right: 5px;
   background: var(--background);
   color: var(--text);
@@ -229,7 +258,7 @@ body {
   transition: background-color var(--style-transition), color var(--style-transition);
 }
 
-.source-controls input::selection {
+.panel-controls input::selection {
   background-color: var(--selection);
 }
 
@@ -250,17 +279,7 @@ body {
   cursor: ew-resize;
 }
 
-.visualizer-content {
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-}
-
-.visualizer-controls {
-  right: 0;
-}
-
-.visualizer-content canvas {
+.preview-panel canvas {
   width: 100%;
   height: 100%;
   background-color: var(--nav-faded);
@@ -283,6 +302,7 @@ body {
   cursor: pointer;
   outline: none;
   font-size: 1rem;
+  white-space: nowrap;
   background-color: var(--btn-background);
   color: var(--btn-text);
   fill: var(--btn-text);
@@ -315,6 +335,7 @@ body {
 
 .errors {
   position: fixed;
+  display: flex;
   bottom: 17px;
   right: 17px;
   margin: 5px;
@@ -325,31 +346,27 @@ body {
   transition: fill var(--style-transition);
 }
 
-.errors:not(.active) .error-list {
-  display: none;
-}
-
 .error {
   display: flex;
   align-items: center;
   padding: 7px;
 }
 
-.error span {
-  padding-left: 11px;
+.error span:not(:last-child) {
+  padding-right: 11px;
 }
 
 .errors .toggle {
   padding: 6px;
   width: 36px;
   height: 36px;
-  align-self: flex-end;
   cursor: pointer;
   user-select: none;
 }
 
-.errors.active .toggle {
-  padding: 2px;
+.errors svg {
+  width: 24px;
+  height: 24px;
 }
 
 .home {
@@ -361,6 +378,7 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0 20px;
+  list-style-type: none;
 }
 
 .generators-card {
@@ -369,6 +387,7 @@ body {
   cursor: pointer;
   user-select: none;
   text-decoration: none;
+  text-transform: capitalize;
   border-radius: 3px;
   background-color: var(--nav-faded);
   color: var(--text);
@@ -378,6 +397,10 @@ body {
   justify-content: space-between;
   transition: background-color 0.2s;
   transition: margin 0.2s;
+}
+
+.generators-card * {
+  pointer-events: none;
 }
 
 .generators-card:hover,
@@ -391,17 +414,54 @@ body {
   margin-left: 10px;
 }
 
+.spinner {
+  margin: 40px auto 0;
+  width: 80px;
+  height: 80px;
+}
+
+.spinner:after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid var(--border);
+  border-color: var(--border) transparent var(--border) transparent;
+  animation: spinner 1.2s linear infinite, fadein 0.4s;
+  transition: border-color var(--style-transition);
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media screen and (max-width: 580px) {
   body {
     overflow-y: hidden;
   }
 
-  .header {
+  header {
     flex-direction: column;
     height: 92px;
   }
 
-  .nav {
+  nav {
     align-self: flex-end;
   }
 
@@ -410,42 +470,36 @@ body {
     height: calc(100vh - 92px);
   }
 
-  .source,
-  .gutter.gutter-horizontal {
+  .tree {
+    padding-top: 50px;
+  }
+
+  .tree-panel + .gutter {
     display: none;
   }
 
-  .tree {
+  .content-output,
+  .tree-panel {
     width: 100% !important;
-    height: 100%;
   }
 
-  .nav-item#source-toggle {
+  nav > .toggle {
     display: flex;
     position: absolute;
     left: 10px;
   }
 
-  .source.active {
-    display: initial;
-    position: absolute;
-    width: 100% !important;
-    height: 100%;
+  body[data-panel="tree"] .content-output {
+    display: none;
   }
 
-  .source.active .source-controls {
-    right: 17px;
-    top: 0px;
+  body[data-panel="source"] .tree-panel {
+    display: none;
   }
 
-  .source.active .source-controls-menu {
-    right: 17px;
-    top: 37px;
-  }
-
-  .nav-selector-menu {
-    right: 0;
-    left: initial;
+  .home {
+    padding: 5px;
+    justify-content: center;
   }
 }
 
@@ -453,10 +507,19 @@ body {
   .header-title h2 {
     font-size: 18px;
   }
+
+  .generators-list {
+    margin: 0 15px;
+  }
+
+  .generators-card {
+    font-size: 14px;
+    padding: 8px;
+  }
 }
 
 @media screen and (min-width: 581px) and (max-width: 640px) {
   .header-title h2 {
-    font-size: 22px;
+    font-size: 23px;
   }
 }

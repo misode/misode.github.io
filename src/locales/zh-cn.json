@@ -13,7 +13,7 @@
   "title.generator": "%0% 生成器",
   "title.home": "数据包生成器",
   "undo": "撤销",
-  "visualize": "可视化",
+  "preview": "可视化",
   "world": "世界设置",
   "worldgen/biome": "生物群系",
   "worldgen/carver": "地形雕刻器",

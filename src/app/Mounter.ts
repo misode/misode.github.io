@@ -1,12 +1,5 @@
 import { ModelPath } from '@mcschema/core'
-
-const dec2hex = (dec: number) => ('0' + dec.toString(16)).substr(-2)
-
-export function hexId(length = 12) {
-  var arr = new Uint8Array(length / 2)
-  window.crypto.getRandomValues(arr)
-  return Array.from(arr, dec2hex).join('')
-}
+import { hexId } from './Utils'
 
 type Registry = {
   [id: string]: (el: Element) => void
@@ -24,7 +17,7 @@ export interface Mounter {
   registerChange(callback: (el: Element) => void): string
   registerClick(callback: (el: Element) => void): string
   nodeInjector(path: ModelPath, mounter: Mounter): string
-  mount(el: HTMLElement): void
+  mount(el: Element): void
 }
 
 export class Mounter implements Mounter {
@@ -79,7 +72,7 @@ export class Mounter implements Mounter {
     return this.registerEvent('click', callback)
   }
 
-  mount(el: HTMLElement): void {
+  mount(el: Element): void {
     for (const id in this.registry) {
       const element = el.querySelector(`[data-id="${id}"]`)
       if (element !== null) this.registry[id](element)

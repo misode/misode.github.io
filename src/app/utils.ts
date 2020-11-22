@@ -5,3 +5,8 @@ export function hexId(length = 12) {
   window.crypto.getRandomValues(arr)
   return Array.from(arr, dec2hex).join('')
 }
+
+export function htmlEncode(str: string) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
+}

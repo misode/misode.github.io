@@ -1,26 +1,17 @@
-import Split from 'split.js'
-import { Base, CollectionRegistry, DataModel, ModelPath, Path, SchemaRegistry } from '@mcschema/core'
+import { CollectionRegistry, DataModel, ObjectNode, PathError, SchemaRegistry } from '@mcschema/core';
 import * as java16 from '@mcschema/java-1.16'
 import * as java17 from '@mcschema/java-1.17'
-import { VisualizerView } from './visualization/VisualizerView'
-import { RegistryFetcher } from './RegistryFetcher'
-import { TreeView } from './TreeView'
-import { SourceView } from './SourceView'
-import { ErrorsView } from './ErrorsView'
-import config from '../config.json'
-import { BiomeNoiseVisualizer } from './visualization/BiomeNoiseVisualizer'
-import { Mounter } from './Mounter'
-import { getLanguage, hasLocale, locale, registerLocale, setLanguage } from './locales'
+import { LocalStorageProperty } from './state/LocalStorageProperty';
+import { Property } from './state/Property';
+import { Preview } from './preview/Preview';
+import { RegistryFetcher } from './RegistryFetcher';
+import { BiomeNoisePreview } from './preview/BiomeNoisePreview';
+import { NoiseSettingsPreview } from './preview/NoiseSettingsPreview';
+import config from '../config.json';
+import { locale, Locales } from './Locales';
+import { Tracker } from './Tracker';
 
-type ModelConfig = {
-  id: string
-  name: string
-  schema?: string
-  minVersion?: string
-  children?: ModelConfig[]
-}
-
-const versionSchemas: {
+const Versions: {
   [versionId: string]: {
     getCollections: () => CollectionRegistry,
     getSchemas: (collections: CollectionRegistry) => SchemaRegistry,
@@ -30,473 +21,110 @@ const versionSchemas: {
   '1.17': java17
 }
 
-const LOCAL_STORAGE_THEME = 'theme'
-const LOCAL_STORAGE_LANGUAGE = 'language'
-const LOCAL_STORAGE_VERSION = 'schema_version'
-
-const publicPath = '/';
-
-const modelFromPath = (p: string) => p.replace(publicPath, '').replace(/\/$/, '')
-
-const modelConfig = (id: string): ModelConfig => config.models.find(m => m.id === id) ?? config.models.filter(m => m.children).reduce((acc: any, cur: any) => [...acc, ...cur.children], []).find(m => m.id === id)
-
-const addChecked = (el: HTMLElement) => {
-  el.classList.add('check')
-  setTimeout(() => {
-    el.classList.remove('check')
-  }, 2000)
+export const Previews: {
+  [key: string]: Preview
+} = {
+  'biome_noise': new BiomeNoisePreview(),
+  'noise_settings': new NoiseSettingsPreview()
 }
 
-const treeViewObserver = (el: HTMLElement) => {
-  el.querySelectorAll('.node[data-help]').forEach(e => {
-    const div = document.createElement('div')
-    div.className = 'node-icon'
-    div.addEventListener('click', evt => {
-      div.getElementsByTagName('span')[0].classList.add('show')
-      document.body.addEventListener('click', evt => {
-        div.getElementsByTagName('span')[0].classList.remove('show')
-      }, { capture: true, once: true })
-    })
-    div.insertAdjacentHTML('beforeend', `<span class="icon-popup">${e.getAttribute('data-help')}</span><svg class="node-help" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>`)
-    e.querySelector('.node-header')?.appendChild(div)
-  })
-  el.querySelectorAll('.node[data-error]').forEach(e => {
-    const div = document.createElement('div')
-    div.className = 'node-icon'
-    div.addEventListener('click', evt => {
-      div.getElementsByTagName('span')[0].classList.add('show')
-      document.body.addEventListener('click', evt => {
-        div.getElementsByTagName('span')[0].classList.remove('show')
-      }, { capture: true, once: true })
-    })
-    div.insertAdjacentHTML('beforeend', `<span class="icon-popup">${e.getAttribute('data-error')}</span><svg class="node-error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"></path></svg>`)
-    e.querySelector('.node-header')?.appendChild(div)
-  })
-  el.querySelectorAll('.collapse.closed, button.add').forEach(e => {
-    e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.75 4.75a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z"></path></svg>`)
-  })
-  el.querySelectorAll('.collapse.open, button.remove').forEach(e => {
-    e.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>`)
-  })
+export const Models: {
+  [key: string]: DataModel
+} = {}
+
+config.models.filter(m => m.schema)
+  .forEach(m => Models[m.id] = new DataModel(ObjectNode({})))
+
+export const App = {
+  version: new LocalStorageProperty('schema_version', config.versions[config.versions.length - 1].id)
+    .watch(Tracker.dimVersion),
+  theme: new LocalStorageProperty('theme', 'light')
+    .watch(Tracker.dimTheme),
+  language: new LocalStorageProperty('language', 'en')
+    .watch(Tracker.dimLanguage),
+  model: new Property<typeof config.models[0] | null>(null),
+  errorsVisible: new Property(false),
+  jsonError: new Property<string | null>(null),
+  preview: new Property<Preview | null>(null)
+    .watch(p => Tracker.dimPreview(p?.getName() ?? 'none')),
+  schemasLoaded: new Property(false),
+  localesLoaded: new Property(false),
+  loaded: new Property(false),
+  mobilePanel: new Property('tree'),
 }
 
-const treeViewNodeInjector = (path: ModelPath, mounter: Mounter) => {
-  let res = VisualizerView.visualizers
-    .filter(v => v.active(path))
-    .map(v => {
-      const id = mounter.registerClick(() => {
-        ga('send', 'event', 'Preview', 'set-preview', v.getName())
-        views.visualizer.set(v, path)
-        views.visualizer.model.invalidate()
-      })
-      return `<button data-id=${id}>${locale('visualize')} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zM6.379 5.227A.25.25 0 006 5.442v5.117a.25.25 0 00.379.214l4.264-2.559a.25.25 0 000-.428L6.379 5.227z"></path></svg></button>`
-    })
-    .join('')
-  if (views.visualizer.active && views.visualizer.visualizer?.getName() === 'biome-noise') {
-    if (path.pop().endsWith(new Path(['generator', 'biome_source', 'biomes']))) {
-      const biomeVisualizer = views.visualizer.visualizer as BiomeNoiseVisualizer
-      const biome = path.push('biome').get()
-      const id = mounter.registerChange(el => {
-        biomeVisualizer.setBiomeColor(biome, (el as HTMLInputElement).value)
-        views.visualizer.visualizer!.state = {}
-        views.visualizer.invalidated()
-      })
-      res += `<input type="color" value="${biomeVisualizer.getBiomeHex(biome)}" data-id=${id}></input>`
-    }
-  }
-  return res
-}
-
-const fetchLocale = async (id: string) => {
-  const response = await fetch(publicPath + `locales/${id}.json`)
-  registerLocale(id, await response.json())
-}
-setLanguage(localStorage.getItem(LOCAL_STORAGE_LANGUAGE)?.toLowerCase())
-
-const homeLink = document.getElementById('home-link')!
-const homeGenerators = document.getElementById('home-generators')!
-const categoryGenerators = document.getElementById('category-generators')!
-const selectedModel = document.getElementById('selected-model')!
-const languageSelector = document.getElementById('language-selector')!
-const languageSelectorMenu = document.getElementById('language-selector-menu')!
-const themeSelector = document.getElementById('theme-selector')!
-const treeViewEl = document.getElementById('tree-view')!
-const sourceViewEl = document.getElementById('source-view')!
-const errorsViewEl = document.getElementById('errors-view')!
-const homeViewEl = document.getElementById('home-view')!
-const errorsToggle = document.getElementById('errors-toggle')!
-const sourceViewOutput = (document.getElementById('source-view-output') as HTMLTextAreaElement)
-const treeViewOutput = document.getElementById('tree-view-output')!
-const sourceControlsToggle = document.getElementById('source-controls-toggle')!
-const sourceControlsMenu = document.getElementById('source-controls-menu')!
-const sourceControlsCopy = document.getElementById('source-controls-copy')!
-const sourceControlsDownload = document.getElementById('source-controls-download')!
-const sourceControlsShare = document.getElementById('source-controls-share')!
-const sourceToggle = document.getElementById('source-toggle')!
-const treeControlsToggle = document.getElementById('tree-controls-toggle')!
-const treeControlsMenu = document.getElementById('tree-controls-menu')!
-const treeVersionToggle = document.getElementById('tree-version-toggle')!
-const treeVersionMenu = document.getElementById('tree-version-menu')!
-const treeVersionLabel = document.getElementById('tree-version-label')!
-const treeControlsReset = document.getElementById('tree-controls-reset')!
-const treeControlsUndo = document.getElementById('tree-controls-undo')!
-const treeControlsRedo = document.getElementById('tree-controls-redo')!
-const visualizerContent = document.getElementById('visualizer-content')!
-const githubLink = document.getElementById('github-link')!
-
-Split([treeViewEl, sourceViewEl], {
-  sizes: [66, 34]
+App.version.watchRun(async (value) => {
+  App.schemasLoaded.set(false)
+  await updateSchemas(value)
+  App.schemasLoaded.set(true)
 })
 
-Split([sourceViewOutput, visualizerContent], {
-  sizes: [60, 40],
-  direction: 'vertical'
+App.theme.watchRun((value) => document.documentElement.setAttribute('data-theme', value))
+
+App.language.watchRun(async (value) => {
+  App.localesLoaded.set(false)
+  await updateLocale(value)
+  App.localesLoaded.set(true)
 })
 
-const dummyModel = new DataModel(Base)
-
-const views = {
-  'tree': new TreeView(dummyModel, treeViewOutput, {
-    showErrors: true,
-    observer: treeViewObserver,
-    nodeInjector: treeViewNodeInjector
-  }),
-  'source': new SourceView(dummyModel, sourceViewOutput, {
-    indentation: 2
-  }),
-  'errors': new ErrorsView(dummyModel, errorsViewEl),
-  'visualizer': new VisualizerView(dummyModel, visualizerContent)
-}
-
-let version = localStorage.getItem(LOCAL_STORAGE_VERSION) ?? config.versions[0].id
-treeVersionLabel.textContent = version
-
-let COLLECTIONS = versionSchemas[version].getCollections()
-
-Promise.all([
-  fetchLocale(getLanguage()),
-  ...(getLanguage() === 'en' ? [] : [fetchLocale('en')]),
-  RegistryFetcher(COLLECTIONS, version)
-]).then(() => {
-
-  let SCHEMAS = versionSchemas[version].getSchemas(COLLECTIONS)
-
-  let models: { [key: string]: DataModel } = {}  
-  const buildModel = (model: any) => {
-    if (model.schema) {
-      const schema = SCHEMAS.get(model.schema)
-      if (schema) {
-        models[model.id] = new DataModel(schema)
-      }
-    } else if (model.children) {
-      model.children.forEach(buildModel)
-    }
-  }
-  config.models.forEach(buildModel)
-
-  let selected = ''
-  Object.values(models).forEach(m => m.validate(true))
-
-  const updateModel = () => {
-    let title = ''
-    if (models[selected] === undefined) {
-      title = locale('title.home')
-    } else {
-      title = locale('title.generator', [locale(selected)])
-      Object.values(views).forEach(v => v.setModel(models[selected]))
-      models[selected].invalidate()
-    }
-    selectedModel.textContent = title
-    document.title = title
-
+App.localesLoaded.watch((value) => {
+  if (value) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
     })
-
-    treeVersionMenu.innerHTML = ''
-    const m = modelConfig(selected)
-    const minVersion = config.versions.findIndex(v => v.id === (m?.minVersion ?? '1.16'))
-    config.versions.forEach((v, i) => {
-      if (i > minVersion) return
-      const entry = document.createElement('button')
-      entry.classList.add('btn')
-      entry.textContent = v.id
-      entry.addEventListener('click', () => {
-        updateVersion(v.id)
-        ga('send', 'event', 'Generator', 'set-version', version)
-      })
-      treeVersionMenu.append(entry)
-    })
   }
+  App.loaded.set(value && App.schemasLoaded.get())
+})
 
-  const updateLanguage = (id: string, store = false) => {
-    setLanguage(id)
-    ga('set', 'dimension4', id);
-    if (store) {
-      localStorage.setItem(LOCAL_STORAGE_LANGUAGE, id)
-    }
+App.schemasLoaded.watch((value) => {
+  App.loaded.set(value && App.localesLoaded.get())
+})
 
-    languageSelectorMenu.innerHTML = ''
-    config.languages.forEach(lang => {
-      languageSelectorMenu.insertAdjacentHTML('beforeend',
-        `<div class="btn${lang.code === getLanguage() ? ' selected' : ''}">${lang.name}</div>`)
-      languageSelectorMenu.lastChild?.addEventListener('click', evt => {
-        updateLanguage(lang.code, true)
-        languageSelectorMenu.style.visibility = 'hidden'
-        ga('send', 'event', 'Generator', 'set-language', lang.code)
-      })
-    })
+App.mobilePanel.watchRun((value) => {
+  document.body.setAttribute('data-panel', value)
+})
 
-    if (hasLocale(id)) {
-      updateModel()
-    } else {
-      fetchLocale(id).then(r => {
-        updateModel()
-      })
-    }
-  }
-
-  const updateVersion = async (id: string) => {
-    localStorage.setItem(LOCAL_STORAGE_VERSION, id)
-    if (id === version) return
-
-    const newCollections = versionSchemas[id].getCollections()
-    await RegistryFetcher(newCollections, id)
-    const newSchemas = versionSchemas[id].getSchemas(newCollections)
-
-    const fixModel = (model: ModelConfig) => {
-      if (model.schema) {
-        const minVersion = config.versions.findIndex(v => v.id === (model.minVersion ?? '1.16'))
-        const targetVersion = config.versions.findIndex(v => v.id === id)
-        if (minVersion >= targetVersion) {
-          const schema = newSchemas.get(model.schema)
-          if (models[model.id] === undefined) {
-            models[model.id] = new DataModel(schema)
-          } else {
-            models[model.id].schema = schema
-          }
-          models[model.id].validate()
-          models[model.id].invalidate()
-        } else {
-          delete models[model.id]
-        }
-      } else if (model.children) {
-        model.children.forEach(fixModel)
-      }
-    }
-    config.models.forEach(fixModel)
-    treeVersionLabel.textContent = id
-    version = id
-    ga('set', 'dimension3', version);
-  }
-
-  homeLink.addEventListener('click', evt => {
-    reload(publicPath)
-  })
-
-  window.onpopstate = (evt: PopStateEvent) => {
-    reload(location.pathname)
-  }
-
-  sourceToggle.addEventListener('click', evt => {
-    if (sourceViewEl.classList.contains('active')) {
-      sourceViewEl.classList.remove('active')
-      sourceToggle.classList.remove('toggled')
-    } else {
-      sourceViewEl.classList.add('active')
-      sourceToggle.classList.add('toggled')
-    }
-  })
-
-  languageSelector.addEventListener('click', evt => {
-    languageSelectorMenu.style.visibility = 'visible'
-    document.body.addEventListener('click', evt => {
-      languageSelectorMenu.style.visibility = 'hidden'
-    }, { capture: true, once: true })
-  })
-
-  const updateTheme = (theme: string | null) => {
-    ga('set', 'dimension1', theme ?? 'default');
-    if (theme === null) return
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark')
-      themeSelector.classList.add('toggled')
-      localStorage.setItem(LOCAL_STORAGE_THEME, 'dark')
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light')
-      themeSelector.classList.remove('toggled')
-      localStorage.setItem(LOCAL_STORAGE_THEME, 'light')
-    }
-  }
-  updateTheme(localStorage.getItem(LOCAL_STORAGE_THEME))
-
-  themeSelector.addEventListener('click', evt => {
-    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-      updateTheme('light')
-    } else {
-      updateTheme('dark')
-    }
-    ga('send', 'event', 'Generator', 'set-theme', document.documentElement.getAttribute('data-theme'))
-  })
-
-  sourceControlsToggle.addEventListener('click', evt => {
-    sourceControlsMenu.style.visibility = 'visible'
-    document.body.addEventListener('click', evt => {
-      sourceControlsMenu.style.visibility = 'hidden'
-    }, { capture: true, once: true })
-  })
-
-  sourceControlsCopy.addEventListener('click', evt => {
-    sourceViewOutput.select()
-    document.execCommand('copy');
-    addChecked(sourceControlsCopy)
-    ga('send', 'event', 'JsonOutput', 'copy')
-  })
-
-  sourceControlsDownload.addEventListener('click', evt => {
-    const fileContents = encodeURIComponent(JSON.stringify(models[selected].data, null, 2) + "\n")
-    const dataString = "data:text/json;charset=utf-8," + fileContents
-    const downloadAnchor = document.getElementById('source-controls-download-anchor')!
-    downloadAnchor.setAttribute("href", dataString)
-    downloadAnchor.setAttribute("download", "data.json")
-    downloadAnchor.click()
-    ga('send', 'event', 'JsonOutput', 'download')
-  })
-
-  sourceControlsShare.addEventListener('click', evt => {
-    const data = btoa(JSON.stringify(JSON.parse(views.source.target.value)));
-    const url = window.location.origin + window.location.pathname + '?q=' + data
-    const shareInput = document.getElementById('source-controls-share-input') as HTMLInputElement
-    shareInput.value = url
-    shareInput.style.display = 'inline-block'
-    document.body.addEventListener('click', evt => {
-      shareInput.style.display = 'none'
-    }, { capture: true, once: true })
-    shareInput.select()
-    document.execCommand('copy');
-    ga('send', 'event', 'JsonOutput', 'share')
-  })
-
-  treeControlsToggle.addEventListener('click', evt => {
-    treeControlsMenu.style.visibility = 'visible'
-    document.body.addEventListener('click', evt => {
-      treeControlsMenu.style.visibility = 'hidden'
-    }, { capture: true, once: true })
-  })
-
-  treeVersionToggle.addEventListener('click', evt => {
-    treeVersionMenu.style.visibility = 'visible'
-    document.body.addEventListener('click', evt => {
-      treeVersionMenu.style.visibility = 'hidden'
-    }, { capture: true, once: true })
-  })
-
-  treeControlsReset.addEventListener('click', evt => {
-    models[selected].reset(models[selected].schema.default(), true)
-    addChecked(treeControlsReset)
-    ga('send', 'event', 'Generator', 'reset')
-  })
-
-  treeControlsUndo.addEventListener('click', evt => {
-    models[selected].undo()
-    ga('send', 'event', 'Generator', 'undo', 'Menu')
-  })
-
-  treeControlsRedo.addEventListener('click', evt => {
-    models[selected].redo()
-    ga('send', 'event', 'Generator', 'redo', 'Menu')
-  })
-
-  document.addEventListener('keyup', evt => {
-    if (evt.ctrlKey && evt.key === 'z') {
-      models[selected].undo()
-      ga('send', 'event', 'Generator', 'undo', 'Hotkey')
-    } else if (evt.ctrlKey && evt.key === 'y') {
-      models[selected].redo()
-      ga('send', 'event', 'Generator', 'redo', 'Hotkey')
-    }
-  })
-
-  errorsToggle.addEventListener('click', evt => {
-    if (errorsViewEl.classList.contains('active')) {
-      errorsViewEl.classList.remove('active')
-      errorsToggle.classList.remove('toggled')
-    } else {
-      errorsViewEl.classList.add('active')
-      errorsToggle.classList.add('toggled')
-    }
-    ga('send', 'event', 'Errors', 'toggle', errorsViewEl.classList.contains('active') ? 'visible' : 'hidden')
-  })
-
-  githubLink.addEventListener('click', () => {
-    window.open('https://github.com/misode/misode.github.io', '_blank')
-  })
-
-  const reload = (target: string, track=true) => {
-    if (!target.endsWith('/')) {
-      target = `${target}/`
-    }
-
-    if (target.startsWith('/dev/')) {
-      reload(target.slice(4))
-      return
-    }
-
-    if (track) {
-      ga('set', 'page', target)
-      ga('send', 'pageview');
-      history.pushState(target, 'Change Page', target)
-    }
-    selected = modelFromPath(target) ?? ''
-
-    const params = new URLSearchParams(window.location.search);
-
-    const panels = [treeViewEl, sourceViewEl, errorsViewEl]
-    if (['', 'worldgen'].includes(selected)) {
-      homeViewEl.style.display = '';
-      (document.querySelector('.gutter') as HTMLElement).style.display = 'none';
-      (document.querySelector('.content') as HTMLElement).style.overflowY = 'initial'
-      panels.forEach(v => v.style.display = 'none')
-
-      const addGen = (output: HTMLElement) => (m: any) => {
-        output.insertAdjacentHTML('beforeend', 
-          `<a class="generators-card${m.id === selected ? ' selected' : ''}" href="${publicPath + m.id}">
-            ${locale(m.name)}
-            ${m.schema ? '' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.22 3.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"></path></svg>'}
-          </a>`)
-        output.lastChild?.addEventListener('click', evt => {
-          reload(publicPath + m.id)
-          evt.preventDefault()
-        })
-      }
-
-      homeGenerators.innerHTML = ''
-      categoryGenerators.innerHTML = ''
-      config.models.forEach(addGen(homeGenerators))
-      config.models.find(m => m.id === selected)?.children?.forEach(addGen(categoryGenerators))
-      
-    } else {
-      homeViewEl.style.display = 'none';
-      (document.querySelector('.gutter') as HTMLElement).style.display = ''
-      panels.forEach(v => v.style.display = '')
-      if (models[selected] === undefined) {
-        const m = modelConfig(selected)
-        const loadedVersion = config.versions.findIndex(v => v.id === version)
-        const minVersion = config.versions.findIndex(v => v.id === m.minVersion)
-        if (minVersion < loadedVersion) {
-          updateVersion(m.minVersion!).then(() => {
-            updateModel()
-          })
+async function updateSchemas(version: string) {
+  // await new Promise(r => setTimeout(r, 500));
+  const collections = Versions[version].getCollections()
+  await RegistryFetcher(collections, version)
+  const schemas = Versions[version].getSchemas(collections)
+  config.models
+    .filter(m => m.schema)
+    .filter(m => checkVersion(App.version.get(), m.minVersion ?? config.versions[0].id))
+    .forEach(m => {
+      const model = Models[m.id]
+      const schema = schemas.get(m.schema!)
+      if (schema) {
+        model.schema = schema
+        if (JSON.stringify(model.data) === '{}') {
+          model.data = schema.default()
+          model.history = [JSON.stringify(model.data)]
+          model.historyIndex = 0
+          model.silentInvalidate()
         }
       }
-      if (params.has('q')) {
-        const data = atob(params.get('q')!)
-        models[selected].reset(JSON.parse(data))
-      }
-    }
+    })
+}
 
-    updateLanguage(getLanguage())
+async function updateLocale(language: string) {
+  // await new Promise(r => setTimeout(r, 500));
+  const data = await (await fetch(`/locales/${language}.json`)).json()
+  Locales[language] = data
+}
+
+export function checkVersion(versionId: string, minVersionId: string) {
+  const version = config.versions.findIndex(v => v.id === versionId)
+  const minVersion = config.versions.findIndex(v => v.id === minVersionId)
+  return minVersion <= version
+}
+
+document.addEventListener('keyup', (evt) => {
+  if (evt.ctrlKey && evt.key === 'z') {
+    Tracker.undo(true)
+    Models[App.model.get()!.id].undo()
+  } else if (evt.ctrlKey && evt.key === 'y') {
+    Tracker.redo(true)
+    Models[App.model.get()!.id].redo()
   }
-  reload(location.pathname, false)
-  document.body.style.visibility = 'initial'
 })

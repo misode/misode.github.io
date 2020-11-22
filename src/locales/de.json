@@ -7,7 +7,7 @@
     "worldgen/feature": "Merkmal",
     "worldgen/carver": "Borer",
     "worldgen/biome": "Biom",
-    "visualize": "Visualisieren",
+    "preview": "Visualisieren",
     "title.home": "Datenpaketgeneratoren",
     "title.generator": "%0%-Generator",
     "share": "Teilen",

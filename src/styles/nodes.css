@@ -174,10 +174,6 @@ button.remove {
   display: inline-block;
 }
 
-.node-icon svg {
-  cursor: pointer;
-}
-
 .node-icon .icon-popup {
   visibility: hidden;
   width: 240px;
@@ -209,19 +205,20 @@ button.remove {
   visibility: visible;
 }
 
-.node-icon > svg {
+.node-icon svg {
   height: 34px;
   width: 34px;
   min-width: 34px;
   margin-left: 6px;
+  cursor: pointer;
   transition: fill var(--style-transition);
 }
 
-.node-header svg.node-help {
+.node-icon.node-help svg {
   fill: var(--node-border);
 }
 
-.node-header svg.node-error {
+.node-icon.node-error  svg {
   fill: var(--node-remove);
 }
 

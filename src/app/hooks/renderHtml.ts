@@ -1,7 +1,7 @@
 import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
-import { locale, pathLocale, segmentedLocale } from '../locales'
+import { locale, segmentedLocale } from '../Locales'
 import { Mounter } from '../Mounter'
-import { hexId } from '../utils'
+import { hexId, htmlEncode } from '../Utils'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -248,6 +248,12 @@ function hashString(str: string) {
   return hash;
 }
 
+function pathLocale(path: Path, params?: string[]): string {
+  // return path.getContext().slice(-5).join('.')
+  return segmentedLocale(path.getContext(), params)
+    ?? path.getContext()[path.getContext().length - 1] ?? ''
+}
+
 function error(p: ModelPath, exact = true) {
   const errors = p.model.errors.get(p, exact)
   if (errors.length === 0) return ''
@@ -258,9 +264,4 @@ function help(path: ModelPath) {
   const message = segmentedLocale(path.contextPush('help').getContext(), [], 6)
   if (message === undefined) return ''
   return `data-help="${htmlEncode(message)}"`
-}
-
-function htmlEncode(str: string) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
 }
