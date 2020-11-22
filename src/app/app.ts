@@ -85,7 +85,6 @@ App.mobilePanel.watchRun((value) => {
 })
 
 async function updateSchemas(version: string) {
-  // await new Promise(r => setTimeout(r, 500));
   const collections = Versions[version].getCollections()
   await RegistryFetcher(collections, version)
   const schemas = Versions[version].getSchemas(collections)
@@ -108,7 +107,7 @@ async function updateSchemas(version: string) {
 }
 
 async function updateLocale(language: string) {
-  // await new Promise(r => setTimeout(r, 500));
+  if (Locales[language]) return
   const data = await (await fetch(`/locales/${language}.json`)).json()
   Locales[language] = data
 }
