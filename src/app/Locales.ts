@@ -1,5 +1,5 @@
 import English from '../locales/en.json'
-import { App } from './app_'
+import { App } from './App'
 
 interface Locale {
   [key: string]: string

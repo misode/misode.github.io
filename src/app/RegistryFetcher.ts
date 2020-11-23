@@ -1,5 +1,5 @@
 import { CollectionRegistry } from '@mcschema/core'
-import { checkVersion } from './app_'
+import { checkVersion } from './App'
 import config from '../config.json'
 
 const localStorageCache = (version: string) => `cache_${version}`

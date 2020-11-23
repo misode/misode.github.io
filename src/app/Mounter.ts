@@ -1,5 +1,5 @@
 import { ModelPath } from '@mcschema/core'
-import { hexId } from './utils_'
+import { hexId } from './Utils'
 
 type Registry = {
   [id: string]: (el: Element) => void

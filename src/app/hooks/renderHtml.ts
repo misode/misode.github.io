@@ -1,7 +1,7 @@
 import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
-import { locale, segmentedLocale } from '../locales_'
+import { locale, segmentedLocale } from '../Locales'
 import { Mounter } from '../Mounter'
-import { hexId, htmlEncode } from '../utils_'
+import { hexId, htmlEncode } from '../Utils'
 
 /**
  * Secondary model used to remember the keys of a map

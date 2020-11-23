@@ -3,7 +3,7 @@ import { Tracker } from '../../Tracker';
 import { transformOutput } from '../../hooks/transformOutput';
 import { View } from '../../views/View';
 import { Octicon } from '../Octicon';
-import { App } from '../../app_';
+import { App } from '../../App';
 
 export const SourcePanel = (view: View, model: DataModel) => {
   const updateContent = (el: HTMLTextAreaElement) => {

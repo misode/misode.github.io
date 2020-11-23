@@ -1,4 +1,4 @@
-import { App } from '../app_';
+import { App } from '../App';
 import { View } from '../views/View';
 import { Dropdown } from './Dropdown';
 import { Octicon } from './Octicon';

@@ -1,4 +1,4 @@
-import { hexId } from "../utils_"
+import { hexId } from "../Utils"
 
 type PropertyWatcher<T> = (value: T, oldValue: T | null) => void
 type NamedPropertyWatcher<T> = {

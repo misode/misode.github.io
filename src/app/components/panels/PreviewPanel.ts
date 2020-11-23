@@ -1,5 +1,5 @@
 import { DataModel } from '@mcschema/core';
-import { App, Previews } from '../../app_';
+import { App, Previews } from '../../App';
 import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
 import { Tracker } from '../../Tracker';
 import { View } from '../../views/View';
