@@ -1,10 +1,10 @@
 import SimplexNoise from 'simplex-noise'
 import { DataModel, Path, ModelPath } from "@mcschema/core"
-import { Visualizer } from './Visualizer'
+import { Preview } from './Preview'
 
 const debug = false
 
-export class NoiseSettingsVisualizer extends Visualizer {
+export class NoiseSettingsPreview extends Preview {
   private noise: SimplexNoise
   private offsetX: number
 

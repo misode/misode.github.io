@@ -14,7 +14,7 @@
   "title.generator": "%0% 生成器",
   "title.home": "資料包生成器",
   "undo": "復原",
-  "visualize": "可視化",
+  "preview": "可視化",
   "world": "世界設定",
   "worldgen/biome": "生態域",
   "worldgen/carver": "地形雕刻器",

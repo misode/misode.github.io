@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const config = require('./src/config.json')
 
 module.exports = (env, argv) => ({
-  entry: './src/app/app.ts',
+  entry: './src/app/Router.ts',
   output: {
     path: __dirname + '/dist',
     filename: 'js/bundle.js'
@@ -47,20 +47,10 @@ module.exports = (env, argv) => ({
       filename: '404.html',
       template: 'src/index.html'
     }),
-    ...config.models.flatMap(buildModel)
+    ...config.models.map(m => new HtmlWebpackPlugin({
+      title: `${m.name} Generator${m.category === true ? 's' : ''} Minecraft 1.16, 1.17`,
+      filename: `${m.id}/index.html`,
+      template: 'src/index.html'
+    }))
   ]
 })
-
-function buildModel(model) {
-  const page = new HtmlWebpackPlugin({
-    title: `${model.name} Generator Minecraft 1.16, 1.17`,
-    filename: `${model.id}/index.html`,
-    template: 'src/index.html'
-  })
-  if (model.schema) {
-    return page
-  } else if (model.children) {
-    return [page, ...model.children.flatMap(buildModel)]
-  }
-  return []
-}
