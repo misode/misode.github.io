@@ -61,6 +61,9 @@ App.version.watchRun(async (value) => {
 
 App.theme.watchRun((value) => document.documentElement.setAttribute('data-theme', value))
 
+
+let hasFetchedEnglish = false
+
 App.language.watchRun(async (value) => {
   App.localesLoaded.set(false)
   await updateLocale(value)
@@ -107,8 +110,9 @@ async function updateSchemas(version: string) {
 }
 
 async function updateLocale(language: string) {
-  if (Locales[language]) return
+  if (Locales[language] && (hasFetchedEnglish || language !== 'en')) return
   const data = await (await fetch(`/locales/${language}.json`)).json()
+  if (language === 'en') hasFetchedEnglish = true
   Locales[language] = data
 }
 
