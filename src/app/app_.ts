@@ -8,7 +8,7 @@ import { RegistryFetcher } from './RegistryFetcher';
 import { BiomeNoisePreview } from './preview/BiomeNoisePreview';
 import { NoiseSettingsPreview } from './preview/NoiseSettingsPreview';
 import config from '../config.json';
-import { locale, Locales } from './Locales';
+import { locale, Locales } from './locales_';
 import { Tracker } from './Tracker';
 
 const Versions: {

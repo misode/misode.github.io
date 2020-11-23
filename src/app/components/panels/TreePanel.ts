@@ -1,12 +1,12 @@
 import { DataModel, ModelPath, Path } from '@mcschema/core';
-import { App, checkVersion, Previews } from '../../App';
+import { App, checkVersion, Previews } from '../../app_';
 import { Tracker } from '../../Tracker'
 import { View } from '../../views/View';
 import { Octicon } from '../Octicon';
 import { Mounter } from '../../Mounter';
 import { renderHtml } from '../../hooks/renderHtml';
 import config from '../../../config.json'
-import { locale } from '../../Locales';
+import { locale } from '../../locales_';
 import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
 
 const createPopupIcon = (type: string, icon: keyof typeof Octicon, popup: string) => {

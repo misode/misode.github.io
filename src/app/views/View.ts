@@ -1,5 +1,5 @@
-import { locale } from "../Locales"
-import { hexId } from "../Utils"
+import { locale } from "../locales_"
+import { hexId } from "../utils_"
 
 export class View {
   private registry: { [id: string]: (el: Element) => void } = {}

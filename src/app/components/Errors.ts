@@ -1,10 +1,10 @@
 import { DataModel } from '@mcschema/core';
-import { App } from '../App';
-import { locale } from '../Locales';
+import { App } from '../app_';
+import { locale } from '../locales_';
 import { View } from '../views/View';
 import { Octicon } from './Octicon';
 import { Toggle } from './Toggle';
-import { htmlEncode } from '../Utils'
+import { htmlEncode } from '../utils_'
 import { Tracker } from '../Tracker';
 
 export const Errors = (view: View, model: DataModel) => {

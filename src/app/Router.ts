@@ -1,4 +1,4 @@
-import { App } from './App';
+import { App } from './app_';
 import { View } from './views/View';
 import { Home } from './views/Home'
 import { Generator } from './views/Generator'

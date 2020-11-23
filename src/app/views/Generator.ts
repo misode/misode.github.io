@@ -1,4 +1,4 @@
-import { App, checkVersion, Models } from '../App'
+import { App, checkVersion, Models } from '../app_'
 import { View } from './View'
 import { Header } from '../components/Header'
 import { SplitGroup } from '../components/SplitGroup'
