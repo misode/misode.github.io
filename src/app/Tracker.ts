@@ -19,7 +19,7 @@ export const Tracker = {
   hidePreview: () => event('Preview', 'hide-preview'),
 
   dimTheme: (theme: string) => dimension(1, theme),
-  dimLanguage: (language: string) => dimension(3, language),
-  dimVersion: (version: string) => dimension(4, version),
+  dimVersion: (version: string) => dimension(3, version),
+  dimLanguage: (language: string) => dimension(4, language),
   dimPreview: (preview: string) => dimension(5, preview),
 }
