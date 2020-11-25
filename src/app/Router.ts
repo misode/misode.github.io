@@ -12,20 +12,23 @@ const router = async () => {
   const urlParts = location.pathname.split('/').filter(e => e)  
   const target = document.getElementById('app')!
   const view = new View()
+  let title = locale('title.home')
 
   if (urlParts.length === 0){
     App.model.set({ id: '', name: 'Data Pack', category: true})
     target.innerHTML = Home(view)
-    document.title = locale('title.home')
   } else if (urlParts.length === 1 && categories.map(m => m.id).includes(urlParts[0])) {
     App.model.set(categories.find(m => m.id === urlParts[0])!)
     target.innerHTML = Home(view)
-    document.title = locale('title.home')
   } else {
     App.model.set(config.models.find(m => m.id === urlParts.join('/'))!)
     target.innerHTML = Generator(view)
-    document.title = App.model.get() ? locale('title.generator', [locale(App.model.get()!.id)]) : locale('title.home')
+    if (App.model.get()) {
+      title = locale('title.generator', [locale(App.model.get()!.id)])
+    }
   }
+
+  document.title = locale('title.suffix', [title])
   view.mounted(target)
 }
 
