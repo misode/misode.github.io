@@ -5,6 +5,11 @@ const dimension = (index: number, value: string) =>
   ga('set', `dimension${index}`, value);
 
 export const Tracker = {
+  pageview: (target: string) => {
+    ga('set', 'page', target)
+    ga('send', 'pageview')
+  },
+
   setTheme: (theme: string) => event('Generator', 'set-theme', theme),
   setVersion: (version: string) => event('Generator', 'set-version', version),
   setPreview: (name: string) => event('Preview', 'set-preview', name),

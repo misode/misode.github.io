@@ -2,6 +2,8 @@ import { App } from './App';
 import { View } from './views/View';
 import { Home } from './views/Home'
 import { Generator } from './views/Generator'
+import { locale } from './Locales';
+import { Tracker } from './Tracker';
 import config from '../config.json'
 
 const categories = config.models.filter(m => m.category === true)
@@ -14,12 +16,15 @@ const router = async () => {
   if (urlParts.length === 0){
     App.model.set({ id: '', name: 'Data Pack', category: true})
     target.innerHTML = Home(view)
+    document.title = locale('title.home')
   } else if (urlParts.length === 1 && categories.map(m => m.id).includes(urlParts[0])) {
     App.model.set(categories.find(m => m.id === urlParts[0])!)
     target.innerHTML = Home(view)
+    document.title = locale('title.home')
   } else {
     App.model.set(config.models.find(m => m.id === urlParts.join('/'))!)
     target.innerHTML = Generator(view)
+    document.title = App.model.get() ? locale('title.generator', [locale(App.model.get()!.id)]) : locale('title.home')
   }
   view.mounted(target)
 }
@@ -33,7 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
       && e.target.hasAttribute('href')
     ) {
       e.preventDefault();
-      history.pushState(null, '', e.target.getAttribute('href'));
+      const target = e.target.getAttribute('href')!
+      Tracker.pageview(target)
+      history.pushState(null, '', target);
       router();
     }
   });
