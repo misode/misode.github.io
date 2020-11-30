@@ -100,10 +100,9 @@ async function updateSchemas(version: string) {
       if (schema) {
         model.schema = schema
         if (JSON.stringify(model.data) === '{}') {
-          model.data = schema.default()
+          model.reset(schema.default(), true)
           model.history = [JSON.stringify(model.data)]
           model.historyIndex = 0
-          model.silentInvalidate()
         }
       }
     })
