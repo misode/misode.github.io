@@ -38,7 +38,7 @@ config.models.filter(m => m.schema)
 export const App = {
   version: new LocalStorageProperty('schema_version', config.versions[config.versions.length - 1].id)
     .watch(Tracker.dimVersion),
-  theme: new LocalStorageProperty('theme', 'light')
+  theme: new LocalStorageProperty('theme', 'dark')
     .watch(Tracker.dimTheme),
   language: new LocalStorageProperty('language', 'en')
     .watch(Tracker.dimLanguage),
