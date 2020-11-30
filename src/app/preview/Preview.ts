@@ -1,4 +1,5 @@
 import { DataModel, ModelPath } from "@mcschema/core"
+import { View } from "../views/View"
 
 export abstract class Preview {
   state: any
@@ -6,6 +7,10 @@ export abstract class Preview {
 
   dirty(path: ModelPath): boolean {
     return JSON.stringify(this.state) !== JSON.stringify(path.get())
+  }
+
+  menu(view: View, redraw: () => void): string {
+    return ''
   }
 
   abstract getName(): string

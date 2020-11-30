@@ -52,3 +52,10 @@ export class View {
     this.mounted(el, clear)
   }
 }
+
+export const toggleMenu = (el: Element) => {
+  el.classList.toggle('active')
+  document.body.addEventListener('click', evt => {
+    el.classList.remove('active')
+  }, { capture: true, once: true })
+}

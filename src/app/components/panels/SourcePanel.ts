@@ -1,7 +1,7 @@
 import { DataModel, ModelPath, Path } from '@mcschema/core';
 import { Tracker } from '../../Tracker';
 import { transformOutput } from '../../hooks/transformOutput';
-import { View } from '../../views/View';
+import { toggleMenu, View } from '../../views/View';
 import { Octicon } from '../Octicon';
 import { App } from '../../App';
 
@@ -44,12 +44,6 @@ export const SourcePanel = (view: View, model: DataModel) => {
   const shareSource = (el: Element) => {
     el.closest('.panel-controls')?.querySelector('input')
     Tracker.share()
-  }
-  const toggleMenu = (el: Element) => {
-    el.classList.toggle('active')
-    document.body.addEventListener('click', evt => {
-      el.classList.remove('active')
-    }, { capture: true, once: true })
   }
   return `<div class="panel source-panel">
     <div class="panel-controls">

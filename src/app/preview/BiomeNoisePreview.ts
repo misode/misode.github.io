@@ -1,5 +1,8 @@
 import { DataModel, Path, ModelPath } from "@mcschema/core"
+import { App } from "../App"
+import { Octicon } from "../components/Octicon"
 import { Property } from "../state/Property"
+import { View } from "../views/View"
 import { NormalNoise } from './NormalNoise'
 import { Preview } from './Preview'
 
@@ -29,6 +32,22 @@ export class BiomeNoisePreview extends Preview {
   active(path: ModelPath) {
     return path.endsWith(new Path(['generator', 'biome_source']))
       && path.push('type').get() === 'minecraft:multi_noise'
+  }
+
+  menu(view: View, redraw: () => void) {
+    return `
+      <div class="btn" data-id="${view.onClick(() => {
+        this.viewScale -= 0.5
+        redraw()
+      })}">
+        ${Octicon.plus}
+      </div>
+      <div class="btn" data-id="${view.onClick(() => {
+        this.viewScale += 0.5
+        redraw()
+      })}">
+        ${Octicon.dash}
+      </div>`
   }
 
   draw(model: DataModel, img: ImageData) {

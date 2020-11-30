@@ -298,8 +298,10 @@ nav > .toggle span {
   align-items: center;
   border: none;
   border-radius: 3px;
+  height: 33px;
   padding: 7px 11px;
   cursor: pointer;
+  user-select: none;
   outline: none;
   font-size: 1rem;
   white-space: nowrap;

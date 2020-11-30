@@ -1,7 +1,7 @@
 import { DataModel, ModelPath, Path } from '@mcschema/core';
 import { App, checkVersion, Previews } from '../../App';
 import { Tracker } from '../../Tracker'
-import { View } from '../../views/View';
+import { toggleMenu, View } from '../../views/View';
 import { Octicon } from '../Octicon';
 import { Mounter } from '../../Mounter';
 import { renderHtml } from '../../hooks/renderHtml';
@@ -108,12 +108,6 @@ export const TreePanel = (view: View, model: DataModel) => {
       mountContent(el)
     }, 'tree-panel')
   })
-  const toggleMenu = (el: Element) => {
-    el.classList.toggle('active')
-    document.body.addEventListener('click', evt => {
-      el.classList.remove('active')
-    }, { capture: true, once: true })
-  }
   return `<div class="panel tree-panel">
     <div class="panel-controls">
       <div class="btn" data-id="${view.onClick(() => {

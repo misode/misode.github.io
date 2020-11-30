@@ -6,11 +6,13 @@ import { View } from '../../views/View';
 import { Octicon } from '../Octicon';
 
 export const PreviewPanel = (view: View, model: DataModel) => {
-  const canvas = view.register(el => {
+  const panel = view.register(el => {
+    const canvasEl = el.querySelector('canvas')!
+    const controlsEl = el.querySelector('.panel-controls')!
     const redraw = () => {
       const preview = App.preview.get()
       if (preview && preview.path && preview.path.withModel(model).get()) {
-        const ctx = (el as HTMLCanvasElement).getContext('2d')!
+        const ctx = canvasEl.getContext('2d')!
         const img = ctx.createImageData(200, 100)
         const newState = preview.path.withModel(model).get()
         preview.state = JSON.parse(JSON.stringify(newState))
@@ -50,15 +52,15 @@ export const PreviewPanel = (view: View, model: DataModel) => {
     ;(el as HTMLCanvasElement).addEventListener('mouseup', evt => {
       dragStart = undefined
     })
-  })
-  return `<div class="panel preview-panel">
-    <div class="panel-controls">
+
+    view.mount(controlsEl, `
+      ${App.preview.get()?.menu(view, redraw) ?? ''}
       <div class="btn" data-id="${view.onClick(() => {
         Tracker.hidePreview(); App.preview.set(null)
-      })}">
-        ${Octicon.x}
-      </div>
-    </div>
-    <canvas width="200" height="100" data-id="${canvas}">
+      })}">${Octicon.x}</div>`, false)
+  })
+  return `<div class="panel preview-panel" data-id="${panel}">
+    <div class="panel-controls"></div>
+    <canvas width="200" height="100">
   </div>`
 }
