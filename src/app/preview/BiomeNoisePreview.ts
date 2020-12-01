@@ -50,6 +50,10 @@ export class BiomeNoisePreview extends Preview {
       </div>`
   }
 
+  getSize(): [number, number] {
+    return [200, 100]
+  }
+
   draw(model: DataModel, img: ImageData) {
     this.noise = BiomeNoisePreview.noiseMaps.map((id, i) => {
       const config = this.state[`${id}_noise`]
@@ -78,9 +82,9 @@ export class BiomeNoisePreview extends Preview {
     }
   }
 
-  onDrag(fromX: number, fromY: number, toX: number, toY: number) {
-    this.offsetX += toX - fromX
-    this.offsetY += toY - fromY
+  onDrag(dx: number, dy: number) {
+    this.offsetX += dx
+    this.offsetY += dy
   }
 
   private closestBiome(x: number, y: number): string {

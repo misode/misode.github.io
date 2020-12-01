@@ -1,17 +1,23 @@
 import SimplexNoise from 'simplex-noise'
 import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Preview } from './Preview'
-
-const debug = false
+import { toggleMenu, View } from '../views/View'
+import { Octicon } from '../components/Octicon'
 
 export class NoiseSettingsPreview extends Preview {
   private noise: SimplexNoise
-  private offsetX: number
+  private width: number = 512
+  private chunkWidth: number = 4
+  private chunkHeight: number = 4
+  private chunkCountY: number = 32
+  private offsetX: number = 0
+  private debug: boolean = false
+  private depth: number = 0.1
+  private scale: number = 0.2
 
   constructor() {
     super()
     this.noise = new SimplexNoise()
-    this.offsetX = 0
   }
 
   getName() {
@@ -22,14 +28,69 @@ export class NoiseSettingsPreview extends Preview {
     return path.endsWith(new Path(['noise']))
   }
 
+  menu(view: View, redraw: () => void) {
+    return `<div class="panel-menu">
+      <div class="btn" data-id="${view.onClick(toggleMenu)}">
+        ${Octicon.kebab_horizontal}
+      </div>
+      <div class="panel-menu-list btn-group">
+        <div class="btn input">
+          ${Octicon.gear}
+          <label data-i18n="preview.depth"></label>
+          <input type="number" step="0.1" data-id="${view.register(el => {
+            (el as HTMLInputElement).value = this.depth.toString()
+            el.addEventListener('change', () => {
+              this.depth = parseFloat((el as HTMLInputElement).value)
+              redraw()
+            })
+          })}">
+        </div>
+        <div class="btn input">
+          ${Octicon.gear}
+          <label data-i18n="preview.scale"></label>
+          <input type="number" step="0.1" data-id="${view.register(el => {
+            (el as HTMLInputElement).value = this.scale.toString()
+            el.addEventListener('change', () => {
+              this.scale = parseFloat((el as HTMLInputElement).value)
+              redraw()
+            })
+          })}">
+        </div>
+        <div class="btn input">
+          ${Octicon.arrow_both}
+          <label data-i18n="preview.width"></label>
+          <input type="number" step="16" data-id="${view.register(el => {
+            (el as HTMLInputElement).value = this.width.toString()
+            el.addEventListener('change', () => {
+              this.width = parseFloat((el as HTMLInputElement).value)
+              redraw()
+            })
+          })}">
+        </div>
+        <div class="btn" data-id="${view.onClick(() => {this.debug = !this.debug; redraw()})}">
+          ${this.debug ? Octicon.square_fill : Octicon.square}
+          <span data-i18n="preview.show_density"></span>
+        </div>
+      </div>
+    </div>`
+  }
+
+  getSize(): [number, number] {
+    return [this.width, this.state.height]
+  }
+
   draw(model: DataModel, img: ImageData) {
+    this.chunkWidth = this.state.size_horizontal * 4
+    this.chunkHeight = this.state.size_vertical * 4
+    this.chunkCountY = Math.floor(this.state.height / this.chunkHeight)
+
     const data = img.data
-    for (let x = 0; x < 200; x += 1) {
-      const densities = this.fillNoiseColumn(x - this.offsetX).reverse()
-      for (let y = 0; y < 100; y += 1) {
+    for (let x = 0; x < this.width; x += 1) {
+      const noise = this.iterateNoiseColumn(x - this.offsetX).reverse()
+      for (let y = 0; y < this.state.height; y += 1) {
         const i = (y * (img.width * 4)) + (x * 4)
-        const color = this.getColor(densities, y)
-        data[i] = (debug && densities[y] > 0) ? 255 : color
+        const color = this.getColor(noise, y)
+        data[i] = (this.debug && noise[y] > 0) ? 255 : color
         data[i + 1] = color
         data[i + 2] = color
         data[i + 3] = 255
@@ -37,57 +98,78 @@ export class NoiseSettingsPreview extends Preview {
     }
   }
 
-  onDrag(fromX: number, fromY: number, toX: number, toY: number) {
-    this.offsetX += toX - fromX
+  onDrag(dx: number, dy: number) {
+    this.offsetX += dx
   }
 
-  private getColor(densities: number[], y: number): number {
-    if (debug) {
-      return -densities[y] * 128 + 128
+  private getColor(noise: number[], y: number): number {
+    if (this.debug) {
+      return -noise[y] / 2 + 128
     }
-    if (densities[y] > 0) {
+    if (noise[y] > 0) {
       return 0
     }
-    if (densities[y+1] > 0) {
+    if (noise[y+1] > 0) {
       return 150
     }
     return 255
   }
 
-  private fillNoiseColumn(x: number) {
-    const data = Array(100)
-    for (let y = 0; y < 100; y += 1) {
-      let density = this.getNoise(x, y)
-      density = density < -1 ? -1 : density > 1 ? 1 : density 
+  private iterateNoiseColumn(x: number): number[] {
+    const data = Array(this.chunkCountY * this.chunkHeight)
+    const cx = Math.floor(x / this.chunkWidth)
+    const ox = Math.floor(x % this.chunkWidth) / this.chunkWidth
+    const noise1 = this.fillNoiseColumn(cx)
+    const noise2 = this.fillNoiseColumn(cx + 1)
 
-      const heightFactor = (1 - y / 50) * this.state.density_factor + this.state.density_offset
-      density += heightFactor * (heightFactor > 0 ? 16 : 4)
-
-      if (this.state.top_slide.size > 0) {
-        density = this.clampedLerp(
-          this.state.top_slide.target / 100,
-          density,
-          (100 - y - (this.state.top_slide.offset * 4)) / (this.state.top_slide.size * 4)
-        )
+    for (let y = this.chunkCountY - 1; y >= 0; y -= 1) {
+      for (let yy = this.chunkHeight; yy >= 0; yy -= 1) {
+        const oy = yy / this.chunkHeight
+        const i = y * this.chunkHeight + yy
+        data[i] = this.lerp2(oy, ox, noise1[y], noise1[y+1], noise2[y], noise2[y+1]);
       }
-
-      if (this.state.bottom_slide.size > 0) {
-        density = this.clampedLerp(
-          this.state.bottom_slide.target / 100,
-          density,
-          (y - (this.state.bottom_slide.offset * 4)) / (this.state.bottom_slide.size * 4)
-        )
-      }
-      data[y] = density
     }
     return data
   }
 
-  private getNoise(x: number, y: number) {
+  private fillNoiseColumn(x: number): number[] {
+    const data = Array(this.chunkCountY + 1)
+
+    const scaledDepth = 0.265625 * this.depth
+    const scaledScale = 96 / this.scale
+
+    for (let y = 0; y <= this.chunkCountY; y += 1) {
+      let noise = this.getNoise(x, y)
+      const yOffset = 1 - y * 2 / this.chunkCountY
+      const density = yOffset * this.state.density_factor + this.state.density_offset
+      const falloff = (density + scaledDepth) * scaledScale
+      noise += falloff * (falloff > 0 ? 4 : 1)
+
+      if (this.state.top_slide.size > 0) {
+        noise = this.clampedLerp(
+          this.state.top_slide.target,
+          noise,
+          (this.chunkCountY - y - (this.state.top_slide.offset)) / (this.state.top_slide.size)
+        )
+      }
+
+      if (this.state.bottom_slide.size > 0) {
+        noise = this.clampedLerp(
+          this.state.bottom_slide.target,
+          noise,
+          (y - (this.state.bottom_slide.offset)) / (this.state.bottom_slide.size)
+        )
+      }
+      data[y] = noise
+    }
+    return data
+  }
+
+  private getNoise(x: number, y: number): number {
     const octaves = [ [64, 1], [32, 2], [16, 4], [8, 8], [4, 16] ]
     return octaves
       .map(o => this.noise.noise2D(x / o[0], y / o[0]) / o[1])
-      .reduce((prev, acc) => prev + acc)
+      .reduce((prev, acc) => prev + acc) * 256
   }
 
   private clampedLerp(a: number, b: number, c: number): number {
@@ -96,7 +178,15 @@ export class NoiseSettingsPreview extends Preview {
     } else if (c > 1) {
       return b
     } else {
-      return a + c * (b - a);
+      return this.lerp(c, a, b)
     }
+  }
+
+  public lerp(a: number, b: number, c: number): number {
+    return b + a * (c - b);
+  }
+
+  public lerp2(a: number, b: number, c: number, d: number, e: number, f: number): number {
+      return this.lerp(b, this.lerp(a, c, d), this.lerp(a, e, f));
   }
 }

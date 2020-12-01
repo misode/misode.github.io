@@ -311,7 +311,7 @@ nav > .toggle span {
   transition: background-color var(--style-transition);
 }
 
-.btn:hover {
+.btn:not(.input):hover {
   background-color: var(--btn-hover);
 }
 
@@ -333,6 +333,15 @@ nav > .toggle span {
 .btn.selected {
   fill: var(--btn-active);
   color: var(--btn-active);
+}
+
+.btn.input {
+  cursor: initial;
+}
+
+.btn input {
+  margin-left: 5px;
+  width: 100px;
 }
 
 .errors {

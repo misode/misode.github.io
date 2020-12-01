@@ -13,9 +13,10 @@ export abstract class Preview {
     return ''
   }
 
+  abstract getSize(): [number, number]
   abstract getName(): string
   abstract active(path: ModelPath): boolean
   abstract draw(model: DataModel, img: ImageData): void
 
-  onDrag(fromX: number, fromY: number, toX: number, toY: number): void {}
+  onDrag(dx: number, dy: number): void {}
 }
