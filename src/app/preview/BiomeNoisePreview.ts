@@ -1,7 +1,7 @@
 import { DataModel, Path, ModelPath } from "@mcschema/core"
-import { App } from "../App"
 import { Octicon } from "../components/Octicon"
 import { Property } from "../state/Property"
+import { hashString, hexId } from "../Utils"
 import { View } from "../views/View"
 import { NormalNoise } from './NormalNoise'
 import { Preview } from './Preview'
@@ -19,7 +19,7 @@ export class BiomeNoisePreview extends Preview {
 
   constructor() {
     super()
-    this.seed = this.hexId()
+    this.seed = hexId()
     this.biomeColors = new Property({})
     this.biomeColors.set(JSON.parse(localStorage.getItem(LOCAL_STORAGE_BIOME_COLORS) ?? '{}'))
     this.noise = []
@@ -89,7 +89,7 @@ export class BiomeNoisePreview extends Preview {
 
   private closestBiome(x: number, y: number): string {
     if (!this.state.biomes || this.state.biomes.length === 0) return ''
-    const noise = this.noise.map(n => n.getValue(x, y))
+    const noise = this.noise.map(n => n.getValue(x, y, 0))
     let minDist = Infinity
     let minBiome = ''
     for (const b of this.state.biomes) {
@@ -125,21 +125,7 @@ export class BiomeNoisePreview extends Preview {
   }
 
   private colorFromBiome(biome: string): number[] {
-    const h = Math.abs(this.hash(biome))
+    const h = Math.abs(hashString(biome))
     return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
-  }
-
-  private hash(s: string) {
-    return (s ?? '').split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)
-  }
-
-  private dec2hex(dec: number) {
-    return ('0' + dec.toString(16)).substr(-2)
-  }
-
-  private hexId(length = 12) {
-    var arr = new Uint8Array(length / 2)
-    window.crypto.getRandomValues(arr)
-    return Array.from(arr, this.dec2hex).join('')
   }
 }

@@ -1,11 +1,14 @@
-import SimplexNoise from 'simplex-noise'
 import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Preview } from './Preview'
 import { toggleMenu, View } from '../views/View'
 import { Octicon } from '../components/Octicon'
+import { clampedLerp, hexId, lerp2 } from '../Utils'
+import { PerlinNoise } from './PerlinNoise'
 
 export class NoiseSettingsPreview extends Preview {
-  private noise: SimplexNoise
+  private minLimitPerlinNoise: PerlinNoise
+  private maxLimitPerlinNoise: PerlinNoise
+  private mainPerlinNoise: PerlinNoise
   private width: number = 512
   private chunkWidth: number = 4
   private chunkHeight: number = 4
@@ -17,7 +20,9 @@ export class NoiseSettingsPreview extends Preview {
 
   constructor() {
     super()
-    this.noise = new SimplexNoise()
+    this.minLimitPerlinNoise = new PerlinNoise(hexId(), -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    this.maxLimitPerlinNoise = new PerlinNoise(hexId(), -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    this.mainPerlinNoise = new PerlinNoise(hexId(), -7, [1, 1, 1, 1, 1, 1, 1, 1])
   }
 
   getName() {
@@ -126,7 +131,7 @@ export class NoiseSettingsPreview extends Preview {
       for (let yy = this.chunkHeight; yy >= 0; yy -= 1) {
         const oy = yy / this.chunkHeight
         const i = y * this.chunkHeight + yy
-        data[i] = this.lerp2(oy, ox, noise1[y], noise1[y+1], noise2[y], noise2[y+1]);
+        data[i] = lerp2(oy, ox, noise1[y], noise1[y+1], noise2[y], noise2[y+1]);
       }
     }
     return data
@@ -137,16 +142,20 @@ export class NoiseSettingsPreview extends Preview {
 
     const scaledDepth = 0.265625 * this.depth
     const scaledScale = 96 / this.scale
+    const xzScale = 684.412 * this.state.sampling.xz_scale
+    const yScale = 684.412 * this.state.sampling.y_scale
+    const xzFactor = xzScale / this.state.sampling.xz_factor
+    const yFactor = yScale / this.state.sampling.y_factor
 
     for (let y = 0; y <= this.chunkCountY; y += 1) {
-      let noise = this.getNoise(x, y)
+      let noise = this.sampleAndClampNoise(x, y, 0, xzScale, yScale, xzFactor, yFactor)
       const yOffset = 1 - y * 2 / this.chunkCountY
       const density = yOffset * this.state.density_factor + this.state.density_offset
       const falloff = (density + scaledDepth) * scaledScale
       noise += falloff * (falloff > 0 ? 4 : 1)
 
       if (this.state.top_slide.size > 0) {
-        noise = this.clampedLerp(
+        noise = clampedLerp(
           this.state.top_slide.target,
           noise,
           (this.chunkCountY - y - (this.state.top_slide.offset)) / (this.state.top_slide.size)
@@ -154,7 +163,7 @@ export class NoiseSettingsPreview extends Preview {
       }
 
       if (this.state.bottom_slide.size > 0) {
-        noise = this.clampedLerp(
+        noise = clampedLerp(
           this.state.bottom_slide.target,
           noise,
           (y - (this.state.bottom_slide.offset)) / (this.state.bottom_slide.size)
@@ -165,28 +174,44 @@ export class NoiseSettingsPreview extends Preview {
     return data
   }
 
-  private getNoise(x: number, y: number): number {
-    const octaves = [ [64, 1], [32, 2], [16, 4], [8, 8], [4, 16] ]
-    return octaves
-      .map(o => this.noise.noise2D(x / o[0], y / o[0]) / o[1])
-      .reduce((prev, acc) => prev + acc) * 256
-  }
+  private sampleAndClampNoise(x: number, y: number, z: number, xzScale: number, yScale: number, xzFactor: number, yFactor: number): number {
+    let a = 0
+    let b = 0
+    let c = 0
+    let d = 1
 
-  private clampedLerp(a: number, b: number, c: number): number {
-    if (c < 0) {
-      return a;
-    } else if (c > 1) {
-      return b
-    } else {
-      return this.lerp(c, a, b)
+    for (let i = 0; i < 16; i += 1) {
+      const x2 = PerlinNoise.wrap(x * xzScale * d)
+      const y2 = PerlinNoise.wrap(y * yScale * d)
+      const z2 = PerlinNoise.wrap(z * xzScale * d)
+      const e = yScale * d
+
+      const minLimitNoise = this.minLimitPerlinNoise.getOctaveNoise(i)
+      if (minLimitNoise) {
+        a += minLimitNoise.noise(x2, y2, z2, e, y * e) / d
+      }
+
+      const maxLimitNoise = this.maxLimitPerlinNoise.getOctaveNoise(i)
+      if (maxLimitNoise) {
+        b += maxLimitNoise.noise(x2, y2, z2, e, y * e) / d
+      }
+
+      if (i < 8) {
+        const mainNoise = this.mainPerlinNoise.getOctaveNoise(i)
+        if (mainNoise) {
+          c += mainNoise.noise(
+            PerlinNoise.wrap(x * xzFactor * d),
+            PerlinNoise.wrap(y * yFactor * d),
+            PerlinNoise.wrap(z * xzFactor * d),
+            yFactor * d,
+            y * yFactor * d 
+          ) / d
+        }
+      }
+
+      d /= 2
     }
-  }
 
-  public lerp(a: number, b: number, c: number): number {
-    return b + a * (c - b);
-  }
-
-  public lerp2(a: number, b: number, c: number, d: number, e: number, f: number): number {
-      return this.lerp(b, this.lerp(a, c, d), this.lerp(a, e, f));
+    return clampedLerp(a / 512, b / 512, (c / 10 + 1) / 2)
   }
 }
