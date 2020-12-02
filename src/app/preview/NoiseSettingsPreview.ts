@@ -9,6 +9,7 @@ export class NoiseSettingsPreview extends Preview {
   private minLimitPerlinNoise: PerlinNoise
   private maxLimitPerlinNoise: PerlinNoise
   private mainPerlinNoise: PerlinNoise
+  private depthNoise: PerlinNoise
   private width: number = 512
   private chunkWidth: number = 4
   private chunkHeight: number = 4
@@ -20,12 +21,13 @@ export class NoiseSettingsPreview extends Preview {
 
   constructor() {
     super()
-    this.minLimitPerlinNoise = new PerlinNoise(hexId(), -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    this.maxLimitPerlinNoise = new PerlinNoise(hexId(), -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    this.mainPerlinNoise = new PerlinNoise(hexId(), -7, [1, 1, 1, 1, 1, 1, 1, 1])
+    this.minLimitPerlinNoise = PerlinNoise.fromRange(hexId(), -15, 0)
+    this.maxLimitPerlinNoise = PerlinNoise.fromRange(hexId(), -15, 0)
+    this.mainPerlinNoise = PerlinNoise.fromRange(hexId(), -7, 0)
+    this.depthNoise = PerlinNoise.fromRange(hexId(), -15, 0)
   }
 
-  getName() {
+  getName() { 
     return 'noise-settings'
   }
 
@@ -73,7 +75,7 @@ export class NoiseSettingsPreview extends Preview {
           })}">
         </div>
         <div class="btn" data-id="${view.onClick(() => {this.debug = !this.debug; redraw()})}">
-          ${this.debug ? Octicon.square_fill : Octicon.square}
+          ${Octicon.square}
           <span data-i18n="preview.show_density"></span>
         </div>
       </div>
@@ -140,16 +142,18 @@ export class NoiseSettingsPreview extends Preview {
   private fillNoiseColumn(x: number): number[] {
     const data = Array(this.chunkCountY + 1)
 
-    const scaledDepth = 0.265625 * this.depth
-    const scaledScale = 96 / this.scale
+    let scaledDepth = 0.265625 * this.depth
+    let scaledScale = 96 / this.scale
     const xzScale = 684.412 * this.state.sampling.xz_scale
     const yScale = 684.412 * this.state.sampling.y_scale
     const xzFactor = xzScale / this.state.sampling.xz_factor
     const yFactor = yScale / this.state.sampling.y_factor
+    const randomDensity = this.state.random_density_offset ? this.getRandomDensity(x) : 0
+    console.log(randomDensity)
 
     for (let y = 0; y <= this.chunkCountY; y += 1) {
-      let noise = this.sampleAndClampNoise(x, y, 0, xzScale, yScale, xzFactor, yFactor)
-      const yOffset = 1 - y * 2 / this.chunkCountY
+      let noise = this.sampleAndClampNoise(x, y, this.mainPerlinNoise.getOctaveNoise(0).zo, xzScale, yScale, xzFactor, yFactor)
+      const yOffset = 1 - y * 2 / this.chunkCountY + randomDensity
       const density = yOffset * this.state.density_factor + this.state.density_offset
       const falloff = (density + scaledDepth) * scaledScale
       noise += falloff * (falloff > 0 ? 4 : 1)
@@ -172,6 +176,14 @@ export class NoiseSettingsPreview extends Preview {
       data[y] = noise
     }
     return data
+  }
+
+  private getRandomDensity(x: number): number {
+    const noise = this.depthNoise.getValue(x * 200, 10, this.depthNoise.getOctaveNoise(0).zo, 1, 0, true)
+    const a = (noise < 0) ? -noise * 0.3 : noise
+    const b = a * 24.575625 - 2
+    console.log(a, b)
+    return (b < 0) ? b * 0.009486607142857142 : Math.min(b, 1) * 0.006640625
   }
 
   private sampleAndClampNoise(x: number, y: number, z: number, xzScale: number, yScale: number, xzFactor: number, yFactor: number): number {

@@ -23,15 +23,14 @@ export const PreviewPanel = (view: View, model: DataModel) => {
       } else {
         App.preview.set(null)
       }
-
-      view.mount(el.querySelector('.panel-controls')!, `
-        ${App.preview.get()?.menu(view, redraw) ?? ''}
-        <div class="btn" data-id="${view.onClick(() => {
-          Tracker.hidePreview(); App.preview.set(null)
-        })}">
-          ${Octicon.x}
-        </div>`, false)
     }
+    view.mount(el.querySelector('.panel-controls')!, `
+      ${App.preview.get()?.menu(view, redraw) ?? ''}
+      <div class="btn" data-id="${view.onClick(() => {
+        Tracker.hidePreview(); App.preview.set(null)
+      })}">
+        ${Octicon.x}
+      </div>`, false)
     model.addListener({
       invalidated: redraw
     })

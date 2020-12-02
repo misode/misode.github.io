@@ -55,9 +55,12 @@ export class View {
 
 export const toggleMenu = (el: Element) => {
   el.classList.add('active')
-  document.body.addEventListener('click', evt => {
-    if ((evt.target as Element).matches('.btn.input')) return
-    if ((evt.target as Element).closest('.btn')?.classList.contains('input')) return
+  const hideMenu = () => document.body.addEventListener('click', evt => {
+    if ((evt.target as Element).matches('.btn.input') || (evt.target as Element).closest('.btn')?.classList.contains('input')) {
+      hideMenu()
+      return
+    }
     el.classList.remove('active')
   }, { capture: true, once: true })
+  hideMenu()
 }

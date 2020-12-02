@@ -19,6 +19,10 @@ export class PerlinNoise {
     this.lowestFreqValueFactor = Math.pow(2, (amplitudes.length - 1)) / (Math.pow(2, amplitudes.length) - 1)
   }
 
+  public static fromRange(seed: string, min: number, max: number) {
+    return new PerlinNoise(seed, min, Array(max - min + 1).fill(1))
+  }
+
   public getValue(x: number, y: number, z: number, a = 0, b = 0, fixY = false) {
     let value = 0
     let inputF = this.lowestFreqInputFactor

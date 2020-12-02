@@ -284,7 +284,7 @@ nav > .toggle span {
   height: 100%;
   background-color: var(--nav-faded);
   display: block;
-  cursor: grab;
+  cursor: crosshair;
   image-rendering: optimizeSpeed;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-optimize-contrast;
