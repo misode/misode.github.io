@@ -27,7 +27,7 @@ export class NoiseSettingsPreview extends Preview {
     this.depthNoise = PerlinNoise.fromRange(hexId(), -15, 0)
   }
 
-  getName() { 
+  getName() {
     return 'noise-settings'
   }
 
@@ -149,7 +149,6 @@ export class NoiseSettingsPreview extends Preview {
     const xzFactor = xzScale / this.state.sampling.xz_factor
     const yFactor = yScale / this.state.sampling.y_factor
     const randomDensity = this.state.random_density_offset ? this.getRandomDensity(x) : 0
-    console.log(randomDensity)
 
     for (let y = 0; y <= this.chunkCountY; y += 1) {
       let noise = this.sampleAndClampNoise(x, y, this.mainPerlinNoise.getOctaveNoise(0).zo, xzScale, yScale, xzFactor, yFactor)
@@ -182,7 +181,6 @@ export class NoiseSettingsPreview extends Preview {
     const noise = this.depthNoise.getValue(x * 200, 10, this.depthNoise.getOctaveNoise(0).zo, 1, 0, true)
     const a = (noise < 0) ? -noise * 0.3 : noise
     const b = a * 24.575625 - 2
-    console.log(a, b)
     return (b < 0) ? b * 0.009486607142857142 : Math.min(b, 1) * 0.006640625
   }
 
