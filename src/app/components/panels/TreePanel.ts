@@ -7,36 +7,6 @@ import { renderHtml } from '../../hooks/renderHtml';
 import config from '../../../config.json'
 import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
 
-const createPopupIcon = (type: string, icon: keyof typeof Octicon, popup: string) => {
-  const div = document.createElement('div')
-  div.className = `node-icon ${type}`
-  div.addEventListener('click', evt => {
-    div.getElementsByTagName('span')[0].classList.add('show')
-    document.body.addEventListener('click', evt => {
-      div.getElementsByTagName('span')[0].classList.remove('show')
-    }, { capture: true, once: true })
-  })
-  div.insertAdjacentHTML('beforeend', `<span class="icon-popup">${popup}</span>${Octicon[icon]}`)
-  return div
-}
-
-const treeViewObserver = (el: Element) => {
-  el.querySelectorAll('.node[data-help]').forEach(e => {
-    e.querySelector('.node-header')?.appendChild(
-      createPopupIcon('node-help', 'info', e.getAttribute('data-help') ?? ''))
-  })
-  el.querySelectorAll('.node[data-error]').forEach(e => {
-    e.querySelector('.node-header')?.appendChild(
-      createPopupIcon('node-error', 'issue_opened', e.getAttribute('data-error') ?? ''))
-  })
-  el.querySelectorAll('.collapse.closed, button.add').forEach(e => {
-    e.insertAdjacentHTML('afterbegin', Octicon.plus_circle)
-  })
-  el.querySelectorAll('.collapse.open, button.remove').forEach(e => {
-    e.insertAdjacentHTML('afterbegin', Octicon.trashcan)
-  })
-}
-
 export const TreePanel = (view: View, model: DataModel) => {
   const getContent = () => {
     if (App.loaded.get()) {
@@ -53,30 +23,26 @@ export const TreePanel = (view: View, model: DataModel) => {
     }
     return '<div class="spinner"></div>'
   }
-  const mountContent = (el: Element) => {
-    view.mount(el, getContent(), false)
-    treeViewObserver(el)
-  }
   const tree = view.register(el => {
     App.loaded.watchRun((value) => {
       if (!value) {
         // If loading is taking more than 100 ms, show spinner
         new Promise(r => setTimeout(r, 100)).then(() => {
           if (!App.loaded.get()) {
-            mountContent(el)
+            view.mount(el, getContent(), false)
           }
         })
       } else {
-        mountContent(el)
+        view.mount(el, getContent(), false)
       }
     })
     model.addListener({
       invalidated() {
-        mountContent(el)
+        view.mount(el, getContent(), false)
       }
     })
     ;(Previews.biome_noise as BiomeNoisePreview).biomeColors.watch(() => {
-      mountContent(el)
+      view.mount(el, getContent(), false)
     }, 'tree-panel')
   })
   return `<div class="panel tree-panel">

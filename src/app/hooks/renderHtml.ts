@@ -3,6 +3,7 @@ import { locale, segmentedLocale } from '../Locales'
 import { Mounter } from '../views/View'
 import { hexId, htmlEncode } from '../Utils'
 import { suffixInjector } from './suffixInjector'
+import { Octicon } from '../components/Octicon'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -69,7 +70,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       if (!Array.isArray(value)) value = []
       path.model.set(path, [...value, children.default()])
     })
-    const suffix = `<button class="add" data-id="${onAdd}"></button>`
+    const suffix = `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
 
     let body = ''
     if (Array.isArray(value)) {
@@ -78,12 +79,14 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         const childPath = path.push(index).contextPush('entry')
         const category = children.category(childPath)
         const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, mounter)
-        return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''} ${error(childPath)} ${help(childPath)}>
+        return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
           <div class="node-header">
-            <button class="remove" data-id="${removeId}"></button>
+            <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
             ${cPrefix}
             <label>${htmlEncode(pathLocale(path.contextPush('entry'), [`${index}`]))}</label>
             ${cSuffix}
+            ${error(childPath, mounter)}
+            ${help(childPath, mounter)}
           </div>
           ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
           </div></div>`
@@ -91,7 +94,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       if (value.length > 2) {
         body += `<div class="node-entry">
           <div class="node node-header">
-            <button class="add" data-id="${onAddBottom}"></button>
+            <button class="add" data-id="${onAddBottom}">${Octicon.plus_circle}</button>
           </div>
         </div>`
       }
@@ -106,7 +109,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       path.model.set(path.push(key), children.default())
     })
     const keyRendered = keys.hook(this, keyPath, keyPath.get() ?? '', mounter)
-    const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}"></button>`
+    const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
     let body = ''
     if (typeof value === 'object' && value !== undefined) {
       body = Object.keys(value)
@@ -115,12 +118,14 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = path.modelPush(key)
           const category = children.category(childPath)
           const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], mounter)
-          return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''} ${error(childPath)} ${help(childPath)}>
+          return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
-              <button class="remove" data-id="${removeId}"></button>
+              <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
               ${cPrefix}
               <label>${htmlEncode(key)}</label>
               ${cSuffix}
+              ${error(childPath, mounter)}
+              ${help(childPath, mounter)}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
             </div></div>`
@@ -149,9 +154,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     let prefix = ''
     if (node.optional()) {
       if (value === undefined) {
-        prefix = `<button class="collapse closed" data-id="${mounter.onClick(() => path.model.set(path, node.default()))}"></button>`
+        prefix = `<button class="collapse closed" data-id="${mounter.onClick(() => path.model.set(path, node.default()))}">${Octicon.plus_circle}</button>`
       } else {
-        prefix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}"></button>`
+        prefix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}">${Octicon.trashcan}</button>`
       }
     }
     let suffix = node.hook(suffixInjector, path, mounter) || ''
@@ -166,11 +171,13 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = getChildModelPath(path, k)
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
-          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''} ${error(childPath)} ${help(childPath)}>
+          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
               ${cPrefix}
               <label>${htmlEncode(pathLocale(childPath))}</label>
               ${cSuffix}
+              ${error(childPath, mounter)}
+              ${help(childPath, mounter)}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
             </div>`
@@ -253,14 +260,26 @@ function pathLocale(path: Path, params?: string[]): string {
     ?? path.getContext()[path.getContext().length - 1] ?? ''
 }
 
-function error(p: ModelPath, exact = true) {
-  const errors = p.model.errors.get(p, exact)
+function error(p: ModelPath, mounter: Mounter) {
+  const errors = p.model.errors.get(p, true)
   if (errors.length === 0) return ''
-  return `data-error="${htmlEncode(locale(errors[0].error, errors[0].params))}"`
+  return popupIcon('node-error', 'issue_opened', htmlEncode(locale(errors[0].error, errors[0].params)), mounter)
 }
 
-function help(path: ModelPath) {
+function help(path: ModelPath, mounter: Mounter) {
   const message = segmentedLocale(path.contextPush('help').getContext(), [], 6)
   if (message === undefined) return ''
-  return `data-help="${htmlEncode(message)}"`
+  return popupIcon('node-help', 'info', htmlEncode(message), mounter)
+}
+
+const popupIcon = (type: string, icon: keyof typeof Octicon, popup: string, mounter: Mounter) => {
+  const onClick = mounter.onClick(el => {
+    el.getElementsByTagName('span')[0].classList.add('show')
+    document.body.addEventListener('click', () => {
+      el.getElementsByTagName('span')[0].classList.remove('show')
+    }, { capture: true, once: true })
+  })
+  return `<div class="node-icon ${type}" data-id="${onClick}">
+    <span class="icon-popup">${popup}</span>${Octicon[icon]}
+  </div>`
 }
