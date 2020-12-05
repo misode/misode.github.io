@@ -5,28 +5,16 @@ type Registry = {
   [id: string]: (el: Element) => void
 }
 
-type NodeInjector = (path: ModelPath, mounter: Mounter) => string
-
-type TreeViewOptions = {
-  nodeInjector?: NodeInjector
-}
-
 export interface Mounter {
   register(callback: (el: Element) => void): string
   registerEvent(type: string, callback: (el: Element) => void): string
   registerChange(callback: (el: Element) => void): string
   registerClick(callback: (el: Element) => void): string
-  nodeInjector(path: ModelPath, mounter: Mounter): string
   mount(el: Element): void
 }
 
 export class Mounter implements Mounter {
   registry: Registry = {}
-  nodeInjector: NodeInjector
-
-  constructor(options?: TreeViewOptions) {
-    this.nodeInjector = options?.nodeInjector ?? (() => '')
-  }
 
   /**
    * Registers a callback and gives an ID

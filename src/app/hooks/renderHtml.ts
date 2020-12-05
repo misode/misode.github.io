@@ -2,6 +2,7 @@ import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, 
 import { locale, segmentedLocale } from '../Locales'
 import { Mounter } from '../Mounter'
 import { hexId, htmlEncode } from '../Utils'
+import { suffixInjector } from './suffixInjector'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -69,7 +70,6 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       path.model.set(path, [...value, children.default()])
     })
     const suffix = `<button class="add" data-id="${onAdd}"></button>`
-      + mounter.nodeInjector(path, mounter)
 
     let body = ''
     if (Array.isArray(value)) {
@@ -106,9 +106,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       path.model.set(path.push(key), children.default())
     })
     const keyRendered = keys.hook(this, keyPath, keyPath.get() ?? '', mounter)
-    const suffix = keyRendered[1]
-      + `<button class="add" data-id="${onAdd}"></button>`
-      + mounter.nodeInjector(path, mounter)
+    const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}"></button>`
     let body = ''
     if (typeof value === 'object' && value !== undefined) {
       body = Object.keys(value)
@@ -156,7 +154,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         prefix = `<button class="collapse open" data-id="${mounter.registerClick(() => path.model.set(path, undefined))}"></button>`
       }
     }
-    let suffix = mounter.nodeInjector(path, mounter)
+    let suffix = node.hook(suffixInjector, path, mounter) || ''
     let body = ''
     if (typeof value === 'object' && value !== undefined && (!(node.optional() && value === undefined))) {
       const activeFields = getActiveFields(path)
@@ -191,7 +189,8 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         evt.stopPropagation()
       })
     })
-    return ['', rawString(params, path, inputId), '']
+    const suffix = params.node.hook(suffixInjector, path, mounter) || ''
+    return ['', rawString(params, path, inputId) + suffix, '']
   }
 }
 

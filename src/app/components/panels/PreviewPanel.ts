@@ -1,6 +1,5 @@
 import { DataModel } from '@mcschema/core';
-import { App, Previews } from '../../App';
-import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
+import { App } from '../../App';
 import { Tracker } from '../../Tracker';
 import { View } from '../../views/View';
 import { Octicon } from '../Octicon';
@@ -36,12 +35,7 @@ export const PreviewPanel = (view: View, model: DataModel) => {
     })
     App.preview.watchRun((value) => {
       if (value) {
-        redraw()
-      }
-    }, 'preview-panel')
-
-    ;(Previews.biome_noise as BiomeNoisePreview).biomeColors.watch(() => {
-      if (App.preview.get()?.getName() === 'biome-noise') {
+        value.redraw = redraw
         redraw()
       }
     }, 'preview-panel')

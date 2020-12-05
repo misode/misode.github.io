@@ -23,6 +23,7 @@ export class BiomeNoisePreview extends Preview {
     this.biomeColors = new Property({})
     this.biomeColors.set(JSON.parse(localStorage.getItem(LOCAL_STORAGE_BIOME_COLORS) ?? '{}'))
     this.noise = []
+    this.biomeColors.watch(() => this.redraw())
   }
 
   getName() {

@@ -6,7 +6,6 @@ import { Octicon } from '../Octicon';
 import { Mounter } from '../../Mounter';
 import { renderHtml } from '../../hooks/renderHtml';
 import config from '../../../config.json'
-import { locale } from '../../Locales';
 import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
 
 const createPopupIcon = (type: string, icon: keyof typeof Octicon, popup: string) => {
@@ -39,33 +38,8 @@ const treeViewObserver = (el: Element) => {
   })
 }
 
-const treeViewNodeInjector = (path: ModelPath, mounter: Mounter) => {
-
-  let res = Object.keys(Previews).map(k => Previews[k])
-    .filter(v => v.active(path))
-    .map(v => {
-      const id = mounter.registerClick(() => {
-        Tracker.setPreview(v.getName())
-        v.path = path
-        App.preview.set(v)
-      })
-      return `<button data-id=${id}>${locale('preview')} ${Octicon.play}</button>`
-    }).join('')
-
-  if (path.pop().endsWith(new Path(['generator', 'biome_source', 'biomes']))) {
-    const biomePreview = Previews.biome_noise as BiomeNoisePreview
-    const biome = path.push('biome').get()
-    const id = mounter.registerChange(el => {
-      biomePreview.setBiomeColor(biome, (el as HTMLInputElement).value)
-      biomePreview.state = {}
-    })
-    res += `<input type="color" value="${biomePreview.getBiomeHex(biome)}" data-id=${id}></input>`
-  }
-  return res
-}
-
 export const TreePanel = (view: View, model: DataModel) => {
-  const mounter = new Mounter({ nodeInjector: treeViewNodeInjector })
+  const mounter = new Mounter()
   const getContent = () => {
     if (App.loaded.get()) {
       const path = new ModelPath(model)

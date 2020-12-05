@@ -4,6 +4,7 @@ import { View } from "../views/View"
 export abstract class Preview {
   state: any
   path?: ModelPath
+  redraw: () => void = () => {}
 
   dirty(path: ModelPath): boolean {
     return JSON.stringify(this.state) !== JSON.stringify(path.get())
