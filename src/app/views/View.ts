@@ -1,7 +1,15 @@
 import { locale } from "../Locales"
 import { hexId } from "../Utils"
 
-export class View {
+
+export interface Mounter {
+  register(callback: (el: Element) => void): string
+  onChange(callback: (el: Element) => void): string
+  onClick(callback: (el: Element) => void): string
+  mounted(el: Element, clear?: boolean): void
+}
+
+export class View implements Mounter{
   private registry: { [id: string]: (el: Element) => void } = {}
 
   render(): string {
@@ -42,7 +50,7 @@ export class View {
     if (clear) {
       this.registry = {}
     }
-    document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
     })
   }

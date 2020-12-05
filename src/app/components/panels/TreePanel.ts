@@ -3,7 +3,6 @@ import { App, checkVersion, Previews } from '../../App';
 import { Tracker } from '../../Tracker'
 import { toggleMenu, View } from '../../views/View';
 import { Octicon } from '../Octicon';
-import { Mounter } from '../../Mounter';
 import { renderHtml } from '../../hooks/renderHtml';
 import config from '../../../config.json'
 import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
@@ -39,11 +38,10 @@ const treeViewObserver = (el: Element) => {
 }
 
 export const TreePanel = (view: View, model: DataModel) => {
-  const mounter = new Mounter()
   const getContent = () => {
     if (App.loaded.get()) {
       const path = new ModelPath(model)
-      const rendered = model.schema.hook(renderHtml, path, model.data, mounter)
+      const rendered = model.schema.hook(renderHtml, path, model.data, view)
       const category = model.schema.category(path)
       if (rendered[1]) {
         return `<div class="node ${model.schema.type(path)}-node" ${category ? `data-category="${category}"` : ''}>
@@ -56,9 +54,8 @@ export const TreePanel = (view: View, model: DataModel) => {
     return '<div class="spinner"></div>'
   }
   const mountContent = (el: Element) => {
-    el.innerHTML = getContent()
+    view.mount(el, getContent(), false)
     treeViewObserver(el)
-    mounter.mount(el)
   }
   const tree = view.register(el => {
     App.loaded.watchRun((value) => {

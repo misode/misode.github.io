@@ -1,6 +1,6 @@
 import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
 import { locale, segmentedLocale } from '../Locales'
-import { Mounter } from '../Mounter'
+import { Mounter } from '../views/View'
 import { hexId, htmlEncode } from '../Utils'
 import { suffixInjector } from './suffixInjector'
 
@@ -22,10 +22,10 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
   },
 
   boolean({ node }, path, value, mounter) {
-    const onFalse = mounter.registerClick(el => {
+    const onFalse = mounter.onClick(el => {
       path.model.set(path, node.optional() && value === false ? undefined : false)
     })
-    const onTrue = mounter.registerClick(el => {
+    const onTrue = mounter.onClick(el => {
       path.model.set(path, node.optional() && value === true ? undefined : true)
     })
     return ['', `<button${value === false ? ' class="selected"' : ' '} 
@@ -61,11 +61,11 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
   },
 
   list({ children }, path, value, mounter) {
-    const onAdd = mounter.registerClick(el => {
+    const onAdd = mounter.onClick(el => {
       if (!Array.isArray(value)) value = []
       path.model.set(path, [children.default(), ...value])
     })
-    const onAddBottom = mounter.registerClick(el => {
+    const onAddBottom = mounter.onClick(el => {
       if (!Array.isArray(value)) value = []
       path.model.set(path, [...value, children.default()])
     })
@@ -74,7 +74,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     let body = ''
     if (Array.isArray(value)) {
       body = value.map((childValue, index) => {
-        const removeId = mounter.registerClick(el => path.model.set(path.push(index), undefined))
+        const removeId = mounter.onClick(el => path.model.set(path.push(index), undefined))
         const childPath = path.push(index).contextPush('entry')
         const category = children.category(childPath)
         const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, mounter)
@@ -101,7 +101,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
 
   map({ keys, children }, path, value, mounter) {
     const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
-    const onAdd = mounter.registerClick(el => {
+    const onAdd = mounter.onClick(el => {
       const key = keyPath.get()
       path.model.set(path.push(key), children.default())
     })
@@ -111,7 +111,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     if (typeof value === 'object' && value !== undefined) {
       body = Object.keys(value)
         .map(key => {
-          const removeId = mounter.registerClick(el => path.model.set(path.push(key), undefined))
+          const removeId = mounter.onClick(el => path.model.set(path.push(key), undefined))
           const childPath = path.modelPush(key)
           const category = children.category(childPath)
           const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], mounter)
@@ -131,7 +131,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
   },
 
   number({ integer, config }, path, value, mounter) {
-    const onChange = mounter.registerChange(el => {
+    const onChange = mounter.onChange(el => {
       const value = (el as HTMLInputElement).value
       let parsed = config?.color
         ? parseInt(value.slice(1), 16)
@@ -149,9 +149,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     let prefix = ''
     if (node.optional()) {
       if (value === undefined) {
-        prefix = `<button class="collapse closed" data-id="${mounter.registerClick(() => path.model.set(path, node.default()))}"></button>`
+        prefix = `<button class="collapse closed" data-id="${mounter.onClick(() => path.model.set(path, node.default()))}"></button>`
       } else {
-        prefix = `<button class="collapse open" data-id="${mounter.registerClick(() => path.model.set(path, undefined))}"></button>`
+        prefix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}"></button>`
       }
     }
     let suffix = node.hook(suffixInjector, path, mounter) || ''

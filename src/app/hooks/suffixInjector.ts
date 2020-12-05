@@ -2,7 +2,7 @@ import { Hook, ModelPath, Path } from '@mcschema/core'
 import { App, Previews } from '../App'
 import { Octicon } from '../components/Octicon'
 import { locale } from '../Locales'
-import { Mounter } from '../Mounter'
+import { Mounter } from '../views/View'
 import { BiomeNoisePreview } from '../preview/BiomeNoisePreview'
 import { Preview } from '../preview/Preview'
 import { Tracker } from '../Tracker'
@@ -32,7 +32,7 @@ export const suffixInjector: Hook<[Mounter], string | void> = {
       && path.pop().pop().endsWith(new Path(['generator', 'biome_source', 'biomes']))) {
         const biomePreview = Previews.biome_noise as BiomeNoisePreview
         const biome = path.get()
-        const id = mounter.registerChange(el => {
+        const id = mounter.onChange(el => {
           biomePreview.setBiomeColor(biome, (el as HTMLInputElement).value)
         })
         return `<input type="color" value="${biomePreview.getBiomeHex(biome)}" data-id=${id}></input>`
@@ -41,7 +41,7 @@ export const suffixInjector: Hook<[Mounter], string | void> = {
 }
 
 function setPreview(preview: Preview, path: ModelPath, mounter: Mounter) {
-  const id = mounter.registerClick(() => {
+  const id = mounter.onClick(() => {
     Tracker.setPreview(preview.getName())
     preview.path = path
     App.preview.set(preview)
