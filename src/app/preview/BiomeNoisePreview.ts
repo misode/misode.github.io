@@ -1,9 +1,9 @@
 import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Octicon } from "../components/Octicon"
 import { Property } from "../state/Property"
-import { hashString, hexId } from "../Utils"
+import { hexId, stringToColor } from "../Utils"
 import { View } from "../views/View"
-import { NormalNoise } from './math/NormalNoise'
+import { NormalNoise } from './noise/NormalNoise'
 import { Preview } from './Preview'
 
 const LOCAL_STORAGE_BIOME_COLORS = 'biome_colors'
@@ -110,7 +110,7 @@ export class BiomeNoisePreview extends Preview {
   getBiomeColor(biome: string): number[] {
     const color = this.biomeColors.get()[biome]
     if (color === undefined) {
-      return this.colorFromBiome(biome)
+      return stringToColor(biome)
     }
     return color
   }
@@ -123,10 +123,5 @@ export class BiomeNoisePreview extends Preview {
 
   getBiomeHex(biome: string): string {
     return '#' + this.getBiomeColor(biome).map(e => e.toString(16).padStart(2, '0')).join('')
-  }
-
-  private colorFromBiome(biome: string): number[] {
-    const h = Math.abs(hashString(biome))
-    return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
   }
 }

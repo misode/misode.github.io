@@ -2,7 +2,7 @@ import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Preview } from './Preview'
 import { toggleMenu, View } from '../views/View'
 import { Octicon } from '../components/Octicon'
-import { NoiseChunkGenerator } from './NoiseChunkGenerator'
+import { NoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export class NoiseSettingsPreview extends Preview {
   private width: number = 512

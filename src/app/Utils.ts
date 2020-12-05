@@ -15,6 +15,15 @@ export function hashString(s: string) {
   return (s ?? '').split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)
 }
 
+export function stringToColor(str: string): [number, number, number] {
+  const h = Math.abs(hashString(str))
+  return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
+}
+
+export function clamp(a: number, b: number, c: number) {
+  return Math.max(a, Math.min(b, c))
+}
+
 export function clampedLerp(a: number, b: number, c: number): number {
   if (c < 0) {
     return a;

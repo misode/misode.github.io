@@ -1,5 +1,5 @@
-import { PerlinNoise } from './math/PerlinNoise'
-import { clampedLerp, hexId, lerp2 } from '../Utils'
+import { PerlinNoise } from './PerlinNoise'
+import { clampedLerp, hexId, lerp2 } from '../../Utils'
 
 export class NoiseChunkGenerator {
   private minLimitPerlinNoise: PerlinNoise
