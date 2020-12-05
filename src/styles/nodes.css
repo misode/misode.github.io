@@ -102,19 +102,18 @@
 
 /** Rounded corners */
 
-.node-header > *:first-child {
+.node-header > .node-icon {
+  order: 1;
+}
+
+.node-header > *:first-child,
+.node-header > .node-icon + * {
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
 }
 
 .node-header > *:last-child,
-.node-header > input[list]:nth-last-child(2),
-.node[data-help] > .node-header > *:nth-last-child(2),
-.node[data-help] > .node-header > input[list]:nth-last-child(3),
-.node[data-error] > .node-header > *:nth-last-child(2),
-.node[data-error] > .node-header > input[list]:nth-last-child(3),
-.node[data-help][data-error] > .node-header > *:nth-last-child(3),
-.node[data-help][data-error] > .node-header > input[list]:nth-last-child(4) {
+.node-header > input[list]:nth-last-child(2) {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }

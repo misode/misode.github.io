@@ -81,12 +81,12 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, mounter)
         return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
           <div class="node-header">
+            ${error(childPath, mounter)}
+            ${help(childPath, mounter)}
             <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
             ${cPrefix}
             <label>${htmlEncode(pathLocale(path.contextPush('entry'), [`${index}`]))}</label>
             ${cSuffix}
-            ${error(childPath, mounter)}
-            ${help(childPath, mounter)}
           </div>
           ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
           </div></div>`
@@ -120,12 +120,12 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], mounter)
           return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
+              ${error(childPath, mounter)}
+              ${help(childPath, mounter)}
               <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
               ${cPrefix}
               <label>${htmlEncode(key)}</label>
               ${cSuffix}
-              ${error(childPath, mounter)}
-              ${help(childPath, mounter)}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
             </div></div>`
@@ -173,11 +173,11 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
           return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
+              ${error(childPath, mounter)}
+              ${help(childPath, mounter)}
               ${cPrefix}
               <label>${htmlEncode(pathLocale(childPath))}</label>
               ${cSuffix}
-              ${error(childPath, mounter)}
-              ${help(childPath, mounter)}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
             </div>`
