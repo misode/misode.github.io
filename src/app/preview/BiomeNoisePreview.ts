@@ -3,7 +3,7 @@ import { Octicon } from "../components/Octicon"
 import { Property } from "../state/Property"
 import { hashString, hexId } from "../Utils"
 import { View } from "../views/View"
-import { NormalNoise } from './NormalNoise'
+import { NormalNoise } from './math/NormalNoise'
 import { Preview } from './Preview'
 
 const LOCAL_STORAGE_BIOME_COLORS = 'biome_colors'

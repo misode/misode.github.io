@@ -1,5 +1,5 @@
 import seedrandom from 'seedrandom'
-import { lerp3, smoothstep } from '../Utils'
+import { lerp3, smoothstep } from '../../Utils'
 
 export class ImprovedNoise {
   private static readonly GRADIENT = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, 1], [0, 1, -1], [0, -1, -1], [1, 1, 0], [0, -1, 1], [-1, 1, 0], [0, -1, -1]]
