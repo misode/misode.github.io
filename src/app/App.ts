@@ -7,6 +7,7 @@ import { Preview } from './preview/Preview';
 import { RegistryFetcher } from './RegistryFetcher';
 import { BiomeNoisePreview } from './preview/BiomeNoisePreview';
 import { NoiseSettingsPreview } from './preview/NoiseSettingsPreview';
+import { DecoratorPreview } from './preview/DecoratorPreview';
 import config from '../config.json';
 import { locale, Locales } from './Locales';
 import { Tracker } from './Tracker';
@@ -25,7 +26,8 @@ export const Previews: {
   [key: string]: Preview
 } = {
   'biome_noise': new BiomeNoisePreview(),
-  'noise_settings': new NoiseSettingsPreview()
+  'noise_settings': new NoiseSettingsPreview(),
+  'decorator': new DecoratorPreview(),
 }
 
 export const Models: {

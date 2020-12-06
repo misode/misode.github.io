@@ -25,6 +25,9 @@ export const suffixInjector: Hook<[Mounter], string | void> = {
     if (Previews.noise_settings.active(path)) {
       return setPreview(Previews.noise_settings, path, mounter)
     }
+    if (Previews.decorator.active(path)) {
+      return setPreview(Previews.decorator, path, mounter)
+    }
   },
 
   string({}, path, mounter) {
