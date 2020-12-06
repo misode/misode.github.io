@@ -8,7 +8,10 @@ import { Octicon } from '../components/Octicon'
 import { View } from "../views/View"
 
 type BlockPos = [number, number, number]
-type Placement = { pos: BlockPos, feature: string } 
+type Placement = { pos: BlockPos, feature: string }
+
+const terrain = [50, 50, 50, 51, 52, 52, 53, 54, 56, 57, 57, 58, 58, 59, 60, 60, 60, 60, 59, 59, 60, 61, 62, 62, 63, 63, 63, 64, 64, 64, 65, 65, 66, 65, 65, 66, 66, 67, 67, 67, 68, 69, 71, 73, 74, 76, 79, 80, 81, 81, 82, 83, 83, 82, 82, 81, 81, 80, 80, 81, 81, 81, 82, 82] 
+const seaLevel = 63
 
 export class DecoratorPreview extends Preview {
   private seed: string
@@ -51,28 +54,50 @@ export class DecoratorPreview extends Preview {
     let placements: Placement[] = []
     for (let x = 0; x < 4; x += 1) {
       for (let z = 0; z < (this.perspective === 'top' ? 3 : 1); z += 1) {
-        const p = getPlacements(random, [x * 16, 0, z * 16], featureData)
-        placements = [...placements, ...p]
+        const chunkPlacements = getPlacements(random, [x * 16, 0, z * 16], featureData)
+        const filtered = chunkPlacements.filter(p => {
+          return p.pos[0] >= 0 && p.pos[0] < 4 * 16
+            && p.pos[1] >= 0 && p.pos[1] < 128
+            && p.pos[2] >= 0 && p.pos[2] < 3 * 16
+        })
+        placements = [...placements, ...filtered]
       }
     }
 
     const data = img.data
     img.data.fill(255)
 
+    if (this.perspective === 'side') {
+      for (let x = 0; x < 4 * 16; x += 1) {
+        for (let y = 0; y < terrain[x]; y += 1) {
+          const i = ((127 - y) * (img.width * 4)) + (x * 4)
+          for (let j = 0; j < 3; j += 1) {
+            data[i + j] = 30
+          }
+        }
+        for (let y = terrain[x]; y < seaLevel; y += 1) {
+          const i = ((127 - y) * (img.width * 4)) + (x * 4)
+          data[i + 0] = 108
+          data[i + 1] = 205
+          data[i + 2] = 230
+        }
+      }
+    }
+
     for (let {pos, feature} of placements) {
       const i = this.perspective === 'top'
         ? (pos[2] * (img.width * 4)) + (pos[0] * 4)
         : ((127 - pos[1]) * (img.width * 4)) + (pos[0] * 4)
       const color = stringToColor(feature)
-      data.set(color.map(c => clamp(30, 205, c)), i)
+      data.set(color.map(c => clamp(50, 205, c)), i)
     }
 
     for (let x = 0; x < 4 * 16; x += 1) {
       for (let y = 0; y < (this.perspective === 'top' ? 3 * 16: 128); y += 1) {
         if ((Math.floor(x/16) + (this.perspective === 'top' ? Math.floor(y/16) : 0)) % 2 === 0) continue
         const i = (y * (img.width * 4)) + (x * 4)
-        for (let j = 0; j < 4; j += 1) {
-          data[i + j] = data[i + j] - 30 
+        for (let j = 0; j < 3; j += 1) {
+          data[i + j] = 0.85 * data[i + j] 
         }
       }
     }
@@ -156,6 +181,18 @@ const Decorators: {
       return getPositions(random, p, config?.inner)
     })
   },
+  heightmap: (config, random, pos) => {
+    const y = Math.max(seaLevel, terrain[clamp(0, 63, pos[0])])
+    return decorateY(pos, y)
+  },
+  heightmap_spread_double: (config, random, pos) => {
+    const y = Math.max(seaLevel, terrain[clamp(0, 63, pos[0])])
+    return decorateY(pos, nextInt(random, y * 2))
+  },
+  heightmap_world_surface: (config, random, pos) => {
+    const y = Math.max(seaLevel, terrain[clamp(0, 63, pos[0])])
+    return decorateY(pos, y)
+  },
   range: (config, random, pos) => {
     const y = nextInt(random, (config?.maximum ?? 1) - (config?.top_offset ?? 0)) + (config?.bottom_offset ?? 0)
     return decorateY(pos, y)
@@ -170,6 +207,10 @@ const Decorators: {
   },
   spread_32_above: (config, random, pos) => {
     const y = nextInt(random, pos[1] + 32)
+    return decorateY(pos, y)
+  },
+  top_solid_heightmap: (config, random, pos) => {
+    const y = terrain[clamp(0, 63, pos[0])]
     return decorateY(pos, y)
   },
   magma: (config, random, pos) => {
