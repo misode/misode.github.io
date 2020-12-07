@@ -84,13 +84,13 @@ export class DecoratorPreview extends Preview {
 
     if (this.perspective === 'side') {
       for (let x = 0; x < this.size[0]; x += 1) {
-        for (let y = 0; y < terrain[x % terrain.length]; y += 1) {
+        for (let y = 0; y < terrain[clamp(0, 63, x)]; y += 1) {
           const i = ((this.size[1] - y - 1) * (img.width * 4)) + (x * 4)
           for (let j = 0; j < 3; j += 1) {
             data[i + j] = 30
           }
         }
-        for (let y = terrain[x % terrain.length]; y < seaLevel; y += 1) {
+        for (let y = terrain[clamp(0, 63, x)]; y < seaLevel; y += 1) {
           const i = ((this.size[1] - y - 1) * (img.width * 4)) + (x * 4)
           data[i + 0] = 108
           data[i + 1] = 205
@@ -190,6 +190,9 @@ export class DecoratorPreview extends Preview {
   private Decorators: {
     [key: string]: (config: any, pos: BlockPos) => BlockPos[]
   } = {
+    chance: (config, pos) => {
+      return this.random() < 1 / (config?.chance ?? 1) ? [pos] : []
+    },
     count: (config, pos) => {
       return new Array(this.sampleUniformInt(config?.count ?? 1)).fill(pos)
     },
@@ -211,10 +214,46 @@ export class DecoratorPreview extends Preview {
       const count = Math.max(0, Math.ceil((noise + config.noise_offset) * config.noise_to_count_ratio))
       return new Array(count).fill(pos)
     },
+    dark_oak_tree: (config, pos) => {
+      return [...new Array(16)].map((e, i) => {
+        const x = Math.floor(i / 4) * 4 + 1 + this.nextInt(3) + pos[0]
+        const y = Math.max(seaLevel, terrain[clamp(0, 63, x)])
+        const z = Math.floor(i % 4) * 4 + 1 + this.nextInt(3) + pos[2]
+        return [x, y, z]
+      })
+    },
     decorated: (config, pos) => {
       return this.getPositions(pos, config?.outer).flatMap(p => {
         return this.getPositions(p, config?.inner)
       })
+    },
+    depth_average: (config, pos) => {
+      const y = this.nextInt(config?.spread ?? 0) + this.nextInt(config?.spread ?? 0) - (config.spread ?? 0) + (config?.baseline ?? 0)
+      return this.decorateY(pos, y)
+    },
+    emerald_ore: (config, pos) => {
+      const count = 3 + this.nextInt(6)
+      return [...new Array(count)].map(e => [
+        this.nextInt(16) + pos[0],
+        this.nextInt(28) + 4,
+        this.nextInt(16) + pos[2]
+      ])
+    },
+    fire: (config, pos) => {
+      const count = this.nextInt(this.nextInt(this.sampleUniformInt(config?.count))) + 1
+      return [...new Array(count)].map(e => [
+        this.nextInt(16) + pos[0],
+        this.nextInt(120) + 4,
+        this.nextInt(16) + pos[2]
+      ])
+    },
+    glowstone: (config, pos) => {
+      const count = this.nextInt(this.nextInt(this.sampleUniformInt(config?.count)) + 1)
+      return [...new Array(count)].map(e => [
+        this.nextInt(16) + pos[0],
+        this.nextInt(120) + 4,
+        this.nextInt(16) + pos[2]
+      ])
     },
     heightmap: (config, pos) => {
       const y = Math.max(seaLevel, terrain[clamp(0, 63, pos[0])])
@@ -227,6 +266,27 @@ export class DecoratorPreview extends Preview {
     heightmap_world_surface: (config, pos) => {
       const y = Math.max(seaLevel, terrain[clamp(0, 63, pos[0])])
       return this.decorateY(pos, y)
+    },
+    iceberg: (config, pos) => {
+      return [[
+        this.nextInt(8) + 4 + pos[0],
+        pos[1],
+        this.nextInt(8) + 4 + pos[2]
+      ]]
+    },
+    lava_lake: (config, pos) => {
+      if (this.nextInt((config.chance ?? 1) / 10) === 0) {
+        const y = this.nextInt(this.nextInt(256 - 8) + 8)
+        if (y < seaLevel || this.nextInt((config?.chance ?? 1) / 8) == 0) {
+          const x = this.nextInt(16) + pos[0]
+          const z = this.nextInt(16) + pos[2]
+          return [[x, y, z]]
+        }
+      }
+      return []
+    },
+    nope: (config, pos) => {
+      return [pos]
     },
     range: (config, pos) => {
       const y = this.nextInt((config?.maximum ?? 1) - (config?.top_offset ?? 0)) + (config?.bottom_offset ?? 0)
@@ -258,6 +318,16 @@ export class DecoratorPreview extends Preview {
         pos[1],
         pos[2] + this.nextInt(16)
       ]]
+    },
+    water_lake: (config, pos) => {
+      if (this.nextInt(config.chance ?? 1) === 0) {
+        return [[
+          this.nextInt(16) + pos[0],
+          this.nextInt(256),
+          this.nextInt(16) + pos[2]
+        ]]
+      }
+      return []
     }
   }
 }
