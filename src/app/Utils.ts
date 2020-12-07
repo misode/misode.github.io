@@ -12,7 +12,10 @@ export function htmlEncode(str: string) {
 }
 
 export function hashString(s: string) {
-  return (s ?? '').split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)
+  let h = 0
+  for(let i = 0; i < s.length; i++)
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0
+  return h
 }
 
 export function stringToColor(str: string): [number, number, number] {
