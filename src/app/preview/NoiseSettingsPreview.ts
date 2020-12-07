@@ -73,14 +73,14 @@ export class NoiseSettingsPreview extends Preview {
   }
 
   getSize(): [number, number] {
-    return [this.width, this.state.height / 2]
+    return [this.width, this.state.height]
   }
 
   draw(model: DataModel, img: ImageData) {
-    this.generator.reset(this.state, this.depth, this.scale)
+    this.generator.reset(this.state, this.depth, this.scale, this.offsetX, this.width)
     const data = img.data
     for (let x = 0; x < this.width; x += 1) {
-      const noise = this.generator.iterateNoiseColumn(x - this.offsetX).reverse()
+      const noise = this.generator.iterateNoiseColumn(x + this.offsetX).reverse()
       for (let y = 0; y < this.state.height; y += 1) {
         const i = (y * (img.width * 4)) + (x * 4)
         const color = this.getColor(noise, y)
@@ -93,7 +93,7 @@ export class NoiseSettingsPreview extends Preview {
   }
 
   onDrag(dx: number, dy: number) {
-    this.offsetX += dx
+    this.offsetX -= dx
   }
 
   private getColor(noise: number[], y: number): number {

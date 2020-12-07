@@ -7,12 +7,15 @@ export class NoiseChunkGenerator {
   private mainPerlinNoise: PerlinNoise
   private depthNoise: PerlinNoise
 
-  private settings: any
+  private settings: any = {}
   private chunkWidth: number = 4
   private chunkHeight: number = 4
   private chunkCountY: number = 32
   private biomeDepth: number = 0.1
   private biomeScale: number = 0.2
+
+  private noiseColumnCache: (number[] | null)[] = []
+  private xOffset: number = 0
 
   constructor() {
     this.minLimitPerlinNoise = PerlinNoise.fromRange(hexId(), -15, 0)
@@ -21,14 +24,16 @@ export class NoiseChunkGenerator {
     this.depthNoise = PerlinNoise.fromRange(hexId(), -15, 0)
   }
 
-  public reset(settings: any, depth: number, scale: number) {
+  public reset(settings: any, depth: number, scale: number, xOffset: number, width: number) {
     this.settings = settings
     this.chunkWidth = settings.size_horizontal * 4
     this.chunkHeight = settings.size_vertical * 4
-    // dividing by two as cheap optimization
-    this.chunkCountY = Math.floor(settings.height / this.chunkHeight) / 2
+    this.chunkCountY = Math.floor(settings.height / this.chunkHeight)
     this.biomeDepth = depth
     this.biomeScale = scale
+
+    this.noiseColumnCache = Array(width).fill(null)
+    this.xOffset = xOffset
   }
   
   public iterateNoiseColumn(x: number): number[] {
@@ -49,6 +54,9 @@ export class NoiseChunkGenerator {
   }
 
   private fillNoiseColumn(x: number): number[] {
+    const cachedColumn = this.noiseColumnCache[x - this.xOffset]
+    if (cachedColumn) return cachedColumn
+
     const data = Array(this.chunkCountY + 1)
 
     let scaledDepth = 0.265625 * this.biomeDepth
@@ -83,6 +91,8 @@ export class NoiseChunkGenerator {
       }
       data[y] = noise
     }
+
+    this.noiseColumnCache[x - this.xOffset] = data
     return data
   }
 
