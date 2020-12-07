@@ -5,11 +5,17 @@ import { Octicon } from '../components/Octicon'
 import { NoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export class NoiseSettingsPreview extends Preview {
-  private width: number = 512
+  private width: number = 256
   private depth: number = 0.1
   private scale: number = 0.2
   private offsetX: number = 0
   private debug: boolean = false
+  private generator: NoiseChunkGenerator
+
+  constructor() {
+    super()
+    this.generator = new NoiseChunkGenerator()
+  }
 
   getName() {
     return 'noise-settings'
@@ -67,15 +73,14 @@ export class NoiseSettingsPreview extends Preview {
   }
 
   getSize(): [number, number] {
-    return [this.width, this.state.height]
+    return [this.width, this.state.height / 2]
   }
 
   draw(model: DataModel, img: ImageData) {
-    const generator = new NoiseChunkGenerator(this.state, this.depth, this.scale)
-
+    this.generator.reset(this.state, this.depth, this.scale)
     const data = img.data
     for (let x = 0; x < this.width; x += 1) {
-      const noise = generator.iterateNoiseColumn(x - this.offsetX).reverse()
+      const noise = this.generator.iterateNoiseColumn(x - this.offsetX).reverse()
       for (let y = 0; y < this.state.height; y += 1) {
         const i = (y * (img.width * 4)) + (x * 4)
         const color = this.getColor(noise, y)

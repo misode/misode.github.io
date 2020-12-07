@@ -7,19 +7,28 @@ export class NoiseChunkGenerator {
   private mainPerlinNoise: PerlinNoise
   private depthNoise: PerlinNoise
 
+  private settings: any
   private chunkWidth: number = 4
   private chunkHeight: number = 4
   private chunkCountY: number = 32
+  private biomeDepth: number = 0.1
+  private biomeScale: number = 0.2
 
-  constructor(private state: any, private depth: number, private scale: number) {
+  constructor() {
     this.minLimitPerlinNoise = PerlinNoise.fromRange(hexId(), -15, 0)
     this.maxLimitPerlinNoise = PerlinNoise.fromRange(hexId(), -15, 0)
     this.mainPerlinNoise = PerlinNoise.fromRange(hexId(), -7, 0)
     this.depthNoise = PerlinNoise.fromRange(hexId(), -15, 0)
-    
-    this.chunkWidth = state.size_horizontal * 4
-    this.chunkHeight = state.size_vertical * 4
-    this.chunkCountY = Math.floor(state.height / this.chunkHeight)
+  }
+
+  public reset(settings: any, depth: number, scale: number) {
+    this.settings = settings
+    this.chunkWidth = settings.size_horizontal * 4
+    this.chunkHeight = settings.size_vertical * 4
+    // dividing by two as cheap optimization
+    this.chunkCountY = Math.floor(settings.height / this.chunkHeight) / 2
+    this.biomeDepth = depth
+    this.biomeScale = scale
   }
   
   public iterateNoiseColumn(x: number): number[] {
@@ -42,34 +51,34 @@ export class NoiseChunkGenerator {
   private fillNoiseColumn(x: number): number[] {
     const data = Array(this.chunkCountY + 1)
 
-    let scaledDepth = 0.265625 * this.depth
-    let scaledScale = 96 / this.scale
-    const xzScale = 684.412 * this.state.sampling.xz_scale
-    const yScale = 684.412 * this.state.sampling.y_scale
-    const xzFactor = xzScale / this.state.sampling.xz_factor
-    const yFactor = yScale / this.state.sampling.y_factor
-    const randomDensity = this.state.random_density_offset ? this.getRandomDensity(x) : 0
+    let scaledDepth = 0.265625 * this.biomeDepth
+    let scaledScale = 96 / this.biomeScale
+    const xzScale = 684.412 * this.settings.sampling.xz_scale
+    const yScale = 684.412 * this.settings.sampling.y_scale
+    const xzFactor = xzScale / this.settings.sampling.xz_factor
+    const yFactor = yScale / this.settings.sampling.y_factor
+    const randomDensity = this.settings.random_density_offset ? this.getRandomDensity(x) : 0
 
     for (let y = 0; y <= this.chunkCountY; y += 1) {
       let noise = this.sampleAndClampNoise(x, y, this.mainPerlinNoise.getOctaveNoise(0).zo, xzScale, yScale, xzFactor, yFactor)
       const yOffset = 1 - y * 2 / this.chunkCountY + randomDensity
-      const density = yOffset * this.state.density_factor + this.state.density_offset
+      const density = yOffset * this.settings.density_factor + this.settings.density_offset
       const falloff = (density + scaledDepth) * scaledScale
       noise += falloff * (falloff > 0 ? 4 : 1)
 
-      if (this.state.top_slide.size > 0) {
+      if (this.settings.top_slide.size > 0) {
         noise = clampedLerp(
-          this.state.top_slide.target,
+          this.settings.top_slide.target,
           noise,
-          (this.chunkCountY - y - (this.state.top_slide.offset)) / (this.state.top_slide.size)
+          (this.chunkCountY - y - (this.settings.top_slide.offset)) / (this.settings.top_slide.size)
         )
       }
 
-      if (this.state.bottom_slide.size > 0) {
+      if (this.settings.bottom_slide.size > 0) {
         noise = clampedLerp(
-          this.state.bottom_slide.target,
+          this.settings.bottom_slide.target,
           noise,
-          (y - (this.state.bottom_slide.offset)) / (this.state.bottom_slide.size)
+          (y - (this.settings.bottom_slide.offset)) / (this.settings.bottom_slide.size)
         )
       }
       data[y] = noise
