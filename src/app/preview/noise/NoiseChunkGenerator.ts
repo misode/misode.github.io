@@ -29,8 +29,13 @@ export class NoiseChunkGenerator {
     this.chunkWidth = settings.size_horizontal * 4
     this.chunkHeight = settings.size_vertical * 4
     this.chunkCountY = Math.floor(settings.height / this.chunkHeight)
-    this.biomeDepth = depth
-    this.biomeScale = scale
+
+    if (settings.amplified && depth > 0) {
+      depth = 1 + depth * 2
+      scale = 1 + scale * 4
+    }
+    this.biomeDepth = 0.265625 * (depth * 0.5 - 0.125);
+    this.biomeScale = 96.0 / (scale * 0.9 + 0.1);
 
     this.noiseColumnCache = Array(width).fill(null)
     this.xOffset = xOffset
@@ -59,8 +64,6 @@ export class NoiseChunkGenerator {
 
     const data = Array(this.chunkCountY + 1)
 
-    let scaledDepth = 0.265625 * this.biomeDepth
-    let scaledScale = 96 / this.biomeScale
     const xzScale = 684.412 * this.settings.sampling.xz_scale
     const yScale = 684.412 * this.settings.sampling.y_scale
     const xzFactor = xzScale / this.settings.sampling.xz_factor
@@ -71,7 +74,7 @@ export class NoiseChunkGenerator {
       let noise = this.sampleAndClampNoise(x, y, this.mainPerlinNoise.getOctaveNoise(0).zo, xzScale, yScale, xzFactor, yFactor)
       const yOffset = 1 - y * 2 / this.chunkCountY + randomDensity
       const density = yOffset * this.settings.density_factor + this.settings.density_offset
-      const falloff = (density + scaledDepth) * scaledScale
+      const falloff = (density + this.biomeDepth) * this.biomeScale
       noise += falloff * (falloff > 0 ? 4 : 1)
 
       if (this.settings.top_slide.size > 0) {
