@@ -45,6 +45,7 @@ export const App = {
   language: new LocalStorageProperty('language', 'en')
     .watch(Tracker.dimLanguage),
   model: new Property<typeof config.models[0] | null>(null),
+  jsonOutput: new Property(''),
   errorsVisible: new Property(false),
   jsonError: new Property<string | null>(null),
   preview: new Property<Preview | null>(null)

@@ -8,7 +8,8 @@ import { App } from '../../App';
 export const SourcePanel = (view: View, model: DataModel) => {
   const updateContent = (el: HTMLTextAreaElement) => {
     const data = model.schema.hook(transformOutput, new ModelPath(model), model.data);
-    el.value = JSON.stringify(data, null, 2)
+    App.jsonOutput.set(JSON.stringify(data, null, 2))
+    el.value = App.jsonOutput.get()
   }
   const source = view.register(el => {
     updateContent(el as HTMLTextAreaElement)
@@ -42,7 +43,16 @@ export const SourcePanel = (view: View, model: DataModel) => {
     Tracker.download()
   }
   const shareSource = (el: Element) => {
-    el.closest('.panel-controls')?.querySelector('input')
+    const shareInput = el.closest('.panel-controls')?.querySelector('input')!
+    const data = btoa(JSON.stringify(JSON.parse(App.jsonOutput.get())))
+    const url = window.location.origin + window.location.pathname + '?q=' + data
+    shareInput.value = url
+    shareInput.style.display = 'inline-block'
+    document.body.addEventListener('click', evt => {
+      shareInput.style.display = 'none'
+    }, { capture: true, once: true })
+    shareInput.select()
+    document.execCommand('copy');
     Tracker.share()
   }
   return `<div class="panel source-panel">

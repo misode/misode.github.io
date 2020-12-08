@@ -1,4 +1,4 @@
-import { App } from './App';
+import { App, Models } from './App';
 import { View } from './views/View';
 import { Home } from './views/Home'
 import { Generator } from './views/Generator'
@@ -10,6 +10,8 @@ const categories = config.models.filter(m => m.category === true)
 
 const router = async () => {
   const urlParts = location.pathname.split('/').filter(e => e)  
+  const urlParams = new URLSearchParams(location.search)
+
   const target = document.getElementById('app')!
   const view = new View()
   let title = locale('title.home')
@@ -22,6 +24,12 @@ const router = async () => {
     target.innerHTML = Home(view)
   } else {
     App.model.set(config.models.find(m => m.id === urlParts.join('/'))!)
+    if (urlParams.has('q')) {
+      try {
+        const data = atob(urlParams.get('q') ?? '')
+        Models[App.model.get()!.id].reset(JSON.parse(data))
+      } catch (e) {}
+    }
     target.innerHTML = Generator(view)
     if (App.model.get()) {
       title = locale('title.generator', [locale(App.model.get()!.id)])
