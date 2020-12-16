@@ -221,7 +221,10 @@ nav > .toggle span {
 }
 
 .preview-panel .panel-controls {
-  right: 5px;
+  justify-content: flex-end;
+  width: 100%;
+  right: 0;
+  padding: 0 5px;
 }
 
 .panel-controls > *:not(:last-child) {
@@ -260,6 +263,15 @@ nav > .toggle span {
 
 .panel-controls input::selection {
   background-color: var(--selection);
+}
+
+.btn.preview-scale {
+  display: block;
+  width: 25%;
+  text-align: center;
+  border-bottom: 2px solid #fff;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .gutter {

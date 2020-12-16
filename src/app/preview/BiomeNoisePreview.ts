@@ -1,5 +1,6 @@
 import { DataModel, Path, ModelPath } from "@mcschema/core"
 import { Octicon } from "../components/Octicon"
+import { locale } from "../Locales"
 import { Property } from "../state/Property"
 import { hexId, stringToColor } from "../Utils"
 import { View } from "../views/View"
@@ -14,12 +15,13 @@ export class BiomeNoisePreview extends Preview {
   seed: string
   offsetX: number = 0
   offsetY: number = 0
-  viewScale: number = 0
+  viewScale: Property<number>
   biomeColors: Property<{ [id: string]: number[] }>
 
   constructor() {
     super()
     this.seed = hexId()
+    this.viewScale = new Property(0)
     this.biomeColors = new Property({})
     this.biomeColors.set(JSON.parse(localStorage.getItem(LOCAL_STORAGE_BIOME_COLORS) ?? '{}'))
     this.noise = []
@@ -37,14 +39,20 @@ export class BiomeNoisePreview extends Preview {
 
   menu(view: View, redraw: () => void) {
     return `
+      <div class="preview-scale btn input" data-id="${view.register(el => {
+        this.viewScale.watchRun(value => {
+          const blocks = (2 ** value) * 200
+          el.textContent = blocks.toFixed()
+        }, 'preview-controls')
+      })}"></div>
       <div class="btn" data-id="${view.onClick(() => {
-        this.viewScale -= 0.5
+        this.viewScale.set(this.viewScale.get() - 0.5)
         redraw()
       })}">
         ${Octicon.plus}
       </div>
       <div class="btn" data-id="${view.onClick(() => {
-        this.viewScale += 0.5
+        this.viewScale.set(this.viewScale.get() + 0.5)
         redraw()
       })}">
         ${Octicon.dash}
@@ -67,7 +75,7 @@ export class BiomeNoisePreview extends Preview {
     })
 
     const data = img.data
-    const s = (2 ** this.viewScale)
+    const s = (2 ** this.viewScale.get())
     for (let x = 0; x < 200; x += 1) {
       for (let y = 0; y < 100; y += 1) {
         const i = (y * (img.width * 4)) + (x * 4)
