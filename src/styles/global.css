@@ -57,7 +57,7 @@ header {
   padding: 10px;
   height: 56px;
   border-bottom: 2px solid var(--border);
-  transition: border-color var(--style-transition);
+  transition: border-color var(--style-transition), background-color var(--style-transition);
 }
 
 .header-title {
@@ -356,6 +356,11 @@ nav > .toggle span {
   width: 100px;
 }
 
+.btn a {
+  color: var(--btn-text);
+  text-decoration: none;
+}
+
 .errors {
   position: fixed;
   display: flex;
@@ -437,6 +442,85 @@ nav > .toggle span {
   margin-left: 10px;
 }
 
+.settings {
+  padding: 20px;
+}
+
+.settings p {
+  color: var(--nav);
+  padding: 8px;
+  border-bottom: 2px solid var(--border);
+  transition: border-color var(--style-transition), color var(--style-transition);
+}
+
+.field-list {
+  width: 100%;
+  border-collapse: collapse;
+  list-style-type: none;
+}
+
+.field-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  transition: border-color var(--style-transition);
+}
+
+.field-prop {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin: 4px;
+}
+
+.field-prop > label,
+.field-prop > input {
+  height: 34px;
+  color: var(--text);
+  margin-right: -1px;
+  border: 1px solid;
+  border-color: var(--nav-faded-hover);
+  transition: all var(--style-transition);
+}
+
+.field-prop label {
+  padding: 0 9px;
+  line-height: 1.94rem;
+  background-color: var(--node-background-label);
+  white-space: nowrap;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.field-prop input {
+  width: 100%;
+  line-height: 1.6rem;
+  background-color: var(--node-background-input);
+  color: var(--text);
+  padding-left: 9px;
+  font-size: 18px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.field-prop svg {
+  padding: 4px;
+  margin: 0 4px;
+  height: 28px;
+  width: 28px;
+  fill: var(--nav);
+  cursor: pointer;
+}
+
+.field-prop .hidden svg {
+  fill: #be4b2e;
+}
+
+.field-prop .dimmed svg {
+  fill: var(--nav-faded);
+}
+
 .spinner {
   margin: 40px auto 0;
   width: 80px;
@@ -475,26 +559,37 @@ nav > .toggle span {
 }
 
 @media screen and (max-width: 580px) {
-  body {
-    overflow-y: hidden;
-  }
-
   header {
     flex-direction: column;
     height: 92px;
+    width: 100%;
+    background-color: var(--background);
+    z-index: 5;
+    position: fixed;
   }
 
   nav {
     align-self: flex-end;
   }
 
-  .content,
-  .source textarea {
-    height: calc(100vh - 92px);
+  .home,
+  .settings,
+  .content {
+    padding-top: 92px; 
+  }
+
+  .content {
+    height: unset;
+    /* min-height: calc(100vh - 92px); */
+    min-height: 100%;
+  }
+
+  textarea.source {
+    height: calc(100vh - 98px);
   }
 
   .tree {
-    padding-top: 50px;
+    padding-top: 44px;
   }
 
   .tree-panel + .gutter {
@@ -504,6 +599,12 @@ nav > .toggle span {
   .content-output,
   .tree-panel {
     width: 100% !important;
+  }
+
+  .tree-panel .panel-controls {
+    top: 97px;
+    right: 5px;
+    position: fixed;
   }
 
   nav > .toggle {
@@ -521,8 +622,20 @@ nav > .toggle span {
   }
 
   .home {
-    padding: 5px;
+    padding: 117px 5px 5px;
     justify-content: center;
+  }
+
+  .field-list li {
+    flex-direction: column;
+  }
+
+  .field-prop {
+    width: 100%;
+  }
+
+  .field-prop input {
+    width: 100%;
   }
 }
 

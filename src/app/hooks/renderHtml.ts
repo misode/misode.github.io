@@ -4,6 +4,7 @@ import { Mounter } from '../views/View'
 import { hexId, htmlEncode } from '../Utils'
 import { suffixInjector } from './suffixInjector'
 import { Octicon } from '../components/Octicon'
+import { App } from '../App'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -167,8 +168,11 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         .filter(k => activeFields[k].enabled(path))
         .map(k => {
           const field = activeFields[k]
-          if (field.hidden && field.hidden()) return ''
           const childPath = getChildModelPath(path, k)
+          const context = childPath.getContext().join('.')
+          const fieldSettings = App.settings.fields.find(f => f?.path && context.endsWith(f.path))
+          if ((field.hidden && field.hidden()) || fieldSettings?.hidden) return ''
+
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
           return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
@@ -176,7 +180,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
               ${error(childPath, mounter)}
               ${help(childPath, mounter)}
               ${cPrefix}
-              <label>${htmlEncode(pathLocale(childPath))}</label>
+              <label>${htmlEncode(fieldSettings?.name ?? pathLocale(childPath))}</label>
               ${cSuffix}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}

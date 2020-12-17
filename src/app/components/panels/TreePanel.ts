@@ -84,6 +84,9 @@ export const TreePanel = (view: View, model: DataModel) => {
           <div class="btn" data-id="${view.onClick(() => {Tracker.redo(); model.redo()})}">
             ${Octicon.arrow_right}<span data-i18n="redo"></span>
           </div>
+          <div class="btn">
+            ${Octicon.gear}<a data-link href="/settings/fields/" data-i18n="fields"></a>
+          </div>
         </div>
       </div>
     </div>

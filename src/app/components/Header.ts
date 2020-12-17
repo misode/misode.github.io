@@ -17,6 +17,11 @@ export const Header = (view: View, title: string, homeLink = '/', panelToggleVis
       <ul>
         <li>${Dropdown(view, 'globe', languages.map(l => [l.code, l.name]), App.language, Tracker.setLanguage)}</li>
         <li>${Toggle(view, [['dark', 'sun'], ['light', 'moon']], App.theme, Tracker.setTheme)}</li>
+        <li>
+          <a data-link href="/settings/fields/">
+            ${Octicon.gear}
+          </a>
+        </li>
         <li class="dimmed">
           <a href="https://github.com/misode/misode.github.io" target="_blank">
             ${Octicon.mark_github}

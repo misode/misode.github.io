@@ -44,6 +44,11 @@ module.exports = (env, argv) => ({
     }),
     new HtmlWebpackPlugin({
       title: 'Data Pack Generators Minecraft 1.16, 1.17',
+      filename: 'settings/fields/index.html',
+      template: 'src/index.html'
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Data Pack Generators Minecraft 1.16, 1.17',
       filename: '404.html',
       template: 'src/index.html'
     }),

@@ -1,4 +1,4 @@
-import { CollectionRegistry, DataModel, ObjectNode, PathError, SchemaRegistry } from '@mcschema/core';
+import { CollectionRegistry, DataModel, ObjectNode, SchemaRegistry } from '@mcschema/core';
 import * as java16 from '@mcschema/java-1.16'
 import * as java17 from '@mcschema/java-1.17'
 import { LocalStorageProperty } from './state/LocalStorageProperty';
@@ -11,6 +11,7 @@ import { DecoratorPreview } from './preview/DecoratorPreview';
 import config from '../config.json';
 import { locale, Locales } from './Locales';
 import { Tracker } from './Tracker';
+import { Settings } from './Settings';
 
 const Versions: {
   [versionId: string]: {
@@ -54,6 +55,7 @@ export const App = {
   localesLoaded: new Property(false),
   loaded: new Property(false),
   mobilePanel: new Property('tree'),
+  settings: new Settings('generator_settings')
 }
 
 App.version.watchRun(async (value) => {
