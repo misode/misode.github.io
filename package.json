@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack-cli -p",
-    "start": "webpack-dev-server -d --content-base ./public"
+    "start": "webpack-dev-server -d --content-base ./public --host 0.0.0.0"
   },
   "keywords": [],
   "author": "Misode",

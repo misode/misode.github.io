@@ -86,7 +86,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
             ${help(childPath, mounter)}
             <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
             ${cPrefix}
-            <label>${htmlEncode(pathLocale(path.contextPush('entry'), [`${index}`]))}</label>
+            <label ${contextMenu(childPath, mounter)}>
+              ${htmlEncode(pathLocale(path.contextPush('entry'), [`${index}`]))}
+            </label>
             ${cSuffix}
           </div>
           ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -125,7 +127,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
               ${help(childPath, mounter)}
               <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
               ${cPrefix}
-              <label>${htmlEncode(key)}</label>
+              <label ${contextMenu(childPath, mounter)}>
+                ${htmlEncode(key)}
+              </label>
               ${cSuffix}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -180,7 +184,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
               ${error(childPath, mounter)}
               ${help(childPath, mounter)}
               ${cPrefix}
-              <label>${htmlEncode(fieldSettings?.name ?? pathLocale(childPath))}</label>
+              <label ${contextMenu(childPath, mounter)}>
+                ${htmlEncode(fieldSettings?.name ?? pathLocale(childPath))}
+              </label>
               ${cSuffix}
             </div>
             ${cBody ? `<div class="node-body">${cBody}</div>` : ''}
@@ -259,7 +265,6 @@ function hashString(str: string) {
 }
 
 function pathLocale(path: Path, params?: string[]): string {
-  // return path.getContext().slice(-5).join('.')
   return segmentedLocale(path.getContext(), params)
     ?? path.getContext()[path.getContext().length - 1] ?? ''
 }
@@ -286,4 +291,58 @@ const popupIcon = (type: string, icon: keyof typeof Octicon, popup: string, moun
   return `<div class="node-icon ${type}" data-id="${onClick}">
     <span class="icon-popup">${popup}</span>${Octicon[icon]}
   </div>`
+}
+
+const contextMenu = (path: ModelPath, mounter: Mounter) => {
+  const id = mounter.register(el => {
+    const openMenu = () => {
+      const popup = document.createElement('div')
+      popup.classList.add('node-menu')
+
+      const helpMessage = segmentedLocale(path.contextPush('help').getContext(), [], 6)
+      if (helpMessage) popup.insertAdjacentHTML('beforeend', `<span class="menu-item help-item">${helpMessage}</span>`)
+
+      const context = path.getContext().join('.')
+      popup.insertAdjacentHTML('beforeend', `
+        <div class="menu-item">
+          <span class="btn">${Octicon.clippy}</span>
+          Context:&nbsp
+          <span class="menu-item-context">${context}</span>
+        </div>`)
+      popup.querySelector('.menu-item .btn')?.addEventListener('click', () => {
+        const inputEl = document.createElement('input')
+        inputEl.value = context
+        el.appendChild(inputEl) 
+        inputEl.select()
+        document.execCommand('copy')
+        el.removeChild(inputEl)
+      })
+
+      el.appendChild(popup)
+      document.body.addEventListener('click', () => {
+        try {el.removeChild(popup)} catch (e) {}
+      }, { capture: true, once: true })
+      document.body.addEventListener('contextmenu', () => {
+        try {el.removeChild(popup)} catch (e) {}
+      }, { capture: true, once: true })
+    }
+    el.addEventListener('contextmenu', evt => {
+      openMenu()
+      evt.preventDefault()
+    })
+    let timer: any = null
+    el.addEventListener('touchstart', () => {
+      timer = setTimeout(() => {
+        openMenu()
+        timer = null
+      }, 800)
+    })
+    el.addEventListener('touchend', () => {
+      if (timer) {
+        clearTimeout(timer)
+        timer = null
+      }
+    })
+  })
+  return `data-id="${id}"`
 }
