@@ -18,7 +18,7 @@ const router = async () => {
   let title = locale('title.home')
 
   if (urlParts.length === 0){
-    App.model.set({ id: '', name: 'Data Pack', category: true})
+    App.model.set({ id: '', name: 'Data Pack', category: true, minVersion: '1.15'})
     target.innerHTML = Home(view)
   } else if (urlParts[0] === 'settings' && urlParts[1] === 'fields') {
     target.innerHTML = FieldSettings(view)

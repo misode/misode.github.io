@@ -1,4 +1,5 @@
 import { CollectionRegistry, DataModel, ObjectNode, SchemaRegistry } from '@mcschema/core';
+import * as java15 from '@mcschema/java-1.15'
 import * as java16 from '@mcschema/java-1.16'
 import * as java17 from '@mcschema/java-1.17'
 import { LocalStorageProperty } from './state/LocalStorageProperty';
@@ -19,6 +20,7 @@ const Versions: {
     getSchemas: (collections: CollectionRegistry) => SchemaRegistry,
   }
 } = {
+  '1.15': java15,
   '1.16': java16,
   '1.17': java17
 }
@@ -98,7 +100,7 @@ async function updateSchemas(version: string) {
   const schemas = Versions[version].getSchemas(collections)
   config.models
     .filter(m => m.schema)
-    .filter(m => checkVersion(App.version.get(), m.minVersion ?? config.versions[0].id))
+    .filter(m => checkVersion(App.version.get(), m.minVersion))
     .forEach(m => {
       const model = Models[m.id]
       const schema = schemas.get(m.schema!)
@@ -120,10 +122,11 @@ async function updateLocale(language: string) {
   Locales[language] = data
 }
 
-export function checkVersion(versionId: string, minVersionId: string) {
+export function checkVersion(versionId: string, minVersionId: string | undefined, maxVersionId?: string) {
   const version = config.versions.findIndex(v => v.id === versionId)
-  const minVersion = config.versions.findIndex(v => v.id === minVersionId)
-  return minVersion <= version
+  const minVersion = minVersionId ? config.versions.findIndex(v => v.id === minVersionId) : 0
+  const maxVersion = maxVersionId ? config.versions.findIndex(v => v.id === maxVersionId) : config.versions.length - 1
+  return minVersion <= version && version <= maxVersion
 }
 
 document.addEventListener('keyup', (evt) => {

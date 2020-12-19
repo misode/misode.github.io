@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@mcschema/core": "^0.11.7",
+    "@mcschema/java-1.15": "^0.1.1",
     "@mcschema/java-1.16": "^0.5.15",
     "@mcschema/java-1.17": "^0.1.9",
     "@mcschema/locales": "^0.1.15",

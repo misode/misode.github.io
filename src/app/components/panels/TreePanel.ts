@@ -62,7 +62,7 @@ export const TreePanel = (view: View, model: DataModel) => {
         </div>
         <div class="panel-menu-list btn-group">
           ${config.versions
-            .filter(v => checkVersion(v.id, App.model.get()!.minVersion ?? '1.16'))
+            .filter(v => checkVersion(v.id, App.model.get()!.minVersion ?? '1.15'))
             .reverse()
             .map(v => `
             <div class="btn" data-id="${view.onClick(() => {

@@ -43,6 +43,10 @@
   ],
   "versions": [
     {
+      "id": "1.15",
+      "mcdata_ref": "13355f7"
+    },
+    {
       "id": "1.16",
       "mcdata_ref": "1.16.4"
     },
@@ -76,105 +80,118 @@
     {
       "id": "dimension",
       "name": "Dimension",
-      "schema": "dimension"
+      "schema": "dimension",
+      "minVersion": "1.16"
     },
     {
       "id": "dimension-type",
       "name": "Dimension Type",
-      "schema": "dimension_type"
+      "schema": "dimension_type",
+      "minVersion": "1.16"
     },
     {
       "id": "world",
       "name": "World Settings",
-      "schema": "world_settings"
+      "schema": "world_settings",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen",
       "name": "Worldgen",
-      "category": true
+      "category": true,
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/biome",
       "name": "Biome",
       "category": "worldgen",
-      "schema": "biome"
+      "schema": "biome",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/carver",
       "name": "Carver",
       "category": "worldgen",
-      "schema": "configured_carver"
+      "schema": "configured_carver",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/feature",
       "name": "Feature",
       "category": "worldgen",
-      "schema": "configured_feature"
+      "schema": "configured_feature",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/noise-settings",
       "name": "Noise Settings",
       "category": "worldgen",
-      "schema": "noise_settings"
+      "schema": "noise_settings",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/structure-feature",
       "name": "Structure Feature",
       "category": "worldgen",
-      "schema": "configured_structure_feature"
+      "schema": "configured_structure_feature",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/surface-builder",
       "name": "Surface Builder",
       "category": "worldgen",
-      "schema": "configured_surface_builder"
+      "schema": "configured_surface_builder",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/processor-list",
       "name": "Processor List",
       "category": "worldgen",
-      "schema": "processor_list"
+      "schema": "processor_list",
+      "minVersion": "1.16"
     },
     {
       "id": "worldgen/template-pool",
       "name": "Template Pool",
       "category": "worldgen",
-      "schema": "template_pool"
+      "schema": "template_pool",
+      "minVersion": "1.16"
     }
   ],
   "registries": [
-    "attribute",
+    { "id": "attribute", "minVersion": "1.16" },
     "block",
     "enchantment",
     "entity_type",
     "fluid",
     "item",
-    "loot_condition_type",
-    "loot_function_type",
+    { "id": "loot_condition_type", "minVersion": "1.16" },
+    { "id": "loot_function_type", "minVersion": "1.16" },
     { "id": "loot_nbt_provider_type", "minVersion": "1.17" },
     { "id": "loot_number_provider_type", "minVersion": "1.17" },
-    "loot_pool_entry_type",
+    { "id": "loot_pool_entry_type", "minVersion": "1.16" },
     { "id": "loot_score_provider_type", "minVersion": "1.17" },
     "mob_effect",
-    "rule_test",
-    "pos_rule_test",
+    { "id": "rule_test", "minVersion": "1.16" },
+    { "id": "pos_rule_test", "minVersion": "1.16" },
     "sound_event",
     "stat_type",
-    "worldgen/block_state_provider_type",
-    "worldgen/block_placer_type",
-    "worldgen/biome_source",
-    "worldgen/carver",
-    "worldgen/chunk_generator",
-    "worldgen/decorator",
-    "worldgen/feature",
-    "worldgen/feature_size_type",
-    "worldgen/foliage_placer_type",
-    "worldgen/structure_feature",
-    "worldgen/structure_pool_element",
-    "worldgen/structure_processor",
-    "worldgen/surface_builder",
-    "worldgen/tree_decorator_type",
-    "worldgen/trunk_placer_type",
-    { "id": "worldgen/biome", "path": "processed/reports/biomes" }
+    { "id": "worldgen/block_state_provider_type", "minVersion": "1.16" },
+    { "id": "worldgen/block_placer_type", "minVersion": "1.16" },
+    { "id": "worldgen/biome_source", "minVersion": "1.16" },
+    { "id": "worldgen/carver", "minVersion": "1.16" },
+    { "id": "worldgen/chunk_generator", "minVersion": "1.16" },
+    { "id": "worldgen/decorator", "minVersion": "1.16" },
+    { "id": "worldgen/feature", "minVersion": "1.16" },
+    { "id": "worldgen/feature_size_type", "minVersion": "1.16" },
+    { "id": "worldgen/foliage_placer_type", "minVersion": "1.16" },
+    { "id": "worldgen/structure_feature", "minVersion": "1.16" },
+    { "id": "worldgen/structure_pool_element", "minVersion": "1.16" },
+    { "id": "worldgen/structure_processor", "minVersion": "1.16" },
+    { "id": "worldgen/surface_builder", "minVersion": "1.16" },
+    { "id": "worldgen/tree_decorator_type", "minVersion": "1.16" },
+    { "id": "worldgen/trunk_placer_type", "minVersion": "1.16" },
+    { "id": "biome", "maxVersion": "1.15" },
+    { "id": "worldgen/biome", "minVersion": "1.16", "path": "processed/reports/biomes" }
   ]
 }
