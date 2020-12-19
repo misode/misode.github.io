@@ -1,6 +1,7 @@
 import { App } from '../App'
 import { Header } from '../components/Header'
 import { Octicon } from '../components/Octicon'
+import { locale } from '../Locales'
 import { View } from './View'
 
 export const FieldSettings = (view: View): string => {
@@ -26,10 +27,12 @@ export const FieldSettings = (view: View): string => {
         })
         return `<li>
           <div class="field-prop">
-            <label>Path</label><input size="30" data-id="${pathInput}">
+            <label>${locale('settings.fields.path')}</label>
+            <input size="30" data-id="${pathInput}">
           </div>
           <div class="field-prop">
-            <label>Name</label><input data-id="${nameInput}">
+            <label>${locale('settings.fields.name')}</label>
+            <input data-id="${nameInput}">
           </div>
           <div class="field-prop">
             <span ${f?.hidden ? 'class="hidden"' : ''} data-id="${view.onClick(() => {
@@ -51,9 +54,7 @@ export const FieldSettings = (view: View): string => {
   
   return `${Header(view, 'Field Settings')}
     <div class="settings">
-      <p>
-        Customize advanced field settings
-      </p>
+      <p>${locale('settings.fields.description')}</p>
       <ul class="field-list" data-id="${fieldListId}"></ul>
     </div>`
 }
