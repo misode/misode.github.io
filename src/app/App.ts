@@ -5,7 +5,7 @@ import * as java17 from '@mcschema/java-1.17'
 import { LocalStorageProperty } from './state/LocalStorageProperty';
 import { Property } from './state/Property';
 import { Preview } from './preview/Preview';
-import { RegistryFetcher } from './RegistryFetcher';
+import { fetchData } from './DataFetcher';
 import { BiomeNoisePreview } from './preview/BiomeNoisePreview';
 import { NoiseSettingsPreview } from './preview/NoiseSettingsPreview';
 import { DecoratorPreview } from './preview/DecoratorPreview';
@@ -14,7 +14,7 @@ import { locale, Locales } from './Locales';
 import { Tracker } from './Tracker';
 import { Settings } from './Settings';
 
-const Versions: {
+export const Versions: {
   [versionId: string]: {
     getCollections: () => CollectionRegistry,
     getSchemas: (collections: CollectionRegistry) => SchemaRegistry,
@@ -39,6 +39,17 @@ export const Models: {
 
 config.models.filter(m => m.schema)
   .forEach(m => Models[m.id] = new DataModel(ObjectNode({})))
+
+export const BlockStateRegistry: {
+  [block: string]: {
+    properties: {
+      [key: string]: string[]
+    },
+    default: {
+      [key: string]: string
+    }
+  }
+} = {}
 
 export const App = {
   version: new LocalStorageProperty('schema_version', config.versions[config.versions.length - 1].id)
@@ -96,7 +107,7 @@ App.mobilePanel.watchRun((value) => {
 
 async function updateSchemas(version: string) {
   const collections = Versions[version].getCollections()
-  await RegistryFetcher(collections, version)
+  await fetchData(collections, version)
   const schemas = Versions[version].getSchemas(collections)
   config.models
     .filter(m => m.schema)

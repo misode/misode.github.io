@@ -4,6 +4,7 @@
   "dimension-type": "Dimension Type",
   "dimension": "Dimension",
   "download": "Download",
+  "error.block_state.missing_property": "Missing block property \"%0%\"",
   "fields": "Fields",
   "item-modifier": "Item Modifier",
   "language": "Language",

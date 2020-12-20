@@ -6,6 +6,8 @@ import { Errors } from '../components/Errors'
 import { TreePanel } from '../components/panels/TreePanel'
 import { SourcePanel } from '../components/panels/SourcePanel'
 import { PreviewPanel } from '../components/panels/PreviewPanel'
+import { customValidation } from '../hooks/customValidation'
+import { ModelPath, Path } from '@mcschema/core'
 
 export const Generator = (view: View): string => {
   const model = Models[App.model.get()!.id]
@@ -26,7 +28,10 @@ export const Generator = (view: View): string => {
     }
   }
   model.addListener({
-    invalidated: validatePreview
+    invalidated: () => {
+      validatePreview()
+      model.schema.hook(customValidation, new ModelPath(model, new Path()), model.data, model.errors)
+    }
   })
   App.schemasLoaded.watch((value) => {
     if (value) {
