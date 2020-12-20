@@ -40,7 +40,7 @@ export const Models: {
 config.models.filter(m => m.schema)
   .forEach(m => Models[m.id] = new DataModel(ObjectNode({})))
 
-export const BlockStateRegistry: {
+export let BlockStateRegistry: {
   [block: string]: {
     properties: {
       [key: string]: string[]
@@ -106,6 +106,7 @@ App.mobilePanel.watchRun((value) => {
 })
 
 async function updateSchemas(version: string) {
+  BlockStateRegistry = {}
   const collections = Versions[version].getCollections()
   await fetchData(collections, version)
   const schemas = Versions[version].getSchemas(collections)

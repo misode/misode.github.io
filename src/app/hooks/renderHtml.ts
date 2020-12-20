@@ -1,10 +1,10 @@
-import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode } from '@mcschema/core'
+import { Hook, ModelPath, Path, StringHookParams, ValidationOption, EnumOption, INode, DataModel, MapNode, StringNode, relativePath } from '@mcschema/core'
 import { locale, segmentedLocale } from '../Locales'
 import { Mounter } from '../views/View'
 import { hexId, htmlEncode } from '../Utils'
 import { suffixInjector } from './suffixInjector'
 import { Octicon } from '../components/Octicon'
-import { App } from '../App'
+import { App, BlockStateRegistry } from '../App'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -105,13 +105,19 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     return ['', suffix, body]
   },
 
-  map({ keys, children }, path, value, mounter) {
+  map({ keys, children, config }, path, value, mounter) {
     const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
     const onAdd = mounter.onClick(el => {
       const key = keyPath.get()
       path.model.set(path.push(key), children.default())
     })
-    const keyRendered = keys.hook(this, keyPath, keyPath.get() ?? '', mounter)
+    const blockState = (config.validation?.validator === 'block_state_map' ? BlockStateRegistry[relativePath(path, config.validation.params.id).get()] : null)
+    if (blockState && !blockState.properties) {
+      return ['', '', '']
+    }
+    const keyRendered = (blockState
+      ? StringNode(null!, { enum: Object.keys(blockState.properties ?? {}) })
+      : keys).hook(this, keyPath, keyPath.get() ?? '', mounter)
     const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
     let body = ''
     if (typeof value === 'object' && value !== undefined) {
@@ -120,7 +126,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const removeId = mounter.onClick(el => path.model.set(path.push(key), undefined))
           const childPath = path.modelPush(key)
           const category = children.category(childPath)
-          const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], mounter)
+          const [cPrefix, cSuffix, cBody] = (blockState
+            ? StringNode(null!, { enum: blockState.properties[key] })
+            : children).hook(this, childPath, value[key], mounter)
           return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
               ${error(childPath, mounter)}

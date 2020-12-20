@@ -2,6 +2,8 @@ import { CollectionRegistry } from '@mcschema/core'
 import { BlockStateRegistry, checkVersion } from './App'
 import config from '../config.json'
 
+const CACHE_FORMAT = 1
+
 type VersionConfig = {
   id: string,
   mcdata_ref: string
@@ -27,59 +29,54 @@ export const fetchData = async (target: CollectionRegistry, versionId: string) =
   if (!version) return
 
   const cache = JSON.parse(localStorage.getItem(localStorageCache(versionId)) ?? '{}')
-  const cacheValid = version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__
+  const cacheValid = cache.format === CACHE_FORMAT && (version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__)
 
-  const cacheDirty = (await Promise.all([
+  await Promise.all([
     fetchRegistries(target, version, cache, cacheValid),
     fetchBlockStateMap(version, cache, cacheValid)
-  ])).some(v => v)
+  ])
 
-  if (cacheDirty) {
+  if (!cacheValid) {
     if (version.mcdata_ref === 'master') {
       cache.mcdata_hash = __MCDATA_MASTER_HASH__
     }
+    cache.format = CACHE_FORMAT
     localStorage.setItem(localStorageCache(versionId), JSON.stringify(cache))
   }
 }
 
 const fetchRegistries = async (target: CollectionRegistry, version: VersionConfig, cache: any, cacheValid: boolean) => {
-  let cacheDirty = false
-  if (!cache.registries) cache.registries = {}
+  if (cacheValid && cache.registries) {
+    config.registries.forEach((r: string | RegistryConfig) => {
+      if (typeof r === 'string') r = { id: r }
+      if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
+
+      target.register(r.id, cache.registries[r.id])
+    })
+    return
+  }
+
+  cache.registries = {}
   if (checkVersion('1.15', version.id)) {
     const url = `${baseUrl}/${version.mcdata_ref}/generated/reports/registries.json`
-    if (cacheValid && cache.registries) {
-      config.registries.forEach((r: string | RegistryConfig) => {
+    try {
+      const res = await fetch(url)
+      const data = await res.json()
+      config.registries.forEach(async (r: string | RegistryConfig) => {
         if (typeof r === 'string') r = { id: r }
         if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
 
-        target.register(r.id, cache.registries[r.id])
+        const values = Object.keys(data[`minecraft:${r.id}`].entries)
+        target.register(r.id, values)
+        cache.registries[r.id] = values
       })
-    } else {
-      try {
-        const res = await fetch(url)
-        const data = await res.json()
-        config.registries.forEach(async (r: string | RegistryConfig) => {
-          if (typeof r === 'string') r = { id: r }
-          if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
-
-          const values = Object.keys(data[`minecraft:${r.id}`].entries)
-          target.register(r.id, values)
-          cache.registries[r.id] = values
-          cacheDirty = true
-        })
-      } catch (e) {
-        console.warn(`Error occurred while fetching registries for version ${version.id}`)
-      }
+    } catch (e) {
+      console.warn(`Error occurred while fetching registries for version ${version.id}`)
     }
   } else {
     await Promise.all(config.registries.map(async (r: string | RegistryConfig) => {
       if (typeof r === 'string') r = { id: r }
       if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
-
-      if (cacheValid && cache.registries?.[r.id]) {
-        target.register(r.id, cache.registries[r.id])
-        return
-      }
   
       const url = r.path
         ? `${baseUrl}/${version.mcdata_ref}/${r.path}/data.min.json`
@@ -91,13 +88,11 @@ const fetchRegistries = async (target: CollectionRegistry, version: VersionConfi
   
         target.register(r.id, data.values)
         cache.registries[r.id] = data.values
-        cacheDirty = true
       } catch (e) {
         console.warn(`Error occurred while fetching registry "${r.id}":`, e)
       }
     }))
   }
-  return cacheDirty
 }
 
 const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid: boolean) => {
@@ -105,9 +100,10 @@ const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid
     Object.keys(cache.block_state_map).forEach(block => {
       BlockStateRegistry[block] = cache.block_state_map[block]
     })
-    return false
+    return
   }
 
+  cache.block_state_map = {}
   const url = (checkVersion(version.id, undefined, '1.15'))
     ? `${baseUrl}/${version.mcdata_ref}/generated/reports/blocks.json`
     : `${baseUrl}/${version.mcdata_ref}/processed/reports/blocks/data.min.json`
@@ -115,7 +111,6 @@ const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid
   const res = await fetch(url)
   const data = await res.json()
 
-  cache.block_state_map = {}
   Object.keys(data).forEach(block => {
     const res = {
       properties: data[block].properties,
@@ -124,6 +119,4 @@ const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid
     BlockStateRegistry[block] = res
     cache.block_state_map[block] = res
   })
-
-  return true
 }
