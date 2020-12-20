@@ -16,11 +16,13 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
       const block = relativePath(path, config.validation.params.id).get()
       const errors = path.getModel().errors
 
-      const requiredProps = BlockStateRegistry[block].properties ?? {}
+      const requiredProps = (BlockStateRegistry[block] ?? {}).properties ?? {}
       const existingKeys = Object.keys(value ?? {})
       Object.keys(requiredProps).forEach(p => {
         if (!existingKeys.includes(p)) {
-          errors.add(path, 'error.block_state.missing_property', p)
+          if (path.last() === 'Properties') {
+            errors.add(path, 'error.block_state.missing_property', p)
+          }
         } else if (!requiredProps[p].includes(value[p])) {
           errors.add(path.push(p), 'error.invalid_enum_option', value[p])
         }
