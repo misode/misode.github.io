@@ -23,20 +23,20 @@ export const fetchData = async (target: CollectionRegistry, versionId: string) =
 
   const cache = JSON.parse(localStorage.getItem(localStorageCache(versionId)) ?? '{}')
   const mcdataCacheValid = cache.format === CACHE_FORMAT && (version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__)
-  const vanillaDataCacheValid = cache.format === CACHE_FORMAT && (version.vanilla_datapack_summary_ref !== 'master' || cache.vanilla_data_summary_hash === __VANILLA_DATAPACK_SUMMARY_HASH__)
+  const vanillaDatapackCacheValid = cache.format === CACHE_FORMAT && (version.vanilla_datapack_summary_ref !== 'master' || cache.vanilla_datapack_summary_hash === __VANILLA_DATAPACK_SUMMARY_HASH__)
 
   await Promise.all([
     fetchRegistries(target, version, cache, mcdataCacheValid),
     fetchBlockStateMap(version, cache, mcdataCacheValid),
-    fetchDynamicRegistries(target, version, cache, vanillaDataCacheValid)
+    fetchDynamicRegistries(target, version, cache, vanillaDatapackCacheValid)
   ])
 
-  if (!mcdataCacheValid || !vanillaDataCacheValid) {
+  if (!mcdataCacheValid || !vanillaDatapackCacheValid) {
     if (version.mcdata_ref === 'master') {
       cache.mcdata_hash = __MCDATA_MASTER_HASH__
     }
-    if (version.mcdata_ref === 'master') {
-      cache.vanilla_data_summary_hash = __VANILLA_DATAPACK_SUMMARY_HASH__
+    if (version.vanilla_datapack_summary_ref === 'master') {
+      cache.vanilla_datapack_summary_hash = __VANILLA_DATAPACK_SUMMARY_HASH__
     }
     cache.format = CACHE_FORMAT
     localStorage.setItem(localStorageCache(versionId), JSON.stringify(cache))
@@ -119,7 +119,7 @@ const fetchDynamicRegistries = async (target: CollectionRegistry, version: Versi
     .filter(r => r.dynamic)
     .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
 
-  if (cacheValid) {
+  if (cacheValid && cache.dynamic_registries) {
     registries.forEach(r => {
       target.register(r.id, cache.dynamic_registries[r.id])
     })
@@ -128,11 +128,15 @@ const fetchDynamicRegistries = async (target: CollectionRegistry, version: Versi
 
   cache.dynamic_registries = {}
   if (checkVersion(version.id, '1.16')) {
-    const res = await fetch(`${vanillaDatapackUrl}/${version.vanilla_datapack_summary_ref}/summary/flattened.min.json`)
-    const data = await res.json()
-    registries.forEach(r => {
-      target.register(r.id, data[r.id])
-      cache.dynamic_registries[r.id] = data[r.id]
-    })
+    try {
+      const res = await fetch(`${vanillaDatapackUrl}/${version.vanilla_datapack_summary_ref}/summary/flattened.min.json`)
+      const data = await res.json()
+      registries.forEach(r => {
+        target.register(r.id, data[r.id])
+        cache.dynamic_registries[r.id] = data[r.id]
+      })
+    } catch (e) {
+      console.warn(`Error occurred while fetching dynamic registries:`, e)
+    }
   }
 }
