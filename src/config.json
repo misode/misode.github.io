@@ -180,6 +180,7 @@
     { "id": "loot_table", "dynamic": true },
     { "id": "mob_effect" },
     { "id": "pos_rule_test", "minVersion": "1.16" },
+    { "id": "potion", "minVersion": "1.15" },
     { "id": "predicate", "dynamic": true },
     { "id": "recipe", "dynamic": true },
     { "id": "rule_test", "minVersion": "1.16" },

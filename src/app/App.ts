@@ -61,6 +61,7 @@ export const App = {
   model: new Property<typeof config.models[0] | null>(null),
   jsonOutput: new Property(''),
   errorsVisible: new Property(false),
+  treeMinimized: new Property(false),
   jsonError: new Property<string | null>(null),
   preview: new Property<Preview | null>(null)
     .watch(p => Tracker.dimPreview(p?.getName() ?? 'none')),

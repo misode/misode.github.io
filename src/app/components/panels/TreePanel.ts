@@ -36,6 +36,9 @@ export const TreePanel = (view: View, model: DataModel) => {
         view.mount(el, getContent(), false)
       }
     })
+    App.treeMinimized.watch(() => {
+      view.mount(el, getContent(), false)
+    })
     model.addListener({
       invalidated() {
         view.mount(el, getContent(), false)
@@ -47,6 +50,11 @@ export const TreePanel = (view: View, model: DataModel) => {
   })
   return `<div class="panel tree-panel">
     <div class="panel-controls">
+      <div class="btn" data-id="${view.onClick(() => {
+        App.treeMinimized.set(!App.treeMinimized.get())
+      })}">
+        ${Octicon.fold}<span data-i18n="minimize"></span>
+      </div>
       <div class="panel-menu">
         <div class="btn" data-id="${view.onClick(toggleMenu)}">
           ${Octicon.tag}

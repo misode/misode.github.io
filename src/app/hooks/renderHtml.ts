@@ -176,7 +176,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     let body = ''
     if (typeof value === 'object' && value !== undefined && (!(node.optional() && value === undefined))) {
       const activeFields = getActiveFields(path)
-      body = Object.keys(activeFields)
+      body = (App.treeMinimized.get()
+          ? Object.keys(activeFields).filter(k => value[k] !== undefined)
+          : Object.keys(activeFields))
         .filter(k => activeFields[k].enabled(path))
         .map(k => {
           const field = activeFields[k]
