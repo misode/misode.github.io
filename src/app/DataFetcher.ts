@@ -23,7 +23,7 @@ export const fetchData = async (target: CollectionRegistry, versionId: string) =
 
   const cache = JSON.parse(localStorage.getItem(localStorageCache(versionId)) ?? '{}')
   const mcdataCacheValid = cache.format === CACHE_FORMAT && (version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__)
-  const vanillaDatapackCacheValid = cache.format === CACHE_FORMAT && (version.vanilla_datapack_summary_ref !== 'master' || cache.vanilla_datapack_summary_hash === __VANILLA_DATAPACK_SUMMARY_HASH__)
+  const vanillaDatapackCacheValid = cache.format === CACHE_FORMAT && (version.vanilla_datapack_summary_ref !== 'summary' || cache.vanilla_datapack_summary_hash === __VANILLA_DATAPACK_SUMMARY_HASH__)
 
   await Promise.all([
     fetchRegistries(target, version, cache, mcdataCacheValid),
@@ -32,12 +32,8 @@ export const fetchData = async (target: CollectionRegistry, versionId: string) =
   ])
 
   if (!mcdataCacheValid || !vanillaDatapackCacheValid) {
-    if (version.mcdata_ref === 'master') {
-      cache.mcdata_hash = __MCDATA_MASTER_HASH__
-    }
-    if (version.vanilla_datapack_summary_ref === 'master') {
-      cache.vanilla_datapack_summary_hash = __VANILLA_DATAPACK_SUMMARY_HASH__
-    }
+    cache.mcdata_hash = __MCDATA_MASTER_HASH__
+    cache.vanilla_datapack_summary_hash = __VANILLA_DATAPACK_SUMMARY_HASH__
     cache.format = CACHE_FORMAT
     localStorage.setItem(localStorageCache(versionId), JSON.stringify(cache))
   }
