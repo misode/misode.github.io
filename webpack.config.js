@@ -20,7 +20,8 @@ module.exports = (env, argv) => ({
   },
   plugins: [
     new webpack.DefinePlugin({
-      __MCDATA_MASTER_HASH__: JSON.stringify(env ? env.hash : '')
+      __MCDATA_MASTER_HASH__: JSON.stringify(env ? env.mcdata_hash : ''),
+      __VANILLA_DATAPACK_SUMMARY_HASH__: JSON.stringify(env ? env.vanilla_datapack_summary_hash : '')
     }),
     new CopyWebpackPlugin({
       patterns: [

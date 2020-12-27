@@ -6,39 +6,37 @@ const CACHE_FORMAT = 1
 
 type VersionConfig = {
   id: string,
-  mcdata_ref: string
-}
-
-type RegistryConfig = {
-  id: string
-  minVersion?: string
-  maxVersion?: string
-  path?: string
+  mcdata_ref: string,
+  vanilla_datapack_summary_ref?: string
 }
 
 const localStorageCache = (version: string) => `cache_${version}`
 declare var __MCDATA_MASTER_HASH__: string;
+declare var __VANILLA_DATAPACK_SUMMARY_HASH__: string;
 
-const baseUrl = 'https://raw.githubusercontent.com/Arcensoth/mcdata'
-const mcdata = (ref: string, registry: string) => {
-  return `${baseUrl}/${ref}/processed/reports/registries/${registry}/data.min.json`
-}
+const mcdataUrl = 'https://raw.githubusercontent.com/Arcensoth/mcdata'
+const vanillaDatapackUrl = 'https://raw.githubusercontent.com/SPGoding/vanilla-datapack'
 
 export const fetchData = async (target: CollectionRegistry, versionId: string) => {
   const version = config.versions.find(v => v.id === versionId)
   if (!version) return
 
   const cache = JSON.parse(localStorage.getItem(localStorageCache(versionId)) ?? '{}')
-  const cacheValid = cache.format === CACHE_FORMAT && (version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__)
+  const mcdataCacheValid = cache.format === CACHE_FORMAT && (version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__)
+  const vanillaDataCacheValid = cache.format === CACHE_FORMAT && (version.vanilla_datapack_summary_ref !== 'master' || cache.vanilla_data_summary_hash === __VANILLA_DATAPACK_SUMMARY_HASH__)
 
   await Promise.all([
-    fetchRegistries(target, version, cache, cacheValid),
-    fetchBlockStateMap(version, cache, cacheValid)
+    fetchRegistries(target, version, cache, mcdataCacheValid),
+    fetchBlockStateMap(version, cache, mcdataCacheValid),
+    fetchDynamicRegistries(target, version, cache, vanillaDataCacheValid)
   ])
 
-  if (!cacheValid) {
+  if (!mcdataCacheValid || !vanillaDataCacheValid) {
     if (version.mcdata_ref === 'master') {
       cache.mcdata_hash = __MCDATA_MASTER_HASH__
+    }
+    if (version.mcdata_ref === 'master') {
+      cache.vanilla_data_summary_hash = __VANILLA_DATAPACK_SUMMARY_HASH__
     }
     cache.format = CACHE_FORMAT
     localStorage.setItem(localStorageCache(versionId), JSON.stringify(cache))
@@ -46,26 +44,24 @@ export const fetchData = async (target: CollectionRegistry, versionId: string) =
 }
 
 const fetchRegistries = async (target: CollectionRegistry, version: VersionConfig, cache: any, cacheValid: boolean) => {
-  if (cacheValid && cache.registries) {
-    config.registries.forEach((r: string | RegistryConfig) => {
-      if (typeof r === 'string') r = { id: r }
-      if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
+  const registries = config.registries
+    .filter(r => !r.dynamic)
+    .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
 
+  if (cacheValid && cache.registries) {
+    registries.forEach(r => {
       target.register(r.id, cache.registries[r.id])
     })
     return
   }
 
   cache.registries = {}
-  if (checkVersion('1.15', version.id)) {
-    const url = `${baseUrl}/${version.mcdata_ref}/generated/reports/registries.json`
+  if (checkVersion(version.id, undefined, '1.15')) {
+    const url = `${mcdataUrl}/${version.mcdata_ref}/generated/reports/registries.json`
     try {
       const res = await fetch(url)
       const data = await res.json()
-      config.registries.forEach(async (r: string | RegistryConfig) => {
-        if (typeof r === 'string') r = { id: r }
-        if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
-
+      registries.forEach(async r => {
         const values = Object.keys(data[`minecraft:${r.id}`].entries)
         target.register(r.id, values)
         cache.registries[r.id] = values
@@ -74,13 +70,10 @@ const fetchRegistries = async (target: CollectionRegistry, version: VersionConfi
       console.warn(`Error occurred while fetching registries for version ${version.id}`)
     }
   } else {
-    await Promise.all(config.registries.map(async (r: string | RegistryConfig) => {
-      if (typeof r === 'string') r = { id: r }
-      if (!checkVersion(version.id, r.minVersion, r.maxVersion)) return
-  
+    await Promise.all(registries.map(async r => {
       const url = r.path
-        ? `${baseUrl}/${version.mcdata_ref}/${r.path}/data.min.json`
-        : mcdata(version.mcdata_ref, typeof r === 'string' ? r : r.id)
+        ? `${mcdataUrl}/${version.mcdata_ref}/${r.path}/data.min.json`
+        : `${mcdataUrl}/${version.mcdata_ref}/processed/reports/registries/${r.id}/data.min.json`
   
       try {
         const res = await fetch(url)
@@ -105,8 +98,8 @@ const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid
 
   cache.block_state_map = {}
   const url = (checkVersion(version.id, undefined, '1.15'))
-    ? `${baseUrl}/${version.mcdata_ref}/generated/reports/blocks.json`
-    : `${baseUrl}/${version.mcdata_ref}/processed/reports/blocks/data.min.json`
+    ? `${mcdataUrl}/${version.mcdata_ref}/generated/reports/blocks.json`
+    : `${mcdataUrl}/${version.mcdata_ref}/processed/reports/blocks/data.min.json`
 
   const res = await fetch(url)
   const data = await res.json()
@@ -119,4 +112,27 @@ const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid
     BlockStateRegistry[block] = res
     cache.block_state_map[block] = res
   })
+}
+
+const fetchDynamicRegistries = async (target: CollectionRegistry, version: VersionConfig, cache: any, cacheValid: boolean) => {
+  const registries = config.registries
+    .filter(r => r.dynamic)
+    .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
+
+  if (cacheValid) {
+    registries.forEach(r => {
+      target.register(r.id, cache.dynamic_registries[r.id])
+    })
+    return
+  }
+
+  cache.dynamic_registries = {}
+  if (checkVersion(version.id, '1.16')) {
+    const res = await fetch(`${vanillaDatapackUrl}/${version.vanilla_datapack_summary_ref}/summary/flattened.min.json`)
+    const data = await res.json()
+    registries.forEach(r => {
+      target.register(r.id, data[r.id])
+      cache.dynamic_registries[r.id] = data[r.id]
+    })
+  }
 }

@@ -111,14 +111,14 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       const key = keyPath.get()
       path.model.set(path.push(key), children.default())
     })
+    let suffix = ''
     const blockState = (config.validation?.validator === 'block_state_map' ? BlockStateRegistry[relativePath(path, config.validation.params.id).get()] : null)
-    if (blockState && !blockState.properties) {
-      return ['', '', '']
+    if (!blockState || blockState.properties) {
+      const keyRendered = (blockState
+        ? StringNode(null!, { enum: Object.keys(blockState.properties ?? {}) })
+        : keys).hook(this, keyPath, keyPath.get() ?? '', mounter)
+      suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
     }
-    const keyRendered = (blockState
-      ? StringNode(null!, { enum: Object.keys(blockState.properties ?? {}) })
-      : keys).hook(this, keyPath, keyPath.get() ?? '', mounter)
-    const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
     let body = ''
     if (typeof value === 'object' && value !== undefined) {
       body = Object.keys(value)
@@ -127,7 +127,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           const childPath = path.modelPush(key)
           const category = children.category(childPath)
           const [cPrefix, cSuffix, cBody] = (blockState
-            ? StringNode(null!, { enum: blockState.properties[key] })
+            ? StringNode(null!, blockState.properties && { enum: blockState.properties[key] })
             : children).hook(this, childPath, value[key], mounter)
           return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">

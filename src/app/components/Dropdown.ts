@@ -8,7 +8,6 @@ export const Dropdown = (view: View, icon: keyof typeof Octicon, entries: [strin
       state.set((el as HTMLSelectElement).value)
     })
     state.watchRun(v => (el as HTMLSelectElement).value = v, 'dropdown')
-    watcher?.(state.get())
   })
   return `
   <div class="dropdown">

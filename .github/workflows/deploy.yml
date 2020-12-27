@@ -20,10 +20,18 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Get latest vanilla-datapack commit hash
+      uses: octokit/request-action@v2.x
+      id: get_vanilla_datapack_summary_hash
+      with:
+        route: GET /repos/SPGoding/vanilla-datapack/branches/summary
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build
       run: |
         npm install
-        npm run build -- --env.hash='${{ fromJson(steps.get_mcdata_hash.outputs.data).commit.sha }}'
+        npm run build -- --env.mcdata_hash='${{ fromJson(steps.get_mcdata_hash.outputs.data).commit.sha }}' --env.vanilla_datapack_summary_hash='${{ fromJson(steps.get_vanilla_datapack_summary_hash.outputs.data).commit.sha }}'
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@releases/v3

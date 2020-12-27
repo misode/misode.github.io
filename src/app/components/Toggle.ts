@@ -10,7 +10,6 @@ export const Toggle = <T>(view: View, entries: [T, keyof typeof Octicon][], stat
       state.set(entries[(i + 1) % entries.length][0])
     })
     state.watch(_ => el.innerHTML = activeOcticon(), 'toggle')
-    watcher?.(state.get())
   })
   return `<div class="toggle" data-id="${toggle}">${activeOcticon()}</div>`
 }

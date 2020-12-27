@@ -47,12 +47,6 @@ export const TreePanel = (view: View, model: DataModel) => {
   })
   return `<div class="panel tree-panel">
     <div class="panel-controls">
-      <div class="btn" data-id="${view.onClick(() => {
-        Tracker.reset(); model.reset(model.schema.default())
-      })}">
-        ${Octicon.history}
-        <span data-i18n="reset"></span>
-      </div>
       <div class="panel-menu">
         <div class="btn" data-id="${view.onClick(toggleMenu)}">
           ${Octicon.tag}
@@ -78,14 +72,16 @@ export const TreePanel = (view: View, model: DataModel) => {
           ${Octicon.kebab_horizontal}
         </div>
         <div class="panel-menu-list btn-group">
+          <div class="btn" data-id="${view.onClick(() => {
+            Tracker.reset(); model.reset(model.schema.default())
+          })}">
+            ${Octicon.history}<span data-i18n="reset"></span>
+          </div>
           <div class="btn" data-id="${view.onClick(() => {Tracker.undo(); model.undo()})}">
             ${Octicon.arrow_left}<span data-i18n="undo"></span>
           </div>
           <div class="btn" data-id="${view.onClick(() => {Tracker.redo(); model.redo()})}">
             ${Octicon.arrow_right}<span data-i18n="redo"></span>
-          </div>
-          <div class="btn">
-            ${Octicon.gear}<a data-link href="/settings/fields/" data-i18n="fields"></a>
           </div>
         </div>
       </div>
