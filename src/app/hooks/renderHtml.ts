@@ -5,6 +5,7 @@ import { hexId, htmlEncode } from '../Utils'
 import { suffixInjector } from './suffixInjector'
 import { Octicon } from '../components/Octicon'
 import { App, BlockStateRegistry } from '../App'
+import { getFilterKey } from './getFilterKey'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -163,7 +164,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     return ['', `<input data-id="${onChange}" value="${value ?? ''}">`, '']
   },
 
-  object({ node, getActiveFields, getChildModelPath }, path, value, mounter) {
+  object({ node, getActiveFields, getChildModelPath, filter }, path, value, mounter) {
     let prefix = ''
     if (node.optional()) {
       if (value === undefined) {
@@ -172,13 +173,19 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         prefix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}">${Octicon.trashcan}</button>`
       }
     }
-    let suffix = node.hook(suffixInjector, path, mounter) || ''
+    let suffix = ''
     let body = ''
     if (typeof value === 'object' && value !== undefined && (!(node.optional() && value === undefined))) {
       const activeFields = getActiveFields(path)
+      const activeKeys = Object.keys(activeFields)
+      const filterKey = path.modelArr.length === 0 ? null : node.hook(getFilterKey, path, path)
+      if (filterKey) {
+        suffix += activeFields[filterKey].hook(this, path.push(filterKey), value[filterKey], mounter)[1]
+      }
       body = (App.treeMinimized.get()
-          ? Object.keys(activeFields).filter(k => value[k] !== undefined)
-          : Object.keys(activeFields))
+          ? activeKeys.filter(k => value[k] !== undefined)
+          : activeKeys)
+        .filter(k => filterKey !== k)
         .filter(k => activeFields[k].enabled(path))
         .map(k => {
           const field = activeFields[k]
@@ -204,6 +211,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
         })
         .join('')
     }
+    suffix += node.hook(suffixInjector, path, mounter) || ''
     return ['', prefix + suffix, body]
   },
 

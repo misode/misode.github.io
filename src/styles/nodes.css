@@ -306,6 +306,7 @@ span.menu-item {
   border-left: none;
 }
 
+.node-entry > .object-node > .node-body > .node > .node-header > .node-icon + *,
 .node-entry > .object-node > .node-body > .node > .node-header > *:first-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -335,6 +336,12 @@ span.menu-item {
 .node-entry:first-child > .list-node[data-category],
 .node-entry:first-child > .map-node[data-category] {
   margin-top: 4px;
+}
+
+.node-entry > .object-node[data-category] > .node-header > .node-icon + *,
+.node-entry > .object-node[data-category] > .node-header > *:first-child {
+  border-top-left-radius: 0;
+  border-left: none;
 }
 
 .node-entry > .object-node[data-category] > .node-body,
