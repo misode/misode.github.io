@@ -126,7 +126,7 @@
   margin-right: -1px;
 }
 
-.object-node > .node-header > *:first-child,
+.object-node:not(.no-body) > .node-header > *:first-child,
 .map-node > .node-header > *:first-child,
 .list-node > .node-header > *:first-child {
   border-top-left-radius: 8px;
@@ -341,6 +341,7 @@ span.menu-item {
 .node-entry > .object-node[data-category] > .node-header > .node-icon + *,
 .node-entry > .object-node[data-category] > .node-header > *:first-child {
   border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
   border-left: none;
 }
 

@@ -1,5 +1,6 @@
 import { Errors, Hook, relativePath } from '@mcschema/core'
 import { BlockStateRegistry } from '../App'
+import { getFilterKey } from './getFilterKey'
 import { walk } from './walk'
 
 export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
@@ -32,7 +33,18 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
 
   number() {},
 
-  object() {},
+  object({ node, getActiveFields }, path, value) {
+    let activeFields = getActiveFields(path)
+    const filterKey = path.modelArr.length === 0 ? null : node.hook(getFilterKey, path, path)
+    const visibleKeys = Object.keys(activeFields)
+      .filter(k => filterKey !== k)
+      .filter(k => activeFields[k].enabled(path))
+    if (visibleKeys.length === 1 && activeFields[visibleKeys[0]].type(path.push(visibleKeys[0])) === 'object') {
+      if (activeFields[visibleKeys[0]].optional() && JSON.stringify(value[visibleKeys[0]]) === '{}') {
+        path.push(visibleKeys[0]).set(undefined)
+      }
+    }
+  },
 
   string() {}
 })

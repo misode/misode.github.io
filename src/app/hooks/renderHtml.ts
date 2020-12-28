@@ -164,7 +164,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     return ['', `<input data-id="${onChange}" value="${value ?? ''}">`, '']
   },
 
-  object({ node, getActiveFields, getChildModelPath, filter }, path, value, mounter) {
+  object({ node, getActiveFields, getChildModelPath }, path, value, mounter) {
     let prefix = ''
     if (node.optional()) {
       if (value === undefined) {
@@ -179,15 +179,21 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       const activeFields = getActiveFields(path)
       const activeKeys = Object.keys(activeFields)
       const filterKey = path.modelArr.length === 0 ? null : node.hook(getFilterKey, path, path)
-      if (filterKey) {
+      if (filterKey && !(activeFields[filterKey].hidden && activeFields[filterKey].hidden())) {
+        prefix += error(path.push(filterKey), mounter)
+        prefix += help(path.push(filterKey), mounter)
         suffix += activeFields[filterKey].hook(this, path.push(filterKey), value[filterKey], mounter)[1]
       }
-      body = (App.treeMinimized.get()
+      const visibleKeys = (App.treeMinimized.get()
           ? activeKeys.filter(k => value[k] !== undefined)
           : activeKeys)
         .filter(k => filterKey !== k)
         .filter(k => activeFields[k].enabled(path))
-        .map(k => {
+      if (visibleKeys.length === 1 && activeFields[visibleKeys[0]].type(path.push(visibleKeys[0])) === 'object') {
+        const newValue = value[visibleKeys[0]] ?? {}
+        body = activeFields[visibleKeys[0]].hook(this, path.push(visibleKeys[0]), newValue, mounter)[2]
+      } else {
+        body = visibleKeys.map(k => {
           const field = activeFields[k]
           const childPath = getChildModelPath(path, k)
           const context = childPath.getContext().join('.')
@@ -196,7 +202,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
 
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
-          return `<div class="node ${field.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
+          return `<div class="node ${field.type(childPath)}-node ${cBody ? '' : 'no-body'}" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
               ${error(childPath, mounter)}
               ${help(childPath, mounter)}
@@ -210,6 +216,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
             </div>`
         })
         .join('')
+      }
     }
     suffix += node.hook(suffixInjector, path, mounter) || ''
     return ['', prefix + suffix, body]
