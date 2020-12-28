@@ -59,6 +59,7 @@ export const App = {
   language: new LocalStorageProperty('language', 'en')
     .watch(Tracker.dimLanguage),
   model: new Property<typeof config.models[0] | null>(null),
+  collections: new Property<CollectionRegistry | null>(null),
   jsonOutput: new Property(''),
   errorsVisible: new Property(false),
   treeMinimized: new Property(false),
@@ -109,6 +110,7 @@ App.mobilePanel.watchRun((value) => {
 async function updateSchemas(version: string) {
   BlockStateRegistry = {}
   const collections = Versions[version].getCollections()
+  App.collections.set(collections)
   await fetchData(collections, version)
   const schemas = Versions[version].getSchemas(collections)
   config.models

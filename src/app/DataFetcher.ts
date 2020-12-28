@@ -7,6 +7,7 @@ const CACHE_FORMAT = 1
 type VersionConfig = {
   id: string,
   mcdata_ref: string,
+  vanilla_datapack_data_ref?: string,
   vanilla_datapack_summary_ref?: string
 }
 
@@ -134,5 +135,14 @@ const fetchDynamicRegistries = async (target: CollectionRegistry, version: Versi
     } catch (e) {
       console.warn(`Error occurred while fetching dynamic registries:`, e)
     }
+  }
+}
+
+export const fetchPreset = async (version: VersionConfig, registry: string, id: string) => {
+  try {
+    const res = await fetch(`${vanillaDatapackUrl}/${version.vanilla_datapack_data_ref}/data/minecraft/${registry}/${id}.json`)
+    return await res.json()
+  } catch (e) {
+    console.warn(`Error occurred while fetching ${registry} preset ${id}:`, e)
   }
 }

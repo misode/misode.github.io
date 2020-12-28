@@ -20,6 +20,7 @@
   "title.generator": "%0% Generator",
   "title.home": "Data Pack Generators",
   "title.suffix": "%0% Minecraft 1.15, 1.16, 1.17",
+  "presets": "Presets",
   "preview": "Visualize",
   "preview.show_density": "Show Density",
   "preview.scale": "Scale",

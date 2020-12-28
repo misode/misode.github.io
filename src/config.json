@@ -49,11 +49,13 @@
     {
       "id": "1.16",
       "mcdata_ref": "1.16.4",
+      "vanilla_datapack_data_ref": "1.16.4-data",
       "vanilla_datapack_summary_ref": "1.16.4-summary"
     },
     {
       "id": "1.17",
       "mcdata_ref": "master",
+      "vanilla_datapack_data_ref": "data",
       "vanilla_datapack_summary_ref": "summary"
     }
   ],
@@ -61,33 +63,39 @@
     {
       "id": "loot-table",
       "name": "Loot Table",
+      "path": "loot_tables",
       "schema": "loot_table"
     },
     {
       "id": "predicate",
       "name": "Predicate",
+      "path": "predicates",
       "schema": "predicate"
     },
     {
       "id": "item-modifier",
       "name": "Item Modifier",
+      "path": "item_modifiers",
       "schema": "item_modifier",
       "minVersion": "1.17"
     },
     {
       "id": "advancement",
       "name": "Advancement",
+      "path": "advancements",
       "schema": "advancement"
     },
     {
       "id": "dimension",
       "name": "Dimension",
+      "path": "dimension",
       "schema": "dimension",
       "minVersion": "1.16"
     },
     {
       "id": "dimension-type",
       "name": "Dimension Type",
+      "path": "dimension_type",
       "schema": "dimension_type",
       "minVersion": "1.16"
     },
@@ -106,6 +114,7 @@
     {
       "id": "worldgen/biome",
       "name": "Biome",
+      "path": "worldgen/biome",
       "category": "worldgen",
       "schema": "biome",
       "minVersion": "1.16"
@@ -113,6 +122,7 @@
     {
       "id": "worldgen/carver",
       "name": "Carver",
+      "path": "worldgen/configured_carver",
       "category": "worldgen",
       "schema": "configured_carver",
       "minVersion": "1.16"
@@ -120,6 +130,7 @@
     {
       "id": "worldgen/feature",
       "name": "Feature",
+      "path": "worldgen/configured_feature",
       "category": "worldgen",
       "schema": "configured_feature",
       "minVersion": "1.16"
@@ -127,6 +138,7 @@
     {
       "id": "worldgen/noise-settings",
       "name": "Noise Settings",
+      "path": "worldgen/noise_settings",
       "category": "worldgen",
       "schema": "noise_settings",
       "minVersion": "1.16"
@@ -134,6 +146,7 @@
     {
       "id": "worldgen/structure-feature",
       "name": "Structure Feature",
+      "path": "worldgen/configured_structure_feature",
       "category": "worldgen",
       "schema": "configured_structure_feature",
       "minVersion": "1.16"
@@ -141,6 +154,7 @@
     {
       "id": "worldgen/surface-builder",
       "name": "Surface Builder",
+      "path": "worldgen/configured_surface_builder",
       "category": "worldgen",
       "schema": "configured_surface_builder",
       "minVersion": "1.16"
@@ -148,6 +162,7 @@
     {
       "id": "worldgen/processor-list",
       "name": "Processor List",
+      "path": "worldgen/processor_list",
       "category": "worldgen",
       "schema": "processor_list",
       "minVersion": "1.16"
@@ -155,6 +170,7 @@
     {
       "id": "worldgen/template-pool",
       "name": "Template Pool",
+      "path": "worldgen/template_pool",
       "category": "worldgen",
       "schema": "template_pool",
       "minVersion": "1.16"

@@ -6,6 +6,7 @@ import { Octicon } from '../Octicon';
 import { renderHtml } from '../../hooks/renderHtml';
 import config from '../../../config.json'
 import { BiomeNoisePreview } from '../../preview/BiomeNoisePreview';
+import { fetchPreset } from '../../DataFetcher'
 
 export const TreePanel = (view: View, model: DataModel) => {
   const getContent = () => {
@@ -48,12 +49,53 @@ export const TreePanel = (view: View, model: DataModel) => {
       view.mount(el, getContent(), false)
     }, 'tree-panel')
   })
+  const m = App.model.get()
+  const registry = (m?.category ? m?.category + '/' : '') + m?.schema
+  let presetList: Element
+  const presetListId = view.register(el => presetList = el)
+  const getPresets = (query?: string) => {
+    const terms = (query ?? '').trim().split(' ')
+    const results = (App.collections.get()?.get(registry) ?? [])
+      .map(r => r.slice(10))
+      .filter(e => terms.every(t => e.includes(t)))
+    return results.map(r => `<div class="btn" data-id="${view.onClick(async () => {
+      App.schemasLoaded.set(false)
+      const preset = await fetchPreset(config.versions.find(v => v.id === App.version.get())!, m?.path!, r)
+      model.reset(preset)
+      App.schemasLoaded.set(true)
+    })}">${r}</div>`).join('')
+  }
+  const presetControl = view.register(el => {
+    App.version.watchRun(v => {
+      const enabled = (m?.path && checkVersion(v, '1.16'))
+      el.classList.toggle('disabled', !enabled || (App.collections.get()?.get(registry) ?? []).length === 0)
+      if (enabled) {
+        view.mount(presetList, getPresets(), false)
+      }
+    }, 'tree-panel')
+  })
   return `<div class="panel tree-panel">
     <div class="panel-controls">
       <div class="btn" data-id="${view.onClick(() => {
         App.treeMinimized.set(!App.treeMinimized.get())
       })}">
         ${Octicon.fold}<span data-i18n="minimize"></span>
+      </div>
+      <div class="panel-menu no-relative" data-id="${presetControl}">
+        <div class="btn" data-id="${view.onClick(el => {
+          toggleMenu(el)
+          el.parentElement?.querySelector('input')?.select()
+        })}">
+          ${Octicon.archive}<span data-i18n="presets"></span>
+        </div>
+        <div class="panel-menu-list btn-group">
+          <div class="btn input large-input">
+            ${Octicon.search}<input data-id="${view.on('keyup', el => {
+              view.mount(presetList, getPresets((el as HTMLInputElement).value), false)
+            })}">
+          </div>
+          <div class="result-list" data-id="${presetListId}"></div>
+        </div>
       </div>
       <div class="panel-menu">
         <div class="btn" data-id="${view.onClick(toggleMenu)}">
