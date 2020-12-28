@@ -63,6 +63,7 @@ export const TreePanel = (view: View, model: DataModel) => {
       const preset = await fetchPreset(config.versions.find(v => v.id === App.version.get())!, m?.path!, r)
       model.reset(preset)
       App.schemasLoaded.set(true)
+      Tracker.loadPreset(m?.path! + '/' + r)
     })}">${r}</div>`).join('')
   }
   const presetControl = view.register(el => {
@@ -78,6 +79,7 @@ export const TreePanel = (view: View, model: DataModel) => {
     <div class="panel-controls">
       <div class="btn" data-id="${view.onClick(() => {
         App.treeMinimized.set(!App.treeMinimized.get())
+        Tracker.toggleMinimize(App.treeMinimized.get())
       })}">
         ${Octicon.fold}<span data-i18n="minimize"></span>
       </div>

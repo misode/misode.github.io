@@ -22,6 +22,8 @@ export const Tracker = {
   share: () => event('JsonOutput', 'share'),
   toggleErrors: (visible: boolean) => event('Errors', 'toggle', visible ? 'visible' : 'hidden'),
   hidePreview: () => event('Preview', 'hide-preview'),
+  toggleMinimize: (minimized: boolean) => event('Generator', 'toggle-minimize', minimized ? 'minimized' : 'unminimized'),
+  loadPreset: (preset: string) => event('Generator', 'load-preset', preset),
 
   dimTheme: (theme: string) => dimension(1, theme),
   dimVersion: (version: string) => dimension(3, version),
