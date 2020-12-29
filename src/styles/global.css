@@ -55,9 +55,17 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  width: 100%;
   height: 56px;
+  z-index: 5;
+  background-color: var(--background);
   border-bottom: 2px solid var(--border);
   transition: border-color var(--style-transition), background-color var(--style-transition);
+}
+
+body[data-panel="home"] header,
+body[data-panel="settings"] header {
+  position: fixed;
 }
 
 .header-title {
@@ -68,6 +76,10 @@ header {
 .header-title h2 {
   color: var(--nav);
   transition: color var(--style-transition);
+}
+
+.home {
+  padding-top: 56px; 
 }
 
 .home-link {
@@ -83,12 +95,16 @@ header {
   padding: 2px;
 }
 
+.panel-toggles {
+  display: none;
+}
+
 nav ul {
   display: flex;
   align-items: center;
 }
 
-nav > .toggle,
+.panel-toggles > *,
 nav li {
   display: flex;
   align-items: center;
@@ -97,6 +113,7 @@ nav li {
   user-select: none;
 }
 
+.panel-toggles > *:hover svg,
 .home-link:hover svg,
 header .toggle:hover svg,
 nav li:hover svg {
@@ -115,6 +132,7 @@ nav li.dimmed:hover svg {
   fill: var(--nav-faded-hover);
 }
 
+.panel-toggles svg,
 nav > .toggle svg,
 nav li > *,
 nav li svg {
@@ -471,6 +489,7 @@ nav > .toggle span {
 
 .settings {
   padding: 20px;
+  padding-top: 56px; 
 }
 
 .settings p {
@@ -587,35 +606,49 @@ nav > .toggle span {
 
 @media screen and (max-width: 580px) {
   header {
-    flex-direction: column;
-    height: 92px;
-    width: 100%;
-    background-color: var(--background);
-    z-index: 5;
     position: fixed;
   }
+  
+  
+  .header-title h2 {
+    font-size: 22px;
+  }
 
-  nav {
+  .panel-toggles {
+    display: flex;
+  }
+
+  body nav ul {
+    display: none;
+  }
+
+  body[data-panel="home"] header {
+    flex-direction: column;
+    align-items: flex-start;
+    height: 92px;
+  }
+  body[data-panel="home"] nav {
     align-self: flex-end;
   }
 
-  .home,
-  .settings,
+  body[data-panel="home"] nav ul {
+    display: flex;
+  }
+
   .content {
-    padding-top: 92px; 
+    padding-top: 56px; 
   }
 
   .content {
     height: unset;
-    /* min-height: calc(100vh - 92px); */
     min-height: 100%;
   }
 
   textarea.source {
-    height: calc(100vh - 98px);
+    height: calc(100vh - 56px);
   }
 
-  .tree-panel + .gutter {
+  .gutter {
     display: none;
   }
 
@@ -624,24 +657,36 @@ nav > .toggle span {
     width: 100% !important;
   }
 
+  .source-panel,
+  .preview-panel,
+  .preview-panel canvas {
+    height: 100% !important;
+  }
+
   .tree-panel .panel-controls {
-    top: 97px;
+    top: 61px;
     right: 5px;
     position: fixed;
   }
 
-  nav > .toggle {
-    display: flex;
-    position: absolute;
-    left: 10px;
+  .btn.btn.large-input,
+  .panel-menu .result-list {
+    width: calc(100vw - 10px); 
   }
 
-  body[data-panel="tree"] .content-output {
+  .tree-panel,
+  .content-output,
+  .source-panel,
+  .preview-panel {
     display: none;
   }
 
-  body[data-panel="source"] .tree-panel {
-    display: none;
+  body[data-panel="tree"] .tree-panel,
+  body[data-panel="source"] .source-panel,
+  body[data-panel="source"] .content-output,
+  body[data-panel="preview"] .preview-panel,
+  body[data-panel="preview"] .content-output {
+    display: block;
   }
 
   .home {
@@ -677,8 +722,8 @@ nav > .toggle span {
   }
 }
 
-@media screen and (min-width: 581px) and (max-width: 640px) {
+@media screen and (min-width: 581px) and (max-width: 650px) {
   .header-title h2 {
-    font-size: 23px;
+    font-size: 22px;
   }
 }

@@ -95,6 +95,7 @@
   font-size: 18px;
   padding: 0 9px;
   line-height: 1.94rem;
+  white-space: nowrap;
   user-select: none;
   cursor: pointer;
   background-color: var(--node-background-input);

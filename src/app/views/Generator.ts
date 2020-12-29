@@ -59,7 +59,7 @@ export const Generator = (view: View): string => {
     }, 'generator')
   })
   const homeLink = typeof App.model.get()!.category === 'string' ? `/${App.model.get()!.category}/` : undefined
-  return `${Header(view, `${App.model.get()!.name} Generator`, homeLink, true)}
+  return `${Header(view, `${App.model.get()!.name} Generator`, homeLink)}
     <div class="content">
       ${SplitGroup(view, { direction: "horizontal", sizes: [66, 34] }, [
         TreePanel(view, model),

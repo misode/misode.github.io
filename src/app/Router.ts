@@ -14,18 +14,21 @@ const router = async () => {
   const urlParams = new URLSearchParams(location.search)
 
   const target = document.getElementById('app')!
-  const view = new View()
   let title = locale('title.home')
+  let renderer = (view: View) => ''
+  let panel = 'home'
 
   if (urlParts.length === 0){
     App.model.set({ id: '', name: 'Data Pack', category: true, minVersion: '1.15'})
-    target.innerHTML = Home(view)
+    renderer = Home
   } else if (urlParts[0] === 'settings' && urlParts[1] === 'fields') {
-    target.innerHTML = FieldSettings(view)
+    panel = 'settings'
+    renderer = FieldSettings
   } else if (urlParts.length === 1 && categories.map(m => m.id).includes(urlParts[0])) {
     App.model.set(categories.find(m => m.id === urlParts[0])!)
-    target.innerHTML = Home(view)
+    renderer = Home
   } else {
+    panel = 'tree'
     App.model.set(config.models.find(m => m.id === urlParts.join('/'))!)
     if (urlParams.has('q')) {
       try {
@@ -33,14 +36,16 @@ const router = async () => {
         Models[App.model.get()!.id].reset(JSON.parse(data))
       } catch (e) {}
     }
-    target.innerHTML = Generator(view)
+    renderer = Generator
     if (App.model.get()) {
       title = locale('title.generator', [locale(App.model.get()!.id)])
     }
   }
 
   document.title = locale('title.suffix', [title])
-  view.mounted(target)
+  App.mobilePanel.set(panel)
+  const view = new View()
+  view.mount(target, renderer(view), true)
 }
 
 window.addEventListener("popstate", router);
