@@ -202,6 +202,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
 
           const category = field.category(childPath)
           const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], mounter)
+          if (k === 'Properties' && cSuffix === '') return ''
           return `<div class="node ${field.type(childPath)}-node ${cBody ? '' : 'no-body'}" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
             <div class="node-header">
               ${error(childPath, mounter)}
