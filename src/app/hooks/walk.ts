@@ -14,7 +14,7 @@ export const walk = <U extends Args> (hook: Hook<[any, ...U], void>): Hook<[any,
     hook.list(params, path, value, ...args)
     if (!Array.isArray(value)) return
     value.forEach((e, i) =>
-      params.children.hook(this, path.push(i), value, ...args)
+      params.children.hook(this, path.push(i), e, ...args)
     )
   },
 
