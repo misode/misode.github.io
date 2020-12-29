@@ -78,10 +78,6 @@ body[data-panel="settings"] header {
   transition: color var(--style-transition);
 }
 
-.home {
-  padding-top: 56px; 
-}
-
 .home-link {
   margin: 0 8px 0 0;
   height: 32px;
@@ -445,6 +441,7 @@ nav > .toggle span {
 .home {
   display: flex;
   padding: 20px;
+  padding-top: 71px;
 }
 
 .generators-list {
@@ -489,7 +486,7 @@ nav > .toggle span {
 
 .settings {
   padding: 20px;
-  padding-top: 56px; 
+  padding-top: 71px; 
 }
 
 .settings p {
@@ -604,14 +601,10 @@ nav > .toggle span {
   }
 }
 
+/* MEDIUM */
 @media screen and (max-width: 580px) {
   header {
     position: fixed;
-  }
-  
-  
-  .header-title h2 {
-    font-size: 22px;
   }
 
   .panel-toggles {
@@ -690,7 +683,7 @@ nav > .toggle span {
   }
 
   .home {
-    padding: 117px 5px 5px;
+    padding: 107px 5px 5px;
     justify-content: center;
   }
 
@@ -707,8 +700,24 @@ nav > .toggle span {
   }
 }
 
+/* SMALL */
+@media screen and (max-width: 650px) {
+  body[data-panel="tree"] .header-title h2,
+  body[data-panel="source"] .header-title h2,
+  body[data-panel="preview"] .header-title h2 {
+    font-size: 22px;
+  }
+}
+
+/* EXTRA SMALL */
 @media screen and (max-width: 480px) {
   .header-title h2 {
+    font-size: 22px;
+  }
+
+  body[data-panel="tree"] .header-title h2,
+  body[data-panel="source"] .header-title h2,
+  body[data-panel="preview"] .header-title h2 {
     font-size: 18px;
   }
 
@@ -719,11 +728,5 @@ nav > .toggle span {
   .generators-card {
     font-size: 14px;
     padding: 8px;
-  }
-}
-
-@media screen and (min-width: 581px) and (max-width: 650px) {
-  .header-title h2 {
-    font-size: 22px;
   }
 }
