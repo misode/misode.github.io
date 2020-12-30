@@ -40,7 +40,7 @@ export const Models: {
 config.models.filter(m => m.schema)
   .forEach(m => Models[m.id] = new DataModel(ObjectNode({})))
 
-export let BlockStateRegistry: {
+export type BlockStateRegistry = {
   [block: string]: {
     properties: {
       [key: string]: string[]
@@ -49,7 +49,7 @@ export let BlockStateRegistry: {
       [key: string]: string
     }
   }
-} = {}
+}
 
 export const App = {
   version: new LocalStorageProperty('schema_version', config.versions[config.versions.length - 1].id)
@@ -70,7 +70,8 @@ export const App = {
   localesLoaded: new Property(false),
   loaded: new Property(false),
   mobilePanel: new Property('tree'),
-  settings: new Settings('generator_settings')
+  settings: new Settings('generator_settings'),
+  blockStateRegistry: {} as BlockStateRegistry
 }
 
 App.version.watchRun(async (value) => {
@@ -108,7 +109,7 @@ App.mobilePanel.watchRun((value) => {
 })
 
 async function updateSchemas(version: string) {
-  BlockStateRegistry = {}
+  App.blockStateRegistry = {}
   const collections = Versions[version].getCollections()
   App.collections.set(collections)
   await fetchData(collections, version)

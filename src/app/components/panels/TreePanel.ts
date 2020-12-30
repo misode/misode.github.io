@@ -67,8 +67,9 @@ export const TreePanel = (view: View, model: DataModel) => {
     })}">${r}</div>`).join('')
   }
   const presetControl = view.register(el => {
-    App.version.watchRun(v => {
-      const enabled = (m?.path && checkVersion(v, '1.16'))
+    App.schemasLoaded.watch(v => {
+      if (!v) return
+      const enabled = (m?.path && checkVersion(App.version.get(), '1.16'))
       el.classList.toggle('disabled', !enabled || (App.collections.get()?.get(registry) ?? []).length === 0)
       if (enabled) {
         view.mount(presetList, getPresets(), false)
