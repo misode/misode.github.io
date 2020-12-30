@@ -2,6 +2,8 @@ import { CollectionRegistry } from '@mcschema/core'
 import { App, BlockStateRegistry, checkVersion } from './App'
 import config from '../config.json'
 
+['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`))
+
 const CACHE_NAME = `misode-v1`
 
 type VersionRef = 'mcdata_master' | 'vanilla_datapack_summary' | 'vanilla_datapack_data'
