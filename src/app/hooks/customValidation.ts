@@ -1,5 +1,5 @@
 import { Errors, Hook, relativePath } from '@mcschema/core'
-import { BlockStateRegistry } from '../App'
+import { App, BlockStateRegistry } from '../App'
 import { getFilterKey } from './getFilterKey'
 import { walk } from './walk'
 
@@ -17,7 +17,7 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
       const block = relativePath(path, config.validation.params.id).get()
       const errors = path.getModel().errors
 
-      const requiredProps = (BlockStateRegistry[block] ?? {}).properties ?? {}
+      const requiredProps = (App.blockStateRegistry[block] ?? {}).properties ?? {}
       const existingKeys = Object.keys(value ?? {})
       Object.keys(requiredProps).forEach(p => {
         if (!existingKeys.includes(p)) {

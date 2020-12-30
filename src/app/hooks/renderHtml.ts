@@ -113,7 +113,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       path.model.set(path.push(key), children.default())
     })
     let suffix = ''
-    const blockState = (config.validation?.validator === 'block_state_map' ? BlockStateRegistry[relativePath(path, config.validation.params.id).get()] : null)
+    const blockState = (config.validation?.validator === 'block_state_map' ? App.blockStateRegistry[relativePath(path, config.validation.params.id).get()] : null)
     if (!blockState || blockState.properties) {
       const keyRendered = (blockState
         ? StringNode(null!, { enum: Object.keys(blockState.properties ?? {}) })

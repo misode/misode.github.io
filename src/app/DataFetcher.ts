@@ -1,136 +1,128 @@
 import { CollectionRegistry } from '@mcschema/core'
-import { BlockStateRegistry, checkVersion } from './App'
+import { App, BlockStateRegistry, checkVersion } from './App'
 import config from '../config.json'
 
-const CACHE_FORMAT = 1
+const CACHE_NAME = `misode-v1`
 
-type VersionConfig = {
+type VersionRef = 'mcdata_master' | 'vanilla_datapack_summary' | 'vanilla_datapack_data'
+
+type Version = {
   id: string,
-  mcdata_ref: string,
-  vanilla_datapack_data_ref?: string,
-  vanilla_datapack_summary_ref?: string
+  refs: Partial<{ [key in VersionRef]: string }>,
+  dynamic?: boolean,
 }
 
-const localStorageCache = (version: string) => `cache_${version}`
 declare var __MCDATA_MASTER_HASH__: string;
 declare var __VANILLA_DATAPACK_SUMMARY_HASH__: string;
 
 const mcdataUrl = 'https://raw.githubusercontent.com/Arcensoth/mcdata'
 const vanillaDatapackUrl = 'https://raw.githubusercontent.com/SPGoding/vanilla-datapack'
 
-export const fetchData = async (target: CollectionRegistry, versionId: string) => {
-  const version = config.versions.find(v => v.id === versionId)
-  if (!version) return
+const refs: {
+  id: VersionRef,
+  hash: string,
+  url: string
+}[] = [
+  {
+    id: 'mcdata_master',
+    hash: __MCDATA_MASTER_HASH__,
+    url: mcdataUrl
+  },
+  {
+    id: 'vanilla_datapack_summary',
+    hash: __VANILLA_DATAPACK_SUMMARY_HASH__,
+    url: vanillaDatapackUrl
+  },
+]
 
-  const cache = JSON.parse(localStorage.getItem(localStorageCache(versionId)) ?? '{}')
-  const mcdataCacheValid = cache.format === CACHE_FORMAT && (version.mcdata_ref !== 'master' || cache.mcdata_hash === __MCDATA_MASTER_HASH__)
-  const vanillaDatapackCacheValid = cache.format === CACHE_FORMAT && (version.vanilla_datapack_summary_ref !== 'summary' || cache.vanilla_datapack_summary_hash === __VANILLA_DATAPACK_SUMMARY_HASH__)
+export async function fetchData(target: CollectionRegistry, versionId: string) {
+  const version = config.versions.find(v => v.id === versionId) as Version | undefined
+  if (!version) return
+  
+  if (version.dynamic) {
+    await Promise.all(refs
+      .filter(r => localStorage.getItem(`cached_${r.id}`) !== r.hash)
+      .map(async r => {
+        await deleteMatching(url => url.startsWith(`${r.url}/${version.refs[r.id]}`))
+        localStorage.setItem(`cached_${r.id}`, r.hash)
+      }))
+  }
 
   await Promise.all([
-    fetchRegistries(target, version, cache, mcdataCacheValid),
-    fetchBlockStateMap(version, cache, mcdataCacheValid),
-    fetchDynamicRegistries(target, version, cache, vanillaDatapackCacheValid)
+    fetchRegistries(version, target),
+    fetchBlockStateMap(version),
+    fetchDynamicRegistries(version, target)
   ])
-
-  if (!mcdataCacheValid || !vanillaDatapackCacheValid) {
-    cache.mcdata_hash = __MCDATA_MASTER_HASH__
-    cache.vanilla_datapack_summary_hash = __VANILLA_DATAPACK_SUMMARY_HASH__
-    cache.format = CACHE_FORMAT
-    localStorage.setItem(localStorageCache(versionId), JSON.stringify(cache))
-  }
 }
 
-const fetchRegistries = async (target: CollectionRegistry, version: VersionConfig, cache: any, cacheValid: boolean) => {
+async function fetchRegistries(version: Version, target: CollectionRegistry) {
   const registries = config.registries
     .filter(r => !r.dynamic)
     .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
 
-  if (cacheValid && cache.registries) {
-    registries.forEach(r => {
-      target.register(r.id, cache.registries[r.id])
-    })
-    return
-  }
-
-  cache.registries = {}
   if (checkVersion(version.id, undefined, '1.15')) {
-    const url = `${mcdataUrl}/${version.mcdata_ref}/generated/reports/registries.json`
+    const url = `${mcdataUrl}/${version.refs.mcdata_master}/generated/reports/registries.json`
     try {
-      const res = await fetch(url)
-      const data = await res.json()
-      registries.forEach(async r => {
-        const values = Object.keys(data[`minecraft:${r.id}`].entries)
-        target.register(r.id, values)
-        cache.registries[r.id] = values
+      const data = await getData(url, (data) => {
+        const res: {[id: string]: string[]} = {}
+        Object.keys(data).forEach(k => {
+          res[k.slice(10)] = Object.keys(data[k].entries)
+        })
+        return res
+      })
+      registries.forEach(r => {
+        target.register(r.id, data[r.id] ?? [])
       })
     } catch (e) {
-      console.warn(`Error occurred while fetching registries for version ${version.id}`)
+      console.warn(`Error occurred while fetching registries:`, e)
     }
   } else {
-    await Promise.all(registries.map(async r => {
-      const url = r.path
-        ? `${mcdataUrl}/${version.mcdata_ref}/${r.path}/data.min.json`
-        : `${mcdataUrl}/${version.mcdata_ref}/processed/reports/registries/${r.id}/data.min.json`
-  
+    return Promise.all(registries.map(async r => {
       try {
-        const res = await fetch(url)
-        const data = await res.json()
-  
-        target.register(r.id, data.values)
-        cache.registries[r.id] = data.values
+        const url = r.path
+          ? `${mcdataUrl}/${version.refs.mcdata_master}/${r.path}/data.min.json`
+          : `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/registries/${r.id}/data.min.json`
+        target.register(r.id, await getData(url, v => v.values))
       } catch (e) {
-        console.warn(`Error occurred while fetching registry "${r.id}":`, e)
+        console.warn(`Error occurred while registry ${r.id}:`, e)
       }
     }))
   }
 }
 
-const fetchBlockStateMap = async (version: VersionConfig, cache: any, cacheValid: boolean) => {
-  if (cacheValid && cache.block_state_map) {
-    Object.keys(cache.block_state_map).forEach(block => {
-      BlockStateRegistry[block] = cache.block_state_map[block]
-    })
-    return
-  }
-
-  cache.block_state_map = {}
+async function fetchBlockStateMap(version: Version) {
   const url = (checkVersion(version.id, undefined, '1.15'))
-    ? `${mcdataUrl}/${version.mcdata_ref}/generated/reports/blocks.json`
-    : `${mcdataUrl}/${version.mcdata_ref}/processed/reports/blocks/data.min.json`
+    ? `${mcdataUrl}/${version.refs.mcdata_master}/generated/reports/blocks.json`
+    : `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/blocks/data.min.json`
 
-  const res = await fetch(url)
-  const data = await res.json()
-
-  Object.keys(data).forEach(block => {
-    const res = {
-      properties: data[block].properties,
-      default: data[block].states.find((s: any) => s.default).properties
-    }
-    BlockStateRegistry[block] = res
-    cache.block_state_map[block] = res
-  })
+  try {
+    const data = await getData(url, (data) => {
+      const res: BlockStateRegistry = {}
+      Object.keys(data).forEach(b => {
+        res[b] = {
+          properties: data[b].properties,
+          default: data[b].states.find((s: any) => s.default).properties
+        }
+      })
+      return res
+    })
+    App.blockStateRegistry = data
+  } catch (e) {
+    console.warn(`Error occurred while fetching block state map:`, e)
+  }
 }
 
-const fetchDynamicRegistries = async (target: CollectionRegistry, version: VersionConfig, cache: any, cacheValid: boolean) => {
+async function fetchDynamicRegistries(version: Version, target: CollectionRegistry) {
   const registries = config.registries
     .filter(r => r.dynamic)
     .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
 
-  if (cacheValid && cache.dynamic_registries) {
-    registries.forEach(r => {
-      target.register(r.id, cache.dynamic_registries[r.id])
-    })
-    return
-  }
-
-  cache.dynamic_registries = {}
   if (checkVersion(version.id, '1.16')) {
+    const url = `${vanillaDatapackUrl}/${version.refs.vanilla_datapack_summary}/summary/flattened.min.json`
     try {
-      const res = await fetch(`${vanillaDatapackUrl}/${version.vanilla_datapack_summary_ref}/summary/flattened.min.json`)
-      const data = await res.json()
+      const data = await getData(url)
       registries.forEach(r => {
         target.register(r.id, data[r.id])
-        cache.dynamic_registries[r.id] = data[r.id]
       })
     } catch (e) {
       console.warn(`Error occurred while fetching dynamic registries:`, e)
@@ -138,11 +130,37 @@ const fetchDynamicRegistries = async (target: CollectionRegistry, version: Versi
   }
 }
 
-export const fetchPreset = async (version: VersionConfig, registry: string, id: string) => {
+export async function fetchPreset(version: Version, registry: string, id: string) {
   try {
-    const res = await fetch(`${vanillaDatapackUrl}/${version.vanilla_datapack_data_ref}/data/minecraft/${registry}/${id}.json`)
+    const res = await fetch(`${vanillaDatapackUrl}/${version.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`)
     return await res.json()
   } catch (e) {
     console.warn(`Error occurred while fetching ${registry} preset ${id}:`, e)
   }
+}
+
+async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
+  const cache = await caches.open(CACHE_NAME)
+  const cacheResponse = await cache.match(url)
+
+  if (cacheResponse && cacheResponse.ok) {
+    return await cacheResponse.json()
+  }
+
+  const fetchResponse = await fetch(url)
+  const responseData = fn(await fetchResponse.json())
+  await cache.put(url, new Response(JSON.stringify(responseData)))
+  return responseData
+}
+
+async function deleteMatching(matches: (url: string) => boolean) {
+  const cache = await caches.open(CACHE_NAME)
+  const promises: Promise<boolean>[] = []
+
+  for (const request of await cache.keys()) {
+    if (matches(request.url)) {
+      promises.push(cache.delete(request))
+    }
+  }
+  return (await Promise.all(promises)).length > 0
 }

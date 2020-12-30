@@ -44,19 +44,26 @@
   "versions": [
     {
       "id": "1.15",
-      "mcdata_ref": "13355f7"
+      "refs": {
+        "mcdata_master": "13355f7"
+      }
     },
     {
       "id": "1.16",
-      "mcdata_ref": "1.16.4",
-      "vanilla_datapack_data_ref": "1.16.4-data",
-      "vanilla_datapack_summary_ref": "1.16.4-summary"
+      "refs": {
+        "mcdata_master": "1.16.4",
+        "vanilla_datapack_data": "1.16.4-data",
+        "vanilla_datapack_summary": "1.16.4-summary"
+      }
     },
     {
       "id": "1.17",
-      "mcdata_ref": "master",
-      "vanilla_datapack_data_ref": "data",
-      "vanilla_datapack_summary_ref": "summary"
+      "refs": {
+        "mcdata_master": "master",
+        "vanilla_datapack_data": "data",
+        "vanilla_datapack_summary": "summary"
+      },
+      "dynamic": true
     }
   ],
   "models": [
