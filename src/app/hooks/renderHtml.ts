@@ -72,7 +72,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       if (!Array.isArray(value)) value = []
       path.model.set(path, [...value, children.default()])
     })
-    const suffix = `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
+    const suffix = `<button class="add" data-id="${onAdd}" aria-label="${locale('button.add')}">${Octicon.plus_circle}</button>`
 
     let body = ''
     if (Array.isArray(value)) {
@@ -85,7 +85,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           <div class="node-header">
             ${error(childPath, mounter)}
             ${help(childPath, mounter)}
-            <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
+            <button class="remove" data-id="${removeId}" aria-label="${locale('button.remove')}">${Octicon.trashcan}</button>
             ${cPrefix}
             <label ${contextMenu(childPath, mounter)}>
               ${htmlEncode(pathLocale(path.contextPush('entry'), [`${index}`]))}
@@ -98,7 +98,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       if (value.length > 2) {
         body += `<div class="node-entry">
           <div class="node node-header">
-            <button class="add" data-id="${onAddBottom}">${Octicon.plus_circle}</button>
+            <button class="add" data-id="${onAddBottom}" aria-label="${locale('button.add')}">${Octicon.plus_circle}</button>
           </div>
         </div>`
       }
@@ -118,7 +118,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
       const keyRendered = (blockState
         ? StringNode(null!, { enum: Object.keys(blockState.properties ?? {}) })
         : keys).hook(this, keyPath, keyPath.get() ?? '', mounter)
-      suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}">${Octicon.plus_circle}</button>`
+      suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}" aria-label="${locale('button.add')}">${Octicon.plus_circle}</button>`
     }
     let body = ''
     if (typeof value === 'object' && value !== undefined) {
@@ -134,7 +134,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
             <div class="node-header">
               ${error(childPath, mounter)}
               ${help(childPath, mounter)}
-              <button class="remove" data-id="${removeId}">${Octicon.trashcan}</button>
+              <button class="remove" data-id="${removeId}" aria-label="${locale('button.remove')}">${Octicon.trashcan}</button>
               ${cPrefix}
               <label ${contextMenu(childPath, mounter)}>
                 ${htmlEncode(key)}
@@ -168,9 +168,9 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
     let prefix = ''
     if (node.optional()) {
       if (value === undefined) {
-        prefix = `<button class="collapse closed" data-id="${mounter.onClick(() => path.model.set(path, node.default()))}">${Octicon.plus_circle}</button>`
+        prefix = `<button class="collapse closed" data-id="${mounter.onClick(() => path.model.set(path, node.default()))}" aria-label="${locale('button.expand')}">${Octicon.plus_circle}</button>`
       } else {
-        prefix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}">${Octicon.trashcan}</button>`
+        prefix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}" aria-label="${locale('button.collapse')}">${Octicon.trashcan}</button>`
       }
     }
     let suffix = ''
