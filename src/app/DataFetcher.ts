@@ -93,24 +93,33 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 }
 
 async function fetchBlockStateMap(version: Version) {
-  const url = (checkVersion(version.id, undefined, '1.15'))
-    ? `${mcdataUrl}/${version.refs.mcdata_master}/generated/reports/blocks.json`
-    : `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/blocks/data.min.json`
+  if (checkVersion(version.id, undefined, '1.16')) {
+    const url = (checkVersion(version.id, undefined, '1.15'))
+      ? `${mcdataUrl}/${version.refs.mcdata_master}/generated/reports/blocks.json`
+      : `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/blocks/data.min.json`
 
-  try {
-    const data = await getData(url, (data) => {
-      const res: BlockStateRegistry = {}
-      Object.keys(data).forEach(b => {
-        res[b] = {
-          properties: data[b].properties,
-          default: data[b].states.find((s: any) => s.default).properties
-        }
+    try {
+      const data = await getData(url, (data) => {
+        const res: BlockStateRegistry = {}
+        Object.keys(data).forEach(b => {
+          res[b] = {
+            properties: data[b].properties,
+            default: data[b].states.find((s: any) => s.default).properties
+          }
+        })
+        return res
       })
-      return res
-    })
-    App.blockStateRegistry = data
-  } catch (e) {
-    console.warn(`Error occurred while fetching block state map:`, e)
+      App.blockStateRegistry = data
+    } catch (e) {
+      console.warn(`Error occurred while fetching block state map:`, e)
+    }
+  } else {
+    const url = `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/blocks/simplified/data.min.json`
+    try {
+      App.blockStateRegistry = await getData(url)
+    } catch (e) {
+      console.warn(`Error occurred while fetching block state map:`, e)
+    }
   }
 }
 
