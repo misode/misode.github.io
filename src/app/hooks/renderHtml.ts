@@ -4,8 +4,9 @@ import { Mounter } from '../views/View'
 import { hexId, htmlEncode } from '../Utils'
 import { suffixInjector } from './suffixInjector'
 import { Octicon } from '../components/Octicon'
-import { App, BlockStateRegistry } from '../App'
+import { App } from '../App'
 import { getFilterKey } from './getFilterKey'
+import { canFlatten } from './canFlatten'
 
 /**
  * Secondary model used to remember the keys of a map
@@ -189,7 +190,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           : activeKeys)
         .filter(k => filterKey !== k)
         .filter(k => activeFields[k].enabled(path))
-      if (visibleKeys.length === 1 && activeFields[visibleKeys[0]].type(path.push(visibleKeys[0])) === 'object') {
+      if (node.hook(canFlatten, path)) {
         const newValue = value[visibleKeys[0]] ?? {}
         body = activeFields[visibleKeys[0]].hook(this, path.push(visibleKeys[0]), newValue, mounter)[2]
       } else {

@@ -1,5 +1,5 @@
 import { Errors, Hook, relativePath } from '@mcschema/core'
-import { App, BlockStateRegistry } from '../App'
+import { App } from '../App'
 import { getFilterKey } from './getFilterKey'
 import { walk } from './walk'
 
