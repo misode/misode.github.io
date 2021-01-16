@@ -3,12 +3,6 @@ import { getFilterKey } from './getFilterKey'
 
 export const canFlatten: Hook<[], boolean> = {
   base: () => false,
-  boolean: () => false,
-  choice: () => false,
-  list: () => false,
-  map: () => false,
-  number: () => false,
-  string: () => false,
   object({ node, getActiveFields }, path) {
     const filterKey = path.modelArr.length === 0 ? null : node.hook(getFilterKey, path, path)
     const visibleEntries = Object.entries(getActiveFields(path))

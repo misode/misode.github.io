@@ -9,10 +9,6 @@ import { Tracker } from '../Tracker'
 
 export const suffixInjector: Hook<[Mounter], string | void> = {
   base() {},
-  boolean() {},
-  list() {},
-  map() {},
-  number() {},
 
   choice({ switchNode }, path, mounter) {
     return switchNode.hook(this, path, mounter)

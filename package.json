@@ -12,7 +12,7 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
-    "@mcschema/core": "^0.12.0",
+    "@mcschema/core": "^0.12.2",
     "@mcschema/java-1.15": "^0.2.0",
     "@mcschema/java-1.16": "^0.6.0",
     "@mcschema/java-1.17": "^0.2.0",

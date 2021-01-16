@@ -5,10 +5,6 @@ export const transformOutput: Hook<[any], any> = {
     return value
   },
 
-  boolean({}, _, value) {
-    return value
-  },
-
   choice({ switchNode }, path, value) {
     return switchNode.hook(this, path, value)
   },
@@ -29,10 +25,6 @@ export const transformOutput: Hook<[any], any> = {
     return res;
   },
 
-  number({}, _, value) {
-    return value
-  },
-
   object({ getActiveFields }, path, value) {
     if (value === undefined || value === null || typeof value !== 'object') {
       return value
@@ -45,9 +37,5 @@ export const transformOutput: Hook<[any], any> = {
         res[f] = activeFields[f].hook(this, path.push(f), value[f])
       })
     return res
-  },
-
-  string({}, _, value) {
-    return value
   }
 }

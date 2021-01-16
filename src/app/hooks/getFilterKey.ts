@@ -2,12 +2,6 @@ import { Hook, ModelPath, relativePath } from '@mcschema/core'
 
 export const getFilterKey: Hook<[ModelPath, number?], string | null> = {
   base: () => null,
-  boolean: () => null,
-  choice: () => null,
-  list: () => null,
-  map: () => null,
-  number: () => null,
-  string: () => null,
   object({ filter, getActiveFields }, path, origin, depth = 0) {
     if (depth > 2) return null
     if (filter) {

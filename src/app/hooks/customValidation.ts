@@ -6,12 +6,6 @@ import { walk } from './walk'
 export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
   base() {},
 
-  boolean() {},
-
-  choice() {},
-
-  list() {},
-
   map({ config }, path, value) {
     if (config.validation?.validator === 'block_state_map') {
       const block = relativePath(path, config.validation.params.id).get()
@@ -31,8 +25,6 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
     }
   },
 
-  number() {},
-
   object({ node, getActiveFields }, path, value) {
     let activeFields = getActiveFields(path)
     const filterKey = path.modelArr.length === 0 ? null : node.hook(getFilterKey, path, path)
@@ -44,7 +36,5 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
         path.push(visibleKeys[0]).set(undefined)
       }
     }
-  },
-
-  string() {}
+  }
 })
