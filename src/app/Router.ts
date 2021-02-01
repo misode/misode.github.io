@@ -1,4 +1,4 @@
-import { App, Models } from './App';
+import { App, checkVersion, Models } from './App';
 import { View } from './views/View';
 import { Home } from './views/Home'
 import { FieldSettings } from './views/FieldSettings'
@@ -42,7 +42,10 @@ const router = async () => {
     }
   }
 
-  document.title = locale('title.suffix', [title])
+  const versions = config.versions
+    .filter(v => checkVersion(v.id, App.model.get()?.minVersion))
+    .map(v => v.id).join(', ')
+  document.title = `${title} Minecraft ${versions}`
   App.mobilePanel.set(panel)
   const view = new View()
   view.mount(target, renderer(view), true)

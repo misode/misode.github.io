@@ -55,9 +55,15 @@ module.exports = (env, argv) => ({
       template: 'src/index.html'
     }),
     ...config.models.map(m => new HtmlWebpackPlugin({
-      title: `${m.name} Generator${m.category === true ? 's' : ''} Minecraft 1.15, 1.16, 1.17`,
+      title: getTitle(m),
       filename: `${m.id}/index.html`,
       template: 'src/index.html'
     }))
   ]
 })
+
+function getTitle(m) {
+  const minVersion = Math.max(0, config.versions.findIndex(v => m.minVersion === v.id))
+  const versions = config.versions.slice(minVersion).map(v => v.id).join(', ')
+  return `${m.name} Generator${m.category === true ? 's' : ''} Minecraft ${versions}`
+}

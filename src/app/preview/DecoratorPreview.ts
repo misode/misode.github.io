@@ -203,6 +203,14 @@ export class DecoratorPreview extends Preview {
       }
       return new Array(count).fill(pos)
     },
+    count_multilayer: (config, pos) => {
+      return new Array(this.sampleUniformInt(config?.count ?? 1)).fill(pos)
+        .map(p => [
+          p[0] + this.nextInt(16),
+          p[1], 
+          p[2] + this.nextInt(16)
+        ])
+    },
     count_noise: (config, pos) => {
       const noise = this.biomeInfoNoise.getValue(pos[0] / 200, 0, pos[2] / 200)
       const count = noise < config.noise_level ? config.below_noise : config.above_noise
