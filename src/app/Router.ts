@@ -1,6 +1,7 @@
 import { App, checkVersion, Models } from './App';
 import { View } from './views/View';
 import { Home } from './views/Home'
+import { NotFound } from './views/NotFound'
 import { FieldSettings } from './views/FieldSettings'
 import { Generator } from './views/Generator'
 import { locale } from './Locales';
@@ -29,16 +30,19 @@ const router = async () => {
     renderer = Home
   } else {
     panel = 'tree'
-    App.model.set(config.models.find(m => m.id === urlParts.join('/'))!)
-    if (urlParams.has('q')) {
-      try {
-        const data = atob(urlParams.get('q') ?? '')
-        Models[App.model.get()!.id].reset(JSON.parse(data))
-      } catch (e) {}
-    }
-    renderer = Generator
-    if (App.model.get()) {
-      title = locale('title.generator', [locale(App.model.get()!.id)])
+    const model = config.models.find(m => m.id === urlParts.join('/')) ?? null
+    App.model.set(model)
+    if (model) {
+      if (urlParams.has('q')) {
+        try {
+          const data = atob(urlParams.get('q') ?? '')
+          Models[model.id].reset(JSON.parse(data))
+        } catch (e) {}
+      }
+      renderer = Generator
+      title = locale('title.generator', [locale(model.id)])
+    } else {
+      renderer = NotFound
     }
   }
 

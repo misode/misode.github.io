@@ -4,9 +4,14 @@ import { View } from './View'
 import { Octicon } from '../components/Octicon'
 import config from '../../config.json'
 
-const GeneratorCard = (url: string, name: string, arrow?: boolean, active?: boolean) =>  `
+function cleanUrl(url: string) {
+  url = url.startsWith('/') ? url : '/' + url
+  return url.endsWith('/') ? url : url + '/'
+}
+
+export const GeneratorCard = (url: string, name: string, arrow?: boolean, active?: boolean) =>  `
   <li>
-    <a data-link href="/${url}/" class="generators-card${active ? ' selected' : ''}">
+    <a data-link href="${cleanUrl(url)}" class="generators-card${active ? ' selected' : ''}">
       ${name}
       ${arrow ? Octicon.chevron_right : ''}
     </a>

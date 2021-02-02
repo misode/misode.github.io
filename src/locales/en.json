@@ -16,6 +16,7 @@
   "language": "Language",
   "loot-table": "Loot Table",
   "minimize": "Minimize",
+  "not_found.description": "The page you were looking for does not exist.",
   "predicate": "Predicate",
   "redo": "Redo",
   "reset": "Reset",

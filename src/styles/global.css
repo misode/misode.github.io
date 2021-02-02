@@ -444,6 +444,18 @@ nav > .toggle span {
   padding-top: 71px;
 }
 
+.home.center {
+  flex-direction: column;
+  align-items: center;
+  color: var(--nav);
+}
+
+.home.center p {
+  padding-bottom: 20px;
+  text-align: center;
+  font-size: 20px;
+}
+
 .generators-list {
   display: flex;
   flex-direction: column;
@@ -581,6 +593,11 @@ nav > .toggle span {
   border-color: var(--border) transparent var(--border) transparent;
   animation: spinner 1.2s linear infinite, fadein 0.4s;
   transition: border-color var(--style-transition);
+}
+
+.very-large {
+  font-size: 80px;
+  font-weight: 100;
 }
 
 @keyframes spinner {
@@ -725,7 +742,7 @@ nav > .toggle span {
     margin: 0 15px;
   }
 
-  .generators-card {
+  .home:not(.center) .generators-card {
     font-size: 14px;
     padding: 8px;
   }
