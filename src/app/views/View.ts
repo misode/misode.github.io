@@ -40,13 +40,10 @@ export class View implements Mounter{
   }
 
   mounted(el: Element, clear = true): void {
-    for (const id in this.registry) {
-      const element = el.querySelector(`[data-id="${id}"]`)
-      if (element !== null) {
-        this.registry[id](element)
-        delete this.registry[id]
-      }
-    }
+    el.querySelectorAll('[data-id]').forEach(el => {
+      const id = el.getAttribute('data-id')!
+      this.registry[id]?.(el)
+    })
     if (clear) {
       this.registry = {}
     }
