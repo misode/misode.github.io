@@ -239,6 +239,17 @@ nav > .toggle span {
   width: 100%;
   right: 0;
   padding: 0 5px;
+  opacity: 0;
+  transition: opacity 0.1s;
+  pointer-events: none;
+}
+
+.preview-panel .panel-controls > * {
+  pointer-events: initial;
+}
+
+.preview-panel:hover .panel-controls {
+  opacity: 1;
 }
 
 .panel-controls > *:not(:last-child) {
@@ -736,6 +747,10 @@ nav > .toggle span {
   body[data-panel="source"] .header-title h2,
   body[data-panel="preview"] .header-title h2 {
     font-size: 18px;
+  }
+
+  body[data-panel="preview"] .preview-panel .panel-controls {
+    opacity: 1;
   }
 
   .generators-list {
