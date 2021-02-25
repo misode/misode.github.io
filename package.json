@@ -15,7 +15,7 @@
     "@mcschema/core": "^0.12.3",
     "@mcschema/java-1.15": "^0.2.0",
     "@mcschema/java-1.16": "^0.6.0",
-    "@mcschema/java-1.17": "^0.2.3",
+    "@mcschema/java-1.17": "^0.2.4",
     "@mcschema/locales": "^0.1.20",
     "@types/google.analytics": "0.0.40",
     "@types/seedrandom": "^2.4.28",
