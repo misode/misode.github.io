@@ -78,12 +78,6 @@ export const TreePanel = (view: View, model: DataModel) => {
   })
   return `<div class="panel tree-panel">
     <div class="panel-controls">
-      <div class="btn" data-id="${view.onClick(() => {
-        App.treeMinimized.set(!App.treeMinimized.get())
-        Tracker.toggleMinimize(App.treeMinimized.get())
-      })}">
-        ${Octicon.fold}<span data-i18n="minimize"></span>
-      </div>
       <div class="panel-menu no-relative" data-id="${presetControl}">
         <div class="btn" data-id="${view.onClick(el => {
           toggleMenu(el)
@@ -130,6 +124,16 @@ export const TreePanel = (view: View, model: DataModel) => {
           })}">
             ${Octicon.history}<span data-i18n="reset"></span>
           </div>
+          <div class="btn" data-id="${view.register(el => {
+            el.addEventListener('click', () => {
+              const value = !App.treeMinimized.get()
+              App.treeMinimized.set(value)
+              Tracker.toggleMinimize(value)
+            })
+            App.treeMinimized.watchRun(value => {
+              view.mount(el, `${Octicon[value ? 'unfold' : 'fold']}<span data-i18n="${value ? 'maximize' : 'minimize'}"></span>`, false)
+            })
+          })}"></div>
           <div class="btn" data-id="${view.onClick(() => {Tracker.undo(); model.undo()})}">
             ${Octicon.arrow_left}<span data-i18n="undo"></span>
           </div>
