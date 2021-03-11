@@ -35,7 +35,7 @@ export const SourcePanel = (view: View, model: DataModel) => {
     Tracker.copy()
   }
   const downloadSource = (el: Element) => {
-    const fileContents = encodeURIComponent(JSON.stringify(model.data, null, 2) + "\n")
+    const fileContents = encodeURIComponent(App.jsonOutput.get() + '\n')
     const downloadAnchor = el.lastElementChild as HTMLAnchorElement
     downloadAnchor.setAttribute('href', 'data:text/json;charset=utf-8,' + fileContents)
     downloadAnchor.setAttribute("download", "data.json")
