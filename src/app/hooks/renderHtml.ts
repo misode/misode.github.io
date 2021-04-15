@@ -190,7 +190,7 @@ export const renderHtml: Hook<[any, Mounter], [string, string, string]> = {
           : activeKeys)
         .filter(k => filterKey !== k)
         .filter(k => activeFields[k].enabled(path))
-      if (node.hook(canFlatten, path)) {
+      if (false /* node.hook(canFlatten, path) */) {
         const newValue = value[visibleKeys[0]] ?? {}
         body = activeFields[visibleKeys[0]].hook(this, path.push(visibleKeys[0]), newValue, mounter)[2]
       } else {
