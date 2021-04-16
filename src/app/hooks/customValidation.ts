@@ -25,6 +25,7 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
     }
   },
 
+  /*
   object({ node, getActiveFields }, path, value) {
     let activeFields = getActiveFields(path)
     const filterKey = path.modelArr.length === 0 ? null : node.hook(getFilterKey, path, path)
@@ -37,4 +38,5 @@ export const customValidation: Hook<[any, Errors], void> = walk<[Errors]>({
       }
     }
   }
+  */
 })
