@@ -6,22 +6,15 @@
       "es2017.object",
       "es2019"
     ],
-    "module": "esnext",
+    "module": "es6",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "downlevelIteration": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@mcschema/*": [
-        "node_modules/@mcschema/*",
-        "*"
-      ]
-    }
+    "baseUrl": "."
   },
   "include": [
-    "src", "app_.ts"
+    "src",
   ]
 }

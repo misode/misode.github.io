@@ -39,12 +39,17 @@ const refs: {
 
 export async function fetchData(target: CollectionRegistry, versionId: string) {
   const version = config.versions.find(v => v.id === versionId) as Version | undefined
-  if (!version) return
-  
+  if (!version) {
+    console.error(`[fetchData] Unknown version ${version} in ${JSON.stringify(config.versions)}`)
+    return
+  }
+  console.debug(`[fetchData] ${JSON.stringify(version)}`)
+
   if (version.dynamic) {
     await Promise.all(refs
       .filter(r => localStorage.getItem(`cached_${r.id}`) !== r.hash)
       .map(async r => {
+        console.debug(`[deleteMatching] ${r.id} '${localStorage.getItem(`cached_${r.id}`)}' < '${r.hash}' ${r.url}/${version.refs[r.id]}`)
         await deleteMatching(url => url.startsWith(`${r.url}/${version.refs[r.id]}`))
         localStorage.setItem(`cached_${r.id}`, r.hash)
       }))
@@ -58,6 +63,7 @@ export async function fetchData(target: CollectionRegistry, versionId: string) {
 }
 
 async function fetchRegistries(version: Version, target: CollectionRegistry) {
+  console.debug(`[fetchRegistries] ${version.id}`)
   const registries = config.registries
     .filter(r => !r.dynamic)
     .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
@@ -93,6 +99,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 }
 
 async function fetchBlockStateMap(version: Version) {
+  console.debug(`[fetchBlockStateMap] ${version.id}`)
   if (checkVersion(version.id, undefined, '1.16')) {
     const url = (checkVersion(version.id, undefined, '1.15'))
       ? `${mcdataUrl}/${version.refs.mcdata_master}/generated/reports/blocks.json`
@@ -124,6 +131,7 @@ async function fetchBlockStateMap(version: Version) {
 }
 
 async function fetchDynamicRegistries(version: Version, target: CollectionRegistry) {
+  console.debug(`[fetchDynamicRegistries] ${version.id}`)
   const registries = config.registries
     .filter(r => r.dynamic)
     .filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
@@ -142,6 +150,7 @@ async function fetchDynamicRegistries(version: Version, target: CollectionRegist
 }
 
 export async function fetchPreset(version: Version, registry: string, id: string) {
+  console.debug(`[fetchPreset] ${version.id} ${registry} ${id}`)
   try {
     const res = await fetch(`${vanillaDatapackUrl}/${version.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`)
     return await res.json()

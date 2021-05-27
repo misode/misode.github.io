@@ -13,6 +13,7 @@ const categories = config.models.filter(m => m.category === true)
 const router = async () => {
   const urlParts = location.pathname.split('/').filter(e => e)  
   const urlParams = new URLSearchParams(location.search)
+  console.debug(`[router] ${urlParts.join('/')}`)
 
   const target = document.getElementById('app')!
   let title = locale('title.home')
@@ -65,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       e.preventDefault();
       const target = e.target.getAttribute('href')!
+      console.debug(`[data-link] ${target}`)
       Tracker.pageview(target)
       history.pushState(null, '', target);
       router();

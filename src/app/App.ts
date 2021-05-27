@@ -75,23 +75,30 @@ export const App = {
 }
 
 App.version.watchRun(async (value) => {
+  console.debug(`[App.version.watchRun] ${value}`)
   App.schemasLoaded.set(false)
   await updateSchemas(value)
   App.schemasLoaded.set(true)
+  console.debug(`[App.version.watchRun] Done! ${value}`)
 })
 
-App.theme.watchRun((value) => document.documentElement.setAttribute('data-theme', value))
-
+App.theme.watchRun((value) => {
+  console.debug(`[App.theme.watchRun] ${value}`)
+  document.documentElement.setAttribute('data-theme', value)
+})
 
 let hasFetchedEnglish = false
 
 App.language.watchRun(async (value) => {
+  console.debug(`[App.language.watchRun] ${value}`)
   App.localesLoaded.set(false)
   await updateLocale(value)
   App.localesLoaded.set(true)
+  console.debug(`[App.language.watchRun] Done! ${value}`)
 })
 
 App.localesLoaded.watch((value) => {
+  console.debug(`[App.localesLoaded.watch] ${value}`)
   if (value) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = locale(el.attributes.getNamedItem('data-i18n')!.value)
@@ -101,10 +108,12 @@ App.localesLoaded.watch((value) => {
 })
 
 App.schemasLoaded.watch((value) => {
+  console.debug(`[App.schemasLoaded.watch] ${value}`)
   App.loaded.set(value && App.localesLoaded.get())
 })
 
 App.mobilePanel.watchRun((value) => {
+  console.debug(`[App.mobilePanel.watchRun] ${value}`)
   document.body.setAttribute('data-panel', value)
 })
 
