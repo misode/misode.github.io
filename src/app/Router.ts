@@ -11,9 +11,13 @@ import config from '../config.json'
 const categories = config.models.filter(m => m.category === true)
 
 const router = async () => {
+  localStorage.length
+
   const urlParts = location.pathname.split('/').filter(e => e)  
   const urlParams = new URLSearchParams(location.search)
   console.debug(`[router] ${urlParts.join('/')}`)
+  console.debug(`[router] LocalStorage? ${'localStorage' in window}`)
+  console.debug(`[router] Caches? ${'caches' in window}`)
 
   const target = document.getElementById('app')!
   let title = locale('title.home')

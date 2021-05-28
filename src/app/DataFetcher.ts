@@ -51,7 +51,9 @@ export async function fetchData(target: CollectionRegistry, versionId: string) {
       .map(async r => {
         console.debug(`[deleteMatching] ${r.id} '${localStorage.getItem(`cached_${r.id}`)}' < '${r.hash}' ${r.url}/${version.refs[r.id]}`)
         await deleteMatching(url => url.startsWith(`${r.url}/${version.refs[r.id]}`))
+        console.debug(`[deleteMatching] Done! ${r.id} ${r.hash} '${localStorage.getItem(`cached_${r.id}`)}'`)
         localStorage.setItem(`cached_${r.id}`, r.hash)
+        console.debug(`[deleteMatching] Set! ${r.id} ${r.hash} '${localStorage.getItem(`cached_${r.id}`)}'`)
       }))
   }
 
@@ -176,11 +178,13 @@ async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v):
 async function deleteMatching(matches: (url: string) => boolean) {
   const cache = await caches.open(CACHE_NAME)
   const promises: Promise<boolean>[] = []
+  console.debug(`[deleteMatching] ${CACHE_NAME} ${cache}`)
 
   for (const request of await cache.keys()) {
     if (matches(request.url)) {
       promises.push(cache.delete(request))
     }
   }
+  console.debug(`[deleteMatching] ${CACHE_NAME} ${promises.length}`)
   return (await Promise.all(promises)).length > 0
 }
