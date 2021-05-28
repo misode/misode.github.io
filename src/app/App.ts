@@ -75,12 +75,12 @@ export const App = {
 }
 console.debug(`[App] LocalStorage=${'localStorage' in window} Caches=${'caches' in window}`)
 
-App.version.watch(async (value) => {
-  console.debug(`[App.version.watch] ${value}`)
+App.version.watchRun(async (value) => {
+  console.debug(`[App.version.watchRun] ${value}`)
   App.schemasLoaded.set(false)
   await updateSchemas(value)
   App.schemasLoaded.set(true)
-  console.debug(`[App.version.watch] Done! ${value}`)
+  console.debug(`[App.version.watchRun] Done! ${value}`)
 })
 
 App.theme.watchRun((value) => {

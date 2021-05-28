@@ -176,15 +176,22 @@ async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v):
 }
 
 async function deleteMatching(matches: (url: string) => boolean) {
-  const cache = await caches.open(CACHE_NAME)
+  console.debug(`[deleteMatching] Open cache ${CACHE_NAME}`)
+  let cache: Cache
+  try {
+    cache = await caches.open(CACHE_NAME)
+  } catch (e) {
+    console.error(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${e.message}`)
+    return
+  }
+  console.debug(`[deleteMatching] Opened cache! ${CACHE_NAME}`)
   const promises: Promise<boolean>[] = []
-  console.debug(`[deleteMatching] ${CACHE_NAME} ${cache}`)
 
   for (const request of await cache.keys()) {
     if (matches(request.url)) {
       promises.push(cache.delete(request))
     }
   }
-  console.debug(`[deleteMatching] ${CACHE_NAME} ${promises.length}`)
+  console.debug(`[deleteMatching] Removing ${promises.length} cache objects...`)
   return (await Promise.all(promises)).length > 0
 }
