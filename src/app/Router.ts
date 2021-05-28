@@ -66,6 +66,7 @@ window.addEventListener("popstate", router);
 
 document.addEventListener("DOMContentLoaded", () => {
   console.debug(`[DOMContentLoaded] LocalStorage=${'localStorage' in window} Caches=${'caches' in window}`)
+  App.version.trigger()
   document.body.addEventListener("click", e => {
     if (e.target instanceof Element
       && e.target.hasAttribute('data-link')

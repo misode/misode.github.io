@@ -73,13 +73,14 @@ export const App = {
   settings: new Settings('generator_settings'),
   blockStateRegistry: {} as BlockStateRegistry
 }
+console.debug(`[App] LocalStorage=${'localStorage' in window} Caches=${'caches' in window}`)
 
-App.version.watchRun(async (value) => {
-  console.debug(`[App.version.watchRun] ${value}`)
+App.version.watch(async (value) => {
+  console.debug(`[App.version.watch] ${value}`)
   App.schemasLoaded.set(false)
   await updateSchemas(value)
   App.schemasLoaded.set(true)
-  console.debug(`[App.version.watchRun] Done! ${value}`)
+  console.debug(`[App.version.watch] Done! ${value}`)
 })
 
 App.theme.watchRun((value) => {

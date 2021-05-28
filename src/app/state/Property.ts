@@ -37,4 +37,8 @@ export class Property<T> {
     }
     return this
   }
+
+  trigger() {
+    this.watchers.forEach(w => w.watcher(this.value, null))
+  }
 }
