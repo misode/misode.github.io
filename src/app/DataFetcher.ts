@@ -94,7 +94,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
           : `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/registries/${r.id}/data.min.json`
         target.register(r.id, await getData(url, v => v.values))
       } catch (e) {
-        console.warn(`Error occurred while registry ${r.id}:`, e)
+        console.warn(`Error occurred while fetching registry ${r.id}:`, e)
       }
     }))
   }
@@ -162,36 +162,45 @@ export async function fetchPreset(version: Version, registry: string, id: string
 }
 
 async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
-  const cache = await caches.open(CACHE_NAME)
-  const cacheResponse = await cache.match(url)
+  try {
+    const cache = await caches.open(CACHE_NAME)
+    console.debug(`[getData] Opened cache ${CACHE_NAME} ${url}`)
+    const cacheResponse = await cache.match(url)
+    
+    if (cacheResponse && cacheResponse.ok) {
+      console.debug(`[getData] Retrieving cached data ${url}`)
+      return await cacheResponse.json()
+    }
+  
+    console.debug(`[getData] fetching data ${url}`)
+    const fetchResponse = await fetch(url)
+    const responseData = fn(await fetchResponse.json())
+    await cache.put(url, new Response(JSON.stringify(responseData)))
+    return responseData
+  } catch (e) {
+    console.warn(`[getData] Failed to open cache ${CACHE_NAME}: ${e.message}`)
 
-  if (cacheResponse && cacheResponse.ok) {
-    return await cacheResponse.json()
+    console.debug(`[getData] fetching data ${url}`)
+    const fetchResponse = await fetch(url)
+    const responseData = fn(await fetchResponse.json())
+    return responseData
   }
-
-  const fetchResponse = await fetch(url)
-  const responseData = fn(await fetchResponse.json())
-  await cache.put(url, new Response(JSON.stringify(responseData)))
-  return responseData
 }
 
 async function deleteMatching(matches: (url: string) => boolean) {
-  console.debug(`[deleteMatching] Open cache ${CACHE_NAME}`)
-  let cache: Cache
   try {
-    cache = await caches.open(CACHE_NAME)
-  } catch (e) {
-    console.error(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${e.message}`)
-    return
-  }
-  console.debug(`[deleteMatching] Opened cache! ${CACHE_NAME}`)
-  const promises: Promise<boolean>[] = []
-
-  for (const request of await cache.keys()) {
-    if (matches(request.url)) {
-      promises.push(cache.delete(request))
+    const cache = await caches.open(CACHE_NAME)
+    console.debug(`[deleteMatching] Opened cache ${CACHE_NAME}`)
+    const promises: Promise<boolean>[] = []
+  
+    for (const request of await cache.keys()) {
+      if (matches(request.url)) {
+        promises.push(cache.delete(request))
+      }
     }
+    console.debug(`[deleteMatching] Removing ${promises.length} cache objects...`)
+    await Promise.all(promises)
+  } catch (e) {
+    console.warn(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${e.message}`)
   }
-  console.debug(`[deleteMatching] Removing ${promises.length} cache objects...`)
-  return (await Promise.all(promises)).length > 0
 }
