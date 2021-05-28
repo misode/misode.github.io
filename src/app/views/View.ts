@@ -53,6 +53,7 @@ export class View implements Mounter{
   }
 
   mount(el: Element, html: string, clear = true) {
+    console.debug(`[View.mount] ${html.replace(/\n/g,'').slice(0, 40)}...`)
     el.innerHTML = html
     this.mounted(el, clear)
   }

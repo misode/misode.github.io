@@ -118,11 +118,15 @@ App.mobilePanel.watchRun((value) => {
 })
 
 async function updateSchemas(version: string) {
+  console.debug(`[updateSchemas] ${version}`)
   App.blockStateRegistry = {}
   const collections = Versions[version].getCollections()
+  console.debug(`[updateSchemas] Done getting collections! ${Object.keys(collections['registry']).length}`)
   App.collections.set(collections)
   await fetchData(collections, version)
+  console.debug('[updateSchemas] Done fetching data!')
   const schemas = Versions[version].getSchemas(collections)
+  console.debug(`[updateSchemas] Done getting schemas! ${Object.keys(schemas['registry']).length}`)
   config.models
     .filter(m => m.schema)
     .filter(m => checkVersion(App.version.get(), m.minVersion))
@@ -138,6 +142,7 @@ async function updateSchemas(version: string) {
         }
       }
     })
+  console.debug(`[updateSchemas] Done!`)
 }
 
 async function updateLocale(language: string) {

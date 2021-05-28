@@ -16,8 +16,6 @@ const router = async () => {
   const urlParts = location.pathname.split('/').filter(e => e)  
   const urlParams = new URLSearchParams(location.search)
   console.debug(`[router] ${urlParts.join('/')}`)
-  console.debug(`[router] LocalStorage? ${'localStorage' in window}`)
-  console.debug(`[router] Caches? ${'caches' in window}`)
 
   const target = document.getElementById('app')!
   let title = locale('title.home')
@@ -51,18 +49,23 @@ const router = async () => {
     }
   }
 
+  console.debug(`[router] Renderer=${renderer.name}`)
+
   const versions = config.versions
     .filter(v => checkVersion(v.id, App.model.get()?.minVersion))
     .map(v => v.id).join(', ')
   document.title = `${title} Minecraft ${versions}`
+  console.debug(`[router] Title=${title} Versions=${versions}`)
   App.mobilePanel.set(panel)
   const view = new View()
   view.mount(target, renderer(view), true)
+  console.debug(`[router] Done!`)
 }
 
 window.addEventListener("popstate", router);
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.debug(`[DOMContentLoaded] LocalStorage=${'localStorage' in window} Caches=${'caches' in window}`)
   document.body.addEventListener("click", e => {
     if (e.target instanceof Element
       && e.target.hasAttribute('data-link')
