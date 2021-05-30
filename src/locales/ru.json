@@ -26,6 +26,10 @@
   "world": "Настройки мира",
   "worldgen/biome": "Биом",
   "worldgen/carver": "«Разрезатель»",
+  "worldgen/feature": "Особенность",
   "worldgen/noise-settings": "Настройки шума",
-  "worldgen/surface-builder": "Генерация плоскости"
+  "worldgen/processor-list": "Список процессоров",
+  "worldgen/structure-feature": "Особенности структур",
+  "worldgen/surface-builder": "Генерация плоскости",
+  "worldgen/template-pool": "Пул шаблонов"
 }
