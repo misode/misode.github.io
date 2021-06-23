@@ -50,6 +50,7 @@ type PreviewProps = {
 	version: VersionId,
 	id: string,
 	shown: boolean,
+	onError: (message: string) => unknown,
 }
 export function PreviewPanel({ lang, model, version, id, shown }: PreviewProps) {
 	const [, setCount] = useState(0)

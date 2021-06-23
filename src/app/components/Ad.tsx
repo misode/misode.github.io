@@ -9,7 +9,9 @@ type AdProps = {
 export function Ad({ type, id }: AdProps) {
 	useEffect(() => {
 		document.getElementById('ad-placeholder')?.remove()
-		ethicalads?.load()
+		if ('ethicalads' in window) {
+			ethicalads.load()
+		}
 	}, [])
 
 	return <div data-ea-publisher="misode-github-io" data-ea-type={type} class="ad dark flat" id={id}></div>

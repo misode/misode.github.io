@@ -12,15 +12,22 @@ type SourcePanelProps = {
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
+	onError: (message: string) => unknown,
 }
-export function SourcePanel({ lang, name, model, doCopy, doDownload, doImport }: SourcePanelProps) {
+export function SourcePanel({ lang, name, model, doCopy, doDownload, doImport, onError }: SourcePanelProps) {
 	const loc = locale.bind(null, lang)
 	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
-	
+
 	useModel(model, model => {
-		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data)
-		source.current.value = JSON.stringify(data, null, 2) + '\n'
+		try {
+			const data = model.schema.hook(transformOutput, new ModelPath(model), model.data)
+			source.current.value = JSON.stringify(data, null, 2) + '\n'
+		} catch (e) {
+			onError(`Error getting JSON output: ${e.message}`)
+			console.error(e)
+			source.current.value = ''
+		}
 	})
 
 	const onImport = () => {

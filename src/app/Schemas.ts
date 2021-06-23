@@ -46,11 +46,15 @@ const versionGetter: {
 
 async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
-		const collections = versionGetter[id].getCollections()
-		const blockStates: BlockStateRegistry = {}
-		await fetchData(id, collections, blockStates)
-		const schemas = versionGetter[id].getSchemas(collections)
-		Versions[id] = { collections, schemas, blockStates }
+		try {
+			const collections = versionGetter[id].getCollections()
+			const blockStates: BlockStateRegistry = {}
+			await fetchData(id, collections, blockStates)
+			const schemas = versionGetter[id].getSchemas(collections)
+			Versions[id] = { collections, schemas, blockStates }
+		} catch (e) {
+			throw new Error(`Cannot get version "${id}": ${e.message}`)
+		}
 	}
 	return Versions[id]
 }
@@ -62,15 +66,19 @@ export async function getModel(version: VersionId, id: string): Promise<DataMode
 		if (!schemaName) {
 			throw new Error(`Cannot find model ${id}`)
 		}
-		const schema = versionData.schemas.get(schemaName)
-		const model = new DataModel(schema)
-		if (Models[id]) {
-			model.reset(Models[id].model.data, false)
-		} else {
-			model.validate(true)
-			model.history = [JSON.stringify(model.data)]
+		try {
+			const schema = versionData.schemas.get(schemaName)
+			const model = new DataModel(schema)
+			if (Models[id]) {
+				model.reset(Models[id].model.data, false)
+			} else {
+				model.validate(true)
+				model.history = [JSON.stringify(model.data)]
+			}
+			Models[id] = { model, version }
+		} catch (e) {
+			throw new Error(`Cannot get generator "${id}" for version "${version}": ${e.message}`)
 		}
-		Models[id] = { model, version }
 	}
 	return Models[id].model
 }
