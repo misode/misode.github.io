@@ -1,20 +1,25 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": [
-      "dom",
-      "es2017.object",
-      "es2019"
-    ],
-    "module": "es6",
-    "strict": true,
+    "module": "esnext",
+    "lib": ["dom","esnext"],
     "moduleResolution": "node",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "baseUrl": "."
+		"strict": true,
+		"sourceMap": true,
+		"skipLibCheck": false,
+		"forceConsistentCasingInFileNames": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"noEmit": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
   },
   "include": [
-    "src",
+    "./src",
   ]
 }

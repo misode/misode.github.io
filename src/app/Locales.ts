@@ -1,39 +1,36 @@
+import config from '../config.json'
 import English from '../locales/en.json'
-import { App } from './App'
+
+export type Localize = (key: string, ...params: string[]) => string
 
 interface Locale {
-  [key: string]: string
+	[key: string]: string
 }
 
 export const Locales: {
-  [key: string]: Locale
+	[key: string]: Locale,
 } = {
-  'en': English
+	fallback: English,
 }
 
-export function resolveLocaleParams(value: string, params?: string[]): string | undefined {
-  return value?.replace(/%\d+%/g, match => {
-    const index = parseInt(match.slice(1, -1))
-    return params?.[index] !== undefined ? params[index] : match
-  })
+function resolveLocaleParams(value: string, params?: string[]): string {
+	return value.replace(/%\d+%/g, match => {
+		const index = parseInt(match.slice(1, -1))
+		return params?.[index] !== undefined ? params[index] : match
+	})
 }
 
-export function locale(key: string, params?: string[]): string {
-  const value: string | undefined = Locales[App.language.get()]?.[key] ?? Locales.en[key]
-  return resolveLocaleParams(value, params) ?? key
+export function locale(language: string, key: string, ...params: string[]): string {
+	const value: string | undefined = Locales[language]?.[key]
+		?? Locales.en?.[key] ?? Locales.fallback[key] ?? key
+	return resolveLocaleParams(value, params)
 }
 
-export function segmentedLocale(segments: string[], params?: string[], depth = 5, minDepth = 1): string | undefined {
-  return [App.language.get(), 'en'].reduce((prev: string | undefined, code) => {
-      if (prev !== undefined) return prev
-
-      const array = segments.slice(-depth);
-      while (array.length >= minDepth) {
-          const locale = resolveLocaleParams(Locales[code]?.[array.join('.')], params)
-          if (locale !== undefined) return locale
-          array.shift()
-      }
-
-      return undefined
-  }, undefined)
+export async function loadLocale(language: string) {
+	const langConfig = config.languages.find(lang => lang.code === language)
+	if (!langConfig) return
+	const data = await import(`../locales/${language}.json`)
+	const schema = langConfig.schemas !== false
+		&& await import(`../../node_modules/@mcschema/locales/src/${language}.json`)
+	Locales[language] = { ...data, ...schema, ...data.default, ...schema.default }
 }
