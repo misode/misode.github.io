@@ -34,7 +34,8 @@
     },
     {
       "code": "sk",
-      "name": "Slovenčina"
+      "name": "Slovenčina",
+      "schemas": false
     },
     {
       "code": "zh-cn",
@@ -197,7 +198,11 @@
     { "id": "entity_type" },
     { "id": "fluid" },
     { "id": "function", "dynamic": true },
+    { "id": "float_provider_type", "minVersion": "1.17" },
     { "id": "item" },
+    { "id": "int_provider_type", "minVersion": "1.17" },
+    { "id": "height_provider_type", "minVersion": "1.17" },
+    { "id": "loot_condition_type", "minVersion": "1.16" },
     { "id": "loot_condition_type", "minVersion": "1.16" },
     { "id": "loot_function_type", "minVersion": "1.16" },
     { "id": "loot_nbt_provider_type", "minVersion": "1.17" },
