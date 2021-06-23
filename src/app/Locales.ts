@@ -32,5 +32,5 @@ export async function loadLocale(language: string) {
 	const data = await import(`../locales/${language}.json`)
 	const schema = langConfig.schemas !== false
 		&& await import(`../../node_modules/@mcschema/locales/src/${language}.json`)
-	Locales[language] = { ...data, ...schema, ...data.default, ...schema.default }
+	Locales[language] = { ...data.default, ...schema.default }
 }

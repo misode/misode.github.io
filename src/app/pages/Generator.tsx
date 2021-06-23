@@ -1,8 +1,8 @@
 import type { DataModel } from '@mcschema/core'
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnInput, BtnMenu, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
+import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
 import { fetchPreset } from '../DataFetcher'
 import { locale } from '../Locales'
 import type { VersionId } from '../Schemas'
@@ -19,11 +19,17 @@ type GeneratorProps = {
 }
 export function Generator({ lang, changeTitle, version, onChangeVersion, category, generator }: GeneratorProps) {
 	const loc = locale.bind(null, lang)
+	const [error, setError] = useState('')
+	const [errorBoundary] = useErrorBoundary()
+	if (errorBoundary) {
+		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`}/></main>
+	}
+
 	const id = category ? `${category}/${generator}` : generator ?? ''
 	const modelConfig = config.models.find(m => m.id === id)
 
 	if (!modelConfig) {
-		return <div class="error">Not found</div>
+		return <main><ErrorPanel error={`Cannot find generator "${id}"`}/></main>
 	}
 
 	const minVersion = config.models.find(m => m.id === id)?.minVersion ?? '1.15'
@@ -36,7 +42,9 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 	const [model, setModel] = useState<DataModel | null>(null)
 	useEffect(() => {
 		setModel(null)
-		getModel(version, id).then(m => setModel(m))
+		getModel(version, id)
+			.then(m => setModel(m))
+			.catch(e => setError(e.message))
 	}, [version, category, generator])
 
 	const reset = () => {
@@ -75,15 +83,17 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 	const registry = (modelConfig.category ? modelConfig.category + '/' : '') + modelConfig.schema
 	useEffect(() => {
 		if (!modelConfig.path) return
-		getCollections(version).then(collections => {
-			const terms = (presetFilter ?? '').trim().split(' ')
-			const presets = collections.get(registry)
-				.map(p => p.slice(10))
-				.filter(p => terms.every(t => p.includes(t)))
-			if (presets) {
-				setPresetResults(presets)
-			}
-		})
+		getCollections(version)
+			.then(collections => {
+				const terms = (presetFilter ?? '').trim().split(' ')
+				const presets = collections.get(registry)
+					.map(p => p.slice(10))
+					.filter(p => terms.every(t => p.includes(t)))
+				if (presets) {
+					setPresetResults(presets)
+				}
+			})
+			.catch(e => setError(e.message))
 	}, [version, category, generator, presetFilter])
 
 	const loadPreset = (id: string) => {
@@ -154,7 +164,8 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 					<Btn icon="arrow_right" label={loc('redo')} onClick={redo} />
 				</BtnMenu>
 			</div>
-			<Tree {...{lang, model, version}} />
+			{error && <ErrorPanel error={error} />}
+			<Tree {...{lang, model, version}} onError={setError} />
 		</main>
 		<div class="popup-actions" style={`--offset: -${10 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''}`} onClick={togglePreview}>
@@ -171,10 +182,10 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{lang, model, version, id}} shown={previewShown} />
+			<PreviewPanel {...{lang, model, version, id}} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, doCopy, doDownload, doImport}} name={modelConfig.schema ?? 'data'} />
+			<SourcePanel {...{lang, model, doCopy, doDownload, doImport}} name={modelConfig.schema ?? 'data'} onError={setError} />
 		</div>
 	</>
 }
