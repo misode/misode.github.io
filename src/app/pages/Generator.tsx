@@ -147,7 +147,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 			<div class="controls">
 				<Btn icon="upload" label={loc('import')} onClick={importSource} />
 				{modelConfig.path && <BtnMenu icon="archive" label={loc('presets')} relative={false}>
-					<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} />
+					<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} />
 					<div class="result-list">
 						{presetResults.map(preset => <Btn label={preset} onClick={() => loadPreset(preset)} />)}
 					</div>
