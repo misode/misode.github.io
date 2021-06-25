@@ -1,7 +1,7 @@
 import type { EnumOption, Hook, ValidationOption } from '@mcschema/core'
-import { DataModel, MapNode, ModelPath, Path, StringNode } from '@mcschema/core'
+import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { Localize } from '../Locales'
-import type { VersionId } from '../Schemas'
+import type { BlockStateRegistry, VersionId } from '../Schemas'
 import { hexId, htmlEncode } from '../Utils'
 import type { Mounter } from './Mounter'
 import { Octicon } from './Octicon'
@@ -10,12 +10,13 @@ export type TreeProps = {
 	loc: Localize,
 	mounter: Mounter,
 	version: VersionId,
+	blockStates: BlockStateRegistry,
 }
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element']
-const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'feature.tree.foliage_placer', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type']
+const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type']
 
 /**
  * Secondary model used to remember the keys of a map
@@ -34,30 +35,30 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		return ['', '', '']
 	},
 
-	boolean({ node }, path, value, { loc, mounter }) {
-		const onFalse = mounter.onClick(() => {
+	boolean({ node }, path, value, props) {
+		const onFalse = props.mounter.onClick(() => {
 			path.model.set(path, node.optional() && value === false ? undefined : false)
 		})
-		const onTrue = mounter.onClick(() => {
+		const onTrue = props.mounter.onClick(() => {
 			path.model.set(path, node.optional() && value === true ? undefined : true)
 		})
 		return ['', `<button${value === false ? ' class="selected"' : ' '} 
-				data-id="${onFalse}">${htmlEncode(loc('false'))}</button>
+				data-id="${onFalse}">${htmlEncode(props.loc('false'))}</button>
 			<button${value === true ? ' class="selected"' : ' '} 
-				data-id="${onTrue}">${htmlEncode(loc('true'))}</button>`, '']
+				data-id="${onTrue}">${htmlEncode(props.loc('true'))}</button>`, '']
 	},
 
-	choice({ choices, config, switchNode }, path, value, { loc, mounter, version }) {
+	choice({ choices, config, switchNode }, path, value, props) {
 		const choice = switchNode.activeCase(path, true)
 		const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
 		const pathWithChoiceContext = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
 
-		const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, { loc, mounter, version })
+		const [prefix, suffix, body] = choice.node.hook(this, pathWithContext, value, props)
 		if (choices.length === 1) {
 			return [prefix, suffix, body]
 		}
 
-		const inputId = mounter.register(el => {
+		const inputId = props.mounter.register(el => {
 			(el as HTMLSelectElement).value = choice.type
 			el.addEventListener('change', () => {
 				const c = choices.find(c => c.type === (el as HTMLSelectElement).value) ?? choice
@@ -66,39 +67,39 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		})
 		const inject = `<select data-id="${inputId}">
 			${choices.map(c => `<option value="${htmlEncode(c.type)}">
-				${htmlEncode(pathLocale(loc, pathWithChoiceContext.contextPush(c.type)))}
+				${htmlEncode(pathLocale(props.loc, pathWithChoiceContext.contextPush(c.type)))}
 			</option>`).join('')}
 		</select>`
 
 		return [prefix, inject + suffix, body]
 	},
 
-	list({ children }, path, value, { loc, mounter, version }) {
-		const onAdd = mounter.onClick(() => {
+	list({ children }, path, value, props) {
+		const onAdd = props.mounter.onClick(() => {
 			if (!Array.isArray(value)) value = []
 			path.model.set(path, [children.default(), ...value])
 		})
-		const onAddBottom = mounter.onClick(() => {
+		const onAddBottom = props.mounter.onClick(() => {
 			if (!Array.isArray(value)) value = []
 			path.model.set(path, [...value, children.default()])
 		})
-		const suffix = `<button class="add" data-id="${onAdd}" aria-label="${loc('button.add')}">${Octicon.plus_circle}</button>`
+		const suffix = `<button class="add" data-id="${onAdd}" aria-label="${props.loc('button.add')}">${Octicon.plus_circle}</button>`
 
 		let body = ''
 		if (Array.isArray(value)) {
 			body = value.map((childValue, index) => {
-				const removeId = mounter.onClick(() => path.model.set(path.push(index), undefined))
+				const removeId = props.mounter.onClick(() => path.model.set(path.push(index), undefined))
 				const childPath = path.push(index).contextPush('entry')
 				const category = children.category(childPath)
-				const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, { loc, mounter, version })
+				const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, props)
 				return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
 					<div class="node-header">
-						${error(loc, childPath, mounter)}
-						${help(loc, childPath, mounter)}
-						<button class="remove" data-id="${removeId}" aria-label="${loc('button.remove')}">${Octicon.trashcan}</button>
+						${error(props.loc, childPath, props.mounter)}
+						${help(props.loc, childPath, props.mounter)}
+						<button class="remove" data-id="${removeId}" aria-label="${props.loc('button.remove')}">${Octicon.trashcan}</button>
 						${cPrefix}
-						<label ${contextMenu(loc, childPath, mounter)}>
-							${htmlEncode(pathLocale(loc, childPath, `${index}`))}
+						<label ${contextMenu(props.loc, childPath, props.mounter)}>
+							${htmlEncode(pathLocale(props.loc, childPath, `${index}`))}
 						</label>
 						${cSuffix}
 					</div>
@@ -109,7 +110,7 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 			if (value.length > 2) {
 				body += `<div class="node-entry">
 					<div class="node node-header">
-						<button class="add" data-id="${onAddBottom}" aria-label="${loc('button.add')}">${Octicon.plus_circle}</button>
+						<button class="add" data-id="${onAddBottom}" aria-label="${props.loc('button.add')}">${Octicon.plus_circle}</button>
 					</div>
 				</div>`
 			}
@@ -117,29 +118,52 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		return ['', suffix, body]
 	},
 
-	map({ children, keys }, path, value, { loc, mounter, version }) {
+	map({ children, keys, config }, path, value, props) {
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
-		const onAdd = mounter.onClick(() => {
+		const onAdd = props.mounter.onClick(() => {
 			const key = keyPath.get()
 			path.model.set(path.push(key), children.default())
 		})
-		const keyRendered = keys.hook(this, keyPath, keyPath.get() ?? '', { loc, mounter, version })
-		const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}" aria-label="${loc('button.add')}">${Octicon.plus_circle}</button>`
+		const blockState = config.validation?.validator === 'block_state_map'? props.blockStates?.[relativePath(path, config.validation.params.id).get()] : null
+		const keysSchema = blockState?.properties
+			? StringNode(null!, { enum: Object.keys(blockState.properties ?? {}) })
+			: keys
+		const keyRendered = keysSchema.hook(this, keyPath, keyPath.get() ?? '', props)
+		const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}" aria-label="${props.loc('button.add')}">${Octicon.plus_circle}</button>`
+		if (blockState && path.last() === 'Properties') {
+			if (typeof value !== 'object') value = {}
+			const properties = Object.entries(blockState.properties)
+				.map(([key, values]) => [key, StringNode(null!, { enum: values })])
+			Object.entries(blockState.properties).forEach(([key, values]) => {
+				if (typeof value[key] !== 'string') {
+					path.model.errors.add(path.push(key), 'error.expected_string')
+				} else if (!values.includes(value[key])) {
+					path.model.errors.add(path.push(key), 'error.invalid_enum_option', value[key])
+				}
+			})
+			return ObjectNode(Object.fromEntries(properties)).hook(this, path, value, props)
+		}
 		let body = ''
 		if (typeof value === 'object' && value !== undefined) {
 			body = Object.keys(value)
 				.map(key => {
-					const onRemove = mounter.onClick(() => path.model.set(path.push(key), undefined))
+					const onRemove = props.mounter.onClick(() => path.model.set(path.push(key), undefined))
 					const childPath = path.modelPush(key)
 					const category = children.category(childPath)
-					const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, value[key], { loc, mounter, version })
+					const childrenSchema = blockState
+						? StringNode(null!, { enum: blockState.properties[key] ?? [] })
+						: children
+					if (blockState?.properties[key] && !blockState.properties[key].includes(value[key])) {
+						path.model.errors.add(childPath, 'error.invalid_enum_option', value[key])
+					}
+					const [cPrefix, cSuffix, cBody] = childrenSchema.hook(this, childPath, value[key], props)
 					return `<div class="node-entry"><div class="node ${children.type(childPath)}-node" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
 						<div class="node-header">
-							${error(loc, childPath, mounter)}
-							${help(loc, childPath, mounter)}
-							<button class="remove" data-id="${onRemove}" aria-label="${loc('button.remove')}">${Octicon.trashcan}</button>
+							${error(props.loc, childPath, props.mounter)}
+							${help(props.loc, childPath, props.mounter)}
+							<button class="remove" data-id="${onRemove}" aria-label="${props.loc('button.remove')}">${Octicon.trashcan}</button>
 							${cPrefix}
-							<label ${contextMenu(loc, childPath, mounter)}>
+							<label ${contextMenu(props.loc, childPath, props.mounter)}>
 								${htmlEncode(key)}
 							</label>
 							${cSuffix}
@@ -168,13 +192,14 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		return ['', `<input data-id="${onChange}" value="${value ?? ''}">`, '']
 	},
 
-	object({ node, getActiveFields, getChildModelPath }, path, value, { loc, mounter, version }) {
+	object({ node, getActiveFields, getChildModelPath }, path, value, props) {
+		let prefix = ''
 		let suffix = ''
 		if (node.optional()) {
 			if (value === undefined) {
-				suffix = `<button class="collapse closed" data-id="${mounter.onClick(() => path.model.set(path, node.default()))}" aria-label="${loc('button.expand')}">${Octicon.plus_circle}</button>`
+				suffix = `<button class="collapse closed" data-id="${props.mounter.onClick(() => path.model.set(path, node.default()))}" aria-label="${props.loc('button.expand')}">${Octicon.plus_circle}</button>`
 			} else {
-				suffix = `<button class="collapse open" data-id="${mounter.onClick(() => path.model.set(path, undefined))}" aria-label="${loc('button.collapse')}">${Octicon.trashcan}</button>`
+				suffix = `<button class="collapse open" data-id="${props.mounter.onClick(() => path.model.set(path, undefined))}" aria-label="${props.loc('button.collapse')}">${Octicon.trashcan}</button>`
 			}
 		}
 		let body = ''
@@ -191,22 +216,26 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 				}
 
 				const category = field.category(childPath)
-				const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], { loc, mounter, version })
-				if (field.type(childPath) === 'object' && flattenedFields.includes(context)) {
-					suffix += cSuffix
-					return cBody
-				}
-				if (inlineFields.includes(context)) {
-					suffix += cSuffix
+				const [cPrefix, cSuffix, cBody] = field.hook(this, childPath, value[k], props)
+				if (cPrefix.length === 0 && cSuffix.length === 0 && cBody.length === 0) {
 					return ''
 				}
+
+				const isFlattened = field.type(childPath) === 'object' && flattenedFields.includes(context)
+				const isInlined = inlineFields.includes(context)
+				if (isFlattened || isInlined) {
+					prefix += `${error(props.loc, childPath, props.mounter)}${help(props.loc, childPath, props.mounter)}${cPrefix}`
+					suffix += cSuffix
+					return isFlattened ? cBody : ''
+				}
+
 				return `<div class="node ${field.type(childPath)}-node ${cBody ? '' : 'no-body'}" ${category ? `data-category="${htmlEncode(category)}"` : ''}>
 					<div class="node-header">
-						${error(loc, childPath, mounter)}
-						${help(loc, childPath, mounter)}
+						${error(props.loc, childPath, props.mounter)}
+						${help(props.loc, childPath, props.mounter)}
 						${cPrefix}
-						<label ${contextMenu(loc, childPath, mounter)}>
-							${pathLocale(loc, childPath)}
+						<label ${contextMenu(props.loc, childPath, props.mounter)}>
+							${pathLocale(props.loc, childPath)}
 						</label>
 						${cSuffix}
 					</div>
@@ -215,11 +244,11 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 			})
 				.join('')
 		}
-		return ['', suffix, body]
+		return [prefix, suffix, body]
 	},
 
-	string({ node, getValues, config }, path, value, { loc, mounter }) {
-		const inputId = mounter.register(el => {
+	string({ node, getValues, config }, path, value, props) {
+		const inputId = props.mounter.register(el => {
 			(el as HTMLSelectElement).value = value ?? ''
 			el.addEventListener('change', evt => {
 				const newValue = (el as HTMLSelectElement).value
@@ -238,17 +267,23 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 				context = context.contextPush(config.params.pool)
 			}
 			suffix = `<select data-id="${inputId}">
-				${node.optional() ? `<option value="">${loc('unset')}</option>` : ''}
+				${node.optional() ? `<option value="">${props.loc('unset')}</option>` : ''}
 				${values.map(v => `<option value="${htmlEncode(v)}">
-					${pathLocale(loc, context.contextPush(v.replace(/^minecraft:/, '')))}
+					${pathLocale(props.loc, context.contextPush(v.replace(/^minecraft:/, '')))}
 				</option>`).join('')}
+			</select>`
+		} else if (!isEnum(config) && config?.validator === 'block_state_key') {
+			const blockState = props.blockStates?.[relativePath(path, config.params.id).get()]
+			const values = Object.keys(blockState?.properties ?? {})
+			suffix = `<select data-id="${inputId}">
+				${values.map(v => `<option>${v}</option>`).join('')}
 			</select>`
 		} else {
 			const datalistId = hexId()
 			suffix = `<input data-id="${inputId}" ${values.length === 0 ? '' : `list="${datalistId}"`}>
 				${values.length === 0 ? '' :
 		`<datalist id="${datalistId}">
-					${values.map(v =>
+								${values.map(v =>
 		`<option value="${htmlEncode(v)}">`
 	).join('')}
 		</datalist>`}`

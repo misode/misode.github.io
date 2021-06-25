@@ -5,8 +5,8 @@ import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
 import { fetchPreset } from '../DataFetcher'
 import { locale } from '../Locales'
-import type { VersionId } from '../Schemas'
-import { checkVersion, getCollections, getModel } from '../Schemas'
+import type { BlockStateRegistry, VersionId } from '../Schemas'
+import { checkVersion, getBlockStates, getCollections, getModel } from '../Schemas'
 
 type GeneratorProps = {
 	lang: string,
@@ -40,8 +40,11 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 	changeTitle(loc('title.generator', loc(id)), allowedVersions)
 
 	const [model, setModel] = useState<DataModel | null>(null)
+	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
 	useEffect(() => {
 		setModel(null)
+		getBlockStates(version)
+			.then(b => setBlockStates(b))
 		getModel(version, id)
 			.then(m => setModel(m))
 			.catch(e => setError(e.message))
@@ -165,7 +168,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} />}
-			<Tree {...{lang, model, version}} onError={setError} />
+			<Tree {...{lang, model, version, blockStates}} onError={setError} />
 		</main>
 		<div class="popup-actions" style={`--offset: -${10 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''}`} onClick={togglePreview}>
@@ -185,7 +188,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion, categor
 			<PreviewPanel {...{lang, model, version, id}} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, doCopy, doDownload, doImport}} name={modelConfig.schema ?? 'data'} onError={setError} />
+			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={modelConfig.schema ?? 'data'} onError={setError} />
 		</div>
 	</>
 }
