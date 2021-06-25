@@ -1,3 +1,7 @@
+export function isPromise(obj: any): obj is Promise<any> {
+	return typeof (obj as any)?.then === 'function' 
+}
+
 const dec2hex = (dec: number) => ('0' + dec.toString(16)).substr(-2)
 
 export function hexId(length = 12) {

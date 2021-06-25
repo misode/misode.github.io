@@ -25,7 +25,7 @@ type VersionData = {
 	schemas: SchemaRegistry,
 	blockStates: BlockStateRegistry,
 }
-const Versions: Record<string, VersionData> = {}
+const Versions: Record<string, VersionData | Promise<VersionData>> = {}
 
 type ModelData = {
 	model: DataModel,
@@ -46,15 +46,19 @@ const versionGetter: {
 
 async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
-		try {
-			const collections = versionGetter[id].getCollections()
-			const blockStates: BlockStateRegistry = {}
-			await fetchData(id, collections, blockStates)
-			const schemas = versionGetter[id].getSchemas(collections)
-			Versions[id] = { collections, schemas, blockStates }
-		} catch (e) {
-			throw new Error(`Cannot get version "${id}": ${e.message}`)
-		}
+		Versions[id] = (async () => {
+			try {
+				const collections = versionGetter[id].getCollections()
+				const blockStates: BlockStateRegistry = {}
+				await fetchData(id, collections, blockStates)
+				const schemas = versionGetter[id].getSchemas(collections)
+				Versions[id] = { collections, schemas, blockStates }
+				return Versions[id]
+			} catch (e) {
+				throw new Error(`Cannot get version "${id}": ${e.message}`)
+			}
+		})()
+		return Versions[id]
 	}
 	return Versions[id]
 }
