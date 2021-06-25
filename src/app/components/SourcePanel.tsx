@@ -4,24 +4,27 @@ import { useEffect, useRef } from 'preact/hooks'
 import { useModel } from '../hooks'
 import { locale } from '../Locales'
 import { transformOutput } from '../schema/transformOutput'
+import type { BlockStateRegistry } from '../Schemas'
 
 type SourcePanelProps = {
 	lang: string,
 	name: string,
 	model: DataModel | null,
+	blockStates: BlockStateRegistry | null,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
 	onError: (message: string) => unknown,
 }
-export function SourcePanel({ lang, name, model, doCopy, doDownload, doImport, onError }: SourcePanelProps) {
+export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, onError }: SourcePanelProps) {
 	const loc = locale.bind(null, lang)
 	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
 
 	useModel(model, model => {
 		try {
-			const data = model.schema.hook(transformOutput, new ModelPath(model), model.data)
+			const props = { blockStates: blockStates ?? {} }
+			const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, props)
 			source.current.value = JSON.stringify(data, null, 2) + '\n'
 		} catch (e) {
 			onError(`Error getting JSON output: ${e.message}`)
