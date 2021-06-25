@@ -46,8 +46,8 @@ export const BiomeSourcePreview = ({ data, shown }: BiomeSourceProps) => {
 	})
 
 	useOnDrag(canvas.current, (dx, dy) => {
-		const x = dx * canvas.current.width / canvas.current.clientWidth
-		const y = dy * canvas.current.height / canvas.current.clientHeight
+		const x = dx * 200 / canvas.current.clientWidth
+		const y = dy * 200 / canvas.current.clientHeight
 		offset.current = [offset.current[0] + x, offset.current[1] + y]
 		redraw.current()
 	})
