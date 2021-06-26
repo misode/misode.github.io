@@ -1,10 +1,18 @@
 import type { DataModel } from '@mcschema/core'
 import { ModelPath } from '@mcschema/core'
-import { useEffect, useRef } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
+import { Btn, BtnMenu } from '.'
 import { useModel } from '../hooks'
 import { locale } from '../Locales'
 import { transformOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry } from '../Schemas'
+import { Store } from '../Store'
+
+const INDENT: Record<string, number | string> = {
+	'2_spaces': 2,
+	'4_spaces': 4,
+	tabs: '\t',
+}
 
 type SourcePanelProps = {
 	lang: string,
@@ -18,20 +26,33 @@ type SourcePanelProps = {
 }
 export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, onError }: SourcePanelProps) {
 	const loc = locale.bind(null, lang)
+	const [indent, setIndent] = useState(Store.getIndent())
 	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
+	const retransform = useRef<Function>()
 
-	useModel(model, model => {
-		try {
-			const props = { blockStates: blockStates ?? {} }
-			const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, props)
-			source.current.value = JSON.stringify(data, null, 2) + '\n'
-		} catch (e) {
-			onError(`Error getting JSON output: ${e.message}`)
-			console.error(e)
-			source.current.value = ''
+	useEffect(() => {
+		retransform.current = () => {
+			if (!model || !blockStates) return
+			try {
+				const props = { blockStates: blockStates ?? {} }
+				const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, props)
+				source.current.value = JSON.stringify(data, null, INDENT[indent]) + '\n'
+			} catch (e) {
+				onError(`Error getting JSON output: ${e.message}`)
+				console.error(e)
+				source.current.value = ''
+			}
 		}
 	})
+
+	useModel(model, () => {
+		retransform.current()
+	})
+
+	useEffect(() => {
+		retransform.current()
+	}, [indent])
 
 	const onImport = () => {
 		try {
@@ -65,7 +86,20 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 		}
 	}, [doImport])
 
+	const changeIndent = (value: string) => {
+		Store.setIndent(value)
+		setIndent(value)
+	}
+
 	return <> 
+		<div class="controls">
+			<BtnMenu icon="gear">
+				{Object.entries(INDENT).map(([key]) =>
+					<Btn label={loc(`indentation.${key}`)} active={indent === key}
+						onClick={() => changeIndent(key)}/>
+				)}
+			</BtnMenu>
+		</div>
 		<textarea ref={source} class="source" onChange={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')}></textarea>
 		<a ref={download} style="display: none;"></a>
 	</>

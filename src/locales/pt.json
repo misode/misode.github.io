@@ -1,1 +1,8 @@
-{}
+{
+  "copy": "Copiar",
+  "indentation.2_spaces": "2 Espaços",
+  "indentation.4_spaces": "4 Espaços",
+  "indentation.tabs": "Guias",
+  "theme.dark": "Escuro",
+  "theme.light": "Claro"
+}

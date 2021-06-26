@@ -5,6 +5,7 @@ export namespace Store {
 	export const ID_LANGUAGE = 'language'
 	export const ID_THEME = 'theme'
 	export const ID_VERSION = 'schema_version'
+	export const ID_INDENT = 'indentation'
 
 	export function getLanguage() {
 		return localStorage.getItem(ID_LANGUAGE) ?? 'en'
@@ -22,6 +23,10 @@ export namespace Store {
 		return '1.17'
 	}
 
+	export function getIndent() {
+		return localStorage.getItem(ID_INDENT) ?? '2_spaces'
+	}
+
 	export function setLanguage(language: string | undefined) {
 		if (language) localStorage.setItem(ID_LANGUAGE, language)
 	}
@@ -32,5 +37,9 @@ export namespace Store {
 
 	export function setVersion(version: VersionId | undefined) {
 		if (version) localStorage.setItem(ID_VERSION, version)
+	}
+
+	export function setIndent(indent: string) {
+		if (indent) localStorage.setItem(ID_INDENT, indent)
 	}
 }
