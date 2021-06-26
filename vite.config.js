@@ -26,8 +26,8 @@ export default defineConfig({
 		stringify: true,
 	},
 	define: {
-		__MCDATA_MASTER_HASH__: env ? env.mcdata_hash : '',
-		__VANILLA_DATAPACK_SUMMARY_HASH__: env ? env.vanilla_datapack_summary_hash : '',
+		__MCDATA_MASTER_HASH__: env.mcdata_hash,
+		__VANILLA_DATAPACK_SUMMARY_HASH__: env.vanilla_datapack_summary_hash,
 	},
 	plugins: [preact()],
 })

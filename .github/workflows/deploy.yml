@@ -31,7 +31,9 @@ jobs:
     - name: Build
       run: |
         npm install
-        npm run build -- --env.mcdata_hash='${{ fromJson(steps.get_mcdata_hash.outputs.data).commit.sha }}' --env.vanilla_datapack_summary_hash='${{ fromJson(steps.get_vanilla_datapack_summary_hash.outputs.data).commit.sha }}'
+        export mcdata_hash="'${{ fromJson(steps.get_mcdata_hash.outputs.data).commit.sha }}'"
+        export vanilla_datapack_summary_hash="'${{ fromJson(steps.get_vanilla_datapack_summary_hash.outputs.data).commit.sha }}'"
+        npm run build
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@releases/v3
