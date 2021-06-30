@@ -1,6 +1,5 @@
-import { Link } from 'preact-router'
 import config from '../../config.json'
-import { Octicon } from '../components/Octicon'
+import { ToolCard } from '../components'
 import { locale } from '../Locales'
 import { cleanUrl } from '../Utils'
 
@@ -8,31 +7,25 @@ type HomeProps = {
 	lang: string,
 	changeTitle: (title: string) => unknown,
 	path?: string,
-	category?: string,
 }
-export function Home({ lang, changeTitle, category }: HomeProps) {
+export function Home({ lang, changeTitle }: HomeProps) {
 	const loc = locale.bind(null, lang)
-	changeTitle(category ? loc('title.generator_category', loc(category)) : loc('title.home'))
+	changeTitle(loc('title.home'))
 	return <main>
 		<div class="home">
-			<div class="generator-picker">
-				<ul class="generators-list">
-					{config.models.filter(m => typeof m.category !== 'string').map(m => <li>
-						<Link class={`generators-card${m.category === true && m.id === category ? ' selected' : ''}`} href={cleanUrl(m.id)}>
-							{loc(m.id)}
-							{m.category && Octicon.chevron_right}
-						</Link>
-					</li>)}
-				</ul>
-				{(category && config.models.some(m => m.category === category)) &&
-				<ul class="generators-list">
-					{config.models.filter(m => m.category === category).map(m => <li>
-						<Link class="generators-card" href={cleanUrl(m.id)}>
-							{loc(m.id)}
-						</Link>
-					</li>)}
-				</ul>}
-			</div>
+			{config.models.filter(m => typeof m.category !== 'string').map(m => 
+				<ToolCard title={loc(m.id)} link={cleanUrl(m.id)} />
+			)}
+			<hr />
+			<ToolCard title="Report Inspector" icon="report" link="https://misode.github.io/report/">
+				<p>Analyse your performance reports</p>
+			</ToolCard>
+			<ToolCard title="Minecraft Sounds" icon="sounds" link="https://misode.github.io/sounds/">
+				<p>Browse through and mix all the vanilla sounds</p>
+			</ToolCard>
+			<ToolCard title="Data Pack Upgrader" link="https://misode.github.io/upgrader/">
+				<p>Convert your 1.16 data packs to 1.17</p>
+			</ToolCard>
 		</div>
 	</main>
 }

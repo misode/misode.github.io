@@ -7,9 +7,7 @@ import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
-import { FieldSettings } from './pages/FieldSettings'
-import { Generator } from './pages/Generator'
-import { Home } from './pages/Home'
+import { FieldSettings, Generator, Home, Worldgen } from './pages'
 import type { VersionId } from './Schemas'
 import { Store } from './Store'
 import { cleanUrl } from './Utils'
@@ -68,7 +66,7 @@ function Main() {
 		<Router onChange={changeRoute}>
 			<Home path="/" {...{lang, changeTitle}} />
 			<FieldSettings path="/settings/fields" {...{lang, changeTitle}} />
-			<Home path="/worldgen" category="worldgen" {...{lang, changeTitle}} />
+			<Worldgen path="/worldgen" {...{lang, changeTitle}} />
 			<Generator path="/:generator" {...{lang, version, changeTitle}} onChangeVersion={changeVersion} />
 			<Generator path="/worldgen/:generator" category="worldgen" {...{lang, version, changeTitle}} onChangeVersion={changeVersion} />
 		</Router>

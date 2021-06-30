@@ -102,6 +102,7 @@
       "name": "Dimension",
       "path": "dimension",
       "schema": "dimension",
+      "category": "worldgen",
       "minVersion": "1.16"
     },
     {
@@ -109,12 +110,14 @@
       "name": "Dimension Type",
       "path": "dimension_type",
       "schema": "dimension_type",
+      "category": "worldgen",
       "minVersion": "1.16"
     },
     {
       "id": "world",
       "name": "World Settings",
       "schema": "world_settings",
+      "category": "worldgen",
       "minVersion": "1.16"
     },
     {

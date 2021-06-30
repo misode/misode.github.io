@@ -1,8 +1,9 @@
 :root {
 	--background-1: #1b1b1b;
 	--background-2: #252525;
-	--background-3: #3d3d3d;
-	--background-4: #464646;
+	--background-3: #2f2f2f;
+	--background-4: #3d3d3d;
+	--background-5: #464646;
 	--text-1: #ffffff;
 	--text-2: #dcdcdc;
 	--text-3: #c3c3c3;
@@ -20,8 +21,9 @@
 :root[data-theme=light] {
 	--background-1: #fafafa;
 	--background-2: #e2e2e2;
-	--background-3: #cccccc;
-	--background-4: #d6d6d6;
+	--background-3: #d4d3d3;
+	--background-4: #cccccc;
+	--background-5: #d6d6d6;
 	--text-1: #000000;
 	--text-2: #505050;
 	--text-3: #6a6a6a;
@@ -40,8 +42,9 @@
 	:root[data-theme=system] {
 		--background-1: #fafafa;
 		--background-2: #e2e2e2;
-		--background-3: #cccccc;
-		--background-4: #d6d6d6;
+		--background-3: #d4d3d3;
+		--background-4: #cccccc;
+		--background-5: #d6d6d6;
 		--text-1: #000000;
 		--text-2: #505050;
 		--text-3: #6a6a6a;
@@ -107,14 +110,29 @@ body[data-panel="settings"] header {
 
 .home-link {
 	margin: 0 8px 0 0;
-	height: 32px;
-	fill: var(--nav);
 }
 
 .home-link svg {
+	display: block;
 	width: 32px;
 	height: 32px;
 	padding: 2px;
+}
+
+.home-link svg rect:nth-child(2n) {
+	transition: transform 0.2s;
+}
+
+.home-link:hover rect:nth-child(2) {
+	transform: translateX(-8px);
+}
+
+.home-link:hover rect:nth-child(4) {
+	transform: translateX(-11px);
+}
+
+.home-link:hover rect:nth-child(6) {
+	transform: translateX(-6px);
 }
 
 nav ul {
@@ -289,7 +307,7 @@ main.has-preview {
 	outline: none;
 	font-size: 1rem;
 	white-space: nowrap;
-	background-color: var(--background-3);
+	background-color: var(--background-4);
 	box-shadow: 0 1px 7px -2px #000;
 	color: var(--text-2);
 	fill: var(--text-2);
@@ -305,7 +323,7 @@ main.has-preview {
 }
 
 .btn:not(.btn-input):hover {
-	background-color: var(--background-4);
+	background-color: var(--background-5);
 }
 
 .btn.no-pointer {
@@ -398,7 +416,7 @@ main.has-preview {
 	padding: 0 8px;
 	border-top-left-radius: 24px;
 	border-bottom-left-radius: 24px;
-	background-color: var(--background-3);
+	background-color: var(--background-4);
 	box-shadow: 0 0 7px -3px #000;
 	user-select: none;
 	-webkit-user-select: none;
@@ -409,7 +427,7 @@ main.has-preview {
 }
 
 .popup-actions:hover {
-	background-color: var(--background-4);
+	background-color: var(--background-5);
 }
 
 .popup-action {
@@ -470,49 +488,44 @@ main.has-preview {
 	font-size: 20px;
 }
 
-.generators-list {
+.home {
+	max-width: 960px;
+	margin: 0 auto;
+}
+
+.tool-card {
 	display: flex;
-	flex-direction: column;
-	list-style-type: none;
-}
-
-.generators-list:not(:last-child) {
-	margin-right: 20px
-}
-
-.generators-card {
-	margin-bottom: 10px;
-	padding: 8px 15px;
-	cursor: pointer;
+	padding: 10px;
+	margin-bottom: 8px;
+	color: var(--text-2);
+	background-color: var(--background-2);
+	box-shadow: 1px 1px 7px -3px #000;
+	border-radius: 6px;
 	text-decoration: none;
-	text-transform: capitalize;
-	border-radius: 3px;
-	background-color: var(--nav-faded);
-	color: var(--text-1);
-	fill: var(--text-1);
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	user-select: none;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	transition: margin 0.2s;
 }
 
-.generators-card * {
-	pointer-events: none;
+.tool-card:hover {
+	background-color: var(--background-3);
 }
 
-.generators-card:hover,
-.generators-card.selected {
-	background-color: var(--nav-faded-hover);
-	margin-left: 8px;
-	margin-right: -8px;
+.tool-card svg {
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
+	margin-right: 8px;
 }
 
-.generators-card svg {
-	margin-left: 10px;
+.tool-card h3 {
+	font-weight: unset;
+}
+
+.tool-card p {
+	color: var(--text-3);
+}
+
+hr {
+	margin: 12px 0;
+	border: none;
 }
 
 .settings {
@@ -522,7 +535,7 @@ main.has-preview {
 .settings p {
 	color: var(--nav);
 	padding: 8px;
-	border-bottom: 2px solid var(--background-3);
+	border-bottom: 2px solid var(--background-4);
 }
 
 .field-list {
@@ -535,7 +548,7 @@ main.has-preview {
 	display: flex;
 	justify-content: space-between;
 	padding: 4px 0;
-	border-bottom: 1px solid var(--background-3);
+	border-bottom: 1px solid var(--background-4);
 }
 
 .field-prop {
