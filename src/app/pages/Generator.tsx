@@ -26,22 +26,21 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 	const dismissError = (error: string) => {
 		setErrors(errors.filter(e => e !== error))
 	}
-	const [errorBoundary] = useErrorBoundary()
+	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
-		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`}/></main>
+		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`} onDismiss={errorRetry} /></main>
 	}
 
-	const generator = getGenerator(getCurrentUrl())
-	if (!generator) {
-		return <main><ErrorPanel error="Cannot find generator" /></main>
+	const gen = getGenerator(getCurrentUrl())
+	if (!gen) {
+		return <main><ErrorPanel error={`Cannot find generator "${getCurrentUrl()}"`} /></main>
 	}
 
-	const minVersion = generator.minVersion ?? '1.15'
 	const allowedVersions = config.versions
-		.filter(v => checkVersion(v.id, minVersion))
+		.filter(v => checkVersion(v.id, gen.minVersion))
 		.map(v => v.id as VersionId)
 
-	changeTitle(loc('title.generator', loc(generator.id)), allowedVersions)
+	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)
 
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
@@ -49,10 +48,10 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 		setModel(null)
 		getBlockStates(version)
 			.then(b => setBlockStates(b))
-		getModel(version, generator.id)
+		getModel(version, gen.id)
 			.then(m => setModel(m))
 			.catch(e => { console.error(e); addError(e.message) })
-	}, [version, generator.id])
+	}, [version, gen.id])
 
 	const reset = () => {
 		Analytics.generatorEvent('reset')
@@ -91,7 +90,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 		getCollections(version)
 			.then(collections => {
 				const terms = (presetFilter ?? '').trim().split(' ')
-				const presets = collections.get(generator.id)
+				const presets = collections.get(gen.id)
 					.map(p => p.slice(10))
 					.filter(p => terms.every(t => p.includes(t)))
 				if (presets) {
@@ -99,11 +98,11 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 				}
 			})
 			.catch(e => { console.error(e); addError(e.message) })
-	}, [version, generator.id, presetFilter])
+	}, [version, gen.id, presetFilter])
 
 	const loadPreset = (id: string) => {
 		Analytics.generatorEvent('load-preset', id)
-		fetchPreset(version, generator.path ?? generator.id, id).then(preset => {
+		fetchPreset(version, gen.path ?? gen.id, id).then(preset => {
 			model?.reset(preset, false)
 		})
 	}
@@ -136,7 +135,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 
 	const [previewShown, setPreviewShown] = useState(false)
 
-	const hasPreview = HasPreview.includes(generator.id)
+	const hasPreview = HasPreview.includes(gen.id)
 	let actionsShown = 1
 	if (hasPreview) actionsShown += 1
 	if (sourceShown) actionsShown += 2
@@ -187,10 +186,10 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{lang, model, version, id: generator.id}} shown={previewShown} onError={addError} />
+			<PreviewPanel {...{lang, model, version, id: gen.id}} shown={previewShown} onError={addError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={generator.schema ?? 'data'} onError={addError} />
+			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} onError={addError} />
 		</div>
 	</>
 }

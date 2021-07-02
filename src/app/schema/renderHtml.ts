@@ -16,7 +16,7 @@ export type TreeProps = {
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element']
-const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type']
+const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target']
 
 /**
  * Secondary model used to remember the keys of a map
@@ -132,9 +132,9 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		const suffix = keyRendered[1] + `<button class="add" data-id="${onAdd}" aria-label="${props.loc('button.add')}">${Octicon.plus_circle}</button>`
 		if (blockState && path.last() === 'Properties') {
 			if (typeof value !== 'object') value = {}
-			const properties = Object.entries(blockState.properties)
+			const properties = Object.entries(blockState.properties ?? {})
 				.map(([key, values]) => [key, StringNode(null!, { enum: values })])
-			Object.entries(blockState.properties).forEach(([key, values]) => {
+			Object.entries(blockState.properties ?? {}).forEach(([key, values]) => {
 				if (typeof value[key] !== 'string') {
 					path.model.errors.add(path.push(key), 'error.expected_string')
 				} else if (!values.includes(value[key])) {
@@ -151,9 +151,9 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 					const childPath = path.modelPush(key)
 					const category = children.category(childPath)
 					const childrenSchema = blockState
-						? StringNode(null!, { enum: blockState.properties[key] ?? [] })
+						? StringNode(null!, { enum: blockState.properties?.[key] ?? [] })
 						: children
-					if (blockState?.properties[key] && !blockState.properties[key].includes(value[key])) {
+					if (blockState?.properties?.[key] && !blockState.properties?.[key].includes(value[key])) {
 						path.model.errors.add(childPath, 'error.invalid_enum_option', value[key])
 					}
 					const [cPrefix, cSuffix, cBody] = childrenSchema.hook(this, childPath, value[key], props)

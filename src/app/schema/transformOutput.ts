@@ -27,7 +27,7 @@ export const transformOutput: Hook<[any, OutputProps], any> = {
 		const res: any = {}
 		Object.keys(value).forEach(f => {
 			if (blockState) {
-				if (!Object.keys(blockState.properties).includes(f)) return
+				if (!Object.keys(blockState.properties ?? {}).includes(f)) return
 			}
 			res[f] = children.hook(this, path.push(f), value[f], props)
 		})

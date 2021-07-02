@@ -99,12 +99,12 @@ body[data-panel="settings"] header {
 	position: fixed;
 }
 
-.header-title {
+.title {
 	display: flex;
 	align-items: center;
 }
 
-.header-title h2 {
+.title h2 {
 	color: var(--nav);
 }
 
@@ -170,14 +170,23 @@ nav li svg {
 	height: 24px;
 }
 
-nav li .btn-menu > .btn {
+.title .btn-menu {
+	margin: 0 8px;
+}
+
+.title .btn-menu > .btn svg {
+	width: 24px;
+	height: 24px;
+}
+
+header .btn-menu > .btn {
 	background: none !important;
 	padding: 0;
 	box-shadow: none;
 	fill: var(--nav);
 }
 
-nav li .btn-menu > .btn:hover {
+header .btn-menu > .btn:hover {
 	fill: var(--nav-hover);
 }
 
@@ -683,8 +692,8 @@ hr {
 
 /* SMALL */
 @media screen and (max-width: 580px) {
-	.header-title h2 {
-		font-size: 22px;
+	.title h2 {
+		font-size: 18px;
 	}
 
 	body nav li {

@@ -1,7 +1,9 @@
-import { getCurrentUrl, Link } from 'preact-router'
+import { getCurrentUrl, Link, route } from 'preact-router'
 import { Btn, BtnMenu, Icons, Octicon } from '.'
 import config from '../../config.json'
 import { locale } from '../Locales'
+import type { VersionId } from '../Schemas'
+import { checkVersion } from '../Schemas'
 import { cleanUrl, getGenerator } from '../Utils'
 
 const Themes: Record<string, keyof typeof Octicon> = {
@@ -13,21 +15,27 @@ const Themes: Record<string, keyof typeof Octicon> = {
 type HeaderProps = {
 	lang: string,
 	title: string,
+	version: VersionId,
 	theme: string,
 	changeTheme: (theme: string) => unknown,
 	language: string,
 	changeLanguage: (language: string) => unknown,
 }
-export function Header({ lang, title, theme, changeTheme, language, changeLanguage }: HeaderProps) {
+export function Header({ lang, title, version, theme, changeTheme, language, changeLanguage }: HeaderProps) {
 	const loc = locale.bind(null, lang)
-	const category = getGenerator(getCurrentUrl())?.category
+	const gen = getGenerator(getCurrentUrl())
 
 	return <header>
-		<div class="header-title">
-			<Link class="home-link" href={typeof category === 'string' ? cleanUrl(category) : '/'}>
-				{Icons.home}
-			</Link>
+		<div class="title">
+			<Link class="home-link" href="/">{Icons.home}</Link>
 			<h2>{title}</h2>
+			{gen && <BtnMenu icon="chevron_down">
+				{config.generators
+					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))
+					.map(g =>
+						<Btn label={loc(g.id)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
+					)}
+			</BtnMenu>}
 		</div>
 		<nav>
 			<ul>

@@ -10,7 +10,7 @@
   "preview": "Visualisieren",
   "reset": "Zurücksetzen",
   "share": "Teilen",
-  "title.generator": "%0%_Generator",
+  "title.generator": "%0%-Generator",
   "title.home": "Datenpaketgeneratoren",
   "worldgen/biome": "Biom",
   "worldgen/configured_carver": "Borer",

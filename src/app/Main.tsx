@@ -62,7 +62,7 @@ function Main() {
 	}
 
 	return <>
-		<Header {...{lang, title, theme, language: lang, changeLanguage, changeTheme}} />
+		<Header {...{lang, title, version, theme, language: lang, changeLanguage, changeTheme}} />
 		<Router onChange={changeRoute}>
 			<Home path="/" {...{lang, changeTitle}} />
 			<FieldSettings path="/settings/fields" {...{lang, changeTitle}} />

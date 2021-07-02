@@ -11,10 +11,10 @@ export type VersionId = typeof VersionIds[number]
 
 export type BlockStateRegistry = {
 	[block: string]: {
-		properties: {
+		properties?: {
 			[key: string]: string[],
 		},
-		default: {
+		default?: {
 			[key: string]: string,
 		},
 	},
