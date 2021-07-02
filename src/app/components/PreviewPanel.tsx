@@ -44,7 +44,7 @@ export const Previews: {
 	},
 ]
 
-type PreviewProps = {
+type PreviewPanelProps = {
 	lang: string,
 	model: DataModel | null,
 	version: VersionId,
@@ -52,7 +52,7 @@ type PreviewProps = {
 	shown: boolean,
 	onError: (message: string) => unknown,
 }
-export function PreviewPanel({ lang, model, version, id, shown }: PreviewProps) {
+export function PreviewPanel({ lang, model, version, id, shown }: PreviewPanelProps) {
 	const [, setCount] = useState(0)
 
 	useModel(model, () => {

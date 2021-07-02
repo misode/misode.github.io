@@ -19,7 +19,13 @@ type GeneratorProps = {
 }
 export function Generator({ lang, changeTitle, version, onChangeVersion }: GeneratorProps) {
 	const loc = locale.bind(null, lang)
-	const [error, setError] = useState('')
+	const [errors, setErrors] = useState<string[]>([])
+	const addError = (error: string) => {
+		setErrors([...errors, error])
+	}
+	const dismissError = (error: string) => {
+		setErrors(errors.filter(e => e !== error))
+	}
 	const [errorBoundary] = useErrorBoundary()
 	if (errorBoundary) {
 		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`}/></main>
@@ -45,7 +51,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			.then(b => setBlockStates(b))
 		getModel(version, generator.id)
 			.then(m => setModel(m))
-			.catch(e => { console.error(e); setError(e.message) })
+			.catch(e => { console.error(e); addError(e.message) })
 	}, [version, generator.id])
 
 	const reset = () => {
@@ -92,7 +98,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 					setPresetResults(presets)
 				}
 			})
-			.catch(e => { console.error(e); setError(e.message) })
+			.catch(e => { console.error(e); addError(e.message) })
 	}, [version, generator.id, presetFilter])
 
 	const loadPreset = (id: string) => {
@@ -163,8 +169,8 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 					<Btn icon="arrow_right" label={loc('redo')} onClick={redo} />
 				</BtnMenu>
 			</div>
-			{error && <ErrorPanel error={error} />}
-			<Tree {...{lang, model, version, blockStates}} onError={setError} />
+			{errors.map(e => <ErrorPanel error={e} onDismiss={() => dismissError(e)} />)}
+			<Tree {...{lang, model, version, blockStates}} onError={addError} />
 		</main>
 		<div class="popup-actions" style={`--offset: -${10 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''}`} onClick={togglePreview}>
@@ -181,10 +187,10 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{lang, model, version, id: generator.id}} shown={previewShown} onError={setError} />
+			<PreviewPanel {...{lang, model, version, id: generator.id}} shown={previewShown} onError={addError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={generator.schema ?? 'data'} onError={setError} />
+			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={generator.schema ?? 'data'} onError={addError} />
 		</div>
 	</>
 }

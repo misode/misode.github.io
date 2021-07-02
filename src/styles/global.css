@@ -219,6 +219,10 @@ main > .controls {
 	padding: 4px 16px 50vh;
 }
 
+.error + .tree {
+	margin-top: 0;
+}
+
 .popup-source {
 	position: fixed;
 	display: flex;
@@ -462,6 +466,18 @@ main.has-preview {
 
 .error > * {
 	margin: 10px 0;
+}
+
+.error .error-dismiss {
+	float: right;
+	cursor: pointer;
+	margin-left: 10px;
+}
+
+.error-dismiss svg {
+	display: block;
+	width: 24px;
+	height: 24px;
 }
 
 .error a {
