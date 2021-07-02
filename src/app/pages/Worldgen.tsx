@@ -13,8 +13,8 @@ export function Worldgen({ lang, changeTitle }: WorldgenProps) {
 	changeTitle(loc('title.generator_category', loc('worldgen')))
 	return <main>
 		<div class="home">
-			{config.models.filter(m => m.category === 'worldgen').map(m => 
-				<ToolCard title={loc(m.id)} link={cleanUrl(m.id)} />
+			{config.generators.filter(g => g.category === 'worldgen').map(g => 
+				<ToolCard title={loc(g.id)} link={cleanUrl(g.url)} />
 			)}
 		</div>
 	</main>

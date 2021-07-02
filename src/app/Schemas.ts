@@ -66,7 +66,7 @@ async function getVersion(id: VersionId): Promise<VersionData> {
 export async function getModel(version: VersionId, id: string): Promise<DataModel> {
 	if (!Models[id] || Models[id].version !== version) {
 		const versionData = await getVersion(version)
-		const schemaName = config.models.find(m => m.id === id)?.schema
+		const schemaName = config.generators.find(g => g.id === id)?.schema
 		if (!schemaName) {
 			throw new Error(`Cannot find model ${id}`)
 		}

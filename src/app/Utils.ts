@@ -1,3 +1,5 @@
+import config from '../config.json'
+
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
 }
@@ -24,6 +26,11 @@ export function hashString(s: string) {
 
 export function cleanUrl(url: string) {
 	return `/${url}/`.replaceAll('//', '/')
+}
+
+export function getGenerator(url: string) {
+	const trimmedUrl = url.replace(/^\//, '').replace(/\/$/, '')
+	return config.generators.find(g => g.url === trimmedUrl)
 }
 
 export function stringToColor(str: string): [number, number, number] {

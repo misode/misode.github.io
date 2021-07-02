@@ -67,8 +67,7 @@ function Main() {
 			<Home path="/" {...{lang, changeTitle}} />
 			<FieldSettings path="/settings/fields" {...{lang, changeTitle}} />
 			<Worldgen path="/worldgen" {...{lang, changeTitle}} />
-			<Generator path="/:generator" {...{lang, version, changeTitle}} onChangeVersion={changeVersion} />
-			<Generator path="/worldgen/:generator" category="worldgen" {...{lang, version, changeTitle}} onChangeVersion={changeVersion} />
+			<Generator default {...{lang, version, changeTitle}} onChangeVersion={changeVersion} />
 		</Router>
 	</>
 }

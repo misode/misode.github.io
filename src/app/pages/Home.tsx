@@ -13,9 +13,10 @@ export function Home({ lang, changeTitle }: HomeProps) {
 	changeTitle(loc('title.home'))
 	return <main>
 		<div class="home">
-			{config.models.filter(m => typeof m.category !== 'string').map(m => 
-				<ToolCard title={loc(m.id)} link={cleanUrl(m.id)} />
+			{config.generators.filter(g => !g.category).map(g => 
+				<ToolCard title={loc(g.id)} link={cleanUrl(g.url)} />
 			)}
+			<ToolCard title={loc('worldgen')} link="/worldgen/" />
 			<hr />
 			<ToolCard title="Report Inspector" icon="report" link="https://misode.github.io/report/">
 				<p>Analyse your performance reports</p>

@@ -71,121 +71,105 @@
       "dynamic": true
     }
   ],
-  "models": [
+  "generators": [
     {
-      "id": "loot-table",
-      "name": "Loot Table",
+      "id": "loot_table",
+      "url": "loot-table",
       "path": "loot_tables",
       "schema": "loot_table"
     },
     {
       "id": "predicate",
-      "name": "Predicate",
+      "url": "predicate",
       "path": "predicates",
       "schema": "predicate"
     },
     {
-      "id": "item-modifier",
-      "name": "Item Modifier",
+      "id": "item_modifier",
+      "url": "item-modifier",
       "path": "item_modifiers",
       "schema": "item_modifier",
       "minVersion": "1.17"
     },
     {
       "id": "advancement",
-      "name": "Advancement",
+      "url": "advancement",
       "path": "advancements",
       "schema": "advancement"
     },
     {
       "id": "dimension",
-      "name": "Dimension",
-      "path": "dimension",
+      "url": "dimension",
       "schema": "dimension",
       "category": "worldgen",
       "minVersion": "1.16"
     },
     {
-      "id": "dimension-type",
-      "name": "Dimension Type",
-      "path": "dimension_type",
+      "id": "dimension_type",
+      "url": "dimension-type",
       "schema": "dimension_type",
       "category": "worldgen",
       "minVersion": "1.16"
     },
     {
       "id": "world",
-      "name": "World Settings",
+      "url": "world",
       "schema": "world_settings",
       "category": "worldgen",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen",
-      "name": "Worldgen",
-      "category": true,
-      "minVersion": "1.16"
-    },
-    {
       "id": "worldgen/biome",
-      "name": "Biome",
-      "path": "worldgen/biome",
+      "url": "worldgen/biome",
       "category": "worldgen",
       "schema": "biome",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/carver",
-      "name": "Carver",
-      "path": "worldgen/configured_carver",
+      "id": "worldgen/configured_carver",
+      "url": "worldgen/carver",
       "category": "worldgen",
       "schema": "configured_carver",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/feature",
-      "name": "Feature",
-      "path": "worldgen/configured_feature",
+      "id": "worldgen/configured_feature",
+      "url": "worldgen/feature",
       "category": "worldgen",
       "schema": "configured_feature",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/noise-settings",
-      "name": "Noise Settings",
-      "path": "worldgen/noise_settings",
+      "id": "worldgen/noise_settings",
+      "url": "worldgen/noise-settings",
       "category": "worldgen",
       "schema": "noise_settings",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/structure-feature",
-      "name": "Structure Feature",
-      "path": "worldgen/configured_structure_feature",
+      "id": "worldgen/configured_structure_feature",
+      "url": "worldgen/structure-feature",
       "category": "worldgen",
       "schema": "configured_structure_feature",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/surface-builder",
-      "name": "Surface Builder",
-      "path": "worldgen/configured_surface_builder",
+      "id": "worldgen/configured_surface_builder",
+      "url": "worldgen/surface-builder",
       "category": "worldgen",
       "schema": "configured_surface_builder",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/processor-list",
-      "name": "Processor List",
-      "path": "worldgen/processor_list",
+      "id": "worldgen/processor_list",
+      "url": "worldgen/processor-list",
       "category": "worldgen",
       "schema": "processor_list",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/template-pool",
-      "name": "Template Pool",
-      "path": "worldgen/template_pool",
+      "id": "worldgen/template_pool",
+      "url": "worldgen/template-pool",
       "category": "worldgen",
       "schema": "template_pool",
       "minVersion": "1.16"

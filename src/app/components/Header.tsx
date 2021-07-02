@@ -2,7 +2,7 @@ import { getCurrentUrl, Link } from 'preact-router'
 import { Btn, BtnMenu, Icons, Octicon } from '.'
 import config from '../../config.json'
 import { locale } from '../Locales'
-import { cleanUrl } from '../Utils'
+import { cleanUrl, getGenerator } from '../Utils'
 
 const Themes: Record<string, keyof typeof Octicon> = {
 	system: 'device_desktop',
@@ -20,8 +20,7 @@ type HeaderProps = {
 }
 export function Header({ lang, title, theme, changeTheme, language, changeLanguage }: HeaderProps) {
 	const loc = locale.bind(null, lang)
-	const id = getCurrentUrl().replace(/^\//, '').replace(/\/$/, '')
-	const category = config.models.find(m => m.id === id)?.category
+	const category = getGenerator(getCurrentUrl())?.category
 
 	return <header>
 		<div class="header-title">

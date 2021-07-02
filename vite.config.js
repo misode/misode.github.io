@@ -14,7 +14,7 @@ export default defineConfig({
 					title: '404',
 					template: template,
 				}),
-				...config.models.map(m => html({
+				...config.generators.map(m => html({
 					fileName: `${m.id}/index.html`,
 					title: getTitle(m),
 					template: template,

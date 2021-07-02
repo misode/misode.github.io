@@ -6,7 +6,7 @@ import { useModel } from '../hooks'
 import type { VersionId } from '../Schemas'
 import { BiomeSourcePreview, DecoratorPreview, NoiseSettingsPreview } from './previews'
 
-export const HasPreview = ['dimension', 'worldgen/noise-settings', 'worldgen/feature']
+export const HasPreview = ['dimension', 'worldgen/noise_settings', 'worldgen/configured_feature']
 
 export const Previews: {
 	id: string,
@@ -30,14 +30,14 @@ export const Previews: {
 	},
 	{
 		id: 'noise-settings',
-		generator: 'worldgen/noise-settings',
+		generator: 'worldgen/noise_settings',
 		path: new Path(['noise']),
 		predicate: () => true,
 		preview: NoiseSettingsPreview,
 	},
 	{
 		id: 'decorator',
-		generator: 'worldgen/feature',
+		generator: 'worldgen/configured_feature',
 		path: new Path([]),
 		predicate: () => true,
 		preview: DecoratorPreview,

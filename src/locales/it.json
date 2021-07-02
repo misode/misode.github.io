@@ -2,12 +2,12 @@
   "advancement": "Avanzamento",
   "copy": "Copia",
   "dimension": "Dimensione",
-  "dimension-type": "Tipo di Dimensione",
+  "dimension_type": "Tipo di Dimensione",
   "download": "Scarica",
   "fields": "Campi",
-  "item-modifier": "Modificatore d'Oggetti",
+  "item_modifier": "Modificatore d'Oggetti",
   "language": "Lingua",
-  "loot-table": "Tavola del Bottino",
+  "loot_table": "Tavola del Bottino",
   "predicate": "Predica",
   "redo": "Rifai"
 }
