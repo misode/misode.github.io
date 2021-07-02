@@ -1,8 +1,8 @@
 import { stringToColor } from '../Utils'
 import { NormalNoise } from './noise/NormalNoise'
 
-export type BiomeColors =Record<string, number[]>
-export type BiomeSourceOptions = {
+type BiomeColors =Record<string, number[]>
+type BiomeSourceOptions = {
 	biomeColors: BiomeColors,
 	offset: [number, number],
 	scale: number,
@@ -10,7 +10,7 @@ export type BiomeSourceOptions = {
 	seed: string,
 }
 
-export const NoiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
+const NoiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
 
 export function biomeSource(state: any, img: ImageData, options: BiomeSourceOptions) {
 	switch (state?.type?.replace(/^minecraft:/, '')) {
@@ -66,6 +66,10 @@ function checkerboard(state: any, img: ImageData, options: BiomeSourceOptions) {
 }
 
 function multiNoise(state: any, img: ImageData, options: BiomeSourceOptions) {
+	if (state.preset?.replace(/^minecraft:/, '') === 'nether') {
+		state = NetherPreset
+	}
+
 	const noise = NoiseMaps.map((id, i) => {
 		const config = state[`${id}_noise`]
 		return new NormalNoise(options.seed + i, config.firstOctave, config.amplitudes)
@@ -232,3 +236,5 @@ const VanillaColors: Record<string, [number, number, number]> = {
 	'minecraft:wooded_hills': [34,85,28],
 	'minecraft:wooded_mountains': [80,112,80],
 }
+
+const NetherPreset = {type:'minecraft:multi_noise',seed:0,altitude_noise:{firstOctave:-7,amplitudes:[1,1]},temperature_noise:{firstOctave:-7,amplitudes:[1,1]},humidity_noise:{firstOctave:-7,amplitudes:[1,1]},weirdness_noise:{firstOctave:-7,amplitudes:[1,1]},biomes:[{biome:'minecraft:nether_wastes',parameters:{altitude:0,temperature:0,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{altitude:0,temperature:0,humidity:-0.5,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{altitude:0,temperature:0.4,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{altitude:0,temperature:0,humidity:0.5,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{altitude:0,temperature:-0.5,humidity:0,weirdness:0,offset:0.175}}]}
