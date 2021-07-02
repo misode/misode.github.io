@@ -88,7 +88,15 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		let body = ''
 		if (Array.isArray(value)) {
 			body = value.map((childValue, index) => {
-				const removeId = props.mounter.onClick(() => path.model.set(path.push(index), undefined))
+				const onRemove = props.mounter.onClick(() => path.model.set(path.push(index), undefined))
+				const onMoveUp = props.mounter.onClick(() => {
+					[value[index - 1], value[index]] = [value[index], value[index - 1]]
+					path.model.set(path, value)
+				})
+				const onMoveDown = props.mounter.onClick(() => {
+					[value[index + 1], value[index]] = [value[index], value[index + 1]]
+					path.model.set(path, value)
+				})
 				const childPath = path.push(index).contextPush('entry')
 				const category = children.category(childPath)
 				const [cPrefix, cSuffix, cBody] = children.hook(this, childPath, childValue, props)
@@ -96,7 +104,11 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 					<div class="node-header">
 						${error(props.loc, childPath, props.mounter)}
 						${help(props.loc, childPath, props.mounter)}
-						<button class="remove" data-id="${removeId}" aria-label="${props.loc('button.remove')}">${Octicon.trashcan}</button>
+						<button class="remove" data-id="${onRemove}" aria-label="${props.loc('button.remove')}">${Octicon.trashcan}</button>
+						${value.length <= 1 ? '' : `<div class="node-move">
+							<button class="move" data-id="${onMoveUp}" ${index === 0 ? 'disabled' : ''}>${Octicon.chevron_up}</button>
+							<button class="move" data-id="${onMoveDown}" ${index === value.length - 1 ? 'disabled' : ''}>${Octicon.chevron_down}</button>
+						</div>`}
 						${cPrefix}
 						<label ${contextMenu(props.loc, childPath, props.mounter)}>
 							${htmlEncode(pathLocale(props.loc, childPath, `${index}`))}

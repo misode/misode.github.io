@@ -118,7 +118,7 @@
   background-color: var(--node-background-input);
 }
 
-.node-header > button {
+.node-header button {
   font-size: 18px;
   padding: 0 9px;
   line-height: 1.94rem;
@@ -201,6 +201,27 @@ button.remove {
 .node-header > button.add:last-child {
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
+}
+
+.node-move {
+  display: flex;
+  flex-direction: column;
+  width: 34px;
+}
+
+button.move {
+  height: 50%;
+  border: none;
+  display: flex;
+}
+
+button.move + button.move {
+  border-top: 1px solid var(--node-border);
+}
+
+button.move:disabled {
+  cursor: unset;
+  fill: var(--node-border);
 }
 
 .node-icon {
