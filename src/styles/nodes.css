@@ -94,6 +94,7 @@
 }
 
 .node-header > label {
+  align-self: flex-start;
   padding: 0 9px;
   line-height: 1.94rem;
   white-space: nowrap;
@@ -109,6 +110,15 @@
 
 .node-header > input[type="color"] {
   padding: 0 2px;
+}
+
+.node-header > textarea {
+  min-width: 236.33px;
+  min-height: 34px;
+  font-size: 18px;
+  padding-left: 9px;
+  padding-top: 5px;
+  background-color: var(--node-background-input);
 }
 
 .node-header > select,

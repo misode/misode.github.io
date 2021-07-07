@@ -13,10 +13,13 @@ export type TreeProps = {
 	blockStates: BlockStateRegistry,
 }
 
+declare var ResizeObserver: any
+
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element']
 const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target']
+const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
 
 /**
  * Secondary model used to remember the keys of a map
@@ -270,8 +273,29 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		})
 		let suffix
 		const values = getValues()
-		if ((isEnum(config) && !config.additional)
-			|| selectRegistries.includes(path.getContext().join('.'))	) {
+		const context = path.getContext().join('.')
+		if (nbtFields.includes(context)) {
+			const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
+			const textareaId = props.mounter.register(el => {
+				const textarea = el as HTMLTextAreaElement
+				textarea.value = value ?? ''
+				textarea.addEventListener('change', evt => {
+					const newValue = textarea.value
+					path.model.set(path, newValue.length === 0 ? undefined : newValue)
+					evt.stopPropagation()
+				})
+				const sizes = keyPath.get()
+				if (sizes) {
+					textarea.style.width = `${sizes.split(' ')[0]}px`
+					textarea.style.height = `${sizes.split(' ')[1]}px`
+				}
+				new ResizeObserver(() => {
+					keyPath.set(`${textarea.offsetWidth} ${textarea.offsetHeight}`)
+				}).observe(el)
+			})
+			suffix = `<textarea data-id="${textareaId}"></textarea>`
+		} else if ((isEnum(config) && !config.additional)
+			|| selectRegistries.includes(context)	) {
 			let context = new Path([])
 			if (isEnum(config) && typeof config.enum === 'string') {
 				context = context.contextPush(config.enum)
@@ -293,12 +317,9 @@ export const renderHtml: Hook<[any, TreeProps], [string, string, string]> = {
 		} else {
 			const datalistId = hexId()
 			suffix = `<input data-id="${inputId}" ${values.length === 0 ? '' : `list="${datalistId}"`}>
-				${values.length === 0 ? '' :
-		`<datalist id="${datalistId}">
-								${values.map(v =>
-		`<option value="${htmlEncode(v)}">`
-	).join('')}
-		</datalist>`}`
+				${values.length === 0 ? '' : `<datalist id="${datalistId}">
+					${values.map(v => `<option value="${htmlEncode(v)}">`).join('')}
+				</datalist>`}`
 		}
 		return ['', suffix, '']
 	},
