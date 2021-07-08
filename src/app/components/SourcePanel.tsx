@@ -49,6 +49,9 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	useModel(model, () => {
 		retransform.current()
 	})
+	useEffect(() => {
+		if (model) retransform.current()
+	}, [model])
 
 	useEffect(() => {
 		retransform.current()
