@@ -12,7 +12,6 @@ export function useModel(model: DataModel | undefined | null, invalidated: (mode
 
 	useEffect(() => {
 		model?.addListener(listener)
-		listener.invalidated()
 		return () => {
 			model?.removeListener(listener)
 		}

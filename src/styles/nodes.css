@@ -148,6 +148,10 @@
   border-color: var(--node-remove) !important;
 }
 
+.node-header > *:focus {
+  position: relative;
+}
+
 /** Rounded corners */
 
 .node-header > .node-icon {
@@ -267,7 +271,7 @@ button.move:disabled {
 }
 
 .node-icon svg:hover + .icon-popup,
-.node-icon .icon-popup.show {
+.node-icon.show .icon-popup {
   visibility: visible;
 }
 
