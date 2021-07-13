@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { Btn } from '..'
 import { useOnDrag, useOnHover } from '../../hooks'
 import { biomeSource, getBiome } from '../../previews'
+import type { VersionId } from '../../Schemas'
 import { hexId } from '../../Utils'
 
 type BiomeSourceProps = {
@@ -10,8 +11,9 @@ type BiomeSourceProps = {
 	model: DataModel,
 	data: any,
 	shown: boolean,
+	version: VersionId,
 }
-export const BiomeSourcePreview = ({ data, shown }: BiomeSourceProps) => {
+export const BiomeSourcePreview = ({ data, shown, version }: BiomeSourceProps) => {
 	const [scale, setScale] = useState(2)
 	const [seed, setSeed] = useState(hexId())
 	const [focused, setFocused] = useState<string | undefined>(undefined)
@@ -26,13 +28,14 @@ export const BiomeSourcePreview = ({ data, shown }: BiomeSourceProps) => {
 	useEffect(() => {
 		redraw.current = (res = 4) => {
 			if (type !== 'multi_noise') res = 1
+			if (version === '1.18') res = 16
 			const ctx = canvas.current.getContext('2d')!
 			canvas.current.width = 200 / res
 			canvas.current.height = 200 / res
 			const img = ctx.createImageData(canvas.current.width, canvas.current.height)
-			biomeSource(data, img, { biomeColors: {}, offset: offset.current, scale, seed, res })
+			biomeSource(data, img, { biomeColors: {}, offset: offset.current, scale, seed, res, version })
 			ctx.putImageData(img, 0, 0)
-			if (res !== 1) {
+			if (res !== 1 && version !== '1.18') {
 				clearTimeout(redrawTimeout.current)
 				redrawTimeout.current = setTimeout(() => redraw.current(1), 150) as any
 			}
@@ -40,7 +43,7 @@ export const BiomeSourcePreview = ({ data, shown }: BiomeSourceProps) => {
 		refocus.current = (x: number, y: number) => {
 			const x2 = x * 200 / canvas.current.clientWidth
 			const y2 = y * 200 / canvas.current.clientHeight
-			const biome = getBiome(data, x2, y2, { biomeColors: {}, offset: offset.current, scale, seed, res: 1 })
+			const biome = getBiome(data, x2, y2, { biomeColors: {}, offset: offset.current, scale, seed, res: 1, version })
 			setFocused(biome)
 		}
 	})

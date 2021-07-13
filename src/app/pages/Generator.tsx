@@ -38,6 +38,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 
 	const allowedVersions = config.versions
 		.filter(v => checkVersion(v.id, gen.minVersion))
+		.filter(v => ['dimension', 'world', 'worldgen/biome'].includes(gen.id) || v.id !== '1.18')
 		.map(v => v.id as VersionId)
 
 	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)
@@ -159,7 +160,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 				</BtnMenu>
 				<BtnMenu icon="tag" label={version}>
 					{allowedVersions.reverse().map(v =>
-						<Btn label={v} active={v === version} onClick={() => onChangeVersion(v)} />
+						<Btn label={v} active={v === version} class={config.versions.find(vv => vv.id === v)?.experimental ? 'experimental' : ''} onClick={() => onChangeVersion(v)} />
 					)}
 				</BtnMenu>
 				<BtnMenu icon="kebab_horizontal">

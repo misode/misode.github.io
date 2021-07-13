@@ -69,6 +69,15 @@
         "vanilla_datapack_summary": "summary"
       },
       "dynamic": true
+    },
+    {
+      "id": "1.18",
+      "refs": {
+        "mcdata_master": "1.17.1",
+        "vanilla_datapack_data": "1.17.1-data",
+        "vanilla_datapack_summary": "1.17.1-summary"
+      },
+      "experimental": true
     }
   ],
   "generators": [
@@ -76,7 +85,8 @@
       "id": "loot_table",
       "url": "loot-table",
       "path": "loot_tables",
-      "schema": "loot_table"
+      "schema": "loot_table",
+      "maxVersion": "1.17"
     },
     {
       "id": "predicate",

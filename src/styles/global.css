@@ -335,6 +335,15 @@ main.has-preview {
 	fill: var(--accent-blue);
 }
 
+.btn.experimental {
+	color: var(--accent-red);
+	fill: var(--accent-red);
+}
+
+.btn.experimental span::after {
+	content: ' (experimental)';
+}
+
 .btn:not(.btn-input):hover {
 	background-color: var(--background-5);
 }

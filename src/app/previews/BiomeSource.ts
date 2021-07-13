@@ -1,5 +1,7 @@
+import type { VersionId } from '../Schemas'
 import { stringToColor } from '../Utils'
 import { NormalNoise } from './noise/NormalNoise'
+import OverworldPreset from './OverworldPreset.json'
 
 type BiomeColors =Record<string, number[]>
 type BiomeSourceOptions = {
@@ -8,6 +10,7 @@ type BiomeSourceOptions = {
 	scale: number,
 	res: number,
 	seed: string,
+	version: VersionId,
 }
 
 const NoiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
@@ -66,17 +69,10 @@ function checkerboard(state: any, img: ImageData, options: BiomeSourceOptions) {
 }
 
 function multiNoise(state: any, img: ImageData, options: BiomeSourceOptions) {
-	if (state.preset?.replace(/^minecraft:/, '') === 'nether') {
-		state = NetherPreset
-	}
-
-	const noise = NoiseMaps.map((id, i) => {
-		const config = state[`${id}_noise`]
-		return new NormalNoise(options.seed + i, config.firstOctave, config.amplitudes)
-	})
+	const { biomes, noise, getBiome } = initMultiNoise(state, options)
 
 	const biomeColorCache: BiomeColors = {}
-	state.biomes.forEach((b: any) => {
+	biomes.forEach((b: any) => {
 		biomeColorCache[b.biome] = getBiomeColor(b.biome, options.biomeColors)
 	})
 
@@ -86,11 +82,12 @@ function multiNoise(state: any, img: ImageData, options: BiomeSourceOptions) {
 	const row = img.width * 4 / options.res
 	const col = 4 / options.res
 	for (let x = 0; x < 200; x += options.res) {
+		console.log('Progress', x)
 		for (let y = 0; y < 200; y += options.res) {
 			const i = y * row + x * col
 			const xx = (x + ox) * options.scale
 			const yy = (y + oy) * options.scale
-			const b = closestBiome(noise, state.biomes, xx, yy)
+			const b = getBiome(noise, biomes, xx, yy)
 			const color = biomeColorCache[b] ?? [128, 128, 128]
 			data[i] = color[0]
 			data[i + 1] = color[1]
@@ -104,11 +101,8 @@ export function getBiome(state: any, x: number, y: number, options: BiomeSourceO
 	const [xx, yy] = toWorld([x, y], options)
 	switch (state?.type?.replace(/^minecraft:/, '')) {
 		case 'multi_noise':
-			const noise = NoiseMaps.map((id, i) => {
-				const config = state[`${id}_noise`]
-				return new NormalNoise(options.seed + i, config.firstOctave, config.amplitudes)
-			})
-			return closestBiome(noise, state.biomes, xx, yy)
+			const { biomes, noise, getBiome } = initMultiNoise(state, options)
+			return getBiome(noise, biomes, xx, yy)
 		case 'fixed': return state.biome
 		case 'checkerboard':
 			const shift = (state.scale ?? 2) + 2
@@ -136,13 +130,31 @@ function toWorld([x, y]: [number, number], options: BiomeSourceOptions) {
 	return [xx, yy]
 }
 
+function initMultiNoise(state: any, options: BiomeSourceOptions) {
+	switch(state.preset?.replace(/^minecraft:/, '')) {
+		case 'nether':
+			state = options.version === '1.18' ? NetherPreset18 : NetherPreset
+			break
+		case 'overworld':
+			state = options.version === '1.18' ? OverworldPreset : state
+			break
+	}
+	const noise = (options.version === '1.18' ? NoiseMaps18 : NoiseMaps)
+		.map((id, i) => {
+			const config = state[`${id}_noise`]
+			return new NormalNoise(options.seed + i, config.firstOctave, config.amplitudes)
+		})
+	const getBiome = options.version === '1.18' ? closestBiome18 : closestBiome
+	return { biomes: state.biomes, noise, getBiome }
+}
+
 function closestBiome(noise: NormalNoise[], biomes: any[], x: number, y: number): string {
 	if (!Array.isArray(biomes) || biomes.length === 0) return ''
 	const n = noise.map(n => n.getValue(x, y, 0))
 	let minDist = Infinity
 	let minBiome = ''
 	for (const b of biomes) {
-		const dist = fitness(b.parameters, {altitude: n[0], temperature: n[1], humidity: n[2], weirdness: n[3], offset: 0})
+		const dist = fitness(b.parameters, {altitude: n[0], temperature: n[1], humidity: n[2], weirdness: n[3]})
 		if (dist < minDist) {
 			minDist = dist
 			minBiome = b.biome
@@ -152,7 +164,32 @@ function closestBiome(noise: NormalNoise[], biomes: any[], x: number, y: number)
 }
 
 function fitness(a: any, b: any) {
-	return (a.altitude - b.altitude) * (a.altitude - b.altitude) + (a.temperature - b.temperature) * (a.temperature - b.temperature) + (a.humidity - b.humidity) * (a.humidity - b.humidity) + (a.weirdness - b.weirdness) * (a.weirdness - b.weirdness) + (a.offset - b.offset) * (a.offset - b.offset)
+	return sq(a.altitude - b.altitude) + sq(a.temperature - b.temperature) + sq(a.humidity - b.humidity) + sq(a.weirdness - b.weirdness) + sq(a.offset)
+}
+
+function sq(a: number) {
+	return a * a
+}
+
+const NoiseMaps18 = ['temperature', 'humidity', 'continentalness', 'erosion', 'weirdness']
+
+function closestBiome18(noise: NormalNoise[], biomes: any[], x: number, y: number): string {
+	if (!Array.isArray(biomes) || biomes.length === 0) return ''
+	const n = noise.map(n => n.getValue(x, y, 0))
+	let minDist = Infinity
+	let minBiome = ''
+	for (const b of biomes) {
+		const dist = fitness18(b.parameters, {temperature: n[0], humidity: n[1], continentalness: n[2], erosion: n[3], depth: 0, weirdness: n[4]})
+		if (dist < minDist) {
+			minDist = dist
+			minBiome = b.biome
+		}
+	}
+	return minBiome
+}
+
+function fitness18(a: any, b: any) {
+	return sq(a.temperature - b.temperature) + sq(a.humidity - b.humidity) + sq(a.continentalness - b.continentalness) + sq(a.erosion - b.erosion) + sq(a.depth - b.depth) + sq(a.weirdness - b.weirdness) + sq(a.offset)
 }
 
 const VanillaColors: Record<string, [number, number, number]> = {
@@ -238,3 +275,6 @@ const VanillaColors: Record<string, [number, number, number]> = {
 }
 
 const NetherPreset = {type:'minecraft:multi_noise',seed:0,altitude_noise:{firstOctave:-7,amplitudes:[1,1]},temperature_noise:{firstOctave:-7,amplitudes:[1,1]},humidity_noise:{firstOctave:-7,amplitudes:[1,1]},weirdness_noise:{firstOctave:-7,amplitudes:[1,1]},biomes:[{biome:'minecraft:nether_wastes',parameters:{altitude:0,temperature:0,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{altitude:0,temperature:0,humidity:-0.5,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{altitude:0,temperature:0.4,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{altitude:0,temperature:0,humidity:0.5,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{altitude:0,temperature:-0.5,humidity:0,weirdness:0,offset:0.175}}]}
+
+
+const NetherPreset18 = {type:'minecraft:multi_noise',seed:0,temperature_noise:{firstOctave:-7,amplitudes:[1,1]},humidity_noise:{firstOctave:-7,amplitudes:[1,1]},continentalness_noise:{firstOctave:-7,amplitudes:[1,1]},erosion_noise:{firstOctave:-7,amplitudes:[1,1]},depth_noise:{firstOctave:-7,amplitudes:[1,1]},weirdness_noise:{firstOctave:-7,amplitudes:[1,1]},biomes:[{biome:'minecraft:nether_wastes',parameters:{temperature:0,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{temperature:0,humidity:-0.5,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{temperature:0.4,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{temperature:0,humidity:0.5,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{temperature:-0.5,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0.175}}]}
