@@ -59,7 +59,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 			const data = JSON.parse(source.current.value)
 			model?.reset(data, false)
 		} catch (e) {
-			// TODO
+			onError(`Error importing: ${e.message}`)
 		}
 	}
 

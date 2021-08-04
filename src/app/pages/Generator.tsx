@@ -5,6 +5,7 @@ import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
 import { fetchPreset } from '../DataFetcher'
+import { useModel } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry, VersionId } from '../Schemas'
 import { checkVersion, getBlockStates, getCollections, getModel } from '../Schemas'
@@ -54,6 +55,10 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			.then(m => setModel(m))
 			.catch(e => { console.error(e); setError(e.message) })
 	}, [version, gen.id])
+
+	useModel(model, () => {
+		setError(null)
+	})
 
 	const reset = () => {
 		Analytics.generatorEvent('reset')
