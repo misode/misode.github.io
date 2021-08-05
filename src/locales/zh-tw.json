@@ -42,7 +42,7 @@
   "title.home": "資料包生成器",
   "undo": "復原",
   "world": "世界設定",
-  "worldgen": "自定義世界生成",
+  "worldgen": "自定義世界生成設定",
   "worldgen/biome": "生態域",
   "worldgen/configured_carver": "地形雕刻器",
   "worldgen/configured_feature": "地景",
