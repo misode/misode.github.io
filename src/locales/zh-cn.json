@@ -15,7 +15,6 @@
   "preview": "可视化",
   "preview.depth": "深度",
   "preview.scale": "比例",
-  "preview.show_density": "显示密度",
   "preview.width": "宽度",
   "redo": "重做",
   "reset": "重置",
@@ -30,9 +29,9 @@
   "worldgen/biome": "生物群系",
   "worldgen/configured_carver": "地形雕刻器",
   "worldgen/configured_feature": "地物",
-  "worldgen/noise_settings": "噪声设置",
-  "worldgen/processor_list": "处理器列表",
   "worldgen/configured_structure_feature": "结构地物",
   "worldgen/configured_surface_builder": "地表生成器",
+  "worldgen/noise_settings": "噪声设置",
+  "worldgen/processor_list": "处理器列表",
   "worldgen/template_pool": "模板池"
 }
