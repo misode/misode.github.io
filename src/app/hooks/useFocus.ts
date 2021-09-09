@@ -10,9 +10,11 @@ export function useFocus(): [boolean, () => unknown] {
 	useEffect(() => {
 		if (active) {
 			document.body.addEventListener('click', hider)
+			document.body.addEventListener('contextmenu', hider)
 		}
 		return () => {
 			document.body.removeEventListener('click', hider)
+			document.body.removeEventListener('contextmenu', hider)
 		}
 	}, [active])
 

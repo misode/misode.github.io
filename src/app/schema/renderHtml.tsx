@@ -1,6 +1,7 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
 import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { ComponentChildren, JSX } from 'preact'
+import { Btn } from '../components'
 import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
@@ -272,6 +273,14 @@ type TreeNodeProps = {
 function TreeNode({ label, schema, path, value, lang, states, children }: TreeNodeProps) {
 	const type = schema.type(path)
 	const category = schema.category(path)
+	const context = path.getContext().join('.')
+
+	const [active, setActive] = useFocus()
+	const onContextMenu = (evt: MouseEvent) => {
+		evt.preventDefault()
+		setActive()
+	}
+
 	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, states)
 	return <div class={`node ${type}-node`} data-category={category}>
 		<div class="node-header">
@@ -279,7 +288,16 @@ function TreeNode({ label, schema, path, value, lang, states, children }: TreeNo
 			<HelpPopup lang={lang} path={path} />
 			{children}
 			{prefix}
-			<label>{label ?? pathLocale(lang, path, `${path.last()}`)}</label>
+			<label onContextMenu={onContextMenu}>
+				{label ?? pathLocale(lang, path, `${path.last()}`)}
+				{active && <div class="node-menu">
+					<div class="menu-item">
+						<Btn icon="clippy" onClick={() => navigator.clipboard.writeText(context)} />
+						Context:
+						<span class="menu-item-context">{context}</span>
+					</div>
+				</div>}
+			</label>
 			{suffix}
 		</div>
 		{body && <div class="node-body">{body}</div>}
