@@ -142,8 +142,8 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 	}
 
 	const [previewShown, setPreviewShown] = useState(false)
-
 	const hasPreview = HasPreview.includes(gen.id)
+	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 1
 	if (hasPreview) actionsShown += 1
 	if (sourceShown) actionsShown += 2
