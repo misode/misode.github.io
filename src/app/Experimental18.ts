@@ -7,10 +7,17 @@ export function getCollections() {
 }
 
 export function getSchemas(collections: CollectionRegistry) {
-	modifyCollection(collections, 'heightmap_type', ['WORLD_SURFACE_IGNORE_SNOW'], [])
-	modifyCollection(collections, 'worldgen/surface_builder', ['grove', 'snowcapped_peaks', 'snowy_slopes', 'lofty_peaks'], [])
-	modifyCollection(collections, 'worldgen/biome_source', [], ['vanilla_layered'])
-	modifyCollection(collections, 'worldgen/biome', ['meadow', 'grove', 'snowy_slopes', 'snowcapped_peaks', 'lofty_peaks'], [])
+	modifyCollection(collections, 'heightmap_type',{
+		add: ['WORLD_SURFACE_IGNORE_SNOW'] })
+	modifyCollection(collections, 'worldgen/surface_builder', {
+		add: ['grove', 'snowcapped_peaks', 'snowy_slopes', 'lofty_peaks'] })
+	modifyCollection(collections, 'worldgen/biome_source', {
+		remove: ['vanilla_layered'] })
+	modifyCollection(collections, 'worldgen/biome', {
+		add: ['meadow', 'grove', 'snowy_slopes', 'snowcapped_peaks', 'lofty_peaks', 'stony_peaks', 'extreme_hills', 'gravelly_hills'],
+		remove: ['mountains', 'gravelly_mountains'] })
+	modifyCollection(collections, 'biome_category', {
+		add: ['mountain'] })
 
 	const schemas = java17.getSchemas(collections)
 	initDimensionSchemas(schemas, collections)
@@ -18,19 +25,21 @@ export function getSchemas(collections: CollectionRegistry) {
 	return schemas
 }
 
-function modifyCollection(collections: CollectionRegistry, id: string, add: string[], remove: string[]) {
+function modifyCollection(collections: CollectionRegistry, id: string, { add, remove }: { add?: string[], remove?: string[] }) {
 	const collection = collections.get(id)
-	remove.forEach(id => {
+	remove?.forEach(id => {
 		const i = collection.indexOf(`minecraft:${id}`)
 		if (i >= 0) collection.splice(i, 1)
 	})
-	add.forEach(id => {
+	add?.forEach(id => {
 		collection.push(`minecraft:${id}`)
 	})
 	collections.register(id, collection)
 }
 
 function initDimensionSchemas(schemas: SchemaRegistry, collections: CollectionRegistry) {
+	console.log('Init 1.18')
+
 	const Reference = RawReference.bind(undefined, schemas)
 	const StringNode = RawStringNode.bind(undefined, collections)
 
@@ -398,7 +407,7 @@ function initDimensionSchemas(schemas: SchemaRegistry, collections: CollectionRe
 							},
 							'minecraft:multi_noise': {
 								seed: NumberNode({ integer: true }),
-								preset: Opt(StringNode({ enum: ['overworld', 'nether'] })),
+								preset: Opt(StringNode({ validator: 'resource', params: { pool: ['minecraft:overworld', 'minecraft:nether'] } })),
 								temperature_noise: NoPreset(Reference('generator_biome_noise')),
 								humidity_noise: NoPreset(Reference('generator_biome_noise')),
 								continentalness_noise: NoPreset(Reference('generator_biome_noise')),
