@@ -11,7 +11,7 @@ type BtnInputProps = {
 	onChange?: (value: string) => unknown,
 }
 export function BtnInput({ icon, label, large, type, doSelect, value, onChange }: BtnInputProps) {
-	const onKeyUp = onChange === undefined ? () => {} : (e: any) => {
+	const onInput = onChange === undefined ? () => {} : (e: any) => {
 		const value = (e.target as HTMLInputElement).value
 		if (type !== 'number' || (!value.endsWith('.') && !isNaN(Number(value)))) {
 			onChange?.(value)
@@ -28,6 +28,6 @@ export function BtnInput({ icon, label, large, type, doSelect, value, onChange }
 	return <div class={`btn btn-input ${large ? 'large-input' : ''}`} onClick={e => e.stopPropagation()}>
 		{icon && Octicon[icon]}
 		{label && <span>{label}</span>}
-		<input ref={ref} type="text" value={value} onKeyUp={onKeyUp} />
+		<input ref={ref} type="text" value={value} onInput={onInput} />
 	</div>
 }

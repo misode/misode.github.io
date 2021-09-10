@@ -67,3 +67,8 @@ export function lerp3(a: number, b: number, c: number, d: number, e: number, f: 
 export function smoothstep(x: number): number {
 	return x * x * x * (x * (x * 6 - 15) + 10)
 }
+
+export function message(e: unknown): string {
+	if (e instanceof Error) return e.message
+	return `${e}`
+}

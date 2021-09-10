@@ -1,11 +1,12 @@
 import type { DataModel } from '@mcschema/core'
 import { ModelPath } from '@mcschema/core'
-import { useEffect, useRef } from 'preact/hooks'
+import type { JSX } from 'preact'
+import { useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
+import rfdc from 'rfdc'
 import { useModel } from '../hooks'
-import { locale } from '../Locales'
-import { Mounter } from '../schema/Mounter'
 import { renderHtml } from '../schema/renderHtml'
 import type { BlockStateRegistry, VersionId } from '../Schemas'
+const clone = rfdc()
 
 type TreePanelProps = {
 	lang: string,
@@ -14,44 +15,29 @@ type TreePanelProps = {
 	blockStates: BlockStateRegistry | null,
 	onError: (message: string) => unknown,
 }
-export function Tree({ lang, model, version, blockStates, onError }: TreePanelProps) {
-	const tree = useRef<HTMLDivElement>(null)
-	const redraw = useRef<Function>()
+export function Tree({ lang, model, blockStates, onError }: TreePanelProps) {
+	if (!model || !blockStates) return <></>
 
-	useEffect(() => {
-		redraw.current = () => {
-			if (!model || !blockStates) return
-			try {
-				const mounter = new Mounter()
-				const props = { loc: locale.bind(null, lang), version, mounter, blockStates }
-				const path = new ModelPath(model)
-				const rendered = model.schema.hook(renderHtml, path, model.data, props)
-				const category = model.schema.category(path)
-				const type = model.schema.type(path)
-				let html = rendered[2]
-				if (rendered[1]) {
-					html = `<div class="node ${type}-node" ${category ? `data-category="${category}"` : ''}>
-						<div class="node-header">${rendered[0]}${rendered[1]}</div>
-						<div class="node-body">${rendered[2]}</div>
-					</div>`
-				}
-				tree.current.innerHTML = html
-				mounter.mounted(tree.current)
-			} catch (e) {
-				onError(`Error rendering the tree: ${e.message}`)
-				console.error(e)
-				tree.current.innerHTML = ''
-			}
-		}
+	const [error] = useErrorBoundary(e => {
+		onError(`Error rendering the tree: ${e.message}`)
+		console.error(e)
 	})
+	if (error) return <></>
 
+	const [state, setState] = useState(0)
 	useModel(model, () => {
-		redraw.current()
+		setState(state => state + 1)
 	})
 
-	useEffect(() => {
-		redraw.current()
-	}, [lang, model, blockStates])
+	const path = new ModelPath(model)
+	const tree = useRef<JSX.Element | null>(null)
+	useMemo(() => {
+		const [prefix, suffix, body] = model.schema.hook(renderHtml, path, clone(model.data), lang, blockStates)
+		tree.current = suffix?.props?.children.some((c: any) => c) ? <div class={`node ${model.schema.type(path)}-node`} data-category={model.schema.category(path)}>
+			<div class="node-header">{prefix}{suffix}</div>
+			<div class="node-body">{body}</div>
+		</div> : body
+	}, [lang, model, blockStates, state])
 
-	return <div ref={tree} class="tree"></div>
+	return <div class="tree">{tree.current}</div>
 }

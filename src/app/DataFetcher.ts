@@ -2,6 +2,7 @@ import type { CollectionRegistry } from '@mcschema/core'
 import config from '../config.json'
 import type { BlockStateRegistry, VersionId } from './Schemas'
 import { checkVersion } from './Schemas'
+import { message } from './Utils'
 
 ['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`))
 
@@ -85,7 +86,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 				target.register(r.id, data[r.id] ?? [])
 			})
 		} catch (e) {
-			console.warn('Error occurred while fetching registries:', e)
+			console.warn('Error occurred while fetching registries:', message(e))
 		}
 	} else {
 		await Promise.all(registries.map(async r => {
@@ -95,7 +96,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 					: `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/registries/${r.id}/data.min.json`
 				target.register(r.id, await getData(url, v => v.values))
 			} catch (e) {
-				console.warn(`Error occurred while fetching registry ${r.id}:`, e)
+				console.warn(`Error occurred while fetching registry ${r.id}:`, message(e))
 			}
 		}))
 	}
@@ -121,7 +122,7 @@ async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) 
 			})
 			Object.assign(target, data)
 		} catch (e) {
-			console.warn('Error occurred while fetching block state map:', e)
+			console.warn('Error occurred while fetching block state map:', message(e))
 		}
 	} else {
 		const url = `${mcdataUrl}/${version.refs.mcdata_master}/processed/reports/blocks/simplified/data.min.json`
@@ -129,7 +130,7 @@ async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) 
 			const data = await getData(url)
 			Object.assign(target, data)
 		} catch (e) {
-			console.warn('Error occurred while fetching block state map:', e)
+			console.warn('Error occurred while fetching block state map:', message(e))
 		}
 	}
 }
@@ -148,7 +149,7 @@ async function fetchDynamicRegistries(version: Version, target: CollectionRegist
 				target.register(r.id, data[r.id])
 			})
 		} catch (e) {
-			console.warn('Error occurred while fetching dynamic registries:', e)
+			console.warn('Error occurred while fetching dynamic registries:', message(e))
 		}
 	}
 }
@@ -160,7 +161,7 @@ export async function fetchPreset(version: VersionId, registry: string, id: stri
 		const res = await fetch(`${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`)
 		return await res.json()
 	} catch (e) {
-		console.warn(`Error occurred while fetching ${registry} preset ${id}:`, e)
+		console.warn(`Error occurred while fetching ${registry} preset ${id}:`, message(e))
 	}
 }
 
@@ -181,7 +182,7 @@ async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v):
 		await cache.put(url, new Response(JSON.stringify(responseData)))
 		return responseData
 	} catch (e) {
-		console.warn(`[getData] Failed to open cache ${CACHE_NAME}: ${e.message}`)
+		console.warn(`[getData] Failed to open cache ${CACHE_NAME}: ${message(e)}`)
 
 		console.debug(`[getData] fetching data ${url}`)
 		const fetchResponse = await fetch(url)
@@ -204,6 +205,6 @@ async function deleteMatching(matches: (url: string) => boolean) {
 		console.debug(`[deleteMatching] Removing ${promises.length} cache objects...`)
 		await Promise.all(promises)
 	} catch (e) {
-		console.warn(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${e.message}`)
+		console.warn(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${message(e)}`)
 	}
 }

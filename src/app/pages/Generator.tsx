@@ -5,6 +5,7 @@ import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
 import { fetchPreset } from '../DataFetcher'
+import { useModel } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry, VersionId } from '../Schemas'
 import { checkVersion, getBlockStates, getCollections, getModel } from '../Schemas'
@@ -19,13 +20,7 @@ type GeneratorProps = {
 }
 export function Generator({ lang, changeTitle, version, onChangeVersion }: GeneratorProps) {
 	const loc = locale.bind(null, lang)
-	const [errors, setErrors] = useState<string[]>([])
-	const addError = (error: string) => {
-		setErrors([...errors, error])
-	}
-	const dismissError = (error: string) => {
-		setErrors(errors.filter(e => e !== error))
-	}
+	const [error, setError] = useState<string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
 		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`} onDismiss={errorRetry} /></main>
@@ -36,12 +31,20 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 		return <main><ErrorPanel error={`Cannot find generator "${getCurrentUrl()}"`} /></main>
 	}
 
+	useEffect(() => {
+		setError(null)
+	}, [gen.id, version])
+
 	const allowedVersions = config.versions
 		.filter(v => checkVersion(v.id, gen.minVersion))
 		.filter(v => ['dimension', 'world', 'worldgen/biome'].includes(gen.id) || v.id !== '1.18')
 		.map(v => v.id as VersionId)
 
 	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)
+
+	if (!checkVersion(version, gen.minVersion)) {
+		setError(`The minimum version for this generator is ${gen.minVersion}`)
+	}
 
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
@@ -51,8 +54,12 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			.then(b => setBlockStates(b))
 		getModel(version, gen.id)
 			.then(m => setModel(m))
-			.catch(e => { console.error(e); addError(e.message) })
+			.catch(e => { console.error(e); setError(e.message) })
 	}, [version, gen.id])
+
+	useModel(model, () => {
+		setError(null)
+	})
 
 	const reset = () => {
 		Analytics.generatorEvent('reset')
@@ -98,7 +105,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 					setPresetResults(presets)
 				}
 			})
-			.catch(e => { console.error(e); addError(e.message) })
+			.catch(e => { console.error(e); setError(e.message) })
 	}, [version, gen.id, presetFilter])
 
 	const loadPreset = (id: string) => {
@@ -169,8 +176,8 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 					<Btn icon="arrow_right" label={loc('redo')} onClick={redo} />
 				</BtnMenu>
 			</div>
-			{errors.map(e => <ErrorPanel error={e} onDismiss={() => dismissError(e)} />)}
-			<Tree {...{lang, model, version, blockStates}} onError={addError} />
+			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
+			<Tree {...{lang, model, version, blockStates}} onError={setError} />
 		</main>
 		<div class="popup-actions" style={`--offset: -${10 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''}`} onClick={togglePreview}>
@@ -187,10 +194,10 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{lang, model, version, id: gen.id}} shown={previewShown} onError={addError} />
+			<PreviewPanel {...{lang, model, version, id: gen.id}} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} onError={addError} />
+			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} onError={setError} />
 		</div>
 	</>
 }

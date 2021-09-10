@@ -6,6 +6,7 @@ import * as java17 from '@mcschema/java-1.17'
 import config from '../config.json'
 import { fetchData } from './DataFetcher'
 import * as java18 from './Experimental18'
+import { message } from './Utils'
 
 export const VersionIds = ['1.15', '1.16', '1.17', '1.18'] as const
 export type VersionId = typeof VersionIds[number]
@@ -57,7 +58,7 @@ async function getVersion(id: VersionId): Promise<VersionData> {
 				Versions[id] = { collections, schemas, blockStates }
 				return Versions[id]
 			} catch (e) {
-				throw new Error(`Cannot get version "${id}": ${e.message}`)
+				throw new Error(`Cannot get version "${id}": ${message(e)}`)
 			}
 		})()
 		return Versions[id]
@@ -83,7 +84,7 @@ export async function getModel(version: VersionId, id: string): Promise<DataMode
 			}
 			Models[id] = { model, version }
 		} catch (e) {
-			throw new Error(`Cannot get generator "${id}" for version "${version}": ${e.message}`)
+			throw new Error(`Cannot get generator "${id}" for version "${version}": ${message(e)}`)
 		}
 	}
 	return Models[id].model

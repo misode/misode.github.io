@@ -7,6 +7,7 @@ import { locale } from '../Locales'
 import { transformOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry } from '../Schemas'
 import { Store } from '../Store'
+import { message } from '../Utils'
 
 const INDENT: Record<string, number | string> = {
 	'2_spaces': 2,
@@ -39,7 +40,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 				const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, props)
 				source.current.value = JSON.stringify(data, null, INDENT[indent]) + '\n'
 			} catch (e) {
-				onError(`Error getting JSON output: ${e.message}`)
+				onError(`Error getting JSON output: ${message(e)}`)
 				console.error(e)
 				source.current.value = ''
 			}
@@ -49,6 +50,9 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	useModel(model, () => {
 		retransform.current()
 	})
+	useEffect(() => {
+		if (model) retransform.current()
+	}, [model])
 
 	useEffect(() => {
 		retransform.current()
@@ -59,7 +63,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 			const data = JSON.parse(source.current.value)
 			model?.reset(data, false)
 		} catch (e) {
-			// TODO
+			onError(`Error importing: ${message(e)}`)
 		}
 	}
 
