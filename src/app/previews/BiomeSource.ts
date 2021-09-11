@@ -1,65 +1,33 @@
+import { Climate, MultiNoise } from 'deepslate'
 import type { VersionId } from '../Schemas'
-import { stringToColor } from '../Utils'
+import { square, stringToColor } from '../Utils'
 import { NormalNoise } from './noise/NormalNoise'
-import OverworldPreset from './OverworldPreset.json'
 
-type BiomeColors =Record<string, number[]>
+type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
 	biomeColors: BiomeColors,
 	offset: [number, number],
 	scale: number,
 	res: number,
-	seed: string,
+	seed: bigint,
 	version: VersionId,
 }
 
-const NoiseMaps = ['altitude', 'temperature', 'humidity', 'weirdness']
-
-export function biomeSource(state: any, img: ImageData, options: BiomeSourceOptions) {
-	switch (state?.type?.replace(/^minecraft:/, '')) {
-		case 'multi_noise': return multiNoise(state, img, options)
-		case 'fixed': return fixed(state, img, options)
-		case 'checkerboard': return checkerboard(state, img, options)
-	}
-}
-
-function fixed(state: any, img: ImageData, options: BiomeSourceOptions) {
-	const data = img.data
-	const color = getBiomeColor(state.biome, options.biomeColors)
-	const row = img.width * 4 / options.res
-	const col = 4 / options.res
-	for (let x = 0; x < 200; x += options.res) {
-		for (let y = 0; y < 200; y += options.res) {
-			const i = y * row + x * col
-			data[i] = color[0]
-			data[i + 1] = color[1]
-			data[i + 2] = color[2]
-			data[i + 3] = 255
-		}
-	}
-}
-
-function checkerboard(state: any, img: ImageData, options: BiomeSourceOptions) {
-	const biomeColorCache: BiomeColors = {}
-	state.biomes?.forEach((b: string) => {
-		biomeColorCache[b] = getBiomeColor(b, options.biomeColors)
-	})
+export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
+	const getBiome = await getBiomeSource(state, options)
 
 	const data = img.data
 	const ox = -options.offset[0] - 100 + options.res / 2
-	const oy = -options.offset[1] - 100 + options.res / 2
+	const oz = -options.offset[1] - 100 + options.res / 2
 	const row = img.width * 4 / options.res
 	const col = 4 / options.res
-	const shift = (state.scale ?? 2) + 2
-	const numBiomes = state.biomes?.length ?? 0
 	for (let x = 0; x < 200; x += options.res) {
-		for (let y = 0; y < 200; y += options.res) {
-			const i = y * row + x * col
-			const xx = (x + ox) * options.scale
-			const yy = (y + oy) * options.scale
-			const j = (((xx >> shift) + (yy >> shift)) % numBiomes + numBiomes) % numBiomes
-			const b = state.biomes?.[j]
-			const color = biomeColorCache[b] ?? [128, 128, 128]
+		for (let z = 0; z < 200; z += options.res) {
+			const i = z * row + x * col
+			const worldX = (x + ox) * options.scale
+			const worldZ = (z + oz) * options.scale
+			const b = getBiome(worldX, 64, worldZ)
+			const color = getBiomeColor(b, options.biomeColors)
 			data[i] = color[0]
 			data[i + 1] = color[1]
 			data[i + 2] = color[2]
@@ -68,52 +36,71 @@ function checkerboard(state: any, img: ImageData, options: BiomeSourceOptions) {
 	}
 }
 
-function multiNoise(state: any, img: ImageData, options: BiomeSourceOptions) {
-	const { biomes, noise, getBiome } = initMultiNoise(state, options)
-
-	const biomeColorCache: BiomeColors = {}
-	biomes.forEach((b: any) => {
-		biomeColorCache[b.biome] = getBiomeColor(b.biome, options.biomeColors)
-	})
-
-	const data = img.data
-	const ox = -options.offset[0] - 100 + options.res / 2
-	const oy = -options.offset[1] - 100 + options.res / 2
-	const row = img.width * 4 / options.res
-	const col = 4 / options.res
-	for (let x = 0; x < 200; x += options.res) {
-		console.log('Progress', x)
-		for (let y = 0; y < 200; y += options.res) {
-			const i = y * row + x * col
-			const xx = (x + ox) * options.scale
-			const yy = (y + oy) * options.scale
-			const b = getBiome(noise, biomes, xx, yy)
-			const color = biomeColorCache[b] ?? [128, 128, 128]
-			data[i] = color[0]
-			data[i + 1] = color[1]
-			data[i + 2] = color[2]
-			data[i + 3] = 255
-		}
-	}
+export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<string | undefined> {
+	const [xx, zz] = toWorld([x, z], options)
+	const getBiome = await getBiomeSource(state, options)
+	return getBiome(xx, 64, zz)
 }
 
-export function getBiome(state: any, x: number, y: number, options: BiomeSourceOptions): string | undefined {
-	const [xx, yy] = toWorld([x, y], options)
+async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<(x: number, y: number, z: number) => string> {
 	switch (state?.type?.replace(/^minecraft:/, '')) {
-		case 'multi_noise':
-			const { biomes, noise, getBiome } = initMultiNoise(state, options)
-			return getBiome(noise, biomes, xx, yy)
-		case 'fixed': return state.biome
+		case 'fixed':
+			return () => (state.biome as string)
+
 		case 'checkerboard':
 			const shift = (state.scale ?? 2) + 2
 			const numBiomes = state.biomes?.length ?? 0
-			const j = (((xx >> shift) + (yy >> shift)) % numBiomes + numBiomes) % numBiomes
-			return state.biomes?.[j]
+			return (x: number, _y: number, z: number) => {
+				const i = (((x >> shift) + (z >> shift)) % numBiomes + numBiomes) % numBiomes
+				return (state.biomes?.[i] as string)
+			}
+
+		case 'multi_noise':
+			switch(state.preset?.replace(/^minecraft:/, '')) {
+				case 'nether':
+					state = options.version === '1.18' ? NetherPreset18 : NetherPreset
+					break
+				case 'overworld':
+					state = options.version === '1.18' ? (await import('./OverworldPreset.json')).default : state
+					break
+			}
+			if (options.version === '1.18') {
+				const parameters = new Climate.Parameters<string>(state.biomes.map((b: any) => [
+					Climate.parameters(readParam(b.parameters.temperature), readParam(b.parameters.humidity), readParam(b.parameters.continentalness), readParam(b.parameters.erosion), readParam(b.parameters.depth), readParam(b.parameters.weirdness), b.parameters.offset),
+					() => b.biome,
+				]))
+				const multiNoise = new MultiNoise(options.seed, parameters, state.temperature_noise, state.humidity_noise, state.continentalness_noise, state.erosion_noise, state.weirdness_noise)
+				return (x: number, y: number, z: number) => multiNoise.getBiome(x, y, z)
+			} else {
+				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
+					.map((id, i) => {
+						const config = state[`${id}_noise`]
+						return new NormalNoise(`${options.seed + BigInt(i)}`, config.firstOctave, config.amplitudes)
+					})
+				if (!Array.isArray(state.biomes) || state.biomes.length === 0) return () => ''
+				return (x: number, _y: number, z: number): string => {
+					const n = noise.map(n => n.getValue(x, z, 0))
+					let minDist = Infinity
+					let minBiome = ''
+					for (const { biome, parameters: p } of state.biomes) {
+						const dist = square(p.altitude - n[0]) + square(p.temperature - n[1]) + square(p.humidity - n[2]) + square(p.weirdness - n[3]) + square(p.offset)
+						if (dist < minDist) {
+							minDist = dist
+							minBiome = biome
+						}
+					}
+					return minBiome
+				}
+			}
 	}
-	return undefined
+	throw new Error('Unknown biome source')
 }
 
-export function getBiomeColor(biome: string, biomeColors: BiomeColors) {
+function readParam(p: any) {
+	return typeof p === 'number' ? p : new Climate.Param(p[0], p[1])
+}
+
+function getBiomeColor(biome: string, biomeColors: BiomeColors) {
 	if (!biome) {
 		return [128, 128, 128]
 	}
@@ -124,72 +111,10 @@ export function getBiomeColor(biome: string, biomeColors: BiomeColors) {
 	return color
 }
 
-function toWorld([x, y]: [number, number], options: BiomeSourceOptions) {
+function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
 	const xx = (x - options.offset[0] - 100 + options.res / 2) * options.scale
-	const yy = (y - options.offset[1] - 100 + options.res / 2) * options.scale
-	return [xx, yy]
-}
-
-function initMultiNoise(state: any, options: BiomeSourceOptions) {
-	switch(state.preset?.replace(/^minecraft:/, '')) {
-		case 'nether':
-			state = options.version === '1.18' ? NetherPreset18 : NetherPreset
-			break
-		case 'overworld':
-			state = options.version === '1.18' ? OverworldPreset : state
-			break
-	}
-	const noise = (options.version === '1.18' ? NoiseMaps18 : NoiseMaps)
-		.map((id, i) => {
-			const config = state[`${id}_noise`]
-			return new NormalNoise(options.seed + i, config.firstOctave, config.amplitudes)
-		})
-	const getBiome = options.version === '1.18' ? closestBiome18 : closestBiome
-	return { biomes: state.biomes, noise, getBiome }
-}
-
-function closestBiome(noise: NormalNoise[], biomes: any[], x: number, y: number): string {
-	if (!Array.isArray(biomes) || biomes.length === 0) return ''
-	const n = noise.map(n => n.getValue(x, y, 0))
-	let minDist = Infinity
-	let minBiome = ''
-	for (const b of biomes) {
-		const dist = fitness(b.parameters, {altitude: n[0], temperature: n[1], humidity: n[2], weirdness: n[3]})
-		if (dist < minDist) {
-			minDist = dist
-			minBiome = b.biome
-		}
-	}
-	return minBiome
-}
-
-function fitness(a: any, b: any) {
-	return sq(a.altitude - b.altitude) + sq(a.temperature - b.temperature) + sq(a.humidity - b.humidity) + sq(a.weirdness - b.weirdness) + sq(a.offset)
-}
-
-function sq(a: number) {
-	return a * a
-}
-
-const NoiseMaps18 = ['temperature', 'humidity', 'continentalness', 'erosion', 'weirdness']
-
-function closestBiome18(noise: NormalNoise[], biomes: any[], x: number, y: number): string {
-	if (!Array.isArray(biomes) || biomes.length === 0) return ''
-	const n = noise.map(n => n.getValue(x, y, 0))
-	let minDist = Infinity
-	let minBiome = ''
-	for (const b of biomes) {
-		const dist = fitness18(b.parameters, {temperature: n[0], humidity: n[1], continentalness: n[2], erosion: n[3], depth: 0, weirdness: n[4]})
-		if (dist < minDist) {
-			minDist = dist
-			minBiome = b.biome
-		}
-	}
-	return minBiome
-}
-
-function fitness18(a: any, b: any) {
-	return sq(a.temperature - b.temperature) + sq(a.humidity - b.humidity) + sq(a.continentalness - b.continentalness) + sq(a.erosion - b.erosion) + sq(a.depth - b.depth) + sq(a.weirdness - b.weirdness) + sq(a.offset)
+	const zz = (z - options.offset[1] - 100 + options.res / 2) * options.scale
+	return [xx, zz]
 }
 
 const VanillaColors: Record<string, [number, number, number]> = {

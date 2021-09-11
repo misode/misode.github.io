@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { useOnDrag, useOnHover } from '../../hooks'
-import { biomeSource, getBiome } from '../../previews'
-import { hexId } from '../../Utils'
+import { biomeMap, getBiome } from '../../previews'
+import { randomSeed } from '../../Utils'
 
 export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
-	const [seed, setSeed] = useState(hexId())
+	const [seed, setSeed] = useState(randomSeed())
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
@@ -19,24 +19,31 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 
 	useEffect(() => {
 		redraw.current = (res = 4) => {
-			if (type !== 'multi_noise') res = 1
-			if (version === '1.18') res = 16
+			if (!shown || !data || !canvas.current) return
+			let next = 0
+			if (type === 'multi_noise' && res === 4) {
+				next = 1
+			} else {
+				res = 1
+			}
 			const ctx = canvas.current.getContext('2d')!
 			canvas.current.width = 200 / res
 			canvas.current.height = 200 / res
-			const img = ctx.createImageData(canvas.current.width, canvas.current.height)
-			biomeSource(data, img, { biomeColors: {}, offset: offset.current, scale, seed, res, version })
-			ctx.putImageData(img, 0, 0)
-			if (res !== 1 && version !== '1.18') {
-				clearTimeout(redrawTimeout.current)
-				redrawTimeout.current = setTimeout(() => redraw.current(1), 150) as any
-			}
+			const img = ctx.getImageData(0, 0, canvas.current.width, canvas.current.height)
+			const options = { biomeColors: {}, offset: offset.current, scale, seed, res, version }
+			biomeMap(data, img, options).then(() => {
+				ctx.putImageData(img, 0, 0)
+				if (next) {
+					clearTimeout(redrawTimeout.current)
+					redrawTimeout.current = setTimeout(() => redraw.current(next), 150) as any
+				}
+			})
 		}
 		refocus.current = (x: number, y: number) => {
 			const x2 = x * 200 / canvas.current.clientWidth
 			const y2 = y * 200 / canvas.current.clientHeight
-			const biome = getBiome(data, x2, y2, { biomeColors: {}, offset: offset.current, scale, seed, res: 1, version })
-			setFocused(biome)
+			const options = { biomeColors: {}, offset: offset.current, scale, seed, res: 1, version }
+			getBiome(data, x2, y2, options).then(biome => setFocused(biome))
 		}
 	})
 
@@ -76,7 +83,7 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 				<Btn icon="plus" onClick={() => changeScale(scale / 1.5)} />
 			</>}
 			{type === 'multi_noise' &&
-				<Btn icon="sync" onClick={() => setSeed(hexId())} />}
+				<Btn icon="sync" onClick={() => setSeed(randomSeed())} />}
 		</div>
 		<canvas ref={canvas} width="200" height="200"></canvas>
 	</>

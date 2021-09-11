@@ -4,6 +4,7 @@ import { Btn, BtnInput, BtnMenu } from '..'
 import { useOnDrag } from '../../hooks'
 import { locale } from '../../Locales'
 import { noiseSettings } from '../../previews'
+import { randomSeed } from '../../Utils'
 
 export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProps) => {
 	const loc = locale.bind(null, lang)
@@ -50,8 +51,4 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 		</div>
 		<canvas ref={canvas} width="200" height={data.height}></canvas>
 	</>
-}
-
-function randomSeed() {
-	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 }

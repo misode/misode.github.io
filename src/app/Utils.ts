@@ -12,6 +12,10 @@ export function hexId(length = 12) {
 	return Array.from(arr, dec2hex).join('')
 }
 
+export function randomSeed() {
+	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+}
+
 export function htmlEncode(str: string) {
 	return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
@@ -36,6 +40,10 @@ export function getGenerator(url: string) {
 export function stringToColor(str: string): [number, number, number] {
 	const h = Math.abs(hashString(str))
 	return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
+}
+
+export function square(a: number) {
+	return a * a
 }
 
 export function clamp(a: number, b: number, c: number) {
