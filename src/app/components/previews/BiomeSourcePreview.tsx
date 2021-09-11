@@ -1,19 +1,11 @@
-import type { DataModel } from '@mcschema/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
+import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { useOnDrag, useOnHover } from '../../hooks'
 import { biomeSource, getBiome } from '../../previews'
-import type { VersionId } from '../../Schemas'
 import { hexId } from '../../Utils'
 
-type BiomeSourceProps = {
-	lang: string,
-	model: DataModel,
-	data: any,
-	shown: boolean,
-	version: VersionId,
-}
-export const BiomeSourcePreview = ({ data, shown, version }: BiomeSourceProps) => {
+export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
 	const [seed, setSeed] = useState(hexId())
 	const [focused, setFocused] = useState<string | undefined>(undefined)

@@ -1,18 +1,10 @@
-import type { DataModel } from '@mcschema/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
+import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { decorator } from '../../previews'
-import type { VersionId } from '../../Schemas'
 import { hexId } from '../../Utils'
 
-type DecoratorProps = {
-	lang: string,
-	model: DataModel,
-	data: any,
-	version: VersionId,
-	shown: boolean,
-}
-export const DecoratorPreview = ({ data, version, shown }: DecoratorProps) => {
+export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 	const [scale, setScale] = useState(4)
 	const [seed, setSeed] = useState(hexId())
 

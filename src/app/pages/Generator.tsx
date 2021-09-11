@@ -37,7 +37,6 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 
 	const allowedVersions = config.versions
 		.filter(v => checkVersion(v.id, gen.minVersion))
-		.filter(v => ['dimension', 'world', 'worldgen/biome'].includes(gen.id) || v.id !== '1.18')
 		.map(v => v.id as VersionId)
 
 	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)

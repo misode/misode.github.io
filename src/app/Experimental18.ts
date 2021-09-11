@@ -7,8 +7,8 @@ export function getCollections() {
 }
 
 export function getSchemas(collections: CollectionRegistry) {
-	modifyCollection(collections, 'heightmap_type',{
-		add: ['WORLD_SURFACE_IGNORE_SNOW'] })
+	modifyCollection(collections, 'heightmap_type', {
+		add: ['WORLD_SURFACE_IGNORE_SNOW'], resource: false })
 	modifyCollection(collections, 'worldgen/surface_builder', {
 		add: ['grove', 'snowcapped_peaks', 'snowy_slopes', 'lofty_peaks'] })
 	modifyCollection(collections, 'worldgen/biome_source', {
@@ -25,21 +25,19 @@ export function getSchemas(collections: CollectionRegistry) {
 	return schemas
 }
 
-function modifyCollection(collections: CollectionRegistry, id: string, { add, remove }: { add?: string[], remove?: string[] }) {
-	const collection = collections.get(id)
+function modifyCollection(collections: CollectionRegistry, category: string, { add, remove, resource }: { add?: string[], remove?: string[], resource?: boolean }) {
+	const collection = collections.get(category)
 	remove?.forEach(id => {
-		const i = collection.indexOf(`minecraft:${id}`)
+		const i = collection.indexOf(resource === false ? id : `minecraft:${id}`)
 		if (i >= 0) collection.splice(i, 1)
 	})
 	add?.forEach(id => {
-		collection.push(`minecraft:${id}`)
+		collection.push(resource === false ? id : `minecraft:${id}`)
 	})
-	collections.register(id, collection)
+	collections.register(category, collection)
 }
 
 function initDimensionSchemas(schemas: SchemaRegistry, collections: CollectionRegistry) {
-	console.log('Init 1.18')
-
 	const Reference = RawReference.bind(undefined, schemas)
 	const StringNode = RawStringNode.bind(undefined, collections)
 
@@ -489,8 +487,8 @@ function initDimensionSchemas(schemas: SchemaRegistry, collections: CollectionRe
 			humidity: ClimateParameter,
 			continentalness: ClimateParameter,
 			erosion: ClimateParameter,
-			depth: ClimateParameter,
 			weirdness: ClimateParameter,
+			depth: ClimateParameter,
 			offset: NumberNode({ min: 0, max: 1 }),
 		}),
 	}, { context: 'generator_biome' }), {
