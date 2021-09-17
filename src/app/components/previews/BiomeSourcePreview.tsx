@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn } from '..'
-import { useOnDrag, useOnHover } from '../../hooks'
+import { useCanvas } from '../../hooks'
 import { biomeMap, getBiome } from '../../previews'
 import { randomSeed } from '../../Utils'
 
@@ -9,69 +9,41 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
 	const [seed, setSeed] = useState(randomSeed())
 	const [focused, setFocused] = useState<string | undefined>(undefined)
+	const state = JSON.stringify(data)
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
-	const canvas = useRef<HTMLCanvasElement>(null)
-	const offset = useRef<[number, number]>([0, 0])
-	const redrawTimeout = useRef(undefined)
-	const redraw = useRef<Function>()
-	const refocus = useRef<Function>()
-
-	useEffect(() => {
-		redraw.current = (res = 4) => {
-			if (!shown || !data || !canvas.current) return
-			let next = 0
-			if (type === 'multi_noise' && res === 4) {
-				next = 1
-			} else {
-				res = 1
+	const { canvas, redraw, move } = useCanvas<number>({
+		data() {
+			return type === 'multi_noise' ? 4 : 1
+		},
+		size({ data: res }) {
+			return [200 / res, 200 / res]
+		},
+		async draw(img, { data: res, offset }, schedule) {
+			const options = { biomeColors: {}, offset, scale, seed, res, version }
+			await biomeMap(data, img, options)
+			if (res === 4) {
+				schedule(150, 1)
 			}
-			const ctx = canvas.current.getContext('2d')!
-			canvas.current.width = 200 / res
-			canvas.current.height = 200 / res
-			const img = ctx.getImageData(0, 0, canvas.current.width, canvas.current.height)
-			const options = { biomeColors: {}, offset: offset.current, scale, seed, res, version }
-			biomeMap(data, img, options).then(() => {
-				ctx.putImageData(img, 0, 0)
-				if (next) {
-					clearTimeout(redrawTimeout.current)
-					redrawTimeout.current = setTimeout(() => redraw.current(next), 150) as any
-				}
-			})
-		}
-		refocus.current = (x: number, y: number) => {
-			const x2 = x * 200 / canvas.current.clientWidth
-			const y2 = y * 200 / canvas.current.clientHeight
-			const options = { biomeColors: {}, offset: offset.current, scale, seed, res: 1, version }
-			getBiome(data, x2, y2, options).then(biome => setFocused(biome))
-		}
-	})
-
-	useOnDrag(canvas.current, (dx, dy) => {
-		const x = dx * 200 / canvas.current.clientWidth
-		const y = dy * 200 / canvas.current.clientHeight
-		offset.current = [offset.current[0] + x, offset.current[1] + y]
-		redraw.current()
-	})
-
-	useOnHover(canvas.current, (x, y) => {
-		if (x === undefined || y === undefined) {
+		},
+		async point(x, y, { offset }) {
+			const options = { biomeColors: {}, offset, scale, seed, res: 1, version }
+			const biome = await getBiome(data, x, y, options)
+			setFocused(biome)
+		},
+		async leave() {
 			setFocused(undefined)
-		} else {
-			refocus.current(x, y)
-		}
-	})
+		},
+	}, [state, scale, seed])
 
-	const state = JSON.stringify(data)
 	useEffect(() => {
 		if (shown) {
-			redraw.current()
+			redraw()
 		}
 	}, [state, scale, seed, shown])
 
 	const changeScale = (newScale: number) => {
-		offset.current[0] *= scale / newScale
-		offset.current[1] *= scale / newScale
+		move(offset => [offset[0] * scale / newScale, offset[1] * scale / newScale])
 		setScale(newScale)
 	}
 
