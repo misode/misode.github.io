@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { useCanvas } from '../../hooks'
@@ -11,39 +11,52 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const state = JSON.stringify(data)
 	const type: string = data.type?.replace(/^minecraft:/, '')
+	const offset = useRef<[number, number]>([0, 0])
+	const res = useRef(1)
+	const refineTimeout = useRef<number>(undefined)
 
-	const { canvas, redraw, move } = useCanvas<number>({
-		data() {
-			return type === 'multi_noise' ? 4 : 1
+	const { canvas, redraw } = useCanvas({
+		size() {
+			return [200 / res.current, 200 / res.current]
 		},
-		size({ data: res }) {
-			return [200 / res, 200 / res]
-		},
-		async draw(img, { data: res, offset }, schedule) {
-			const options = { biomeColors: {}, offset, scale, seed, res, version }
+		async draw(img) {
+			const options = { biomeColors: {}, offset: offset.current, scale, seed, res: res.current, version }
 			await biomeMap(data, img, options)
-			if (res === 4) {
-				schedule(150, 1)
+			if (res.current === 4) {
+				clearTimeout(refineTimeout.current)
+				refineTimeout.current = setTimeout(() => {
+					res.current = 1
+					redraw()
+				}, 150)
 			}
 		},
-		async point(x, y, { offset }) {
-			const options = { biomeColors: {}, offset, scale, seed, res: 1, version }
-			const biome = await getBiome(data, x, y, options)
+		async onDrag(dx, dy) {
+			offset.current[0] = offset.current[0] + dx * 200
+			offset.current[1] = offset.current[1] + dy * 200
+			clearTimeout(refineTimeout.current)
+			res.current = type === 'multi_noise' ? 4 : 1
+			redraw()
+		},
+		async onHover(x, y) {
+			const options = { biomeColors: {}, offset: offset.current, scale, seed, res: 1, version }
+			const biome = await getBiome(data, x * 200, y * 200, options)
 			setFocused(biome)
 		},
-		async leave() {
+		onLeave() {
 			setFocused(undefined)
 		},
 	}, [state, scale, seed])
 
 	useEffect(() => {
 		if (shown) {
+			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
 	}, [state, scale, seed, shown])
 
 	const changeScale = (newScale: number) => {
-		move(offset => [offset[0] * scale / newScale, offset[1] * scale / newScale])
+		offset.current[0] = offset.current[0] * scale / newScale
+		offset.current[1] = offset.current[1] * scale / newScale
 		setScale(newScale)
 	}
 

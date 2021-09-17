@@ -1,53 +1,49 @@
 import type { Inputs } from 'preact/hooks'
 import { useEffect, useRef } from 'preact/hooks'
 
-type Context<Data> = { data: Data, offset: Vec2}
 type Vec2 = [number, number]
 
-export function useCanvas<Data>({ data, size, draw, point, leave }: {
-	data: () => Data,
-	size: (context: Context<Data>) => Vec2,
-	draw: (img: ImageData, context: Context<Data>, schedule: (timeout: number, data?: Data) => unknown) => Promise<unknown>,
-	point?: (x: number, y: number, context: Context<Data>) => Promise<unknown>,
-	leave?: () => Promise<unknown>,
+export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
+	size: () => Vec2,
+	draw: (img: ImageData) => Promise<unknown>,
+	onDrag?: (dx: number, dy: number) => Promise<unknown>,
+	onHover?: (x: number, y: number) => unknown,
+	onLeave?: () => unknown,
 }, inputs?: Inputs) {
 	const canvas = useRef<HTMLCanvasElement>(null)
-	const offset = useRef<Vec2>([0, 0])
-	const dataRef = useRef(data())
-	const sizeRef = useRef<Vec2>(size({ data: dataRef.current, offset: offset.current }))
 
-	const request = useRef<number>()
 	const dragStart = useRef<Vec2 | undefined>()
-	const pending = useRef<Vec2>([0, 0])
+	const dragRequest = useRef<number>()
+	const dragPending = useRef<Vec2>([0, 0])
+	const dragBusy = useRef(false)
 
 	useEffect(() => {
 		const onMouseDown = (e: MouseEvent) => {
-			dataRef.current = data()
 			dragStart.current = [e.offsetX, e.offsetY]
 		}
 		const onMouseMove = (e: MouseEvent) => {
-			const context = { data: dataRef.current, offset: offset.current }
-			console.log(`Move ${dataRef.current}`)
-			sizeRef.current = size(context)
 			if (dragStart.current === undefined) {
-				const x = e.offsetX * sizeRef.current[0] / canvas.current.clientWidth
-				const y = e.offsetY * sizeRef.current[1] / canvas.current.clientHeight
-				point?.(x, y, context)
+				const x = e.offsetX  / canvas.current.clientWidth
+				const y = e.offsetY  / canvas.current.clientHeight
+				onHover?.(x, y)
 				return
 			}
+			if (!onDrag) return
 			const dx = e.offsetX - dragStart.current[0]
 			const dy = e.offsetY - dragStart.current[1]
 			if (!(dx === 0 && dy === 0)) {
-				cancelAnimationFrame(request.current)
-				pending.current = [pending.current[0] + dx, pending.current[1] + dy]
-				request.current = requestAnimationFrame(() => {
-					const [dx, dy] = pending.current
-					const x = offset.current[0] + dx * sizeRef.current[0] / canvas.current.clientWidth
-					const y = offset.current[1] + dy * sizeRef.current[1] / canvas.current.clientHeight
-					offset.current = [x, y]
-					redraw.current()
-					pending.current = [0, 0]
-				})
+				dragPending.current = [dragPending.current[0] + dx, dragPending.current[1] + dy]
+				if (!dragBusy.current) {
+					cancelAnimationFrame(dragRequest.current)
+					dragRequest.current = requestAnimationFrame(async () => {
+						dragBusy.current = true
+						const dx = dragPending.current[0] / canvas.current.clientWidth
+						const dy = dragPending.current[1] / canvas.current.clientHeight
+						dragPending.current = [0, 0]
+						await onDrag?.(dx, dy)
+						dragBusy.current = false
+					})
+				}
 			}
 			dragStart.current = [e.offsetX, e.offsetY]
 		}
@@ -55,7 +51,7 @@ export function useCanvas<Data>({ data, size, draw, point, leave }: {
 			dragStart.current = undefined
 		}
 		const onMouseLeave = () => {
-			leave?.()
+			onLeave?.()
 		}
 
 		canvas.current.addEventListener('mousedown', onMouseDown)
@@ -72,44 +68,22 @@ export function useCanvas<Data>({ data, size, draw, point, leave }: {
 	}, [...inputs ?? [], canvas.current])
 
 	const redraw = useRef<() => Promise<unknown>>()
-	const redrawTimeout = useRef<number>(undefined)
 	const redrawCount = useRef(0)
 	redraw.current = async () => {
 		const ctx = canvas.current.getContext('2d')!
-		const context = { data: dataRef.current, offset: offset.current }
-		const s = size(context)
+		const s = size()
 		canvas.current.width = s[0]
 		canvas.current.height = s[1]
-		const img = ctx.createImageData(s[0], s[1])
+		const img = ctx.getImageData(0, 0, s[0], s[1])
 		const ownCount = redrawCount.current += 1
-		console.log(`Redraw... ${dataRef.current} ${ownCount}`)
-		await draw(img, context, (timeout, d) => {
-			clearTimeout(redrawTimeout.current)
-			redrawTimeout.current = setTimeout(() => {
-				if (d) {
-					dataRef.current = d
-				}
-				redraw.current()
-			}, timeout)
-		})
+		await draw(img)
 		if (ownCount === redrawCount.current) {
 			ctx.putImageData(img, 0, 0)
-			console.log(` Update :D ${dataRef.current} ${ownCount}`)
-		} else {
-			console.log(` Outdated -_- ${dataRef.current} ${ownCount} ${redrawCount.current}`)
 		}
 	}
 
 	return {
 		canvas,
-		redraw: (d?: Data) => {
-			if (d) {
-				dataRef.current = d
-			}
-			redraw.current()
-		},
-		move: (offsetter: (offset: Vec2) => Vec2) => {
-			offset.current = offsetter(offset.current)
-		},
+		redraw: redraw.current,
 	}
 }

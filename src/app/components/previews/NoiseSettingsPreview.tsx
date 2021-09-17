@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnInput, BtnMenu } from '..'
 import { useCanvas } from '../../hooks'
@@ -11,17 +11,19 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 	const [seed, setSeed] = useState(randomSeed())
 	const [biomeDepth, setBiomeDepth] = useState(0.1)
 	const [biomeScale, setBiomeScale] = useState(0.2)
+	const offset = useRef(0)
 
 	const size = data?.noise?.height ?? 256
 	const { canvas, redraw } = useCanvas({
-		data() {
-			return undefined
-		},
 		size() {
 			return [size, size]
 		},
-		async draw(img, { offset }) {
-			noiseSettings(data, img, { biomeDepth, biomeScale, offset: offset[0], width: img.width, seed, version })
+		async draw(img) {
+			noiseSettings(data, img, { biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version })
+		},
+		async onDrag(dx) {
+			offset.current += dx * size
+			redraw()
 		},
 	})
 

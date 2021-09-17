@@ -10,7 +10,6 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 	const [seed, setSeed] = useState(hexId())
 
 	const { canvas, redraw } = useCanvas({
-		data() { return undefined },
 		size() {
 			return [scale * 16, scale * 16]
 		},
