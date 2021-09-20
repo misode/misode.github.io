@@ -166,7 +166,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 				</BtnMenu>
 				<BtnMenu icon="tag" label={version}>
 					{allowedVersions.reverse().map(v =>
-						<Btn label={v} active={v === version} class={config.versions.find(vv => vv.id === v)?.experimental ? 'experimental' : ''} onClick={() => onChangeVersion(v)} />
+						<Btn label={v} active={v === version} onClick={() => onChangeVersion(v)} />
 					)}
 				</BtnMenu>
 				<BtnMenu icon="kebab_horizontal">
