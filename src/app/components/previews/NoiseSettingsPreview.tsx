@@ -4,14 +4,24 @@ import { Btn, BtnInput, BtnMenu } from '..'
 import { useCanvas } from '../../hooks'
 import { locale } from '../../Locales'
 import { noiseSettings } from '../../previews'
+import { checkVersion } from '../../Schemas'
 import { randomSeed } from '../../Utils'
 
 export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProps) => {
 	const loc = locale.bind(null, lang)
 	const [seed, setSeed] = useState(randomSeed())
-	const [biomeDepth, setBiomeDepth] = useState(0.1)
-	const [biomeScale, setBiomeScale] = useState(0.2)
+	const [biomeFactor, setBiomeFactor] = useState(0.2)
+	const [biomeOffset, setBiomeOffset] = useState(0.1)
+	const [biomePeaks, setBiomePeaks] = useState(0)
+	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const offset = useRef(0)
+	const state = JSON.stringify(data)
+
+	const hasPeaks = checkVersion(version, '1.18')
+	useEffect(() => {
+		setBiomeFactor(hasPeaks ? 600 : 0.2)
+		setBiomeOffset(hasPeaks ? 0.05 : 0.1)
+	}, [hasPeaks])
 
 	const size = data?.noise?.height ?? 256
 	const { canvas, redraw } = useCanvas({
@@ -19,26 +29,40 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 			return [size, size]
 		},
 		async draw(img) {
-			noiseSettings(data, img, { biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version })
+			const options = { biomeOffset, biomeFactor, biomePeaks, offset: offset.current, width: img.width, seed, version }
+			noiseSettings(data, img, options)
 		},
 		async onDrag(dx) {
 			offset.current += dx * size
 			redraw()
 		},
-	})
+		async onHover(_, y) {
+			const worldY = size - Math.max(1, Math.ceil(y * size)) + (data?.noise?.min_y ?? 0)
+			setFocused(`${worldY}`)
+		},
+		onLeave() {
+			setFocused(undefined)
+		},
+	}, [state, biomeFactor, biomeOffset, biomePeaks, seed])
 
-	const state = JSON.stringify(data)
 	useEffect(() => {
 		if (shown) {
 			redraw()
 		}
-	}, [state, biomeDepth, biomeScale, seed, shown])
+	}, [state, biomeFactor, biomeOffset, biomePeaks, seed, shown])
 
 	return <>
 		<div class="controls">
+			{focused && <Btn label={`Y = ${focused}`} class="no-pointer" />}
 			<BtnMenu icon="gear">
-				<BtnInput label={loc('preview.depth')} value={`${biomeDepth}`} onChange={v => setBiomeDepth(Number(v))} />
-				<BtnInput label={loc('preview.scale')} value={`${biomeScale}`} onChange={v => setBiomeScale(Number(v))} />
+				{hasPeaks ? <>
+					<BtnInput label={loc('preview.factor')} value={`${biomeFactor}`} onChange={v => setBiomeFactor(Number(v))} />
+					<BtnInput label={loc('preview.offset')} value={`${biomeOffset}`} onChange={v => setBiomeOffset(Number(v))} />
+					<BtnInput label={loc('preview.peaks')} value={`${biomePeaks}`} onChange={v => setBiomePeaks(Number(v))} />
+				</> : <>
+					<BtnInput label={loc('preview.scale')} value={`${biomeFactor}`} onChange={v => setBiomeFactor(Number(v))} />
+					<BtnInput label={loc('preview.depth')} value={`${biomeOffset}`} onChange={v => setBiomeOffset(Number(v))} />
+				</>}
 			</BtnMenu>
 			<Btn icon="sync" onClick={() => setSeed(randomSeed())} />
 		</div>

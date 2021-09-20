@@ -1,16 +1,20 @@
 import type { BlockPos, NoiseGeneratorSettings } from 'deepslate'
 import { BlockState, Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator } from 'deepslate'
 import type { VersionId } from '../Schemas'
+import { checkVersion } from '../Schemas'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export type NoiseSettingsOptions = {
-	biomeScale: number,
-	biomeDepth: number,
+	biomeFactor: number,
+	biomeOffset: number,
+	biomePeaks: number,
 	offset: number,
 	width: number,
 	seed: bigint,
 	version: VersionId,
 }
+
+const Z = 0
 
 const colors: Record<string, [number, number, number]> = {
 	'minecraft:air': [150, 160, 170],
@@ -25,12 +29,12 @@ let stateCache: string = ''
 let chunkCache: Chunk[] = []
 
 export function noiseSettings(state: any, img: ImageData, options: NoiseSettingsOptions) {
-	if (options.version === '1.18') {
+	if (checkVersion(options.version, '1.18')) {
 		const settings = readSettings(state)
-		const biomeSource = new FixedBiome('unknown', { offset: options.biomeDepth, factor: options.biomeScale, peaks: 0, nearWater: false})
+		const biomeSource = new FixedBiome('unknown', { offset: options.biomeOffset, factor: options.biomeFactor, peaks: options.biomePeaks, nearWater: false})
 		const generator = new NoiseChunkGenerator(options.seed, biomeSource, settings)
 
-		const newState = `${options.seed} ${options.biomeDepth} ${options.biomeScale} ${JSON.stringify(state)}`
+		const newState = `${options.seed} ${options.biomeOffset} ${options.biomeFactor} ${options.biomePeaks} ${JSON.stringify(state)}`
 		if (newState !== stateCache) {
 			stateCache = newState
 			chunkCache = []
@@ -43,7 +47,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 		for (let x = 0; x < options.width; x += 1) {
 			for (let y = 0; y < settings.noise.height; y += 1) {
 				const i = x * 4 + (settings.noise.height-y-1) * 4 * img.width
-				const state = slice.getBlockState([x - options.offset, y, 0])
+				const state = slice.getBlockState([x - options.offset, y, Z])
 				const color = colors[state.getName()] ?? [0, 0, 0]
 				data[i] = color[0]
 				data[i + 1] = color[1]
@@ -55,7 +59,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 	}
 
 	const generator = new OldNoiseChunkGenerator(options.seed.toString())
-	generator.reset(state.noise, options.biomeDepth, options.biomeScale, options.offset, 200)
+	generator.reset(state.noise, options.biomeOffset, options.biomeFactor, options.offset, 200)
 	const data = img.data
 	const row = img.width * 4
 	for (let x = 0; x < options.width; x += 1) {
@@ -155,7 +159,7 @@ class LevelSlice {
 					this.filled[i] = true
 					return cached
 				}
-				return new Chunk(minY, height, ChunkPos.create(x, 0))
+				return new Chunk(minY, height, ChunkPos.create(x, Z >> 4))
 			})
 	}
 
