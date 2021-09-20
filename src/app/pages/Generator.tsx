@@ -13,7 +13,7 @@ import { getGenerator } from '../Utils'
 
 type GeneratorProps = {
 	lang: string,
-	changeTitle: (title: string, versions?: string[]) => unknown,
+	changeTitle: (title: string, versions?: VersionId[]) => unknown,
 	version: VersionId,
 	onChangeVersion: (version: VersionId) => unknown,
 	default?: true,

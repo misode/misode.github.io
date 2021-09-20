@@ -3,9 +3,9 @@ import { DataModel } from '@mcschema/core'
 import * as java15 from '@mcschema/java-1.15'
 import * as java16 from '@mcschema/java-1.16'
 import * as java17 from '@mcschema/java-1.17'
+import * as java18 from '@mcschema/java-1.18'
 import config from '../config.json'
 import { fetchData } from './DataFetcher'
-import * as java18 from './Experimental18'
 import { message } from './Utils'
 
 export const VersionIds = ['1.15', '1.16', '1.17', '1.18'] as const
@@ -44,7 +44,7 @@ const versionGetter: {
 	1.15: java15,
 	1.16: java16,
 	1.17: java17,
-	1.18: java18 as any,
+	1.18: java18,
 }
 
 async function getVersion(id: VersionId): Promise<VersionData> {

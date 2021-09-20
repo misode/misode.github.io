@@ -8,6 +8,9 @@ import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
 import { hexId } from '../Utils'
 
+const LIST_LIMIT = 20
+const LIST_LIMIT_SHOWN = 5
+
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element']
@@ -82,10 +85,10 @@ export const renderHtml: RenderHook = {
 		const suffix = <button class="add" onClick={onAdd}>{Octicon.plus_circle}</button>
 		const body = <>
 			{(value && Array.isArray(value)) && value.map((cValue, index) => {
-				if (value.length > 10 && index >= 5 && index < value.length - 5) {
-					if (index === 5) {
+				if (value.length > LIST_LIMIT && index >= LIST_LIMIT_SHOWN && index < value.length - LIST_LIMIT_SHOWN) {
+					if (index === LIST_LIMIT_SHOWN) {
 						return <div class="node-entry">
-							<span class="node-message">{value.length - 10} hidden entries...</span>
+							<span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
 						</div>
 					}
 					return null

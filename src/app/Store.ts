@@ -39,7 +39,7 @@ export namespace Store {
 		if (version) localStorage.setItem(ID_VERSION, version)
 	}
 
-	export function setIndent(indent: string) {
+	export function setIndent(indent: string | undefined) {
 		if (indent) localStorage.setItem(ID_INDENT, indent)
 	}
 }

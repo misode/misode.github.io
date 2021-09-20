@@ -21,9 +21,6 @@ declare var __VANILLA_DATAPACK_SUMMARY_HASH__: string
 
 const mcdataUrl = 'https://raw.githubusercontent.com/Arcensoth/mcdata'
 const vanillaDatapackUrl = 'https://raw.githubusercontent.com/SPGoding/vanilla-datapack'
-const vanillaWorldgenUrl = 'https://raw.githubusercontent.com/misode/vanilla-worldgen'
-
-const worldgenRegistries = new Set(['dimension', 'dimension_type', 'worldgen/biome', 'worldgen/configured_carver', 'worldgen/configured_feature', 'worldgen/configured_structure_feature', 'worldgen/configured_surface_builder', 'worldgen/noise_settings', 'worldgen/processor_list', 'worldgen/template_pool'])
 
 const refs: {
 	id: VersionRef,
@@ -161,9 +158,7 @@ export async function fetchPreset(version: VersionId, registry: string, id: stri
 	console.debug(`[fetchPreset] ${id} ${registry} ${id}`)
 	const versionData = config.versions.find(v => v.id === version)!
 	try {
-		const url = version === '1.18' && worldgenRegistries.has(registry)
-			?	`${vanillaWorldgenUrl}/1.18-experimental/${registry}/${id}.json`
-			: `${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`
+		const url = `${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`
 		const res = await fetch(url)
 		return await res.json()
 	} catch (e) {
