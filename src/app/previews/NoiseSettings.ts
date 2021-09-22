@@ -1,7 +1,8 @@
-import type { BlockPos, NoiseGeneratorSettings } from 'deepslate'
-import { BlockState, Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator } from 'deepslate'
+import type { BlockPos, BlockState } from 'deepslate'
+import { Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
 import type { VersionId } from '../Schemas'
 import { checkVersion } from '../Schemas'
+import { deepEqual } from '../Utils'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export type NoiseSettingsOptions = {
@@ -25,20 +26,13 @@ const colors: Record<string, [number, number, number]> = {
 	'minecraft:end_stone': [200, 200, 140],
 }
 
-let stateCache: string = ''
+let cacheState: any
+let generatorCache: NoiseChunkGenerator
 let chunkCache: Chunk[] = []
 
 export function noiseSettings(state: any, img: ImageData, options: NoiseSettingsOptions) {
 	if (checkVersion(options.version, '1.18')) {
-		const settings = readSettings(state)
-		const biomeSource = new FixedBiome('unknown', { offset: options.biomeOffset, factor: options.biomeFactor, peaks: options.biomePeaks, nearWater: false})
-		const generator = new NoiseChunkGenerator(options.seed, biomeSource, settings)
-
-		const newState = `${options.seed} ${options.biomeOffset} ${options.biomeFactor} ${options.biomePeaks} ${JSON.stringify(state)}`
-		if (newState !== stateCache) {
-			stateCache = newState
-			chunkCache = []
-		}
+		const { settings, generator } = getCached(state, options)
 
 		const slice = new LevelSlice(-options.offset, options.width, settings.noise.minY, settings.noise.height)
 		slice.fill(generator)
@@ -75,6 +69,26 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 	}
 }
 
+function getCached(state: unknown, options: NoiseSettingsOptions) {
+	const settings = NoiseGeneratorSettings.fromJson(state)
+	// Temporary fix for slides
+	settings.noise.bottomSlide.target *= 128
+	settings.noise.topSlide.target *= 128
+	const shape = { factor: options.biomeFactor, offset: options.biomeOffset, peaks: options.biomePeaks, nearWater: false }
+
+	const newState = [state, shape, `${options.seed}`]
+	if (!deepEqual(newState, cacheState)) {
+		cacheState = newState
+		chunkCache = []
+		const biomeSource = new FixedBiome('unknown')
+		generatorCache = new NoiseChunkGenerator(options.seed, biomeSource, settings, shape)
+	}
+	return {
+		settings,
+		generator: generatorCache,
+	}
+}
+
 function getColor(noise: number[], y: number): number {
 	if (noise[y] > 0) {
 		return 0
@@ -83,61 +97,6 @@ function getColor(noise: number[], y: number): number {
 		return 150
 	}
 	return 255
-}
-
-function readSettings(obj: any): NoiseGeneratorSettings {
-	return {
-		defaultBlock: readBlockState(obj?.default_block, new BlockState('minecraft:stone')),
-		defaultFluid: readBlockState(obj?.default_fluid, new BlockState('minecraft:water', { level: '0' })),
-		bedrockRoofPosition: readNumber(obj?.bedrock_roof_position, -2147483648),
-		bedrockFloorPosition: readNumber(obj?.bedrock_floor_position, -2147483648),
-		seaLevel: readNumber(obj?.sea_level, 0),
-		minSurfaceLevel: readNumber(obj?.min_surface_level, 0),
-		disableMobGeneration: false,
-		aquifersEnabled: false,
-		noiseCavesEnabled: false,
-		deepslateEnabled: false,
-		oreVeinsEnabled: false,
-		noodleCavesEnabled: false,
-		structures: { structures: {} },
-		noise: {
-			minY: readNumber(obj?.noise?.min_y, 0),
-			height: readNumber(obj?.noise?.height, 256),
-			xzSize: readNumber(obj?.noise?.size_horizontal, 1),
-			ySize: readNumber(obj?.noise?.size_vertical, 1),
-			densityFactor: readNumber(obj?.noise?.density_factor, 0),
-			densityOffset: readNumber(obj?.noise?.density_offset, 0),
-			sampling: {
-				xzScale: readNumber(obj?.noise?.sampling?.xz_scale, 1),
-				yScale: readNumber(obj?.noise?.sampling?.y_scale, 1),
-				xzFactor: readNumber(obj?.noise?.sampling?.xz_factor, 80),
-				yFactor: readNumber(obj?.noise?.sampling?.y_factor, 80),
-			},
-			topSlide: {
-				target: readNumber(obj?.noise?.top_slide?.target, 0),
-				size: readNumber(obj?.noise?.top_slide?.size, 0),
-				offset: readNumber(obj?.noise?.top_slide?.offset, 0),
-			},
-			bottomSlide: {
-				target: readNumber(obj?.noise?.bottom_slide?.target, 0),
-				size: readNumber(obj?.noise?.bottom_slide?.size, 0),
-				offset: readNumber(obj?.noise?.bottom_slide?.offset, 0),
-			},
-			useSimplexSurfaceNoise: false,
-			randomDensityOffset: false,
-			islandNoiseOverride: false,
-			isAmplified: false,
-		},
-	}
-}
-
-function readBlockState(obj: any, fallback = BlockState.AIR) {
-	if (typeof obj?.Name !== 'string') return fallback
-	return new BlockState(obj.Name)
-}
-
-function readNumber(obj: any, fallback = 0) {
-	return typeof obj === 'number' ? obj : fallback
 }
 
 class LevelSlice {

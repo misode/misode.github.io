@@ -15,7 +15,7 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 	const [biomePeaks, setBiomePeaks] = useState(0)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const offset = useRef(0)
-	const state = JSON.stringify(data)
+	const state = JSON.stringify([data, biomeFactor, biomeOffset, biomePeaks])
 
 	const hasPeaks = checkVersion(version, '1.18')
 	useEffect(() => {
@@ -43,13 +43,13 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, biomeFactor, biomeOffset, biomePeaks, seed])
+	}, [state, seed])
 
 	useEffect(() => {
 		if (shown) {
 			redraw()
 		}
-	}, [state, biomeFactor, biomeOffset, biomePeaks, seed, shown])
+	}, [state, seed, shown])
 
 	return <>
 		<div class="controls">
