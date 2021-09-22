@@ -1,7 +1,7 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import { getCurrentUrl } from 'preact-router'
-import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
+import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
@@ -148,6 +148,16 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 		setImport(0)
 	}
 
+	const [copyActive, setCopyActive] = useState(false)
+	const copyTimeout = useRef<number | undefined>(undefined)
+	const copySuccess = () => {
+		setCopyActive(true)
+		if (copyTimeout.current !== undefined) clearTimeout(copyTimeout.current)
+		copyTimeout.current = setTimeout(() => {
+			setCopyActive(false)
+		}, 2000)
+	}
+
 	const [previewShown, setPreviewShown] = useState(false)
 	const hasPreview = HasPreview.includes(gen.id)
 	if (previewShown && !hasPreview) setPreviewShown(false)
@@ -193,8 +203,8 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			<div class={`popup-action action-download${sourceShown ? ' shown' : ''}`} onClick={downloadSource}>
 				{Octicon.download}
 			</div>
-			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}`} onClick={copySource}>
-				{Octicon.clippy}
+			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''}`} onClick={copySource}>
+				{copyActive ? Octicon.check : Octicon.clippy}
 			</div>
 			<div class={'popup-action action-code shown'} onClick={toggleSource}>
 				{sourceShown ? Octicon.chevron_right : Octicon.code}
@@ -204,7 +214,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			<PreviewPanel {...{lang, model, version, id: gen.id}} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} onError={setError} />
+			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
 		</div>
 	</>
 }
