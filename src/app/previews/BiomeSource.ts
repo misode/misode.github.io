@@ -1,9 +1,8 @@
-import type { BiomeSource, NoiseOctaves } from 'deepslate'
-import { Climate, FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler } from 'deepslate'
+import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
+import { FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
 import { fetchPreset } from '../DataFetcher'
 import type { VersionId } from '../Schemas'
 import { deepEqual, square, stringToColor } from '../Utils'
-import { NormalNoise } from './noise/NormalNoise'
 
 type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
@@ -92,23 +91,19 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 					break
 			}
 			if (options.version === '1.18') {
-				const parameters = new Climate.Parameters<string>(state.biomes.map((b: any) => [
-					Climate.parameters(readParam(b.parameters.temperature), readParam(b.parameters.humidity), readParam(b.parameters.continentalness), readParam(b.parameters.erosion), readParam(b.parameters.depth), readParam(b.parameters.weirdness), b.parameters.offset),
-					() => b.biome,
-				]))
-				return new MultiNoise(parameters)
+				return MultiNoise.fromJson(state)
 			} else {
 				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
 					.map((id, i) => {
 						const config = state[`${id}_noise`]
-						return new NormalNoise(`${options.seed + BigInt(i)}`, config.firstOctave, config.amplitudes)
+						return new NormalNoise(new Random(options.seed + BigInt(i)), config)
 					})
 				if (!Array.isArray(state.biomes) || state.biomes.length === 0) {
 					return new FixedBiome('unknown')
 				}
 				return {
 					getBiome(x: number, _y: number, z: number): string {
-						const n = noise.map(n => n.getValue(x, z, 0))
+						const n = noise.map(n => n.sample(x, z, 0))
 						let minDist = Infinity
 						let minBiome = ''
 						for (const { biome, parameters: p } of state.biomes) {
@@ -124,10 +119,6 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 			}
 	}
 	throw new Error('Unknown biome source')
-}
-
-function readParam(p: any) {
-	return typeof p === 'number' ? p : new Climate.Param(p[0], p[1])
 }
 
 function getBiomeColor(biome: string, biomeColors: BiomeColors) {
@@ -243,5 +234,5 @@ const NetherPreset18 = {type:'minecraft:multi_noise',biomes:[{biome:'minecraft:n
 
 async function OverworldPreset18() {
 	const overworld = await fetchPreset('1.18', 'dimension', 'overworld')
-	MultiNoise.fromJson(overworld.generator.biome_source)
+	return overworld.generator.biome_source
 }

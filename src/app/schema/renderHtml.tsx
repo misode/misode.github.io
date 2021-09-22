@@ -54,7 +54,6 @@ export const renderHtml: RenderHook = {
 		const choiceContextPath = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
 		const set = (value: string) => {
 			const c = choices.find(c => c.type === value) ?? choice
-			console.log(c)
 			path.model.set(path, c.change ? c.change(value) : c.node.default())
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>

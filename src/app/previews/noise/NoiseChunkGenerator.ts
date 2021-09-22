@@ -1,5 +1,5 @@
+import { PerlinNoise, Random } from 'deepslate'
 import { clampedLerp, lerp2 } from '../../Utils'
-import { PerlinNoise } from './PerlinNoise'
 
 export class NoiseChunkGenerator {
 	private readonly minLimitPerlinNoise: PerlinNoise
@@ -17,11 +17,12 @@ export class NoiseChunkGenerator {
 	private noiseColumnCache: (number[] | null)[] = []
 	private xOffset: number = 0
 
-	constructor(seed: string) {
-		this.minLimitPerlinNoise = PerlinNoise.fromRange(seed + 'djfqnqd', -15, 0)
-		this.maxLimitPerlinNoise = PerlinNoise.fromRange(seed + 'gowdnqs', -15, 0)
-		this.mainPerlinNoise = PerlinNoise.fromRange(seed + 'afiwmco', -7, 0)
-		this.depthNoise = PerlinNoise.fromRange(seed + 'qphnmeo', -15, 0)
+	constructor(seed: bigint) {
+		const random = new Random(seed)
+		this.minLimitPerlinNoise = new PerlinNoise(random, -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+		this.maxLimitPerlinNoise = new PerlinNoise(random, -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+		this.mainPerlinNoise = new PerlinNoise(random, -7, [1, 1, 1, 1, 1, 1, 1, 1])
+		this.depthNoise = new PerlinNoise(random, -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 	}
 
 	public reset(settings: any, depth: number, scale: number, xOffset: number, width: number) {
@@ -71,7 +72,7 @@ export class NoiseChunkGenerator {
 		const randomDensity = this.settings.random_density_offset ? this.getRandomDensity(x) : 0
 
 		for (let y = 0; y <= this.chunkCountY; y += 1) {
-			let noise = this.sampleAndClampNoise(x, y, this.mainPerlinNoise.getOctaveNoise(0).zo, xzScale, yScale, xzFactor, yFactor)
+			let noise = this.sampleAndClampNoise(x, y, this.mainPerlinNoise.getOctaveNoise(0)!.zo, xzScale, yScale, xzFactor, yFactor)
 			const yOffset = 1 - y * 2 / this.chunkCountY + randomDensity
 			const density = yOffset * this.settings.density_factor + this.settings.density_offset
 			const falloff = (density + this.biomeDepth) * this.biomeScale
@@ -100,7 +101,7 @@ export class NoiseChunkGenerator {
 	}
 
 	private getRandomDensity(x: number): number {
-		const noise = this.depthNoise.getValue(x * 200, 10, this.depthNoise.getOctaveNoise(0).zo, 1, 0, true)
+		const noise = this.depthNoise.sample(x * 200, 10, this.depthNoise.getOctaveNoise(0)!.zo, 1, 0, true)
 		const a = (noise < 0) ? -noise * 0.3 : noise
 		const b = a * 24.575625 - 2
 		return (b < 0) ? b * 0.009486607142857142 : Math.min(b, 1) * 0.006640625
@@ -120,18 +121,18 @@ export class NoiseChunkGenerator {
 
 			const minLimitNoise = this.minLimitPerlinNoise.getOctaveNoise(i)
 			if (minLimitNoise) {
-				a += minLimitNoise.noise(x2, y2, z2, e, y * e) / d
+				a += minLimitNoise.sample(x2, y2, z2, e, y * e) / d
 			}
 
 			const maxLimitNoise = this.maxLimitPerlinNoise.getOctaveNoise(i)
 			if (maxLimitNoise) {
-				b += maxLimitNoise.noise(x2, y2, z2, e, y * e) / d
+				b += maxLimitNoise.sample(x2, y2, z2, e, y * e) / d
 			}
 
 			if (i < 8) {
 				const mainNoise = this.mainPerlinNoise.getOctaveNoise(i)
 				if (mainNoise) {
-					c += mainNoise.noise(
+					c += mainNoise.sample(
 						PerlinNoise.wrap(x * xzFactor * d),
 						PerlinNoise.wrap(y * yFactor * d),
 						PerlinNoise.wrap(z * xzFactor * d),

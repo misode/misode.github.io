@@ -52,7 +52,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 		return
 	}
 
-	const generator = new OldNoiseChunkGenerator(options.seed.toString())
+	const generator = new OldNoiseChunkGenerator(options.seed)
 	generator.reset(state.noise, options.biomeOffset, options.biomeFactor, options.offset, 200)
 	const data = img.data
 	const row = img.width * 4
