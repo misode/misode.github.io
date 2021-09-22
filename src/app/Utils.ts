@@ -1,3 +1,6 @@
+import type { DataModel } from '@mcschema/core'
+import { Path } from '@mcschema/core'
+import rfdc from 'rfdc'
 import config from '../config.json'
 
 export function isPromise(obj: any): obj is Promise<any> {
@@ -14,6 +17,12 @@ export function hexId(length = 12) {
 
 export function randomSeed() {
 	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+}
+
+export function newSeed(model: DataModel) {
+	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
+	model.set(new Path(['generator', 'seed']), seed, true)
+	model.set(new Path(['generator', 'biome_source', 'seed']), seed)
 }
 
 export function htmlEncode(str: string) {
@@ -80,6 +89,8 @@ export function message(e: unknown): string {
 	if (e instanceof Error) return e.message
 	return `${e}`
 }
+
+export const deepClone = rfdc()
 
 /**
  * MIT License

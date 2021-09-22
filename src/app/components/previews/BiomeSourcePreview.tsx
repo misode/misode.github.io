@@ -6,16 +6,16 @@ import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { useCanvas } from '../../hooks'
 import { biomeMap, getBiome } from '../../previews'
-import { randomSeed } from '../../Utils'
+import { newSeed } from '../../Utils'
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
-	const [seed, setSeed] = useState(randomSeed())
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
 	const refineTimeout = useRef<number>(undefined)
 
+	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
 	const octaves = getOctaves(model.get(new Path(['generator', 'settings'])))
 	const state = calculateState(data, octaves)
 	const type: string = data.type?.replace(/^minecraft:/, '')
@@ -73,7 +73,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 				<Btn icon="plus" onClick={() => changeScale(scale / 1.5)} />
 			</>}
 			{type === 'multi_noise' &&
-				<Btn icon="sync" onClick={() => setSeed(randomSeed())} />}
+				<Btn icon="sync" onClick={() => newSeed(model)} />}
 		</div>
 		<canvas ref={canvas} width="200" height="200"></canvas>
 	</>

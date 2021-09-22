@@ -6,7 +6,7 @@ import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
-import { hexId } from '../Utils'
+import { hexId, newSeed } from '../Utils'
 
 const LIST_LIMIT = 20
 const LIST_LIMIT_SHOWN = 5
@@ -234,8 +234,11 @@ function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookPara
 			: integer ? parseInt(value) : parseFloat(value)
 		path.model.set(path, parsed)
 	}
-	return <input type={config?.color ? 'color' : 'text'} onChange={onChange}
-		value={config?.color ? '#' + value?.toString(16).padStart(6, '0') ?? '#000000' : value ?? ''} />
+	const val = config?.color ? '#' + value?.toString(16).padStart(6, '0') ?? '#000000' : value ?? ''
+	return <>
+		<input type={config?.color ? 'color' : 'text'} onChange={onChange} value={val} />
+		{path.equals(new Path(['generator', 'seed'])) && <button onClick={() => newSeed(path.model)}>{Octicon.sync}</button>}
+	</>
 }
 
 function StringSuffix({ path, getValues, config, node, value, lang, states }: NodeProps<StringHookParams>) {

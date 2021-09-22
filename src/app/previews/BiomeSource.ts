@@ -2,7 +2,7 @@ import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
 import { FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
 import { fetchPreset } from '../DataFetcher'
 import type { VersionId } from '../Schemas'
-import { deepEqual, square, stringToColor } from '../Utils'
+import { deepClone, deepEqual, square, stringToColor } from '../Utils'
 
 type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
@@ -52,7 +52,7 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: BiomeSource, climateSampler: Climate.Sampler }> {
 	const newState = [state, options.octaves, `${options.seed}`, options.version]
 	if (!deepEqual(newState, cacheState)) {
-		cacheState = newState
+		cacheState = deepClone(newState)
 
 		biomeSourceCache = await getBiomeSource(state, options)
 

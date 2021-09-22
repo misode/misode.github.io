@@ -1,4 +1,5 @@
 import type { DataModel } from '@mcschema/core'
+import { Path } from '@mcschema/core'
 import { getCurrentUrl } from 'preact-router'
 import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 import config from '../../config.json'
@@ -110,6 +111,13 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 	const loadPreset = (id: string) => {
 		Analytics.generatorEvent('load-preset', id)
 		fetchPreset(version, gen.path ?? gen.id, id).then(preset => {
+			const seed = model?.get(new Path(['generator', 'seed']))
+			if (preset?.generator?.seed !== undefined && seed !== undefined) {
+				preset.generator.seed = seed
+				if (preset.generator.biome_source?.seed !== undefined) {
+					preset.generator.biome_source.seed = seed
+				}
+			}
 			model?.reset(preset, false)
 		})
 	}

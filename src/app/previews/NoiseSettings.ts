@@ -2,7 +2,7 @@ import type { BlockPos, BlockState } from 'deepslate'
 import { Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
 import type { VersionId } from '../Schemas'
 import { checkVersion } from '../Schemas'
-import { deepEqual } from '../Utils'
+import { deepClone, deepEqual } from '../Utils'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export type NoiseSettingsOptions = {
@@ -78,7 +78,7 @@ function getCached(state: unknown, options: NoiseSettingsOptions) {
 
 	const newState = [state, shape, `${options.seed}`]
 	if (!deepEqual(newState, cacheState)) {
-		cacheState = newState
+		cacheState = deepClone(newState)
 		chunkCache = []
 		const biomeSource = new FixedBiome('unknown')
 		generatorCache = new NoiseChunkGenerator(options.seed, biomeSource, settings, shape)
