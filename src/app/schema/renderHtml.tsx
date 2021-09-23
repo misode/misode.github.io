@@ -67,10 +67,16 @@ export const renderHtml: RenderHook = {
 	list({ children, config }, path, value, lang, states) {
 		const context = path.getContext().join('.')
 		if (fixedLists.includes(context)) {
-			return [<div class="fixed-list"></div>, <>{[...Array(config.maxLength)].map((_, i) => {
+			const prefix = <>
+				{[...Array(config.maxLength!)].map((_, i) =>
+					<ErrorPopup lang={lang} path={path.modelPush(i)} />)}
+				<div class="fixed-list"></div>
+			</>
+			const suffix = <>{[...Array(config.maxLength)].map((_, i) => {
 				const child = children.hook(this, path.modelPush(i), value?.[i], lang, states)
 				return child[1]
-			})}</>, null]
+			})}</>
+			return [prefix, suffix, null]
 		}
 
 		const onAdd = () => {
