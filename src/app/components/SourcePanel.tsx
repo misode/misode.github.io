@@ -75,6 +75,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 			model?.reset(data, false)
 		} catch (e) {
 			onError(`Error importing: ${message(e)}`)
+			console.error(e)
 		}
 	}
 

@@ -186,7 +186,7 @@ export const renderHtml: RenderHook = {
 			}
 		}
 		const body = <>
-			{(typeof value === 'object' && !(node.optional() && value === undefined)) &&
+			{(typeof value === 'object' && value !== null && !(node.optional() && value === undefined)) &&
 				Object.entries(getActiveFields(path))
 					.filter(([_, child]) => child.enabled(path))
 					.map(([key, child]) => {
