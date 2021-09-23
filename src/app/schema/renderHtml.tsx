@@ -1,12 +1,13 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
 import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { ComponentChildren, JSX } from 'preact'
+import { memo } from 'preact/compat'
 import { Btn } from '../components'
 import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
-import { hexId, newSeed } from '../Utils'
+import { deepEqual, hexId, newSeed } from '../Utils'
 
 const LIST_LIMIT = 20
 const LIST_LIMIT_SHOWN = 5
@@ -29,7 +30,13 @@ const keysModel = new DataModel(MapNode(
 type JSXTriple = [JSX.Element | null, JSX.Element | null, JSX.Element | null]
 type RenderHook = Hook<[any, string, BlockStateRegistry], JSXTriple>
 
-type NodeProps<T> = T & { node: INode<any> } & { path: ModelPath } & { value: any} & { lang: string } & { states: BlockStateRegistry }
+type NodeProps<T> = T & {
+	node: INode<any>,
+	path: ModelPath,
+	value: any,
+	lang: string,
+	states: BlockStateRegistry,
+}
 
 /**
  * Renders the node and handles events to update the model
@@ -108,7 +115,7 @@ export const renderHtml: RenderHook = {
 					[v[index + 1], v[index]] = [v[index], v[index + 1]]
 					path.model.set(path, v)
 				}
-				return <TreeNode path={cPath} schema={children} value={cValue} lang={lang} states={states}>
+				return <TreeNode key={index} path={cPath} schema={children} value={cValue} lang={lang} states={states}>
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
 						<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
@@ -161,9 +168,9 @@ export const renderHtml: RenderHook = {
 					path.model.errors.add(cPath, 'error.invalid_enum_option', cValue)
 				}
 				const onRemove = () => cPath.set(undefined)
-				return <TreeNode schema={cSchema} path={cPath} value={cValue} lang={lang} states={states} label={key}>
+				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} lang={lang} states={states} label={key}>
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
-				</TreeNode>
+				</MemoedTreeNode>
 			})}
 		</>
 		return [null, suffix, body]
@@ -202,7 +209,7 @@ export const renderHtml: RenderHook = {
 							suffix = <>{suffix}{cSuffix}</>
 							return isFlattened ? cBody : null
 						}
-						return <TreeNode schema={child} path={cPath} value={value[key]} lang={lang} states={states} />
+						return <MemoedTreeNode key={key} schema={child} path={cPath} value={value[key]} lang={lang} states={states} />
 					})
 			}
 		</>
@@ -227,14 +234,24 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookParams>) {
 	const onChange = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
-		const parsed = config?.color
-			? parseInt(value.slice(1), 16)
-			: integer ? parseInt(value) : parseFloat(value)
+		const parsed = integer ? parseInt(value) : parseFloat(value)
+		if (value.length > 0 && !value.match(/\.0*$/)) {
+			path.model.set(path, parsed)
+		}
+	}
+	const onBlur = (evt: Event) => {
+		const value = (evt.target as HTMLInputElement).value
+		const parsed = integer ? parseInt(value) : parseFloat(value)
 		path.model.set(path, parsed)
 	}
-	const val = config?.color ? '#' + value?.toString(16).padStart(6, '0') ?? '#000000' : value ?? ''
+	const onColor = (evt: Event) => {
+		const value = (evt.target as HTMLInputElement).value
+		const parsed = parseInt(value.slice(1), 16)
+		path.model.set(path, parsed)
+	}
 	return <>
-		<input type={config?.color ? 'color' : 'text'} onChange={onChange} value={val} />
+		<input type="text" value={value ?? ''} onChange={onChange} onBlur={onBlur} />
+		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
 		{path.equals(new Path(['generator', 'seed'])) && <button onClick={() => newSeed(path.model)}>{Octicon.sync}</button>}
 	</>
 }
@@ -323,6 +340,13 @@ function TreeNode({ label, schema, path, value, lang, states, children }: TreeNo
 		{body && <div class="node-body">{body}</div>}
 	</div>
 }
+
+const MemoedTreeNode = memo(TreeNode, (prev, next) => {
+	return deepEqual(prev.value, next.value)
+		&& prev.path.equals(next.path)
+		&& prev.schema === next.schema
+		&& prev.lang === next.lang
+})
 
 function isEnum(value?: ValidationOption | EnumOption): value is EnumOption {
 	return !!(value as any)?.enum
