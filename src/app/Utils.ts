@@ -1,3 +1,6 @@
+import type { DataModel } from '@mcschema/core'
+import { Path } from '@mcschema/core'
+import rfdc from 'rfdc'
 import config from '../config.json'
 
 export function isPromise(obj: any): obj is Promise<any> {
@@ -10,6 +13,16 @@ export function hexId(length = 12) {
 	var arr = new Uint8Array(length / 2)
 	window.crypto.getRandomValues(arr)
 	return Array.from(arr, dec2hex).join('')
+}
+
+export function randomSeed() {
+	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+}
+
+export function newSeed(model: DataModel) {
+	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
+	model.set(new Path(['generator', 'seed']), seed, true)
+	model.set(new Path(['generator', 'biome_source', 'seed']), seed)
 }
 
 export function htmlEncode(str: string) {
@@ -36,6 +49,10 @@ export function getGenerator(url: string) {
 export function stringToColor(str: string): [number, number, number] {
 	const h = Math.abs(hashString(str))
 	return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
+}
+
+export function square(a: number) {
+	return a * a
 }
 
 export function clamp(a: number, b: number, c: number) {
@@ -71,4 +88,43 @@ export function smoothstep(x: number): number {
 export function message(e: unknown): string {
 	if (e instanceof Error) return e.message
 	return `${e}`
+}
+
+export const deepClone = rfdc()
+
+/**
+ * MIT License
+ * 
+ * Copyright (c) 2017 Evgeny Poberezkin
+ * 
+ * https://github.com/epoberezkin/fast-deep-equal/blob/master/LICENSE
+ */
+export function deepEqual(a: any, b: any) {
+	if (a === b) return true
+
+	if (a && b && typeof a == 'object' && typeof b == 'object') {
+		if (a.constructor !== b.constructor) return false
+		let length, i
+		if (Array.isArray(a)) {
+			length = a.length
+			if (length != b.length) return false
+			for (i = length; i-- !== 0;) {
+				if (!deepEqual(a[i], b[i])) return false
+			}
+			return true
+		}
+		if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf()
+		if (a.toString !== Object.prototype.toString) return a.toString() === b.toString()
+		const keys = Object.keys(a)
+		length = keys.length
+		if (length !== Object.keys(b).length) return false
+		for (i = length; i-- !== 0;)
+			if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false
+		for (i = length; i-- !== 0;) {
+			const key = keys[i]
+			if (!deepEqual(a[key], b[key])) return false
+		}
+		return true
+	}
+	return a !== a && b !== b
 }

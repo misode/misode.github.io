@@ -1,75 +1,67 @@
-import type { DataModel } from '@mcschema/core'
+import { Path } from '@mcschema/core'
+import type { NoiseOctaves } from 'deepslate'
+import { NoiseGeneratorSettings } from 'deepslate'
 import { useEffect, useRef, useState } from 'preact/hooks'
+import type { PreviewProps } from '.'
 import { Btn } from '..'
-import { useOnDrag, useOnHover } from '../../hooks'
-import { biomeSource, getBiome } from '../../previews'
-import { hexId } from '../../Utils'
+import { useCanvas } from '../../hooks'
+import { biomeMap, getBiome } from '../../previews'
+import { newSeed } from '../../Utils'
 
-type BiomeSourceProps = {
-	lang: string,
-	model: DataModel,
-	data: any,
-	shown: boolean,
-}
-export const BiomeSourcePreview = ({ data, shown }: BiomeSourceProps) => {
+export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
-	const [seed, setSeed] = useState(hexId())
 	const [focused, setFocused] = useState<string | undefined>(undefined)
+	const offset = useRef<[number, number]>([0, 0])
+	const res = useRef(1)
+	const refineTimeout = useRef<number>(undefined)
+
+	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
+	const octaves = getOctaves(model.get(new Path(['generator', 'settings'])))
+	const state = calculateState(data, octaves)
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
-	const canvas = useRef<HTMLCanvasElement>(null)
-	const offset = useRef<[number, number]>([0, 0])
-	const redrawTimeout = useRef(undefined)
-	const redraw = useRef<Function>()
-	const refocus = useRef<Function>()
-
-	useEffect(() => {
-		redraw.current = (res = 4) => {
-			if (type !== 'multi_noise') res = 1
-			const ctx = canvas.current.getContext('2d')!
-			canvas.current.width = 200 / res
-			canvas.current.height = 200 / res
-			const img = ctx.createImageData(canvas.current.width, canvas.current.height)
-			biomeSource(data, img, { biomeColors: {}, offset: offset.current, scale, seed, res })
-			ctx.putImageData(img, 0, 0)
-			if (res !== 1) {
-				clearTimeout(redrawTimeout.current)
-				redrawTimeout.current = setTimeout(() => redraw.current(1), 150) as any
+	const { canvas, redraw } = useCanvas({
+		size() {
+			return [200 / res.current, 200 / res.current]
+		},
+		async draw(img) {
+			const options = { octaves, biomeColors: {}, offset: offset.current, scale, seed, res: res.current, version }
+			await biomeMap(data, img, options)
+			if (res.current === 4) {
+				clearTimeout(refineTimeout.current)
+				refineTimeout.current = setTimeout(() => {
+					res.current = 1
+					redraw()
+				}, 150)
 			}
-		}
-		refocus.current = (x: number, y: number) => {
-			const x2 = x * 200 / canvas.current.clientWidth
-			const y2 = y * 200 / canvas.current.clientHeight
-			const biome = getBiome(data, x2, y2, { biomeColors: {}, offset: offset.current, scale, seed, res: 1 })
+		},
+		async onDrag(dx, dy) {
+			offset.current[0] = offset.current[0] + dx * 200
+			offset.current[1] = offset.current[1] + dy * 200
+			clearTimeout(refineTimeout.current)
+			res.current = type === 'multi_noise' ? 4 : 1
+			redraw()
+		},
+		async onHover(x, y) {
+			const options = { octaves, biomeColors: {}, offset: offset.current, scale, seed, res: 1, version }
+			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
-		}
-	})
-
-	useOnDrag(canvas.current, (dx, dy) => {
-		const x = dx * 200 / canvas.current.clientWidth
-		const y = dy * 200 / canvas.current.clientHeight
-		offset.current = [offset.current[0] + x, offset.current[1] + y]
-		redraw.current()
-	})
-
-	useOnHover(canvas.current, (x, y) => {
-		if (x === undefined || y === undefined) {
+		},
+		onLeave() {
 			setFocused(undefined)
-		} else {
-			refocus.current(x, y)
-		}
-	})
+		},
+	}, [state, scale, seed])
 
-	const state = JSON.stringify(data)
 	useEffect(() => {
 		if (shown) {
-			redraw.current()
+			res.current = type === 'multi_noise' ? 4 : 1
+			redraw()
 		}
 	}, [state, scale, seed, shown])
 
 	const changeScale = (newScale: number) => {
-		offset.current[0] *= scale / newScale
-		offset.current[1] *= scale / newScale
+		offset.current[0] = offset.current[0] * scale / newScale
+		offset.current[1] = offset.current[1] * scale / newScale
 		setScale(newScale)
 	}
 
@@ -81,8 +73,49 @@ export const BiomeSourcePreview = ({ data, shown }: BiomeSourceProps) => {
 				<Btn icon="plus" onClick={() => changeScale(scale / 1.5)} />
 			</>}
 			{type === 'multi_noise' &&
-				<Btn icon="sync" onClick={() => setSeed(hexId())} />}
+				<Btn icon="sync" onClick={() => newSeed(model)} />}
 		</div>
 		<canvas ref={canvas} width="200" height="200"></canvas>
 	</>
+}
+
+function calculateState(data: any, octaves: NoiseOctaves) {
+	return JSON.stringify([data, octaves])
+}
+
+function getOctaves(obj: any): NoiseOctaves {
+	if (typeof obj === 'string') {
+		switch (obj.replace(/^minecraft:/, '')) {
+			case 'overworld':
+			case 'amplified':
+				return {
+					temperature: { firstOctave: -9, amplitudes: [1.5, 0, 1, 0, 0, 0] },
+					humidity: { firstOctave: -7, amplitudes: [1, 1, 0, 0, 0, 0] },
+					continentalness: { firstOctave: -9, amplitudes: [1, 1, 2, 2, 2, 1, 1, 1, 1] },
+					erosion: { firstOctave: -9, amplitudes: [1, 1, 0, 1, 1] },
+					weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
+					shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
+				}
+			case 'end':
+			case 'floating_islands':
+				return {
+					temperature: { firstOctave: 0, amplitudes: [0] },
+					humidity: { firstOctave: 0, amplitudes: [0] },
+					continentalness: { firstOctave: 0, amplitudes: [0] },
+					erosion: { firstOctave: 0, amplitudes: [0] },
+					weirdness: { firstOctave: 0, amplitudes: [0] },
+					shift: { firstOctave: 0, amplitudes: [0] },
+				}
+			default:
+				return {
+					temperature: { firstOctave: -7, amplitudes: [1, 1] },
+					humidity: { firstOctave: -7, amplitudes: [1, 1] },
+					continentalness: { firstOctave: -7, amplitudes: [1, 1] },
+					erosion: { firstOctave: -7, amplitudes: [1, 1] },
+					weirdness: { firstOctave: -7, amplitudes: [1, 1] },
+					shift: { firstOctave: 0, amplitudes: [0] },
+				}
+		}
+	}
+	return NoiseGeneratorSettings.fromJson(obj).octaves
 }

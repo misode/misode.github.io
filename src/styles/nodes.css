@@ -3,6 +3,7 @@
   --node-background-label: #1b1b1b;
   --node-background-input: #272727;
   --node-text: #dadada;
+  --node-text-dimmed: #b4b4b4;
   --node-selected: #ad9715;
   --node-selected-border: #8d7a0d;
   --node-add: #487c13;
@@ -29,6 +30,7 @@
   --node-background-label: #e4e4e4;
   --node-background-input: #ffffff;
   --node-text: #000000;
+  --node-text-dimmed: #2c2c2c;
   --node-selected: #f0e65e;
   --node-selected-border: #b9a327;
   --node-add: #9bd464;
@@ -56,6 +58,7 @@
     --node-background-label: #e4e4e4;
     --node-background-input: #ffffff;
     --node-text: #000000;
+    --node-text-dimmed: #2c2c2c;
     --node-selected: #f0e65e;
     --node-selected-border: #b9a327;
     --node-add: #9bd464;
@@ -144,7 +147,8 @@
 
 .node-error ~ select:last-child,
 .node-error ~ input:last-child,
-.node-error ~ input[list]:nth-last-child(2) {
+.node-error ~ input[list]:nth-last-child(2),
+.node-error + .fixed-list ~ input {
   border-color: var(--node-remove) !important;
 }
 
@@ -339,6 +343,11 @@ span.menu-item {
   color: var(--node-popup-text-dimmed);
 }
 
+.node-message {
+  color: var(--node-text-dimmed);
+  margin: 6px 0;
+}
+
 /* Node body and list entry */
 
 .node {
@@ -421,8 +430,13 @@ span.menu-item {
   width: 25px;
 }
 
+.fixed-list {
+  display: none;
+}
+
 .number-node input,
-.range-node input {
+.range-node input,
+.fixed-list ~ input {
   width: 100px;
 }
 

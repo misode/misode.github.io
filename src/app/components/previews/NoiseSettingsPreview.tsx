@@ -1,60 +1,71 @@
-import type { DataModel } from '@mcschema/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
+import type { PreviewProps } from '.'
 import { Btn, BtnInput, BtnMenu } from '..'
-import { useOnDrag } from '../../hooks'
+import { useCanvas } from '../../hooks'
 import { locale } from '../../Locales'
 import { noiseSettings } from '../../previews'
-import { hexId } from '../../Utils'
+import { checkVersion } from '../../Schemas'
+import { randomSeed } from '../../Utils'
 
-type NoiseSettingsProps = {
-	lang: string,
-	model: DataModel,
-	data: any,
-	shown: boolean,
-}
-export const NoiseSettingsPreview = ({ lang, data, shown }: NoiseSettingsProps) => {
+export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProps) => {
 	const loc = locale.bind(null, lang)
-	const [seed, setSeed] = useState(hexId())
-	const [biomeDepth, setBiomeDepth] = useState(0.1)
-	const [biomeScale, setBiomeScale] = useState(0.2)
+	const [seed, setSeed] = useState(randomSeed())
+	const [biomeFactor, setBiomeFactor] = useState(0.2)
+	const [biomeOffset, setBiomeOffset] = useState(0.1)
+	const [biomePeaks, setBiomePeaks] = useState(0)
+	const [focused, setFocused] = useState<string | undefined>(undefined)
+	const offset = useRef(0)
+	const state = JSON.stringify([data, biomeFactor, biomeOffset, biomePeaks])
 
-	const canvas = useRef<HTMLCanvasElement>(null)
-	const offset = useRef<number>(0)
-	const redraw = useRef<Function>()
-
+	const hasPeaks = checkVersion(version, '1.18')
 	useEffect(() => {
-		redraw.current = () => {
-			const ctx = canvas.current.getContext('2d')!
-			const size = data.height
-			canvas.current.width = size
-			canvas.current.height = size
-			const img = ctx.createImageData(canvas.current.width, canvas.current.height)
-			noiseSettings(data, img, { biomeDepth, biomeScale, offset: offset.current, width: size, seed })
-			ctx.putImageData(img, 0, 0)
-		}
-	})
+		setBiomeFactor(hasPeaks ? 600 : 0.2)
+		setBiomeOffset(hasPeaks ? 0.05 : 0.1)
+	}, [hasPeaks])
 
-	useOnDrag(canvas.current, (dx) => {
-		const x = dx * canvas.current.width / canvas.current.clientWidth
-		offset.current = offset.current + x
-		redraw.current()
-	})
+	const size = data?.noise?.height ?? 256
+	const { canvas, redraw } = useCanvas({
+		size() {
+			return [size, size]
+		},
+		async draw(img) {
+			const options = { biomeOffset, biomeFactor, biomePeaks, offset: offset.current, width: img.width, seed, version }
+			noiseSettings(data, img, options)
+		},
+		async onDrag(dx) {
+			offset.current += dx * size
+			redraw()
+		},
+		async onHover(_, y) {
+			const worldY = size - Math.max(1, Math.ceil(y * size)) + (data?.noise?.min_y ?? 0)
+			setFocused(`${worldY}`)
+		},
+		onLeave() {
+			setFocused(undefined)
+		},
+	}, [state, seed])
 
-	const state = JSON.stringify(data)
 	useEffect(() => {
 		if (shown) {
-			redraw.current()
+			redraw()
 		}
-	}, [state, biomeDepth, biomeScale, seed, shown])
+	}, [state, seed, shown])
 
 	return <>
 		<div class="controls">
+			{focused && <Btn label={`Y = ${focused}`} class="no-pointer" />}
 			<BtnMenu icon="gear">
-				<BtnInput type="number" label={loc('preview.depth')} value={`${biomeDepth}`} onChange={v => setBiomeDepth(Number(v))} />
-				<BtnInput type="number" label={loc('preview.scale')} value={`${biomeScale}`} onChange={v => setBiomeScale(Number(v))} />
+				{hasPeaks ? <>
+					<BtnInput label={loc('preview.factor')} value={`${biomeFactor}`} onChange={v => setBiomeFactor(Number(v))} />
+					<BtnInput label={loc('preview.offset')} value={`${biomeOffset}`} onChange={v => setBiomeOffset(Number(v))} />
+					<BtnInput label={loc('preview.peaks')} value={`${biomePeaks}`} onChange={v => setBiomePeaks(Number(v))} />
+				</> : <>
+					<BtnInput label={loc('preview.scale')} value={`${biomeFactor}`} onChange={v => setBiomeFactor(Number(v))} />
+					<BtnInput label={loc('preview.depth')} value={`${biomeOffset}`} onChange={v => setBiomeOffset(Number(v))} />
+				</>}
 			</BtnMenu>
-			<Btn icon="sync" onClick={() => setSeed(hexId())} />
+			<Btn icon="sync" onClick={() => setSeed(randomSeed())} />
 		</div>
-		<canvas ref={canvas} width="200" height={data.height}></canvas>
+		<canvas ref={canvas} width={size} height={size}></canvas>
 	</>
 }

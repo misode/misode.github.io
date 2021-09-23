@@ -7,8 +7,8 @@
 	--text-1: #ffffff;
 	--text-2: #dcdcdc;
 	--text-3: #c3c3c3;
-	--accent-blue: #50baf9;
-	--accent-red: #f1453f;
+	--accent-primary: #50baf9;
+	--accent-success: #3eb84f;
 	--nav: #91908f;
 	--nav-hover: #b4b3b0;
 	--nav-faded: #4d4c4c;
@@ -27,8 +27,8 @@
 	--text-1: #000000;
 	--text-2: #505050;
 	--text-3: #6a6a6a;
-	--accent-blue: #088cdb;
-	--accent-red: #cc312c;
+	--accent-primary: #088cdb;
+	--accent-success: #1a7f37;
 	--nav: #343a40;
 	--nav-hover: #565d64;
 	--nav-faded: #9fa2a7;
@@ -48,8 +48,8 @@
 		--text-1: #000000;
 		--text-2: #505050;
 		--text-3: #6a6a6a;
-		--accent-blue: #088cdb;
-		--accent-red: #cc312c;
+		--accent-primary: #088cdb;
+		--accent-success: #1a7f37;
 		--nav: #343a40;
 		--nav-hover: #565d64;
 		--nav-faded: #9fa2a7;
@@ -331,8 +331,8 @@ main.has-preview {
 }
 
 .btn.active {
-	color: var(--accent-blue);
-	fill: var(--accent-blue);
+	color: var(--accent-primary);
+	fill: var(--accent-primary);
 }
 
 .btn:not(.btn-input):hover {
@@ -462,7 +462,11 @@ main.has-preview {
 }
 
 .popup-action.action-preview {
-	fill: var(--accent-blue);
+	fill: var(--accent-primary);
+}
+
+.popup-action.action-copy.active {
+	fill: var(--accent-success);
 }
 
 .error {
@@ -648,7 +652,7 @@ hr {
 }
 
 .ea-content strong {
-	color: var(--accent-blue) !important;
+	color: var(--accent-primary) !important;
 }
 
 .ea-callout {

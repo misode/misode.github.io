@@ -18,9 +18,10 @@
     "@mcschema/java-1.15": "^0.2.0",
     "@mcschema/java-1.16": "^0.6.3",
     "@mcschema/java-1.17": "^0.2.23",
-    "@mcschema/locales": "^0.1.21",
-    "rfdc": "^1.3.0",
-    "seedrandom": "^3.0.5"
+    "@mcschema/java-1.18": "^0.1.1",
+    "@mcschema/locales": "^0.1.23",
+    "deepslate": "^0.9.0-beta.2",
+    "rfdc": "^1.3.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.1.0",

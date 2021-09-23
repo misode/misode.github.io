@@ -155,10 +155,11 @@ async function fetchDynamicRegistries(version: Version, target: CollectionRegist
 }
 
 export async function fetchPreset(version: VersionId, registry: string, id: string) {
-	console.debug(`[fetchPreset] ${id} ${registry} ${id}`)
+	console.debug(`[fetchPreset] ${registry} ${id}`)
 	const versionData = config.versions.find(v => v.id === version)!
 	try {
-		const res = await fetch(`${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`)
+		const url = `${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`
+		const res = await fetch(url)
 		return await res.json()
 	} catch (e) {
 		console.warn(`Error occurred while fetching ${registry} preset ${id}:`, message(e))

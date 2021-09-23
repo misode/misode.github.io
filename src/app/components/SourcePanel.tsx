@@ -1,6 +1,6 @@
 import type { DataModel } from '@mcschema/core'
 import { ModelPath } from '@mcschema/core'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '.'
 import { useModel } from '../hooks'
 import { locale } from '../Locales'
@@ -8,6 +8,8 @@ import { transformOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry } from '../Schemas'
 import { Store } from '../Store'
 import { message } from '../Utils'
+
+const OUTPUT_CHARS_LIMIT = 10000
 
 const INDENT: Record<string, number | string> = {
 	'2_spaces': 2,
@@ -23,22 +25,31 @@ type SourcePanelProps = {
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
+	copySuccess: () => unknown,
 	onError: (message: string) => unknown,
 }
-export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, onError }: SourcePanelProps) {
+export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const loc = locale.bind(null, lang)
 	const [indent, setIndent] = useState(Store.getIndent())
 	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
 
+	const getOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
+		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })
+		return JSON.stringify(data, null, INDENT[indent]) + '\n'
+	}, [])
+
 	useEffect(() => {
 		retransform.current = () => {
 			if (!model || !blockStates) return
 			try {
-				const props = { blockStates: blockStates ?? {} }
-				const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, props)
-				source.current.value = JSON.stringify(data, null, INDENT[indent]) + '\n'
+				const output = getOutput(model, blockStates)
+				if (output.length >= OUTPUT_CHARS_LIMIT) {
+					source.current.value = output.slice(0, OUTPUT_CHARS_LIMIT) + `\n\nOutput is too large to display (+${OUTPUT_CHARS_LIMIT} chars)\nExport to view complete output\n\n`
+				} else {
+					source.current.value = output
+				}
 			} catch (e) {
 				onError(`Error getting JSON output: ${message(e)}`)
 				console.error(e)
@@ -68,9 +79,10 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	}
 
 	useEffect(() => {
-		if (doCopy && source.current) {
-			source.current.select()
-			document.execCommand('copy')
+		if (doCopy && model && blockStates) {
+			navigator.clipboard.writeText(getOutput(model, blockStates)).then(() => {
+				copySuccess()
+			})
 		}
 	}, [doCopy])
 

@@ -6,13 +6,17 @@ import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
-import { hexId } from '../Utils'
+import { hexId, newSeed } from '../Utils'
 
-const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
+const LIST_LIMIT = 20
+const LIST_LIMIT_SHOWN = 5
+
+const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element']
-const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target']
+const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome']
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
+const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit']
 
 /**
  * Secondary model used to remember the keys of a map
@@ -50,7 +54,6 @@ export const renderHtml: RenderHook = {
 		const choiceContextPath = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
 		const set = (value: string) => {
 			const c = choices.find(c => c.type === value) ?? choice
-			console.log(c)
 			path.model.set(path, c.change ? c.change(value) : c.node.default())
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
@@ -61,7 +64,21 @@ export const renderHtml: RenderHook = {
 		return [prefix, <>{inject}{suffix}</>, body]
 	},
 
-	list({ children }, path, value, lang, states) {
+	list({ children, config }, path, value, lang, states) {
+		const context = path.getContext().join('.')
+		if (fixedLists.includes(context)) {
+			const prefix = <>
+				{[...Array(config.maxLength!)].map((_, i) =>
+					<ErrorPopup lang={lang} path={path.modelPush(i)} />)}
+				<div class="fixed-list"></div>
+			</>
+			const suffix = <>{[...Array(config.maxLength)].map((_, i) => {
+				const child = children.hook(this, path.modelPush(i), value?.[i], lang, states)
+				return child[1]
+			})}</>
+			return [prefix, suffix, null]
+		}
+
 		const onAdd = () => {
 			if (!Array.isArray(value)) value = []
 			path.model.set(path, [children.default(), ...value])
@@ -73,6 +90,14 @@ export const renderHtml: RenderHook = {
 		const suffix = <button class="add" onClick={onAdd}>{Octicon.plus_circle}</button>
 		const body = <>
 			{(value && Array.isArray(value)) && value.map((cValue, index) => {
+				if (value.length > LIST_LIMIT && index >= LIST_LIMIT_SHOWN && index < value.length - LIST_LIMIT_SHOWN) {
+					if (index === LIST_LIMIT_SHOWN) {
+						return <div class="node-entry">
+							<span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
+						</div>
+					}
+					return null
+				}
 				const cPath = path.push(index).contextPush('entry')
 				const onRemove = () => cPath.set(undefined)
 				const onMoveUp = () => {
@@ -215,8 +240,11 @@ function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookPara
 			: integer ? parseInt(value) : parseFloat(value)
 		path.model.set(path, parsed)
 	}
-	return <input type={config?.color ? 'color' : 'text'} onChange={onChange}
-		value={config?.color ? '#' + value?.toString(16).padStart(6, '0') ?? '#000000' : value ?? ''} />
+	const val = config?.color ? '#' + value?.toString(16).padStart(6, '0') ?? '#000000' : value ?? ''
+	return <>
+		<input type={config?.color ? 'color' : 'text'} onChange={onChange} value={val} />
+		{path.equals(new Path(['generator', 'seed'])) && <button onClick={() => newSeed(path.model)}>{Octicon.sync}</button>}
+	</>
 }
 
 function StringSuffix({ path, getValues, config, node, value, lang, states }: NodeProps<StringHookParams>) {

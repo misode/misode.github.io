@@ -2,6 +2,7 @@ import { render } from 'preact'
 import type { RouterOnChangeArgs } from 'preact-router'
 import { Router } from 'preact-router'
 import { useEffect, useState } from 'preact/hooks'
+import config from '../config.json'
 import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics'
@@ -11,6 +12,8 @@ import { FieldSettings, Generator, Home, Worldgen } from './pages'
 import type { VersionId } from './Schemas'
 import { Store } from './Store'
 import { cleanUrl } from './Utils'
+
+const VERSIONS_IN_TITLE = 3
 
 function Main() {
 	const [lang, setLanguage] = useState<string>('en')
@@ -51,7 +54,9 @@ function Main() {
 	}
 
 	const [title, setTitle] = useState<string>(locale(lang, 'title.home'))
-	const changeTitle = (title: string, versions = ['1.15', '1.16', '1.17']) => {
+	const changeTitle = (title: string, versions?: VersionId[]) => {
+		versions ??= config.versions.map(v => v.id as VersionId)
+		versions.splice(0, versions.length - VERSIONS_IN_TITLE)
 		document.title = `${title} Minecraft ${versions.join(', ')}`
 		setTitle(title)
 	}

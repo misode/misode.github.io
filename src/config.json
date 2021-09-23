@@ -64,6 +64,14 @@
     {
       "id": "1.17",
       "refs": {
+        "mcdata_master": "1.17.1",
+        "vanilla_datapack_data": "1.17.1-data",
+        "vanilla_datapack_summary": "1.17.1-summary"
+      }
+    },
+    {
+      "id": "1.18",
+      "refs": {
         "mcdata_master": "master",
         "vanilla_datapack_data": "data",
         "vanilla_datapack_summary": "summary"
@@ -76,7 +84,8 @@
       "id": "loot_table",
       "url": "loot-table",
       "path": "loot_tables",
-      "schema": "loot_table"
+      "schema": "loot_table",
+      "maxVersion": "1.17"
     },
     {
       "id": "predicate",

@@ -28,7 +28,7 @@ export function PreviewPanel({ lang, model, version, id, shown }: PreviewPanelPr
 	}
 
 	if (id === 'worldgen/noise_settings' && model) {
-		const data = model.get(new Path(['noise']))
+		const data = model.get(new Path([]))
 		if (data) return <NoiseSettingsPreview {...{ lang, model, version, shown, data }} />
 	}
 
