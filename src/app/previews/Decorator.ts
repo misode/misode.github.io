@@ -42,8 +42,8 @@ export function decorator(state: any, img: ImageData, options: DecoratorOptions)
 		biomeInfoNoise: new PerlinNoise(random.fork(), 0, [1]),
 		seaLevel: 63,
 		version: options.version,
-		nextFloat: random.nextFloat,
-		nextInt: random.nextInt,
+		nextFloat: () => random.nextFloat(),
+		nextInt: (max: number) => random.nextInt(max),
 		sampleInt(value) { return sampleInt(value, this) },
 	}
 
@@ -296,6 +296,12 @@ const Decorators: {
 			pos[1],
 			pos[2] + ctx.nextInt(16),
 		]]
+	},
+	surface_relative_threshold: (config, pos) => {
+		const height = terrain[clamp(0, 63, pos[0])]
+		const min = height + (config?.min_inclusive ?? -Infinity)
+		const max = height + (config?.max_inclusive ?? Infinity)
+		return (pos[1] < min || pos[1] > max) ? [pos] : []
 	},
 	water_lake: (config, pos, ctx) => {
 		if (ctx.nextInt(config.chance ?? 1) === 0) {
