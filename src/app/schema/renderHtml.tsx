@@ -92,9 +92,7 @@ export const renderHtml: RenderHook = {
 			{(value && Array.isArray(value)) && value.map((cValue, index) => {
 				if (value.length > LIST_LIMIT && index >= LIST_LIMIT_SHOWN && index < value.length - LIST_LIMIT_SHOWN) {
 					if (index === LIST_LIMIT_SHOWN) {
-						return <div class="node-entry">
-							<span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
-						</div>
+						return <span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
 					}
 					return null
 				}
@@ -110,20 +108,16 @@ export const renderHtml: RenderHook = {
 					[v[index + 1], v[index]] = [v[index], v[index + 1]]
 					path.model.set(path, v)
 				}
-				return <div class="node-entry">
-					<TreeNode path={cPath} schema={children} value={cValue} lang={lang} states={states}>
-						<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
-						{value.length > 1 && <div class="node-move">
-							<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
-							<button class="move" onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
-						</div>}
-					</TreeNode>
-				</div>
+				return <TreeNode path={cPath} schema={children} value={cValue} lang={lang} states={states}>
+					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
+					{value.length > 1 && <div class="node-move">
+						<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
+						<button class="move" onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
+					</div>}
+				</TreeNode>
 			})}
-			{(value && value.length > 2) && <div class="node-entry">
-				<div class="node node-header">
-					<button class="add" onClick={onAddBottom}>{Octicon.plus_circle}</button>
-				</div>
+			{(value && value.length > 2) && <div class="node node-header">
+				<button class="add" onClick={onAddBottom}>{Octicon.plus_circle}</button>
 			</div>}
 		</>
 		return [null, suffix, body]
@@ -167,11 +161,9 @@ export const renderHtml: RenderHook = {
 					path.model.errors.add(cPath, 'error.invalid_enum_option', cValue)
 				}
 				const onRemove = () => cPath.set(undefined)
-				return <div class="node-entry" key={key}>
-					<TreeNode schema={cSchema} path={cPath} value={cValue} lang={lang} states={states} label={key}>
-						<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
-					</TreeNode>
-				</div>
+				return <TreeNode schema={cSchema} path={cPath} value={cValue} lang={lang} states={states} label={key}>
+					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
+				</TreeNode>
 			})}
 		</>
 		return [null, suffix, body]

@@ -372,55 +372,46 @@ span.menu-item {
   padding-left: 18px;
 }
 
-.node-entry > .object-node > .node-body {
+.list-node > .node-body > .object-node > .node-body,
+.map-node > .node-body > .object-node > .node-body {
   padding-left: 0;
 }
 
-.node-entry > .object-node > .node-body > .node > .node-body {
+.list-node > .node-body > .object-node > .node-body > .node > .node-body,
+.map-node > .node-body > .object-node > .node-body > .node > .node-body {
   border-left: none;
 }
 
-.node-entry > .object-node > .node-body > .node > .node-header > .node-icon + *,
-.node-entry > .object-node > .node-body > .node > .node-header > *:first-child {
+.list-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon + *,
+.list-node > .node-body > .object-node > .node-body > .node > .node-header > *:first-child,
+.map-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon + *,
+.map-node > .node-body > .object-node > .node-body > .node > .node-header > *:first-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: none;
 }
 
-.node-entry {
-  display: flex;
-  flex-direction: column;
-  margin-top: 4px;
-}
-
-.node-entry > .object-node[data-category],
-.node-entry > .list-node[data-category],
-.node-entry > .map-node[data-category] {
+.node-body > .object-node[data-category],
+.node-body > .list-node[data-category],
+.node-body > .map-node[data-category] {
   width: 100%;
   min-width: max-content;
   padding: 5px;
   padding-left: 0px;
-  margin-top: 8px;
   border: 2px solid var(--node-border);
   border-radius: 3px;
 }
 
-.node-entry:first-child > .object-node[data-category],
-.node-entry:first-child > .list-node[data-category],
-.node-entry:first-child > .map-node[data-category] {
-  margin-top: 4px;
-}
-
-.node-entry > .object-node[data-category] > .node-header > .node-icon + *,
-.node-entry > .object-node[data-category] > .node-header > *:first-child {
+.node-body > .object-node[data-category] > .node-header > .node-icon + *,
+.node-body > .object-node[data-category] > .node-header > *:first-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-left: none;
 }
 
-.node-entry > .object-node[data-category] > .node-body,
-.node-entry > .list-node[data-category] > .node-body,
-.node-entry > .map-node[data-category] > .node-body {
+.node-body > .object-node[data-category] > .node-body,
+.node-body > .list-node[data-category] > .node-body,
+.node-body > .map-node[data-category] > .node-body {
   border: none;
 }
 
@@ -454,9 +445,9 @@ span.menu-item {
   border-color: var(--category-predicate-border);
 }
 
-.node-entry > .node.object-node[data-category=predicate],
-.node-entry > .node.list-node[data-category=predicate],
-.node-entry > .node.map-node[data-category=predicate] {
+.node-body > .node.object-node[data-category=predicate],
+.node-body > .node.list-node[data-category=predicate],
+.node-body > .node.map-node[data-category=predicate] {
   background-color: var(--category-predicate-background);
   border-color: var(--category-predicate-border);
 }
@@ -473,9 +464,9 @@ span.menu-item {
   border-color: var(--category-function-border);
 }
 
-.node-entry > .node.object-node[data-category=function],
-.node-entry > .node.list-node[data-category=function],
-.node-entry > .node.map-node[data-category=function] {
+.node-body > .node.object-node[data-category=function],
+.node-body > .node.list-node[data-category=function],
+.node-body > .node.map-node[data-category=function] {
   background-color: var(--category-function-background);
   border-color: var(--category-function-border);
 }
@@ -492,9 +483,9 @@ span.menu-item {
   border-color: var(--category-pool-border);
 }
 
-.node-entry > .node.object-node[data-category=pool],
-.node-entry > .node.list-node[data-category=pool],
-.node-entry > .node.map-node[data-category=pool] {
+.node-body > .node.object-node[data-category=pool],
+.node-body > .node.list-node[data-category=pool],
+.node-body > .node.map-node[data-category=pool] {
   background-color: var(--category-pool-background);
   border-color: var(--category-pool-border);
 }
