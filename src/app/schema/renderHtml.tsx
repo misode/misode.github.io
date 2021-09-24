@@ -76,8 +76,9 @@ const renderHtml: RenderHook = {
 	},
 
 	list({ children, config }, path, value, lang, states, ctx) {
-		const [toggleState, setToggleState] = useState(new Map<string, boolean>())
+		const { expand, collapse, isToggled } = useToggles()
 		const [maxShown, setMaxShown] = useState(50)
+
 		const context = path.getContext().join('.')
 		if (fixedLists.includes(context)) {
 			const prefix = <>
@@ -116,20 +117,13 @@ const renderHtml: RenderHook = {
 					return null
 				}
 
-				const onExpand = () => {
-					setToggleState(state => new Map(state.set(cId, true)))
-				}
-				const onCollapse = () => {
-					setToggleState(state => new Map(state.set(cId, false)))
-				}
-
 				const cPath = path.push(index).contextPush('entry')
 				const canToggle = children.type(cPath) === 'object'
-				const toggle = toggleState.get(cId)
+				const toggle = isToggled(cId)
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
 					return <div class="node node-header" data-category={children.category(cPath)}>
 						<ErrorPopup lang={lang} path={cPath} nested />
-						<button class="toggle" onClick={onExpand}>{Octicon.chevron_right}</button>
+						<button class="toggle" onClick={expand(cId)}>{Octicon.chevron_right}</button>
 						<label>{pathLocale(lang, cPath, `${index}`)}</label>
 						<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
 					</div>
@@ -147,7 +141,7 @@ const renderHtml: RenderHook = {
 					path.model.set(path, v)
 				}
 				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} lang={lang} states={states} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
-					{canToggle && <button class="toggle" onClick={onCollapse}>{Octicon.chevron_down}</button>}
+					{canToggle && <button class="toggle" onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
 						<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
@@ -163,7 +157,8 @@ const renderHtml: RenderHook = {
 	},
 
 	map({ children, keys, config }, path, value, lang, states, ctx) {
-		const [toggleState, setToggleState] = useState(new Map<string, boolean>())
+		const { expand, collapse, isToggled } = useToggles()
+
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
 		const onAdd = () => {
 			const key = keyPath.get()
@@ -192,19 +187,14 @@ const renderHtml: RenderHook = {
 		</>
 		const body = <>
 			{typeof value === 'object' && Object.entries(value).map(([key, cValue]) => {
-				const onExpand = () => {
-					setToggleState(state => new Map(state.set(key, true)))
-				}
-				const onCollapse = () => {
-					setToggleState(state => new Map(state.set(key, false)))
-				}
+
 				const cPath = path.modelPush(key)
 				const canToggle = children.type(cPath) === 'object'
-				const toggle = toggleState.get(key)
+				const toggle = isToggled(key)
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
 					return <div class="node node-header" data-category={children.category(cPath)}>
 						<ErrorPopup lang={lang} path={cPath} nested />
-						<button class="toggle" onClick={onExpand}>{Octicon.chevron_right}</button>
+						<button class="toggle" onClick={expand(key)}>{Octicon.chevron_right}</button>
 						<label>{key}</label>
 						<Collapsed key={key} path={cPath} value={cValue} schema={children} />
 					</div>
@@ -218,7 +208,7 @@ const renderHtml: RenderHook = {
 				}
 				const onRemove = () => cPath.set(undefined)
 				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} {...{lang, states, ctx}} label={key}>
-					{canToggle && <button class="toggle" onClick={onCollapse}>{Octicon.chevron_down}</button>}
+					{canToggle && <button class="toggle" onClick={collapse(key)}>{Octicon.chevron_down}</button>}
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 				</MemoedTreeNode>
 			})}
@@ -288,6 +278,34 @@ function Collapsed({ path, value }: { path: ModelPath, value: any, schema: INode
 		}
 	}
 	return null
+}
+
+function useToggles() {
+	const [toggleState, setToggleState] = useState(new Map<string, boolean>())
+	const [toggleAll, setToggleAll] = useState<boolean | undefined>(undefined)
+
+	const expand = (key: string) => (evt: MouseEvent) => {
+		if (evt.ctrlKey) {
+			setToggleState(new Map())
+			setToggleAll(true)
+		} else {
+			setToggleState(state => new Map(state.set(key, true)))
+		}
+	}
+	const collapse = (key: string) => (evt: MouseEvent) => {
+		if (evt.ctrlKey) {
+			setToggleState(new Map())
+			setToggleAll(false)
+		} else {
+			setToggleState(state => new Map(state.set(key, false)))
+		}
+	}
+	
+	const isToggled = (key: string) => {
+		return toggleState.get(key) ?? toggleAll
+	}
+
+	return { expand, collapse, isToggled }
 }
 
 function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>) {
