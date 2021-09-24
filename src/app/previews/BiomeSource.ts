@@ -2,7 +2,7 @@ import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
 import { FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
 import { fetchPreset } from '../DataFetcher'
 import type { VersionId } from '../Schemas'
-import { deepClone, deepEqual, square, stringToColor, unwrapLists } from '../Utils'
+import { clamp, deepClone, deepEqual, square, stringToColor, unwrapLists } from '../Utils'
 
 type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
@@ -90,12 +90,14 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 					state = options.version === '1.18' ? await OverworldPreset18() : state
 					break
 			}
+			state = unwrapLists(state)
 			if (options.version === '1.18') {
-				return MultiNoise.fromJson(unwrapLists(state))
+				return MultiNoise.fromJson(state)
 			} else {
 				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
 					.map((id, i) => {
 						const config = state[`${id}_noise`]
+						config.firstOctave = clamp(config.firstOctave ?? -7, -100, -1)
 						return new NormalNoise(new Random(options.seed + BigInt(i)), config)
 					})
 				if (!Array.isArray(state.biomes) || state.biomes.length === 0) {
@@ -106,7 +108,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 						const n = noise.map(n => n.sample(x, z, 0))
 						let minDist = Infinity
 						let minBiome = ''
-						for (const { biome, parameters: p } of unwrapLists(state.biomes)) {
+						for (const { biome, parameters: p } of state.biomes) {
 							const dist = square(p.altitude - n[0]) + square(p.temperature - n[1]) + square(p.humidity - n[2]) + square(p.weirdness - n[3]) + square(p.offset)
 							if (dist < minDist) {
 								minDist = dist
