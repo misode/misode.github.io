@@ -116,8 +116,6 @@ const renderHtml: RenderHook = {
 					return null
 				}
 
-				const cPath = path.push(index).contextPush('entry')
-
 				const onExpand = () => {
 					setToggleState(state => new Map(state.set(cId, true)))
 				}
@@ -125,6 +123,7 @@ const renderHtml: RenderHook = {
 					setToggleState(state => new Map(state.set(cId, false)))
 				}
 
+				const cPath = path.push(index).contextPush('entry')
 				const canToggle = children.type(cPath) === 'object'
 				const toggle = toggleState.get(cId)
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
@@ -164,6 +163,7 @@ const renderHtml: RenderHook = {
 	},
 
 	map({ children, keys, config }, path, value, lang, states, ctx) {
+		const [toggleState, setToggleState] = useState(new Map<string, boolean>())
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
 		const onAdd = () => {
 			const key = keyPath.get()
@@ -192,7 +192,23 @@ const renderHtml: RenderHook = {
 		</>
 		const body = <>
 			{typeof value === 'object' && Object.entries(value).map(([key, cValue]) => {
+				const onExpand = () => {
+					setToggleState(state => new Map(state.set(key, true)))
+				}
+				const onCollapse = () => {
+					setToggleState(state => new Map(state.set(key, false)))
+				}
 				const cPath = path.modelPush(key)
+				const canToggle = children.type(cPath) === 'object'
+				const toggle = toggleState.get(key)
+				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
+					return <div class="node node-header" data-category={children.category(cPath)}>
+						<ErrorPopup lang={lang} path={cPath} nested />
+						<button class="toggle" onClick={onExpand}>{Octicon.chevron_right}</button>
+						<label>{key}</label>
+						<Collapsed key={key} path={cPath} value={cValue} schema={children} />
+					</div>
+				}
 				const cSchema = blockState
 					? StringNode(null!, { enum: blockState.properties?.[key] ?? [] })
 					: children
@@ -202,6 +218,7 @@ const renderHtml: RenderHook = {
 				}
 				const onRemove = () => cPath.set(undefined)
 				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} {...{lang, states, ctx}} label={key}>
+					{canToggle && <button class="toggle" onClick={onCollapse}>{Octicon.chevron_down}</button>}
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 				</MemoedTreeNode>
 			})}
