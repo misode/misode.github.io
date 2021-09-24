@@ -2,6 +2,7 @@ import type { BooleanHookParams, EnumOption, Hook, INode, NumberHookParams, Stri
 import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
+import { useState } from 'preact/hooks'
 import { Btn } from '../components'
 import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
@@ -234,25 +235,24 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 }
 
 function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookParams>) {
+	const [text, setText] = useState(value ?? '')
 	const onChange = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = integer ? parseInt(value) : parseFloat(value)
-		if (value.length > 0 && !value.match(/\.0*$/)) {
-			path.model.set(path, parsed)
-		}
-	}
-	const onBlur = (evt: Event) => {
-		const value = (evt.target as HTMLInputElement).value
-		const parsed = integer ? parseInt(value) : parseFloat(value)
 		path.model.set(path, parsed)
+		setText(value)
+	}
+	const onBlur = () => {
+		setText(value ?? '')
 	}
 	const onColor = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = parseInt(value.slice(1), 16)
 		path.model.set(path, parsed)
+		setText(parsed)
 	}
 	return <>
-		<input type="text" value={value ?? ''} onChange={onChange} onBlur={onBlur} />
+		<input type="text" value={text} onChange={onChange} onBlur={onBlur} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
 		{path.equals(new Path(['generator', 'seed'])) && <button onClick={() => newSeed(path.model)}>{Octicon.sync}</button>}
 	</>
