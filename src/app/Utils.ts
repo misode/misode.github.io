@@ -108,7 +108,7 @@ export function deepEqual(a: any, b: any) {
 		if (Array.isArray(a)) {
 			length = a.length
 			if (length != b.length) return false
-			for (i = length; i-- !== 0;) {
+			for (i = 0; i < length; i++) {
 				if (!deepEqual(a[i], b[i])) return false
 			}
 			return true

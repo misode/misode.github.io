@@ -2,16 +2,13 @@ import type { BooleanHookParams, EnumOption, Hook, INode, NumberHookParams, Stri
 import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
-import { useState } from 'preact/hooks'
+import { useRef, useState } from 'preact/hooks'
 import { Btn } from '../components'
 import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
-import { deepEqual, hexId, newSeed } from '../Utils'
-
-const LIST_LIMIT = 20
-const LIST_LIMIT_SHOWN = 5
+import { deepClone, deepEqual, hexId, newSeed } from '../Utils'
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
@@ -29,7 +26,7 @@ const keysModel = new DataModel(MapNode(
 ), { historyMax: 0 })
 
 type JSXTriple = [JSX.Element | null, JSX.Element | null, JSX.Element | null]
-type RenderHook = Hook<[any, string, BlockStateRegistry], JSXTriple>
+type RenderHook = Hook<[any, string, BlockStateRegistry, Record<string, any>], JSXTriple>
 
 type NodeProps<T> = T & {
 	node: INode<any>,
@@ -37,25 +34,31 @@ type NodeProps<T> = T & {
 	value: any,
 	lang: string,
 	states: BlockStateRegistry,
+	ctx: Record<string, any>,
 }
 
-/**
- * Renders the node and handles events to update the model
- * @returns string HTML representation of this node using the given data
- */
-export const renderHtml: RenderHook = {
+export function FullNode({ model, lang, blockStates }: { model: DataModel, lang: string, blockStates: BlockStateRegistry }) {
+	const path = new ModelPath(model)
+	const [prefix, suffix, body] = model.schema.hook(renderHtml, path, deepClone(model.data), lang, blockStates, {})
+	return suffix?.props?.children.some((c: any) => c) ? <div class={`node ${model.schema.type(path)}-node`} data-category={model.schema.category(path)}>
+		<div class="node-header">{prefix}{suffix}</div>
+		<div class="node-body">{body}</div>
+	</div> : body
+}
+
+const renderHtml: RenderHook = {
 	base() {
 		return [null, null, null]
 	},
 
-	boolean(params, path, value, lang, states) {
-		return [null, <BooleanSuffix {...{...params, path, value, lang, states}} />, null]
+	boolean(params, path, value, lang, states, ctx) {
+		return [null, <BooleanSuffix {...{...params, path, value, lang, states, ctx}} />, null]
 	},
 
-	choice({ choices, config, switchNode }, path, value, lang, states) {
+	choice({ choices, config, switchNode }, path, value, lang, states, ctx) {
 		const choice = switchNode.activeCase(path, true) as typeof choices[number]
 		const contextPath = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
-		const [prefix, suffix, body] = choice.node.hook(this, contextPath, value, lang, states)
+		const [prefix, suffix, body] = choice.node.hook(this, contextPath, value, lang, states, ctx)
 		if (choices.length === 1) {
 			return [prefix, suffix, body]
 		}
@@ -72,7 +75,10 @@ export const renderHtml: RenderHook = {
 		return [prefix, <>{inject}{suffix}</>, body]
 	},
 
-	list({ children, config }, path, value, lang, states) {
+	list({ children, config }, path, value, lang, states, ctx) {
+		const { expand, collapse, isToggled } = useToggles()
+		const [maxShown, setMaxShown] = useState(50)
+
 		const context = path.getContext().join('.')
 		if (fixedLists.includes(context)) {
 			const prefix = <>
@@ -81,7 +87,7 @@ export const renderHtml: RenderHook = {
 				<div class="fixed-list"></div>
 			</>
 			const suffix = <>{[...Array(config.maxLength)].map((_, i) => {
-				const child = children.hook(this, path.modelPush(i), value?.[i]?.node, lang, states)
+				const child = children.hook(this, path.modelPush(i), value?.[i]?.node, lang, states, ctx)
 				return child[1]
 			})}</>
 			return [prefix, suffix, null]
@@ -100,13 +106,29 @@ export const renderHtml: RenderHook = {
 		const suffix = <button class="add" onClick={onAdd}>{Octicon.plus_circle}</button>
 		const body = <>
 			{(value && Array.isArray(value)) && value.map(({ node: cValue, id: cId }, index) => {
-				if (value.length > LIST_LIMIT && index >= LIST_LIMIT_SHOWN && index < value.length - LIST_LIMIT_SHOWN) {
-					if (index === LIST_LIMIT_SHOWN) {
-						return <span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
-					}
+				if (index === maxShown) {
+					return <div class="node node-header">
+						<label>{locale(lang, 'entries_hidden', `${value.length - maxShown}`)}</label>
+						<button onClick={() => setMaxShown(Math.min(maxShown + 50, value.length))}>{locale(lang, 'entries_hidden.more', '50')}</button>
+						<button onClick={() => setMaxShown(value.length)}>{locale(lang, 'entries_hidden.all')}</button>
+					</div>
+				}
+				if (index > maxShown) {
 					return null
 				}
+
 				const cPath = path.push(index).contextPush('entry')
+				const canToggle = children.type(cPath) === 'object'
+				const toggle = isToggled(cId)
+				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
+					return <div class="node node-header" data-category={children.category(cPath)}>
+						<ErrorPopup lang={lang} path={cPath} nested />
+						<button class="toggle" onClick={expand(cId)}>{Octicon.chevron_right}</button>
+						<label>{pathLocale(lang, cPath, `${index}`)}</label>
+						<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
+					</div>
+				}
+
 				const onRemove = () => cPath.set(undefined)
 				const onMoveUp = () => {
 					const v = [...path.get()];
@@ -118,7 +140,8 @@ export const renderHtml: RenderHook = {
 					[v[index + 1], v[index]] = [v[index], v[index + 1]]
 					path.model.set(path, v)
 				}
-				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} lang={lang} states={states} context={(index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}>
+				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} lang={lang} states={states} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
+					{canToggle && <button class="toggle" onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
 						<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
@@ -126,14 +149,16 @@ export const renderHtml: RenderHook = {
 					</div>}
 				</MemoedTreeNode>
 			})}
-			{(value && value.length > 2) && <div class="node node-header">
+			{(value && value.length > 2 && value.length <= maxShown) && <div class="node node-header">
 				<button class="add" onClick={onAddBottom}>{Octicon.plus_circle}</button>
 			</div>}
 		</>
 		return [null, suffix, body]
 	},
 
-	map({ children, keys, config }, path, value, lang, states) {
+	map({ children, keys, config }, path, value, lang, states, ctx) {
+		const { expand, collapse, isToggled } = useToggles()
+
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
 		const onAdd = () => {
 			const key = keyPath.get()
@@ -154,15 +179,26 @@ export const renderHtml: RenderHook = {
 					path.model.errors.add(path.push(key), 'error.invalid_enum_option', value[key])
 				}
 			})
-			return ObjectNode(Object.fromEntries(properties)).hook(this, path, value, lang, states)
+			return ObjectNode(Object.fromEntries(properties)).hook(this, path, value, lang, states, ctx)
 		}
 		const suffix = <>
-			{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, states)[1]}
+			{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, states, ctx)[1]}
 			<button class="add" onClick={onAdd}>{Octicon.plus_circle}</button>
 		</>
 		const body = <>
 			{typeof value === 'object' && Object.entries(value).map(([key, cValue]) => {
+
 				const cPath = path.modelPush(key)
+				const canToggle = children.type(cPath) === 'object'
+				const toggle = isToggled(key)
+				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
+					return <div class="node node-header" data-category={children.category(cPath)}>
+						<ErrorPopup lang={lang} path={cPath} nested />
+						<button class="toggle" onClick={expand(key)}>{Octicon.chevron_right}</button>
+						<label>{key}</label>
+						<Collapsed key={key} path={cPath} value={cValue} schema={children} />
+					</div>
+				}
 				const cSchema = blockState
 					? StringNode(null!, { enum: blockState.properties?.[key] ?? [] })
 					: children
@@ -171,7 +207,8 @@ export const renderHtml: RenderHook = {
 					path.model.errors.add(cPath, 'error.invalid_enum_option', cValue)
 				}
 				const onRemove = () => cPath.set(undefined)
-				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} lang={lang} states={states} label={key}>
+				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} {...{lang, states, ctx}} label={key}>
+					{canToggle && <button class="toggle" onClick={collapse(key)}>{Octicon.chevron_down}</button>}
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 				</MemoedTreeNode>
 			})}
@@ -179,11 +216,11 @@ export const renderHtml: RenderHook = {
 		return [null, suffix, body]
 	},
 
-	number(params, path, value, lang, states) {
-		return [null, <NumberSuffix {...{...params, path, value, lang, states}} />, null]
+	number(params, path, value, lang, states, ctx) {
+		return [null, <NumberSuffix {...{...params, path, value, lang, states, ctx}} />, null]
 	},
 
-	object({ node, getActiveFields, getChildModelPath }, path, value, lang, states) {
+	object({ node, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
 		let prefix: JSX.Element | null = null
 		let suffix: JSX.Element | null = null
 		if (node.optional()) {
@@ -195,6 +232,8 @@ export const renderHtml: RenderHook = {
 				suffix = <button class="collapse open" onClick={onCollapse}>{Octicon.trashcan}</button>
 			}
 		}
+		const newCtx = (typeof value === 'object' && value !== null && node.default()?.pools)
+			? { ...ctx, loot: value?.type } : ctx
 		const body = <>
 			{(typeof value === 'object' && value !== null && !(node.optional() && value === undefined)) &&
 				Object.entries(getActiveFields(path))
@@ -203,7 +242,7 @@ export const renderHtml: RenderHook = {
 						const cPath = getChildModelPath(path, key)
 						const context = cPath.getContext().join('.')
 						if (hiddenFields.includes(context)) return null
-						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, states)
+						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, states, newCtx)
 						if (!cPrefix && !cSuffix && !((cBody?.props?.children?.length ?? 0) > 0)) return null
 						const isFlattened = child.type(cPath) === 'object' && flattenedFields.includes(context)
 						const isInlined = inlineFields.includes(context)
@@ -212,16 +251,61 @@ export const renderHtml: RenderHook = {
 							suffix = <>{suffix}{cSuffix}</>
 							return isFlattened ? cBody : null
 						}
-						return <MemoedTreeNode key={key} schema={child} path={cPath} value={value[key]} lang={lang} states={states} />
+						return <MemoedTreeNode key={key} schema={child} path={cPath} value={value[key]} {...{lang, states, ctx: newCtx}} />
 					})
 			}
 		</>
 		return [prefix, suffix, body]
 	},
 
-	string(params, path, value, lang, states) {
-		return [null, <StringSuffix {...{...params, path, value, lang, states}} />, null]
+	string(params, path, value, lang, states, ctx) {
+		return [null, <StringSuffix {...{...params, path, value, lang, states, ctx}} />, null]
 	},
+}
+
+function Collapsed({ path, value }: { path: ModelPath, value: any, schema: INode<any> }) {
+	const context = path.getContext().join('.')
+	switch (context) {
+		case 'loot_table.pools.entry':
+			return <label>{value?.entries?.length ?? 0} entries</label>
+		case 'function.set_contents.entries.entry':
+		case 'loot_pool.entries.entry':
+			return <label>{value?.name?.replace(/^minecraft:/, '') ?? value?.type?.replace(/^minecraft:/, '')}</label>
+	}
+	for (const child of Object.values(value ?? {})) {
+		if (typeof child === 'string') {
+			return <label>{child.replace(/^minecraft:/, '')}</label>
+		}
+	}
+	return null
+}
+
+function useToggles() {
+	const [toggleState, setToggleState] = useState(new Map<string, boolean>())
+	const [toggleAll, setToggleAll] = useState<boolean | undefined>(undefined)
+
+	const expand = (key: string) => (evt: MouseEvent) => {
+		if (evt.ctrlKey) {
+			setToggleState(new Map())
+			setToggleAll(true)
+		} else {
+			setToggleState(state => new Map(state.set(key, true)))
+		}
+	}
+	const collapse = (key: string) => (evt: MouseEvent) => {
+		if (evt.ctrlKey) {
+			setToggleState(new Map())
+			setToggleAll(false)
+		} else {
+			setToggleState(state => new Map(state.set(key, false)))
+		}
+	}
+	
+	const isToggled = (key: string) => {
+		return toggleState.get(key) ?? toggleAll
+	}
+
+	return { expand, collapse, isToggled }
 }
 
 function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>) {
@@ -236,11 +320,18 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 
 function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookParams>) {
 	const [text, setText] = useState(value ?? '')
+	const commitTimeout = useRef<number>()
+	const scheduleCommit = (value: number) => {
+		if (commitTimeout.current) clearTimeout(commitTimeout.current)
+		commitTimeout.current = setTimeout(() => {
+			path.model.set(path, value)
+		}, 500)
+	}
 	const onChange = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = integer ? parseInt(value) : parseFloat(value)
-		path.model.set(path, parsed)
 		setText(value)
+		scheduleCommit(parsed)
 	}
 	const onBlur = () => {
 		setText(value ?? '')
@@ -248,8 +339,8 @@ function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookPara
 	const onColor = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = parseInt(value.slice(1), 16)
-		path.model.set(path, parsed)
 		setText(parsed)
+		scheduleCommit(parsed)
 	}
 	return <>
 		<input type="text" value={text} onChange={onChange} onBlur={onBlur} />
@@ -260,9 +351,9 @@ function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookPara
 
 function StringSuffix({ path, getValues, config, node, value, lang, states }: NodeProps<StringHookParams>) {
 	const onChange = (evt: Event) => {
+		evt.stopPropagation()
 		const newValue = (evt.target as HTMLSelectElement).value
 		path.model.set(path, newValue.length === 0 ? undefined : newValue)
-		evt.stopPropagation()
 	}
 	const values = getValues()
 	const context = path.getContext().join('.')
@@ -305,12 +396,12 @@ type TreeNodeProps = {
 	value: any,
 	lang: string,
 	states: BlockStateRegistry,
+	ctx: Record<string, any>,
 	compare?: any,
 	label?: string,
 	children?: ComponentChildren,
-	context?: number,
 }
-function TreeNode({ label, schema, path, value, lang, states, children }: TreeNodeProps) {
+function TreeNode({ label, schema, path, value, lang, states, ctx, children }: TreeNodeProps) {
 	const type = schema.type(path)
 	const category = schema.category(path)
 	const context = path.getContext().join('.')
@@ -321,7 +412,9 @@ function TreeNode({ label, schema, path, value, lang, states, children }: TreeNo
 		setActive()
 	}
 
-	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, states)
+	const newCtx = {...ctx}
+	delete newCtx.index
+	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, states, newCtx)
 	return <div class={`node ${type}-node`} data-category={category}>
 		<div class="node-header">
 			<ErrorPopup lang={lang} path={path} />
@@ -345,11 +438,11 @@ function TreeNode({ label, schema, path, value, lang, states, children }: TreeNo
 }
 
 const MemoedTreeNode = memo(TreeNode, (prev, next) => {
-	return deepEqual(prev.value, next.value)
-		&& prev.path.equals(next.path)
-		&& prev.schema === next.schema
+	return prev.schema === next.schema
 		&& prev.lang === next.lang
-		&& prev.context === next.context
+		&& prev.path.equals(next.path)
+		&& deepEqual(prev.ctx, next.ctx)
+		&& deepEqual(prev.value, next.value)
 })
 
 function isEnum(value?: ValidationOption | EnumOption): value is EnumOption {
@@ -378,8 +471,10 @@ function pathLocale(lang: string, path: Path, ...params: string[]) {
 	return ctx[ctx.length - 1]
 }
 
-function ErrorPopup({ lang, path }: { lang: string, path: ModelPath }) {
-	const e = path.model.errors.get(path, true)
+function ErrorPopup({ lang, path, nested }: { lang: string, path: ModelPath, nested?: boolean }) {
+	const e = nested
+		?	path.model.errors.getAll().filter(e => e.path.startsWith(path))
+		: path.model.errors.get(path, true)
 	if (e.length === 0) return null
 	const message = locale(lang, e[0].error, ...(e[0].params ?? []))
 	return popupIcon('node-error', 'issue_opened', message)

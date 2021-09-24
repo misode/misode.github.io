@@ -17,7 +17,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 
 	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
 	const octaves = getOctaves(model.get(new Path(['generator', 'settings'])))
-	const state = calculateState(data, octaves)
+	const state = shown ? calculateState(data, octaves) : ''
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
 	const { canvas, redraw } = useCanvas({
