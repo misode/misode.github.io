@@ -2,7 +2,7 @@ import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
 import { FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
 import { fetchPreset } from '../DataFetcher'
 import type { VersionId } from '../Schemas'
-import { deepClone, deepEqual, square, stringToColor } from '../Utils'
+import { deepClone, deepEqual, square, stringToColor, unwrapLists } from '../Utils'
 
 type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
@@ -77,7 +77,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 			return {
 				getBiome(x: number, _y: number, z: number) {
 					const i = (((x >> shift) + (z >> shift)) % numBiomes + numBiomes) % numBiomes
-					return (state.biomes?.[i] as string)
+					return (state.biomes?.[i].node as string)
 				},
 			}
 
@@ -91,7 +91,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 					break
 			}
 			if (options.version === '1.18') {
-				return MultiNoise.fromJson(state)
+				return MultiNoise.fromJson(unwrapLists(state))
 			} else {
 				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
 					.map((id, i) => {
@@ -106,7 +106,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 						const n = noise.map(n => n.sample(x, z, 0))
 						let minDist = Infinity
 						let minBiome = ''
-						for (const { biome, parameters: p } of state.biomes) {
+						for (const { biome, parameters: p } of unwrapLists(state.biomes)) {
 							const dist = square(p.altitude - n[0]) + square(p.temperature - n[1]) + square(p.humidity - n[2]) + square(p.weirdness - n[3]) + square(p.offset)
 							if (dist < minDist) {
 								minDist = dist

@@ -1,6 +1,6 @@
 import { PerlinNoise, Random } from 'deepslate'
 import type { VersionId } from '../Schemas'
-import { clamp, stringToColor } from '../Utils'
+import { clamp, stringToColor, unwrapLists } from '../Utils'
 
 type BlockPos = [number, number, number]
 type Placement = [BlockPos, number]
@@ -49,7 +49,7 @@ export function decorator(state: any, img: ImageData, options: DecoratorOptions)
 
 	for (let x = 0; x < options.size[0] / 16; x += 1) {
 		for (let z = 0; z < options.size[2] / 16; z += 1) {
-			getPlacements([x * 16, 0, z * 16], state, ctx)
+			getPlacements([x * 16, 0, z * 16], unwrapLists(state), ctx)
 		}
 	}
 

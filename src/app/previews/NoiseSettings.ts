@@ -2,7 +2,7 @@ import type { BlockPos, BlockState } from 'deepslate'
 import { Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
 import type { VersionId } from '../Schemas'
 import { checkVersion } from '../Schemas'
-import { deepClone, deepEqual } from '../Utils'
+import { deepClone, deepEqual, unwrapLists } from '../Utils'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export type NoiseSettingsOptions = {
@@ -70,7 +70,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 }
 
 function getCached(state: unknown, options: NoiseSettingsOptions) {
-	const settings = NoiseGeneratorSettings.fromJson(state)
+	const settings = NoiseGeneratorSettings.fromJson(unwrapLists(state))
 	// Temporary fix for slides
 	settings.noise.bottomSlide.target *= 128
 	settings.noise.topSlide.target *= 128

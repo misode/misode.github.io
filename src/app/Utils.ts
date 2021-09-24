@@ -128,3 +128,17 @@ export function deepEqual(a: any, b: any) {
 	}
 	return a !== a && b !== b
 }
+
+export function unwrapLists(value: any): any {
+	if (Array.isArray(value)) {
+		return value.map(v => unwrapLists(v.node))
+	} else if (typeof value === 'object' && value !== null) {
+		const res: Record<string, any> = {}
+		Object.entries(value).map(([k, v]) => {
+			res[k] = unwrapLists(v)
+		})
+		return res
+	} else {
+		return value
+	}
+}
