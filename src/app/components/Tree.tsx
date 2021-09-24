@@ -1,12 +1,8 @@
 import type { DataModel } from '@mcschema/core'
-import { ModelPath } from '@mcschema/core'
-import type { JSX } from 'preact'
-import { useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
-import rfdc from 'rfdc'
+import { useErrorBoundary, useState } from 'preact/hooks'
 import { useModel } from '../hooks'
-import { renderHtml } from '../schema/renderHtml'
+import { FullNode } from '../schema/renderHtml'
 import type { BlockStateRegistry, VersionId } from '../Schemas'
-const clone = rfdc()
 
 type TreePanelProps = {
 	lang: string,
@@ -24,20 +20,12 @@ export function Tree({ lang, model, blockStates, onError }: TreePanelProps) {
 	})
 	if (error) return <></>
 
-	const [state, setState] = useState(0)
+	const [, setState] = useState(0)
 	useModel(model, () => {
 		setState(state => state + 1)
 	})
 
-	const path = new ModelPath(model)
-	const tree = useRef<JSX.Element | null>(null)
-	useMemo(() => {
-		const [prefix, suffix, body] = model.schema.hook(renderHtml, path, clone(model.data), lang, blockStates)
-		tree.current = suffix?.props?.children.some((c: any) => c) ? <div class={`node ${model.schema.type(path)}-node`} data-category={model.schema.category(path)}>
-			<div class="node-header">{prefix}{suffix}</div>
-			<div class="node-body">{body}</div>
-		</div> : body
-	}, [lang, model, blockStates, state])
-
-	return <div class="tree">{tree.current}</div>
+	return <div class="tree">
+		<FullNode {...{model, lang, blockStates}}/>
+	</div>
 }

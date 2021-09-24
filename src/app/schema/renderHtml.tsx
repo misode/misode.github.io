@@ -2,16 +2,13 @@ import type { BooleanHookParams, EnumOption, Hook, INode, NumberHookParams, Stri
 import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
-import { useState } from 'preact/hooks'
+import { useRef, useState } from 'preact/hooks'
 import { Btn } from '../components'
 import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
-import { deepEqual, hexId, newSeed } from '../Utils'
-
-const LIST_LIMIT = 20
-const LIST_LIMIT_SHOWN = 5
+import { deepClone, deepEqual, hexId, newSeed } from '../Utils'
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
@@ -39,11 +36,16 @@ type NodeProps<T> = T & {
 	states: BlockStateRegistry,
 }
 
-/**
- * Renders the node and handles events to update the model
- * @returns string HTML representation of this node using the given data
- */
-export const renderHtml: RenderHook = {
+export function FullNode({ model, lang, blockStates }: { model: DataModel, lang: string, blockStates: BlockStateRegistry }) {
+	const path = new ModelPath(model)
+	const [prefix, suffix, body] = model.schema.hook(renderHtml, path, deepClone(model.data), lang, blockStates)
+	return suffix?.props?.children.some((c: any) => c) ? <div class={`node ${model.schema.type(path)}-node`} data-category={model.schema.category(path)}>
+		<div class="node-header">{prefix}{suffix}</div>
+		<div class="node-body">{body}</div>
+	</div> : body
+}
+
+const renderHtml: RenderHook = {
 	base() {
 		return [null, null, null]
 	},
@@ -73,6 +75,9 @@ export const renderHtml: RenderHook = {
 	},
 
 	list({ children, config }, path, value, lang, states) {
+		const [toggleState, setToggleState] = useState(new Map<string, boolean>())
+		console.log(toggleState)
+		const [maxShown, setMaxShown] = useState(50)
 		const context = path.getContext().join('.')
 		if (fixedLists.includes(context)) {
 			const prefix = <>
@@ -100,13 +105,38 @@ export const renderHtml: RenderHook = {
 		const suffix = <button class="add" onClick={onAdd}>{Octicon.plus_circle}</button>
 		const body = <>
 			{(value && Array.isArray(value)) && value.map(({ node: cValue, id: cId }, index) => {
-				if (value.length > LIST_LIMIT && index >= LIST_LIMIT_SHOWN && index < value.length - LIST_LIMIT_SHOWN) {
-					if (index === LIST_LIMIT_SHOWN) {
-						return <span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
-					}
+				if (index === maxShown) {
+					return <div class="node node-header">
+						<label>{locale(lang, 'entries_hidden', `${value.length - maxShown}`)}</label>
+						<button onClick={() => setMaxShown(Math.min(maxShown + 50, value.length))}>{locale(lang, 'entries_hidden.more', '50')}</button>
+						<button onClick={() => setMaxShown(value.length)}>{locale(lang, 'entries_hidden.all')}</button>
+					</div>
+				}
+				if (index > maxShown) {
 					return null
 				}
+
 				const cPath = path.push(index).contextPush('entry')
+
+				const onExpand = () => {
+					console.log('expand')
+					setToggleState(state => new Map(state.set(cId, true)))
+				}
+				const onCollapse = () => {
+					console.log('collapse')
+					setToggleState(state => new Map(state.set(cId, false)))
+				}
+
+				const canToggle = children.type(cPath) === 'object'
+				const toggle = toggleState.get(cId)
+				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
+					return <div class="node node-header" data-category={children.category(cPath)}>
+						<button class="toggle" onClick={onExpand}>{Octicon.chevron_right}</button>
+						<label>{pathLocale(lang, cPath, `${index}`)}</label>
+						<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
+					</div>
+				}
+
 				const onRemove = () => cPath.set(undefined)
 				const onMoveUp = () => {
 					const v = [...path.get()];
@@ -119,6 +149,7 @@ export const renderHtml: RenderHook = {
 					path.model.set(path, v)
 				}
 				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} lang={lang} states={states} context={(index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}>
+					{canToggle && <button class="toggle" onClick={onCollapse}>{Octicon.chevron_down}</button>}
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
 						<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
@@ -126,7 +157,7 @@ export const renderHtml: RenderHook = {
 					</div>}
 				</MemoedTreeNode>
 			})}
-			{(value && value.length > 2) && <div class="node node-header">
+			{(value && value.length > 2 && value.length <= maxShown) && <div class="node node-header">
 				<button class="add" onClick={onAddBottom}>{Octicon.plus_circle}</button>
 			</div>}
 		</>
@@ -224,6 +255,23 @@ export const renderHtml: RenderHook = {
 	},
 }
 
+function Collapsed({ path, value }: { path: ModelPath, value: any, schema: INode<any> }) {
+	const context = path.getContext().join('.')
+	switch (context) {
+		case 'loot_table.pools.entry':
+			return <label>{value?.entries?.length ?? 0} entries</label>
+		case 'function.set_contents.entries.entry':
+		case 'loot_pool.entries.entry':
+			return <label>{value?.name?.replace(/^minecraft:/, '') ?? value?.type?.replace(/^minecraft:/, '')}</label>
+	}
+	for (const child of Object.values(value ?? {})) {
+		if (typeof child === 'string') {
+			return <label>{child.replace(/^minecraft:/, '')}</label>
+		}
+	}
+	return null
+}
+
 function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>) {
 	const set = (target: boolean) => {
 		path.model.set(path, node.optional() && value === target ? undefined : target)
@@ -236,11 +284,18 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 
 function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookParams>) {
 	const [text, setText] = useState(value ?? '')
+	const commitTimeout = useRef<number>()
+	const scheduleCommit = (value: number) => {
+		if (commitTimeout.current) clearTimeout(commitTimeout.current)
+		commitTimeout.current = setTimeout(() => {
+			path.model.set(path, value)
+		}, 500)
+	}
 	const onChange = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = integer ? parseInt(value) : parseFloat(value)
-		path.model.set(path, parsed)
 		setText(value)
+		scheduleCommit(parsed)
 	}
 	const onBlur = () => {
 		setText(value ?? '')
@@ -248,8 +303,8 @@ function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookPara
 	const onColor = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = parseInt(value.slice(1), 16)
-		path.model.set(path, parsed)
 		setText(parsed)
+		scheduleCommit(parsed)
 	}
 	return <>
 		<input type="text" value={text} onChange={onChange} onBlur={onBlur} />
@@ -260,9 +315,9 @@ function NumberSuffix({ path, config, integer, value }: NodeProps<NumberHookPara
 
 function StringSuffix({ path, getValues, config, node, value, lang, states }: NodeProps<StringHookParams>) {
 	const onChange = (evt: Event) => {
+		evt.stopPropagation()
 		const newValue = (evt.target as HTMLSelectElement).value
 		path.model.set(path, newValue.length === 0 ? undefined : newValue)
-		evt.stopPropagation()
 	}
 	const values = getValues()
 	const context = path.getContext().join('.')
