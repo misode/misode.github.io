@@ -1,5 +1,4 @@
-import type { DataModel } from '@mcschema/core'
-import { ModelPath } from '@mcschema/core'
+import { DataModel, ModelPath } from '@mcschema/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '.'
 import { useModel } from '../hooks'
@@ -72,7 +71,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	const onImport = () => {
 		try {
 			const data = JSON.parse(source.current.value)
-			model?.reset(data, false)
+			model?.reset(DataModel.wrapLists(data), false)
 		} catch (e) {
 			onError(`Error importing: ${message(e)}`)
 			console.error(e)

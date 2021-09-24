@@ -17,7 +17,7 @@ export const transformOutput: Hook<[any, OutputProps], any> = {
 	list({ children }, path, value, props) {
 		if (!Array.isArray(value)) return value
 		return value.map((obj, index) =>
-			children.hook(this, path.push(index), obj, props)
+			children.hook(this, path.push(index), obj.node, props)
 		)
 	},
 

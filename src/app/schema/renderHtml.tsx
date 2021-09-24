@@ -61,7 +61,7 @@ export const renderHtml: RenderHook = {
 		const choiceContextPath = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
 		const set = (value: string) => {
 			const c = choices.find(c => c.type === value) ?? choice
-			path.model.set(path, c.change ? c.change(value) : c.node.default())
+			path.model.set(path, c.change ? c.change(value, { wrapLists: true }) : DataModel.wrapLists(c.node.default()))
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
 			{choices.map(c => <option value={c.type}>
@@ -80,7 +80,7 @@ export const renderHtml: RenderHook = {
 				<div class="fixed-list"></div>
 			</>
 			const suffix = <>{[...Array(config.maxLength)].map((_, i) => {
-				const child = children.hook(this, path.modelPush(i), value?.[i], lang, states)
+				const child = children.hook(this, path.modelPush(i), value?.[i]?.node, lang, states)
 				return child[1]
 			})}</>
 			return [prefix, suffix, null]
@@ -88,15 +88,17 @@ export const renderHtml: RenderHook = {
 
 		const onAdd = () => {
 			if (!Array.isArray(value)) value = []
-			path.model.set(path, [children.default(), ...value])
+			const node = DataModel.wrapLists(children.default())
+			path.model.set(path, [{ node, id: hexId() }, ...value])
 		}
 		const onAddBottom = () => {
 			if (!Array.isArray(value)) value = []
-			path.model.set(path, [...value, children.default()])
+			const node = DataModel.wrapLists(children.default())
+			path.model.set(path, [...value, { node, id: hexId() }])
 		}
 		const suffix = <button class="add" onClick={onAdd}>{Octicon.plus_circle}</button>
 		const body = <>
-			{(value && Array.isArray(value)) && value.map((cValue, index) => {
+			{(value && Array.isArray(value)) && value.map(({ node: cValue, id: cId }, index) => {
 				if (value.length > LIST_LIMIT && index >= LIST_LIMIT_SHOWN && index < value.length - LIST_LIMIT_SHOWN) {
 					if (index === LIST_LIMIT_SHOWN) {
 						return <span class="node-message">{value.length - LIST_LIMIT} hidden entries...</span>
@@ -106,22 +108,22 @@ export const renderHtml: RenderHook = {
 				const cPath = path.push(index).contextPush('entry')
 				const onRemove = () => cPath.set(undefined)
 				const onMoveUp = () => {
-					const v = [...value];
+					const v = [...path.get()];
 					[v[index - 1], v[index]] = [v[index], v[index - 1]]
 					path.model.set(path, v)
 				}
 				const onMoveDown = () => {
-					const v = [...value];
+					const v = [...path.get()];
 					[v[index + 1], v[index]] = [v[index], v[index + 1]]
 					path.model.set(path, v)
 				}
-				return <TreeNode key={index} path={cPath} schema={children} value={cValue} lang={lang} states={states}>
+				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} lang={lang} states={states} context={(index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}>
 					<button class="remove" onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
 						<button class="move" onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
 						<button class="move" onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
 					</div>}
-				</TreeNode>
+				</MemoedTreeNode>
 			})}
 			{(value && value.length > 2) && <div class="node node-header">
 				<button class="add" onClick={onAddBottom}>{Octicon.plus_circle}</button>
@@ -134,7 +136,7 @@ export const renderHtml: RenderHook = {
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
 		const onAdd = () => {
 			const key = keyPath.get()
-			path.model.set(path.push(key), children.default())
+			path.model.set(path.push(key), DataModel.wrapLists(children.default()))
 		}
 		const blockState = config.validation?.validator === 'block_state_map' ? states?.[relativePath(path, config.validation.params.id).get()] : null
 		const keysSchema = blockState?.properties
@@ -185,7 +187,7 @@ export const renderHtml: RenderHook = {
 		let suffix: JSX.Element | null = null
 		if (node.optional()) {
 			if (value === undefined) {
-				const onExpand = () => path.set(node.default())
+				const onExpand = () => path.set(DataModel.wrapLists(node.default()))
 				suffix = <button class="collapse closed" onClick={onExpand}>{Octicon.plus_circle}</button>
 			} else {
 				const onCollapse = () => path.set(undefined)
@@ -306,6 +308,7 @@ type TreeNodeProps = {
 	compare?: any,
 	label?: string,
 	children?: ComponentChildren,
+	context?: number,
 }
 function TreeNode({ label, schema, path, value, lang, states, children }: TreeNodeProps) {
 	const type = schema.type(path)
@@ -346,6 +349,7 @@ const MemoedTreeNode = memo(TreeNode, (prev, next) => {
 		&& prev.path.equals(next.path)
 		&& prev.schema === next.schema
 		&& prev.lang === next.lang
+		&& prev.context === next.context
 })
 
 function isEnum(value?: ValidationOption | EnumOption): value is EnumOption {

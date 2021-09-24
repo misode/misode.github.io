@@ -1,5 +1,4 @@
-import type { DataModel } from '@mcschema/core'
-import { Path } from '@mcschema/core'
+import { DataModel, Path } from '@mcschema/core'
 import { getCurrentUrl } from 'preact-router'
 import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
@@ -63,7 +62,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 
 	const reset = () => {
 		Analytics.generatorEvent('reset')
-		model?.reset(model.schema.default(), true)
+		model?.reset(DataModel.wrapLists(model.schema.default()), true)
 	}
 	const undo = (e: MouseEvent) => {
 		e.stopPropagation()
@@ -118,7 +117,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 					preset.generator.biome_source.seed = seed
 				}
 			}
-			model?.reset(preset, false)
+			model?.reset(DataModel.wrapLists(preset), false)
 		})
 	}
 

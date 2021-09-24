@@ -75,13 +75,14 @@ export async function getModel(version: VersionId, id: string): Promise<DataMode
 		}
 		try {
 			const schema = versionData.schemas.get(schemaName)
-			const model = new DataModel(schema)
+			const model = new DataModel(schema, { wrapLists: true, verbose: true })
 			if (Models[id]) {
 				model.reset(Models[id].model.data, false)
 			} else {
 				model.validate(true)
 				model.history = [JSON.stringify(model.data)]
 			}
+			console.log(model.data)
 			Models[id] = { model, version }
 		} catch (e) {
 			throw new Error(`Cannot get generator "${id}" for version "${version}": ${message(e)}`)
