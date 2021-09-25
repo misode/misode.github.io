@@ -21,6 +21,14 @@ export function randomSeed() {
 
 export function newSeed(model: DataModel) {
 	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
+	const dimensions = model.get(new Path(['dimensions']))
+	model.set(new Path(['seed']), seed, true)
+	if (typeof dimensions === 'object' && dimensions !== null) {
+		Object.keys(dimensions).forEach(id => {
+			model.set(new Path(['dimensions', id, 'generator', 'seed']), seed, true)
+			model.set(new Path(['dimensions', id, 'generator', 'biome_source', 'seed']), seed, true)
+		})
+	}
 	model.set(new Path(['generator', 'seed']), seed, true)
 	model.set(new Path(['generator', 'biome_source', 'seed']), seed)
 }

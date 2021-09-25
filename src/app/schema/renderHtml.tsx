@@ -320,6 +320,7 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 
 function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHookParams>) {
 	const [text, setText] = useState(value ?? '')
+	const [editing, setEditing] = useState(false)
 	const commitTimeout = useRef<number>()
 	const commitValue = useRef<number | undefined>()
 	const scheduleCommit = (newValue: number) => {
@@ -328,6 +329,7 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 		commitTimeout.current = setTimeout(() => {
 			path.model.set(path, commitValue.current)
 			commitValue.current = undefined
+			setEditing(false)
 		}, 500)
 	}
 	const onChange = (evt: Event) => {
@@ -336,7 +338,11 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 		setText(value)
 		scheduleCommit(parsed)
 	}
+	const onFocus = () => {
+		setEditing(true)
+	}
 	const onBlur = () => {
+		if (commitValue === undefined) setEditing(false)
 		setText(commitValue.current ?? value ?? '')
 	}
 	const onColor = (evt: Event) => {
@@ -346,9 +352,9 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 		scheduleCommit(parsed)
 	}
 	return <>
-		<input type="text" value={text} onChange={onChange} onBlur={onBlur} />
+		<input type="text" value={editing ? text : (value ?? '')} onChange={onChange} onFocus={onFocus} onBlur={onBlur} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
-		{path.equals(new Path(['generator', 'seed'])) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={locale(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
+		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={locale(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
 	</>
 }
 

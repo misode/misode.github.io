@@ -116,7 +116,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 				)}
 			</BtnMenu>
 		</div>
-		<textarea ref={source} class="source" onChange={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')}></textarea>
+		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')}></textarea>
 		<a ref={download} style="display: none;"></a>
 	</>
 }
