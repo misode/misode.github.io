@@ -302,7 +302,7 @@ function useToggles() {
 	}
 	
 	const isToggled = (key: string) => {
-		return toggleState.get(key) ?? toggleAll
+		return toggleState?.get(key) ?? toggleAll
 	}
 
 	return { expand, collapse, isToggled }
