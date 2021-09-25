@@ -1,9 +1,10 @@
 :root {
 	--background-1: #1b1b1b;
 	--background-2: #252525;
-	--background-3: #2f2f2f;
+	--background-3: #222222;
 	--background-4: #3d3d3d;
-	--background-5: #464646;
+	--background-5: #383838;
+	--background-6: #575757;
 	--text-1: #ffffff;
 	--text-2: #dcdcdc;
 	--text-3: #c3c3c3;
@@ -22,11 +23,12 @@
 	--background-1: #fafafa;
 	--background-2: #e2e2e2;
 	--background-3: #d4d3d3;
-	--background-4: #cccccc;
-	--background-5: #d6d6d6;
+	--background-4: #b8b8b8;
+	--background-5: #bdbdbd;
+	--background-6: #cecece;
 	--text-1: #000000;
-	--text-2: #505050;
-	--text-3: #6a6a6a;
+	--text-2: #2f2f2f;
+	--text-3: #494949;
 	--accent-primary: #088cdb;
 	--accent-success: #1a7f37;
 	--nav: #343a40;
@@ -43,11 +45,12 @@
 		--background-1: #fafafa;
 		--background-2: #e2e2e2;
 		--background-3: #d4d3d3;
-		--background-4: #cccccc;
-		--background-5: #d6d6d6;
+		--background-4: #b8b8b8;
+		--background-5: #bdbdbd;
+		--background-6: #cecece;
 		--text-1: #000000;
-		--text-2: #505050;
-		--text-3: #6a6a6a;
+		--text-2: #2f2f2f;
+		--text-3: #494949;
 		--accent-primary: #088cdb;
 		--accent-success: #1a7f37;
 		--nav: #343a40;
@@ -426,9 +429,7 @@ main.has-preview {
 	bottom: 8px;
 	left: 100%;
 	z-index: 5;
-	padding: 0 8px;
-	border-top-left-radius: 24px;
-	border-bottom-left-radius: 24px;
+	padding-right: 16px;
 	background-color: var(--background-4);
 	box-shadow: 0 0 7px -3px #000;
 	user-select: none;
@@ -437,16 +438,23 @@ main.has-preview {
 	-ms-user-select: none;
 	transform: translateX(var(--offset));
 	transition: padding 0.1s, transform 0.3s;
-}
-
-.popup-actions:hover {
-	background-color: var(--background-5);
+	border-top-left-radius: 24px;
+	border-bottom-left-radius: 24px;
 }
 
 .popup-action {
 	padding: 12px;
-	fill: var(--text-2);
+	fill: var(--text-3);
 	cursor: pointer;
+	border-top-left-radius: 50%;
+	border-bottom-left-radius: 50%;
+	padding-left: 16px;
+}
+
+.popup-action.shown ~ .popup-action {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	padding-left: 12px;
 }
 
 .popup-action:not(.shown) {
@@ -461,12 +469,104 @@ main.has-preview {
 	height: 24px;
 }
 
+.popup-action:hover {
+	background-color: var(--background-5);
+}
+
 .popup-action.action-preview {
 	fill: var(--accent-primary);
 }
 
 .popup-action.action-copy.active {
 	fill: var(--accent-success);
+}
+
+.tooltipped {
+	position: relative;
+}
+
+.tooltipped::after {
+	content: attr(aria-label);
+	position: absolute;
+	z-index: 100;
+	padding: 3px 7px;
+	display: none;
+	white-space: pre;
+	pointer-events: none;
+	background-color: var(--background-6);
+	color: var(--text-1);
+	border-radius: 6px;
+	font-size: 14px;
+	line-height: 1.5;
+	text-align: left;
+	opacity: 0;
+}
+
+.tooltipped.tip-ne::after {
+	bottom: 100%;
+	margin-bottom: 6px;
+	left: 50%;
+	margin-left: -16px;
+}
+
+.tooltipped.tip-nw::after {
+	bottom: 100%;
+	margin-bottom: 6px;
+	right: 50%;
+	margin-right: -16px;
+}
+
+.tooltipped.tip-ne::before,
+.tooltipped.tip-nw::before {
+	bottom: auto;
+  top: -7px;
+	border-top-color: var(--background-6);
+}
+
+.tooltipped.tip-se::after {
+	top: 100%;
+	margin-top: 6px;
+	left: 50%;
+	margin-left: -16px;
+}
+
+.tooltipped.tip-sw::after {
+	top: 100%;
+	margin-top: 6px;
+	right: 50%;
+	margin-right: -16px;
+}
+
+.tooltipped.tip-se::before,
+.tooltipped.tip-sw::before {
+	top: auto;
+  bottom: -7px;
+	border-bottom-color: var(--background-6);
+}
+
+.tooltipped::before {
+	content: '';
+	position: absolute;
+	z-index: 100;
+	display: none;
+  right: 50%;
+	width: 0;
+	height: 0;
+  margin-right: -8px;
+	pointer-events: none;
+	border: 8px solid transparent;
+	opacity: 0;
+}
+
+.tooltipped:not([disabled]):hover::before,
+.tooltipped:not([disabled]):hover::after {
+	display: inline-block;
+	animation: tooltip-appear 0.1s ease-in 0.4s forwards;
+}
+
+@keyframes tooltip-appear {
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
 
 .error {

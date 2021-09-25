@@ -5,10 +5,11 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { useCanvas } from '../../hooks'
+import { locale } from '../../Locales'
 import { biomeMap, getBiome } from '../../previews'
 import { newSeed } from '../../Utils'
 
-export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
+export const BiomeSourcePreview = ({ model, data, shown, lang, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const offset = useRef<[number, number]>([0, 0])
@@ -69,11 +70,14 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 		<div class="controls">
 			{focused && <Btn label={focused} class="no-pointer" />}
 			{(type === 'multi_noise' || type === 'checkerboard') && <>
-				<Btn icon="dash" onClick={() => changeScale(scale * 1.5)} />
-				<Btn icon="plus" onClick={() => changeScale(scale / 1.5)} />
+				<Btn icon="dash" tooltip={locale(lang, 'zoom_out')}
+					onClick={() => changeScale(scale * 1.5)} />
+				<Btn icon="plus" tooltip={locale(lang, 'zoom_in')}
+					onClick={() => changeScale(scale / 1.5)} />
 			</>}
 			{type === 'multi_noise' &&
-				<Btn icon="sync" onClick={() => newSeed(model)} />}
+				<Btn icon="sync" tooltip={locale(lang, 'generate_new_seed')}
+					onClick={() => newSeed(model)} />}
 		</div>
 		<canvas ref={canvas} width="200" height="200"></canvas>
 	</>

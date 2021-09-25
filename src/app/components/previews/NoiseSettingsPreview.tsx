@@ -54,7 +54,7 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 	return <>
 		<div class="controls">
 			{focused && <Btn label={`Y = ${focused}`} class="no-pointer" />}
-			<BtnMenu icon="gear">
+			<BtnMenu icon="gear" tooltip={locale(lang, 'terrain_settings')}>
 				{hasPeaks ? <>
 					<BtnInput label={loc('preview.factor')} value={`${biomeFactor}`} onChange={v => setBiomeFactor(Number(v))} />
 					<BtnInput label={loc('preview.offset')} value={`${biomeOffset}`} onChange={v => setBiomeOffset(Number(v))} />
@@ -64,7 +64,8 @@ export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProp
 					<BtnInput label={loc('preview.depth')} value={`${biomeOffset}`} onChange={v => setBiomeOffset(Number(v))} />
 				</>}
 			</BtnMenu>
-			<Btn icon="sync" onClick={() => setSeed(randomSeed())} />
+			<Btn icon="sync" tooltip={locale(lang, 'generate_new_seed')}
+				onClick={() => setSeed(randomSeed())} />
 		</div>
 		<canvas ref={canvas} width={size} height={size}></canvas>
 	</>

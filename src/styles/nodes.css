@@ -1,19 +1,20 @@
 :root {
-  --node-border: #4e4e4e;
+  --node-border: #3f3f3f;
   --node-background-label: #1b1b1b;
   --node-background-input: #272727;
+  --node-background-hover: #1f1f1f;
   --node-text: #dadada;
   --node-text-dimmed: #b4b4b4;
   --node-selected: #ad9715;
+  --node-selected-hover: #a38c0a;
   --node-selected-border: #8d7a0d;
   --node-add: #487c13;
+  --node-add-hover: #3e7409;
   --node-add-border: #3b6e0c;
   --node-remove: #9b341b;
+  --node-remove-hover: #922d13;
   --node-remove-border: #7e1d05;
   --node-indent-border: #454749;
-  --node-popup-background: #0a0a0ae6;
-  --node-popup-text: #dadada;
-  --node-popup-text-dimmed: #b4b4b4;
   --category-predicate: #306163;
   --category-predicate-border: #224849;
   --category-predicate-background: #1d3333;
@@ -29,18 +30,19 @@
   --node-border: #bcbfc3;
   --node-background-label: #e4e4e4;
   --node-background-input: #ffffff;
+  --node-background-hover: #e7e7e7;
   --node-text: #000000;
   --node-text-dimmed: #2c2c2c;
   --node-selected: #f0e65e;
+  --node-selected-hover: #faf06c;
   --node-selected-border: #b9a327;
   --node-add: #9bd464;
+  --node-add-hover: #a5dd70;
   --node-add-border: #498d09;
   --node-remove: #e76f51;
+  --node-remove-hover: #f57656;
   --node-remove-border: #be4b2e;
   --node-indent-border: #b9b9b9;
-  --node-popup-background: #1f2020e6;
-  --node-popup-text: #dadada;
-  --node-popup-text-dimmed: #b4b4b4;
   --category-predicate: #65b5b8;
   --category-predicate-border: #187e81;
   --category-predicate-background: #95c5c7;
@@ -57,18 +59,19 @@
     --node-border: #bcbfc3;
     --node-background-label: #e4e4e4;
     --node-background-input: #ffffff;
+    --node-background-hover: #e7e7e7;
     --node-text: #000000;
     --node-text-dimmed: #2c2c2c;
     --node-selected: #f0e65e;
+    --node-selected-hover: #faf06c;
     --node-selected-border: #b9a327;
     --node-add: #9bd464;
+    --node-add-hover: #a5dd70;
     --node-add-border: #498d09;
     --node-remove: #e76f51;
+    --node-remove-hover: #f57656;
     --node-remove-border: #be4b2e;
     --node-indent-border: #b9b9b9;
-    --node-popup-background: #1f2020e6;
-    --node-popup-text: #dadada;
-    --node-popup-text-dimmed: #b4b4b4;
     --category-predicate: #65b5b8;
     --category-predicate-border: #187e81;
     --category-predicate-background: #95c5c7;
@@ -91,6 +94,7 @@
 
 .node-header > * {
   height: 34px;
+  /* border: none; */
   border: 1px solid;
   color: var(--node-text);
   border-color: var(--node-border);
@@ -139,6 +143,10 @@
   user-select: none;
   cursor: pointer;
   background-color: var(--node-background-input);
+}
+
+.node-header button:not([disabled]):hover {
+  background-color: var(--node-background-hover);
 }
 
 .object-node > .node-header > .collapse {
@@ -191,6 +199,9 @@ button.selected {
   background-color: var(--node-selected);
   border-color: var(--node-selected-border);
 }
+button:not([disabled]).selected:hover {
+  background-color: var(--node-selected-hover);
+}
 
 .collapse svg {
   fill: var(--node-text);
@@ -202,10 +213,20 @@ button.add {
   border-color: var(--node-add-border);
 }
 
+.collapse:not([disabled]).closed:hover,
+button:not([disabled]).add:hover {
+  background-color: var(--node-add-hover);
+}
+
 .collapse.open,
 button.remove {
   background-color: var(--node-remove);
   border-color: var(--node-remove-border);
+}
+
+.collapse:not([disabled]).open:hover,
+button:not([disabled]).remove:hover {
+  background-color: var(--node-remove-hover);
 }
 
 .node-header > button svg {
@@ -251,8 +272,8 @@ button.move:disabled {
 .node-icon .icon-popup {
   visibility: hidden;
   width: 240px;
-  background-color: var(--node-popup-background);
-  color: var(--node-popup-text);
+  background-color: var(--background-6);
+  color: var(--text-1);
   text-align: center;
   border-radius: 6px;
   padding: 8px 4px;
@@ -271,7 +292,7 @@ button.move:disabled {
   margin-left: -3px;
   border-width: 5px;
   border-style: solid;
-  border-color: transparent transparent var(--node-popup-background) transparent;
+  border-color: transparent transparent var(--background-6) transparent;
 }
 
 .node-icon svg:hover + .icon-popup,
@@ -303,10 +324,11 @@ button.move:disabled {
   margin-top: 4px;
   margin-left: 4px;
   z-index: 1;
-  color: var(--node-popup-text);
+  color: var(--text-1);
   font-size: 16px;
-  border-radius: 3px;
-  background-color: var(--node-popup-background);
+  border-radius: 6px;
+  background-color: var(--background-6);
+  box-shadow: 0 1px 5px -2px #000;
 }
 
 .node-menu::after {
@@ -317,7 +339,7 @@ button.move:disabled {
   margin-left: 6px;
   border-width: 5px;
   border-style: solid;
-  border-color: transparent transparent var(--node-popup-background) transparent;
+  border-color: transparent transparent var(--background-6) transparent;
 }
 
 .menu-item {
@@ -333,6 +355,7 @@ button.move:disabled {
 
 .menu-item .btn {
   padding: 8px;
+  box-shadow: unset;
 }
 
 span.menu-item {
@@ -340,12 +363,7 @@ span.menu-item {
 }
 
 .menu-item-context {
-  color: var(--node-popup-text-dimmed);
-}
-
-.node-message {
-  color: var(--node-text-dimmed);
-  margin: 6px 0;
+  color: var(--text-2);
 }
 
 /* Node body and list entry */

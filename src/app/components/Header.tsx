@@ -27,9 +27,9 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 
 	return <header>
 		<div class="title">
-			<Link class="home-link" href="/">{Icons.home}</Link>
+			<Link class="home-link" href="/" aria-label={loc('home')}>{Icons.home}</Link>
 			<h2>{title}</h2>
-			{gen && <BtnMenu icon="chevron_down">
+			{gen && <BtnMenu icon="chevron_down" tooltip={loc('switch_generator')}>
 				{config.generators
 					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))
 					.map(g =>
@@ -40,7 +40,7 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 		<nav>
 			<ul>
 				<li>
-					<BtnMenu icon="globe">
+					<BtnMenu icon="globe" tooltip={loc('language')}>
 						{config.languages.map(({ code, name }) =>
 							<Btn label={name} active={code === language}
 								onClick={() => changeLanguage(code)} />
@@ -48,7 +48,7 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 					</BtnMenu>
 				</li>
 				<li>
-					<BtnMenu icon={Themes[theme]}>
+					<BtnMenu icon={Themes[theme]} tooltip={loc('theme')}>
 						{Object.entries(Themes).map(([th, icon]) =>
 							<Btn icon={icon} label={loc(`theme.${th}`)} active={th === theme}
 								onClick={() => changeTheme(th)} />
@@ -56,7 +56,7 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 					</BtnMenu>
 				</li>
 				<li class="dimmed">
-					<a href="https://github.com/misode/misode.github.io" target="_blank" rel="noreferrer" title={loc('github')}>
+					<a href="https://github.com/misode/misode.github.io" target="_blank" rel="noreferrer" class="tooltipped tip-sw" aria-label={loc('github')}>
 						{Octicon.mark_github}
 					</a>
 				</li>

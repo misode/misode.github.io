@@ -37,7 +37,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	const getOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
 		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })
 		return JSON.stringify(data, null, INDENT[indent]) + '\n'
-	}, [])
+	}, [indent])
 
 	useEffect(() => {
 		retransform.current = () => {
@@ -109,7 +109,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	return <> 
 		<div class="controls">
-			<BtnMenu icon="gear">
+			<BtnMenu icon="gear" tooltip={loc('output_settings')}>
 				{Object.entries(INDENT).map(([key]) =>
 					<Btn label={loc(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>

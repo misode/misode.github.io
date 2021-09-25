@@ -2,10 +2,11 @@ import { useEffect, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn } from '..'
 import { useCanvas } from '../../hooks'
+import { locale } from '../../Locales'
 import { decorator } from '../../previews'
 import { randomSeed } from '../../Utils'
 
-export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
+export const DecoratorPreview = ({ data, version, shown, lang }: PreviewProps) => {
 	const [scale, setScale] = useState(4)
 	const [seed, setSeed] = useState(randomSeed())
 
@@ -27,9 +28,12 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 
 	return <>
 		<div class="controls">
-			<Btn icon="dash" onClick={() => setScale(Math.min(16, scale + 1))} />
-			<Btn icon="plus" onClick={() => setScale(Math.max(1, scale - 1))} />
-			<Btn icon="sync" onClick={() => setSeed(randomSeed())} />
+			<Btn icon="dash" tooltip={locale(lang, 'zoom_out')}
+				onClick={() => setScale(Math.min(16, scale + 1))} />
+			<Btn icon="plus" tooltip={locale(lang, 'zoom_in')}
+				onClick={() => setScale(Math.max(1, scale - 1))} />
+			<Btn icon="sync" tooltip={locale(lang, 'generate_new_seed')}
+				onClick={() => setSeed(randomSeed())} />
 		</div>
 		<canvas ref={canvas} width="64" height="64"></canvas>
 	</>

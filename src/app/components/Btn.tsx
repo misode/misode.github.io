@@ -4,11 +4,13 @@ type BtnProps = {
 	icon?: keyof typeof Octicon,
 	label?: string,
 	active?: boolean,
+	tooltip?: string,
+	tooltipLoc?: 'se' | 'sw' | 'nw',
 	class?: string,
 	onClick?: (event: MouseEvent) => unknown,
 }
-export function Btn({ icon, label, active, class: class_, onClick }: BtnProps) {
-	return <div class={`btn${active ? ' active' : ''}${class_ ? ` ${class_}` : ''}`} onClick={onClick}>
+export function Btn({ icon, label, active, class: clazz, tooltip, tooltipLoc, onClick }: BtnProps) {
+	return <div class={`btn${active ? ' active' : ''}${clazz ? ` ${clazz}` : ''}${tooltip ? ` tooltipped tip-${tooltipLoc ?? 'sw'}` : ''}`} onClick={onClick} aria-label={tooltip}>
 		{icon && Octicon[icon]}
 		{label && <span>{label}</span>}
 	</div>

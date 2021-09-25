@@ -175,7 +175,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			<div class="controls">
 				<Btn icon="upload" label={loc('import')} onClick={importSource} />
 				<BtnMenu icon="archive" label={loc('presets')} relative={false}>
-					<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} />
+					<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} placeholder={loc('search')} />
 					<div class="result-list">
 						{presetResults.map(preset => <Btn label={preset} onClick={() => loadPreset(preset)} />)}
 					</div>
@@ -186,7 +186,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 						<Btn label={v} active={v === version} onClick={() => onChangeVersion(v)} />
 					)}
 				</BtnMenu>
-				<BtnMenu icon="kebab_horizontal">
+				<BtnMenu icon="kebab_horizontal" tooltip={loc('more')}>
 					<Btn icon="history" label={loc('reset')} onClick={reset} />
 					<Btn icon="arrow_left" label={loc('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={loc('redo')} onClick={redo} />
@@ -195,17 +195,17 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 			<Tree {...{lang, model, version, blockStates}} onError={setError} />
 		</main>
-		<div class="popup-actions" style={`--offset: -${10 + actionsShown * 50}px;`}>
-			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''}`} onClick={togglePreview}>
+		<div class="popup-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
+			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={loc(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
-			<div class={`popup-action action-download${sourceShown ? ' shown' : ''}`} onClick={downloadSource}>
+			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={loc('download')} onClick={downloadSource}>
 				{Octicon.download}
 			</div>
-			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''}`} onClick={copySource}>
+			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={loc(copyActive ? 'copied' : 'copy')} onClick={copySource}>
 				{copyActive ? Octicon.check : Octicon.clippy}
 			</div>
-			<div class={'popup-action action-code shown'} onClick={toggleSource}>
+			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={loc(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
 				{sourceShown ? Octicon.chevron_right : Octicon.code}
 			</div>
 		</div>
