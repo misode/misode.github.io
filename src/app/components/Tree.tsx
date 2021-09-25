@@ -12,7 +12,7 @@ type TreePanelProps = {
 	onError: (message: string) => unknown,
 }
 export function Tree({ lang, model, blockStates, onError }: TreePanelProps) {
-	if (!model || !blockStates) return <></>
+	if (!model || !blockStates || lang === 'none') return <></>
 
 	const [error] = useErrorBoundary(e => {
 		onError(`Error rendering the tree: ${e.message}`)

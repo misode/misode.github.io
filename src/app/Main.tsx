@@ -16,7 +16,7 @@ import { cleanUrl } from './Utils'
 const VERSIONS_IN_TITLE = 3
 
 function Main() {
-	const [lang, setLanguage] = useState<string>('en')
+	const [lang, setLanguage] = useState<string>('none')
 	const changeLanguage = async (language: string) => {
 		if (!Locales[language]) {
 			await loadLocale(language)
