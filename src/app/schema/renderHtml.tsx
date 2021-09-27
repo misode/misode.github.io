@@ -362,12 +362,13 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 	const onChange = (evt: Event) => {
 		evt.stopPropagation()
 		const newValue = (evt.target as HTMLSelectElement).value
+		if (newValue === value) return
 		path.model.set(path, newValue.length === 0 ? undefined : newValue)
 	}
 	const values = getValues()
 	const context = path.getContext().join('.')
 	if (nbtFields.includes(context)) {
-		return <textarea value={value ?? ''} onChange={onChange}></textarea>
+		return <textarea value={value ?? ''} onBlur={onChange}></textarea>
 	} else if ((isEnum(config) && !config.additional) || selectRegistries.includes(context)) {
 		let context = new Path([])
 		if (isEnum(config) && typeof config.enum === 'string') {
@@ -390,7 +391,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 	} else {
 		const datalistId = hexId()
 		return <>
-			<input value={value ?? ''} onChange={onChange}
+			<input value={value ?? ''} onBlur={onChange}
 				list={values.length > 0 ? datalistId : ''} />
 			{values.length > 0 && <datalist id={datalistId}>
 				{values.map(v => <option value={v} />)}
