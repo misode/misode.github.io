@@ -60,9 +60,9 @@ export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
 		document.body.addEventListener('mouseup', onMouseUp)
 
 		return () => {
-			canvas.current.removeEventListener('mousedown', onMouseDown)
-			canvas.current.removeEventListener('mousemove', onMouseMove)
-			canvas.current.removeEventListener('mouseleave', onMouseLeave)
+			canvas.current?.removeEventListener('mousedown', onMouseDown)
+			canvas.current?.removeEventListener('mousemove', onMouseMove)
+			canvas.current?.removeEventListener('mouseleave', onMouseLeave)
 			document.body.removeEventListener('mouseup', onMouseUp)
 		}
 	}, [...inputs ?? [], canvas.current])
