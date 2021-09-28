@@ -145,7 +145,18 @@ const renderHtml: RenderHook = {
 					[v[index + 1], v[index]] = [v[index], v[index + 1]]
 					path.model.set(path, v)
 				}
-				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} lang={lang} states={states} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
+				const actions: MenuAction[] = [
+					{
+						icon: 'duplicate',
+						label: 'duplicate',
+						onSelect: () => {
+							const v = [...path.get()]
+							v.splice(index, 0, { id: hexId(), node: deepClone(cValue) })
+							path.model.set(path, v)
+						},
+					},
+				]
+				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} {...{lang, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
 					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'collapse')}\n${locale(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
 					<button class="remove tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
@@ -390,6 +401,13 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 	}
 }
 
+type MenuAction = {
+	label: string,
+	description?: string,
+	icon: keyof typeof Octicon,
+	onSelect: () => unknown,
+}
+
 type TreeNodeProps = {
 	schema: INode<any>,
 	path: ModelPath,
@@ -399,9 +417,10 @@ type TreeNodeProps = {
 	ctx: Record<string, any>,
 	compare?: any,
 	label?: string,
+	actions?: MenuAction[],
 	children?: ComponentChildren,
 }
-function TreeNode({ label, schema, path, value, lang, states, ctx, children }: TreeNodeProps) {
+function TreeNode({ label, schema, path, value, lang, states, ctx, actions, children }: TreeNodeProps) {
 	const type = schema.type(path)
 	const category = schema.category(path)
 	const context = path.getContext().join('.')
@@ -416,18 +435,21 @@ function TreeNode({ label, schema, path, value, lang, states, ctx, children }: T
 	delete newCtx.index
 	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, states, newCtx)
 	return <div class={`node ${type}-node`} data-category={category}>
-		<div class="node-header">
+		<div class="node-header" onContextMenu={onContextMenu}>
 			<ErrorPopup lang={lang} path={path} />
 			<HelpPopup lang={lang} path={path} />
 			{children}
 			{prefix}
-			<label onContextMenu={onContextMenu}>
+			<label>
 				{label ?? pathLocale(lang, path, `${path.last()}`)}
 				{active && <div class="node-menu">
+					{actions?.map(a => <div key={a.label} class="menu-item">
+						<Btn icon={a.icon} tooltip={locale(lang, a.label)} tooltipLoc="se" onClick={() => a.onSelect()}/>
+						<span>{a.description ?? locale(lang, a.label)}</span>
+					</div>)}
 					<div class="menu-item">
 						<Btn icon="clippy" tooltip={locale(lang, 'copy_context')} tooltipLoc="se" onClick={() => navigator.clipboard.writeText(context)} />
-						Context:
-						<span class="menu-item-context">{context}</span>
+						<span>{context}</span>
 					</div>
 				</div>}
 			</label>

@@ -547,7 +547,7 @@ main.has-preview {
 .tooltipped::before {
 	content: '';
 	position: absolute;
-	z-index: 100;
+	z-index: 101;
 	display: none;
   right: 50%;
 	width: 0;
@@ -562,6 +562,10 @@ main.has-preview {
 .tooltipped:not([disabled]):hover::after {
 	display: inline-block;
 	animation: tooltip-appear 0.1s ease-in 0.4s forwards;
+}
+
+.tooltipped:not([disabled]):hover::after {
+	box-shadow: 0 1px 3px 0 #0007;
 }
 
 @keyframes tooltip-appear {

@@ -358,11 +358,7 @@ button.move:disabled {
   box-shadow: unset;
 }
 
-span.menu-item {
-  padding: 4px 8px;
-}
-
-.menu-item-context {
+.menu-item span {
   color: var(--text-2);
 }
 
