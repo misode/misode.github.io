@@ -224,72 +224,8 @@ const renderHtml: RenderHook = {
 
 	object({ node, config, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
 		if (path.getArray().length == 0 && isDecorated(config.context, value)) {
-			const originalFields = getActiveFields(path)
-			const decorators: any[] = []
-			const feature = iterateNestedDecorators(value, decorators)
-			const fields: NodeChildren = {
-				type: originalFields.type,
-				config: ObjectNode({
-					decorators: ListNode(CachedDecorator),
-					feature: CachedFeature,
-				}, { context: 'feature.decorated' }),
-			}
-			const schema = ObjectNode(fields, { context: 'feature' })
-			const featurePath = new Path(['config', 'feature'])
-			const model = path.getModel()
-			const wrapper: ModelWrapper = new ModelWrapper(schema, path => {
-				if (path.startsWith(featurePath)) {
-					return new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr])
-				} else if (path.startsWith(new Path(['config', 'decorators']))) {
-					if (path.modelArr.length === 2) {
-						return new Path([])
-					}
-					const index = path.modelArr[2]
-					if (typeof index === 'number') {
-						return new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
-					}
-				}
-				return path
-			}, path => {
-				if (path.equals(new Path(['config', 'decorators']))) {
-					const decorators: any[] = []
-					iterateNestedDecorators(model.data, decorators)
-					return decorators
-				}
-				return model.get(wrapper.map(path))
-			}, (path, value, silent) => {
-				if (path.startsWith(featurePath)) {
-					model.set(new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr]), value, silent)
-				} else if (path.startsWith(new Path(['config', 'decorators']))) {
-					const index = path.modelArr[2]
-					if (path.modelArr.length === 2) {
-						console.log('Set', path)
-						const feature = wrapper.get(featurePath)
-						model.set(new Path(), produceNestedDecorators(feature, value))
-					} else if (typeof index === 'number') {
-						if (path.modelArr.length === 3 && value === undefined) {
-							const feature = wrapper.get(featurePath)
-							const newDecorators = [...decorators]
-							newDecorators.splice(index, 1)
-							const newValue = produceNestedDecorators(feature, newDecorators)
-							model.set(new Path(), newValue)
-						} else {
-							const newPath = new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
-							model.set(newPath, value, silent)
-						}
-					}
-				}
-				return path
-			})
-			value = {
-				type: model.data.type,
-				config: {
-					decorators,
-					feature,
-				},
-			}
-			wrapper.data = value
-			wrapper.errors = model.errors
+			const { wrapper, fields } = createDecoratorsWrapper(getActiveFields(path), path, value)
+			value = wrapper.data
 			getActiveFields = () => fields
 			getChildModelPath = (path, key) => new ModelPath(wrapper, new Path(path.getArray(), ['feature'])).push(key)
 		}
@@ -564,6 +500,73 @@ function isDecorated(context: string | undefined, value: any) {
 	return context === 'feature'
 		&& value?.type?.replace(/^minecraft:/, '') === 'decorated'
 		&& isObject(value?.config)
+}
+
+function createDecoratorsWrapper(originalFields: NodeChildren, path: ModelPath, value: any) {
+	const decorators: any[] = []
+	const feature = iterateNestedDecorators(value, decorators)
+	const fields = {
+		type: originalFields.type,
+		config: ObjectNode({
+			decorators: ListNode(CachedDecorator),
+			feature: CachedFeature,
+		}, { context: 'feature.decorated' }),
+	}
+	const schema = ObjectNode(fields, { context: 'feature' })
+	const featurePath = new Path(['config', 'feature'])
+	const model = path.getModel()
+	const wrapper: ModelWrapper = new ModelWrapper(schema, path => {
+		if (path.startsWith(featurePath)) {
+			return new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr])
+		} else if (path.startsWith(new Path(['config', 'decorators']))) {
+			if (path.modelArr.length === 2) {
+				return new Path([])
+			}
+			const index = path.modelArr[2]
+			if (typeof index === 'number') {
+				return new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
+			}
+		}
+		return path
+	}, path => {
+		if (path.equals(new Path(['config', 'decorators']))) {
+			const decorators: any[] = []
+			iterateNestedDecorators(model.data, decorators)
+			return decorators
+		}
+		return model.get(wrapper.map(path))
+	}, (path, value, silent) => {
+		if (path.startsWith(featurePath)) {
+			model.set(new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr]), value, silent)
+		} else if (path.startsWith(new Path(['config', 'decorators']))) {
+			const index = path.modelArr[2]
+			if (path.modelArr.length === 2) {
+				const feature = wrapper.get(featurePath)
+				model.set(new Path(), produceNestedDecorators(feature, value))
+			} else if (typeof index === 'number') {
+				if (path.modelArr.length === 3 && value === undefined) {
+					const feature = wrapper.get(featurePath)
+					const newDecorators = [...decorators]
+					newDecorators.splice(index, 1)
+					const newValue = produceNestedDecorators(feature, newDecorators)
+					model.set(new Path(), newValue)
+				} else {
+					const newPath = new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
+					model.set(newPath, value, silent)
+				}
+			}
+		}
+		return path
+	})
+	wrapper.data = {
+		type: model.data.type,
+		config: {
+			decorators,
+			feature,
+		},
+	}
+	wrapper.errors = model.errors
+	return { fields, wrapper }
 }
 
 function iterateNestedDecorators(value: any, decorators: any[]): any {
