@@ -67,7 +67,10 @@ const renderHtml: RenderHook = {
 		const choiceContextPath = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
 		const set = (value: string) => {
 			const c = choices.find(c => c.type === value) ?? choice
-			path.model.set(path, c.change ? c.change(value, { wrapLists: true }) : DataModel.wrapLists(c.node.default()))
+			const newValue = c.change
+				? c.change(value, { wrapLists: true })
+				: DataModel.wrapLists(config.choiceContext === 'feature' ?	c.node.default()?.config?.feature : c.node.default())
+			path.model.set(path, newValue)
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
 			{choices.map(c => <option value={c.type}>
@@ -514,11 +517,12 @@ function createDecoratorsWrapper(originalFields: NodeChildren, path: ModelPath, 
 	}
 	const schema = ObjectNode(fields, { context: 'feature' })
 	const featurePath = new Path(['config', 'feature'])
+	const decoratorsPath = new Path(['config', 'decorators'])
 	const model = path.getModel()
 	const wrapper: ModelWrapper = new ModelWrapper(schema, path => {
 		if (path.startsWith(featurePath)) {
 			return new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr])
-		} else if (path.startsWith(new Path(['config', 'decorators']))) {
+		} else if (path.startsWith(decoratorsPath)) {
 			if (path.modelArr.length === 2) {
 				return new Path([])
 			}
@@ -529,34 +533,38 @@ function createDecoratorsWrapper(originalFields: NodeChildren, path: ModelPath, 
 		}
 		return path
 	}, path => {
-		if (path.equals(new Path(['config', 'decorators']))) {
-			const decorators: any[] = []
-			iterateNestedDecorators(model.data, decorators)
-			return decorators
+		if (path.equals(decoratorsPath)) {
+			const newDecorators: any[] = []
+			iterateNestedDecorators(model.data, newDecorators)
+			return newDecorators
 		}
 		return model.get(wrapper.map(path))
 	}, (path, value, silent) => {
 		if (path.startsWith(featurePath)) {
-			model.set(new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr]), value, silent)
-		} else if (path.startsWith(new Path(['config', 'decorators']))) {
+			const newDecorators: any[] = []
+			iterateNestedDecorators(model.data, newDecorators)
+			const newPath =new Path([...[...Array(newDecorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr])
+			return model.set(newPath, value, silent)
+		} else if (path.startsWith(decoratorsPath)) {
 			const index = path.modelArr[2]
 			if (path.modelArr.length === 2) {
 				const feature = wrapper.get(featurePath)
-				model.set(new Path(), produceNestedDecorators(feature, value))
+				return model.set(new Path(), produceNestedDecorators(feature, value), silent)
 			} else if (typeof index === 'number') {
 				if (path.modelArr.length === 3 && value === undefined) {
 					const feature = wrapper.get(featurePath)
-					const newDecorators = [...decorators]
+					const newDecorators: any[] = []
+					iterateNestedDecorators(model.data, newDecorators)
 					newDecorators.splice(index, 1)
 					const newValue = produceNestedDecorators(feature, newDecorators)
-					model.set(new Path(), newValue)
+					return model.set(new Path(), newValue, silent)
 				} else {
 					const newPath = new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
-					model.set(newPath, value, silent)
+					return model.set(newPath, value, silent)
 				}
 			}
 		}
-		return path
+		model.set(path, value, silent)
 	})
 	wrapper.data = {
 		type: model.data.type,
