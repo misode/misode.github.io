@@ -171,7 +171,7 @@
 }
 
 .node-header > *:first-child,
-.node-header > .node-icon + * {
+.node-header > .node-icon:first-child + * {
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
 }
@@ -400,9 +400,9 @@ span.menu-item {
   border-left: none;
 }
 
-.list-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon + *,
+.list-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon:first-child + *,
 .list-node > .node-body > .object-node > .node-body > .node > .node-header > *:first-child,
-.map-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon + *,
+.map-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon:first-child + *,
 .map-node > .node-body > .object-node > .node-body > .node > .node-header > *:first-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -420,7 +420,7 @@ span.menu-item {
   border-radius: 3px;
 }
 
-.node-body > .object-node[data-category] > .node-header > .node-icon + *,
+.node-body > .object-node[data-category] > .node-header > .node-icon:first-child + *,
 .node-body > .object-node[data-category] > .node-header > *:first-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;

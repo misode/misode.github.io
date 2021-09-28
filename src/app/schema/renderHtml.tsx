@@ -251,6 +251,11 @@ const renderHtml: RenderHook = {
 				}
 				return path
 			}, path => {
+				if (path.equals(new Path(['config', 'decorators']))) {
+					const decorators: any[] = []
+					iterateNestedDecorators(model.data, decorators)
+					return decorators
+				}
 				return model.get(wrapper.map(path))
 			}, (path, value, silent) => {
 				if (path.startsWith(featurePath)) {
@@ -258,6 +263,7 @@ const renderHtml: RenderHook = {
 				} else if (path.startsWith(new Path(['config', 'decorators']))) {
 					const index = path.modelArr[2]
 					if (path.modelArr.length === 2) {
+						console.log('Set', path)
 						const feature = wrapper.get(featurePath)
 						model.set(new Path(), produceNestedDecorators(feature, value))
 					} else if (typeof index === 'number') {
