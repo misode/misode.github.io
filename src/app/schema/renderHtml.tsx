@@ -378,7 +378,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 	} else {
 		const datalistId = hexId()
 		return <>
-			<input value={value ?? ''} onBlur={onChange}
+			<input value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}}
 				list={values.length > 0 ? datalistId : ''} />
 			{values.length > 0 && <datalist id={datalistId}>
 				{values.map(v => <option value={v} />)}
