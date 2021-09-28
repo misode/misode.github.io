@@ -1,5 +1,5 @@
-import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
-import { DataModel } from '@mcschema/core'
+import type { CollectionRegistry, INode, SchemaRegistry } from '@mcschema/core'
+import { ChoiceNode, DataModel, Reference, StringNode } from '@mcschema/core'
 import * as java15 from '@mcschema/java-1.15'
 import * as java16 from '@mcschema/java-1.16'
 import * as java17 from '@mcschema/java-1.17'
@@ -47,6 +47,9 @@ const versionGetter: {
 	1.18: java18,
 }
 
+export let CachedDecorator: INode<any>
+export let CachedFeature: INode<any>
+
 async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
 		Versions[id] = (async () => {
@@ -69,6 +72,19 @@ async function getVersion(id: VersionId): Promise<VersionData> {
 export async function getModel(version: VersionId, id: string): Promise<DataModel> {
 	if (!Models[id] || Models[id].version !== version) {
 		const versionData = await getVersion(version)
+		
+		CachedDecorator = Reference(versionData.schemas, 'configured_decorator')
+		CachedFeature = ChoiceNode([
+			{
+				type: 'string',
+				node: StringNode(versionData.collections, { validator: 'resource', params: { pool: '$worldgen/configured_feature' } }),
+			},
+			{
+				type: 'object',
+				node: Reference(versionData.schemas, 'configured_feature'),
+			},
+		], { choiceContext: 'feature' })
+
 		const schemaName = config.generators.find(g => g.id === id)?.schema
 		if (!schemaName) {
 			throw new Error(`Cannot find model ${id}`)

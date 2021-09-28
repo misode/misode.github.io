@@ -16,6 +16,8 @@
   "entries_hidden.all": "Show all",
   "expand": "Expand",
   "expand_all": "Hold %0% to expand all",
+  "feature.decorated.decorators": "Decorators",
+  "feature.decorated.decorators.entry": "Decorator",
   "fields": "Fields",
   "generate_new_seed": "Generate new seed",
   "github": "GitHub",

@@ -1,14 +1,16 @@
-import type { BooleanHookParams, EnumOption, Hook, INode, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
-import { DataModel, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
+import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
+import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
-import { useRef, useState } from 'preact/hooks'
+import { useState } from 'preact/hooks'
 import { Btn } from '../components'
 import { Octicon } from '../components/Octicon'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry } from '../Schemas'
-import { deepClone, deepEqual, hexId, newSeed } from '../Utils'
+import { CachedDecorator, CachedFeature } from '../Schemas'
+import { deepClone, deepEqual, hexId, isObject, newSeed } from '../Utils'
+import { ModelWrapper } from './ModelWrapper'
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
@@ -220,7 +222,14 @@ const renderHtml: RenderHook = {
 		return [null, <NumberSuffix {...{...params, path, value, lang, states, ctx}} />, null]
 	},
 
-	object({ node, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
+	object({ node, config, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
+		if (path.getArray().length == 0 && isDecorated(config.context, value)) {
+			const { wrapper, fields } = createDecoratorsWrapper(getActiveFields(path), path, value)
+			value = wrapper.data
+			getActiveFields = () => fields
+			getChildModelPath = (path, key) => new ModelPath(wrapper, new Path(path.getArray(), ['feature'])).push(key)
+		}
+
 		let prefix: JSX.Element | null = null
 		let suffix: JSX.Element | null = null
 		if (node.optional()) {
@@ -319,40 +328,18 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 }
 
 function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHookParams>) {
-	const [text, setText] = useState(value ?? '')
-	const [editing, setEditing] = useState(false)
-	const commitTimeout = useRef<number>()
-	const commitValue = useRef<number | undefined>()
-	const scheduleCommit = (newValue: number) => {
-		if (commitTimeout.current) clearTimeout(commitTimeout.current)
-		commitValue.current = newValue
-		commitTimeout.current = setTimeout(() => {
-			path.model.set(path, commitValue.current)
-			commitValue.current = undefined
-			setEditing(false)
-		}, 500)
-	}
 	const onChange = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = integer ? parseInt(value) : parseFloat(value)
-		setText(value)
-		scheduleCommit(parsed)
-	}
-	const onFocus = () => {
-		setEditing(true)
-	}
-	const onBlur = () => {
-		if (commitValue === undefined) setEditing(false)
-		setText(commitValue.current ?? value ?? '')
+		path.model.set(path, parsed)
 	}
 	const onColor = (evt: Event) => {
 		const value = (evt.target as HTMLInputElement).value
 		const parsed = parseInt(value.slice(1), 16)
-		setText(parsed)
-		scheduleCommit(parsed)
+		path.model.set(path, parsed)
 	}
 	return <>
-		<input type="text" value={editing ? text : (value ?? '')} onChange={onChange} onFocus={onFocus} onBlur={onBlur} />
+		<input type="text" value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
 		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={locale(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
 	</>
@@ -391,7 +378,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 	} else {
 		const datalistId = hexId()
 		return <>
-			<input value={value ?? ''} onBlur={onChange}
+			<input value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}}
 				list={values.length > 0 ? datalistId : ''} />
 			{values.length > 0 && <datalist id={datalistId}>
 				{values.map(v => <option value={v} />)}
@@ -482,6 +469,9 @@ function pathLocale(lang: string, path: Path, ...params: string[]) {
 }
 
 function ErrorPopup({ lang, path, nested }: { lang: string, path: ModelPath, nested?: boolean }) {
+	if (path.model instanceof ModelWrapper) {
+		path = path.model.map(path).withModel(path.model)
+	}
 	const e = nested
 		?	path.model.errors.getAll().filter(e => e.path.startsWith(path))
 		: path.model.errors.get(path, true)
@@ -504,4 +494,99 @@ const popupIcon = (type: string, icon: keyof typeof Octicon, popup: string) => {
 		{Octicon[icon]}
 		<span class="icon-popup">{popup}</span>
 	</div>
+}
+
+function isDecorated(context: string | undefined, value: any) {
+	return context === 'feature'
+		&& value?.type?.replace(/^minecraft:/, '') === 'decorated'
+		&& isObject(value?.config)
+}
+
+function createDecoratorsWrapper(originalFields: NodeChildren, path: ModelPath, value: any) {
+	const decorators: any[] = []
+	const feature = iterateNestedDecorators(value, decorators)
+	const fields = {
+		type: originalFields.type,
+		config: ObjectNode({
+			decorators: ListNode(CachedDecorator),
+			feature: CachedFeature,
+		}, { context: 'feature.decorated' }),
+	}
+	const schema = ObjectNode(fields, { context: 'feature' })
+	const featurePath = new Path(['config', 'feature'])
+	const model = path.getModel()
+	const wrapper: ModelWrapper = new ModelWrapper(schema, path => {
+		if (path.startsWith(featurePath)) {
+			return new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr])
+		} else if (path.startsWith(new Path(['config', 'decorators']))) {
+			if (path.modelArr.length === 2) {
+				return new Path([])
+			}
+			const index = path.modelArr[2]
+			if (typeof index === 'number') {
+				return new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
+			}
+		}
+		return path
+	}, path => {
+		if (path.equals(new Path(['config', 'decorators']))) {
+			const decorators: any[] = []
+			iterateNestedDecorators(model.data, decorators)
+			return decorators
+		}
+		return model.get(wrapper.map(path))
+	}, (path, value, silent) => {
+		if (path.startsWith(featurePath)) {
+			model.set(new Path([...[...Array(decorators.length - 1)].flatMap(() => ['config', 'feature']), ...path.modelArr]), value, silent)
+		} else if (path.startsWith(new Path(['config', 'decorators']))) {
+			const index = path.modelArr[2]
+			if (path.modelArr.length === 2) {
+				const feature = wrapper.get(featurePath)
+				model.set(new Path(), produceNestedDecorators(feature, value))
+			} else if (typeof index === 'number') {
+				if (path.modelArr.length === 3 && value === undefined) {
+					const feature = wrapper.get(featurePath)
+					const newDecorators = [...decorators]
+					newDecorators.splice(index, 1)
+					const newValue = produceNestedDecorators(feature, newDecorators)
+					model.set(new Path(), newValue)
+				} else {
+					const newPath = new Path([...[...Array(index)].flatMap(() => ['config', 'feature']), 'config', 'decorator', ...path.modelArr.slice(3)])
+					model.set(newPath, value, silent)
+				}
+			}
+		}
+		return path
+	})
+	wrapper.data = {
+		type: model.data.type,
+		config: {
+			decorators,
+			feature,
+		},
+	}
+	wrapper.errors = model.errors
+	return { fields, wrapper }
+}
+
+function iterateNestedDecorators(value: any, decorators: any[]): any {
+	if (value?.type?.replace(/^minecraft:/, '') !== 'decorated') {
+		return value
+	}
+	if (!isObject(value?.config)) {
+		return value
+	}
+	decorators.push({ id: decorators.length, node: value.config.decorator })
+	return iterateNestedDecorators(value.config.feature ?? '', decorators)
+}
+
+function produceNestedDecorators(feature: any, decorators: any[]): any {
+	if (decorators.length === 0) return feature
+	return {
+		type: 'minecraft:decorated',
+		config: {
+			decorator: decorators.shift().node,
+			feature: produceNestedDecorators(feature, decorators),
+		},
+	}
 }
