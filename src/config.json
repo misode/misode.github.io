@@ -188,6 +188,7 @@
     { "id": "advancement", "dynamic": true },
     { "id": "attribute", "minVersion": "1.16" },
     { "id": "block" },
+    { "id": "block_predicate_type", "minVersion": "1.18" },
     { "id": "dimension", "dynamic": true },
     { "id": "dimension_type", "dynamic": true },
     { "id": "enchantment" },
