@@ -11,7 +11,7 @@ type BiomeSourceOptions = {
 	offset: [number, number],
 	scale: number,
 	res: number,
-	seed: bigint,
+	seed: bigint | undefined,
 	version: VersionId,
 }
 
@@ -50,6 +50,9 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 }
 
 async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: BiomeSource, climateSampler: Climate.Sampler }> {
+	if(options.seed == undefined) {
+		options.seed = Math.random() * (1000000 - 0) + 0
+	}
 	const newState = [state, options.octaves, `${options.seed}`, options.version]
 	if (!deepEqual(newState, cacheState)) {
 		cacheState = deepClone(newState)
