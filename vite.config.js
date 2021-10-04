@@ -4,6 +4,7 @@ import html from '@rollup/plugin-html'
 import config from './src/config.json'
 import { env } from 'process'
 import copy from 'rollup-plugin-copy'
+import English from './src/locales/en.json'
 
 export default defineConfig({
 	build: {
@@ -41,8 +42,9 @@ export default defineConfig({
 
 function getTitle(m) {
 	const minVersion = Math.max(0, config.versions.findIndex(v => m.minVersion === v.id))
-	const versions = config.versions.slice(minVersion).map(v => v.id).join(', ')
-	return `${m.name} Generator${m.category === true ? 's' : ''} Minecraft ${versions}`
+	const versions = config.versions.slice(minVersion).map(v => v.id)
+	versions.splice(0, versions.length - 3)
+	return `${English[m.id] ?? ''} Generator${m.category === true ? 's' : ''} Minecraft ${versions.join(', ')}`
 }
 
 function template({ files, title }) {
