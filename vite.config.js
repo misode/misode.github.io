@@ -17,7 +17,7 @@ export default defineConfig({
 					template: template,
 				}),
 				...config.generators.map(m => html({
-					fileName: `${m.id}/index.html`,
+					fileName: `${m.url}/index.html`,
 					title: getTitle(m),
 					template: template,
 				})),
