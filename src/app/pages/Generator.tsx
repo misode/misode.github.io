@@ -154,7 +154,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 		if (copyTimeout.current !== undefined) clearTimeout(copyTimeout.current)
 		copyTimeout.current = setTimeout(() => {
 			setCopyActive(false)
-		}, 2000)
+		}, 2000) as any
 	}
 
 	const [previewShown, setPreviewShown] = useState(false)

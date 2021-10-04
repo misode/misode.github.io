@@ -3,6 +3,7 @@ import preact from '@preact/preset-vite'
 import html from '@rollup/plugin-html'
 import config from './src/config.json'
 import { env } from 'process'
+import copy from 'rollup-plugin-copy'
 
 export default defineConfig({
 	build: {
@@ -19,6 +20,12 @@ export default defineConfig({
 					title: getTitle(m),
 					template: template,
 				})),
+				copy({
+					targets: [
+						{ src: 'src/sitemap.txt', dest: 'dist' }
+					],
+					hook: 'writeBundle'
+				})
 			],
 		},
 	},

@@ -33,7 +33,7 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 				refineTimeout.current = setTimeout(() => {
 					res.current = 1
 					redraw()
-				}, 150)
+				}, 150) as any
 			}
 		},
 		async onDrag(dx, dy) {
