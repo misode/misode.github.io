@@ -3,6 +3,7 @@ https://misode.github.io/loot-table/
 https://misode.github.io/predicate/
 https://misode.github.io/item-modifier/
 https://misode.github.io/advancement/
+https://misode.github.io/recipe/
 https://misode.github.io/dimension/
 https://misode.github.io/dimension-type/
 https://misode.github.io/world/

@@ -107,6 +107,12 @@
       "schema": "advancement"
     },
     {
+      "id": "recipe",
+      "url": "recipe",
+      "path": "recipes",
+      "schema": "recipe"
+    },
+    {
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",
@@ -212,6 +218,7 @@
     { "id": "potion", "minVersion": "1.15" },
     { "id": "predicate", "dynamic": true },
     { "id": "recipe", "dynamic": true },
+    { "id": "recipe_serializer" },
     { "id": "rule_test", "minVersion": "1.16" },
     { "id": "sound_event" },
     { "id": "stat_type" },
@@ -223,7 +230,7 @@
     { "id": "tag/item", "dynamic": true },
     { "id": "worldgen/biome", "dynamic": true },
     { "id": "worldgen/block_state_provider_type", "minVersion": "1.16" },
-    { "id": "worldgen/block_placer_type", "minVersion": "1.16" },
+    { "id": "worldgen/block_placer_type", "minVersion": "1.16", "maxVersion": "1.17" },
     { "id": "worldgen/biome_source", "minVersion": "1.16" },
     { "id": "worldgen/carver", "minVersion": "1.16" },
     { "id": "worldgen/chunk_generator", "minVersion": "1.16" },

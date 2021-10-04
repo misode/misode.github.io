@@ -23,7 +23,8 @@ export default defineConfig({
 				})),
 				copy({
 					targets: [
-						{ src: 'src/sitemap.txt', dest: 'dist' }
+						{ src: 'src/sitemap.txt', dest: 'dist' },
+						{ src: 'src/sitemap.txt', dest: 'dist', rename: 'sitemap2.txt' },
 					],
 					hook: 'writeBundle'
 				})
