@@ -65,12 +65,12 @@ const renderHtml: RenderHook = {
 			return [prefix, suffix, body]
 		}
 		const choiceContextPath = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
-		const set = (value: string) => {
-			const c = choices.find(c => c.type === value) ?? choice
+		const set = (type: string) => {
+			const c = choices.find(c => c.type === type) ?? choice
 			const newValue = c.change
-				? c.change(value, { wrapLists: true })
-				: DataModel.wrapLists(config.choiceContext === 'feature' ?	c.node.default()?.config?.feature : c.node.default())
-			path.model.set(path, newValue)
+				? c.change(DataModel.unwrapLists(value))
+				: config.choiceContext === 'feature' ?	c.node.default()?.config?.feature : c.node.default()
+			path.model.set(path, DataModel.wrapLists(newValue))
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
 			{choices.map(c => <option value={c.type}>

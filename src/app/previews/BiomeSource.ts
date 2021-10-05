@@ -1,8 +1,9 @@
+import { DataModel } from '@mcschema/core'
 import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
 import { FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
 import { fetchPreset } from '../DataFetcher'
 import type { VersionId } from '../Schemas'
-import { clamp, deepClone, deepEqual, square, stringToColor, unwrapLists } from '../Utils'
+import { clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
 
 type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
@@ -90,7 +91,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 					state = options.version === '1.18' ? await OverworldPreset18() : state
 					break
 			}
-			state = unwrapLists(state)
+			state = DataModel.unwrapLists(state)
 			if (options.version === '1.18') {
 				return MultiNoise.fromJson(state)
 			} else {
