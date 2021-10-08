@@ -16,6 +16,11 @@ export default defineConfig({
 					title: '404',
 					template: template,
 				}),
+				html({
+					fileName: `sounds/index.html`,
+					title: getTitle({ id: 'title.sounds', page: true }),
+					template: template,
+				}),
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
 					title: getTitle(m),
@@ -45,7 +50,11 @@ function getTitle(m) {
 	const minVersion = Math.max(0, config.versions.findIndex(v => m.minVersion === v.id))
 	const versions = config.versions.slice(minVersion).map(v => v.id)
 	versions.splice(0, versions.length - 3)
-	return `${English[m.id] ?? ''} Generator${m.category === true ? 's' : ''} Minecraft ${versions.join(', ')}`
+	return `${English[m.id] ?? ''}${m.page ? '' : ` Generator${m.category === true ? 's' : ''}`} Minecraft ${versions.join(', ')}`
+}
+
+function getTitleSuffix(versions ) {
+
 }
 
 function template({ files, title }) {
