@@ -9,16 +9,16 @@ import { useModel } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry, VersionId } from '../Schemas'
 import { checkVersion, getBlockStates, getCollections, getModel } from '../Schemas'
-import { getGenerator } from '../Utils'
+import { getGenerator, message } from '../Utils'
 
 type GeneratorProps = {
 	lang: string,
 	changeTitle: (title: string, versions?: VersionId[]) => unknown,
 	version: VersionId,
-	onChangeVersion: (version: VersionId) => unknown,
+	changeVersion: (version: VersionId) => unknown,
 	default?: true,
 }
-export function Generator({ lang, changeTitle, version, onChangeVersion }: GeneratorProps) {
+export function Generator({ lang, changeTitle, version, changeVersion }: GeneratorProps) {
 	const loc = locale.bind(null, lang)
 	const [error, setError] = useState<string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
@@ -53,7 +53,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 			.then(b => setBlockStates(b))
 		getModel(version, gen.id)
 			.then(m => setModel(m))
-			.catch(e => { console.error(e); setError(e.message) })
+			.catch(e => { console.error(e); setError(message(e)) })
 	}, [version, gen.id])
 
 	useModel(model, () => {
@@ -183,7 +183,7 @@ export function Generator({ lang, changeTitle, version, onChangeVersion }: Gener
 				</BtnMenu>
 				<BtnMenu icon="tag" label={version}>
 					{allowedVersions.reverse().map(v =>
-						<Btn label={v} active={v === version} onClick={() => onChangeVersion(v)} />
+						<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
 					)}
 				</BtnMenu>
 				<BtnMenu icon="kebab_horizontal" tooltip={loc('more')}>

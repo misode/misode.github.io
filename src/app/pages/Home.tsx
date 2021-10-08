@@ -21,7 +21,7 @@ export function Home({ lang, changeTitle }: HomeProps) {
 			<ToolCard title="Report Inspector" icon="report" link="https://misode.github.io/report/">
 				<p>Analyse your performance reports</p>
 			</ToolCard>
-			<ToolCard title="Minecraft Sounds" icon="sounds" link="https://misode.github.io/sounds/">
+			<ToolCard title="Minecraft Sounds" icon="sounds" link="/sounds/">
 				<p>Browse through and mix all the vanilla sounds</p>
 			</ToolCard>
 			<ToolCard title="Data Pack Upgrader" link="https://misode.github.io/upgrader/">

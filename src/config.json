@@ -49,12 +49,14 @@
   "versions": [
     {
       "id": "1.15",
+      "latest": "1.15.2",
       "refs": {
         "mcdata_master": "13355f7"
       }
     },
     {
       "id": "1.16",
+      "latest": "1.16.5",
       "refs": {
         "mcdata_master": "1.16.4",
         "vanilla_datapack_data": "1.16.4-data",
@@ -63,6 +65,7 @@
     },
     {
       "id": "1.17",
+      "latest": "1.17.1",
       "refs": {
         "mcdata_master": "1.17.1",
         "vanilla_datapack_data": "1.17.1-data",

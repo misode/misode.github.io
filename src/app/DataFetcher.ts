@@ -1,5 +1,6 @@
 import type { CollectionRegistry } from '@mcschema/core'
 import config from '../config.json'
+import type { VersionAssets, VersionManifest } from './Manifest'
 import type { BlockStateRegistry, VersionId } from './Schemas'
 import { checkVersion } from './Schemas'
 import { message } from './Utils'
@@ -21,6 +22,9 @@ declare var __VANILLA_DATAPACK_SUMMARY_HASH__: string
 
 const mcdataUrl = 'https://raw.githubusercontent.com/Arcensoth/mcdata'
 const vanillaDatapackUrl = 'https://raw.githubusercontent.com/SPGoding/vanilla-datapack'
+const manifestUrl = 'https://launchermeta.mojang.com/mc/game/version_manifest.json'
+const resourceUrl = 'https://resources.download.minecraft.net/'
+const corsUrl = 'https://misode-cors-anywhere.herokuapp.com/'
 
 const refs: {
 	id: VersionRef,
@@ -164,6 +168,40 @@ export async function fetchPreset(version: VersionId, registry: string, id: stri
 	} catch (e) {
 		console.warn(`Error occurred while fetching ${registry} preset ${id}:`, message(e))
 	}
+}
+
+export async function fetchManifest() {
+	try {
+		const res = await fetch(manifestUrl)
+		return await res.json()
+	} catch (e) {
+		throw new Error(`Error occurred while fetching version manifest: ${message(e)}`)
+	}
+}
+
+export async function fetchAssets(versionId: VersionId, manifest: VersionManifest) {
+	const version = config.versions.find(v => v.id === versionId)
+	const id = version?.latest ?? manifest.latest.snapshot
+	try {
+		const versionMeta = await getData(manifest.versions.find(v => v.id === id)!.url)
+	
+		return (await getData(versionMeta.assetIndex.url)).objects
+	} catch (e) {
+		throw new Error(`Error occurred while fetching assets for ${version}: ${message(e)}`)
+	}
+}
+
+export async function fetchSounds(version: VersionId, assets: VersionAssets) {
+	try {
+		const hash = assets['minecraft/sounds.json'].hash
+		return await getData(getResourceUrl(hash))
+	} catch (e) {
+		throw new Error(`Error occurred while fetching sounds for ${version}: ${message(e)}`)
+	}
+}
+
+export function getResourceUrl(hash: string) {
+	return `${corsUrl}${resourceUrl}${hash.slice(0, 2)}/${hash}`
 }
 
 async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {

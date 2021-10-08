@@ -6,6 +6,7 @@ export namespace Store {
 	export const ID_THEME = 'theme'
 	export const ID_VERSION = 'schema_version'
 	export const ID_INDENT = 'indentation'
+	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
 
 	export function getLanguage() {
 		return localStorage.getItem(ID_LANGUAGE) ?? 'en'
@@ -27,6 +28,10 @@ export namespace Store {
 		return localStorage.getItem(ID_INDENT) ?? '2_spaces'
 	}
 
+	export function getSoundsVersion() {
+		return localStorage.getItem(ID_SOUNDS_VERSION) ?? 'latest'
+	}
+
 	export function setLanguage(language: string | undefined) {
 		if (language) localStorage.setItem(ID_LANGUAGE, language)
 	}
@@ -41,5 +46,9 @@ export namespace Store {
 
 	export function setIndent(indent: string | undefined) {
 		if (indent) localStorage.setItem(ID_INDENT, indent)
+	}
+
+	export function setSoundsVersion(version: string | undefined) {
+		if (version) localStorage.setItem(ID_SOUNDS_VERSION, version)
 	}
 }

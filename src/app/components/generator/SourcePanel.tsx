@@ -1,12 +1,12 @@
 import { DataModel, ModelPath } from '@mcschema/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
-import { Btn, BtnMenu } from '.'
-import { useModel } from '../hooks'
-import { locale } from '../Locales'
-import { transformOutput } from '../schema/transformOutput'
-import type { BlockStateRegistry } from '../Schemas'
-import { Store } from '../Store'
-import { message } from '../Utils'
+import { Btn, BtnMenu } from '..'
+import { useModel } from '../../hooks'
+import { locale } from '../../Locales'
+import { transformOutput } from '../../schema/transformOutput'
+import type { BlockStateRegistry } from '../../Schemas'
+import { Store } from '../../Store'
+import { message } from '../../Utils'
 
 const OUTPUT_CHARS_LIMIT = 10000
 

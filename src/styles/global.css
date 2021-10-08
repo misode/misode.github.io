@@ -10,6 +10,10 @@
 	--text-3: #c3c3c3;
 	--accent-primary: #50baf9;
 	--accent-success: #3eb84f;
+	--accent-sounds-1: #451475;
+	--accent-sounds-2: #39155e;
+	--accent-sounds-3: #6a08a3;
+	--accent-sounds-4: #d1a5e6;
 	--nav: #91908f;
 	--nav-hover: #b4b3b0;
 	--nav-faded: #4d4c4c;
@@ -17,6 +21,7 @@
 	--selection: #6786dd99;
 	--errors-background: #62190f;
 	--errors-text: #ffffffcc;
+  --invalid-text: #fd7951;
 }
 
 :root[data-theme=light] {
@@ -31,6 +36,10 @@
 	--text-3: #494949;
 	--accent-primary: #088cdb;
 	--accent-success: #1a7f37;
+	--accent-sounds-1: #b481e7;
+	--accent-sounds-2: #c18df5;
+	--accent-sounds-3: #af72d3;
+	--accent-sounds-4: #efd3fd;
 	--nav: #343a40;
 	--nav-hover: #565d64;
 	--nav-faded: #9fa2a7;
@@ -38,6 +47,7 @@
 	--selection: #6786dd99;
 	--errors-background: #f66653;
 	--errors-text: #000000cc;
+  --invalid-text: #a32600;
 }
 
 @media (prefers-color-scheme: light) {
@@ -53,6 +63,10 @@
 		--text-3: #494949;
 		--accent-primary: #088cdb;
 		--accent-success: #1a7f37;
+		--accent-sounds-1: #b481e7;
+		--accent-sounds-2: #c18df5;
+		--accent-sounds-3: #af72d3;
+		--accent-sounds-4: #efd3fd;
 		--nav: #343a40;
 		--nav-hover: #565d64;
 		--nav-faded: #9fa2a7;
@@ -60,6 +74,7 @@
 		--selection: #6786dd99;
 		--errors-background: #f66653;
 		--errors-text: #000000cc;
+		--invalid-text: #a32600;
 	}
 }
 
@@ -80,6 +95,7 @@ a svg {
 body {
 	font-size: 18px;
 	font-family: Arial, Helvetica, sans-serif;
+	min-height: 100vh;
 	overflow-x: hidden;
 	background-color: var(--background-1);
 }
@@ -206,6 +222,7 @@ main {
 	position: fixed;
 	top: 12px;
 	right: 16px;
+	left: 16px;
 	z-index: 1;
 	pointer-events: none;
 }
@@ -213,7 +230,7 @@ main {
 main > .controls {
 	position: sticky;
 	margin-right: 16px;
-	right: 16px;
+	margin-left: 16px;
 	top: 68px;
 }
 
@@ -502,46 +519,53 @@ main.has-preview {
 	opacity: 0;
 }
 
+.tooltipped.tip-nw::after,
 .tooltipped.tip-ne::after {
 	bottom: 100%;
 	margin-bottom: 6px;
+}
+
+.tooltipped.tip-se::after,
+.tooltipped.tip-s::after,
+.tooltipped.tip-sw::after {
+	top: 100%;
+	margin-top: 6px;
+}
+
+.tooltipped.tip-ne::after
+.tooltipped.tip-se::after {
 	left: 50%;
 	margin-left: -16px;
 }
 
-.tooltipped.tip-nw::after {
-	bottom: 100%;
-	margin-bottom: 6px;
+.tooltipped.tip-nw::after,
+.tooltipped.tip-sw::after {
 	right: 50%;
 	margin-right: -16px;
 }
 
 .tooltipped.tip-ne::before,
+.tooltipped.tip-n::before,
 .tooltipped.tip-nw::before {
 	bottom: auto;
   top: -7px;
 	border-top-color: var(--background-6);
 }
 
-.tooltipped.tip-se::after {
-	top: 100%;
-	margin-top: 6px;
-	left: 50%;
-	margin-left: -16px;
-}
-
-.tooltipped.tip-sw::after {
-	top: 100%;
-	margin-top: 6px;
-	right: 50%;
-	margin-right: -16px;
-}
-
 .tooltipped.tip-se::before,
+.tooltipped.tip-s::before,
 .tooltipped.tip-sw::before {
 	top: auto;
   bottom: -7px;
 	border-bottom-color: var(--background-6);
+}
+
+.tooltipped.tip-s::after,
+.tooltipped.tip-n::after,
+.tooltipped.tip-s::before,
+.tooltipped.tip-n::before {
+	left: var(--x, 50%);
+	transform: translate(-50%, 8px);
 }
 
 .tooltipped::before {
@@ -768,12 +792,236 @@ hr {
 	color: var(--text-3) !important;
 }
 
-@keyframes spinner {
+.sounds {
+	padding: 16px;
+}
+
+.sound-search-group {
+	flex-basis: 350px;
+	height: 32px;
+	display: flex;
+	border-radius: 6px;
+	box-shadow: 0 1px 7px -2px #000;
+}
+
+.sound-search {
+	flex-basis: 100%;
+	padding: 8px;
+	color: var(--text-1);
+	background-color: var(--background-2);
+	border: none;
+	border-radius: 6px;
+	font-size: 16px;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	margin-right: 0 !important;
+	box-shadow: none;
+}
+
+.btn.add-sound {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	background-color: var(--accent-sounds-1);
+	box-shadow: none;
+}
+
+.btn.add-sound:hover {
+	background-color: var(--accent-sounds-2);
+}
+
+.spacer {
+	margin-right: auto !important;
+}
+
+.sound-config {
+  display: grid;
+  grid-template-columns: min-content 2fr min-content min-content min-content 1fr min-content 1fr min-content min-content;
+  align-items: center;
+  gap: 12px 8px;
+  padding: 10px;
+  background-color: var(--background-2);
+  border-radius: 5px;
+}
+
+.sound-config:not(:last-child) {
+	margin-bottom: 8px;
+}
+
+.sound-config .btn {
+	box-shadow: none;
+}
+
+.sound-config .sound {
+	width: 100%;
+}
+
+.sound-config label {
+	color: var(--text-2);
+  white-space: nowrap;
+}
+
+.sound-config .delay {
+  width: 50px;
+  padding: 4px;
+}
+
+.sound-config input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+}
+
+.sound-config input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+.sound-config input[type=range]:focus {
+  outline: none;
+}
+
+.sound-config input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--text-3);
+  cursor: pointer;
+  margin-top: -5px;
+}
+
+.sound-config input[type=range]::-moz-range-thumb {
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--text-3);
+  cursor: pointer;
+}
+
+.sound-config input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  cursor: pointer;
+  background: var(--background-4);
+  border-radius: 2px;
+  border: none;
+}
+
+.sound-config input[type=range]:focus::-webkit-slider-runnable-track {
+	background: var(--background-5);
+}
+
+.sound-config input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  cursor: pointer;
+  background: var(--background-4);
+  border-radius: 2px;
+  border: none;
+}
+
+.sound-config input[type=range]:focus::-moz-range-track {
+	background: var(--background-5);
+}
+
+.sound-config .copy[data-command] {
+  position: relative;
+}
+
+.sound-config .copy[data-command]::after {
+  content: attr(data-command);
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background-color: var(--background-3);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px var(--background-1);
+  cursor: initial;
+}
+
+.sound-config.invalid .play,
+.sound-config.loading .play {
+	cursor: initial;
+}
+
+.sound-config.playing {
+  background-color: var(--background-3);
+}
+
+.sound-config.playing .play {
+  background-image: linear-gradient(110deg, var(--accent-sounds-3), var(--accent-sounds-3) 45%, var(--accent-sounds-4) 47%, var(--accent-sounds-4) 53%, var(--accent-sounds-3) 55%);
+  background-size: 300%;
+  background-position: right;
+  animation: playing 1s infinite;
+}
+
+@keyframes playing {
+  0% {
+    background-position: left;
+  }
+  100% {
+    background-position: right;
+  }
+}
+
+.sound-config.loading:not(.invalid) .play svg {
+  animation: spinning 2s infinite linear;
+}
+
+.sound-config.invalid .sound {
+  color: var(--invalid-text);
+}
+
+@media screen and (max-width: 720px) {
+	.sound-search-group {
+		margin-bottom: 8px;
+		flex-basis: 100%;
+		margin-right: 0 !important;
+	}
+
+	.sounds-controls {
+		flex-wrap: wrap;
+	}
+
+  .sounds .btn {
+    padding: 8px 10px;
+  }
+
+	.sounds .btn svg {
+    margin-right: 0 !important;
+  }
+
+	.sounds .btn span {
+		display: none;
+	}
+
+  .sound-config {
+    grid-template-columns: min-content min-content 1fr min-content 1fr min-content;
+    grid-template-areas:
+      "play sound sound sound sound copy"
+      "pitch-label pitch-label pitch volume-label volume remove";
+  }
+  .sound-config .play { grid-area: play; }
+  .sound-config .sound { grid-area: sound; }
+  .sound-config .delay-label { display: none; }
+  .sound-config .delay { display: none; }
+  .sound-config .pitch-label { grid-area: pitch-label; }
+  .sound-config .pitch { grid-area: pitch; }
+  .sound-config .volume-label { grid-area: volume-label; }
+  .sound-config .volume { grid-area: volume; }
+  .sound-config .copy { grid-area: copy; }
+  .sound-config .remove { grid-area: remove; }
+}
+
+@keyframes spinning {
 	0% {
 		transform: rotate(0deg);
 	}
 	100% {
-		transform: rotate(360deg);
+		transform: rotate(-360deg);
 	}
 }
 
@@ -848,17 +1096,5 @@ hr {
 
 	.generator-picker {
 		justify-content: center;
-	}
-
-	.field-list li {
-		flex-direction: column;
-	}
-
-	.field-prop {
-		width: 100%;
-	}
-
-	.field-prop input {
-		width: 100%;
 	}
 }

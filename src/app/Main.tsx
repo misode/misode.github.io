@@ -8,7 +8,7 @@ import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
-import { Generator, Home, Worldgen } from './pages'
+import { Generator, Home, Sounds, Worldgen } from './pages'
 import type { VersionId } from './Schemas'
 import { Store } from './Store'
 import { cleanUrl } from './Utils'
@@ -71,7 +71,8 @@ function Main() {
 		<Router onChange={changeRoute}>
 			<Home path="/" {...{lang, changeTitle}} />
 			<Worldgen path="/worldgen" {...{lang, changeTitle}} />
-			<Generator default {...{lang, version, changeTitle}} onChangeVersion={changeVersion} />
+			<Sounds path="/sounds" {...{lang, version, changeTitle, changeVersion}} />
+			<Generator default {...{lang, version, changeTitle, changeVersion}} />
 		</Router>
 	</>
 }

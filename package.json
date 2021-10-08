@@ -21,12 +21,14 @@
     "@mcschema/java-1.18": "^0.1.5",
     "@mcschema/locales": "^0.1.29",
     "deepslate": "^0.9.0-beta.2",
+    "howler": "^2.2.3",
     "rfdc": "^1.3.0"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.1.0",
     "@rollup/plugin-html": "^0.2.3",
     "@types/google.analytics": "0.0.40",
+    "@types/howler": "^2.2.4",
     "@types/seedrandom": "^2.4.28",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
