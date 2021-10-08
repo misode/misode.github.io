@@ -160,10 +160,6 @@
   border-color: var(--node-remove) !important;
 }
 
-.node-header > *:focus {
-  position: relative;
-}
-
 /** Rounded corners */
 
 .node-header > .node-icon {
