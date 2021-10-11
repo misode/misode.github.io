@@ -73,7 +73,7 @@
   "world": "世界设置",
   "worldgen": "世界生成",
   "worldgen/biome": "生物群系",
-  "worldgen/configured_carver": "洞穴生成",
+  "worldgen/configured_carver": "地形雕刻器",
   "worldgen/configured_feature": "地物",
   "worldgen/configured_structure_feature": "结构地物",
   "worldgen/configured_surface_builder": "地表生成器",
