@@ -176,7 +176,8 @@
       "url": "worldgen/surface-builder",
       "category": "worldgen",
       "schema": "configured_surface_builder",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "maxVersion": "1.17"
     },
     {
       "id": "worldgen/processor_list",
@@ -246,12 +247,14 @@
     { "id": "worldgen/feature", "minVersion": "1.16" },
     { "id": "worldgen/feature_size_type", "minVersion": "1.16" },
     { "id": "worldgen/foliage_placer_type", "minVersion": "1.16" },
+    { "id": "worldgen/material_condition", "minVersion": "1.18" },
+    { "id": "worldgen/material_rule", "minVersion": "1.18" },
     { "id": "worldgen/noise_settings", "minVersion": "1.16" , "dynamic": true },
     { "id": "worldgen/processor_list", "minVersion": "1.16" , "dynamic": true },
     { "id": "worldgen/structure_feature", "minVersion": "1.16" },
     { "id": "worldgen/structure_pool_element", "minVersion": "1.16" },
     { "id": "worldgen/structure_processor", "minVersion": "1.16" },
-    { "id": "worldgen/surface_builder", "minVersion": "1.16" },
+    { "id": "worldgen/surface_builder", "minVersion": "1.16", "maxVersion": "1.17" },
     { "id": "worldgen/template_pool", "minVersion": "1.16" , "dynamic": true },
     { "id": "worldgen/tree_decorator_type", "minVersion": "1.16" },
     { "id": "worldgen/trunk_placer_type", "minVersion": "1.16" },

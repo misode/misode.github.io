@@ -14,12 +14,12 @@
   "author": "Misode",
   "license": "MIT",
   "dependencies": {
-    "@mcschema/core": "^0.12.11",
+    "@mcschema/core": "^0.12.12",
     "@mcschema/java-1.15": "^0.2.2",
     "@mcschema/java-1.16": "^0.6.5",
     "@mcschema/java-1.17": "^0.2.24",
-    "@mcschema/java-1.18": "^0.1.8",
-    "@mcschema/locales": "^0.1.30",
+    "@mcschema/java-1.18": "^0.1.13",
+    "@mcschema/locales": "^0.1.32",
     "deepslate": "^0.9.0-beta.2",
     "howler": "^2.2.3",
     "rfdc": "^1.3.0"

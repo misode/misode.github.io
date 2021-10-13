@@ -100,7 +100,9 @@ export async function getModel(version: VersionId, id: string): Promise<DataMode
 			}
 			Models[id] = { model, version }
 		} catch (e) {
-			throw new Error(`Cannot get generator "${id}" for version "${version}": ${message(e)}`)
+			const err = new Error(`Cannot get generator "${id}" for version "${version}": ${message(e)}`)
+			if (e instanceof Error) err.stack = e.stack
+			throw err
 		}
 	}
 	return Models[id].model

@@ -164,6 +164,11 @@ export async function fetchPreset(version: VersionId, registry: string, id: stri
 	try {
 		const url = `${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`
 		const res = await fetch(url)
+		if (registry === 'worldgen/noise_settings' && version === '1.18') {
+			let text = await res.text()
+			text = text.replaceAll('"max_threshold": Infinity', '"max_threshold": 100')
+			return JSON.parse(text)
+		}
 		return await res.json()
 	} catch (e) {
 		console.warn(`Error occurred while fetching ${registry} preset ${id}:`, message(e))

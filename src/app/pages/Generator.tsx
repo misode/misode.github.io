@@ -36,7 +36,7 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 	}, [gen.id, version])
 
 	const allowedVersions = config.versions
-		.filter(v => checkVersion(v.id, gen.minVersion))
+		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
 		.map(v => v.id as VersionId)
 
 	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)
