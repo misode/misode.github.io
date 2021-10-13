@@ -325,7 +325,8 @@ function useToggles() {
 	}
 	
 	const isToggled = (key: string) => {
-		return toggleState?.get(key) ?? toggleAll
+		if (!(toggleState instanceof Map)) return false
+		return toggleState.get(key) ?? toggleAll
 	}
 
 	return { expand, collapse, isToggled }
