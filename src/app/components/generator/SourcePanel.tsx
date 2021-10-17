@@ -87,8 +87,8 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	}, [doCopy])
 
 	useEffect(() => {
-		if (doDownload && source.current && download.current) {
-			const content = encodeURIComponent(source.current.value)
+		if (doDownload && model && blockStates && download.current) {
+			const content = encodeURIComponent(getOutput(model, blockStates))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
 			download.current.setAttribute('download', `${name}.json`)
 			download.current.click()
