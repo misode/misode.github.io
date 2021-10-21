@@ -3,6 +3,7 @@ import type { VersionId } from '../../Schemas'
 
 export * from './BiomeSourcePreview'
 export * from './DecoratorPreview'
+export * from './NoisePreview'
 export * from './NoiseSettingsPreview'
 
 export type PreviewProps = {

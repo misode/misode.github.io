@@ -156,6 +156,9 @@ async function fetchDynamicRegistries(version: Version, target: CollectionRegist
 			console.warn('Error occurred while fetching dynamic registries:', message(e))
 		}
 	}
+	if (checkVersion(version.id, '1.18')) {
+		target.register('worldgen/noise', Noises)
+	}
 }
 
 export async function fetchPreset(version: VersionId, registry: string, id: string) {
@@ -252,3 +255,58 @@ async function deleteMatching(matches: (url: string) => boolean) {
 		console.warn(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${message(e)}`)
 	}
 }
+
+const Noises = [
+	'minecraft:aquifer_barrier',
+	'minecraft:aquifer_fluid_level_floodedness',
+	'minecraft:aquifer_fluid_level_spread',
+	'minecraft:aquifer_lava',
+	'minecraft:calcite',
+	'minecraft:cave_cheese',
+	'minecraft:cave_entrance',
+	'minecraft:cave_layer',
+	'minecraft:clay_bands_offset',
+	'minecraft:continentalness',
+	'minecraft:erosion',
+	'minecraft:gravel',
+	'minecraft:gravel_layer',
+	'minecraft:ice',
+	'minecraft:iceberg_and_badlands_pillar',
+	'minecraft:iceberg_and_badlands_pillar_roof',
+	'minecraft:jagged',
+	'minecraft:nether_state_selector',
+	'minecraft:nether_wart',
+	'minecraft:netherrack',
+	'minecraft:noodle',
+	'minecraft:noodle_ridge_a',
+	'minecraft:noodle_ridge_b',
+	'minecraft:noodle_thickness',
+	'minecraft:offset',
+	'minecraft:ore_gap',
+	'minecraft:ore_vein_a',
+	'minecraft:ore_vein_b',
+	'minecraft:ore_veininess',
+	'minecraft:packed_ice',
+	'minecraft:patch',
+	'minecraft:pillar',
+	'minecraft:pillar_rareness',
+	'minecraft:pillar_thickness',
+	'minecraft:powder_snow_surface',
+	'minecraft:powder_snow_under',
+	'minecraft:ridge',
+	'minecraft:soul_sand_layer',
+	'minecraft:spaghetti_2d',
+	'minecraft:spaghetti_2d_elevation',
+	'minecraft:spaghetti_2d_modulator',
+	'minecraft:spaghetti_2d_thickness',
+	'minecraft:spaghetti_3d_1',
+	'minecraft:spaghetti_3d_2',
+	'minecraft:spaghetti_3d_rarity',
+	'minecraft:spaghetti_3d_thickness',
+	'minecraft:spaghetti_roughness',
+	'minecraft:spaghetti_roughness_modulator',
+	'minecraft:surface',
+	'minecraft:surface_swamp',
+	'minecraft:temperature',
+	'minecraft:vegetation',
+]

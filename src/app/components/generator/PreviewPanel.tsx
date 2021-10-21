@@ -3,9 +3,9 @@ import { Path } from '@mcschema/core'
 import { useState } from 'preact/hooks'
 import { useModel } from '../../hooks'
 import type { VersionId } from '../../Schemas'
-import { BiomeSourcePreview, DecoratorPreview, NoiseSettingsPreview } from '../previews'
+import { BiomeSourcePreview, DecoratorPreview, NoisePreview, NoiseSettingsPreview } from '../previews'
 
-export const HasPreview = ['dimension', 'worldgen/noise_settings', 'worldgen/configured_feature']
+export const HasPreview = ['dimension', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature']
 
 type PreviewPanelProps = {
 	lang: string,
@@ -25,6 +25,11 @@ export function PreviewPanel({ lang, model, version, id, shown }: PreviewPanelPr
 	if (id === 'dimension' && model?.get(new Path(['generator', 'type']))?.endsWith('noise')) {
 		const data = model.get(new Path(['generator', 'biome_source']))
 		if (data) return <BiomeSourcePreview {...{ lang, model, version, shown, data }} />
+	}
+
+	if (id === 'worldgen/noise' && model) {
+		const data = model.get(new Path([]))
+		if (data) return <NoisePreview {...{ lang, model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/noise_settings' && model) {
