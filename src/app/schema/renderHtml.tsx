@@ -377,6 +377,8 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 			context = context.contextPush(config.enum)
 		} else if (!isEnum(config) && config?.validator === 'resource' && typeof config.params.pool === 'string') {
 			context = context.contextPush(config.params.pool)
+		} else if (isEnum(config)) {
+			context = path
 		}
 		return <select value={value ?? ''} onChange={onChange}>
 			{node.optional() && <option value="">{locale(lang, 'unset')}</option>}
