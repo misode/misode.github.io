@@ -1,9 +1,20 @@
 import { DataModel } from '@mcschema/core'
 import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
-import { FixedBiome, MultiNoise, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
+import { FixedBiome, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
+import init, { biome_parameters, climate_sampler, multi_noise } from 'deepslate-rs'
+// @ts-expect-error
+import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
 import { fetchPreset } from '../DataFetcher'
 import type { VersionId } from '../Schemas'
-import { clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
+import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
+
+let ready = false
+async function loadWasm() {
+	if (ready) return
+	await init(wasm)
+	ready = true
+	console.debug(`Loaded deepslate-rs from "${wasm}"`)
+}
 
 type BiomeColors = Record<string, number[]>
 type BiomeSourceOptions = {
@@ -16,24 +27,35 @@ type BiomeSourceOptions = {
 	version: VersionId,
 }
 
+interface CachedBiomeSource extends BiomeSource {
+	getBiomes?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): string[]
+}
+
 let cacheState: any
-let biomeSourceCache: BiomeSource
+let biomeSourceCache: CachedBiomeSource
 let climateSamplerCache: Climate.Sampler
 
 export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
 	const { biomeSource, climateSampler } = await getCached(state, options)
 
 	const data = img.data
-	const ox = -options.offset[0] - 100 + options.res / 2
-	const oz = -options.offset[1] - 100 + options.res / 2
+	const ox = -Math.round(options.offset[0]) - 100 + options.res / 2
+	const oz = -Math.round(options.offset[1]) - 100 + options.res / 2
 	const row = img.width * 4 / options.res
 	const col = 4 / options.res
+
+	const biomes = biomeSource.getBiomes?.(
+		ox * options.scale, (200 + ox) * options.scale, options.res * options.scale,
+		64, 65, 1,
+		oz * options.scale, (200 + oz) * options.scale, options.res * options.scale,
+	)
+
 	for (let x = 0; x < 200; x += options.res) {
 		for (let z = 0; z < 200; z += options.res) {
 			const i = z * row + x * col
 			const worldX = (x + ox) * options.scale
 			const worldZ = (z + oz) * options.scale
-			const b = biomeSource.getBiome(worldX, 64, worldZ, climateSampler)
+			const b = biomes?.[(x / options.res) * 200 / options.res + z / options.res] ?? biomeSource.getBiome(worldX, 64, worldZ, climateSampler)
 			const color = getBiomeColor(b, options.biomeColors)
 			data[i] = color[0]
 			data[i + 1] = color[1]
@@ -50,7 +72,7 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 	return biomeSource.getBiome(xx, 64, zz, climateSampler)
 }
 
-async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: BiomeSource, climateSampler: Climate.Sampler }> {
+async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource, climateSampler: Climate.Sampler }> {
 	const newState = [state, options.octaves, `${options.seed}`, options.version]
 	if (!deepEqual(newState, cacheState)) {
 		cacheState = deepClone(newState)
@@ -67,7 +89,7 @@ async function getCached(state: any, options: BiomeSourceOptions): Promise<{ bio
 	} 
 }
 
-async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<BiomeSource> {
+async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<CachedBiomeSource> {
 	switch (state?.type?.replace(/^minecraft:/, '')) {
 		case 'fixed':
 			return new FixedBiome(state.biome as string)
@@ -93,7 +115,41 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 			}
 			state = DataModel.unwrapLists(state)
 			if (options.version === '1.18') {
-				return MultiNoise.fromJson(state)
+				await loadWasm()
+				const BiomeIds = new BiMap<string, number>()
+				const param = (p: number | number[]) => {
+					return typeof p === 'number' ? [p, p] : p
+				}
+				const [t0, t1, h0, h1, c0, c1, e0, e1, w0, w1, d0, d1, o, b] = [[], [], [], [], [], [], [], [], [], [], [], [], [], []] as number[][]
+				for (const i of state.biomes) {
+					const { temperature, humidity, continentalness, erosion, weirdness, depth, offset } = i.parameters
+					t0.push(param(temperature)[0])
+					t1.push(param(temperature)[1])
+					h0.push(param(humidity)[0])
+					h1.push(param(humidity)[1])
+					c0.push(param(continentalness)[0])
+					c1.push(param(continentalness)[1])
+					e0.push(param(erosion)[0])
+					e1.push(param(erosion)[1])
+					w0.push(param(weirdness)[0])
+					w1.push(param(weirdness)[1])
+					d0.push(param(depth)[0])
+					d1.push(param(depth)[1])
+					o.push(offset)
+					b.push(BiomeIds.getOrPut(i.biome, Math.floor(Math.random() * 2147483647)))
+				}
+				const parameters = biome_parameters(new Float64Array(t0), new Float64Array(t1), new Float64Array(h0), new Float64Array(h1), new Float64Array(c0), new Float64Array(c1), new Float64Array(e0), new Float64Array(e1), new Float64Array(w0), new Float64Array(w1), new Float64Array(d0), new Float64Array(d1), new Float64Array(o), new Int32Array(b))
+				const sampler = climate_sampler(options.seed, options.octaves.temperature.firstOctave, new Float64Array(options.octaves.temperature.amplitudes), options.octaves.humidity.firstOctave, new Float64Array(options.octaves.humidity.amplitudes), options.octaves.continentalness.firstOctave, new Float64Array(options.octaves.continentalness.amplitudes), options.octaves.erosion.firstOctave, new Float64Array(options.octaves.erosion.amplitudes), options.octaves.weirdness.firstOctave, new Float64Array(options.octaves.weirdness.amplitudes), options.octaves.shift.firstOctave, new Float64Array(options.octaves.shift.amplitudes))
+				return {
+					getBiome(x, y, z) {
+						const ids = multi_noise(parameters, sampler, x, x + 1, 1, y, y + 1, 1, z, z + 1, 1)
+						return BiomeIds.getA(ids[0]) ?? 'unknown'
+					},
+					getBiomes(xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep) {
+						const ids = multi_noise(parameters, sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
+						return [...ids].map(id => BiomeIds.getA(id) ?? 'unknown')
+					},
+				}
 			} else {
 				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
 					.map((id, i) => {
@@ -171,13 +227,18 @@ const VanillaColors: Record<string, [number, number, number]> = {
 	'minecraft:frozen_ocean': [112,112,214],
 	'minecraft:frozen_river': [160,160,255],
 	'minecraft:giant_spruce_taiga': [129,142,121],
+	'minecraft:old_growth_spruce_taiga': [129,142,121],
 	'minecraft:giant_spruce_taiga_hills': [109,119,102],
 	'minecraft:giant_tree_taiga': [89,102,81],
+	'minecraft:old_growth_pine_taiga': [89,102,81],
 	'minecraft:giant_tree_taiga_hills': [69,79,62],
+	'minecraft:gravelly_hills': [136,136,136],
 	'minecraft:gravelly_mountains': [136,136,136],
+	'minecraft:windswept_gravelly_hills': [136,136,136],
 	'minecraft:ice_spikes': [180,220,220],
 	'minecraft:jungle': [83,123,9],
 	'minecraft:jungle_edge': [98,139,23],
+	'minecraft:sparse_jungle': [98,139,23],
 	'minecraft:jungle_hills': [44,66,5],
 	'minecraft:lukewarm_ocean': [0,0,144],
 	'minecraft:modified_badlands_plateau': [242,180,141],
@@ -186,7 +247,9 @@ const VanillaColors: Record<string, [number, number, number]> = {
 	'minecraft:modified_jungle_edge': [138,179,63],
 	'minecraft:modified_wooded_badlands_plateau': [216,191,141],
 	'minecraft:mountain_edge': [114,120,154],
+	'minecraft:extreme_hills': [96,96,96],
 	'minecraft:mountains': [96,96,96],
+	'minecraft:windswept_hills': [96,96,96],
 	'minecraft:mushroom_field_shore': [160,0,255],
 	'minecraft:mushroom_fields': [255,0,255],
 	'minecraft:nether_wastes': [191,59,59],
@@ -196,6 +259,7 @@ const VanillaColors: Record<string, [number, number, number]> = {
 	'minecraft:savanna': [189,178,95],
 	'minecraft:savanna_plateau': [167,157,100],
 	'minecraft:shattered_savanna': [229,218,135],
+	'minecraft:windswept_savanna': [229,218,135],
 	'minecraft:shattered_savanna_plateau': [207,197,140],
 	'minecraft:small_end_islands': [128,128,255],
 	'minecraft:snowy_beach': [250,240,192],
@@ -204,8 +268,10 @@ const VanillaColors: Record<string, [number, number, number]> = {
 	'minecraft:snowy_taiga_hills': [36,63,54],
 	'minecraft:snowy_taiga_mountains': [89,125,114],
 	'minecraft:snowy_tundra': [255,255,255],
+	'minecraft:snowy_plains': [255,255,255],
 	'minecraft:soul_sand_valley': [94,56,48],
 	'minecraft:stone_shore': [162,162,132],
+	'minecraft:stony_shore': [162,162,132],
 	'minecraft:sunflower_plains': [181,219,136],
 	'minecraft:swamp': [7,249,178],
 	'minecraft:swamp_hills': [47,255,218],
@@ -213,17 +279,22 @@ const VanillaColors: Record<string, [number, number, number]> = {
 	'minecraft:taiga_hills': [22,57,51],
 	'minecraft:taiga_mountains': [51,142,129],
 	'minecraft:tall_birch_forest': [88,156,108],
+	'minecraft:old_growth_birch_forest': [88,156,108],
 	'minecraft:tall_birch_hills': [71,135,90],
 	'minecraft:the_end': [128,128,255],
 	'minecraft:the_void': [0,0,0],
 	'minecraft:warm_ocean': [0,0,172],
 	'minecraft:warped_forest': [73,144,123],
 	'minecraft:wooded_badlands_plateau': [176,151,101],
+	'minecraft:wooded_badlands': [176,151,101],
 	'minecraft:wooded_hills': [34,85,28],
 	'minecraft:wooded_mountains': [80,112,80],
+	'minecraft:windswept_forest': [80,112,80],
 	'minecraft:snowy_slopes': [140, 195, 222],
 	'minecraft:lofty_peaks': [196, 168, 193],
+	'minecraft:jagged_peaks': [196, 168, 193],
 	'minecraft:snowcapped_peaks': [200, 198, 200],
+	'minecraft:frozen_peaks': [200, 198, 200],
 	'minecraft:stony_peaks': [82, 92, 103],
 	'minecraft:grove': [150, 150, 189],
 	'minecraft:meadow': [169, 197, 80],

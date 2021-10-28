@@ -140,3 +140,35 @@ export function deepEqual(a: any, b: any) {
 	}
 	return a !== a && b !== b
 }
+
+export class BiMap<A, B> {
+	private readonly forward: Map<A, B>
+	private readonly backward: Map<B, A>
+
+	constructor() {
+		this.forward = new Map()
+		this.backward = new Map()
+	}
+
+	public set(a: A, b: B) {
+		this.forward.set(a, b)
+		this.backward.set(b, a)
+	}
+
+	public getA(key: B) {
+		return this.backward.get(key)
+	}
+
+	public getB(key: A) {
+		return this.forward.get(key)
+	}
+
+	public getOrPut(key: A, defaultValue: B) {
+		const b = this.forward.get(key)
+		if (b === undefined) {
+			this.set(key, defaultValue)
+			return defaultValue
+		}
+		return b
+	}
+}
