@@ -82,7 +82,7 @@ function getCached(state: unknown, options: NoiseSettingsOptions) {
 		cacheState = deepClone(newState)
 		chunkCache = []
 		const biomeSource = new FixedBiome('unknown')
-		generatorCache = new NoiseChunkGenerator(options.seed, biomeSource, settings, shape)
+		generatorCache = new NoiseChunkGenerator(options.seed, biomeSource, settings)
 	}
 	return {
 		settings,

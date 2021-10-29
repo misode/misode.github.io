@@ -3,15 +3,18 @@ import type { NoiseOctaves } from 'deepslate'
 import { NoiseGeneratorSettings } from 'deepslate'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
-import { Btn } from '..'
+import { Btn, BtnMenu } from '..'
 import { useCanvas } from '../../hooks'
 import { locale } from '../../Locales'
 import { biomeMap, getBiome } from '../../previews'
 import { newSeed } from '../../Utils'
 
+const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness', 'offset', 'factor', 'jaggedness'] as const
+
 export const BiomeSourcePreview = ({ model, data, shown, lang, version }: PreviewProps) => {
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
+	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
 	const refineTimeout = useRef<number>(undefined)
@@ -26,7 +29,7 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { octaves, biomeColors: {}, offset: offset.current, scale, seed, res: res.current, version }
+			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -44,21 +47,21 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves, biomeColors: {}, offset: offset.current, scale, seed, res: 1, version }
+			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, scale, seed])
+	}, [state, scale, seed, layers])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [state, scale, seed, shown])
+	}, [state, scale, seed, layers, shown])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale
@@ -69,6 +72,19 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 	return <>
 		<div class="controls">
 			{focused && <Btn label={focused} class="no-pointer" />}
+			{type === 'multi_noise' &&
+				<BtnMenu icon="stack" tooltip={locale(lang, 'configure_layers')}>
+					{LAYERS.map(name => {
+						const enabled = layers.has(name)
+						return <Btn label={locale(lang, `layer.${name}`)} 
+							active={enabled}
+							tooltip={enabled ? locale(lang, 'enabled') : locale(lang, 'disabled')}
+							onClick={(e) => {
+								setLayers(new Set([name]))
+								e.stopPropagation()
+							}} />
+					})}
+				</BtnMenu>}
 			{(type === 'multi_noise' || type === 'checkerboard') && <>
 				<Btn icon="dash" tooltip={locale(lang, 'zoom_out')}
 					onClick={() => changeScale(scale * 1.5)} />
@@ -88,38 +104,40 @@ function calculateState(data: any, octaves: NoiseOctaves) {
 }
 
 function getOctaves(obj: any): NoiseOctaves {
-	if (typeof obj === 'string') {
-		switch (obj.replace(/^minecraft:/, '')) {
-			case 'overworld':
-			case 'amplified':
-				return {
-					temperature: { firstOctave: -9, amplitudes: [1.5, 0, 1, 0, 0, 0] },
-					humidity: { firstOctave: -7, amplitudes: [1, 1, 0, 0, 0, 0] },
-					continentalness: { firstOctave: -9, amplitudes: [1, 1, 2, 2, 2, 1, 1, 1, 1] },
-					erosion: { firstOctave: -9, amplitudes: [1, 1, 0, 1, 1] },
-					weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
-					shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
-				}
-			case 'end':
-			case 'floating_islands':
-				return {
-					temperature: { firstOctave: 0, amplitudes: [0] },
-					humidity: { firstOctave: 0, amplitudes: [0] },
-					continentalness: { firstOctave: 0, amplitudes: [0] },
-					erosion: { firstOctave: 0, amplitudes: [0] },
-					weirdness: { firstOctave: 0, amplitudes: [0] },
-					shift: { firstOctave: 0, amplitudes: [0] },
-				}
-			default:
-				return {
-					temperature: { firstOctave: -7, amplitudes: [1, 1] },
-					humidity: { firstOctave: -7, amplitudes: [1, 1] },
-					continentalness: { firstOctave: -7, amplitudes: [1, 1] },
-					erosion: { firstOctave: -7, amplitudes: [1, 1] },
-					weirdness: { firstOctave: -7, amplitudes: [1, 1] },
-					shift: { firstOctave: 0, amplitudes: [0] },
-				}
-		}
+	if (typeof obj !== 'string') {
+		const settings = NoiseGeneratorSettings.fromJson(obj)
+		obj = settings.noise.densityFactor === 0 && settings.noise.densityOffset === -0.030078125
+			? 'minecraft:nether' : 'minecraft:overworld'
 	}
-	return NoiseGeneratorSettings.fromJson(obj).octaves
+	switch (obj.replace(/^minecraft:/, '')) {
+		case 'overworld':
+		case 'amplified':
+			return {
+				temperature: { firstOctave: -9, amplitudes: [1.5, 0, 1, 0, 0, 0] },
+				humidity: { firstOctave: -7, amplitudes: [1, 1, 0, 0, 0, 0] },
+				continentalness: { firstOctave: -9, amplitudes: [1, 1, 2, 2, 2, 1, 1, 1, 1] },
+				erosion: { firstOctave: -9, amplitudes: [1, 1, 0, 1, 1] },
+				weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
+				shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
+			}
+		case 'end':
+		case 'floating_islands':
+			return {
+				temperature: { firstOctave: 0, amplitudes: [0] },
+				humidity: { firstOctave: 0, amplitudes: [0] },
+				continentalness: { firstOctave: 0, amplitudes: [0] },
+				erosion: { firstOctave: 0, amplitudes: [0] },
+				weirdness: { firstOctave: 0, amplitudes: [0] },
+				shift: { firstOctave: 0, amplitudes: [0] },
+			}
+		default:
+			return {
+				temperature: { firstOctave: -7, amplitudes: [1, 1] },
+				humidity: { firstOctave: -7, amplitudes: [1, 1] },
+				continentalness: { firstOctave: -7, amplitudes: [1, 1] },
+				erosion: { firstOctave: -7, amplitudes: [1, 1] },
+				weirdness: { firstOctave: -7, amplitudes: [1, 1] },
+				shift: { firstOctave: 0, amplitudes: [0] },
+			}
+	}
 }

@@ -1,5 +1,5 @@
 import { DataModel } from '@mcschema/core'
-import { NoiseParameters, NormalNoise, Random } from 'deepslate'
+import { LegacyRandom, NoiseParameters, NormalNoise } from 'deepslate'
 import type { VersionId } from '../Schemas'
 
 export type NoiseOptions = {
@@ -10,7 +10,7 @@ export type NoiseOptions = {
 }
 
 export function normalNoise(state: any, img: ImageData, options: NoiseOptions) {
-	const random = new Random(options.seed)
+	const random = new LegacyRandom(options.seed)
 	const params = NoiseParameters.fromJson(DataModel.unwrapLists(state))
 	const noise = new NormalNoise(random, params)
 

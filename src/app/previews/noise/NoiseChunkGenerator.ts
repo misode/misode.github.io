@@ -1,4 +1,4 @@
-import { PerlinNoise, Random } from 'deepslate'
+import { LegacyRandom, PerlinNoise } from 'deepslate'
 import { clampedLerp, lerp2 } from '../../Utils'
 
 export class NoiseChunkGenerator {
@@ -18,7 +18,7 @@ export class NoiseChunkGenerator {
 	private xOffset: number = 0
 
 	constructor(seed: bigint) {
-		const random = new Random(seed)
+		const random = new LegacyRandom(seed)
 		this.minLimitPerlinNoise = new PerlinNoise(random, -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 		this.maxLimitPerlinNoise = new PerlinNoise(random, -15, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 		this.mainPerlinNoise = new PerlinNoise(random, -7, [1, 1, 1, 1, 1, 1, 1, 1])

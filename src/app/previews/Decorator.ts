@@ -1,5 +1,6 @@
 import { DataModel } from '@mcschema/core'
-import { PerlinNoise, Random } from 'deepslate'
+import type { Random } from 'deepslate'
+import { LegacyRandom, PerlinNoise } from 'deepslate'
 import type { VersionId } from '../Schemas'
 import { clamp, stringToColor } from '../Utils'
 
@@ -35,7 +36,7 @@ export type DecoratorOptions = {
 	version: VersionId,
 }
 export function decorator(state: any, img: ImageData, options: DecoratorOptions) {
-	const random = new Random(options.seed)
+	const random = new LegacyRandom(options.seed)
 	const ctx: PlacementContext = {
 		placements: [],
 		features: [],

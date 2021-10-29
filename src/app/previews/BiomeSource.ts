@@ -1,7 +1,7 @@
 import { DataModel } from '@mcschema/core'
-import type { BiomeSource, Climate, NoiseOctaves } from 'deepslate'
-import { FixedBiome, NoiseGeneratorSettings, NoiseSampler, NormalNoise, Random } from 'deepslate'
-import init, { biome_parameters, climate_sampler, multi_noise } from 'deepslate-rs'
+import type { NoiseOctaves } from 'deepslate'
+import { FixedBiome, LegacyRandom, NormalNoise, TerrainShaper } from 'deepslate'
+import init, { biome_parameters, climate_noise, climate_sampler, multi_noise } from 'deepslate-rs'
 // @ts-expect-error
 import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
 import { fetchPreset } from '../DataFetcher'
@@ -16,7 +16,21 @@ async function loadWasm() {
 	console.debug(`Loaded deepslate-rs from "${wasm}"`)
 }
 
-type BiomeColors = Record<string, number[]>
+const OverworldShaper = TerrainShaper.overworld()
+
+const LAYERS = {
+	temperature: [-1, 1],
+	humidity: [-1, 1],
+	continentalness: [-1.1, 1],
+	erosion: [-1, 1],
+	weirdness: [-1, 1],
+	offset: [-1, 1],
+	factor: [0, 12],
+	jaggedness: [0, 1],
+}
+
+type Triple = [number, number, number]
+type BiomeColors = Record<string, Triple>
 type BiomeSourceOptions = {
 	octaves: NoiseOctaves,
 	biomeColors: BiomeColors,
@@ -25,18 +39,20 @@ type BiomeSourceOptions = {
 	res: number,
 	seed: bigint,
 	version: VersionId,
+	layers: Set<keyof typeof LAYERS | 'biomes'>,
 }
 
-interface CachedBiomeSource extends BiomeSource {
+interface CachedBiomeSource {
+	getBiome(x: number, y: number, z: number): string
 	getBiomes?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): string[]
+	getClimate?(layers: Set<keyof typeof LAYERS>, xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): {[k: string]: number}[]
 }
 
 let cacheState: any
 let biomeSourceCache: CachedBiomeSource
-let climateSamplerCache: Climate.Sampler
 
 export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
-	const { biomeSource, climateSampler } = await getCached(state, options)
+	const { biomeSource } = await getCached(state, options)
 
 	const data = img.data
 	const ox = -Math.round(options.offset[0]) - 100 + options.res / 2
@@ -44,19 +60,29 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 	const row = img.width * 4 / options.res
 	const col = 4 / options.res
 
-	const biomes = biomeSource.getBiomes?.(
-		ox * options.scale, (200 + ox) * options.scale, options.res * options.scale,
-		64, 65, 1,
-		oz * options.scale, (200 + oz) * options.scale, options.res * options.scale,
-	)
+	const xRange: Triple = [ox * options.scale, (200 + ox) * options.scale, options.res * options.scale]
+	const zRange: Triple = [oz * options.scale, (200 + oz) * options.scale, options.res * options.scale]
+
+	const biomes = !options.layers.has('biomes') ? undefined : biomeSource.getBiomes?.(...xRange, 64, 65, 1, ...zRange)
+	const layers = [...options.layers].filter(l => l !== 'biomes') as (keyof typeof LAYERS)[]
+	const noise = layers.length === 0 ? undefined : biomeSource.getClimate?.(new Set(layers), ...xRange, 64, 65, 1, ...zRange)
 
 	for (let x = 0; x < 200; x += options.res) {
 		for (let z = 0; z < 200; z += options.res) {
 			const i = z * row + x * col
+			const j = (x / options.res) * 200 / options.res + z / options.res
 			const worldX = (x + ox) * options.scale
 			const worldZ = (z + oz) * options.scale
-			const b = biomes?.[(x / options.res) * 200 / options.res + z / options.res] ?? biomeSource.getBiome(worldX, 64, worldZ, climateSampler)
-			const color = getBiomeColor(b, options.biomeColors)
+			let color: Triple = [50, 50, 50]
+			if (options.layers.has('biomes')) {
+				const biome = biomes?.[j] ?? biomeSource.getBiome(worldX, 64, worldZ)
+				color = getBiomeColor(biome, options.biomeColors)
+			} else if (noise && layers[0]) {
+				const value = noise[j][layers[0]]
+				const [min, max] = LAYERS[layers[0]]
+				const brightness = (value - min) / (max - min) * 256
+				color = [brightness, brightness, brightness]
+			}
 			data[i] = color[0]
 			data[i + 1] = color[1]
 			data[i + 2] = color[2]
@@ -66,26 +92,21 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 }
 
 export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<string | undefined> {
-	const { biomeSource, climateSampler } = await getCached(state, options)
+	const { biomeSource } = await getCached(state, options)
 
 	const [xx, zz] = toWorld([x, z], options)
-	return biomeSource.getBiome(xx, 64, zz, climateSampler)
+	return biomeSource.getBiome(xx, 64, zz)
 }
 
-async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource, climateSampler: Climate.Sampler }> {
+async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource}> {
 	const newState = [state, options.octaves, `${options.seed}`, options.version]
 	if (!deepEqual(newState, cacheState)) {
 		cacheState = deepClone(newState)
 
 		biomeSourceCache = await getBiomeSource(state, options)
-
-		const settings = NoiseGeneratorSettings.fromJson({ octaves: options.octaves })
-		const noiseSampler = new NoiseSampler(4, 4, 32, biomeSourceCache, settings.noise, options.octaves, options.seed)
-		climateSamplerCache = noiseSampler.getClimate.bind(noiseSampler)
 	}
 	return {
 		biomeSource: biomeSourceCache,
-		climateSampler: climateSamplerCache,
 	} 
 }
 
@@ -149,13 +170,32 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 						const ids = multi_noise(parameters, sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
 						return [...ids].map(id => BiomeIds.getA(id) ?? 'unknown')
 					},
+					getClimate(layers, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep) {
+						const climate = climate_noise(sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
+						const result = []
+						for (let i = 0; i < climate.length; i += 7) {
+							const [t, h, c, e, w] = climate.slice(i, i + 5)
+							const point = TerrainShaper.point(c, e, w)
+							result.push({
+								temperature: t,
+								humidity: h,
+								continentalness: c,
+								erosion: e,
+								weirdness: w,
+								...layers.has('offset') && { offset: OverworldShaper.offset(point) },
+								...layers.has('factor') && { factor: OverworldShaper.factor(point) },
+								...layers.has('jaggedness') && { jaggedness: OverworldShaper.jaggedness(point) },
+							})
+						}
+						return result
+					},
 				}
 			} else {
 				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
 					.map((id, i) => {
 						const config = state[`${id}_noise`]
 						config.firstOctave = clamp(config.firstOctave ?? -7, -100, -1)
-						return new NormalNoise(new Random(options.seed + BigInt(i)), config)
+						return new NormalNoise(new LegacyRandom(options.seed + BigInt(i)), config)
 					})
 				if (!Array.isArray(state.biomes) || state.biomes.length === 0) {
 					return new FixedBiome('unknown')
@@ -180,7 +220,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 	throw new Error('Unknown biome source')
 }
 
-function getBiomeColor(biome: string, biomeColors: BiomeColors) {
+function getBiomeColor(biome: string, biomeColors: BiomeColors): Triple {
 	if (!biome) {
 		return [128, 128, 128]
 	}
@@ -197,7 +237,7 @@ function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
 	return [xx, zz]
 }
 
-const VanillaColors: Record<string, [number, number, number]> = {
+const VanillaColors: Record<string, Triple> = {
 	'minecraft:badlands': [217,69,21],
 	'minecraft:badlands_plateau': [202,140,101],
 	'minecraft:bamboo_jungle': [118,142,20],
