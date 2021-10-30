@@ -6,6 +6,7 @@ export namespace Analytics {
 	const DIM_VERSION = 3
 	const DIM_LANGUAGE = 4
 	const DIM_PREVIEW = 5
+	const DIM_GENERATOR = 6
 
 	function event(category: string, action: string, label?: string) {
 		ga('send', 'event', category, action, label)
@@ -38,6 +39,11 @@ export namespace Analytics {
 	export function setPreview(preview: string) {
 		dimension(DIM_PREVIEW, preview)
 		event(ID_GENERATOR, 'set-preview', preview)
+	}
+
+	export function setGenerator(generator: string) {
+		dimension(DIM_GENERATOR, generator)
+		console.log(generator)
 	}
 
 	export function generatorEvent(action: string, label?: string) {

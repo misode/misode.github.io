@@ -31,10 +31,6 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 		return <main><ErrorPanel error={`Cannot find generator "${getCurrentUrl()}"`} /></main>
 	}
 
-	useEffect(() => {
-		setError(null)
-	}, [gen.id, version])
-
 	const allowedVersions = config.versions
 		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
 		.map(v => v.id as VersionId)
@@ -48,11 +44,15 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
 	useEffect(() => {
+		setError(null)
 		setModel(null)
 		getBlockStates(version)
 			.then(b => setBlockStates(b))
 		getModel(version, gen.id)
-			.then(m => setModel(m))
+			.then(m => {
+				Analytics.setGenerator(gen.id)
+				setModel(m)
+			})
 			.catch(e => { console.error(e); setError(message(e)) })
 	}, [version, gen.id])
 

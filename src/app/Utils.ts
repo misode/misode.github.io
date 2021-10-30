@@ -54,7 +54,7 @@ export function cleanUrl(url: string) {
 }
 
 export function getGenerator(url: string) {
-	const trimmedUrl = url.replace(/^\//, '').replace(/\/$/, '')
+	const trimmedUrl = url.replace(/^\//, '').replace(/\/$/, '').replace(/\?.*/, '')
 	return config.generators.find(g => g.url === trimmedUrl)
 }
 
