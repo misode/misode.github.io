@@ -237,6 +237,8 @@ const renderHtml: RenderHook = {
 	},
 
 	object({ node, config, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
+		const { expand, isToggled } = useToggles()
+
 		if (path.getArray().length == 0 && isDecorated(config.context, value)) {
 			const { wrapper, fields } = createDecoratorsWrapper(getActiveFields(path), path, value)
 			value = wrapper.data
@@ -263,6 +265,16 @@ const renderHtml: RenderHook = {
 					.filter(([_, child]) => child.enabled(path))
 					.map(([key, child]) => {
 						const cPath = getChildModelPath(path, key)
+						const canToggle = child.type(cPath) === 'object'
+						const toggle = isToggled(key)
+						if (canToggle && (toggle === false || (toggle === undefined && (ctx.depth ?? 0) > 5))) {
+							return <div class="node node-header" data-category={child.category(cPath)}>
+								<ErrorPopup lang={lang} path={cPath} nested />
+								<button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'expand')}\n${locale(lang, 'expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
+								<label>{pathLocale(lang, cPath)}</label>
+							</div>
+						}
+
 						const context = cPath.getContext().join('.')
 						if (hiddenFields.includes(context)) return null
 						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, states, newCtx)
@@ -434,7 +446,7 @@ function TreeNode({ label, schema, path, value, lang, states, ctx, actions, chil
 		setActive()
 	}
 
-	const newCtx = {...ctx}
+	const newCtx: Record<string, any> = { ...ctx, depth: (ctx.depth ?? 0) + 1 }
 	delete newCtx.index
 	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, states, newCtx)
 	return <div class={`node ${type}-node`} data-category={category}>

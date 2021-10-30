@@ -170,7 +170,11 @@ export async function fetchPreset(version: VersionId, registry: string, id: stri
 		if (registry === 'worldgen/noise_settings' && version === '1.18') {
 			let text = await res.text()
 			text = text.replaceAll('"max_threshold": Infinity', '"max_threshold": 100')
-			return JSON.parse(text)
+			const data = JSON.parse(text)
+			if (id !== 'overworld' && id !== 'large_biomes') {
+				data.noise.terrain_shaper = { offset: 0, factor: 0, jaggedness: 0 }
+			}
+			return data
 		}
 		return await res.json()
 	} catch (e) {

@@ -106,7 +106,7 @@ function calculateState(data: any, octaves: NoiseOctaves, shaper: TerrainShaper)
 	return JSON.stringify([data, octaves, shaper.toJson()])
 }
 
-function getOctaves(obj: any): NoiseOctaves {
+export function getOctaves(obj: any): NoiseOctaves {
 	if (typeof obj !== 'string') {
 		const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(obj))
 		obj = settings.noise.densityFactor === 0 && settings.noise.densityOffset === -0.030078125
@@ -145,7 +145,7 @@ function getOctaves(obj: any): NoiseOctaves {
 	}
 }
 
-function getShaper(obj: any): TerrainShaper {
+export function getShaper(obj: any): TerrainShaper {
 	if (typeof obj === 'string') {
 		switch (obj.replace(/^minecraft:/, '')) {
 			case 'overworld':

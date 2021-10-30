@@ -1,15 +1,15 @@
 import { DataModel } from '@mcschema/core'
 import type { BlockPos, BlockState } from 'deepslate'
 import { Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
+import { getOctaves } from '../components'
 import type { VersionId } from '../Schemas'
 import { checkVersion } from '../Schemas'
 import { deepClone, deepEqual } from '../Utils'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export type NoiseSettingsOptions = {
-	biomeFactor: number,
-	biomeOffset: number,
-	biomePeaks: number,
+	biomeScale?: number,
+	biomeDepth?: number,
 	offset: number,
 	width: number,
 	seed: bigint,
@@ -54,7 +54,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 	}
 
 	const generator = new OldNoiseChunkGenerator(options.seed)
-	generator.reset(state.noise, options.biomeOffset, options.biomeFactor, options.offset, 200)
+	generator.reset(state.noise, options.biomeDepth ?? 0, options.biomeScale ?? 0, options.offset, options.width)
 	const data = img.data
 	const row = img.width * 4
 	for (let x = 0; x < options.width; x += 1) {
@@ -72,12 +72,9 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 
 function getCached(state: unknown, options: NoiseSettingsOptions) {
 	const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(state))
-	// Temporary fix for slides
-	settings.noise.bottomSlide.target *= 128
-	settings.noise.topSlide.target *= 128
-	const shape = { factor: options.biomeFactor, offset: options.biomeOffset, peaks: options.biomePeaks, nearWater: false }
+	settings.octaves = getOctaves(settings)
 
-	const newState = [state, shape, `${options.seed}`]
+	const newState = [state, `${options.seed}`]
 	if (!deepEqual(newState, cacheState)) {
 		cacheState = deepClone(newState)
 		chunkCache = []
