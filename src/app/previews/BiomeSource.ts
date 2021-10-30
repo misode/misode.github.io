@@ -16,8 +16,6 @@ async function loadWasm() {
 	console.debug(`Loaded deepslate-rs from "${wasm}"`)
 }
 
-const OverworldShaper = TerrainShaper.overworld()
-
 const LAYERS = {
 	temperature: [-1, 1],
 	humidity: [-1, 1],
@@ -33,6 +31,7 @@ type Triple = [number, number, number]
 type BiomeColors = Record<string, Triple>
 type BiomeSourceOptions = {
 	octaves: NoiseOctaves,
+	shaper: TerrainShaper,
 	biomeColors: BiomeColors,
 	offset: [number, number],
 	scale: number,
@@ -99,7 +98,7 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 }
 
 async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource}> {
-	const newState = [state, options.octaves, `${options.seed}`, options.version]
+	const newState = [state, options.octaves, options.shaper.toJson(), `${options.seed}`, options.version]
 	if (!deepEqual(newState, cacheState)) {
 		cacheState = deepClone(newState)
 
@@ -182,9 +181,9 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 								continentalness: c,
 								erosion: e,
 								weirdness: w,
-								...layers.has('offset') && { offset: OverworldShaper.offset(point) },
-								...layers.has('factor') && { factor: OverworldShaper.factor(point) },
-								...layers.has('jaggedness') && { jaggedness: OverworldShaper.jaggedness(point) },
+								...layers.has('offset') && { offset: options.shaper.offset(point) },
+								...layers.has('factor') && { factor: options.shaper.factor(point) },
+								...layers.has('jaggedness') && { jaggedness: options.shaper.jaggedness(point) },
 							})
 						}
 						return result
