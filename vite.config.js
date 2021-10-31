@@ -21,6 +21,11 @@ export default defineConfig({
 					title: getTitle({ id: 'title.sounds', page: true }),
 					template: template,
 				}),
+				html({
+					fileName: `changelog/index.html`,
+					title: getTitle({ id: 'title.changelog', page: true }),
+					template: template,
+				}),
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
 					title: getTitle(m),

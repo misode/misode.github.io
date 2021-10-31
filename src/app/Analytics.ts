@@ -43,7 +43,6 @@ export namespace Analytics {
 
 	export function setGenerator(generator: string) {
 		dimension(DIM_GENERATOR, generator)
-		console.log(generator)
 	}
 
 	export function generatorEvent(action: string, label?: string) {

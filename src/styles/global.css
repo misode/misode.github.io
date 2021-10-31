@@ -22,6 +22,8 @@
 	--errors-background: #62190f;
 	--errors-text: #ffffffcc;
   --invalid-text: #fd7951;
+	--text-saturation: 60%;
+	--text-lightness: 45%;
 }
 
 :root[data-theme=light] {
@@ -48,6 +50,8 @@
 	--errors-background: #f66653;
 	--errors-text: #000000cc;
   --invalid-text: #a32600;
+	--text-saturation: 100%;
+	--text-lightness: 30%;
 }
 
 @media (prefers-color-scheme: light) {
@@ -75,6 +79,8 @@
 		--errors-background: #f66653;
 		--errors-text: #000000cc;
 		--invalid-text: #a32600;
+		--text-saturation: 100%;
+		--text-lightness: 35%;
 	}
 }
 
@@ -379,9 +385,16 @@ main.has-preview {
 	display: flex;
 	flex-direction: column;
 	position: absolute;
-	right: 0;
 	top: 100%;
 	margin-top: 8px;
+}
+
+.btn-menu.menu-sw .btn-group {
+	right: 0;
+}
+
+.btn-menu.menu-se .btn-group {
+	left: 0;
 }
 
 .btn-group {
@@ -973,6 +986,83 @@ hr {
 
 .sound-config.invalid .sound {
   color: var(--invalid-text);
+}
+
+.changelog {
+	display: flex;
+	flex-direction: column;
+	padding: 16px;
+}
+
+.changelog-entry {
+	background: var(--background-2);
+	border-radius: 4px;
+	margin-bottom: 8px;
+	padding: 8px;
+	color: var(--text-2);
+}
+
+.changelog-tags {
+	display: flex;
+	margin-bottom: 8px;
+}
+
+.changelog-tag {
+	--color: hsl(var(--tint, 0), var(--text-saturation), var(--text-lightness));
+	margin-right: 8px;
+	border: 1.5px solid var(--color);
+	height: 24px;
+	border-radius: 12px;
+	padding: 0 8px;
+	color: var(--color);
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+
+.changelog-tag.clickable {
+	cursor: pointer;
+}
+
+.changelog-tag.active {
+	background-color: var(--color);
+	color: var(--background-2);
+}
+
+.changelog-version {
+	margin-left: auto;
+	font-size: 15px;
+	color: var(--text-3);
+	text-decoration: none;
+}
+
+.changelog-version:hover {
+	text-decoration: underline;
+}
+
+.changelog-entry code {
+	background-color: var(--background-5);
+	padding: 1px 4px;
+	border-radius: 4px;
+	color: var(--text-1);
+}
+
+.changelog-controls {
+	display: flex;
+	flex-direction: column;
+	padding: 0 16px;
+}
+
+.changelog-search {
+	flex-basis: 100%;
+	padding: 8px;
+	background-color: var(--background-2);
+	border-radius: 6px;
+}
+
+.changelog-controls .changelog-tags {
+	margin: 8px 0 0;
 }
 
 @media screen and (max-width: 720px) {

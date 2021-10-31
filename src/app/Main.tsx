@@ -8,7 +8,7 @@ import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
-import { Generator, Home, Sounds, Worldgen } from './pages'
+import { Changelog, Generator, Home, Sounds, Worldgen } from './pages'
 import type { VersionId } from './Schemas'
 import { Store } from './Store'
 import { cleanUrl } from './Utils'
@@ -72,6 +72,7 @@ function Main() {
 			<Home path="/" {...{lang, changeTitle}} />
 			<Worldgen path="/worldgen" {...{lang, changeTitle}} />
 			<Sounds path="/sounds" {...{lang, version, changeTitle, changeVersion}} />
+			<Changelog path="/changelog" {...{lang, changeTitle}} />
 			<Generator default {...{lang, version, changeTitle, changeVersion}} />
 		</Router>
 	</>

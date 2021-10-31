@@ -27,6 +27,7 @@ export function Home({ lang, changeTitle }: HomeProps) {
 			<ToolCard title="Data Pack Upgrader" link="https://misode.github.io/upgrader/">
 				<p>Convert your 1.16 data packs to 1.17</p>
 			</ToolCard>
+			<ToolCard title="Technical Changelog" link="/changelog/" />
 		</div>
 	</main>
 }
