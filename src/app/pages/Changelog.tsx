@@ -1,6 +1,6 @@
 import marked from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { Ad, ErrorPanel, TextInput } from '../components'
+import { Ad, ErrorPanel, Octicon, TextInput } from '../components'
 import { locale } from '../Locales'
 import type { VersionId } from '../Schemas'
 import type { ChangelogEntry } from '../services/Changelogs'
@@ -72,7 +72,7 @@ function Change({ change, activeTags, addTag }: ChangeProps) {
 			{change.tags.map(tag => <Tag label={tag} onClick={() => addTag(tag)} active={activeTags.includes(tag)} />)}
 			<a class="changelog-version" href={`https://www.minecraft.net/en-us/article/minecraft-snapshot-${change.version}`}>{change.version}</a>
 		</div>
-		<div dangerouslySetInnerHTML={{ __html: marked(change.content) }} />
+		<div class="changelog-content" dangerouslySetInnerHTML={{ __html: marked(change.content) }} />
 	</div>
 }
 
@@ -82,6 +82,9 @@ type TagProps = {
 	onClick?: () => unknown,
 }
 function Tag({ label, active, onClick }: TagProps) {
-	const color = hashString(label) % 360
-	return <div class={`changelog-tag${active ? ' active' : ''}${onClick ? ' clickable' : ''}`} style={`--tint: ${color}`} onClick={onClick}>{label}</div>
+	const color = label === 'breaking' ? 5 : hashString(label) % 360
+	return <div class={`changelog-tag${active ? ' active' : ''}${onClick ? ' clickable' : ''}`} style={`--tint: ${color}`} onClick={onClick}>
+		{label === 'breaking' && Octicon.alert}
+		{label}
+	</div>
 }

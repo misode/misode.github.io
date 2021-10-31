@@ -41,7 +41,9 @@ function parseChangelog(text: string) {
 			const i = entry.indexOf('|')
 			return {
 				tags: entry.substring(0, i).trim().split(' '),
-				content: entry.slice(i + 1).trim(),
+				content: entry.slice(i + 1).trim()
+					.replaceAll('->', '→')
+					.replaceAll('\n...\n', '\n\n'),
 			}
 		})
 }

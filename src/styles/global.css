@@ -1009,16 +1009,25 @@ hr {
 
 .changelog-tag {
 	--color: hsl(var(--tint, 0), var(--text-saturation), var(--text-lightness));
+	display: flex;
+	align-items: center;
 	margin-right: 8px;
 	border: 1.5px solid var(--color);
 	height: 24px;
 	border-radius: 12px;
 	padding: 0 8px;
 	color: var(--color);
+	fill: var(--color);
 	user-select: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+}
+
+.changelog-tag svg {
+	margin-right: 4px;
+	width: 20px;
+	height: 20px;
 }
 
 .changelog-tag.clickable {
@@ -1028,6 +1037,7 @@ hr {
 .changelog-tag.active {
 	background-color: var(--color);
 	color: var(--background-2);
+	fill: var(--background-2);
 }
 
 .changelog-version {
@@ -1039,6 +1049,10 @@ hr {
 
 .changelog-version:hover {
 	text-decoration: underline;
+}
+
+.changelog-content ul {
+	padding-left: 24px;
 }
 
 .changelog-entry code {
