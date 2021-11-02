@@ -1004,7 +1004,7 @@ hr {
 
 .changelog-tags {
 	display: flex;
-	margin-bottom: 8px;
+	flex-wrap: wrap;
 }
 
 .changelog-tag {
@@ -1018,10 +1018,15 @@ hr {
 	padding: 0 8px;
 	color: var(--color);
 	fill: var(--color);
+	white-space: nowrap;
 	user-select: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+}
+
+.changelog-entry .changelog-tag {
+	margin-bottom: 8px;
 }
 
 .changelog-tag svg {
@@ -1041,13 +1046,31 @@ hr {
 }
 
 .changelog-version {
+	float: right;
+}
+
+.changelog-version > * {
 	margin-left: auto;
 	font-size: 15px;
 	color: var(--text-3);
 	text-decoration: none;
 }
 
-.changelog-version:hover {
+.changelog-version > *:first-child {
+	position: relative;
+	margin-right: 19px;
+}
+
+.changelog-version > *:first-child::after {
+	content: '•';
+	position: absolute;
+	text-decoration: none;
+	right: -12px;
+	top: 0;
+	pointer-events: none;
+}
+
+.changelog-version a:hover {
 	text-decoration: underline;
 }
 

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks'
 import { Ad, ErrorPanel, Octicon, TextInput } from '../components'
 import { locale } from '../Locales'
 import type { VersionId } from '../Schemas'
-import type { ChangelogEntry } from '../services/Changelogs'
+import type { ChangelogEntry, ChangelogVersion } from '../services/Changelogs'
 import { getChangelogs } from '../services/Changelogs'
 import { hashString } from '../Utils'
 
@@ -26,9 +26,11 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 
 	const [search, setSearch] = useState('')
 	const [tags, setTags] = useState<string[]>([])
-	const addTag = (tag: string) => {
+	const toggleTag = (tag: string) => {
 		if (!tags.includes(tag)) {
 			setTags([...tags, tag])
+		} else {
+			setTags(tags.filter(t => t !== tag))
 		}
 	}
 
@@ -56,7 +58,7 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 		</div>
 		<div class="changelog">
 			{filteredChangelogs.map(change =>
-				<Change change={change} activeTags={tags} addTag={addTag} />)}
+				<Change change={change} activeTags={tags} toggleTag={toggleTag} />)}
 		</div>
 	</main>
 }
@@ -64,16 +66,25 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 type ChangeProps = {
 	change: ChangelogEntry,
 	activeTags: string[],
-	addTag: (tag: string) => unknown,
+	toggleTag: (tag: string) => unknown,
 }
-function Change({ change, activeTags, addTag }: ChangeProps) {
+function Change({ change, activeTags, toggleTag }: ChangeProps) {
 	return <div class="changelog-entry">
+		<div class="changelog-version">
+			<ArticleLink {...change.version}/>
+			<ArticleLink {...change.group}/>
+		</div>
 		<div class="changelog-tags">
-			{change.tags.map(tag => <Tag label={tag} onClick={() => addTag(tag)} active={activeTags.includes(tag)} />)}
-			<a class="changelog-version" href={`https://www.minecraft.net/en-us/article/minecraft-snapshot-${change.version}`}>{change.version}</a>
+			{change.tags.map(tag => <Tag label={tag} onClick={() => toggleTag(tag)} active={activeTags.includes(tag)} />)}
 		</div>
 		<div class="changelog-content" dangerouslySetInnerHTML={{ __html: marked(change.content) }} />
 	</div>
+}
+
+function ArticleLink({ id, article }: ChangelogVersion) {
+	return article === null
+		? <span>{id}</span>
+		: <a href={`https://www.minecraft.net/en-us/article/${article}`} target="_blank">{id}</a>
 }
 
 type TagProps = {
