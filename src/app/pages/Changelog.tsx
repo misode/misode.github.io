@@ -50,7 +50,7 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 
 	const sortedChangelogs = useMemo(() => {
 		return filteredChangelogs.sort((a, b) => sort ? b.order - a.order : a.order - b.order)
-	}, [changelogs, sort])
+	}, [filteredChangelogs, sort])
 
 	return <main>
 		<Ad type="text" id="changelog" />
