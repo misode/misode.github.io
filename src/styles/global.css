@@ -1091,6 +1091,14 @@ hr {
 	padding: 0 16px;
 }
 
+.changelog-query {
+	display: flex;
+}
+
+.changelog-query > *:not(:first-child) {
+	margin-left: 8px;
+}
+
 .changelog-search {
 	flex-basis: 100%;
 	padding: 8px;

@@ -5,6 +5,7 @@ const repo = 'https://raw.githubusercontent.com/misode/technical-changes/main'
 export type ChangelogEntry = {
 	group: ChangelogVersion,
 	version: ChangelogVersion,
+	order: number,
 	tags: string[],
 	content: string,
 }
@@ -20,24 +21,25 @@ export async function getChangelogs() {
 	if (!Changelogs) {
 		const index = await (await fetch(`${repo}/index.json`)).json() as string[]
 		Changelogs = (await Promise.all(
-			index.map(group => fetchGroup(parseVersion(group)))
+			index.map((group, i) => fetchGroup(parseVersion(group), i))
 		)).flat()
 	}
 	return Changelogs
 }
 
-async function fetchGroup(group: ChangelogVersion) {
+async function fetchGroup(group: ChangelogVersion, groupIndex: number) {
 	const index = await (await fetch(`${repo}/${group.id}/index.json`)).json() as string[]
 	return (await Promise.all(
-		index.map(version => fetchChangelog(group, parseVersion(version)))
+		index.map((version, i) => fetchChangelog(group, parseVersion(version), groupIndex, i))
 	)).flat()
 }
 
-async function fetchChangelog(group: ChangelogVersion, version: ChangelogVersion) {
+async function fetchChangelog(group: ChangelogVersion, version: ChangelogVersion, groupIndex: number, versionIndex: number) {
 	const text = await (await fetch(`${repo}/${group.id}/${version.id}.md`)).text()
 	return parseChangelog(text).map(change => ({
 		version,
 		group,
+		order: groupIndex * 1000 + versionIndex,
 		...change,
 	}))
 }

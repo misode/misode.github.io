@@ -1,6 +1,6 @@
 import marked from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { Ad, ErrorPanel, Octicon, TextInput } from '../components'
+import { Ad, Btn, ErrorPanel, Octicon, TextInput } from '../components'
 import { locale } from '../Locales'
 import type { VersionId } from '../Schemas'
 import type { ChangelogEntry, ChangelogVersion } from '../services/Changelogs'
@@ -46,18 +46,27 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 		})
 	}, [changelogs, search, tags])
 
+	const [sort, setSort] = useState(false)
+
+	const sortedChangelogs = useMemo(() => {
+		return filteredChangelogs.sort((a, b) => sort ? b.order - a.order : a.order - b.order)
+	}, [changelogs, sort])
+
 	return <main>
 		<Ad type="text" id="changelog" />
 		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 		<div class="changelog-controls">
-			<TextInput class="btn btn-input changelog-search" list="sound-list" placeholder={loc('changelog.search')}
-				value={search} onChange={setSearch} />
+			<div class="changelog-query">
+				<TextInput class="btn btn-input changelog-search" list="sound-list" placeholder={loc('changelog.search')}
+					value={search} onChange={setSearch} />
+				<Btn icon={sort ? 'sort_desc' : 'sort_asc'} label={sort ? 'Newest first' : 'Oldest first'} onClick={() => setSort(!sort)} />
+			</div>
 			{tags.length > 0 && <div class="changelog-tags">
 				{tags.map(tag => <Tag label={tag} onClick={() => setTags(tags.filter(t => t !== tag))} />)}
 			</div>}
 		</div>
 		<div class="changelog">
-			{filteredChangelogs.map(change =>
+			{sortedChangelogs.map(change =>
 				<Change change={change} activeTags={tags} toggleTag={toggleTag} />)}
 		</div>
 	</main>
