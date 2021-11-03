@@ -1,9 +1,9 @@
 import type { CollectionRegistry } from '@mcschema/core'
-import config from '../config.json'
+import config from '../../config.json'
+import { message } from '../Utils'
 import type { VersionAssets, VersionManifest } from './Manifest'
 import type { BlockStateRegistry, VersionId } from './Schemas'
 import { checkVersion } from './Schemas'
-import { message } from './Utils'
 
 ['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`))
 

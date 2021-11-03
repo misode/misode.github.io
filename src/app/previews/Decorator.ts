@@ -1,7 +1,7 @@
 import { DataModel } from '@mcschema/core'
 import type { Random } from 'deepslate'
 import { LegacyRandom, PerlinNoise } from 'deepslate'
-import type { VersionId } from '../Schemas'
+import type { VersionId } from '../services'
 import { clamp, stringToColor } from '../Utils'
 
 type BlockPos = [number, number, number]

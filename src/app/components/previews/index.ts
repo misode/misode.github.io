@@ -1,5 +1,5 @@
 import type { DataModel } from '@mcschema/core'
-import type { VersionId } from '../../Schemas'
+import type { VersionId } from '../../services'
 
 export * from './BiomeSourcePreview'
 export * from './DecoratorPreview'

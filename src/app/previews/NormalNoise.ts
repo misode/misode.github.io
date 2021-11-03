@@ -1,6 +1,6 @@
 import { DataModel } from '@mcschema/core'
 import { LegacyRandom, NoiseParameters, NormalNoise } from 'deepslate'
-import type { VersionId } from '../Schemas'
+import type { VersionId } from '../services'
 
 export type NoiseOptions = {
 	offset: [number, number],

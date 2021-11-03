@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
 import { locale } from '../Locales'
-import type { SoundEvents, VersionAssets } from '../Manifest'
-import { getAssets, getSounds } from '../Manifest'
-import type { VersionId } from '../Schemas'
+import type { SoundEvents, VersionAssets, VersionId } from '../services'
+import { getAssets, getSounds } from '../services'
 import { hexId, message } from '../Utils'
 
 type SoundsProps = {

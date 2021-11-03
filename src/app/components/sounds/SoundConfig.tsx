@@ -1,9 +1,9 @@
 import { Howl } from 'howler'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, NumberInput, RangeInput, TextInput } from '..'
-import { getResourceUrl } from '../../DataFetcher'
 import { locale } from '../../Locales'
-import type { SoundEvents, VersionAssets } from '../../Manifest'
+import type { SoundEvents, VersionAssets } from '../../services'
+import { getResourceUrl } from '../../services'
 
 export interface SoundConfig {
 	id: string,

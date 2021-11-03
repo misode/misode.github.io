@@ -2,8 +2,8 @@ import { getCurrentUrl, Link, route } from 'preact-router'
 import { Btn, BtnMenu, Icons, Octicon } from '.'
 import config from '../../config.json'
 import { locale } from '../Locales'
-import type { VersionId } from '../Schemas'
-import { checkVersion } from '../Schemas'
+import type { VersionId } from '../services'
+import { checkVersion } from '../services'
 import { cleanUrl, getGenerator } from '../Utils'
 
 const Themes: Record<string, keyof typeof Octicon> = {

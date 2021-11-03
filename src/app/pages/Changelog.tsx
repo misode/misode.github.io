@@ -2,9 +2,8 @@ import marked from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { Ad, Btn, ErrorPanel, Octicon, TextInput } from '../components'
 import { locale } from '../Locales'
-import type { VersionId } from '../Schemas'
-import type { ChangelogEntry, ChangelogVersion } from '../services/Changelogs'
-import { getChangelogs } from '../services/Changelogs'
+import type { ChangelogEntry, ChangelogVersion, VersionId } from '../services'
+import { getChangelogs } from '../services'
 import { hashString } from '../Utils'
 
 type ChangelogProps = {

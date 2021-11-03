@@ -4,7 +4,7 @@ import { Btn, BtnInput, BtnMenu } from '..'
 import { useCanvas } from '../../hooks'
 import { locale } from '../../Locales'
 import { noiseSettings } from '../../previews'
-import { checkVersion } from '../../Schemas'
+import { checkVersion } from '../../services'
 import { randomSeed } from '../../Utils'
 
 export const NoiseSettingsPreview = ({ lang, data, shown, version }: PreviewProps) => {

@@ -4,11 +4,10 @@ import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
-import { fetchPreset } from '../DataFetcher'
 import { useModel } from '../hooks'
 import { locale } from '../Locales'
-import type { BlockStateRegistry, VersionId } from '../Schemas'
-import { checkVersion, getBlockStates, getCollections, getModel } from '../Schemas'
+import type { BlockStateRegistry, VersionId } from '../services'
+import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
 import { getGenerator, message } from '../Utils'
 
 type GeneratorProps = {

@@ -4,7 +4,7 @@ import { Btn, BtnMenu } from '..'
 import { useModel } from '../../hooks'
 import { locale } from '../../Locales'
 import { transformOutput } from '../../schema/transformOutput'
-import type { BlockStateRegistry } from '../../Schemas'
+import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
 

@@ -4,8 +4,8 @@ import { FixedBiome, LegacyRandom, NormalNoise, TerrainShaper } from 'deepslate'
 import init, { biome_parameters, climate_noise, climate_sampler, multi_noise } from 'deepslate-rs'
 // @ts-expect-error
 import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
-import { fetchPreset } from '../DataFetcher'
-import type { VersionId } from '../Schemas'
+import type { VersionId } from '../services'
+import { fetchPreset } from '../services'
 import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
 
 let ready = false

@@ -1,6 +1,6 @@
 import type { Hook } from '@mcschema/core'
 import { relativePath } from '@mcschema/core'
-import type { BlockStateRegistry } from '../Schemas'
+import type { BlockStateRegistry } from '../services'
 
 export type OutputProps = {
 	blockStates: BlockStateRegistry,

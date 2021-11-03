@@ -9,7 +9,7 @@ import { Analytics } from './Analytics'
 import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
 import { Changelog, Generator, Home, Sounds, Worldgen } from './pages'
-import type { VersionId } from './Schemas'
+import type { VersionId } from './services'
 import { Store } from './Store'
 import { cleanUrl } from './Utils'
 

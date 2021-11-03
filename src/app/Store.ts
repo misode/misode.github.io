@@ -1,5 +1,5 @@
-import type { VersionId } from './Schemas'
-import { VersionIds } from './Schemas'
+import type { VersionId } from './services'
+import { VersionIds } from './services'
 
 export namespace Store {
 	export const ID_LANGUAGE = 'language'

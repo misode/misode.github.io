@@ -2,7 +2,7 @@ import type { DataModel } from '@mcschema/core'
 import { useErrorBoundary, useState } from 'preact/hooks'
 import { useModel } from '../../hooks'
 import { FullNode } from '../../schema/renderHtml'
-import type { BlockStateRegistry, VersionId } from '../../Schemas'
+import type { BlockStateRegistry, VersionId } from '../../services'
 
 type TreePanelProps = {
 	lang: string,
