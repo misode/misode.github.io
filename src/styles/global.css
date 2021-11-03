@@ -386,15 +386,8 @@ main.has-preview {
 	flex-direction: column;
 	position: absolute;
 	top: 100%;
-	margin-top: 8px;
-}
-
-.btn-menu.menu-sw .btn-group {
 	right: 0;
-}
-
-.btn-menu.menu-se .btn-group {
-	left: 0;
+	margin-top: 8px;
 }
 
 .btn-group {
