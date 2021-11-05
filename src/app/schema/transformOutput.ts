@@ -43,7 +43,10 @@ export const transformOutput: Hook<[any, OutputProps], any> = {
 		Object.keys(activeFields)
 			.filter(k => activeFields[k].enabled(path))
 			.forEach(f => {
-				res[f] = activeFields[f].hook(this, path.push(f), value[f], props)
+				const out = activeFields[f].hook(this, path.push(f), value[f], props)
+				if (out !== undefined && out !== null) {
+					res[f] = out
+				}
 			})
 		return res
 	},

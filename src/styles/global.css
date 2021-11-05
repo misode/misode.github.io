@@ -298,6 +298,14 @@ main > .controls {
 	box-shadow: 0 0 7px -3px #000;
 }
 
+.popup-source .btn-menu > .btn-group {
+	right: 100%;
+	top: 50%;
+	margin-top: 0;
+	margin-right: 8px;
+	transform: translateY(-50%);
+}
+
 .popup-preview {
 	position: fixed;
 	display: flex;
@@ -408,6 +416,15 @@ main.has-preview {
 .btn-group .btn:not(:first-child) {
 	border-top-right-radius: 0px;
 	border-top-left-radius: 0px;
+}
+
+.btn-group > hr {
+	border: 4px solid var(--background-4);
+	border-left: transparent;
+	border-right: transparent;
+	background-color: var(--background-6);
+	margin: 0;
+	padding: 2px 0;
 }
 
 .btn-input {

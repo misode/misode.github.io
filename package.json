@@ -24,6 +24,7 @@
     "deepslate": "^0.9.0-beta.6",
     "deepslate-rs": "^0.1.6",
     "howler": "^2.2.3",
+    "js-yaml": "^3.14.1",
     "marked": "^3.0.8",
     "rfdc": "^1.3.0"
   },
@@ -32,6 +33,7 @@
     "@rollup/plugin-html": "^0.2.3",
     "@types/google.analytics": "0.0.40",
     "@types/howler": "^2.2.4",
+    "@types/js-yaml": "^4.0.4",
     "@types/marked": "^3.0.2",
     "@types/seedrandom": "^2.4.28",
     "@typescript-eslint/eslint-plugin": "^4.25.0",

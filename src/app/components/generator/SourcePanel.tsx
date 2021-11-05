@@ -1,4 +1,5 @@
 import { DataModel, ModelPath } from '@mcschema/core'
+import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
 import { useModel } from '../../hooks'
@@ -10,10 +11,28 @@ import { message } from '../../Utils'
 
 const OUTPUT_CHARS_LIMIT = 10000
 
-const INDENT: Record<string, number | string> = {
+const INDENT: Record<string, number | string | undefined> = {
 	'2_spaces': 2,
 	'4_spaces': 4,
 	tabs: '\t',
+	minified: undefined,
+}
+
+const FORMATS: Record<string, {
+	parse: (v: string) => any,
+	stringify: (v: any, indentation: string | number | undefined) => string,
+}> = {
+	json: {
+		parse: JSON.parse,
+		stringify: (v, i) => JSON.stringify(v, null, i),
+	},
+	yaml: {
+		parse: yaml.load,
+		stringify: (v, i) => yaml.dump(v, {
+			flowLevel: i === undefined ? 0 : -1,
+			indent: typeof i === 'string' ? 4 : i,
+		}),
+	},
 }
 
 type SourcePanelProps = {
@@ -30,14 +49,15 @@ type SourcePanelProps = {
 export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const loc = locale.bind(null, lang)
 	const [indent, setIndent] = useState(Store.getIndent())
+	const [format, setFormat] = useState(Store.getFormat())
 	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
 
 	const getOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
 		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })
-		return JSON.stringify(data, null, INDENT[indent]) + '\n'
-	}, [indent])
+		return FORMATS[format].stringify(data, INDENT[indent]) + '\n'
+	}, [indent, format])
 
 	useEffect(() => {
 		retransform.current = () => {
@@ -66,11 +86,12 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	useEffect(() => {
 		retransform.current()
-	}, [indent])
+	}, [indent, format])
 
 	const onImport = () => {
+		if (source.current.value.length === 0) return
 		try {
-			const data = JSON.parse(source.current.value)
+			const data = FORMATS[format].parse(source.current.value)
 			model?.reset(DataModel.wrapLists(data), false)
 		} catch (e) {
 			onError(`Error importing: ${message(e)}`)
@@ -90,7 +111,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 		if (doDownload && model && blockStates && download.current) {
 			const content = encodeURIComponent(getOutput(model, blockStates))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
-			download.current.setAttribute('download', `${name}.json`)
+			download.current.setAttribute('download', `${name}.${format}`)
 			download.current.click()
 		}
 	}, [doDownload])
@@ -107,6 +128,11 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 		setIndent(value)
 	}
 
+	const changeFormat = (value: string) => {
+		Store.setFormat(value)
+		setFormat(value)
+	}
+
 	return <> 
 		<div class="controls">
 			<BtnMenu icon="gear" tooltip={loc('output_settings')}>
@@ -114,6 +140,10 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 					<Btn label={loc(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>
 				)}
+				<hr />
+				{Object.keys(FORMATS).map(key =>
+					<Btn label={loc(`format.${key}`)} active={format === key}
+						onClick={() => changeFormat(key)} />)}
 			</BtnMenu>
 		</div>
 		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')}></textarea>

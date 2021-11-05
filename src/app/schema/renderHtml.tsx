@@ -59,7 +59,6 @@ const renderHtml: RenderHook = {
 	choice({ choices, config, switchNode }, path, value, lang, states, ctx) {
 		const choice = switchNode.activeCase(path, true) as typeof choices[number]
 		const contextPath = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
-		console.log('RENDER', path.toString(), choice.type, value)
 		const [prefix, suffix, body] = choice.node.hook(this, contextPath, value, lang, states, ctx)
 		if (choices.length === 1) {
 			return [prefix, suffix, body]
@@ -70,7 +69,6 @@ const renderHtml: RenderHook = {
 			const newValue = c.change
 				? c.change(DataModel.unwrapLists(value))
 				: config.choiceContext === 'feature' ?	c.node.default()?.config?.feature : c.node.default()
-			console.warn('CHOICE', type, c, value, newValue)
 			path.model.set(path, DataModel.wrapLists(newValue))
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
@@ -260,7 +258,6 @@ const renderHtml: RenderHook = {
 		}
 		const newCtx = (typeof value === 'object' && value !== null && node.default()?.pools)
 			? { ...ctx, loot: value?.type } : ctx
-		// console.log('OBJECT', path.toString(), Object.keys(getActiveFields(path)))
 		const body = <>
 			{(typeof value === 'object' && value !== null && !(node.optional() && value === undefined)) &&
 				Object.entries(getActiveFields(path))
