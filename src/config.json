@@ -51,7 +51,8 @@
       "id": "1.15",
       "latest": "1.15.2",
       "refs": {
-        "mcdata_master": "13355f7"
+        "mcdata_master": "13355f7",
+        "mcassets": "1.15.2"
       }
     },
     {
@@ -59,6 +60,7 @@
       "latest": "1.16.5",
       "refs": {
         "mcdata_master": "1.16.4",
+        "mcassets": "1.16.5",
         "vanilla_datapack_data": "1.16.4-data",
         "vanilla_datapack_summary": "1.16.4-summary"
       }
@@ -68,6 +70,7 @@
       "latest": "1.17.1",
       "refs": {
         "mcdata_master": "1.17.1",
+        "mcassets": "1.17.1",
         "vanilla_datapack_data": "1.17.1-data",
         "vanilla_datapack_summary": "1.17.1-summary"
       }
@@ -76,6 +79,7 @@
       "id": "1.18",
       "refs": {
         "mcdata_master": "master",
+        "mcassets": "21w44a",
         "vanilla_datapack_data": "data",
         "vanilla_datapack_summary": "summary"
       },
@@ -199,12 +203,29 @@
       "category": "worldgen",
       "schema": "template_pool",
       "minVersion": "1.16"
+    },
+    {
+      "id": "block_definition",
+      "url": "assets/blockstate",
+      "path": "blockstates",
+      "category": "assets",
+      "schema": "block_definition",
+      "minVersion": "1.18"
+    },
+    {
+      "id": "model",
+      "url": "assets/model",
+      "path": "models",
+      "category": "assets",
+      "schema": "model",
+      "minVersion": "1.18"
     }
   ],
   "registries": [
     { "id": "advancement", "dynamic": true },
     { "id": "attribute", "minVersion": "1.16" },
     { "id": "block" },
+    { "id": "block_definition", "path": "blockstates", "asset": true },
     { "id": "block_predicate_type", "minVersion": "1.18" },
     { "id": "dimension", "dynamic": true },
     { "id": "dimension_type", "dynamic": true },
@@ -225,6 +246,7 @@
     { "id": "loot_score_provider_type", "minVersion": "1.17" },
     { "id": "loot_table", "dynamic": true },
     { "id": "mob_effect" },
+    { "id": "model", "path": "models", "asset": true },
     { "id": "pos_rule_test", "minVersion": "1.16" },
     { "id": "potion", "minVersion": "1.15" },
     { "id": "predicate", "dynamic": true },
@@ -239,6 +261,7 @@
     { "id": "tag/fluid", "dynamic": true },
     { "id": "tag/function", "dynamic": true },
     { "id": "tag/item", "dynamic": true },
+    { "id": "texture", "path": "textures", "asset": true },
     { "id": "worldgen/biome", "dynamic": true },
     { "id": "worldgen/block_state_provider_type", "minVersion": "1.16" },
     { "id": "worldgen/block_placer_type", "minVersion": "1.16", "maxVersion": "1.17" },

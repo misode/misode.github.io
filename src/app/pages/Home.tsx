@@ -18,6 +18,8 @@ export function Home({ lang, changeTitle }: HomeProps) {
 			)}
 			<ToolCard title={loc('worldgen')} link="/worldgen/" />
 			<hr />
+			<ToolCard title={loc('assets')} link="/assets/" />
+			<hr />
 			<ToolCard title="Report Inspector" icon="report" link="https://misode.github.io/report/">
 				<p>Analyse your performance reports</p>
 			</ToolCard>

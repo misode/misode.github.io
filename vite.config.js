@@ -26,6 +26,16 @@ export default defineConfig({
 					title: getTitle({ id: 'title.changelog', page: true }),
 					template: template,
 				}),
+				html({
+					fileName: `worldgen/index.html`,
+					title: getTitle({ id: 'worldgen', category: true }),
+					template: template,
+				}),
+				html({
+					fileName: `assets/index.html`,
+					title: getTitle({ id: 'assets', category: true }),
+					template: template,
+				}),
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
 					title: getTitle(m),

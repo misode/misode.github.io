@@ -16,7 +16,7 @@ const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provid
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element', 'decorator.block_survives_filter.state', 'material_rule.block.result_state']
 const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type']
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
-const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset']
+const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale']
 
 /**
  * Secondary model used to remember the keys of a map
@@ -59,6 +59,7 @@ const renderHtml: RenderHook = {
 	choice({ choices, config, switchNode }, path, value, lang, states, ctx) {
 		const choice = switchNode.activeCase(path, true) as typeof choices[number]
 		const contextPath = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
+		console.log('RENDER', path.toString(), choice.type, value)
 		const [prefix, suffix, body] = choice.node.hook(this, contextPath, value, lang, states, ctx)
 		if (choices.length === 1) {
 			return [prefix, suffix, body]
@@ -69,6 +70,7 @@ const renderHtml: RenderHook = {
 			const newValue = c.change
 				? c.change(DataModel.unwrapLists(value))
 				: config.choiceContext === 'feature' ?	c.node.default()?.config?.feature : c.node.default()
+			console.warn('CHOICE', type, c, value, newValue)
 			path.model.set(path, DataModel.wrapLists(newValue))
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
@@ -258,6 +260,7 @@ const renderHtml: RenderHook = {
 		}
 		const newCtx = (typeof value === 'object' && value !== null && node.default()?.pools)
 			? { ...ctx, loot: value?.type } : ctx
+		// console.log('OBJECT', path.toString(), Object.keys(getActiveFields(path)))
 		const body = <>
 			{(typeof value === 'object' && value !== null && !(node.optional() && value === undefined)) &&
 				Object.entries(getActiveFields(path))

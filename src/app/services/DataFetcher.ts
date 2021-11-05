@@ -9,7 +9,7 @@ import { checkVersion } from './Schemas'
 
 const CACHE_NAME = 'misode-v1'
 
-type VersionRef = 'mcdata_master' | 'vanilla_datapack_summary' | 'vanilla_datapack_data'
+type VersionRef = 'mcdata_master' | 'mcassets' | 'vanilla_datapack_summary' | 'vanilla_datapack_data'
 
 type Version = {
 	id: string,
@@ -21,6 +21,7 @@ declare var __MCDATA_MASTER_HASH__: string
 declare var __VANILLA_DATAPACK_SUMMARY_HASH__: string
 
 const mcdataUrl = 'https://raw.githubusercontent.com/Arcensoth/mcdata'
+const mcassetsUrl = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets'
 const vanillaDatapackUrl = 'https://raw.githubusercontent.com/SPGoding/vanilla-datapack'
 const manifestUrl = 'https://launchermeta.mojang.com/mc/game/version_manifest.json'
 const resourceUrl = 'https://resources.download.minecraft.net/'
@@ -67,13 +68,14 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 		fetchRegistries(version, collectionTarget),
 		fetchBlockStateMap(version, blockStateTarget),
 		fetchDynamicRegistries(version, collectionTarget),
+		fetchAssetsRegistries(version, collectionTarget),
 	])
 }
 
 async function fetchRegistries(version: Version, target: CollectionRegistry) {
 	console.debug(`[fetchRegistries] ${version.id}`)
 	const registries = config.registries
-		.filter(r => !r.dynamic)
+		.filter(r => !r.dynamic && !r.asset)
 		.filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
 
 	if (checkVersion(version.id, undefined, '1.15')) {
@@ -142,7 +144,7 @@ async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) 
 async function fetchDynamicRegistries(version: Version, target: CollectionRegistry) {
 	console.debug(`[fetchDynamicRegistries] ${version.id}`)
 	const registries = config.registries
-		.filter(r => r.dynamic)
+		.filter(r => r.dynamic && !r.asset)
 		.filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
 
 	if (checkVersion(version.id, '1.16')) {
@@ -161,11 +163,43 @@ async function fetchDynamicRegistries(version: Version, target: CollectionRegist
 	}
 }
 
+export async function fetchAssetsRegistries(version: Version, target: CollectionRegistry) {
+	console.debug(`[fetchAssetsRegistries] ${version.id}`)
+	const registries = config.registries
+		.filter(r => r.asset)
+		.filter(r => checkVersion(version.id, r.minVersion, r.maxVersion))
+
+	await Promise.all(registries.map(async r => {
+		try {
+			const fetchFolder = async (path: string): Promise<string[]> => {
+				const url = `${mcassetsUrl}/${version.refs.mcassets}/assets/minecraft/${path}/_list.json`
+				const data = await getData(url)
+				if (data.directories.length === 0) {
+					return data.files
+				}
+				const directories = await Promise.all(data.directories.map(async (d: string) => {
+					const files = await fetchFolder(`${path}/${d}`)
+					return files.map(v => `${d}/${v}`)
+				}))
+				return [...data.files, ...directories.flat()]
+			}
+			const ids = (await fetchFolder(r.path ?? r.id))	
+				.filter((v: string) => v.endsWith('.json') || v.endsWith('.png'))
+				.map(v => `minecraft:${v.replace(/\.(json|png)$/, '')}`)
+			target.register(r.id, ids)
+		} catch (e) {
+			console.warn(`Error occurred while fetching assets registry ${r.id}:`, message(e))
+		}
+	}))
+}
+
 export async function fetchPreset(version: VersionId, registry: string, id: string) {
 	console.debug(`[fetchPreset] ${registry} ${id}`)
 	const versionData = config.versions.find(v => v.id === version)!
 	try {
-		const url = `${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`
+		const url = ['blockstates', 'models'].includes(registry)
+			?	`${mcassetsUrl}/${versionData.refs.mcassets}/assets/minecraft/${registry}/${id}.json`
+			: `${vanillaDatapackUrl}/${versionData.refs.vanilla_datapack_data}/data/minecraft/${registry}/${id}.json`
 		const res = await fetch(url)
 		if (registry === 'worldgen/noise_settings' && version === '1.18') {
 			let text = await res.text()
