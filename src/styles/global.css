@@ -129,7 +129,8 @@ body[data-panel="settings"] header {
 	align-items: center;
 }
 
-.title h2 {
+.title h1 {
+	font-size: 27px;
 	color: var(--nav);
 }
 
@@ -648,34 +649,31 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home {
+.home, .category {
 	padding: 16px;
-}
-
-.generator-picker {
-	display: flex;
-}
-
-.home.center {
-	flex-direction: column;
-	align-items: center;
-	color: var(--nav);
-}
-
-.home.center p {
-	padding-bottom: 20px;
-	text-align: center;
-	font-size: 20px;
-}
-
-.home {
 	max-width: 960px;
 	margin: 0 auto;
 }
 
+.home {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0 8px;
+	align-items: flex-start;
+}
+
+.home > *:nth-child(n+3) {
+	grid-column: 1 / 3;
+}
+
+h2 {
+	font-size: 24px;
+	font-weight: unset;
+}
+
 .tool-card {
 	display: flex;
-	padding: 10px;
+	flex-direction: column;
 	margin-bottom: 8px;
 	color: var(--text-2);
 	background-color: var(--background-2);
@@ -684,23 +682,41 @@ main.has-preview {
 	text-decoration: none;
 }
 
-.tool-card:hover {
+a.tool-card:hover {
 	background-color: var(--background-3);
 }
 
-.tool-card svg {
+.tool-head {
+	display: flex;
+	padding: 10px;
+}
+
+.tool-head svg {
 	width: 32px;
 	height: 32px;
 	flex-shrink: 0;
 	margin-right: 8px;
 }
 
-.tool-card h3 {
+.tool-head h3 {
 	font-weight: unset;
 }
 
-.tool-card p {
+.tool-head p {
 	color: var(--text-3);
+}
+
+.tool-body {
+	display: flex;
+	flex-direction: column;
+	border-top: 2px solid var(--background-1);
+	padding-top: 4px;
+}
+
+.tool-body > .tool-card {
+	margin: 0 8px 8px;
+	box-shadow: none;
+	margin-bottom: 0;
 }
 
 hr {
@@ -1193,7 +1209,16 @@ hr {
 
 /* SMALL */
 @media screen and (max-width: 580px) {
-	.title h2 {
+	.home {
+		grid-template-columns: 1fr;
+		gap: 0;
+	}
+
+	.home > * {
+		grid-column: 1 / 2;
+	}
+
+	.title h1 {
 		font-size: 18px;
 	}
 

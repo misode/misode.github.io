@@ -28,7 +28,7 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 	return <header>
 		<div class="title">
 			<Link class="home-link" href="/" aria-label={loc('home')}>{Icons.home}</Link>
-			<h2>{title}</h2>
+			<h1>{title}</h1>
 			{gen && <BtnMenu icon="chevron_down" tooltip={loc('switch_generator')}>
 				{config.generators
 					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))

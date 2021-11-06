@@ -3,16 +3,25 @@ import { Icons } from './Icons'
 
 type ToolCardProps = {
 	title: string,
-	link: string,
+	desc?: string,
+	link?: string,
 	icon?: keyof typeof Icons,
 	children?: ComponentChildren,
 }
-export function ToolCard({ title, link, icon, children }: ToolCardProps) {
-	return <a class="tool-card" href={link}>
-		{icon && Icons[icon]}
-		<div>
-			<h3>{title}</h3>
-			{children}
+export function ToolCard({ title, desc, link, icon, children }: ToolCardProps) {
+	const content = <>
+		<div class="tool-head">
+			{icon && Icons[icon]}
+			<div>
+				<h3>{title}</h3>
+				<p>{desc}</p>
+			</div>
 		</div>
-	</a>
+		{children && <div class="tool-body">
+			{children}
+		</div>}
+	</>
+	return link
+		? <a class="tool-card" href={link}>{content}</a>
+		: <div class="tool-card">{content}</div>
 }
