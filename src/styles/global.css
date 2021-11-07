@@ -710,11 +710,10 @@ a.tool-card:hover {
 	display: flex;
 	flex-direction: column;
 	border-top: 2px solid var(--background-1);
-	padding-top: 4px;
+	padding: 4px 8px;
 }
 
 .tool-body > .tool-card {
-	margin: 0 8px 8px;
 	box-shadow: none;
 	margin-bottom: 0;
 }

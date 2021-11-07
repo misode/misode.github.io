@@ -17,6 +17,7 @@ const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.val
 const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type']
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
 const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale']
+const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
 
 /**
  * Secondary model used to remember the keys of a map
@@ -236,7 +237,7 @@ const renderHtml: RenderHook = {
 	},
 
 	object({ node, config, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
-		const { expand, isToggled } = useToggles()
+		const { expand, collapse, isToggled } = useToggles()
 
 		if (path.getArray().length == 0 && isDecorated(config.context, value)) {
 			const { wrapper, fields } = createDecoratorsWrapper(getActiveFields(path), path, value)
@@ -256,6 +257,17 @@ const renderHtml: RenderHook = {
 				suffix = <button class="collapse open tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
 			}
 		}
+		const context = path.getContext().join('.')
+		if (collapsedFields.includes(context)) {
+			const toggled = isToggled('')
+			prefix = <>
+				<button class="toggle tooltipped tip-se" aria-label={locale(lang, toggled ? 'collapse' : 'expand')} onClick={toggled ? collapse('') : expand('')}>{toggled ? Octicon.chevron_down : Octicon.chevron_right}</button>
+			</>
+			if (!toggled) {
+				return [prefix, suffix, null]
+			}
+		}
+
 		const newCtx = (typeof value === 'object' && value !== null && node.default()?.pools)
 			? { ...ctx, loot: value?.type } : ctx
 		const body = <>
@@ -264,16 +276,6 @@ const renderHtml: RenderHook = {
 					.filter(([_, child]) => child.enabled(path))
 					.map(([key, child]) => {
 						const cPath = getChildModelPath(path, key)
-						const canToggle = child.type(cPath) === 'object'
-						const toggle = isToggled(key)
-						if (canToggle && (toggle === false || (toggle === undefined && (ctx.depth ?? 0) > 5))) {
-							return <div class="node node-header" data-category={child.category(cPath)}>
-								<ErrorPopup lang={lang} path={cPath} nested />
-								<button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'expand')}\n${locale(lang, 'expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
-								<label>{pathLocale(lang, cPath)}</label>
-							</div>
-						}
-
 						const context = cPath.getContext().join('.')
 						if (hiddenFields.includes(context)) return null
 						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, states, newCtx)
