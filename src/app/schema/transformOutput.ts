@@ -16,9 +16,13 @@ export const transformOutput: Hook<[any, OutputProps], any> = {
 
 	list({ children }, path, value, props) {
 		if (!Array.isArray(value)) return value
-		return value.map((obj, index) =>
+		const res = value.map((obj, index) =>
 			children.hook(this, path.push(index), obj.node, props)
 		)
+		for (const a of Object.getOwnPropertySymbols(value)) {
+			res[a as any] = value[a as any]
+		}
+		return res
 	},
 
 	map({ children, config }, path, value, props) {
@@ -31,6 +35,9 @@ export const transformOutput: Hook<[any, OutputProps], any> = {
 			}
 			res[f] = children.hook(this, path.push(f), value[f], props)
 		})
+		for (const a of Object.getOwnPropertySymbols(value)) {
+			res[a as any] = value[a]
+		}
 		return res
 	},
 
@@ -48,6 +55,9 @@ export const transformOutput: Hook<[any, OutputProps], any> = {
 					res[f] = out
 				}
 			})
+		for (const a of Object.getOwnPropertySymbols(value)) {
+			res[a as any] = value[a]
+		}
 		return res
 	},
 }

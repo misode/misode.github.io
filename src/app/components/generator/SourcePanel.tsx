@@ -1,4 +1,5 @@
 import { DataModel, ModelPath } from '@mcschema/core'
+import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
@@ -23,8 +24,8 @@ const FORMATS: Record<string, {
 	stringify: (v: any, indentation: string | number | undefined) => string,
 }> = {
 	json: {
-		parse: JSON.parse,
-		stringify: (v, i) => JSON.stringify(v, null, i),
+		parse: json.parse,
+		stringify: (v, i) => json.stringify(v, null, i),
 	},
 	yaml: {
 		parse: yaml.load,
