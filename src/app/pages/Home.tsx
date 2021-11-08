@@ -11,7 +11,6 @@ type HomeProps = {
 export function Home({ lang, changeTitle }: HomeProps) {
 	const loc = locale.bind(null, lang)
 	changeTitle(loc('title.home'))
-	console.log(config.generators)
 	return <main>
 		<div class="home">
 			<ToolCard title="Data packs">
