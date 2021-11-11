@@ -45,7 +45,7 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 		})
 	}, [changelogs, search, tags])
 
-	const [sort, setSort] = useState(false)
+	const [sort, setSort] = useState(true)
 
 	const sortedChangelogs = useMemo(() => {
 		return filteredChangelogs.sort((a, b) => sort ? b.order - a.order : a.order - b.order)
