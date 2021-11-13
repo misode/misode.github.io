@@ -67,9 +67,10 @@ const renderHtml: RenderHook = {
 		const choiceContextPath = config?.choiceContext ? new Path([], [config.choiceContext]) : config?.context ? new Path([], [config.context]) : path
 		const set = (type: string) => {
 			const c = choices.find(c => c.type === type) ?? choice
+			const def = c.node.default()
 			const newValue = c.change
 				? c.change(DataModel.unwrapLists(value))
-				: config.choiceContext === 'feature' ?	c.node.default()?.config?.feature : c.node.default()
+				: config.choiceContext === 'feature' && def?.type === 'minecraft:decorated' ? def.config.feature : def
 			path.model.set(path, DataModel.wrapLists(newValue))
 		}
 		const inject = <select value={choice.type} onChange={(e) => set((e.target as HTMLSelectElement).value)}>
