@@ -162,6 +162,13 @@
       "minVersion": "1.16"
     },
     {
+      "id": "worldgen/placed_feature",
+      "url": "worldgen/placed-feature",
+      "category": "worldgen",
+      "schema": "placed_feature",
+      "minVersion": "1.18"
+    },
+    {
       "id": "worldgen/noise",
       "url": "worldgen/noise",
       "category": "worldgen",
@@ -273,7 +280,7 @@
     { "id": "worldgen/configured_feature", "minVersion": "1.16" , "dynamic": true },
     { "id": "worldgen/configured_structure_feature", "minVersion": "1.16" , "dynamic": true },
     { "id": "worldgen/configured_surface_builder", "minVersion": "1.16" , "dynamic": true },
-    { "id": "worldgen/decorator", "minVersion": "1.16" },
+    { "id": "worldgen/decorator", "minVersion": "1.16", "maxVersion": "1.17" },
     { "id": "worldgen/feature", "minVersion": "1.16" },
     { "id": "worldgen/feature_size_type", "minVersion": "1.16" },
     { "id": "worldgen/foliage_placer_type", "minVersion": "1.16" },
@@ -281,6 +288,8 @@
     { "id": "worldgen/material_rule", "minVersion": "1.18" },
     { "id": "worldgen/noise", "minVersion": "1.18" , "dynamic": true },
     { "id": "worldgen/noise_settings", "minVersion": "1.16" , "dynamic": true },
+    { "id": "worldgen/placed_feature", "minVersion": "1.18" , "dynamic": true },
+    { "id": "worldgen/placement_modifier_type", "minVersion": "1.18" },
     { "id": "worldgen/processor_list", "minVersion": "1.16" , "dynamic": true },
     { "id": "worldgen/structure_feature", "minVersion": "1.16" },
     { "id": "worldgen/structure_pool_element", "minVersion": "1.16" },
@@ -290,6 +299,7 @@
     { "id": "worldgen/tree_decorator_type", "minVersion": "1.16" },
     { "id": "worldgen/trunk_placer_type", "minVersion": "1.16" },
     { "id": "biome", "maxVersion": "1.15" },
-    { "id": "worldgen/biome", "minVersion": "1.16", "path": "processed/reports/biomes" }
+    { "id": "worldgen/biome", "minVersion": "1.16", "maxVersion": "1.17", "path": "processed/reports/biomes" },
+    { "id": "worldgen/biome", "minVersion": "1.18", "path": "processed/reports/worldgen/minecraft/worldgen/biome" }
   ]
 }

@@ -109,6 +109,7 @@
   "worldgen/biome": "Biome",
   "worldgen/configured_carver": "Carver",
   "worldgen/configured_feature": "Feature",
+  "worldgen/placed_feature": "Placed Feature",
   "worldgen/noise": "Noise",
   "worldgen/noise_settings": "Noise Settings",
   "worldgen/processor_list": "Processor List",
