@@ -22,7 +22,10 @@ export async function getChangelogs() {
 		const index = await (await fetch(`${repo}/index.json`)).json() as string[]
 		Changelogs = (await Promise.all(
 			index.map((group, i) => fetchGroup(parseVersion(group), i))
-		)).flat()
+		)).flat().map<ChangelogEntry>(change => ({
+			...change,
+			tags: [change.group.id, ...change.tags],
+		}))
 	}
 	return Changelogs
 }
