@@ -233,6 +233,7 @@
     { "id": "attribute", "minVersion": "1.16" },
     { "id": "block" },
     { "id": "block_definition", "path": "blockstates", "asset": true },
+    { "id": "block_entity_type", "minVersion": "1.18" },
     { "id": "block_predicate_type", "minVersion": "1.18" },
     { "id": "dimension", "dynamic": true },
     { "id": "dimension_type", "dynamic": true },
