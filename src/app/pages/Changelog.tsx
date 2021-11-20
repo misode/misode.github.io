@@ -41,7 +41,12 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 				return false
 			}
 			const content = change.tags.join(' ') + ' ' + change.content.toLowerCase()
-			return query.every(q => content.includes(q))
+			return query.every(q => {
+				if (q.startsWith('!')) {
+					return q.length === 1 || !content.includes(q.slice(1))
+				}
+				return content.includes(q)
+			})
 		})
 	}, [changelogs, search, tags])
 
