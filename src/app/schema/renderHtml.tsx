@@ -7,7 +7,7 @@ import config from '../../config.json'
 import { Btn, Octicon } from '../components'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
-import type { BlockStateRegistry } from '../services'
+import type { BlockStateRegistry, VersionId } from '../services'
 import { CachedDecorator, CachedFeature } from '../services'
 import { deepClone, deepEqual, hexId, isObject, newSeed } from '../Utils'
 import { ModelWrapper } from './ModelWrapper'
@@ -33,20 +33,21 @@ const keysModel = new DataModel(MapNode(
 ), { historyMax: 0 })
 
 type JSXTriple = [JSX.Element | null, JSX.Element | null, JSX.Element | null]
-type RenderHook = Hook<[any, string, BlockStateRegistry, Record<string, any>], JSXTriple>
+type RenderHook = Hook<[any, string, VersionId, BlockStateRegistry, Record<string, any>], JSXTriple>
 
 type NodeProps<T> = T & {
 	node: INode<any>,
 	path: ModelPath,
 	value: any,
 	lang: string,
+	version: VersionId,
 	states: BlockStateRegistry,
 	ctx: Record<string, any>,
 }
 
-export function FullNode({ model, lang, blockStates }: { model: DataModel, lang: string, blockStates: BlockStateRegistry }) {
+export function FullNode({ model, lang, version, blockStates }: { model: DataModel, lang: string, version: VersionId, blockStates: BlockStateRegistry }) {
 	const path = new ModelPath(model)
-	const [prefix, suffix, body] = model.schema.hook(renderHtml, path, deepClone(model.data), lang, blockStates, {})
+	const [prefix, suffix, body] = model.schema.hook(renderHtml, path, deepClone(model.data), lang, version, blockStates, {})
 	return suffix?.props?.children.some((c: any) => c) ? <div class={`node ${model.schema.type(path)}-node`} data-category={model.schema.category(path)}>
 		<div class="node-header">{prefix}{suffix}</div>
 		<div class="node-body">{body}</div>
@@ -58,14 +59,14 @@ const renderHtml: RenderHook = {
 		return [null, null, null]
 	},
 
-	boolean(params, path, value, lang, states, ctx) {
-		return [null, <BooleanSuffix {...{...params, path, value, lang, states, ctx}} />, null]
+	boolean(params, path, value, lang, version, states, ctx) {
+		return [null, <BooleanSuffix {...{...params, path, value, lang, version, states, ctx}} />, null]
 	},
 
-	choice({ choices, config, switchNode }, path, value, lang, states, ctx) {
+	choice({ choices, config, switchNode }, path, value, lang, version, states, ctx) {
 		const choice = switchNode.activeCase(path, true) as typeof choices[number]
 		const contextPath = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
-		const [prefix, suffix, body] = choice.node.hook(this, contextPath, value, lang, states, ctx)
+		const [prefix, suffix, body] = choice.node.hook(this, contextPath, value, lang, version, states, ctx)
 		if (choices.length === 1) {
 			return [prefix, suffix, body]
 		}
@@ -86,7 +87,7 @@ const renderHtml: RenderHook = {
 		return [prefix, <>{inject}{suffix}</>, body]
 	},
 
-	list({ children, config }, path, value, lang, states, ctx) {
+	list({ children, config }, path, value, lang, version, states, ctx) {
 		const { expand, collapse, isToggled } = useToggles()
 		const [maxShown, setMaxShown] = useState(50)
 
@@ -98,7 +99,7 @@ const renderHtml: RenderHook = {
 				<div class="fixed-list"></div>
 			</>
 			const suffix = <>{[...Array(config.maxLength)].map((_, i) => {
-				const child = children.hook(this, path.modelPush(i), value?.[i]?.node, lang, states, ctx)
+				const child = children.hook(this, path.modelPush(i), value?.[i]?.node, lang, version, states, ctx)
 				return child[1]
 			})}</>
 			return [prefix, suffix, null]
@@ -162,7 +163,7 @@ const renderHtml: RenderHook = {
 						},
 					},
 				]
-				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} {...{lang, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
+				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} {...{lang, version, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
 					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'collapse')}\n${locale(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
 					<button class="remove tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
@@ -178,7 +179,7 @@ const renderHtml: RenderHook = {
 		return [null, suffix, body]
 	},
 
-	map({ children, keys, config }, path, value, lang, states, ctx) {
+	map({ children, keys, config }, path, value, lang, version, states, ctx) {
 		const { expand, collapse, isToggled } = useToggles()
 
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
@@ -201,10 +202,10 @@ const renderHtml: RenderHook = {
 					path.model.errors.add(path.push(key), 'error.invalid_enum_option', value[key])
 				}
 			})
-			return ObjectNode(Object.fromEntries(properties)).hook(this, path, value, lang, states, ctx)
+			return ObjectNode(Object.fromEntries(properties)).hook(this, path, value, lang, version, states, ctx)
 		}
 		const suffix = <>
-			{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, states, ctx)[1]}
+			{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, version, states, ctx)[1]}
 			<button class="add tooltipped tip-se" aria-label={locale(lang, 'add')} onClick={onAdd}>{Octicon.plus_circle}</button>
 		</>
 		const body = <>
@@ -229,7 +230,7 @@ const renderHtml: RenderHook = {
 					path.model.errors.add(cPath, 'error.invalid_enum_option', cValue)
 				}
 				const onRemove = () => cPath.set(undefined)
-				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} {...{lang, states, ctx}} label={key}>
+				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} {...{lang, version, states, ctx}} label={key}>
 					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'collapse')}\n${locale(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>}
 					<button class="remove tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 				</MemoedTreeNode>
@@ -238,11 +239,11 @@ const renderHtml: RenderHook = {
 		return [null, suffix, body]
 	},
 
-	number(params, path, value, lang, states, ctx) {
-		return [null, <NumberSuffix {...{...params, path, value, lang, states, ctx}} />, null]
+	number(params, path, value, lang, version, states, ctx) {
+		return [null, <NumberSuffix {...{...params, path, value, lang, version, states, ctx}} />, null]
 	},
 
-	object({ node, config, getActiveFields, getChildModelPath }, path, value, lang, states, ctx) {
+	object({ node, config, getActiveFields, getChildModelPath }, path, value, lang, version, states, ctx) {
 		const { expand, collapse, isToggled } = useToggles()
 
 		if (path.getArray().length == 0 && isDecorated(config.context, value)) {
@@ -284,7 +285,7 @@ const renderHtml: RenderHook = {
 						const cPath = getChildModelPath(path, key)
 						const context = cPath.getContext().join('.')
 						if (hiddenFields.includes(context)) return null
-						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, states, newCtx)
+						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, version, states, newCtx)
 						if (!cPrefix && !cSuffix && !((cBody?.props?.children?.length ?? 0) > 0)) return null
 						const isFlattened = child.type(cPath) === 'object' && flattenedFields.includes(context)
 						const isInlined = inlineFields.includes(context)
@@ -293,15 +294,15 @@ const renderHtml: RenderHook = {
 							suffix = <>{suffix}{cSuffix}</>
 							return isFlattened ? cBody : null
 						}
-						return <MemoedTreeNode key={key} schema={child} path={cPath} value={value[key]} {...{lang, states, ctx: newCtx}} />
+						return <MemoedTreeNode key={key} schema={child} path={cPath} value={value[key]} {...{lang, version, states, ctx: newCtx}} />
 					})
 			}
 		</>
 		return [prefix, suffix, body]
 	},
 
-	string(params, path, value, lang, states, ctx) {
-		return [null, <StringSuffix {...{...params, path, value, lang, states, ctx}} />, null]
+	string(params, path, value, lang, version, states, ctx) {
+		return [null, <StringSuffix {...{...params, path, value, lang, version, states, ctx}} />, null]
 	},
 }
 
@@ -379,7 +380,7 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 	</>
 }
 
-function StringSuffix({ path, getValues, config, node, value, lang, states }: NodeProps<StringHookParams>) {
+function StringSuffix({ path, getValues, config, node, value, lang, version, states }: NodeProps<StringHookParams>) {
 	const onChange = (evt: Event) => {
 		evt.stopPropagation()
 		const newValue = (evt.target as HTMLSelectElement).value
@@ -424,7 +425,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 				{values.map(v => <option value={v} />)}
 			</datalist>}
 			{gen && values.includes(value) && value.startsWith('minecraft:') &&
-				<a href={`/${gen.url}/?preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale(lang, 'follow_reference')}>{Octicon.link_external}</a>}
+				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>
 	}
 }
@@ -441,6 +442,7 @@ type TreeNodeProps = {
 	path: ModelPath,
 	value: any,
 	lang: string,
+	version: VersionId,
 	states: BlockStateRegistry,
 	ctx: Record<string, any>,
 	compare?: any,
@@ -448,7 +450,7 @@ type TreeNodeProps = {
 	actions?: MenuAction[],
 	children?: ComponentChildren,
 }
-function TreeNode({ label, schema, path, value, lang, states, ctx, actions, children }: TreeNodeProps) {
+function TreeNode({ label, schema, path, value, lang, version, states, ctx, actions, children }: TreeNodeProps) {
 	const type = schema.type(path)
 	const category = schema.category(path)
 	const context = path.getContext().join('.')
@@ -461,7 +463,7 @@ function TreeNode({ label, schema, path, value, lang, states, ctx, actions, chil
 
 	const newCtx: Record<string, any> = { ...ctx, depth: (ctx.depth ?? 0) + 1 }
 	delete newCtx.index
-	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, states, newCtx)
+	const [prefix, suffix, body] = schema.hook(renderHtml, path, value, lang, version, states, newCtx)
 	return <div class={`node ${type}-node`} data-category={category}>
 		<div class="node-header" onContextMenu={onContextMenu}>
 			<ErrorPopup lang={lang} path={path} />

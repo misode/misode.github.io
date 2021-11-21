@@ -11,7 +11,7 @@ type TreePanelProps = {
 	blockStates: BlockStateRegistry | null,
 	onError: (message: string) => unknown,
 }
-export function Tree({ lang, model, blockStates, onError }: TreePanelProps) {
+export function Tree({ lang, version, model, blockStates, onError }: TreePanelProps) {
 	if (!model || !blockStates || lang === 'none') return <></>
 
 	const [error] = useErrorBoundary(e => {
@@ -26,6 +26,6 @@ export function Tree({ lang, model, blockStates, onError }: TreePanelProps) {
 	})
 
 	return <div class="tree">
-		<FullNode {...{model, lang, blockStates}}/>
+		<FullNode {...{model, lang, version, blockStates}}/>
 	</div>
 }
