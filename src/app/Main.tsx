@@ -1,7 +1,7 @@
 import { render } from 'preact'
 import type { RouterOnChangeArgs } from 'preact-router'
-import { Router } from 'preact-router'
-import { useEffect, useState } from 'preact/hooks'
+import { getCurrentUrl, Router } from 'preact-router'
+import { useCallback, useEffect, useState } from 'preact/hooks'
 import config from '../config.json'
 import '../styles/global.css'
 import '../styles/nodes.css'
@@ -10,8 +10,9 @@ import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
 import { Category, Changelog, Generator, Home, Sounds } from './pages'
 import type { VersionId } from './services'
+import { VersionIds } from './services'
 import { Store } from './Store'
-import { cleanUrl } from './Utils'
+import { cleanUrl, getSearchParams, setSeachParams } from './Utils'
 
 const VERSIONS_IN_TITLE = 3
 
@@ -46,18 +47,28 @@ function Main() {
 		document.documentElement.setAttribute('data-theme', theme)
 	}, [theme])
 
+	const searchParams = getSearchParams(getCurrentUrl())
+	const targetVersion = searchParams.get('version')
 	const [version, setVersion] = useState<VersionId>(Store.getVersion())
-	const changeVersion = (version: VersionId) => {
+	const changeVersion = useCallback((version: VersionId) => {
+		if (getSearchParams(getCurrentUrl()).has('version')) {
+			setSeachParams({ version })
+		}
 		Analytics.setVersion(version)
 		Store.setVersion(version)
 		setVersion(version)
-	}
+	}, [targetVersion])
+	useEffect(() => {
+		if (VersionIds.includes(targetVersion as VersionId) && version !== targetVersion) {
+			setVersion(targetVersion as VersionId)
+		}
+	}, [version, targetVersion])
 
 	const [title, setTitle] = useState<string>(locale(lang, 'title.home'))
 	const changeTitle = (title: string, versions?: VersionId[]) => {
 		versions ??= config.versions.map(v => v.id as VersionId)
-		versions.splice(0, versions.length - VERSIONS_IN_TITLE)
-		document.title = `${title} Minecraft ${versions.join(', ')}`
+		const titleVersions = versions.slice(versions.length - VERSIONS_IN_TITLE)
+		document.title = `${title} Minecraft ${titleVersions.join(', ')}`
 		setTitle(title)
 	}
 

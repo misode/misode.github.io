@@ -8,7 +8,7 @@ import { useModel } from '../hooks'
 import { locale } from '../Locales'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
-import { getGenerator, message } from '../Utils'
+import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
 type GeneratorProps = {
 	lang: string,
@@ -40,6 +40,9 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
 	}
 
+	const searchParams = getSearchParams(getCurrentUrl())
+	const currentPreset = searchParams.get('preset')
+
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
 	useEffect(() => {
@@ -48,14 +51,19 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 		getBlockStates(version)
 			.then(b => setBlockStates(b))
 		getModel(version, gen.id)
-			.then(m => {
+			.then(async m => {
 				Analytics.setGenerator(gen.id)
+				if (currentPreset) {
+					const preset = await loadPreset(currentPreset)
+					m.reset(DataModel.wrapLists(preset), false)
+				}
 				setModel(m)
 			})
 			.catch(e => { console.error(e); setError(message(e)) })
 	}, [version, gen.id])
 
 	useModel(model, () => {
+		setSeachParams({ version: undefined, preset: undefined })
 		setError(null)
 	})
 
@@ -106,9 +114,18 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 			.catch(e => { console.error(e); setError(e.message) })
 	}, [version, gen.id, presetFilter])
 
-	const loadPreset = (id: string) => {
+	const selectPreset = (id: string) => {
+		loadPreset(id).then(preset => {
+			model?.reset(DataModel.wrapLists(preset), false)
+			setSeachParams({ version, preset: id })
+		})
+	}
+
+	const loadPreset = async (id: string) => {
 		Analytics.generatorEvent('load-preset', id)
-		fetchPreset(version, gen.path ?? gen.id, id).then(preset => {
+		console.log('load preset', version, gen.id, id)
+		try {
+			const preset = await fetchPreset(version, gen.path ?? gen.id, id)
 			const seed = model?.get(new Path(['generator', 'seed']))
 			if (preset?.generator?.seed !== undefined && seed !== undefined) {
 				preset.generator.seed = seed
@@ -116,8 +133,10 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 					preset.generator.biome_source.seed = seed
 				}
 			}
-			model?.reset(DataModel.wrapLists(preset), false)
-		})
+			return preset
+		} catch (e) {
+			setError(message(e))
+		}
 	}
 
 	const [sourceShown, setSourceShown] = useState(window.innerWidth > 820)
@@ -176,7 +195,7 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 				<BtnMenu icon="archive" label={loc('presets')} relative={false}>
 					<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} placeholder={loc('search')} />
 					<div class="result-list">
-						{presetResults.map(preset => <Btn label={preset} onClick={() => loadPreset(preset)} />)}
+						{presetResults.map(preset => <Btn label={preset} onClick={() => selectPreset(preset)} />)}
 					</div>
 					{presetResults.length === 0 && <Btn label={loc('no_presets')}/>}
 				</BtnMenu>

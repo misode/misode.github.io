@@ -1,5 +1,6 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
+import { getCurrentUrl, route } from 'preact-router'
 import rfdc from 'rfdc'
 import config from '../config.json'
 
@@ -53,9 +54,42 @@ export function cleanUrl(url: string) {
 	return `/${url}/`.replaceAll('//', '/')
 }
 
+export function getPath(url: string) {
+	const searchIndex = url.indexOf('?')
+	if (searchIndex >= 0) {
+		url = url.slice(0, searchIndex)
+	}
+	return cleanUrl(url)
+}
+
 export function getGenerator(url: string) {
-	const trimmedUrl = url.replace(/^\//, '').replace(/\/$/, '').replace(/\?.*/, '')
+	const trimmedUrl = getPath(url).replace(/^\//, '').replace(/\/$/, '')
 	return config.generators.find(g => g.url === trimmedUrl)
+}
+
+export function getSearchParams(url: string) {
+	const searchIndex = url.indexOf('?')
+	if (searchIndex >= 0) {
+		url = url.slice(searchIndex + 1)
+		return new Map(url.split('&').map<[string, string]>(param => {
+			const index = param.indexOf('=')
+			if (index === -1) return [param, 'true']
+			return [decodeURIComponent(param.slice(0, index)), decodeURIComponent(param.slice(index + 1))]
+		}))
+	}
+	return new Map<string, string>()
+}
+
+export function setSeachParams(modifications: Record<string, string | undefined>) {
+	const url = getCurrentUrl()
+	const searchParams = getSearchParams(url)
+	Object.entries(modifications).forEach(([key, value]) => {
+		if (value === undefined) searchParams.delete(key)
+		else searchParams.set(key, value)
+	})
+	const search = Array.from(searchParams).map(([key, value]) =>
+		`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+	route(`${getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
 }
 
 export function stringToColor(str: string): [number, number, number] {

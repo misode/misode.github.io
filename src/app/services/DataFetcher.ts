@@ -213,7 +213,7 @@ export async function fetchPreset(version: VersionId, registry: string, id: stri
 		}
 		return await res.json()
 	} catch (e) {
-		console.warn(`Error occurred while fetching ${registry} preset ${id}:`, message(e))
+		throw new Error(`Error occurred while fetching ${registry} preset ${id}: ${message(e)}`)
 	}
 }
 
