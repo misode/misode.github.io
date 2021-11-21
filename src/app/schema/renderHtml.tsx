@@ -417,7 +417,6 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 	} else {
 		const datalistId = hexId()
 		const gen = id ? findGenerator(id) : undefined
-		console.log(id, gen)
 		return <>
 			<input value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}}
 				list={values.length > 0 ? datalistId : ''} />

@@ -42,6 +42,11 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 
 	const searchParams = getSearchParams(getCurrentUrl())
 	const currentPreset = searchParams.get('preset')
+	useEffect(() => {
+		if (model && currentPreset) {
+			selectPreset(currentPreset)
+		}
+	}, [currentPreset])
 
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
