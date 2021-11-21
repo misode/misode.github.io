@@ -149,6 +149,18 @@
   background-color: var(--node-background-hover);
 }
 
+.node-header a {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  padding: 0 9px;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  fill: var(--node-text);
+  background-color: var(--node-background-input);
+}
+
 .object-node > .node-header > .collapse {
   cursor: pointer;
 }

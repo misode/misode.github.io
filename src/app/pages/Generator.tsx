@@ -123,7 +123,6 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 
 	const loadPreset = async (id: string) => {
 		Analytics.generatorEvent('load-preset', id)
-		console.log('load preset', version, gen.id, id)
 		try {
 			const preset = await fetchPreset(version, gen.path ?? gen.id, id)
 			const seed = model?.get(new Path(['generator', 'seed']))

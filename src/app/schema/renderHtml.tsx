@@ -3,6 +3,7 @@ import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
+import config from '../../config.json'
 import { Btn, Octicon } from '../components'
 import { useFocus } from '../hooks'
 import { locale } from '../Locales'
@@ -18,6 +19,10 @@ const inlineFields = ['loot_entry.type', 'function.function', 'condition.conditi
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
 const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale']
 const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
+
+const findGenerator = (id: string) => {
+	return config.generators.find(g => g.id === id.replace(/^\$/, ''))
+}
 
 /**
  * Secondary model used to remember the keys of a map
@@ -383,14 +388,16 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 	}
 	const values = getValues()
 	const context = path.getContext().join('.')
+	const id = !isEnum(config) && config?.validator === 'resource' && typeof config.params.pool === 'string' ? config.params.pool : undefined
+
 	if (nbtFields.includes(context)) {
 		return <textarea value={value ?? ''} onBlur={onChange}></textarea>
 	} else if ((isEnum(config) && !config.additional) || selectRegistries.includes(context)) {
 		let context = new Path([])
 		if (isEnum(config) && typeof config.enum === 'string') {
 			context = context.contextPush(config.enum)
-		} else if (!isEnum(config) && config?.validator === 'resource' && typeof config.params.pool === 'string') {
-			context = context.contextPush(config.params.pool)
+		} else if (id) {
+			context = context.contextPush(id)
 		} else if (isEnum(config)) {
 			context = path
 		}
@@ -408,12 +415,16 @@ function StringSuffix({ path, getValues, config, node, value, lang, states }: No
 		</select>
 	} else {
 		const datalistId = hexId()
+		const gen = id ? findGenerator(id) : undefined
+		console.log(id, gen)
 		return <>
 			<input value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}}
 				list={values.length > 0 ? datalistId : ''} />
 			{values.length > 0 && <datalist id={datalistId}>
 				{values.map(v => <option value={v} />)}
 			</datalist>}
+			{gen && values.includes(value) && value.startsWith('minecraft:') &&
+				<a href={`/${gen.url}/?preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>
 	}
 }

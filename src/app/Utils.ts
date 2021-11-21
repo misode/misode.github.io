@@ -80,7 +80,7 @@ export function getSearchParams(url: string) {
 	return new Map<string, string>()
 }
 
-export function setSeachParams(modifications: Record<string, string | undefined>) {
+export function setSeachParams(modifications: Record<string, string | undefined>, newPath?: string) {
 	const url = getCurrentUrl()
 	const searchParams = getSearchParams(url)
 	Object.entries(modifications).forEach(([key, value]) => {
@@ -89,7 +89,7 @@ export function setSeachParams(modifications: Record<string, string | undefined>
 	})
 	const search = Array.from(searchParams).map(([key, value]) =>
 		`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-	route(`${getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
+	route(`${newPath ? cleanUrl(newPath) : getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
 }
 
 export function stringToColor(str: string): [number, number, number] {
