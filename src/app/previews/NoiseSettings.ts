@@ -42,7 +42,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 		for (let x = 0; x < options.width; x += 1) {
 			for (let y = 0; y < settings.noise.height; y += 1) {
 				const i = x * 4 + (settings.noise.height-y-1) * 4 * img.width
-				const state = slice.getBlockState([x - options.offset, y, Z])
+				const state = slice.getBlockState([x - options.offset, y + settings.noise.minY, Z])
 				const color = colors[state.getName()] ?? [0, 0, 0]
 				data[i] = color[0]
 				data[i + 1] = color[1]
