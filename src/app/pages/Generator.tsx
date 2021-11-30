@@ -39,6 +39,9 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
 	}
+	if (!checkVersion(version, undefined, gen.maxVersion)) {
+		setError(`This generator is not available in versions above ${gen.maxVersion}`)
+	}
 
 	const searchParams = getSearchParams(getCurrentUrl())
 	const currentPreset = searchParams.get('preset')
