@@ -32,7 +32,7 @@ export function Home({ lang, changeTitle }: HomeProps) {
 				desc="Browse through and mix all the vanilla sounds" />
 			<ToolCard title="Data Pack Upgrader"
 				link="https://misode.github.io/upgrader/"
-				desc="Convert your 1.16 data packs to 1.17" />
+				desc="Convert your data packs from 1.16 to 1.17 to 1.18" />
 			<ToolCard title="Technical Changelog" link="/changelog/" />
 		</div>
 	</main>
