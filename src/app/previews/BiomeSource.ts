@@ -230,7 +230,7 @@ function getBiomeColor(biome: string, biomeColors: BiomeColors): Triple {
 	return color
 }
 
-function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
+export function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
 	const xx = (x - options.offset[0] - 100 + options.res / 2) * options.scale
 	const zz = (z - options.offset[1] - 100 + options.res / 2) * options.scale
 	return [xx, zz]

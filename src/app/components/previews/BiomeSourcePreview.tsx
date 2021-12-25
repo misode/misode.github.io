@@ -6,7 +6,7 @@ import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
 import { useCanvas } from '../../hooks'
 import { locale } from '../../Locales'
-import { biomeMap, getBiome } from '../../previews'
+import { biomeMap, getBiome, toWorld } from '../../previews'
 import { newSeed } from '../../Utils'
 
 const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness', 'offset', 'factor', 'jaggedness'] as const
@@ -52,7 +52,8 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 		async onHover(x, y) {
 			const options = { octaves, shaper, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
-			setFocused(biome)
+			const [xx, zz] = toWorld([Math.floor(x * 200), Math.floor(y * 200)], options)
+			setFocused(biome + " (" + xx + ", " + zz + ")")
 		},
 		onLeave() {
 			setFocused(undefined)
