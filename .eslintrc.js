@@ -6,7 +6,7 @@ module.exports = {
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
 		"tsconfigRootDir": __dirname,
-		"project": "./tsconfig.json"
+		"project": "./tsconfig-eslint.json"
 	},
 	"plugins": [
 		"@typescript-eslint"
@@ -14,8 +14,7 @@ module.exports = {
 	"ignorePatterns": [
 		"**/node_modules",
 		"**/dist",
-		".eslintrc.js",
-		"vite.config.js"
+		".eslintrc.js"
 	],
 	"rules": {
 		"@typescript-eslint/consistent-type-imports": [

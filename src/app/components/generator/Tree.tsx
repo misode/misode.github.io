@@ -25,7 +25,7 @@ export function Tree({ lang, version, model, blockStates, onError }: TreePanelPr
 		setState(state => state + 1)
 	})
 
-	return <div class="tree">
+	return <div class="tree" data-cy="tree">
 		<FullNode {...{model, lang, version, blockStates}}/>
 	</div>
 }

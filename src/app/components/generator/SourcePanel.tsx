@@ -25,7 +25,7 @@ const FORMATS: Record<string, {
 }> = {
 	json: {
 		parse: json.parse,
-		stringify: (v, i) => json.stringify(v, null, i),
+		stringify: (v, i) => json.stringify(v, null, i) + '\n',
 	},
 	yaml: {
 		parse: yaml.load,
@@ -57,7 +57,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	const getOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
 		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })
-		return FORMATS[format].stringify(data, INDENT[indent]) + '\n'
+		return FORMATS[format].stringify(data, INDENT[indent])
 	}, [indent, format])
 
 	useEffect(() => {
@@ -136,7 +136,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	return <> 
 		<div class="controls">
-			<BtnMenu icon="gear" tooltip={loc('output_settings')}>
+			<BtnMenu icon="gear" tooltip={loc('output_settings')} data-cy="source-controls">
 				{Object.entries(INDENT).map(([key]) =>
 					<Btn label={loc(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>
@@ -147,7 +147,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 						onClick={() => changeFormat(key)} />)}
 			</BtnMenu>
 		</div>
-		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')}></textarea>
+		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')} data-cy="import-area"></textarea>
 		<a ref={download} style="display: none;"></a>
 	</>
 }

@@ -27,9 +27,9 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 
 	return <header>
 		<div class="title">
-			<Link class="home-link" href="/" aria-label={loc('home')}>{Icons.home}</Link>
+			<Link class="home-link" href="/" aria-label={loc('home')} data-cy="home-link">{Icons.home}</Link>
 			<h1>{title}</h1>
-			{gen && <BtnMenu icon="chevron_down" tooltip={loc('switch_generator')}>
+			{gen && <BtnMenu icon="chevron_down" tooltip={loc('switch_generator')} data-cy="generator-switcher">
 				{config.generators
 					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))
 					.map(g =>
@@ -39,7 +39,7 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 		</div>
 		<nav>
 			<ul>
-				<li>
+				<li data-cy="language-switcher">
 					<BtnMenu icon="globe" tooltip={loc('language')}>
 						{config.languages.map(({ code, name }) =>
 							<Btn label={name} active={code === language}
@@ -47,7 +47,7 @@ export function Header({ lang, title, version, theme, changeTheme, language, cha
 						)}
 					</BtnMenu>
 				</li>
-				<li>
+				<li data-cy="theme-switcher">
 					<BtnMenu icon={Themes[theme]} tooltip={loc('theme')}>
 						{Object.entries(Themes).map(([th, icon]) =>
 							<Btn icon={icon} label={loc(`theme.${th}`)} active={th === theme}

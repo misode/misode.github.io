@@ -206,7 +206,7 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 					</div>
 					{presetResults.length === 0 && <Btn label={loc('no_presets')}/>}
 				</BtnMenu>
-				<BtnMenu icon="tag" label={version}>
+				<BtnMenu icon="tag" label={version} data-cy="version-switcher">
 					{allowedVersions.reverse().map(v =>
 						<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
 					)}
