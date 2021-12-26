@@ -192,6 +192,9 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 	const togglePreview = () => {
 		Analytics.generatorEvent('toggle-preview', !previewShown ? 'visible' : 'hidden')
 		setPreviewShown(!previewShown)
+		if (!previewShown && sourceShown) {
+			setSourceShown(false)
+		}
 	}
 
 	return <>
