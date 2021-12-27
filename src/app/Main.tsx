@@ -1,7 +1,7 @@
 import { render } from 'preact'
 import type { RouterOnChangeArgs } from 'preact-router'
 import { getCurrentUrl, Router } from 'preact-router'
-import { useCallback, useEffect, useState } from 'preact/hooks'
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../config.json'
 import '../styles/global.css'
 import '../styles/nodes.css'
@@ -10,7 +10,7 @@ import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
 import { Category, Changelog, Generator, Home, Sounds } from './pages'
 import type { VersionId } from './services'
-import { VersionIds } from './services'
+import { getProject, VersionIds } from './services'
 import { Store } from './Store'
 import { cleanUrl, getSearchParams, setSeachParams } from './Utils'
 
@@ -64,6 +64,11 @@ function Main() {
 		}
 	}, [version, targetVersion])
 
+	const [projectName, _setProject] = useState<string>('Drafts')
+	const project = useMemo(() => {
+		return getProject(projectName) ?? getProject('Drafts')!
+	}, [projectName])
+
 	const [title, setTitle] = useState<string>(locale(lang, 'title.home'))
 	const changeTitle = (title: string, versions?: VersionId[]) => {
 		versions ??= config.versions.map(v => v.id as VersionId)
@@ -85,7 +90,7 @@ function Main() {
 			<Category path="/assets" category="assets" {...{lang, changeTitle}} />
 			<Sounds path="/sounds" {...{lang, version, changeTitle, changeVersion}} />
 			<Changelog path="/changelog" {...{lang, changeTitle}} />
-			<Generator default {...{lang, version, changeTitle, changeVersion}} />
+			<Generator default {...{lang, version, changeTitle, changeVersion, project}} />
 		</Router>
 	</>
 }

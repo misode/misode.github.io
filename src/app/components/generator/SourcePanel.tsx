@@ -1,11 +1,11 @@
-import { DataModel, ModelPath } from '@mcschema/core'
+import { DataModel } from '@mcschema/core'
 import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
 import { useModel } from '../../hooks'
 import { locale } from '../../Locales'
-import { transformOutput } from '../../schema/transformOutput'
+import { getOutput } from '../../schema/transformOutput'
 import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
@@ -55,8 +55,8 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
 
-	const getOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
-		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })
+	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
+		const data = getOutput(model, blockStates)
 		return FORMATS[format].stringify(data, INDENT[indent])
 	}, [indent, format])
 
@@ -64,7 +64,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 		retransform.current = () => {
 			if (!model || !blockStates) return
 			try {
-				const output = getOutput(model, blockStates)
+				const output = getSerializedOutput(model, blockStates)
 				if (output.length >= OUTPUT_CHARS_LIMIT) {
 					source.current.value = output.slice(0, OUTPUT_CHARS_LIMIT) + `\n\nOutput is too large to display (+${OUTPUT_CHARS_LIMIT} chars)\nExport to view complete output\n\n`
 				} else {
@@ -102,7 +102,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {
-			navigator.clipboard.writeText(getOutput(model, blockStates)).then(() => {
+			navigator.clipboard.writeText(getSerializedOutput(model, blockStates)).then(() => {
 				copySuccess()
 			})
 		}
@@ -110,7 +110,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	useEffect(() => {
 		if (doDownload && model && blockStates && download.current) {
-			const content = encodeURIComponent(getOutput(model, blockStates))
+			const content = encodeURIComponent(getSerializedOutput(model, blockStates))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
 			download.current.setAttribute('download', `${name}.${format}`)
 			download.current.click()

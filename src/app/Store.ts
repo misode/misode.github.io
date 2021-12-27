@@ -1,4 +1,4 @@
-import type { VersionId } from './services'
+import type { Project, VersionId } from './services'
 import { VersionIds } from './services'
 
 export namespace Store {
@@ -8,6 +8,7 @@ export namespace Store {
 	export const ID_INDENT = 'indentation'
 	export const ID_FORMAT = 'output_format'
 	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
+	export const ID_PROJECTS = 'misode_projects'
 
 	export function getLanguage() {
 		return localStorage.getItem(ID_LANGUAGE) ?? 'en'
@@ -37,6 +38,20 @@ export namespace Store {
 		return localStorage.getItem(ID_SOUNDS_VERSION) ?? 'latest'
 	}
 
+	export function getProjects(): Project[] {
+		const projects = localStorage.getItem(ID_PROJECTS)
+		if (projects) {
+			return JSON.parse(projects) as Project[]
+		}
+		return [
+			{
+				name: 'Drafts',
+				namespace: 'draft',
+				files: [],
+			},
+		]
+	}
+
 	export function setLanguage(language: string | undefined) {
 		if (language) localStorage.setItem(ID_LANGUAGE, language)
 	}
@@ -59,5 +74,9 @@ export namespace Store {
 
 	export function setSoundsVersion(version: string | undefined) {
 		if (version) localStorage.setItem(ID_SOUNDS_VERSION, version)
+	}
+
+	export function setProjects(projects: Project[] | undefined) {
+		if (projects) localStorage.setItem(ID_PROJECTS, JSON.stringify(projects))
 	}
 }

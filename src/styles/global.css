@@ -10,6 +10,7 @@
 	--text-3: #c3c3c3;
 	--accent-primary: #50baf9;
 	--accent-success: #3eb84f;
+	--accent-warning: #b8893e;
 	--accent-sounds-1: #451475;
 	--accent-sounds-2: #39155e;
 	--accent-sounds-3: #6a08a3;
@@ -38,6 +39,7 @@
 	--text-3: #494949;
 	--accent-primary: #088cdb;
 	--accent-success: #1a7f37;
+	--accent-warning: #a36f1c;
 	--accent-sounds-1: #b481e7;
 	--accent-sounds-2: #c18df5;
 	--accent-sounds-3: #af72d3;
@@ -67,6 +69,7 @@
 		--text-3: #494949;
 		--accent-primary: #088cdb;
 		--accent-success: #1a7f37;
+		--accent-warning: #a36f1c;
 		--accent-sounds-1: #b481e7;
 		--accent-sounds-2: #c18df5;
 		--accent-sounds-3: #af72d3;
@@ -117,11 +120,6 @@ header {
 	position: fixed;
 	box-shadow: 0 0 9px -3px #000;
 	background-color: var(--background-2);
-}
-
-body[data-panel="home"] header,
-body[data-panel="settings"] header {
-	position: fixed;
 }
 
 .title {
@@ -230,29 +228,73 @@ main {
 	top: 12px;
 	right: 16px;
 	left: 16px;
-	z-index: 1;
 	pointer-events: none;
-}
-
-main > .controls {
-	position: sticky;
-	margin-right: 16px;
-	margin-left: 16px;
-	top: 68px;
 }
 
 .controls > * {
 	pointer-events: all;
 }
 
-.controls > *:not(:last-child) {
+main > .controls {
+	justify-content: space-between;
+	flex-wrap: wrap;
+	position: initial;
+	margin-right: 16px;
+	margin-left: 16px;
+	row-gap: 8px;
+}
+
+.generator-controls {
+	display: flex;
+	margin-left: auto;
+	position: sticky;
+	top: 68px;
+	z-index: 1;
+}
+
+.generator-controls > *:not(:last-child) {
 	margin-right: 8px;
 }
 
+.project-controls {
+	position: relative;
+	display: flex;
+	width: max-content;
+	z-index: 2;
+}
+
+.project-controls > .btn-row > .btn-input {
+	background-color: var(--background-2);
+}
+
+.project-controls > .status-icon {
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	align-self: center;
+	margin-right: 8px;
+	fill: var(--text-3);
+	display: flex;
+	align-items: center;
+}
+
+.project-controls > .active {
+	fill: var(--accent-success);
+}
+
+.project-controls .btn-menu .btn-group {
+	left: 0;
+	right: unset;
+}
+
+.source-controls {
+	justify-content: flex-end;
+}
+
 .tree {
-	margin-top: -36px;
 	overflow-x: auto;
-	padding: 4px 16px 50vh;
+	padding: 8px 16px 50vh;
 }
 
 .error + .tree {
@@ -426,6 +468,28 @@ main.has-preview {
 	background-color: var(--background-6);
 	margin: 0;
 	padding: 2px 0;
+}
+
+.btn-row {
+	display: flex;
+	box-shadow: 0 1px 7px -2px #000;
+}
+
+.btn-row > *,
+.btn-row > .btn-menu > * {
+	box-shadow: none;
+}
+
+.btn-row > *:not(:first-child),
+.btn-row > .btn-menu:not(:first-child) > * {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.btn-row > *:not(:last-child),
+.btn-row > .btn-menu:not(:last-child) > * {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 .btn-input {
@@ -1194,18 +1258,6 @@ hr {
 	}
 }
 
-@media screen and (max-width: 1300px) {
-	main.has-preview .tree {
-		margin-top: 8px;
-	}
-}
-
-@media screen and (max-width: 800px) {
-	main .tree {
-		margin-top: 4px !important;
-	}
-}
-
 /* SMALL */
 @media screen and (max-width: 580px) {
 	.home {
@@ -1260,7 +1312,7 @@ hr {
 
 	.btn.btn.large-input,
 	.btn-menu .result-list {
-		width: calc(100vw - 10px); 
+		width: calc(100vw - 32px); 
 	}
 
 	.generator-picker {
