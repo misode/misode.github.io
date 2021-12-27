@@ -64,7 +64,7 @@ function Main() {
 		}
 	}, [version, targetVersion])
 
-	const [projectName, _setProject] = useState<string>('Drafts')
+	const [projectName] = useState<string>('Drafts')
 	const project = useMemo(() => {
 		return getProject(projectName) ?? getProject('Drafts')!
 	}, [projectName])

@@ -110,7 +110,7 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 		setSeachParams({ version: undefined, preset: undefined })
 		setError(null)
 		setDirty(true)
-	}, [model])
+	})
 
 	const reset = () => {
 		Analytics.generatorEvent('reset')
