@@ -3,7 +3,7 @@ import { getCurrentUrl } from 'preact-router'
 import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, TextInput, Tree } from '../components'
+import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { useActiveTimeout, useModel } from '../hooks'
 import { locale } from '../Locales'
 import { getOutput } from '../schema/transformOutput'
@@ -158,21 +158,13 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 		}
 	}, [model, blockStates, fileName])
 
-	const [presetFilter, setPresetFilter] = useState('')
-	const [presetResults, setPresetResults] = useState<string[]>([])
+	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
-		getCollections(version)
-			.then(collections => {
-				const terms = (presetFilter ?? '').trim().split(' ')
-				const presets = collections.get(gen.id)
-					.map(p => p.slice(10))
-					.filter(p => terms.every(t => p.includes(t)))
-				if (presets) {
-					setPresetResults(presets)
-				}
-			})
+		getCollections(version).then(collections => {
+			setPresets(collections.get(gen.id).map(p => p.slice(10)))
+		})
 			.catch(e => { console.error(e); setError(e.message) })
-	}, [version, gen.id, presetFilter])
+	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
 		loadPreset(id).then(preset => {
@@ -248,13 +240,7 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 				<div class="project-controls">
 					<div class="btn-row">
 						<BtnMenu icon="repo" label="Drafts" relative={false}>
-							<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} placeholder={loc(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} />
-							<div class="result-list">
-								{project.files.filter(f => f.type === gen.id).map(f =>
-									<Btn label={f.id} onClick={() => openFile(f.id)}/>
-								)}
-							</div>
-							{project.files.filter(f => f.type === gen.id).length === 0 && <Btn label={loc('project.no_files')}/>}
+							<SearchList searchPlaceholder={loc(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={loc('project.no_files')} values={project.files.map(f => f.id)} onSelect={openFile} />
 						</BtnMenu>
 						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} />
 					</div>
@@ -267,11 +253,7 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 				<div class="generator-controls">
 					<Btn icon="upload" label={loc('import')} onClick={importSource} />
 					<BtnMenu icon="archive" label={loc('presets')} relative={false}>
-						<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} placeholder={loc('search')} />
-						<div class="result-list">
-							{presetResults.map(preset => <Btn label={preset} onClick={() => selectPreset(preset)} />)}
-						</div>
-						{presetResults.length === 0 && <Btn label={loc('no_presets')}/>}
+						<SearchList searchPlaceholder={loc('search')} noResults={loc('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
 					<BtnMenu icon="tag" label={version} data-cy="version-switcher">
 						{allowedVersions.reverse().map(v =>
