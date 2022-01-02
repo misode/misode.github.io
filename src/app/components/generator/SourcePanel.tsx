@@ -3,8 +3,8 @@ import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
+import { useLocale } from '../../contexts'
 import { useModel } from '../../hooks'
-import { locale } from '../../Locales'
 import { getOutput } from '../../schema/transformOutput'
 import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
@@ -37,7 +37,6 @@ const FORMATS: Record<string, {
 }
 
 type SourcePanelProps = {
-	lang: string,
 	name: string,
 	model: DataModel | null,
 	blockStates: BlockStateRegistry | null,
@@ -47,8 +46,8 @@ type SourcePanelProps = {
 	copySuccess: () => unknown,
 	onError: (message: string) => unknown,
 }
-export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
-	const loc = locale.bind(null, lang)
+export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
+	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
 	const source = useRef<HTMLTextAreaElement>(null)
@@ -136,18 +135,18 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	return <> 
 		<div class="controls">
-			<BtnMenu icon="gear" tooltip={loc('output_settings')} data-cy="source-controls">
+			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
 				{Object.entries(INDENT).map(([key]) =>
-					<Btn label={loc(`indentation.${key}`)} active={indent === key}
+					<Btn label={locale(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>
 				)}
 				<hr />
 				{Object.keys(FORMATS).map(key =>
-					<Btn label={loc(`format.${key}`)} active={format === key}
+					<Btn label={locale(`format.${key}`)} active={format === key}
 						onClick={() => changeFormat(key)} />)}
 			</BtnMenu>
 		</div>
-		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')} data-cy="import-area"></textarea>
+		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={locale('source_placeholder')} data-cy="import-area"></textarea>
 		<a ref={download} style="display: none;"></a>
 	</>
 }

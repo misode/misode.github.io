@@ -8,14 +8,13 @@ import { BiomeSourcePreview, DecoratorPreview, NoisePreview, NoiseSettingsPrevie
 export const HasPreview = ['dimension', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature']
 
 type PreviewPanelProps = {
-	lang: string,
 	model: DataModel | null,
 	version: VersionId,
 	id: string,
 	shown: boolean,
 	onError: (message: string) => unknown,
 }
-export function PreviewPanel({ lang, model, version, id, shown }: PreviewPanelProps) {
+export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
 	const [, setCount] = useState(0)
 
 	useModel(model, () => {
@@ -24,22 +23,22 @@ export function PreviewPanel({ lang, model, version, id, shown }: PreviewPanelPr
 
 	if (id === 'dimension' && model?.get(new Path(['generator', 'type']))?.endsWith('noise')) {
 		const data = model.get(new Path(['generator', 'biome_source']))
-		if (data) return <BiomeSourcePreview {...{ lang, model, version, shown, data }} />
+		if (data) return <BiomeSourcePreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/noise' && model) {
 		const data = model.get(new Path([]))
-		if (data) return <NoisePreview {...{ lang, model, version, shown, data }} />
+		if (data) return <NoisePreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/noise_settings' && model) {
 		const data = model.get(new Path([]))
-		if (data) return <NoiseSettingsPreview {...{ lang, model, version, shown, data }} />
+		if (data) return <NoiseSettingsPreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/configured_feature' && model) {
 		const data = model.get(new Path([]))
-		if (data) return <DecoratorPreview {...{ lang, model, version, shown, data }} />
+		if (data) return <DecoratorPreview {...{ model, version, shown, data }} />
 	}
 
 	return <></>

@@ -4,23 +4,22 @@ import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { useLocale } from '../contexts'
 import { useActiveTimeout, useModel } from '../hooks'
-import { locale } from '../Locales'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, Project, VersionId } from '../services'
 import { changeFile, checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
 import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
 type GeneratorProps = {
-	lang: string,
 	changeTitle: (title: string, versions?: VersionId[]) => unknown,
 	version: VersionId,
 	changeVersion: (version: VersionId) => unknown,
 	project: Project,
 	default?: true,
 }
-export function Generator({ lang, changeTitle, version, changeVersion, project }: GeneratorProps) {
-	const loc = locale.bind(null, lang)
+export function Generator({ changeTitle, version, changeVersion, project }: GeneratorProps) {
+	const { locale } = useLocale()
 	const [error, setError] = useState<string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -36,7 +35,7 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
 		.map(v => v.id as VersionId)
 
-	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)
+	changeTitle(locale('title.generator', locale(gen.id)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
@@ -240,8 +239,8 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 				<div class="project-controls">
 					<div class="btn-row">
 						<BtnMenu icon="repo" label="Drafts" relative={false}>
-							<Btn icon="arrow_left" label={loc('project.go_to')} onClick={() => route('/project')} />
-							<SearchList searchPlaceholder={loc(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={loc('project.no_files')} values={project.files.map(f => f.id)} onSelect={openFile} />
+							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
+							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.map(f => f.id)} onSelect={openFile} />
 						</BtnMenu>
 						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} />
 					</div>
@@ -252,44 +251,44 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 							: fileSaved && <div class="status-icon active">{Octicon.check}</div>}
 				</div>
 				<div class="generator-controls">
-					<Btn icon="upload" label={loc('import')} onClick={importSource} />
-					<BtnMenu icon="archive" label={loc('presets')} relative={false}>
-						<SearchList searchPlaceholder={loc('search')} noResults={loc('no_presets')} values={presets} onSelect={selectPreset}/>
+					<Btn icon="upload" label={locale('import')} onClick={importSource} />
+					<BtnMenu icon="archive" label={locale('presets')} relative={false}>
+						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
 					<BtnMenu icon="tag" label={version} data-cy="version-switcher">
 						{allowedVersions.reverse().map(v =>
 							<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
 						)}
 					</BtnMenu>
-					<BtnMenu icon="kebab_horizontal" tooltip={loc('more')}>
-						<Btn icon="history" label={loc('reset')} onClick={reset} />
-						<Btn icon="arrow_left" label={loc('undo')} onClick={undo} />
-						<Btn icon="arrow_right" label={loc('redo')} onClick={redo} />
+					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
+						<Btn icon="history" label={locale('reset')} onClick={reset} />
+						<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
+						<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
 					</BtnMenu>
 				</div>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			<Tree {...{lang, model, version, blockStates}} onError={setError} />
+			<Tree {...{model, version, blockStates}} onError={setError} />
 		</main>
 		<div class="popup-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
-			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={loc(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
+			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
-			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={loc('download')} onClick={downloadSource}>
+			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
 				{Octicon.download}
 			</div>
-			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={loc(copyActive ? 'copied' : 'copy')} onClick={copySource}>
+			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={locale(copyActive ? 'copied' : 'copy')} onClick={copySource}>
 				{copyActive ? Octicon.check : Octicon.clippy}
 			</div>
-			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={loc(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
+			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={locale(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
 				{sourceShown ? Octicon.chevron_right : Octicon.code}
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{lang, model, version, id: gen.id}} shown={previewShown} onError={setError} />
+			<PreviewPanel {...{model, version, id: gen.id}} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
+			<SourcePanel {...{model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
 		</div>
 	</>
 }
