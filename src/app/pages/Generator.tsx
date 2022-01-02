@@ -1,5 +1,5 @@
 import { DataModel, Path } from '@mcschema/core'
-import { getCurrentUrl } from 'preact-router'
+import { getCurrentUrl, route } from 'preact-router'
 import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
@@ -240,6 +240,7 @@ export function Generator({ lang, changeTitle, version, changeVersion, project }
 				<div class="project-controls">
 					<div class="btn-row">
 						<BtnMenu icon="repo" label="Drafts" relative={false}>
+							<Btn icon="arrow_left" label={loc('project.go_to')} onClick={() => route('/project')} />
 							<SearchList searchPlaceholder={loc(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={loc('project.no_files')} values={project.files.map(f => f.id)} onSelect={openFile} />
 						</BtnMenu>
 						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} />

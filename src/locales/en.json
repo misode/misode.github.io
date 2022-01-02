@@ -84,6 +84,7 @@
   "preview.offset": "Offset",
   "preview.peaks": "Peaks",
   "preview.width": "Width",
+  "project.go_to": "Go to project",
   "project.search": "Search project",
   "project.search_drafts": "Search drafts",
   "project.no_files": "No files",

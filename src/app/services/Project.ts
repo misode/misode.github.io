@@ -1,3 +1,4 @@
+import config from '../../config.json'
 import { Store } from '../Store'
 import type { VersionId } from './Schemas'
 
@@ -39,4 +40,13 @@ export function changeFile(project: Project, type: string, from: string | undefi
 		project.files[index].data = data
 	}
 	Store.setProjects(Projects)
+}
+
+export function getFilePath(file: ProjectFile) {
+	const [namespace, id] = file.id.includes(':') ? file.id.split(':') : ['minecraft', file.id]
+	const gen = config.generators.find(g => g.id === file.type)
+	if (!gen) {
+		throw new Error(`Cannot find generator of type ${file.type}`)
+	}
+	return `data/${namespace}/${gen.path ?? gen.id}/${id}`
 }

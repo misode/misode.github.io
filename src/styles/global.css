@@ -713,7 +713,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category {
+.home, .category, .project {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -866,6 +866,37 @@ hr {
 .very-large {
 	font-size: 80px;
 	font-weight: 100;
+}
+
+.project h2 {
+	color: var(--text-1);
+	margin-bottom: 8px;
+}
+
+.file-view {
+	background-color: var(--background-2);
+	border-radius: 6px;
+	padding: 6px;
+}
+
+.tree-view .entry {
+	cursor: pointer;
+	padding: 4px 2px;
+	padding-left: calc(var(--indent, 0) * 24px);
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	background-color: var(--background-2);
+	color: var(--text-2);
+}
+
+.tree-view .entry:hover {
+	background-color: var(--background-3);
+}
+
+.tree-view .entry svg {
+	margin-right: 4px;
 }
 
 [data-ea-publisher] {

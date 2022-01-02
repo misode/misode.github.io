@@ -8,7 +8,7 @@ import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
 import { loadLocale, locale, Locales } from './Locales'
-import { Category, Changelog, Generator, Home, Sounds } from './pages'
+import { Category, Changelog, Generator, Home, Project, Sounds } from './pages'
 import type { VersionId } from './services'
 import { getProject, VersionIds } from './services'
 import { Store } from './Store'
@@ -90,6 +90,7 @@ function Main() {
 			<Category path="/assets" category="assets" {...{lang, changeTitle}} />
 			<Sounds path="/sounds" {...{lang, version, changeTitle, changeVersion}} />
 			<Changelog path="/changelog" {...{lang, changeTitle}} />
+			<Project path="/project" {...{lang, project}} />
 			<Generator default {...{lang, version, changeTitle, changeVersion, project}} />
 		</Router>
 	</>
