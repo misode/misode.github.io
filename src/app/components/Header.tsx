@@ -1,7 +1,7 @@
 import { getCurrentUrl, Link, route } from 'preact-router'
 import { Btn, BtnMenu, Icons, Octicon } from '.'
 import config from '../../config.json'
-import { useLocale } from '../contexts'
+import { useLocale, useTheme } from '../contexts'
 import type { VersionId } from '../services'
 import { checkVersion } from '../services'
 import { cleanUrl, getGenerator } from '../Utils'
@@ -15,11 +15,10 @@ const Themes: Record<string, keyof typeof Octicon> = {
 type HeaderProps = {
 	title: string,
 	version: VersionId,
-	theme: string,
-	changeTheme: (theme: string) => unknown,
 }
-export function Header({ title, version, theme, changeTheme }: HeaderProps) {
+export function Header({ title, version }: HeaderProps) {
 	const { lang, locale, changeLanguage } = useLocale()
+	const { theme, changeTheme } = useTheme()
 	const gen = getGenerator(getCurrentUrl())
 
 	return <header>

@@ -18,16 +18,6 @@ const VERSIONS_IN_TITLE = 3
 export function App() {
 	const { locale } = useLocale()
 
-	const [theme, setTheme] = useState<string>(Store.getTheme())
-	const changeTheme = (theme: string) => {
-		Analytics.setTheme(theme)
-		Store.setTheme(theme)
-		setTheme(theme)
-	}
-	useEffect(() => {
-		document.documentElement.setAttribute('data-theme', theme)
-	}, [theme])
-
 	const searchParams = getSearchParams(getCurrentUrl())
 	const targetVersion = searchParams.get('version')
 	const [version, setVersion] = useState<VersionId>(Store.getVersion())
@@ -64,7 +54,7 @@ export function App() {
 	}
 
 	return <>
-		<Header {...{title, version, theme, changeTheme}} />
+		<Header {...{title, version}} />
 		<Router onChange={changeRoute}>
 			<Home path="/" {...{changeTitle}} />
 			<Category path="/worldgen" category="worldgen" {...{changeTitle}} />
