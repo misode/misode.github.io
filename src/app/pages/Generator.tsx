@@ -4,7 +4,7 @@ import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
-import { useLocale } from '../contexts'
+import { useLocale, useVersion } from '../contexts'
 import { useActiveTimeout, useModel } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, Project, VersionId } from '../services'
@@ -13,13 +13,12 @@ import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils
 
 type GeneratorProps = {
 	changeTitle: (title: string, versions?: VersionId[]) => unknown,
-	version: VersionId,
-	changeVersion: (version: VersionId) => unknown,
 	project: Project,
 	default?: true,
 }
-export function Generator({ changeTitle, version, changeVersion, project }: GeneratorProps) {
+export function Generator({ changeTitle, project }: GeneratorProps) {
 	const { locale } = useLocale()
+	const { version, changeVersion } = useVersion()
 	const [error, setError] = useState<string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {

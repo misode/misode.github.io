@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
-import { useLocale } from '../contexts'
+import { useLocale, useVersion } from '../contexts'
 import type { SoundEvents, VersionAssets, VersionId } from '../services'
 import { getAssets, getSounds } from '../services'
 import { hexId, message } from '../Utils'
@@ -9,11 +9,10 @@ import { hexId, message } from '../Utils'
 type SoundsProps = {
 	path?: string,
 	changeTitle: (title: string, versions?: VersionId[]) => unknown,
-	version: VersionId,
-	changeVersion: (version: VersionId) => unknown,
 }
-export function Sounds({ changeTitle, version, changeVersion }: SoundsProps) {
+export function Sounds({ changeTitle }: SoundsProps) {
 	const { locale } = useLocale()
+	const { version, changeVersion } = useVersion()
 	const [error, setError] = useState<string | null>(null)
 	changeTitle(locale('title.sounds'))
 
