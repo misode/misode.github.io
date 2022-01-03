@@ -1,4 +1,6 @@
-import type { Project, VersionId } from './services'
+import type { Project } from './contexts'
+import { DRAFT_PROJECT } from './contexts'
+import type { VersionId } from './services'
 import { VersionIds } from './services'
 
 export namespace Store {
@@ -43,13 +45,7 @@ export namespace Store {
 		if (projects) {
 			return JSON.parse(projects) as Project[]
 		}
-		return [
-			{
-				name: 'Drafts',
-				namespace: 'draft',
-				files: [],
-			},
-		]
+		return [DRAFT_PROJECT]
 	}
 
 	export function setLanguage(language: string | undefined) {

@@ -2,16 +2,14 @@ import { route } from 'preact-router'
 import { useMemo } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, TreeView } from '../components'
-import { useLocale, useTitle } from '../contexts'
-import type { Project } from '../services'
-import { getFilePath } from '../services'
+import { getFilePath, useLocale, useProject, useTitle } from '../contexts'
 
 interface Props {
 	path?: string,
-	project: Project,
 }
-export function Project({ project }: Props) {
+export function Project({}: Props) {
 	const { locale } = useLocale()
+	const { project } = useProject()
 	useTitle(locale('title.project', project.name))
 	const entries = useMemo(() => project.files.map(getFilePath), project.files)
 
