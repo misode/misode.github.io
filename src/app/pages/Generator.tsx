@@ -17,8 +17,7 @@ interface Props {
 export function Generator({}: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion } = useVersion()
-	const { project, updateFile } = useProject()
-	console.log(project)
+	const { project, file, updateFile, openFile, closeFile } = useProject()
 	const [error, setError] = useState<string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -41,40 +40,6 @@ export function Generator({}: Props) {
 	}
 	if (!checkVersion(version, undefined, gen.maxVersion)) {
 		setError(`This generator is not available in versions above ${gen.maxVersion}`)
-	}
-
-	const [fileRename, setFileRename] = useState('')
-	const [fileName, setFileName] = useState('')
-	const renameTimeout = useRef<number | undefined>(undefined)
-	const [fileSaved, doSave] = useActiveTimeout()
-
-	useEffect(() => {
-		if (renameTimeout.current !== undefined) {
-			clearTimeout(renameTimeout.current)
-			renameTimeout.current = undefined
-		}
-		if (fileRename !== fileName && model && blockStates) {
-			renameTimeout.current = setTimeout(() => {
-				const data = getOutput(model, blockStates)
-				console.log('Renaming file', fileName, '->', fileRename, JSON.stringify(data).slice(0, 50))
-				updateFile(gen.id, fileName, { id: fileRename, data })
-				setFileName(fileRename)
-				doSave()
-				renameTimeout.current = undefined
-			}, 500) as any
-		}
-	}, [fileRename])
-
-	const openFile = (id: string) => {
-		const file = project.files.find(f => f.type === gen.id && f.id === id)
-		if (file) {
-			console.log('Opening file', id, JSON.stringify(file.data).slice(0, 50))
-			setFileRename(id)
-			setFileName(id)
-			model?.reset(DataModel.wrapLists(file.data))
-			console.log('===>', model?.data)
-			setDirty(false)
-		}
 	}
 
 	const searchParams = getSearchParams(getCurrentUrl())
@@ -111,6 +76,38 @@ export function Generator({}: Props) {
 		setDirty(true)
 	})
 
+	const [fileRename, setFileRename] = useState('')
+	const renameTimeout = useRef<number | undefined>(undefined)
+	const [fileSaved, doSave] = useActiveTimeout()
+
+	useEffect(() => {
+		if (renameTimeout.current !== undefined) {
+			clearTimeout(renameTimeout.current)
+			renameTimeout.current = undefined
+		}
+		if (fileRename !== file?.id && fileRename && model && blockStates) {
+			renameTimeout.current = setTimeout(() => {
+				const data = getOutput(model, blockStates)
+				console.log('Renaming file', file?.id, '->', fileRename, JSON.stringify(data).slice(0, 50))
+				updateFile(gen.id, file?.id, { id: fileRename, data })
+				doSave()
+				renameTimeout.current = undefined
+			}, 500) as any
+		}
+	}, [fileRename])
+
+	useEffect(() => {
+		if (model) {
+			setFileRename(file?.id ?? '')
+			if (file && gen.id === file.type) {
+				model.reset(DataModel.wrapLists(file.data))
+			} else {
+				model.reset(DataModel.wrapLists(model.schema.default()))
+			}
+			setDirty(false)
+		}
+	}, [file, model])
+
 	const reset = () => {
 		Analytics.generatorEvent('reset')
 		model?.reset(DataModel.wrapLists(model.schema.default()), true)
@@ -138,11 +135,11 @@ export function Generator({}: Props) {
 	const onKeyDown = (e: KeyboardEvent) => {
 		if (e.ctrlKey && e.key === 's') {
 			e.preventDefault()
-			if (fileName && model && blockStates) {
+			if (model && blockStates && file) {
 				Analytics.generatorEvent('save', 'Hotkey')
 				const data = getOutput(model, blockStates)
-				console.log('Saved file', fileName, JSON.stringify(data).slice(0, 50))
-				updateFile(gen.id, fileName, { id: fileName, data })
+				console.log('Saved file', file?.id, JSON.stringify(data).slice(0, 50))
+				updateFile(gen.id, file?.id, { id: file?.id, data })
 				setDirty(false)
 				doSave()
 			}
@@ -155,7 +152,7 @@ export function Generator({}: Props) {
 			document.removeEventListener('keyup', onKeyUp)
 			document.removeEventListener('keydown', onKeyDown)
 		}
-	}, [model, blockStates, fileName])
+	}, [model, blockStates, file])
 
 	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
@@ -240,7 +237,8 @@ export function Generator({}: Props) {
 					<div class="btn-row">
 						<BtnMenu icon="repo" label="Drafts" relative={false}>
 							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
-							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={openFile} />
+							<Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />
+							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
 						</BtnMenu>
 						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} />
 					</div>
