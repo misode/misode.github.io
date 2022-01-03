@@ -1,20 +1,19 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
-import { useLocale, useVersion } from '../contexts'
+import { useLocale, useTitle, useVersion } from '../contexts'
 import type { SoundEvents, VersionAssets, VersionId } from '../services'
 import { getAssets, getSounds } from '../services'
 import { hexId, message } from '../Utils'
 
-type SoundsProps = {
+interface Props {
 	path?: string,
-	changeTitle: (title: string, versions?: VersionId[]) => unknown,
 }
-export function Sounds({ changeTitle }: SoundsProps) {
+export function Sounds({}: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion } = useVersion()
 	const [error, setError] = useState<string | null>(null)
-	changeTitle(locale('title.sounds'))
+	useTitle(locale('title.sounds'))
 
 	const [assets, setAssets] = useState<VersionAssets>({})
 	const [sounds, setSounds] = useState<SoundEvents>({})

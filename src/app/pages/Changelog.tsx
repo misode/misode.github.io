@@ -1,19 +1,18 @@
 import marked from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { Ad, Btn, ErrorPanel, Octicon, TextInput } from '../components'
-import { useLocale } from '../contexts'
-import type { ChangelogEntry, ChangelogVersion, VersionId } from '../services'
+import { useLocale, useTitle } from '../contexts'
+import type { ChangelogEntry, ChangelogVersion } from '../services'
 import { getChangelogs } from '../services'
 import { hashString } from '../Utils'
 
-type ChangelogProps = {
+interface Props {
 	path?: string,
-	changeTitle: (title: string, versions?: VersionId[]) => unknown,
 }
-export function Changelog({ changeTitle }: ChangelogProps) {
+export function Changelog({}: Props) {
 	const { locale } = useLocale()
 	const [error, setError] = useState<string | null>(null)
-	changeTitle(locale('title.changelog'))
+	useTitle(locale('title.changelog'))
 
 	const [changelogs, setChangelogs] = useState<ChangelogEntry[]>([])
 	useEffect(() => {

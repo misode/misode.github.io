@@ -2,13 +2,15 @@ import { render } from 'preact'
 import '../styles/global.css'
 import '../styles/nodes.css'
 import { App } from './App'
-import { LocaleProvider, ThemeProvider, VersionProvider } from './contexts'
+import { LocaleProvider, ThemeProvider, TitleProvider, VersionProvider } from './contexts'
 
 function Main() {
 	return <LocaleProvider>
 		<ThemeProvider>
 			<VersionProvider>
-				<App />
+				<TitleProvider>
+					<App />
+				</TitleProvider>
 			</VersionProvider>
 		</ThemeProvider>
 	</LocaleProvider>

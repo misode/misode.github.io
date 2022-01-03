@@ -1,15 +1,14 @@
 import config from '../../config.json'
 import { ToolCard } from '../components'
-import { useLocale } from '../contexts'
+import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
-type HomeProps = {
-	changeTitle: (title: string) => unknown,
+interface Props {
 	path?: string,
 }
-export function Home({ changeTitle }: HomeProps) {
+export function Home({}: Props) {
 	const { locale } = useLocale()
-	changeTitle(locale('title.home'))
+	useTitle(locale('title.home'))
 	return <main>
 		<div class="home">
 			<ToolCard title="Data packs">

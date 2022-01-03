@@ -4,19 +4,18 @@ import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
-import { useLocale, useVersion } from '../contexts'
+import { useLocale, useTitle, useVersion } from '../contexts'
 import { useActiveTimeout, useModel } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, Project, VersionId } from '../services'
 import { changeFile, checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
 import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
-type GeneratorProps = {
-	changeTitle: (title: string, versions?: VersionId[]) => unknown,
+interface Props {
 	project: Project,
 	default?: true,
 }
-export function Generator({ changeTitle, project }: GeneratorProps) {
+export function Generator({ project }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion } = useVersion()
 	const [error, setError] = useState<string | null>(null)
@@ -34,7 +33,7 @@ export function Generator({ changeTitle, project }: GeneratorProps) {
 		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
 		.map(v => v.id as VersionId)
 
-	changeTitle(locale('title.generator', locale(gen.id)), allowedVersions)
+	useTitle(locale('title.generator', locale(gen.id)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
