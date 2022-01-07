@@ -62,6 +62,7 @@
   "source_placeholder": "JSON-Inhalt hier einfügen",
   "switch_generator": "Generator wechseln",
   "terrain_settings": "Geländeeinstellungen",
+  "theme": "Thema",
   "theme.dark": "Dunkel",
   "theme.light": "Hell",
   "theme.system": "System",
@@ -78,5 +79,7 @@
   "worldgen/configured_surface_builder": "Oberflächengestalter",
   "worldgen/noise_settings": "Rauscheinstellungen",
   "worldgen/processor_list": "Prozessorliste",
-  "worldgen/template_pool": "Vorlagenauswahl"
+  "worldgen/template_pool": "Vorlagenauswahl",
+  "zoom_in": "Vergrößern",
+  "zoom_out": "Verkleinern"
 }
