@@ -1,4 +1,4 @@
-import marked from 'marked'
+import { marked } from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { Ad, Btn, ErrorPanel, Octicon, TextInput } from '../components'
 import { locale } from '../Locales'
