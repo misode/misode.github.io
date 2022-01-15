@@ -36,7 +36,7 @@
     "@types/google.analytics": "0.0.40",
     "@types/howler": "^2.2.4",
     "@types/js-yaml": "^4.0.4",
-    "@types/marked": "^3.0.2",
+    "@types/marked": "^4.0.1",
     "@types/seedrandom": "^2.4.28",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
