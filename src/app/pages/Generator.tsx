@@ -1,6 +1,6 @@
 import { DataModel, Path } from '@mcschema/core'
 import { getCurrentUrl, route } from 'preact-router'
-import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
+import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
@@ -77,7 +77,6 @@ export function Generator({}: Props) {
 	})
 
 	const [fileRename, setFileRename] = useState('')
-	const renameTimeout = useRef<number | undefined>(undefined)
 	const [fileSaved, doSave] = useActiveTimeout()
 	const [fileError, doFileError] = useActiveTimeout()
 
@@ -246,7 +245,7 @@ export function Generator({}: Props) {
 		<main class={previewShown ? 'has-preview' : ''}>
 			<Ad id="data-pack-generator" type="text" />
 			<div class="controls">
-				<div class="project-controls">
+				<div class={`project-controls ${file && 'has-file'}`}>
 					<div class="btn-row">
 						<BtnMenu icon="repo" label="Drafts" relative={false}>
 							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
@@ -256,10 +255,9 @@ export function Generator({}: Props) {
 						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
 						{file && <Btn icon="trashcan" tooltip="Delete file" onClick={deleteFile} />}
 					</div>
-					{renameTimeout.current ? <div class="status-icon">{Octicon.dot}</div>
-						: dirty ? <div class="status-icon">{Octicon.dot_fill}</div>
-							: fileSaved ? <div class="status-icon active">{Octicon.check}</div>
-								: fileError && <div class="status-icon danger">{Octicon.x}</div> }
+					{dirty ? <div class="status-icon">{Octicon.dot_fill}</div>
+						: fileSaved ? <div class="status-icon active">{Octicon.check}</div>
+							: fileError && <div class="status-icon danger">{Octicon.x}</div> }
 				</div>
 				<div class="generator-controls">
 					<Btn icon="upload" label={locale('import')} onClick={importSource} />

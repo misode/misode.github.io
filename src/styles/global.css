@@ -282,6 +282,10 @@ main > .controls {
 	align-items: center;
 }
 
+.project-controls.has-file > .status-icon {
+	right: 38px;
+}
+
 .project-controls > .active {
 	fill: var(--accent-success);
 }
@@ -435,10 +439,6 @@ main.has-preview {
 	position: relative;
 }
 
-.btn-menu > .btn {
-	height: 100%;
-}
-
 .btn-menu .btn-group {
 	display: flex;
 	flex-direction: column;
@@ -480,6 +480,7 @@ main.has-preview {
 .btn-row {
 	display: flex;
 	box-shadow: 0 1px 7px -2px #000;
+	border-radius: 6px;
 }
 
 .btn-row > *,
