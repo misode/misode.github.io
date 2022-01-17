@@ -247,13 +247,13 @@ export function Generator({}: Props) {
 			<div class="controls">
 				<div class={`project-controls ${file && 'has-file'}`}>
 					<div class="btn-row">
-						<BtnMenu icon="repo" label="Drafts" relative={false}>
+						<BtnMenu icon="repo" label={project.name} relative={false}>
 							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
 							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
 							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
 						</BtnMenu>
-						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
-						{file && <Btn icon="trashcan" tooltip="Delete file" onClick={deleteFile} />}
+						<TextInput class="btn btn-input" placeholder={locale('project.unsaved_file')} value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
+						{file && <Btn icon="trashcan" tooltip={locale('project.delete_file')} onClick={deleteFile} />}
 					</div>
 					{dirty ? <div class="status-icon">{Octicon.dot_fill}</div>
 						: fileSaved ? <div class="status-icon active">{Octicon.check}</div>
@@ -264,7 +264,7 @@ export function Generator({}: Props) {
 					<BtnMenu icon="archive" label={locale('presets')} relative={false}>
 						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
-					<BtnMenu icon="tag" label={version} data-cy="version-switcher">
+					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
 						{allowedVersions.reverse().map(v =>
 							<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
 						)}

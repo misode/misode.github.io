@@ -146,7 +146,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 						onClick={() => changeFormat(key)} />)}
 			</BtnMenu>
 		</div>
-		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={locale('source_placeholder')} data-cy="import-area"></textarea>
+		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={locale('source_placeholder', format.toUpperCase())} data-cy="import-area"></textarea>
 		<a ref={download} style="display: none;"></a>
 	</>
 }
