@@ -79,22 +79,36 @@ export function Generator({}: Props) {
 	const [fileRename, setFileRename] = useState('')
 	const renameTimeout = useRef<number | undefined>(undefined)
 	const [fileSaved, doSave] = useActiveTimeout()
+	const [fileError, doFileError] = useActiveTimeout()
+
+	const doFileRename = () => {
+		if (fileRename !== file?.id && fileRename && model && blockStates) {
+			const data = getOutput(model, blockStates)
+			const success = updateFile(gen.id, file?.id, { id: fileRename, data })
+			if (success) {
+				doSave()
+			} else {
+				doFileError()
+				if (file) {
+					setFileRename(file?.id)
+				}
+			}
+		} else if (file) {
+			setFileRename(file?.id)
+		}
+	}
+
+	const deleteFile = () => {
+		if (file) {
+			updateFile(gen.id, file.id, {})
+		}
+	}
 
 	useEffect(() => {
-		if (renameTimeout.current !== undefined) {
-			clearTimeout(renameTimeout.current)
-			renameTimeout.current = undefined
+		if (file) {
+			setFileRename(file.id)
 		}
-		if (fileRename !== file?.id && fileRename && model && blockStates) {
-			renameTimeout.current = setTimeout(() => {
-				const data = getOutput(model, blockStates)
-				console.log('Renaming file', file?.id, '->', fileRename, JSON.stringify(data).slice(0, 50))
-				updateFile(gen.id, file?.id, { id: fileRename, data })
-				doSave()
-				renameTimeout.current = undefined
-			}, 500) as any
-		}
-	}, [fileRename])
+	}, [file])
 
 	useEffect(() => {
 		if (model) {
@@ -102,7 +116,7 @@ export function Generator({}: Props) {
 			if (file && gen.id === file.type) {
 				model.reset(DataModel.wrapLists(file.data))
 			} else {
-				model.reset(DataModel.wrapLists(model.schema.default()))
+				model.reset(DataModel.wrapLists(model.schema.default()), true)
 			}
 			setDirty(false)
 		}
@@ -138,7 +152,6 @@ export function Generator({}: Props) {
 			if (model && blockStates && file) {
 				Analytics.generatorEvent('save', 'Hotkey')
 				const data = getOutput(model, blockStates)
-				console.log('Saved file', file?.id, JSON.stringify(data).slice(0, 50))
 				updateFile(gen.id, file?.id, { id: file?.id, data })
 				setDirty(false)
 				doSave()
@@ -237,16 +250,16 @@ export function Generator({}: Props) {
 					<div class="btn-row">
 						<BtnMenu icon="repo" label="Drafts" relative={false}>
 							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
-							<Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />
+							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
 							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
 						</BtnMenu>
-						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} />
+						<TextInput class="btn btn-input" placeholder="Unsaved file" value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
+						{file && <Btn icon="trashcan" tooltip="Delete file" onClick={deleteFile} />}
 					</div>
-					{renameTimeout.current
-						? <div class="status-icon">{Octicon.dot}</div>
-						: dirty
-							? <div class="status-icon">{Octicon.dot_fill}</div>
-							: fileSaved && <div class="status-icon active">{Octicon.check}</div>}
+					{renameTimeout.current ? <div class="status-icon">{Octicon.dot}</div>
+						: dirty ? <div class="status-icon">{Octicon.dot_fill}</div>
+							: fileSaved ? <div class="status-icon active">{Octicon.check}</div>
+								: fileError && <div class="status-icon danger">{Octicon.x}</div> }
 				</div>
 				<div class="generator-controls">
 					<Btn icon="upload" label={locale('import')} onClick={importSource} />

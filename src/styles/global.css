@@ -11,6 +11,7 @@
 	--accent-primary: #50baf9;
 	--accent-success: #3eb84f;
 	--accent-warning: #b8893e;
+	--accent-danger: #cf4945;
 	--accent-sounds-1: #451475;
 	--accent-sounds-2: #39155e;
 	--accent-sounds-3: #6a08a3;
@@ -40,6 +41,7 @@
 	--accent-primary: #088cdb;
 	--accent-success: #1a7f37;
 	--accent-warning: #a36f1c;
+	--accent-danger: #bd2f2a;
 	--accent-sounds-1: #b481e7;
 	--accent-sounds-2: #c18df5;
 	--accent-sounds-3: #af72d3;
@@ -70,6 +72,7 @@
 		--accent-primary: #088cdb;
 		--accent-success: #1a7f37;
 		--accent-warning: #a36f1c;
+	--accent-danger: #bd2f2a;
 		--accent-sounds-1: #b481e7;
 		--accent-sounds-2: #c18df5;
 		--accent-sounds-3: #af72d3;
@@ -281,6 +284,10 @@ main > .controls {
 
 .project-controls > .active {
 	fill: var(--accent-success);
+}
+
+.project-controls > .danger {
+	fill: var(--accent-danger);
 }
 
 .project-controls .btn-menu .btn-group {

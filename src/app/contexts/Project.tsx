@@ -30,7 +30,7 @@ interface ProjectContext {
 	file?: ProjectFile,
 	changeProject: (name: string) => unknown,
 	updateProject: (project: Partial<Project>) => unknown,
-	updateFile: (type: string, id: string | undefined, file: Partial<ProjectFile>) => unknown,
+	updateFile: (type: string, id: string | undefined, file: Partial<ProjectFile>) => boolean,
 	openFile: (type: string, id: string) => unknown,
 	closeFile: () => unknown,
 }
@@ -38,7 +38,7 @@ const Project = createContext<ProjectContext>({
 	project: DRAFT_PROJECT,
 	changeProject: () => {},
 	updateProject: () => {},
-	updateFile: () => {},
+	updateFile: () => false,
 	openFile: () => {},
 	closeFile: () => {},
 })
@@ -75,14 +75,20 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 			updateProject({ files: project.files.filter(f => f.type !== type || f.id !== id) })
 		} else {
 			const newId = edits.id.includes(':') ? edits.id : `${project.namespace}:${edits.id}`
-			if (project.files.some(f => f.type === type && f.id === newId)) return
+			const exists = project.files.some(f => f.type === type && f.id === newId)
 			if (!id) { // create
+				if (exists) return false
 				updateProject({ files: [...project.files, { type, id: newId, data: edits.data ?? {} } ]})
+				setFileId([type, newId])
 			} else { // rename or update data
+				if (file?.id === id && id !== newId && exists) {
+					return false
+				}
 				updateProject({ files: project.files.map(f => f.type === type && f.id === id ? { ...f, ...edits, id: newId } : f)})
-				if (file?.id === id && edits.id) setFileId([type, edits.id])
+				if (file?.id === id) setFileId([type, newId])
 			}
 		}
+		return true
 	}, [updateProject, project, file])
 
 	const openFile = useCallback((type: string, id: string) => {
