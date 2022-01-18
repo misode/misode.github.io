@@ -10,6 +10,8 @@
 	--text-3: #c3c3c3;
 	--accent-primary: #50baf9;
 	--accent-success: #3eb84f;
+	--accent-warning: #b8893e;
+	--accent-danger: #cf4945;
 	--accent-sounds-1: #451475;
 	--accent-sounds-2: #39155e;
 	--accent-sounds-3: #6a08a3;
@@ -38,6 +40,8 @@
 	--text-3: #494949;
 	--accent-primary: #088cdb;
 	--accent-success: #1a7f37;
+	--accent-warning: #a36f1c;
+	--accent-danger: #bd2f2a;
 	--accent-sounds-1: #b481e7;
 	--accent-sounds-2: #c18df5;
 	--accent-sounds-3: #af72d3;
@@ -67,6 +71,8 @@
 		--text-3: #494949;
 		--accent-primary: #088cdb;
 		--accent-success: #1a7f37;
+		--accent-warning: #a36f1c;
+	--accent-danger: #bd2f2a;
 		--accent-sounds-1: #b481e7;
 		--accent-sounds-2: #c18df5;
 		--accent-sounds-3: #af72d3;
@@ -117,11 +123,6 @@ header {
 	position: fixed;
 	box-shadow: 0 0 9px -3px #000;
 	background-color: var(--background-2);
-}
-
-body[data-panel="home"] header,
-body[data-panel="settings"] header {
-	position: fixed;
 }
 
 .title {
@@ -230,29 +231,81 @@ main {
 	top: 12px;
 	right: 16px;
 	left: 16px;
-	z-index: 1;
 	pointer-events: none;
-}
-
-main > .controls {
-	position: sticky;
-	margin-right: 16px;
-	margin-left: 16px;
-	top: 68px;
 }
 
 .controls > * {
 	pointer-events: all;
 }
 
-.controls > *:not(:last-child) {
+main > .controls {
+	justify-content: space-between;
+	flex-wrap: wrap;
+	position: initial;
+	margin-right: 16px;
+	margin-left: 16px;
+	row-gap: 8px;
+}
+
+.generator-controls {
+	display: flex;
+	margin-left: auto;
+	position: sticky;
+	top: 68px;
+	z-index: 1;
+}
+
+.generator-controls > *:not(:last-child) {
 	margin-right: 8px;
 }
 
+.project-controls {
+	position: relative;
+	display: flex;
+	width: max-content;
+	z-index: 2;
+}
+
+.project-controls > .btn-row > .btn-input {
+	background-color: var(--background-2);
+}
+
+.project-controls > .status-icon {
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	align-self: center;
+	margin-right: 8px;
+	fill: var(--text-3);
+	display: flex;
+	align-items: center;
+}
+
+.project-controls.has-file > .status-icon {
+	right: 38px;
+}
+
+.project-controls > .active {
+	fill: var(--accent-success);
+}
+
+.project-controls > .danger {
+	fill: var(--accent-danger);
+}
+
+.project-controls .btn-menu .btn-group {
+	left: 0;
+	right: unset;
+}
+
+.source-controls {
+	justify-content: flex-end;
+}
+
 .tree {
-	margin-top: -36px;
 	overflow-x: auto;
-	padding: 4px 16px 50vh;
+	padding: 8px 16px 50vh;
 }
 
 .error + .tree {
@@ -266,7 +319,7 @@ main > .controls {
 	width: 40vw;
 	left: 100%;
 	bottom: 0;
-	z-index: 1;
+	z-index: 3;
 	transition: transform 0.3s;
 	border-radius: 6px 0 0 0;
 }
@@ -315,7 +368,7 @@ main > .controls {
 	width: 40vw;
 	left: 100%;
 	bottom: 0;
-	z-index: 1;
+	z-index: 3;
 	background-color: var(--background-2);
 	box-shadow: 0 0 7px -3px #000;
 	transition: transform 0.3s;
@@ -386,10 +439,6 @@ main.has-preview {
 	position: relative;
 }
 
-.btn-menu > .btn {
-	height: 100%;
-}
-
 .btn-menu .btn-group {
 	display: flex;
 	flex-direction: column;
@@ -426,6 +475,29 @@ main.has-preview {
 	background-color: var(--background-6);
 	margin: 0;
 	padding: 2px 0;
+}
+
+.btn-row {
+	display: flex;
+	box-shadow: 0 1px 7px -2px #000;
+	border-radius: 6px;
+}
+
+.btn-row > *,
+.btn-row > .btn-menu > * {
+	box-shadow: none;
+}
+
+.btn-row > *:not(:first-child),
+.btn-row > .btn-menu:not(:first-child) > * {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.btn-row > *:not(:last-child),
+.btn-row > .btn-menu:not(:last-child) > * {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 .btn-input {
@@ -469,7 +541,7 @@ main.has-preview {
 	position: fixed;
 	bottom: 8px;
 	left: 100%;
-	z-index: 5;
+	z-index: 4;
 	padding-right: 16px;
 	background-color: var(--background-4);
 	box-shadow: 0 0 7px -3px #000;
@@ -649,7 +721,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category {
+.home, .category, .project {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -802,6 +874,37 @@ hr {
 .very-large {
 	font-size: 80px;
 	font-weight: 100;
+}
+
+.project h2 {
+	color: var(--text-1);
+	margin-bottom: 8px;
+}
+
+.file-view {
+	background-color: var(--background-2);
+	border-radius: 6px;
+	padding: 6px;
+}
+
+.tree-view .entry {
+	cursor: pointer;
+	padding: 4px 2px;
+	padding-left: calc(var(--indent, 0) * 24px);
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	background-color: var(--background-2);
+	color: var(--text-2);
+}
+
+.tree-view .entry:hover {
+	background-color: var(--background-3);
+}
+
+.tree-view .entry svg {
+	margin-right: 4px;
 }
 
 [data-ea-publisher] {
@@ -1194,18 +1297,6 @@ hr {
 	}
 }
 
-@media screen and (max-width: 1300px) {
-	main.has-preview .tree {
-		margin-top: 8px;
-	}
-}
-
-@media screen and (max-width: 800px) {
-	main .tree {
-		margin-top: 4px !important;
-	}
-}
-
 /* SMALL */
 @media screen and (max-width: 580px) {
 	.home {
@@ -1260,7 +1351,7 @@ hr {
 
 	.btn.btn.large-input,
 	.btn-menu .result-list {
-		width: calc(100vw - 10px); 
+		width: calc(100vw - 32px); 
 	}
 
 	.generator-picker {

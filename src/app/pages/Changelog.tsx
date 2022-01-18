@@ -1,20 +1,18 @@
 import { marked } from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { Ad, Btn, ErrorPanel, Octicon, TextInput } from '../components'
-import { locale } from '../Locales'
-import type { ChangelogEntry, ChangelogVersion, VersionId } from '../services'
+import { useLocale, useTitle } from '../contexts'
+import type { ChangelogEntry, ChangelogVersion } from '../services'
 import { getChangelogs } from '../services'
 import { hashString } from '../Utils'
 
-type ChangelogProps = {
+interface Props {
 	path?: string,
-	lang: string,
-	changeTitle: (title: string, versions?: VersionId[]) => unknown,
 }
-export function Changelog({ lang, changeTitle }: ChangelogProps) {
-	const loc = locale.bind(null, lang)
+export function Changelog({}: Props) {
+	const { locale } = useLocale()
 	const [error, setError] = useState<string | null>(null)
-	changeTitle(loc('title.changelog'))
+	useTitle(locale('title.changelog'))
 
 	const [changelogs, setChangelogs] = useState<ChangelogEntry[]>([])
 	useEffect(() => {
@@ -61,7 +59,7 @@ export function Changelog({ lang, changeTitle }: ChangelogProps) {
 		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 		<div class="changelog-controls">
 			<div class="changelog-query">
-				<TextInput class="btn btn-input changelog-search" list="sound-list" placeholder={loc('changelog.search')}
+				<TextInput class="btn btn-input changelog-search" list="sound-list" placeholder={locale('changelog.search')}
 					value={search} onChange={setSearch} />
 				<Btn icon={sort ? 'sort_desc' : 'sort_asc'} label={sort ? 'Newest first' : 'Oldest first'} onClick={() => setSort(!sort)} />
 			</div>

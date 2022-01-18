@@ -1,24 +1,23 @@
 import { DataModel, Path } from '@mcschema/core'
-import { getCurrentUrl } from 'preact-router'
-import { useEffect, useErrorBoundary, useRef, useState } from 'preact/hooks'
+import { getCurrentUrl, route } from 'preact-router'
+import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnInput, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SourcePanel, Tree } from '../components'
-import { useModel } from '../hooks'
-import { locale } from '../Locales'
+import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { useLocale, useProject, useTitle, useVersion } from '../contexts'
+import { useActiveTimeout, useModel } from '../hooks'
+import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
 import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
-type GeneratorProps = {
-	lang: string,
-	changeTitle: (title: string, versions?: VersionId[]) => unknown,
-	version: VersionId,
-	changeVersion: (version: VersionId) => unknown,
+interface Props {
 	default?: true,
 }
-export function Generator({ lang, changeTitle, version, changeVersion }: GeneratorProps) {
-	const loc = locale.bind(null, lang)
+export function Generator({}: Props) {
+	const { locale } = useLocale()
+	const { version, changeVersion } = useVersion()
+	const { project, file, updateFile, openFile, closeFile } = useProject()
 	const [error, setError] = useState<string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -34,7 +33,7 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
 		.map(v => v.id as VersionId)
 
-	changeTitle(loc('title.generator', loc(gen.id)), allowedVersions)
+	useTitle(locale('title.generator', locale(gen.id)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
@@ -70,10 +69,57 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 			.catch(e => { console.error(e); setError(message(e)) })
 	}, [version, gen.id])
 
+	const [dirty, setDirty] = useState(false)
 	useModel(model, () => {
 		setSeachParams({ version: undefined, preset: undefined })
 		setError(null)
+		setDirty(true)
 	})
+
+	const [fileRename, setFileRename] = useState('')
+	const [fileSaved, doSave] = useActiveTimeout()
+	const [fileError, doFileError] = useActiveTimeout()
+
+	const doFileRename = () => {
+		if (fileRename !== file?.id && fileRename && model && blockStates) {
+			const data = getOutput(model, blockStates)
+			const success = updateFile(gen.id, file?.id, { id: fileRename, data })
+			if (success) {
+				doSave()
+			} else {
+				doFileError()
+				if (file) {
+					setFileRename(file?.id)
+				}
+			}
+		} else if (file) {
+			setFileRename(file?.id)
+		}
+	}
+
+	const deleteFile = () => {
+		if (file) {
+			updateFile(gen.id, file.id, {})
+		}
+	}
+
+	useEffect(() => {
+		if (file) {
+			setFileRename(file.id)
+		}
+	}, [file])
+
+	useEffect(() => {
+		if (model) {
+			setFileRename(file?.id ?? '')
+			if (file && gen.id === file.type) {
+				model.reset(DataModel.wrapLists(file.data))
+			} else {
+				model.reset(DataModel.wrapLists(model.schema.default()), true)
+			}
+			setDirty(false)
+		}
+	}, [file, model])
 
 	const reset = () => {
 		Analytics.generatorEvent('reset')
@@ -99,28 +145,34 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 			model?.redo()
 		}
 	}
+	const onKeyDown = (e: KeyboardEvent) => {
+		if (e.ctrlKey && e.key === 's') {
+			e.preventDefault()
+			if (model && blockStates && file) {
+				Analytics.generatorEvent('save', 'Hotkey')
+				const data = getOutput(model, blockStates)
+				updateFile(gen.id, file?.id, { id: file?.id, data })
+				setDirty(false)
+				doSave()
+			}
+		}
+	}
 	useEffect(() => {
 		document.addEventListener('keyup', onKeyUp)
+		document.addEventListener('keydown', onKeyDown)
 		return () => {
 			document.removeEventListener('keyup', onKeyUp)
+			document.removeEventListener('keydown', onKeyDown)
 		}
-	}, [model])
+	}, [model, blockStates, file])
 
-	const [presetFilter, setPresetFilter] = useState('')
-	const [presetResults, setPresetResults] = useState<string[]>([])
+	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
-		getCollections(version)
-			.then(collections => {
-				const terms = (presetFilter ?? '').trim().split(' ')
-				const presets = collections.get(gen.id)
-					.map(p => p.slice(10))
-					.filter(p => terms.every(t => p.includes(t)))
-				if (presets) {
-					setPresetResults(presets)
-				}
-			})
+		getCollections(version).then(collections => {
+			setPresets(collections.get(gen.id).map(p => p.slice(10)))
+		})
 			.catch(e => { console.error(e); setError(e.message) })
-	}, [version, gen.id, presetFilter])
+	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
 		loadPreset(id).then(preset => {
@@ -172,15 +224,7 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 		setImport(0)
 	}
 
-	const [copyActive, setCopyActive] = useState(false)
-	const copyTimeout = useRef<number | undefined>(undefined)
-	const copySuccess = () => {
-		setCopyActive(true)
-		if (copyTimeout.current !== undefined) clearTimeout(copyTimeout.current)
-		copyTimeout.current = setTimeout(() => {
-			setCopyActive(false)
-		}, 2000) as any
-	}
+	const [copyActive, copySuccess] = useActiveTimeout()
 
 	const [previewShown, setPreviewShown] = useState(false)
 	const hasPreview = HasPreview.includes(gen.id)
@@ -201,47 +245,59 @@ export function Generator({ lang, changeTitle, version, changeVersion }: Generat
 		<main class={previewShown ? 'has-preview' : ''}>
 			<Ad id="data-pack-generator" type="text" />
 			<div class="controls">
-				<Btn icon="upload" label={loc('import')} onClick={importSource} />
-				<BtnMenu icon="archive" label={loc('presets')} relative={false}>
-					<BtnInput icon="search" large value={presetFilter} onChange={setPresetFilter} doSelect={1} placeholder={loc('search')} />
-					<div class="result-list">
-						{presetResults.map(preset => <Btn label={preset} onClick={() => selectPreset(preset)} />)}
+				<div class={`project-controls ${file && 'has-file'}`}>
+					<div class="btn-row">
+						<BtnMenu icon="repo" label={project.name} relative={false}>
+							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
+							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
+							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
+						</BtnMenu>
+						<TextInput class="btn btn-input" placeholder={locale('project.unsaved_file')} value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
+						{file && <Btn icon="trashcan" tooltip={locale('project.delete_file')} onClick={deleteFile} />}
 					</div>
-					{presetResults.length === 0 && <Btn label={loc('no_presets')}/>}
-				</BtnMenu>
-				<BtnMenu icon="tag" label={version} data-cy="version-switcher">
-					{allowedVersions.reverse().map(v =>
-						<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
-					)}
-				</BtnMenu>
-				<BtnMenu icon="kebab_horizontal" tooltip={loc('more')}>
-					<Btn icon="history" label={loc('reset')} onClick={reset} />
-					<Btn icon="arrow_left" label={loc('undo')} onClick={undo} />
-					<Btn icon="arrow_right" label={loc('redo')} onClick={redo} />
-				</BtnMenu>
+					{dirty ? <div class="status-icon">{Octicon.dot_fill}</div>
+						: fileSaved ? <div class="status-icon active">{Octicon.check}</div>
+							: fileError && <div class="status-icon danger">{Octicon.x}</div> }
+				</div>
+				<div class="generator-controls">
+					<Btn icon="upload" label={locale('import')} onClick={importSource} />
+					<BtnMenu icon="archive" label={locale('presets')} relative={false}>
+						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
+					</BtnMenu>
+					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
+						{allowedVersions.reverse().map(v =>
+							<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
+						)}
+					</BtnMenu>
+					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
+						<Btn icon="history" label={locale('reset')} onClick={reset} />
+						<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
+						<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
+					</BtnMenu>
+				</div>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			<Tree {...{lang, model, version, blockStates}} onError={setError} />
+			<Tree {...{model, version, blockStates}} onError={setError} />
 		</main>
 		<div class="popup-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
-			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={loc(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
+			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
-			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={loc('download')} onClick={downloadSource}>
+			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
 				{Octicon.download}
 			</div>
-			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={loc(copyActive ? 'copied' : 'copy')} onClick={copySource}>
+			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={locale(copyActive ? 'copied' : 'copy')} onClick={copySource}>
 				{copyActive ? Octicon.check : Octicon.clippy}
 			</div>
-			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={loc(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
+			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={locale(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
 				{sourceShown ? Octicon.chevron_right : Octicon.code}
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{lang, model, version, id: gen.id}} shown={previewShown} onError={setError} />
+			<PreviewPanel {...{model, version, id: gen.id}} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{lang, model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
+			<SourcePanel {...{model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
 		</div>
 	</>
 }

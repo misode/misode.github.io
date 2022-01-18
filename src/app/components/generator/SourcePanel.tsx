@@ -1,11 +1,11 @@
-import { DataModel, ModelPath } from '@mcschema/core'
+import { DataModel } from '@mcschema/core'
 import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
+import { useLocale } from '../../contexts'
 import { useModel } from '../../hooks'
-import { locale } from '../../Locales'
-import { transformOutput } from '../../schema/transformOutput'
+import { getOutput } from '../../schema/transformOutput'
 import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
@@ -37,7 +37,6 @@ const FORMATS: Record<string, {
 }
 
 type SourcePanelProps = {
-	lang: string,
 	name: string,
 	model: DataModel | null,
 	blockStates: BlockStateRegistry | null,
@@ -47,16 +46,16 @@ type SourcePanelProps = {
 	copySuccess: () => unknown,
 	onError: (message: string) => unknown,
 }
-export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
-	const loc = locale.bind(null, lang)
+export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
+	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
 	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
 
-	const getOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
-		const data = model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })
+	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
+		const data = getOutput(model, blockStates)
 		return FORMATS[format].stringify(data, INDENT[indent])
 	}, [indent, format])
 
@@ -64,7 +63,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 		retransform.current = () => {
 			if (!model || !blockStates) return
 			try {
-				const output = getOutput(model, blockStates)
+				const output = getSerializedOutput(model, blockStates)
 				if (output.length >= OUTPUT_CHARS_LIMIT) {
 					source.current.value = output.slice(0, OUTPUT_CHARS_LIMIT) + `\n\nOutput is too large to display (+${OUTPUT_CHARS_LIMIT} chars)\nExport to view complete output\n\n`
 				} else {
@@ -102,7 +101,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {
-			navigator.clipboard.writeText(getOutput(model, blockStates)).then(() => {
+			navigator.clipboard.writeText(getSerializedOutput(model, blockStates)).then(() => {
 				copySuccess()
 			})
 		}
@@ -110,7 +109,7 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	useEffect(() => {
 		if (doDownload && model && blockStates && download.current) {
-			const content = encodeURIComponent(getOutput(model, blockStates))
+			const content = encodeURIComponent(getSerializedOutput(model, blockStates))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
 			download.current.setAttribute('download', `${name}.${format}`)
 			download.current.click()
@@ -136,18 +135,18 @@ export function SourcePanel({ lang, name, model, blockStates, doCopy, doDownload
 
 	return <> 
 		<div class="controls">
-			<BtnMenu icon="gear" tooltip={loc('output_settings')} data-cy="source-controls">
+			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
 				{Object.entries(INDENT).map(([key]) =>
-					<Btn label={loc(`indentation.${key}`)} active={indent === key}
+					<Btn label={locale(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>
 				)}
 				<hr />
 				{Object.keys(FORMATS).map(key =>
-					<Btn label={loc(`format.${key}`)} active={format === key}
+					<Btn label={locale(`format.${key}`)} active={format === key}
 						onClick={() => changeFormat(key)} />)}
 			</BtnMenu>
 		</div>
-		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={loc('source_placeholder')} data-cy="import-area"></textarea>
+		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={locale('source_placeholder', format.toUpperCase())} data-cy="import-area"></textarea>
 		<a ref={download} style="display: none;"></a>
 	</>
 }

@@ -4,8 +4,8 @@ import { NoiseGeneratorSettings, TerrainShaper } from 'deepslate'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
+import { useLocale } from '../../contexts'
 import { useCanvas } from '../../hooks'
-import { locale } from '../../Locales'
 import { biomeMap, getBiome } from '../../previews'
 import { newSeed } from '../../Utils'
 
@@ -13,7 +13,8 @@ const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion
 
 const OverworldShaper = TerrainShaper.overworld()
 
-export const BiomeSourcePreview = ({ model, data, shown, lang, version }: PreviewProps) => {
+export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
+	const { locale } = useLocale()
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
@@ -76,12 +77,12 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 		<div class="controls">
 			{focused && <Btn label={focused} class="no-pointer" />}
 			{type === 'multi_noise' &&
-				<BtnMenu icon="stack" tooltip={locale(lang, 'configure_layers')}>
+				<BtnMenu icon="stack" tooltip={locale('configure_layers')}>
 					{LAYERS.map(name => {
 						const enabled = layers.has(name)
-						return <Btn label={locale(lang, `layer.${name}`)} 
+						return <Btn label={locale(`layer.${name}`)} 
 							active={enabled}
-							tooltip={enabled ? locale(lang, 'enabled') : locale(lang, 'disabled')}
+							tooltip={enabled ? locale('enabled') : locale('disabled')}
 							onClick={(e) => {
 								setLayers(new Set([name]))
 								e.stopPropagation()
@@ -89,13 +90,13 @@ export const BiomeSourcePreview = ({ model, data, shown, lang, version }: Previe
 					})}
 				</BtnMenu>}
 			{(type === 'multi_noise' || type === 'checkerboard') && <>
-				<Btn icon="dash" tooltip={locale(lang, 'zoom_out')}
+				<Btn icon="dash" tooltip={locale('zoom_out')}
 					onClick={() => changeScale(scale * 1.5)} />
-				<Btn icon="plus" tooltip={locale(lang, 'zoom_in')}
+				<Btn icon="plus" tooltip={locale('zoom_in')}
 					onClick={() => changeScale(scale / 1.5)} />
 			</>}
 			{type === 'multi_noise' &&
-				<Btn icon="sync" tooltip={locale(lang, 'generate_new_seed')}
+				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => newSeed(model)} />}
 		</div>
 		<canvas ref={canvas} width="200" height="200"></canvas>

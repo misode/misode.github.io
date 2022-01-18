@@ -8,14 +8,15 @@ interface BtnMenuProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	label?: string,
 	relative?: boolean,
 	tooltip?: string,
+	tooltipLoc?: 'se' | 'sw' | 'nw',
 	children: ComponentChildren,
 }
 export function BtnMenu(props: BtnMenuProps) {
-	const { icon, label, relative, tooltip, children } = props
+	const { icon, label, relative, tooltip, tooltipLoc, children } = props
 	const [active, setActive] = useFocus()
 
 	return <div class={`btn-menu${relative === false ? ' no-relative' : ''}`} {...props}>
-		<Btn {...{icon, label, tooltip}} onClick={setActive} />
+		<Btn {...{icon, label, tooltip, tooltipLoc}} onClick={setActive} />
 		{active && <div class="btn-group">
 			{children}
 		</div>}

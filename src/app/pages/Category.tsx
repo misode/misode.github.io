@@ -1,21 +1,19 @@
 import config from '../../config.json'
 import { ToolCard } from '../components'
-import { locale } from '../Locales'
+import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
-type WorldgenProps = {
+interface Props {
 	category: string,
-	lang: string,
-	changeTitle: (title: string) => unknown,
 	path?: string,
 }
-export function Category({ category, lang, changeTitle }: WorldgenProps) {
-	const loc = locale.bind(null, lang)
-	changeTitle(loc('title.generator_category', loc(category)))
+export function Category({ category }: Props) {
+	const { locale } = useLocale()
+	useTitle(locale('title.generator_category', locale(category)))
 	return <main>
 		<div class="category">
 			{config.generators.filter(g => g.category === category).map(g => 
-				<ToolCard title={loc(g.id)} link={cleanUrl(g.url)} />
+				<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 			)}
 		</div>
 	</main>

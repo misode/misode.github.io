@@ -1,17 +1,18 @@
 import type { DataModel } from '@mcschema/core'
 import { useErrorBoundary, useState } from 'preact/hooks'
+import { useLocale } from '../../contexts'
 import { useModel } from '../../hooks'
 import { FullNode } from '../../schema/renderHtml'
 import type { BlockStateRegistry, VersionId } from '../../services'
 
 type TreePanelProps = {
-	lang: string,
 	version: VersionId,
 	model: DataModel | null,
 	blockStates: BlockStateRegistry | null,
 	onError: (message: string) => unknown,
 }
-export function Tree({ lang, version, model, blockStates, onError }: TreePanelProps) {
+export function Tree({ version, model, blockStates, onError }: TreePanelProps) {
+	const { lang } = useLocale()
 	if (!model || !blockStates || lang === 'none') return <></>
 
 	const [error] = useErrorBoundary(e => {

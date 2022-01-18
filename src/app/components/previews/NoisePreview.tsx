@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn } from '..'
+import { useLocale } from '../../contexts'
 import { useCanvas } from '../../hooks'
-import { locale } from '../../Locales'
 import { normalNoise } from '../../previews'
 import { randomSeed } from '../../Utils'
 
-export const NoisePreview = ({ lang, data, shown, version }: PreviewProps) => {
+export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
+	const { locale } = useLocale()
 	const [seed, setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const offset = useRef<[number, number]>([0, 0])
@@ -41,11 +42,11 @@ export const NoisePreview = ({ lang, data, shown, version }: PreviewProps) => {
 
 	return <>
 		<div class="controls">
-			<Btn icon="dash" tooltip={locale(lang, 'zoom_out')}
+			<Btn icon="dash" tooltip={locale('zoom_out')}
 				onClick={() => changeScale(scale * 1.5)} />
-			<Btn icon="plus" tooltip={locale(lang, 'zoom_in')}
+			<Btn icon="plus" tooltip={locale('zoom_in')}
 				onClick={() => changeScale(scale / 1.5)} />
-			<Btn icon="sync" tooltip={locale(lang, 'generate_new_seed')}
+			<Btn icon="sync" tooltip={locale('generate_new_seed')}
 				onClick={() => setSeed(randomSeed())} />
 		</div>
 		<canvas ref={canvas} width="256" height="256"></canvas>

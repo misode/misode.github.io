@@ -5,8 +5,8 @@ import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Btn, Octicon } from '../components'
+import { localize } from '../contexts'
 import { useFocus } from '../hooks'
-import { locale } from '../Locales'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { CachedDecorator, CachedFeature } from '../services'
 import { deepClone, deepEqual, hexId, isObject, newSeed } from '../Utils'
@@ -115,14 +115,14 @@ const renderHtml: RenderHook = {
 			const node = DataModel.wrapLists(children.default())
 			path.model.set(path, [...value, { node, id: hexId() }])
 		}
-		const suffix = <button class="add tooltipped tip-se" aria-label={locale(lang, 'add_top')} onClick={onAdd}>{Octicon.plus_circle}</button>
+		const suffix = <button class="add tooltipped tip-se" aria-label={localize(lang, 'add_top')} onClick={onAdd}>{Octicon.plus_circle}</button>
 		const body = <>
 			{(value && Array.isArray(value)) && value.map(({ node: cValue, id: cId }, index) => {
 				if (index === maxShown) {
 					return <div class="node node-header">
-						<label>{locale(lang, 'entries_hidden', `${value.length - maxShown}`)}</label>
-						<button onClick={() => setMaxShown(Math.min(maxShown + 50, value.length))}>{locale(lang, 'entries_hidden.more', '50')}</button>
-						<button onClick={() => setMaxShown(value.length)}>{locale(lang, 'entries_hidden.all')}</button>
+						<label>{localize(lang, 'entries_hidden', `${value.length - maxShown}`)}</label>
+						<button onClick={() => setMaxShown(Math.min(maxShown + 50, value.length))}>{localize(lang, 'entries_hidden.more', '50')}</button>
+						<button onClick={() => setMaxShown(value.length)}>{localize(lang, 'entries_hidden.all')}</button>
 					</div>
 				}
 				if (index > maxShown) {
@@ -135,7 +135,7 @@ const renderHtml: RenderHook = {
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
 					return <div class="node node-header" data-category={children.category(cPath)}>
 						<ErrorPopup lang={lang} path={cPath} nested />
-						<button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'expand')}\n${locale(lang, 'expand_all', 'Ctrl')}`} onClick={expand(cId)}>{Octicon.chevron_right}</button>
+						<button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'expand')}\n${localize(lang, 'expand_all', 'Ctrl')}`} onClick={expand(cId)}>{Octicon.chevron_right}</button>
 						<label>{pathLocale(lang, cPath, `${index}`)}</label>
 						<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
 					</div>
@@ -164,16 +164,16 @@ const renderHtml: RenderHook = {
 					},
 				]
 				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} {...{lang, version, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
-					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'collapse')}\n${locale(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
-					<button class="remove tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
+					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'collapse')}\n${localize(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
+					<button class="remove tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
-						<button class="move tooltipped tip-se" aria-label={locale(lang, 'move_up')} onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
-						<button class="move tooltipped tip-se" aria-label={locale(lang, 'move_down')} onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
+						<button class="move tooltipped tip-se" aria-label={localize(lang, 'move_up')} onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
+						<button class="move tooltipped tip-se" aria-label={localize(lang, 'move_down')} onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
 					</div>}
 				</MemoedTreeNode>
 			})}
 			{(value && value.length > 0 && value.length <= maxShown) && <div class="node node-header">
-				<button class="add tooltipped tip-se" aria-label={locale(lang, 'add_bottom')} onClick={onAddBottom}>{Octicon.plus_circle}</button>
+				<button class="add tooltipped tip-se" aria-label={localize(lang, 'add_bottom')} onClick={onAddBottom}>{Octicon.plus_circle}</button>
 			</div>}
 		</>
 		return [null, suffix, body]
@@ -206,7 +206,7 @@ const renderHtml: RenderHook = {
 		}
 		const suffix = <>
 			{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, version, states, ctx)[1]}
-			<button class="add tooltipped tip-se" aria-label={locale(lang, 'add')} onClick={onAdd}>{Octicon.plus_circle}</button>
+			<button class="add tooltipped tip-se" aria-label={localize(lang, 'add')} onClick={onAdd}>{Octicon.plus_circle}</button>
 		</>
 		const body = <>
 			{typeof value === 'object' && Object.entries(value).map(([key, cValue]) => {
@@ -217,7 +217,7 @@ const renderHtml: RenderHook = {
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
 					return <div class="node node-header" data-category={children.category(cPath)}>
 						<ErrorPopup lang={lang} path={cPath} nested />
-						<button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'expand')}\n${locale(lang, 'expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
+						<button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'expand')}\n${localize(lang, 'expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
 						<label>{key}</label>
 						<Collapsed key={key} path={cPath} value={cValue} schema={children} />
 					</div>
@@ -231,8 +231,8 @@ const renderHtml: RenderHook = {
 				}
 				const onRemove = () => cPath.set(undefined)
 				return <MemoedTreeNode key={key} schema={cSchema} path={cPath} value={cValue} {...{lang, version, states, ctx}} label={key}>
-					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${locale(lang, 'collapse')}\n${locale(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>}
-					<button class="remove tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
+					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'collapse')}\n${localize(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>}
+					<button class="remove tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 				</MemoedTreeNode>
 			})}
 		</>
@@ -258,17 +258,17 @@ const renderHtml: RenderHook = {
 		if (node.optional()) {
 			if (value === undefined) {
 				const onExpand = () => path.set(DataModel.wrapLists(node.default()))
-				suffix = <button class="collapse closed tooltipped tip-se" aria-label={locale(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
+				suffix = <button class="collapse closed tooltipped tip-se" aria-label={localize(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
 			} else {
 				const onCollapse = () => path.set(undefined)
-				suffix = <button class="collapse open tooltipped tip-se" aria-label={locale(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
+				suffix = <button class="collapse open tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
 			}
 		}
 		const context = path.getContext().join('.')
 		if (collapsedFields.includes(context)) {
 			const toggled = isToggled('')
 			prefix = <>
-				<button class="toggle tooltipped tip-se" aria-label={locale(lang, toggled ? 'collapse' : 'expand')} onClick={toggled ? collapse('') : expand('')}>{toggled ? Octicon.chevron_down : Octicon.chevron_right}</button>
+				<button class="toggle tooltipped tip-se" aria-label={localize(lang, toggled ? 'collapse' : 'expand')} onClick={toggled ? collapse('') : expand('')}>{toggled ? Octicon.chevron_down : Octicon.chevron_right}</button>
 			</>
 			if (!toggled) {
 				return [prefix, suffix, null]
@@ -357,8 +357,8 @@ function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>
 		path.model.set(path, node.optional() && value === target ? undefined : target)
 	}
 	return <>
-		<button class={value === false ? 'selected' : ''} onClick={() => set(false)}>{locale(lang, 'false')}</button>
-		<button class={value === true ? 'selected' : ''} onClick={() => set(true)}>{locale(lang, 'true')}</button>
+		<button class={value === false ? 'selected' : ''} onClick={() => set(false)}>{localize(lang, 'false')}</button>
+		<button class={value === true ? 'selected' : ''} onClick={() => set(true)}>{localize(lang, 'true')}</button>
 	</>
 }
 
@@ -376,7 +376,7 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 	return <>
 		<input type="text" value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
-		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={locale(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
+		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
 	</>
 }
 
@@ -403,7 +403,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 			context = path
 		}
 		return <select value={value ?? ''} onChange={onChange}>
-			{node.optional() && <option value="">{locale(lang, 'unset')}</option>}
+			{node.optional() && <option value="">{localize(lang, 'unset')}</option>}
 			{values.map(v => <option value={v}>
 				{pathLocale(lang, context.contextPush(v.replace(/^minecraft:/, '')))}
 			</option>)}
@@ -424,7 +424,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 				{values.map(v => <option value={v} />)}
 			</datalist>}
 			{gen && values.includes(value) && value.startsWith('minecraft:') &&
-				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale(lang, 'follow_reference')}>{Octicon.link_external}</a>}
+				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={localize(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>
 	}
 }
@@ -473,11 +473,11 @@ function TreeNode({ label, schema, path, value, lang, version, states, ctx, acti
 				{label ?? pathLocale(lang, path, `${path.last()}`)}
 				{active && <div class="node-menu">
 					{actions?.map(a => <div key={a.label} class="menu-item">
-						<Btn icon={a.icon} tooltip={locale(lang, a.label)} tooltipLoc="se" onClick={() => a.onSelect()}/>
-						<span>{a.description ?? locale(lang, a.label)}</span>
+						<Btn icon={a.icon} tooltip={localize(lang, a.label)} tooltipLoc="se" onClick={() => a.onSelect()}/>
+						<span>{a.description ?? localize(lang, a.label)}</span>
 					</div>)}
 					<div class="menu-item">
-						<Btn icon="clippy" tooltip={locale(lang, 'copy_context')} tooltipLoc="se" onClick={() => navigator.clipboard.writeText(context)} />
+						<Btn icon="clippy" tooltip={localize(lang, 'copy_context')} tooltipLoc="se" onClick={() => navigator.clipboard.writeText(context)} />
 						<span>{context}</span>
 					</div>
 				</div>}
@@ -514,7 +514,7 @@ function pathLocale(lang: string, path: Path, ...params: string[]) {
 	const ctx = path.getContext()
 	for (let i = 0; i < ctx.length; i += 1) {
 		const key = ctx.slice(i).join('.')
-		const result = locale(lang, key, ...params)
+		const result = localize(lang, key, ...params)
 		if (key !== result) {
 			return result
 		}
@@ -530,13 +530,13 @@ function ErrorPopup({ lang, path, nested }: { lang: string, path: ModelPath, nes
 		?	path.model.errors.getAll().filter(e => e.path.startsWith(path))
 		: path.model.errors.get(path, true)
 	if (e.length === 0) return null
-	const message = locale(lang, e[0].error, ...(e[0].params ?? []))
+	const message = localize(lang, e[0].error, ...(e[0].params ?? []))
 	return popupIcon('node-error', 'issue_opened', message)
 }
 
 function HelpPopup({ lang, path }: { lang: string, path: Path }) {
 	const key = path.contextPush('help').getContext().join('.')
-	const message = locale(lang, key)
+	const message = localize(lang, key)
 	if (message === key) return null
 	return popupIcon('node-help', 'info', message)
 }

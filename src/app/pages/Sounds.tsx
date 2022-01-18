@@ -1,22 +1,19 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
-import { locale } from '../Locales'
+import { useLocale, useTitle, useVersion } from '../contexts'
 import type { SoundEvents, VersionAssets, VersionId } from '../services'
 import { getAssets, getSounds } from '../services'
 import { hexId, message } from '../Utils'
 
-type SoundsProps = {
+interface Props {
 	path?: string,
-	lang: string,
-	changeTitle: (title: string, versions?: VersionId[]) => unknown,
-	version: VersionId,
-	changeVersion: (version: VersionId) => unknown,
 }
-export function Sounds({ lang, changeTitle, version, changeVersion }: SoundsProps) {
-	const loc = locale.bind(null, lang)
+export function Sounds({}: Props) {
+	const { locale } = useLocale()
+	const { version, changeVersion } = useVersion()
 	const [error, setError] = useState<string | null>(null)
-	changeTitle(loc('title.sounds'))
+	useTitle(locale('title.sounds'))
 
 	const [assets, setAssets] = useState<VersionAssets>({})
 	const [sounds, setSounds] = useState<SoundEvents>({})
@@ -63,13 +60,13 @@ export function Sounds({ lang, changeTitle, version, changeVersion }: SoundsProp
 		{soundKeys.length > 0 && <>
 			<div class="controls sounds-controls">
 				<div class="sound-search-group">
-					<TextInput class="btn btn-input sound-search" list="sound-list" placeholder={loc('sounds.search')}
+					<TextInput class="btn btn-input sound-search" list="sound-list" placeholder={locale('sounds.search')}
 						value={search} onChange={setSearch} onEnter={addConfig} />
-					<Btn icon="plus" tooltip={loc('sounds.add_sound')} class="add-sound" onClick={addConfig} />
+					<Btn icon="plus" tooltip={locale('sounds.add_sound')} class="add-sound" onClick={addConfig} />
 				</div>
-				{configs.length > 1 && <Btn icon="play" label={ loc('sounds.play_all')} class="play-all-sounds" onClick={playAll} />}
+				{configs.length > 1 && <Btn icon="play" label={ locale('sounds.play_all')} class="play-all-sounds" onClick={playAll} />}
 				<div class="spacer"></div>
-				<Btn icon="download" label={loc('download')} tooltip={loc('sounds.download_function')} class="download-sounds" onClick={downloadFunction} />
+				<Btn icon="download" label={locale('download')} tooltip={locale('sounds.download_function')} class="download-sounds" onClick={downloadFunction} />
 				<BtnMenu icon="tag" label={version}>
 					{config.versions.reverse().map(v =>
 						<Btn label={v.id} active={v.id === version} onClick={() => changeVersion(v.id as VersionId)} />
@@ -77,7 +74,7 @@ export function Sounds({ lang, changeTitle, version, changeVersion }: SoundsProp
 				</BtnMenu>
 			</div>
 			<div class="sounds">
-				{configs.map(c => <SoundConfig key={c.id} {...c} {...{ lang, assets, sounds, delayedPlay }} onEdit={editConfig(c.id)} onDelete={deleteConfig(c.id)} />)}
+				{configs.map(c => <SoundConfig key={c.id} {...c} {...{ assets, sounds, delayedPlay }} onEdit={editConfig(c.id)} onDelete={deleteConfig(c.id)} />)}
 			</div>
 			<a ref={download} style="display: none;"></a>
 		</>}

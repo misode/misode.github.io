@@ -1,27 +1,25 @@
 import config from '../../config.json'
 import { ToolCard } from '../components'
-import { locale } from '../Locales'
+import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
-type HomeProps = {
-	lang: string,
-	changeTitle: (title: string) => unknown,
+interface Props {
 	path?: string,
 }
-export function Home({ lang, changeTitle }: HomeProps) {
-	const loc = locale.bind(null, lang)
-	changeTitle(loc('title.home'))
+export function Home({}: Props) {
+	const { locale } = useLocale()
+	useTitle(locale('title.home'))
 	return <main>
 		<div class="home">
 			<ToolCard title="Data packs">
 				{config.generators.filter(g => !g.category).map(g => 
-					<ToolCard title={loc(g.id)} link={cleanUrl(g.url)} />
+					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 				)}
-				<ToolCard title={loc('worldgen')} link="/worldgen/" />
+				<ToolCard title={locale('worldgen')} link="/worldgen/" />
 			</ToolCard>
 			<ToolCard title="Resource packs">
 				{config.generators.filter(g => g.category === 'assets').map(g =>
-					<ToolCard title={loc(g.id)} link={cleanUrl(g.url)} />
+					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 				)}
 			</ToolCard>
 			<ToolCard title="Report Inspector" icon="report"
