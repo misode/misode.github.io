@@ -45,7 +45,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 	}, [state, seed, shown])
 
 	return <>
-		<div class="controls">
+		<div class="controls preview-controls">
 			{focused && <Btn label={`Y = ${focused}`} class="no-pointer" />}
 			{checkVersion(version, undefined, '1.17') &&
 				<BtnMenu icon="gear" tooltip={locale('terrain_settings')}>

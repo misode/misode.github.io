@@ -2,7 +2,8 @@ import { DataModel } from '@mcschema/core'
 import type { Random } from 'deepslate'
 import { LegacyRandom, PerlinNoise } from 'deepslate'
 import type { VersionId } from '../services'
-import { clamp, stringToColor } from '../Utils'
+import { checkVersion } from '../services'
+import { clamp, isObject, stringToColor } from '../Utils'
 
 type BlockPos = [number, number, number]
 type Placement = [BlockPos, number]
@@ -51,7 +52,11 @@ export function decorator(state: any, img: ImageData, options: DecoratorOptions)
 
 	for (let x = 0; x < options.size[0] / 16; x += 1) {
 		for (let z = 0; z < options.size[2] / 16; z += 1) {
-			getPlacements([x * 16, 0, z * 16], DataModel.unwrapLists(state), ctx)
+			if (checkVersion(options.version, undefined, '1.17')) {
+				getPlacements([x * 16, 0, z * 16], DataModel.unwrapLists(state), ctx)
+			} else {
+				modifyPlacement([x * 16, 0, z * 16], DataModel.unwrapLists(state.placement), ctx)
+			}
 		}
 	}
 
@@ -103,6 +108,56 @@ function sampleInt(value: any, ctx: PlacementContext): number {
 	}
 }
 
+function resolveAnchor(anchor: any, _ctx: PlacementContext): number {
+	if (!isObject(anchor)) throw new Error('Invalid vertical anchor')
+	if (anchor.absolute) return anchor.absolute
+	if (anchor.above_bottom) return anchor.above_bottom
+	if (anchor.below_top) return 256 - anchor.below_top
+	throw new Error('Invalid vertical anchor')
+}
+
+function sampleHeight(height: any, ctx: PlacementContext): number {
+	if (!isObject(height)) throw new Error('Invalid height provider')
+	if (typeof height.type !== 'string') {
+		return resolveAnchor(height, ctx)
+	}
+	switch (normalize(height.type)) {
+		case 'constant': return resolveAnchor(height.value, ctx)
+		case 'uniform': {
+			const min = resolveAnchor(height.min_inclusive, ctx)
+			const max = resolveAnchor(height.max_inclusive, ctx)
+			return min + ctx.nextInt(max - min + 1)
+		}
+		case 'biased_to_bottom': {
+			const min = resolveAnchor(height.min_inclusive, ctx)
+			const max = resolveAnchor(height.max_inclusive, ctx)
+			const n = ctx.nextInt(max - min - (height.inner ?? 1) + 1)
+			return min + ctx.nextInt(n + (height.inner ?? 1))
+		}
+		case 'very_biased_to_bottom': {
+			const min = resolveAnchor(height.min_inclusive, ctx)
+			const max = resolveAnchor(height.max_inclusive, ctx)
+			const inner = height.inner ?? 1
+			const n1 = min + inner + ctx.nextInt(max - min - inner + 1)
+			const n2 = min + ctx.nextInt(n1 - min)
+			return min + ctx.nextInt(n2 - min + inner)
+		}
+		case 'trapezoid': {
+			const min = resolveAnchor(height.min_inclusive, ctx)
+			const max = resolveAnchor(height.max_inclusive, ctx)
+			const plateau = height.plateau ?? 0
+			if (plateau >= max - min) {
+				return min + ctx.nextInt(max - min + 1)
+			}
+			const n1 = (max - min - plateau) / 2
+			const n2 = (max - min) - n1
+			return min + ctx.nextInt(n2 + 1) + ctx.nextInt(n1 + 1)
+		}
+		default: throw new Error(`Invalid height provider ${height.type}`)
+	}
+}
+
+// 1.17 and before
 function useFeature(s: string, ctx: PlacementContext) {
 	const i = ctx.features.indexOf(s)
 	if (i != -1) return i
@@ -314,5 +369,74 @@ const Decorators: {
 			]]
 		}
 		return []
+	},
+}
+
+// 1.18 and after
+function modifyPlacement(pos: BlockPos, placement: any[], ctx: PlacementContext) {
+	let positions = [pos]
+	for (const modifier of placement) {
+		const modifierFn = PlacementModifiers[normalize(modifier?.type ?? 'nope')]
+		if (!modifierFn) continue
+		positions = positions.flatMap(pos =>
+			PlacementModifiers[normalize(modifier.type)](modifier, pos, ctx)
+		)
+	}
+	for (const pos of positions) {
+		ctx.placements.push([pos, 0])
+	}
+}
+
+const PlacementModifiers: {
+	[key: string]: (config: any, pos: BlockPos, ctx: PlacementContext) => BlockPos[],
+} = {
+	count: ({ count }, pos, ctx) => {
+		return new Array(ctx.sampleInt(count ?? 1)).fill(pos)
+	},
+	count_on_every_layer: ({ count }, pos, ctx) => {
+		return new Array(ctx.sampleInt(count ?? 1)).fill(pos)
+			.map(p => [
+				p[0] + ctx.nextInt(16),
+				p[1], 
+				p[2] + ctx.nextInt(16),
+			])
+	},
+	environment_scan: ({}, pos) => {
+		return [pos]
+	},
+	height_range: ({ height }, pos, ctx) => {
+		return decorateY(pos, sampleHeight(height, ctx))
+	},
+	heightmap: ({}, pos, ctx) => {
+		const y = Math.max(ctx.seaLevel, terrain[clamp(0, 63, pos[0])])
+		return decorateY(pos, y)
+	},
+	in_square: ({}, pos, ctx) => {
+		return [[
+			pos[0] + ctx.nextInt(16),
+			pos[1],
+			pos[2] + ctx.nextInt(16),
+		]]
+	},
+	noise_based_count: ({ noise_to_count_ratio, noise_factor, noise_offset }, pos, ctx) => {
+		const factor = Math.max(1, noise_factor)
+		const noise = ctx.biomeInfoNoise.sample(pos[0] / factor, 0, pos[2] / factor)
+		const count = Math.max(0, Math.ceil((noise + (noise_offset ?? 0)) * noise_to_count_ratio))
+		return new Array(count).fill(pos)
+	},
+	noise_threshold_count: ({ noise_level, below_noise, above_noise }, pos, ctx) => {
+		const noise = ctx.biomeInfoNoise.sample(pos[0] / 200, 0, pos[2] / 200)
+		const count = noise < noise_level ? below_noise : above_noise
+		return new Array(count).fill(pos)
+	},
+	random_offset: ({ xz_spread, y_spread }, pos, ctx) => {
+		return [[
+			pos[0] + sampleInt(xz_spread, ctx),
+			pos[1] + sampleInt(y_spread, ctx),
+			pos[2] + sampleInt(xz_spread, ctx),
+		]]
+	},
+	rarity_filter: ({ chance }, pos, ctx) => {
+		return ctx.nextFloat() < 1 / (chance ?? 1) ? [pos] : []
 	},
 }

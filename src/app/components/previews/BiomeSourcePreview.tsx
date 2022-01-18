@@ -74,7 +74,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	}
 
 	return <>
-		<div class="controls">
+		<div class="controls preview-controls">
 			{focused && <Btn label={focused} class="no-pointer" />}
 			{type === 'multi_noise' &&
 				<BtnMenu icon="stack" tooltip={locale('configure_layers')}>

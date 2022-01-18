@@ -255,6 +255,7 @@ main > .controls {
 	z-index: 1;
 }
 
+.preview-controls > *:not(:last-child),
 .generator-controls > *:not(:last-child) {
 	margin-right: 8px;
 }

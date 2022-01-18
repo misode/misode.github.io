@@ -3,9 +3,10 @@ import { Path } from '@mcschema/core'
 import { useState } from 'preact/hooks'
 import { useModel } from '../../hooks'
 import type { VersionId } from '../../services'
+import { checkVersion } from '../../services'
 import { BiomeSourcePreview, DecoratorPreview, NoisePreview, NoiseSettingsPreview } from '../previews'
 
-export const HasPreview = ['dimension', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature']
+export const HasPreview = ['dimension', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
 
 type PreviewPanelProps = {
 	model: DataModel | null,
@@ -21,22 +22,24 @@ export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
 		setCount(count => count + 1)
 	})
 
-	if (id === 'dimension' && model?.get(new Path(['generator', 'type']))?.endsWith('noise')) {
+	if (!model) return <></>
+
+	if (id === 'dimension' && model.get(new Path(['generator', 'type']))?.endsWith('noise')) {
 		const data = model.get(new Path(['generator', 'biome_source']))
 		if (data) return <BiomeSourcePreview {...{ model, version, shown, data }} />
 	}
 
-	if (id === 'worldgen/noise' && model) {
+	if (id === 'worldgen/noise') {
 		const data = model.get(new Path([]))
 		if (data) return <NoisePreview {...{ model, version, shown, data }} />
 	}
 
-	if (id === 'worldgen/noise_settings' && model) {
+	if (id === 'worldgen/noise_settings') {
 		const data = model.get(new Path([]))
 		if (data) return <NoiseSettingsPreview {...{ model, version, shown, data }} />
 	}
 
-	if (id === 'worldgen/configured_feature' && model) {
+	if ((id === 'worldgen/placed_feature' ||  (id === 'worldgen/configured_feature' && checkVersion(version, '1.16', '1.17')))) {
 		const data = model.get(new Path([]))
 		if (data) return <DecoratorPreview {...{ model, version, shown, data }} />
 	}

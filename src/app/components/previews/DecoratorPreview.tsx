@@ -28,7 +28,7 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 	}, [state, scale, seed, shown])
 
 	return <>
-		<div class="controls">
+		<div class="controls preview-controls">
 			<Btn icon="dash" tooltip={locale('zoom_out')}
 				onClick={() => setScale(Math.min(16, scale + 1))} />
 			<Btn icon="plus" tooltip={locale('zoom_in')}

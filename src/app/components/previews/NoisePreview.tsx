@@ -41,7 +41,7 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 	}
 
 	return <>
-		<div class="controls">
+		<div class="controls preview-controls">
 			<Btn icon="dash" tooltip={locale('zoom_out')}
 				onClick={() => changeScale(scale * 1.5)} />
 			<Btn icon="plus" tooltip={locale('zoom_in')}

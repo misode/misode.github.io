@@ -227,7 +227,7 @@ export function Generator({}: Props) {
 	const [copyActive, copySuccess] = useActiveTimeout()
 
 	const [previewShown, setPreviewShown] = useState(false)
-	const hasPreview = HasPreview.includes(gen.id)
+	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
 	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 1
 	if (hasPreview) actionsShown += 1
