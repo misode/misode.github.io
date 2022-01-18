@@ -19,7 +19,7 @@
     "@mcschema/java-1.15": "^0.2.2",
     "@mcschema/java-1.16": "^0.6.5",
     "@mcschema/java-1.17": "^0.2.24",
-    "@mcschema/java-1.18": "^0.2.13",
+    "@mcschema/java-1.18": "^0.2.14",
     "@mcschema/locales": "^0.1.42",
     "buffer": "^6.0.3",
     "comment-json": "^4.1.1",
