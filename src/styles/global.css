@@ -319,7 +319,7 @@ main > .controls {
 	width: 40vw;
 	left: 100%;
 	bottom: 0;
-	z-index: 1;
+	z-index: 3;
 	transition: transform 0.3s;
 	border-radius: 6px 0 0 0;
 }
@@ -368,7 +368,7 @@ main > .controls {
 	width: 40vw;
 	left: 100%;
 	bottom: 0;
-	z-index: 1;
+	z-index: 3;
 	background-color: var(--background-2);
 	box-shadow: 0 0 7px -3px #000;
 	transition: transform 0.3s;
@@ -541,7 +541,7 @@ main.has-preview {
 	position: fixed;
 	bottom: 8px;
 	left: 100%;
-	z-index: 5;
+	z-index: 4;
 	padding-right: 16px;
 	background-color: var(--background-4);
 	box-shadow: 0 0 7px -3px #000;
