@@ -17,6 +17,7 @@ type PlacementContext = {
 	version: VersionId,
 	nextFloat(): number,
 	nextInt(max: number): number,
+	nextGaussian(): number,
 	sampleInt(provider: any): number,
 }
 
@@ -47,6 +48,7 @@ export function decorator(state: any, img: ImageData, options: DecoratorOptions)
 		version: options.version,
 		nextFloat: () => random.nextFloat(),
 		nextInt: (max: number) => random.nextInt(max),
+		nextGaussian: () => Math.sqrt(-2 * Math.log(1 - random.nextFloat())) * Math.cos(2 * Math.PI * random.nextFloat()),
 		sampleInt(value) { return sampleInt(value, this) },
 	}
 
@@ -102,7 +104,18 @@ function sampleInt(value: any, ctx: PlacementContext): number {
 			case 'constant': return value.value
 			case 'uniform': return value.value.min_inclusive + ctx.nextInt(value.value.max_inclusive - value.value.min_inclusive + 1)
 			case 'biased_to_bottom': return value.value.min_inclusive + ctx.nextInt(ctx.nextInt(value.value.max_inclusive - value.value.min_inclusive + 1) + 1)
-			case 'clamped': return Math.max(value.value.min_inclusive, Math.min(value.value.max_inclusive, sampleInt(value.value.source, ctx)))
+			case 'clamped': return clamp(ctx.sampleInt(value.value.source), value.value.min_inclusive, value.value.max_inclusive)
+			case 'clamped_normal':
+				const normal = value.value.mean + ctx.nextGaussian() * value.value.deviation
+				return Math.floor(clamp(value.value.min_inclusive, value.value.max_inclusive, normal))
+			case 'weighted_list':
+				const totalWeight = (value.distribution as any[]).reduce<number>((sum, e) => sum + e.weight, 0)
+				let i = ctx.nextInt(totalWeight)
+				for (const e of value.distribution) {
+					i -= e.weight
+					if (i < 0) return ctx.sampleInt(e.data)
+				}
+				return 0
 		}
 		return 1
 	}
@@ -431,9 +444,9 @@ const PlacementModifiers: {
 	},
 	random_offset: ({ xz_spread, y_spread }, pos, ctx) => {
 		return [[
-			pos[0] + sampleInt(xz_spread, ctx),
-			pos[1] + sampleInt(y_spread, ctx),
-			pos[2] + sampleInt(xz_spread, ctx),
+			pos[0] + ctx.sampleInt(xz_spread),
+			pos[1] + ctx.sampleInt(y_spread),
+			pos[2] + ctx.sampleInt(xz_spread),
 		]]
 	},
 	rarity_filter: ({ chance }, pos, ctx) => {
