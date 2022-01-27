@@ -55,7 +55,7 @@ export default defineConfig({
 		stringify: true,
 	},
 	define: {
-		__MCMETA_SUMMARY_HASH__: env.mcdata_hash,
+		__LATEST_VERSION__: env.latest_version,
 	},
 	plugins: [preact()],
 })

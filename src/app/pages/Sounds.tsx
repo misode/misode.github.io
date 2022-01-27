@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
-import type { SoundEvents, VersionAssets, VersionId } from '../services'
-import { getAssets, getSounds } from '../services'
+import type { SoundEvents, VersionId } from '../services'
+import { fetchSounds } from '../services'
 import { hexId, message } from '../Utils'
 
 interface Props {
@@ -15,13 +15,11 @@ export function Sounds({}: Props) {
 	const [error, setError] = useState<string | null>(null)
 	useTitle(locale('title.sounds'))
 
-	const [assets, setAssets] = useState<VersionAssets>({})
 	const [sounds, setSounds] = useState<SoundEvents>({})
 	const soundKeys = Object.keys(sounds ?? {})
 	useEffect(() => {
-		getAssets(version)
-			.then(assets => { setAssets(assets); return getSounds(version) })
-			.then(sounds => { if (sounds) setSounds(sounds) })
+		fetchSounds(version)
+			.then(setSounds)
 			.catch(e => { console.error(e); setError(message(e)) })
 	}, [version])
 
@@ -74,7 +72,7 @@ export function Sounds({}: Props) {
 				</BtnMenu>
 			</div>
 			<div class="sounds">
-				{configs.map(c => <SoundConfig key={c.id} {...c} {...{ assets, sounds, delayedPlay }} onEdit={editConfig(c.id)} onDelete={deleteConfig(c.id)} />)}
+				{configs.map(c => <SoundConfig key={c.id} {...c} {...{ sounds, delayedPlay }} onEdit={editConfig(c.id)} onDelete={deleteConfig(c.id)} />)}
 			</div>
 			<a ref={download} style="display: none;"></a>
 		</>}

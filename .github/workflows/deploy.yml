@@ -12,18 +12,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
-    - name: Get latest mcmeta commit hash
-      uses: octokit/request-action@v2.x
-      id: get_mcmeta_hash
-      with:
-        route: GET /repos/misode/mcmeta/branches/summary
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Get latest version
+      id: get_latest_version
+      run: |
+        echo ::set-output name=data::$(curl -s "https://raw.githubusercontent.com/misode/mcmeta/summary/version.json")
 
     - name: Build
       run: |
         npm install
-        export mcmeta_hash="'${{ fromJson(steps.get_mcmeta_hash.outputs.data).commit.sha }}'"
+        export latest_version="'${{ fromJson(steps.get_latest_version.outputs.data).commit.sha }}'"
         npm run build
 
     - name: Deploy

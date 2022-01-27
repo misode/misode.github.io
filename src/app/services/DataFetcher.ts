@@ -1,7 +1,6 @@
 import type { CollectionRegistry } from '@mcschema/core'
 import config from '../../config.json'
 import { message } from '../Utils'
-import type { VersionAssets, VersionManifest } from './Manifest'
 import type { BlockStateRegistry, VersionId } from './Schemas'
 
 // Cleanup old caches
@@ -10,6 +9,7 @@ import type { BlockStateRegistry, VersionId } from './Schemas'
 caches.delete('misode-v1')
 
 const CACHE_NAME = 'misode-v2'
+const CACHE_LATEST_VERSION = 'cached_latest_version'
 
 type Version = {
 	id: string,
@@ -17,20 +17,14 @@ type Version = {
 	dynamic?: boolean,
 }
 
-declare var __MCMETA_SUMMARY_HASH__: string
-const mcmetaHash = __MCMETA_SUMMARY_HASH__ ?? 'summary'
-
+declare var __LATEST_VERSION__: string
+const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
-const manifestUrl = 'https://launchermeta.mojang.com/mc/game/version_manifest.json'
-const resourceUrl = 'https://resources.download.minecraft.net/'
-const corsUrl = 'https://misode-cors-anywhere.herokuapp.com/'
 
-function mcmetaSummary(version: Version) {
-	return `${mcmetaUrl}/${version.dynamic ? mcmetaHash : `${version.ref}-summary`}`
-}
+type McmetaTypes = 'summary' | 'data' | 'assets'
 
-function mcmetaData(version: Version) {
-	return `${mcmetaUrl}/${version.dynamic ? 'data' : `${version.ref}-data`}`
+function mcmeta(version: Version, type: McmetaTypes) {
+	return `${mcmetaUrl}/${version.dynamic ? type : `${version.ref}-${type}`}`
 }
 
 export async function fetchData(versionId: string, collectionTarget: CollectionRegistry, blockStateTarget: BlockStateRegistry) {
@@ -41,11 +35,11 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 	}
 
 	if (version.dynamic) {
-		if (localStorage.getItem('cached_mcmeta_summary') !== mcmetaHash) {
+		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
 			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary`))
-			localStorage.setItem('cached_mcmeta_summary', mcmetaHash)
+			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
 		}
-		version.ref = mcmetaHash
+		version.ref = latestVersion
 	}
 
 	await Promise.all([
@@ -57,7 +51,7 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 async function fetchRegistries(version: Version, target: CollectionRegistry) {
 	console.debug(`[fetchRegistries] ${version.id}`)
 	try {
-		const data = await getData(`${mcmetaSummary(version)}/registries/data.min.json`)
+		const data = await getData(`${mcmeta(version, 'summary')}/registries/data.min.json`)
 		for (const id in data) {
 			target.register(id, data[id].map((e: string) => 'minecraft:' + e))
 		}
@@ -69,7 +63,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) {
 	console.debug(`[fetchBlockStateMap] ${version.id}`)
 	try {
-		const data = await getData(`${mcmetaSummary(version)}/blocks/data.min.json`)
+		const data = await getData(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
 		for (const id in data) {
 			target['minecraft:' + id] = {
 				properties: data[id][0],
@@ -86,7 +80,7 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 	const version = config.versions.find(v => v.id === versionId)!
 	try {
 		const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
-		const url = `${mcmetaData(version)}/${type}/minecraft/${registry}/${id}.json`
+		const url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
 		const res = await fetch(url)
 		return res.json()
 	} catch (e) {
@@ -94,38 +88,24 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 	}
 }
 
-export async function fetchManifest() {
-	try {
-		const res = await fetch(manifestUrl)
-		return await res.json()
-	} catch (e) {
-		throw new Error(`Error occurred while fetching version manifest: ${message(e)}`)
-	}
+export type SoundEvents = {
+	[key: string]: {
+		sounds: (string | { name: string })[],
+	},
 }
-
-export async function fetchAssets(versionId: VersionId, manifest: VersionManifest) {
-	const version = config.versions.find(v => v.id === versionId)
-	const id = version?.ref ?? manifest.latest.snapshot
+export async function fetchSounds(versionId: VersionId): Promise<SoundEvents> {
+	const version = config.versions.find(v => v.id === versionId)!
 	try {
-		const versionMeta = await getData(manifest.versions.find(v => v.id === id)!.url)
-	
-		return (await getData(versionMeta.assetIndex.url)).objects
-	} catch (e) {
-		throw new Error(`Error occurred while fetching assets for ${version}: ${message(e)}`)
-	}
-}
-
-export async function fetchSounds(version: VersionId, assets: VersionAssets) {
-	try {
-		const hash = assets['minecraft/sounds.json'].hash
-		return await getData(getResourceUrl(hash))
+		const url = `${mcmeta(version, 'summary')}/sounds/data.min.json`
+		return await getData(url)
 	} catch (e) {
 		throw new Error(`Error occurred while fetching sounds for ${version}: ${message(e)}`)
 	}
 }
 
-export function getResourceUrl(hash: string) {
-	return `${corsUrl}${resourceUrl}${hash.slice(0, 2)}/${hash}`
+export function getSoundUrl(versionId: VersionId, path: string) {
+	const version = config.versions.find(v => v.id === versionId)!
+	return `${mcmeta(version, 'assets')}/assets/minecraft/sounds/${path}.ogg`
 }
 
 async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
