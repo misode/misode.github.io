@@ -193,16 +193,14 @@
       "url": "assets/blockstate",
       "path": "blockstates",
       "category": "assets",
-      "schema": "block_definition",
-      "minVersion": "1.18"
+      "schema": "block_definition"
     },
     {
       "id": "model",
       "url": "assets/model",
       "path": "models",
       "category": "assets",
-      "schema": "model",
-      "minVersion": "1.18"
+      "schema": "model"
     }
   ]
 }
