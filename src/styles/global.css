@@ -255,6 +255,7 @@ main > .controls {
 	z-index: 1;
 }
 
+.sounds-controls > *:not(:last-child),
 .preview-controls > *:not(:last-child),
 .generator-controls > *:not(:last-child) {
 	margin-right: 8px;
@@ -447,6 +448,7 @@ main.has-preview {
 	top: 100%;
 	right: 0;
 	margin-top: 8px;
+	z-index: 10;
 }
 
 .btn-group {

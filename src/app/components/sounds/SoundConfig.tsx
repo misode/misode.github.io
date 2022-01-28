@@ -1,9 +1,9 @@
 import { Howl } from 'howler'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, NumberInput, RangeInput, TextInput } from '..'
-import { useLocale } from '../../contexts'
-import type { SoundEvents, VersionAssets } from '../../services'
-import { getResourceUrl } from '../../services'
+import { useLocale, useVersion } from '../../contexts'
+import type { SoundEvents } from '../../services'
+import { getSoundUrl } from '../../services'
 
 export interface SoundConfig {
 	id: string,
@@ -13,14 +13,14 @@ export interface SoundConfig {
 	volume: number,
 }
 type SoundConfigProps = SoundConfig & {
-	assets: VersionAssets,
 	sounds: SoundEvents,
 	onEdit: (changes: Partial<SoundConfig>) => unknown,
 	onDelete: () => unknown,
 	delayedPlay?: number,
 }
-export function SoundConfig({ assets, sounds, sound, delay, pitch, volume, onEdit, onDelete, delayedPlay }: SoundConfigProps) {
+export function SoundConfig({ sounds, sound, delay, pitch, volume, onEdit, onDelete, delayedPlay }: SoundConfigProps) {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [loading, setLoading] = useState(true)
 	const [playing, setPlaying] = useState(false)
 	const [invalid, setInvalid] = useState(false)
@@ -33,8 +33,7 @@ export function SoundConfig({ assets, sounds, sound, delay, pitch, volume, onEdi
 		howls.current.forEach(h => h.stop())
 		howls.current = (soundEvent?.sounds ?? []).map(entry => {
 			const soundPath = typeof entry === 'string' ? entry : entry.name
-			const hash = assets[`minecraft/sounds/${soundPath}.ogg`].hash
-			const url = getResourceUrl(hash)
+			const url = getSoundUrl(version, soundPath)
 			const howl = new Howl({
 				src: [url],
 				format: ['ogg'],
