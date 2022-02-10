@@ -264,9 +264,9 @@ export function Generator({}: Props) {
 					<BtnMenu icon="archive" label={locale('presets')} relative={false}>
 						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
-					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
+					<BtnMenu icon="tag" label={locale(version)} tooltip={locale('switch_version')} data-cy="version-switcher">
 						{allowedVersions.reverse().map(v =>
-							<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
+							<Btn label={locale(v)} active={v === version} onClick={() => changeVersion(v)} />
 						)}
 					</BtnMenu>
 					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
