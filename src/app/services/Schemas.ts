@@ -51,6 +51,7 @@ const versionGetter: {
 
 export let CachedDecorator: INode<any>
 export let CachedFeature: INode<any>
+export let CachedCollections: CollectionRegistry
 
 async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
@@ -112,6 +113,7 @@ export async function getModel(version: VersionId, id: string): Promise<DataMode
 
 export async function getCollections(version: VersionId): Promise<CollectionRegistry> {
 	const versionData = await getVersion(version)
+	CachedCollections = versionData.collections
 	return versionData.collections
 }
 

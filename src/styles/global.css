@@ -518,6 +518,10 @@ main.has-preview {
 	width: 100px;
 }
 
+.btn-input.larger-input input {
+	width: 200px;
+}
+
 .btn-input.large-input {
 	padding: 5px;
 	padding-left: 11px;

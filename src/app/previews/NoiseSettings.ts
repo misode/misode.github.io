@@ -1,6 +1,6 @@
 import { DataModel } from '@mcschema/core'
-import type { BlockPos, BlockState } from 'deepslate'
-import { Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
+import type { BlockState } from 'deepslate'
+import { BlockPos, Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
 import { getOctaves } from '../components'
 import type { VersionId } from '../services'
 import { checkVersion } from '../services'
@@ -8,6 +8,7 @@ import { deepClone, deepEqual } from '../Utils'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
 
 export type NoiseSettingsOptions = {
+	biome?: string,
 	biomeScale?: number,
 	biomeDepth?: number,
 	offset: number,
@@ -22,8 +23,18 @@ const colors: Record<string, [number, number, number]> = {
 	'minecraft:air': [150, 160, 170],
 	'minecraft:water': [20, 80, 170],
 	'minecraft:lava': [200, 100, 0],
-	'minecraft:stone': [50, 50, 50],
+	'minecraft:stone': [55, 55, 55],
+	'minecraft:deepslate': [34, 34, 36],
+	'minecraft:bedrock': [10, 10, 10],
+	'minecraft:grass_block': [47, 120, 23],
+	'minecraft:dirt': [64, 40, 8],
+	'minecraft:gravel': [70, 70, 70],
+	'minecraft:sand': [196, 180, 77],
+	'minecraft:sandstone': [148, 135, 52],
 	'minecraft:netherrack': [100, 40, 40],
+	'minecraft:crimson_nylium': [144, 22, 22],
+	'minecraft:warped_nylium': [28, 115, 113],
+	'minecraft:basalt': [73, 74, 85],
 	'minecraft:end_stone': [200, 200, 140],
 }
 
@@ -36,7 +47,7 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 		const { settings, generator } = getCached(state, options)
 
 		const slice = new LevelSlice(-options.offset, options.width, settings.noise.minY, settings.noise.height)
-		slice.fill(generator)
+		slice.generate(generator, options.biome ?? 'minecraft:plains')
 
 		const data = img.data
 		for (let x = 0; x < options.width; x += 1) {
@@ -70,11 +81,19 @@ export function noiseSettings(state: any, img: ImageData, options: NoiseSettings
 	}
 }
 
+export function getNoiseBlock(x: number, y: number) {
+	const chunk = chunkCache.find(c => ChunkPos.minBlockX(c.pos) <= x && ChunkPos.maxBlockX(c.pos) >= x)
+	if (!chunk) {
+		return undefined
+	}
+	return chunk.getBlockState(BlockPos.create(x, y, Z))
+}
+
 function getCached(state: unknown, options: NoiseSettingsOptions) {
 	const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(state))
 	settings.octaves = getOctaves(settings)
 
-	const newState = [state, `${options.seed}`]
+	const newState = [state, `${options.seed}`, options.biome]
 	if (!deepEqual(newState, cacheState)) {
 		cacheState = deepClone(newState)
 		chunkCache = []
@@ -99,7 +118,7 @@ function getColor(noise: number[], y: number): number {
 
 class LevelSlice {
 	private readonly chunks: Chunk[]
-	private readonly filled: boolean[]
+	private readonly done: boolean[]
 
 	constructor(
 		private readonly minX: number,
@@ -107,24 +126,25 @@ class LevelSlice {
 		minY: number,
 		height: number,
 	) {
-		this.filled = []
+		this.done = []
 		this.chunks = [...Array(Math.ceil(width / 16) + 1)]
 			.map((_, i) => {
 				const x = (minX >> 4) + i
 				const cached = chunkCache.find(c => c.pos[0] === x)
 				if (cached) {
-					this.filled[i] = true
+					this.done[i] = true
 					return cached
 				}
 				return new Chunk(minY, height, ChunkPos.create(x, Z >> 4))
 			})
 	}
 
-	public fill(generator: NoiseChunkGenerator) {
+	public generate(generator: NoiseChunkGenerator, forcedBiome: string) {
 		this.chunks.forEach((chunk, i) => {
-			if (!this.filled[i]) {
+			if (!this.done[i]) {
 				generator.fill(chunk)
-				this.filled[i] = true
+				generator.buildSurface(chunk, forcedBiome)
+				this.done[i] = true
 				chunkCache.push(chunk)
 			}
 		})

@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnInput, BtnMenu } from '..'
 import { useLocale } from '../../contexts'
 import { useCanvas } from '../../hooks'
-import { noiseSettings } from '../../previews'
-import { checkVersion } from '../../services'
+import { getNoiseBlock, noiseSettings } from '../../previews'
+import { CachedCollections, checkVersion } from '../../services'
 import { randomSeed } from '../../Utils'
 
 export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
 	const [seed, setSeed] = useState(randomSeed())
+	const [biome, setBiome] = useState('minecraft:plains')
 	const [biomeScale, setBiomeScale] = useState(0.2)
 	const [biomeDepth, setBiomeDepth] = useState(0.1)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
@@ -22,16 +23,18 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 			return [size, size]
 		},
 		async draw(img) {
-			const options = { biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version }
+			const options = { biome, biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version }
 			noiseSettings(data, img, options)
 		},
 		async onDrag(dx) {
 			offset.current += dx * size
 			redraw()
 		},
-		async onHover(_, y) {
+		async onHover(x, y) {
+			const worldX = Math.floor(x * size - offset.current)
 			const worldY = size - Math.max(1, Math.ceil(y * size)) + (data?.noise?.min_y ?? 0)
-			setFocused(`${worldY}`)
+			const block = getNoiseBlock(worldX, worldY)
+			setFocused(block ? `Y=${worldY} (${block.getName().replace(/^minecraft:/, '')})` : `Y=${worldY}`)
 		},
 		onLeave() {
 			setFocused(undefined)
@@ -42,17 +45,21 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 		if (shown) {
 			redraw()
 		}
-	}, [state, seed, shown])
+	}, [state, seed, shown, biome, biomeScale, biomeDepth])
+
+	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
 
 	return <>
 		<div class="controls preview-controls">
-			{focused && <Btn label={`Y = ${focused}`} class="no-pointer" />}
-			{checkVersion(version, undefined, '1.17') &&
-				<BtnMenu icon="gear" tooltip={locale('terrain_settings')}>
+			{focused && <Btn label={focused} class="no-pointer" />}
+			<BtnMenu icon="gear" tooltip={locale('terrain_settings')}>
+				{checkVersion(version, undefined, '1.17') ? <>
 					<BtnInput label={locale('preview.scale')} value={`${biomeScale}`} onChange={v => setBiomeScale(Number(v))} />
 					<BtnInput label={locale('preview.depth')} value={`${biomeDepth}`} onChange={v => setBiomeDepth(Number(v))} />
-				</BtnMenu>
-			}
+				</> :
+					<BtnInput label={locale('preview.biome')} value={biome} onChange={setBiome} dataList={allBiomes} larger />
+				}
+			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')}
 				onClick={() => setSeed(randomSeed())} />
 		</div>
