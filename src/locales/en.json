@@ -80,6 +80,7 @@
   "title.sounds": "Sound Explorer",
   "presets": "Presets",
   "preview": "Visualize",
+  "preview.auto_scroll": "Auto scroll",
   "preview.biome": "Biome",
   "preview.scale": "Scale",
   "preview.depth": "Depth",

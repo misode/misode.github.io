@@ -13,8 +13,10 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 	const [biome, setBiome] = useState('minecraft:plains')
 	const [biomeScale, setBiomeScale] = useState(0.2)
 	const [biomeDepth, setBiomeDepth] = useState(0.1)
+	const [autoScroll, setAutoScroll] = useState(false)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
 	const offset = useRef(0)
+	const scrollInterval = useRef<number | undefined>(undefined)
 	const state = JSON.stringify([data, biomeScale, biomeDepth])
 
 	const size = data?.noise?.height ?? 256
@@ -42,10 +44,19 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 	}, [state, seed])
 
 	useEffect(() => {
+		if (scrollInterval.current) {
+			clearInterval(scrollInterval.current)
+		}
 		if (shown) {
 			redraw()
+			if (autoScroll) {
+				scrollInterval.current = setInterval(() => {
+					offset.current -= 8
+					redraw()
+				}, 100) as any
+			}
 		}
-	}, [state, seed, shown, biome, biomeScale, biomeDepth])
+	}, [state, seed, shown, biome, biomeScale, biomeDepth, autoScroll])
 
 	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
 
@@ -59,6 +70,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 				</> :
 					<BtnInput label={locale('preview.biome')} value={biome} onChange={setBiome} dataList={allBiomes} larger />
 				}
+				<Btn icon={autoScroll ? 'square_fill' : 'square'} label={locale('preview.auto_scroll')} onClick={() => setAutoScroll(!autoScroll)} />
 			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')}
 				onClick={() => setSeed(randomSeed())} />
