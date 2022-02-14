@@ -1,5 +1,5 @@
 import { DataModel } from '@mcschema/core'
-import type { NoiseOctaves } from 'deepslate'
+import type { NoiseParameters } from 'deepslate'
 import { FixedBiome, LegacyRandom, NormalNoise, TerrainShaper } from 'deepslate'
 import init, { biome_parameters, climate_noise, climate_sampler, multi_noise } from 'deepslate-rs'
 // @ts-expect-error
@@ -30,7 +30,7 @@ const LAYERS = {
 type Triple = [number, number, number]
 type BiomeColors = Record<string, Triple>
 type BiomeSourceOptions = {
-	octaves: NoiseOctaves,
+	octaves: Record<string, NoiseParameters>,
 	shaper: TerrainShaper,
 	biomeColors: BiomeColors,
 	offset: [number, number],

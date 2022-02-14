@@ -1,7 +1,6 @@
 import { DataModel } from '@mcschema/core'
 import type { BlockState } from 'deepslate'
 import { BlockPos, Chunk, ChunkPos, FixedBiome, NoiseChunkGenerator, NoiseGeneratorSettings } from 'deepslate'
-import { getOctaves } from '../components'
 import type { VersionId } from '../services'
 import { checkVersion } from '../services'
 import { deepClone, deepEqual } from '../Utils'
@@ -91,7 +90,6 @@ export function getNoiseBlock(x: number, y: number) {
 
 function getCached(state: unknown, options: NoiseSettingsOptions) {
 	const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(state))
-	settings.octaves = getOctaves(settings)
 
 	const newState = [state, `${options.seed}`, options.biome]
 	if (!deepEqual(newState, cacheState)) {

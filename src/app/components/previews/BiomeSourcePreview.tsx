@@ -1,5 +1,5 @@
 import { DataModel, Path } from '@mcschema/core'
-import type { NoiseOctaves } from 'deepslate'
+import type { NoiseParameters } from 'deepslate'
 import { NoiseGeneratorSettings, TerrainShaper } from 'deepslate'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
@@ -103,11 +103,11 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	</>
 }
 
-function calculateState(data: any, octaves: NoiseOctaves, shaper: TerrainShaper) {
+function calculateState(data: any, octaves: Record<string, NoiseParameters>, shaper: TerrainShaper) {
 	return JSON.stringify([data, octaves, shaper.toJson()])
 }
 
-export function getOctaves(obj: any): NoiseOctaves {
+export function getOctaves(obj: any): Record<string, NoiseParameters> {
 	if (typeof obj !== 'string') {
 		const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(obj))
 		obj = settings.legacyRandomSource ? 'minecraft:nether' : 'minecraft:overworld'
