@@ -46,7 +46,10 @@ export function Generator({}: Props) {
 	const currentPreset = searchParams.get('preset')
 	useEffect(() => {
 		if (model && currentPreset) {
-			selectPreset(currentPreset)
+			loadPreset(currentPreset).then(preset => {
+				model?.reset(DataModel.wrapLists(preset), false)
+				setSeachParams({ version, preset: currentPreset })
+			})
 		}
 	}, [currentPreset])
 
@@ -114,8 +117,6 @@ export function Generator({}: Props) {
 			setFileRename(file?.id ?? '')
 			if (file && gen.id === file.type) {
 				model.reset(DataModel.wrapLists(file.data))
-			} else {
-				model.reset(DataModel.wrapLists(model.schema.default()), true)
 			}
 			setDirty(false)
 		}
@@ -175,14 +176,11 @@ export function Generator({}: Props) {
 	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
-		loadPreset(id).then(preset => {
-			model?.reset(DataModel.wrapLists(preset), false)
-			setSeachParams({ version, preset: id })
-		})
+		Analytics.generatorEvent('load-preset', id)
+		setSeachParams({ version, preset: id })
 	}
 
 	const loadPreset = async (id: string) => {
-		Analytics.generatorEvent('load-preset', id)
 		try {
 			const preset = await fetchPreset(version, gen.path ?? gen.id, id)
 			const seed = model?.get(new Path(['generator', 'seed']))
