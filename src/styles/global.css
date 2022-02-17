@@ -95,6 +95,10 @@
 		--invalid-text: #a32600;
 		--text-saturation: 100%;
 		--text-lightness: 35%;
+		--editor-variable: #0451A5;
+		--editor-string: #A31515;
+		--editor-constant: #0000FF;
+		--editor-number: #098658;
 	}
 }
 
