@@ -20,12 +20,16 @@
 	--nav-hover: #b4b3b0;
 	--nav-faded: #4d4c4c;
 	--nav-faded-hover: #6e6e6e;
-	--selection: #6786dd99;
+	--selection: #445a9599;
 	--errors-background: #62190f;
 	--errors-text: #ffffffcc;
   --invalid-text: #fd7951;
 	--text-saturation: 60%;
 	--text-lightness: 45%;
+	--editor-variable: #9CDCFE;
+	--editor-string: #CE9178;
+	--editor-constant: #569CD6;
+	--editor-number: #B5CEA8;
 }
 
 :root[data-theme=light] {
@@ -56,6 +60,10 @@
   --invalid-text: #a32600;
 	--text-saturation: 100%;
 	--text-lightness: 30%;
+	--editor-variable: #0451A5;
+	--editor-string: #A31515;
+	--editor-constant: #0000FF;
+	--editor-number: #098658;
 }
 
 @media (prefers-color-scheme: light) {
@@ -307,6 +315,7 @@ main > .controls {
 
 .source-controls {
 	justify-content: flex-end;
+	z-index: 10;
 }
 
 .tree {
@@ -1247,6 +1256,49 @@ hr {
 
 .changelog-controls .changelog-tags {
 	margin: 8px 0 0;
+}
+
+.ace_editor,
+.ace_gutter,
+.ace_gutter .ace_layer,
+.ace_content {
+	color: var(--text-2) !important;
+	background-color: var(--background-2) !important;
+	border: none;
+}
+
+.ace_cursor {
+	color: var(--text-1) !important;
+}
+
+.ace_gutter-active-line {
+	background-color: var(--background-3) !important;
+}
+
+.ace_tag,
+.ace_variable {
+	color: var(--editor-variable) !important;
+}
+
+.ace_string {
+	color: var(--editor-string) !important;
+}
+
+.ace_constant {
+	color: var(--editor-constant) !important;
+}
+
+.ace_numeric {
+	color: var(--editor-number) !important;
+}
+
+.ace_markup,
+.ace_keyword {
+	color: unset !important;
+}
+
+.ace_marker-layer .ace_selection {
+	background-color: var(--selection) !important;
 }
 
 @media screen and (max-width: 720px) {

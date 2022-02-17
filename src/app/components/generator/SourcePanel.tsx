@@ -1,4 +1,7 @@
 import { DataModel } from '@mcschema/core'
+import brace from 'brace'
+import 'brace/mode/json'
+import 'brace/mode/yaml'
 import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
@@ -9,8 +12,6 @@ import { getOutput } from '../../schema/transformOutput'
 import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
-
-const OUTPUT_CHARS_LIMIT = 10000
 
 const INDENT: Record<string, number | string | undefined> = {
 	'2_spaces': 2,
@@ -50,9 +51,11 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
-	const source = useRef<HTMLTextAreaElement>(null)
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
+	const onImport = useRef<(e: any) => any>()
+
+	const editor = useRef<brace.Editor>()
 
 	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
 		const data = getOutput(model, blockStates)
@@ -64,18 +67,38 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			if (!model || !blockStates) return
 			try {
 				const output = getSerializedOutput(model, blockStates)
-				if (output.length >= OUTPUT_CHARS_LIMIT) {
-					source.current.value = output.slice(0, OUTPUT_CHARS_LIMIT) + `\n\nOutput is too large to display (+${OUTPUT_CHARS_LIMIT} chars)\nExport to view complete output\n\n`
-				} else {
-					source.current.value = output
-				}
+				editor.current.getSession().setValue(output)
 			} catch (e) {
 				onError(`Error getting JSON output: ${message(e)}`)
 				console.error(e)
-				source.current.value = ''
+				editor.current.setValue('')
 			}
 		}
-	})
+
+		onImport.current = () => {
+			const value = editor.current.getValue()
+			if (value.length === 0) return
+			try {
+				const data = FORMATS[format].parse(value)
+				model?.reset(DataModel.wrapLists(data), false)
+			} catch (e) {
+				onError(`Error importing: ${message(e)}`)
+				console.error(e)
+			}
+		}
+	}, [model, blockStates, indent, format])
+
+	useEffect(() => {
+		editor.current = brace.edit('editor')
+		editor.current.setOptions({
+			fontSize: 14,
+			showFoldWidgets: false,
+			highlightSelectedWord: false,
+		})
+		editor.current.$blockScrolling = Infinity
+		editor.current.on('blur', e => onImport.current(e))
+		editor.current.getSession().setMode('ace/mode/json')
+	}, [])
 
 	useModel(model, () => {
 		retransform.current()
@@ -85,19 +108,11 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [model])
 
 	useEffect(() => {
+		const softTabs = indent === 'tabs' ? false : INDENT[indent]
+		editor.current.setOption('useSoftTabs', softTabs)
+		editor.current.getSession().setMode(`ace/mode/${format}`)
 		retransform.current()
 	}, [indent, format])
-
-	const onImport = () => {
-		if (source.current.value.length === 0) return
-		try {
-			const data = FORMATS[format].parse(source.current.value)
-			model?.reset(DataModel.wrapLists(data), false)
-		} catch (e) {
-			onError(`Error importing: ${message(e)}`)
-			console.error(e)
-		}
-	}
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {
@@ -117,9 +132,9 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [doDownload])
 
 	useEffect(() => {
-		if (doImport && source.current) {
-			source.current.value = ''
-			source.current.select()
+		if (doImport && editor.current) {
+			editor.current.setValue('')
+			editor.current.selectAll()
 		}
 	}, [doImport])
 
@@ -134,7 +149,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}
 
 	return <> 
-		<div class="controls">
+		<div class="controls source-controls">
 			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
 				{Object.entries(INDENT).map(([key]) =>
 					<Btn label={locale(`indentation.${key}`)} active={indent === key}
@@ -146,7 +161,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 						onClick={() => changeFormat(key)} />)}
 			</BtnMenu>
 		</div>
-		<textarea ref={source} class="source" onBlur={onImport} spellcheck={false} autocorrect="off" placeholder={locale('source_placeholder', format.toUpperCase())} data-cy="import-area"></textarea>
+		<pre id="editor" class="source"></pre>
 		<a ref={download} style="display: none;"></a>
 	</>
 }
