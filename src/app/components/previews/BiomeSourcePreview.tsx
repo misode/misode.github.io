@@ -16,7 +16,7 @@ const OverworldShaper = TerrainShaper.overworld()
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
 	const [scale, setScale] = useState(2)
-	const [focused, setFocused] = useState<string | undefined>(undefined)
+	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
@@ -75,7 +75,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 
 	return <>
 		<div class="controls preview-controls">
-			{focused && <Btn label={focused} class="no-pointer" />}
+			{focused && <Btn label={focused.biome as string} class="no-pointer" />}
 			{type === 'multi_noise' &&
 				<BtnMenu icon="stack" tooltip={locale('configure_layers')}>
 					{LAYERS.map(name => {
@@ -99,6 +99,11 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => newSeed(model)} />}
 		</div>
+		{focused?.temperature && <div class="controls secondary-controls">
+			<Btn class="no-pointer" label={Object.entries(focused)
+				.filter(([k]) => k !== 'biome')
+				.map(([k, v]) => `${k[0].toUpperCase()}: ${(v as number).toFixed(2)}`).join('  ')}/>
+		</div>}
 		<canvas ref={canvas} width="200" height="200"></canvas>
 	</>
 }

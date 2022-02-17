@@ -261,6 +261,10 @@ main > .controls {
 	margin-right: 8px;
 }
 
+.secondary-controls {
+	margin-top: 40px;
+}
+
 .project-controls {
 	position: relative;
 	display: flex;

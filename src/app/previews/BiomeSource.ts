@@ -44,7 +44,8 @@ type BiomeSourceOptions = {
 interface CachedBiomeSource {
 	getBiome(x: number, y: number, z: number): string
 	getBiomes?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): string[]
-	getClimate?(layers: Set<keyof typeof LAYERS>, xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): {[k: string]: number}[]
+	getClimate?(x: number, y: number, z: number): {[k: string]: number}
+	getClimates?(layers: Set<keyof typeof LAYERS>, xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): {[k: string]: number}[]
 }
 
 let cacheState: any
@@ -64,7 +65,7 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 
 	const biomes = !options.layers.has('biomes') ? undefined : biomeSource.getBiomes?.(...xRange, 64, 65, 1, ...zRange)
 	const layers = [...options.layers].filter(l => l !== 'biomes') as (keyof typeof LAYERS)[]
-	const noise = layers.length === 0 ? undefined : biomeSource.getClimate?.(new Set(layers), ...xRange, 64, 65, 1, ...zRange)
+	const noise = layers.length === 0 ? undefined : biomeSource.getClimates?.(new Set(layers), ...xRange, 64, 65, 1, ...zRange)
 
 	for (let x = 0; x < 200; x += options.res) {
 		for (let z = 0; z < 200; z += options.res) {
@@ -90,11 +91,14 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 	}
 }
 
-export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<string | undefined> {
+export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<{[k: string]: number | string} | undefined> {
 	const { biomeSource } = await getCached(state, options)
 
 	const [xx, zz] = toWorld([x, z], options)
-	return biomeSource.getBiome(xx, 64, zz)
+	return {
+		biome: biomeSource.getBiome(xx, 64, zz),
+		...biomeSource.getClimate?.(xx, 64, zz),
+	}
 }
 
 async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource}> {
@@ -169,7 +173,18 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 						const ids = multi_noise(parameters, sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
 						return [...ids].map(id => BiomeIds.getA(id) ?? 'unknown')
 					},
-					getClimate(layers, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep) {
+					getClimate(x, y, z) {
+						const climate = climate_noise(sampler, x, x + 1, 1, y, y + 1, 1, z, z + 1, 1)
+						const [t, h, c, e, w] = climate.slice(0, 5)
+						return {
+							temperature: t,
+							humidity: h,
+							continentalness: c,
+							erosion: e,
+							weirdness: w,
+						}
+					},
+					getClimates(layers, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep) {
 						const climate = climate_noise(sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
 						const result = []
 						for (let i = 0; i < climate.length; i += 7) {
