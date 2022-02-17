@@ -108,8 +108,8 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [model])
 
 	useEffect(() => {
-		const softTabs = indent === 'tabs' ? false : INDENT[indent]
-		editor.current.setOption('useSoftTabs', softTabs)
+		editor.current.setOption('useSoftTabs', indent !== 'tabs')
+		editor.current.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
 		editor.current.getSession().setMode(`ace/mode/${format}`)
 		retransform.current()
 	}, [indent, format])
