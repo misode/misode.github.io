@@ -195,6 +195,10 @@ nav li {
 	fill: var(--nav-hover);
 }
 
+nav li .btn-menu {
+	height: 100%;
+}
+
 nav li.dimmed svg {
 	fill: var(--nav-faded);
 }
