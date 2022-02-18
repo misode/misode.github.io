@@ -64,7 +64,7 @@
       "ref": "1.18.1"
     },
     {
-      "id": "latest",
+      "id": "1.18.2",
       "dynamic": true
     }
   ],
@@ -143,6 +143,13 @@
       "minVersion": "1.16"
     },
     {
+      "id": "worldgen/density_function",
+      "url": "worldgen/density-function",
+      "category": "worldgen",
+      "schema": "density_function",
+      "minVersion": "1.18.2"
+    },
+    {
       "id": "worldgen/placed_feature",
       "url": "worldgen/placed-feature",
       "category": "worldgen",
@@ -169,6 +176,13 @@
       "category": "worldgen",
       "schema": "configured_structure_feature",
       "minVersion": "1.16"
+    },
+    {
+      "id": "worldgen/structure_set",
+      "url": "worldgen/structure-set",
+      "category": "worldgen",
+      "schema": "structure_set",
+      "minVersion": "1.18.2"
     },
     {
       "id": "worldgen/configured_surface_builder",

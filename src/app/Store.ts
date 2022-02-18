@@ -25,6 +25,7 @@ export namespace Store {
 		if (version && VersionIds.includes(version as VersionId)) {
 			return version as VersionId
 		}
+		if (version === 'latest') return '1.18.2' // Upgrade path, remove in the future
 		return '1.18'
 	}
 
