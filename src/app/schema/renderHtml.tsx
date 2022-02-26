@@ -288,7 +288,6 @@ const renderHtml: RenderHook = {
 						const context = cPath.getContext().join('.')
 						if (hiddenFields.includes(context)) return null
 						const [cPrefix, cSuffix, cBody] = child.hook(this, cPath, value[key], lang, version, states, newCtx)
-						if (!cPrefix && !cSuffix && !((cBody?.props?.children?.length ?? 0) > 0)) return null
 						const isFlattened = child.type(cPath) === 'object' && flattenedFields.includes(context)
 						const isInlined = inlineFields.includes(context)
 						if (isFlattened || isInlined) {
