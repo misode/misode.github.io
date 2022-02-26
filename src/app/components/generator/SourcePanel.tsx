@@ -37,6 +37,13 @@ const FORMATS: Record<string, {
 	},
 }
 
+interface Editor {
+	getValue(): string
+	setValue(value: string): void
+	configure(indent: string, format: string): void
+	select(): void
+}
+
 type SourcePanelProps = {
 	name: string,
 	model: DataModel | null,
@@ -51,11 +58,13 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
+	const [highlighting, setHighlighting] = useState(Store.getHighlighting())
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
 	const onImport = useRef<(e: any) => any>()
 
-	const editor = useRef<brace.Editor>()
+	const textarea = useRef<HTMLTextAreaElement>()
+	const editor = useRef<Editor>()
 
 	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
 		const data = getOutput(model, blockStates)
@@ -67,7 +76,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			if (!model || !blockStates) return
 			try {
 				const output = getSerializedOutput(model, blockStates)
-				editor.current.getSession().setValue(output)
+				editor.current.setValue(output)
 			} catch (e) {
 				onError(`Error getting JSON output: ${message(e)}`)
 				console.error(e)
@@ -86,19 +95,49 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				console.error(e)
 			}
 		}
-	}, [model, blockStates, indent, format])
+	}, [model, blockStates, indent, format, highlighting])
 
 	useEffect(() => {
-		editor.current = brace.edit('editor')
-		editor.current.setOptions({
-			fontSize: 14,
-			showFoldWidgets: false,
-			highlightSelectedWord: false,
-		})
-		editor.current.$blockScrolling = Infinity
-		editor.current.on('blur', e => onImport.current(e))
-		editor.current.getSession().setMode('ace/mode/json')
-	}, [])
+		if (highlighting) {
+			const braceEditor = brace.edit('editor')
+			braceEditor.setOptions({
+				fontSize: 14,
+				showFoldWidgets: false,
+				highlightSelectedWord: false,
+			})
+			braceEditor.$blockScrolling = Infinity
+			braceEditor.on('blur', e => onImport.current(e))
+			braceEditor.getSession().setMode('ace/mode/json')
+
+			editor.current = {
+				getValue() {
+					return braceEditor.getSession().getValue()
+				},
+				setValue(value) {
+					braceEditor.getSession().setValue(value)
+				},
+				configure(indent, format) {
+					braceEditor.setOption('useSoftTabs', indent !== 'tabs')
+					braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
+					braceEditor.getSession().setMode(`ace/mode/${format}`)
+				},
+				select() {
+					braceEditor.selectAll()
+				},
+			}
+		} else {
+			editor.current = {
+				getValue() {
+					return textarea.current.value
+				},
+				setValue(value: string) {
+					textarea.current.value = value
+				},
+				configure() {},
+				select() {},
+			}
+		}
+	}, [highlighting])
 
 	useModel(model, () => {
 		retransform.current()
@@ -108,11 +147,9 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [model])
 
 	useEffect(() => {
-		editor.current.setOption('useSoftTabs', indent !== 'tabs')
-		editor.current.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
-		editor.current.getSession().setMode(`ace/mode/${format}`)
+		editor.current.configure(indent, format)
 		retransform.current()
-	}, [indent, format])
+	}, [indent, format, highlighting])
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {
@@ -134,7 +171,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	useEffect(() => {
 		if (doImport && editor.current) {
 			editor.current.setValue('')
-			editor.current.selectAll()
+			editor.current.select()
 		}
 	}, [doImport])
 
@@ -148,6 +185,11 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		setFormat(value)
 	}
 
+	const changeHighlighting = (value: boolean) => {
+		Store.setHighlighting(value)
+		setHighlighting(value)
+	}
+
 	return <> 
 		<div class="controls source-controls">
 			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
@@ -159,9 +201,14 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				{Object.keys(FORMATS).map(key =>
 					<Btn label={locale(`format.${key}`)} active={format === key}
 						onClick={() => changeFormat(key)} />)}
+				<hr />
+				<Btn icon={highlighting ? 'square_fill' : 'square'} label={locale('highlighting')}
+					onClick={() => changeHighlighting(!highlighting)} />
 			</BtnMenu>
 		</div>
-		<pre id="editor" class="source"></pre>
+		{highlighting
+			? <pre id="editor" class="source"></pre>
+			: <textarea ref={textarea} class="source" spellcheck={false} autocorrect="off" onBlur={onImport.current}></textarea>}
 		<a ref={download} style="display: none;"></a>
 	</>
 }

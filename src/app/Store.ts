@@ -9,6 +9,7 @@ export namespace Store {
 	export const ID_VERSION = 'schema_version'
 	export const ID_INDENT = 'indentation'
 	export const ID_FORMAT = 'output_format'
+	export const ID_HIGHLIGHTING = 'output_highlighting'
 	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
 	export const ID_PROJECTS = 'misode_projects'
 
@@ -35,6 +36,10 @@ export namespace Store {
 
 	export function getFormat() {
 		return localStorage.getItem(ID_FORMAT) ?? 'json'
+	}
+
+	export function getHighlighting() {
+		return localStorage.getItem(ID_HIGHLIGHTING) !== 'false'
 	}
 
 	export function getSoundsVersion() {
@@ -67,6 +72,10 @@ export namespace Store {
 
 	export function setFormat(format: string | undefined) {
 		if (format) localStorage.setItem(ID_FORMAT, format)
+	}
+
+	export function setHighlighting(highlighting: boolean | undefined) {
+		if (highlighting !== undefined) localStorage.setItem(ID_HIGHLIGHTING, highlighting.toString())
 	}
 
 	export function setSoundsVersion(version: string | undefined) {
