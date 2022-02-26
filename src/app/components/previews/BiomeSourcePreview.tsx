@@ -1,6 +1,6 @@
 import { DataModel, Path } from '@mcschema/core'
 import type { NoiseParameters } from 'deepslate'
-import { NoiseGeneratorSettings, TerrainShaper } from 'deepslate'
+import { NoiseGeneratorSettings } from 'deepslate'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
@@ -9,9 +9,7 @@ import { useCanvas } from '../../hooks'
 import { biomeMap, getBiome } from '../../previews'
 import { newSeed } from '../../Utils'
 
-const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness', 'offset', 'factor', 'jaggedness'] as const
-
-const OverworldShaper = TerrainShaper.overworld()
+const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness'] as const
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
@@ -24,8 +22,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 
 	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
 	const octaves = getOctaves(model.get(new Path(['generator', 'settings'])))
-	const shaper = getShaper(model.get(new Path(['generator', 'settings'])))
-	const state = shown ? calculateState(data, octaves, shaper) : ''
+	const state = shown ? calculateState(data, octaves) : ''
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
 	const { canvas, redraw } = useCanvas({
@@ -33,7 +30,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { octaves, shaper, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
+			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -51,7 +48,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves, shaper, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
+			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
@@ -108,8 +105,8 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	</>
 }
 
-function calculateState(data: any, octaves: Record<string, NoiseParameters>, shaper: TerrainShaper) {
-	return JSON.stringify([data, octaves, shaper.toJson()])
+function calculateState(data: any, octaves: Record<string, NoiseParameters>) {
+	return JSON.stringify([data, octaves])
 }
 
 export function getOctaves(obj: any): Record<string, NoiseParameters> {
@@ -148,17 +145,4 @@ export function getOctaves(obj: any): Record<string, NoiseParameters> {
 				shift: { firstOctave: 0, amplitudes: [0] },
 			}
 	}
-}
-
-export function getShaper(obj: any): TerrainShaper {
-	if (typeof obj === 'string') {
-		switch (obj.replace(/^minecraft:/, '')) {
-			case 'overworld':
-			case 'amplified':
-				return OverworldShaper
-			default:
-				return TerrainShaper.fromJson({ offset: 0, factor: 0, jaggedness: 0 })
-		}
-	}
-	return TerrainShaper.fromJson(DataModel.unwrapLists(obj?.noise?.terrain_shaper))
 }

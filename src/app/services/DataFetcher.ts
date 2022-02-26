@@ -1,7 +1,7 @@
-import type { CollectionRegistry } from '@mcschema/core'
-import config from '../../config.json'
-import { message } from '../Utils'
-import type { BlockStateRegistry, VersionId } from './Schemas'
+import type { CollectionRegistry } from '@mcschema/core';
+import config from '../../config.json';
+import { message } from '../Utils';
+import type { BlockStateRegistry, VersionId } from './Schemas';
 
 // Cleanup old caches
 ['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
@@ -21,7 +21,7 @@ declare var __LATEST_VERSION__: string
 const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 
-type McmetaTypes = 'summary' | 'data' | 'assets'
+type McmetaTypes = 'summary' | 'data' | 'assets' | 'registries'
 
 function mcmeta(version: Version, type: McmetaTypes) {
 	return `${mcmetaUrl}/${version.dynamic ? type : `${version.ref}-${type}`}`
@@ -85,6 +85,20 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 		return res.json()
 	} catch (e) {
 		throw new Error(`Error occurred while fetching ${registry} preset ${id}: ${message(e)}`)
+	}
+}
+
+export async function fetchAllPresets(versionId: VersionId, registry: string) {
+	console.debug(`[fetchAllPresets] ${versionId} ${registry}`)
+	const version = config.versions.find(v => v.id === versionId)!
+	try {
+		const entries = await getData(`${mcmeta(version, 'registries')}/${registry}/data.min.json`)
+		return new Map<string, unknown>(await Promise.all(
+			entries.map(async (e: string) =>
+				[e, await getData(`${mcmeta(version, 'data')}/data/minecraft/${registry}/${e}.json`)])
+		))
+	} catch (e) {
+		throw new Error(`Error occurred while fetching all ${registry} presets: ${message(e)}`)
 	}
 }
 

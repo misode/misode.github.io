@@ -4,9 +4,9 @@ import { useState } from 'preact/hooks'
 import { useModel } from '../../hooks'
 import type { VersionId } from '../../services'
 import { checkVersion } from '../../services'
-import { BiomeSourcePreview, DecoratorPreview, NoisePreview, NoiseSettingsPreview } from '../previews'
+import { BiomeSourcePreview, DecoratorPreview, DensityFunctionPreview, NoisePreview, NoiseSettingsPreview } from '../previews'
 
-export const HasPreview = ['dimension', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
+export const HasPreview = ['dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
 
 type PreviewPanelProps = {
 	model: DataModel | null,
@@ -27,6 +27,11 @@ export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
 	if (id === 'dimension' && model.get(new Path(['generator', 'type']))?.endsWith('noise')) {
 		const data = model.get(new Path(['generator', 'biome_source']))
 		if (data) return <BiomeSourcePreview {...{ model, version, shown, data }} />
+	}
+
+	if (id === 'worldgen/density_function') {
+		const data = model.get(new Path([]))
+		if (data) return <DensityFunctionPreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/noise') {

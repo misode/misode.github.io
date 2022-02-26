@@ -3,6 +3,7 @@ import type { VersionId } from '../../services'
 
 export * from './BiomeSourcePreview'
 export * from './DecoratorPreview'
+export * from './DensityFunctionPreview'
 export * from './NoisePreview'
 export * from './NoiseSettingsPreview'
 
