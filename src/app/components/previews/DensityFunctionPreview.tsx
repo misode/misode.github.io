@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
 import { useLocale } from '../../contexts'
 import { useCanvas } from '../../hooks'
 import { densityFunction } from '../../previews'
-import { CachedCollections } from '../../services'
 import { randomSeed } from '../../Utils'
 
 export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) => {
@@ -53,8 +52,6 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 			}
 		}
 	}, [state, seed, shown, autoScroll])
-
-	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
 
 	return <>
 		<div class="controls preview-controls">

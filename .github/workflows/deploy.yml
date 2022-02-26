@@ -20,7 +20,7 @@ jobs:
     - name: Build
       run: |
         npm install
-        export latest_version="'${{ fromJson(steps.get_latest_version.outputs.data).commit.sha }}'"
+        export latest_version="'${{ fromJson(steps.get_latest_version.outputs.data).id }}'"
         npm run build
 
     - name: Deploy
