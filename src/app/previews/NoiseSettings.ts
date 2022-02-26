@@ -135,7 +135,7 @@ async function createDensityFunction(state: any, options: NoiseSettingsOptions) 
 		terrain_shaper: { offset: 0.044, factor: 4, jaggedness: 0 },
 	})
 	const originalFn = DensityFunction.fromJson(state)
-	const fn = originalFn.mapAll(NoiseRouter.createVisitor(random, settings))
+	const fn = originalFn.mapAll(new NoiseRouter.Visitor(random, settings))
 
 	return {
 		fn,
