@@ -36,7 +36,7 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
-			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary`))
+			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`))
 			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
 		}
 		version.ref = latestVersion
