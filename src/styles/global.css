@@ -273,7 +273,8 @@ main > .controls {
 
 .sounds-controls > *:not(:last-child),
 .preview-controls > *:not(:last-child),
-.generator-controls > *:not(:last-child) {
+.generator-controls > *:not(:last-child),
+.versions-controls > *:not(:last-child) {
 	margin-right: 8px;
 }
 
@@ -456,6 +457,21 @@ main.has-preview {
 
 .btn svg:not(:last-child) {
 	margin-right: 5px;
+}
+
+.btn-link {
+	text-decoration: none;
+	display: inline-flex;
+}
+
+.btn-link svg {
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+.btn-link:not([href]) {
+	cursor: default;
+	background-color: var(--background-2) !important;
 }
 
 .btn-menu:not(.no-relative) {
@@ -749,7 +765,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category, .project {
+.home, .category, .project, .versions {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -1230,6 +1246,10 @@ hr {
 	text-decoration: underline;
 }
 
+.changelog-content {
+	word-wrap: break-word;
+}
+
 .changelog-content ul {
 	padding-left: 24px;
 }
@@ -1241,14 +1261,9 @@ hr {
 	color: var(--text-1);
 }
 
-.changelog-controls {
-	display: flex;
-	flex-direction: column;
-	padding: 0 16px;
-}
-
 .changelog-query {
 	display: flex;
+	margin-bottom: 8px;
 }
 
 .changelog-query > *:not(:first-child) {
@@ -1257,13 +1272,121 @@ hr {
 
 .changelog-search {
 	flex-basis: 100%;
-	padding: 8px;
 	background-color: var(--background-2);
-	border-radius: 6px;
 }
 
-.changelog-controls .changelog-tags {
-	margin: 8px 0 0;
+.changelog-tags {
+	margin-bottom: 8px;
+}
+
+.versions-controls {
+	display: flex;
+	padding-bottom: 16px;
+}
+
+.version-search {
+	min-width: 0px;
+	background-color: var(--background-2);
+}
+
+.checkbox {
+	display: flex;
+	align-items: center;
+	padding: 7px 11px;
+	border-radius: 6px;
+	height: 32px;
+	font-size: 1rem;
+	color: var(--text-2);
+	background-color: var(--background-2);
+	box-shadow: 0 1px 7px -2px #000;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+
+.checkbox input {
+	margin-right: 8px;
+}
+
+.versions-controls .checkbox {
+	white-space: nowrap;
+}
+
+.version-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.version-entry {
+	display: grid;
+	grid-template-columns: 0.8fr 1.2fr 1fr 0.8fr;
+	gap: 8px;
+	background: var(--background-2);
+	border-radius: 4px;
+	margin-bottom: 8px;
+	padding: 8px;
+	text-decoration: none;
+}
+
+.version-entry:hover {
+	background: var(--background-3);
+}
+
+.version-entry > .version-metadata {
+	font-size: 1rem;
+	align-self: center;
+}
+
+.version-entry > .version-id {
+	color: var(--text-1);
+	font-size: 1.1rem;
+}
+
+.version-navigation {
+	display: flex;
+}
+
+.version-navigation > *:not(:last-child) {
+	margin-right: 8px;
+}
+
+.version-detail {
+	color: var(--text-3);
+}
+
+.version-detail h2,
+.version-detail h3,
+.version-detail h4 {
+	color: var(--text-2);
+	margin-top: 24px;
+	margin-bottom: 8px;
+}
+
+.version-info {
+	background: var(--background-2);
+	border-radius: 6px;
+	padding: 7px 11px;
+	box-shadow: 0 1px 5px -2px #000;
+}
+
+.version-metadata {
+	color: var(--text-3);
+	font-size: 1.2rem;
+}
+
+.version-metadata-value {
+	color: var(--text-1);
+}
+
+.version-metadata-link {
+	fill: var(--text-2);
+	vertical-align: middle;
+	margin-left: 8px;
+}
+
+.version-metadata-link:hover {
+	fill: var(--accent-primary);
 }
 
 .ace_editor,
@@ -1348,6 +1471,10 @@ hr {
   .sound-config .volume { grid-area: volume; }
   .sound-config .copy { grid-area: copy; }
   .sound-config .remove { grid-area: remove; }
+
+	.version-entry {
+		grid-template-columns: 1fr 1fr;
+	}
 }
 
 @keyframes spinning {
@@ -1427,5 +1554,9 @@ hr {
 
 	.generator-picker {
 		justify-content: center;
+	}
+
+	.version-metadata-hide {
+		display: none;
 	}
 }

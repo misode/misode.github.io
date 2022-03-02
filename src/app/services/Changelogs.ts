@@ -2,7 +2,7 @@ import { isObject } from '../Utils'
 
 const repo = 'https://raw.githubusercontent.com/misode/technical-changes/main'
 
-export type ChangelogEntry = {
+export type Change = {
 	group: ChangelogVersion,
 	version: ChangelogVersion,
 	order: number,
@@ -15,14 +15,14 @@ export type ChangelogVersion = {
 	article: string | null,
 }
 
-let Changelogs: ChangelogEntry[] | Promise<ChangelogEntry[]> | null = null
+let Changelogs: Change[] | Promise<Change[]> | null = null
 
 export async function getChangelogs() {
 	if (!Changelogs) {
 		const index = await (await fetch(`${repo}/index.json`)).json() as string[]
 		Changelogs = (await Promise.all(
 			index.map((group, i) => fetchGroup(parseVersion(group), i))
-		)).flat().map<ChangelogEntry>(change => ({
+		)).flat().map<Change>(change => ({
 			...change,
 			tags: [change.group.id, ...change.tags],
 		}))

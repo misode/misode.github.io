@@ -4,7 +4,7 @@ import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
-import { Category, Changelog, Generator, Home, Project, Sounds } from './pages'
+import { Category, Changelog, Generator, Home, Project, Sounds, Versions } from './pages'
 import { cleanUrl } from './Utils'
 
 export function App() {
@@ -21,6 +21,7 @@ export function App() {
 			<Category path="/assets" category="assets" />
 			<Sounds path="/sounds" />
 			<Changelog path="/changelog" />
+			<Versions path="/versions" />
 			<Project path="/project" />
 			<Generator default />
 		</Router>

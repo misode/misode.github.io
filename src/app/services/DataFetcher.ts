@@ -1,7 +1,7 @@
-import type { CollectionRegistry } from '@mcschema/core';
-import config from '../../config.json';
-import { message } from '../Utils';
-import type { BlockStateRegistry, VersionId } from './Schemas';
+import type { CollectionRegistry } from '@mcschema/core'
+import config from '../../config.json'
+import { message } from '../Utils'
+import type { BlockStateRegistry, VersionId } from './Schemas'
 
 // Cleanup old caches
 ['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
@@ -23,8 +23,18 @@ const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 
 type McmetaTypes = 'summary' | 'data' | 'assets' | 'registries'
 
-function mcmeta(version: Version, type: McmetaTypes) {
+function mcmeta(version: { dynamic: true } | { dynamic?: false, ref?: string}, type: McmetaTypes) {
 	return `${mcmetaUrl}/${version.dynamic ? type : `${version.ref}-${type}`}`
+}
+
+async function validateCache(version: Version) {
+	if (version.dynamic) {
+		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
+			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`))
+			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
+		}
+		version.ref = latestVersion
+	}
 }
 
 export async function fetchData(versionId: string, collectionTarget: CollectionRegistry, blockStateTarget: BlockStateRegistry) {
@@ -34,13 +44,7 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 		return
 	}
 
-	if (version.dynamic) {
-		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
-			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`))
-			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
-		}
-		version.ref = latestVersion
-	}
+	await validateCache(version)
 
 	await Promise.all([
 		fetchRegistries(version, collectionTarget),
@@ -91,6 +95,7 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 export async function fetchAllPresets(versionId: VersionId, registry: string) {
 	console.debug(`[fetchAllPresets] ${versionId} ${registry}`)
 	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
 	try {
 		const entries = await getData(`${mcmeta(version, 'registries')}/${registry}/data.min.json`)
 		return new Map<string, unknown>(await Promise.all(
@@ -109,6 +114,7 @@ export type SoundEvents = {
 }
 export async function fetchSounds(versionId: VersionId): Promise<SoundEvents> {
 	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
 	try {
 		const url = `${mcmeta(version, 'summary')}/sounds/data.min.json`
 		return await getData(url)
@@ -120,6 +126,30 @@ export async function fetchSounds(versionId: VersionId): Promise<SoundEvents> {
 export function getSoundUrl(versionId: VersionId, path: string) {
 	const version = config.versions.find(v => v.id === versionId)!
 	return `${mcmeta(version, 'assets')}/assets/minecraft/sounds/${path}.ogg`
+}
+
+export type VersionMeta = {
+	id: string,
+	name: string,
+	release_target: string,
+	type: 'snapshot' | 'release',
+	stable: boolean,
+	data_version: number,
+	protocol_version: number,
+	data_pack_version: number,
+	resource_pack_version: number,
+	build_time: string,
+	release_time: string,
+	sha1: string,
+}
+export async function fetchVersions(): Promise<VersionMeta[]> {
+	const version = config.versions[config.versions.length - 1]
+	await validateCache(version)
+	try {
+		return getData(`${mcmeta(version, 'summary')}/versions/data.min.json`)
+	} catch (e) {
+		throw new Error(`Error occured while fetching versions: ${message(e)}`)
+	}
 }
 
 async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
