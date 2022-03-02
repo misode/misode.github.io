@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
-import { Ad, Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
+import { Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import type { SoundEvents, VersionId } from '../services'
 import { fetchSounds } from '../services'
@@ -53,7 +53,6 @@ export function Sounds({}: Props) {
 	}
 
 	return <main>
-		<Ad type="text" id="sounds" />
 		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 		{soundKeys.length > 0 && <>
 			<div class="controls sounds-controls">
