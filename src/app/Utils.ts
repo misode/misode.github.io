@@ -1,5 +1,6 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
+import * as zip from '@zip.js/zip.js'
 import { getCurrentUrl, route } from 'preact-router'
 import rfdc from 'rfdc'
 import config from '../config.json'
@@ -205,4 +206,14 @@ export class BiMap<A, B> {
 		}
 		return b
 	}
+}
+
+export async function readZip(file: File): Promise<[string, string][]> {
+	const buffer = await file.arrayBuffer()
+	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
+	const entries = await reader.getEntries()
+	return await Promise.all(entries.map(async e => {
+		const writer = new zip.TextWriter('utf-8')
+		return [e.filename, await e.getData?.(writer)] as [string, string]
+	}))
 }

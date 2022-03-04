@@ -1,6 +1,6 @@
 import { getCurrentUrl } from 'preact-router'
 import { useEffect, useState } from 'preact/hooks'
-import { Ad, ErrorPanel, Octicon, VersionDetail, VersionList } from '../components'
+import { Ad, BtnLink, ErrorPanel, VersionDetail, VersionList } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import type { VersionMeta } from '../services'
 import { fetchVersions } from '../services'
@@ -26,8 +26,8 @@ export function Versions({}: Props) {
 
 	useTitle(selected ? selected.name : 'Versions Explorer', selected ? [] : undefined)
 
+	const prevVersion = selected && getOffsetVersion(versions, selected, 1)
 	const nextVersion = selected && getOffsetVersion(versions, selected, -1)
-	const previousVersion = selected && getOffsetVersion(versions, selected, 1)
 
 	return <main>
 		<Ad type="text" id="versions" />
@@ -35,18 +35,11 @@ export function Versions({}: Props) {
 		<div class="versions">
 			{selected ? <>
 				<div class="version-navigation">
-					<a class="btn btn-link" href="/versions/">
-						{Octicon.three_bars}
-						{locale('versions.all')}
-					</a>
-					<a class="btn btn-link" {...previousVersion ? {href: `/versions/?id=${previousVersion.id}`} : {disabled: true}}>
-						{Octicon.arrow_left}
-						{locale('versions.previous')}
-					</a>
-					<a class="btn btn-link" {...nextVersion ? {href: `/versions/?id=${nextVersion.id}`} : {disabled: true}}>
-						{locale('versions.next')}
-						{Octicon.arrow_right}
-					</a>
+					<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
+					<BtnLink link={prevVersion ? `/versions/?id=${prevVersion.id}` : undefined} 
+						icon="arrow_left" label={locale('versions.previous')} />
+					<BtnLink link={nextVersion ? `/versions/?id=${nextVersion.id}` : undefined} 
+						icon="arrow_right" label={locale('versions.next')} swapped />
 				</div>
 				<VersionDetail version={selected} />
 			</> : <VersionList versions={versions} link={id => `/versions/?id=${id}`} />}

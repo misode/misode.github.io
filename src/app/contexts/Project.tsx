@@ -9,8 +9,9 @@ import { cleanUrl } from '../Utils'
 
 export type Project = {
 	name: string,
-	namespace: string,
+	namespace?: string,
 	version?: VersionId,
+	meta?: any,
 	files: ProjectFile[],
 }
 export const DRAFT_PROJECT: Project = {
@@ -25,9 +26,18 @@ export type ProjectFile = {
 	data: any,
 }
 
+export const FilePatterns = [
+	'worldgen/[a-z_]+',
+	'tags/worldgen/[a-z_]+',
+	'tags/[a-z_]+',
+	'[a-z_]+',
+].map(e => RegExp(`^data/([a-z0-9._-]+)/(${e})/([a-z0-9/._-]+)$`))
+
 interface ProjectContext {
+	projects: Project[],
 	project: Project,
 	file?: ProjectFile,
+	createProject: (name: string, namespace?: string, version?: VersionId) => unknown,
 	changeProject: (name: string) => unknown,
 	updateProject: (project: Partial<Project>) => unknown,
 	updateFile: (type: string, id: string | undefined, file: Partial<ProjectFile>) => boolean,
@@ -35,7 +45,9 @@ interface ProjectContext {
 	closeFile: () => unknown,
 }
 const Project = createContext<ProjectContext>({
+	projects: [DRAFT_PROJECT],
 	project: DRAFT_PROJECT,
+	createProject: () => {},
 	changeProject: () => {},
 	updateProject: () => {},
 	updateFile: () => false,
@@ -66,6 +78,10 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		setProjects(projects)
 	}, [])
 
+	const createProject = useCallback((name: string, namespace?: string, version?: VersionId) => {
+		changeProjects([...projects, { name, namespace, version, files: [] }])
+	}, [projects])
+
 	const updateProject = useCallback((edits: Partial<Project>) => {
 		changeProjects(projects.map(p => p.name === projectName ?	{ ...p, ...edits } : p))
 	}, [projects, projectName])
@@ -74,7 +90,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		if (!edits.id) { // remove
 			updateProject({ files: project.files.filter(f => f.type !== type || f.id !== id) })
 		} else {
-			const newId = edits.id.includes(':') ? edits.id : `${project.namespace}:${edits.id}`
+			const newId = edits.id.includes(':') ? edits.id : `${project.namespace ?? 'minecraft'}:${edits.id}`
 			const exists = project.files.some(f => f.type === type && f.id === newId)
 			if (!id) { // create
 				if (exists) return false
@@ -105,8 +121,10 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	}, [])
 
 	const value: ProjectContext = {
+		projects,
 		project,
 		file,
+		createProject,
 		changeProject: setProjectName,
 		updateProject,
 		updateFile,
@@ -126,4 +144,19 @@ export function getFilePath(file: ProjectFile) {
 		throw new Error(`Cannot find generator of type ${file.type}`)
 	}
 	return `data/${namespace}/${gen.path ?? gen.id}/${id}`
+}
+
+export function disectFilePath(path: string) {
+	for (const p of FilePatterns) {
+		const match = path.match(p)
+		if (!match) continue
+		const gen = config.generators.find(g => (g.path ?? g.id) === match[2])
+		if (gen) {
+			return {
+				type: gen.id,
+				id: `${match[1]}:${match[3]}`,
+			}
+		}
+	}
+	return undefined
 }

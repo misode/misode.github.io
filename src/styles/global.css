@@ -309,14 +309,15 @@ main > .controls {
 	right: 38px;
 }
 
-.project-controls > .active {
+.status-icon.active {
 	fill: var(--accent-success);
 }
 
-.project-controls > .danger {
+.status-icon.danger {
 	fill: var(--accent-danger);
 }
 
+.project-creation .btn-menu .btn-group,
 .project-controls .btn-menu .btn-group {
 	left: 0;
 	right: unset;
@@ -447,7 +448,17 @@ main.has-preview {
 	fill: var(--accent-primary);
 }
 
-.btn:not(.btn-input):hover {
+.btn.disabled {
+	cursor: default;
+	background-color: var(--background-2);
+}
+
+.btn.invalid {
+	outline: var(--accent-danger) solid 1px;
+	outline-offset: -1px;
+}
+
+.btn:not(.btn-input):not(.disabled):hover {
 	background-color: var(--background-5);
 }
 
@@ -459,14 +470,13 @@ main.has-preview {
 	margin-right: 5px;
 }
 
+.btn svg:not(:first-child) {
+	margin-left: 5px;
+}
+
 .btn-link {
 	text-decoration: none;
 	display: inline-flex;
-}
-
-.btn-link svg {
-	margin-left: 4px;
-	margin-right: 4px;
 }
 
 .btn-link:not([href]) {
@@ -765,7 +775,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category, .project, .versions {
+.home, .category, .project, .new-project, .versions {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -920,6 +930,17 @@ hr {
 	font-weight: 100;
 }
 
+.project-navigation {
+	display: flex;
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 0 16px;
+}
+
+.project-navigation > *:not(:last-child) {
+	margin-right: 8px;
+}
+
 .project h2 {
 	color: var(--text-1);
 	margin-bottom: 8px;
@@ -927,8 +948,57 @@ hr {
 
 .file-view {
 	background-color: var(--background-2);
+	color: var(--text-2);
 	border-radius: 6px;
 	padding: 6px;
+}
+
+.project-creation {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	background-color: var(--background-2);
+	padding: 16px;
+	border-radius: 6px;
+	color: var(--text-2);
+}
+
+.project-creation > *:not(:last-child) {
+	margin-bottom: 8px;
+}
+
+.project-creation label {
+	margin-right: 8px;
+}
+
+.project-creation input {
+	background-color: var(--background-1);
+	box-shadow: none;
+}
+
+.input-group {
+	display: flex;
+	align-items: center;
+}
+
+.input-group .status-icon {
+	margin-left: 8px;
+}
+
+.file-upload {
+	display: flex;
+	align-items: center;
+	padding: 16px;
+	border-radius: 6px;
+	background-color: var(--background-1);
+}
+
+.file-upload input[type=file] {
+	display: none;
+}
+
+.file-upload .btn {
+	margin-right: 8px;
 }
 
 .tree-view .entry {
@@ -953,6 +1023,7 @@ hr {
 
 [data-ea-publisher] {
 	margin: 0 16px 8px;
+	min-height: 69.38px;
 }
 
 .ea-content {

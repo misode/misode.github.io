@@ -12,6 +12,8 @@ import { fetchData } from './DataFetcher'
 export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2'] as const
 export type VersionId = typeof VersionIds[number]
 
+export const DEFAULT_VERSION: VersionId = '1.18.2'
+
 export type BlockStateRegistry = {
 	[block: string]: {
 		properties?: {

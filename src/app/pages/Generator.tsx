@@ -1,9 +1,9 @@
 import { DataModel, Path } from '@mcschema/core'
-import { getCurrentUrl, route } from 'preact-router'
+import { getCurrentUrl } from 'preact-router'
 import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { Ad, Btn, BtnLink, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { useActiveTimeout, useModel } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
@@ -246,7 +246,7 @@ export function Generator({}: Props) {
 				<div class={`project-controls ${file && 'has-file'}`}>
 					<div class="btn-row">
 						<BtnMenu icon="repo" label={project.name} relative={false}>
-							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
+							<BtnLink link="/project/" icon="arrow_left" label={locale('project.go_to')} />
 							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
 							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
 						</BtnMenu>
