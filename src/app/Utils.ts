@@ -217,3 +217,11 @@ export async function readZip(file: File): Promise<[string, string][]> {
 		return [e.filename, await e.getData?.(writer)] as [string, string]
 	}))
 }
+
+export async function writeZip(entries: [string, string][]): Promise<string> {
+	const writer = new zip.ZipWriter(new zip.Data64URIWriter('application/zip'))
+	await Promise.all(entries.map(async ([name, data]) => {
+		await writer.add(name, new zip.TextReader(data))
+	}))
+	return await writer.close()
+}

@@ -2,7 +2,7 @@ import { route } from 'preact-router'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnLink, BtnMenu, FileUpload, Octicon, TextInput } from '../components'
-import type { ProjectFile } from '../contexts'
+import type { Project } from '../contexts'
 import { FilePatterns, useLocale, useProject, useTitle } from '../contexts'
 import type { VersionId } from '../services'
 import { DEFAULT_VERSION } from '../services'
@@ -34,7 +34,6 @@ export function NewProject({}: Props) {
 
 	const projectUpdater = useRef(updateProject)
 	useEffect(() => {
-		console.log('Refresh project updater')
 		projectUpdater.current = updateProject
 	}, [updateProject])
 
@@ -43,28 +42,25 @@ export function NewProject({}: Props) {
 		changeProject(name)
 		if (file) {
 			readZip(file).then((entries) => {
-				const files: ProjectFile[] = []
+				const project: Partial<Project> = { files: [] }
 				entries.forEach((entry) => {
 					if (entry[0] === 'pack.mcmeta') {
-						projectUpdater.current({ meta: JSON.parse(entry[1]) })
+						project.meta = JSON.parse(entry[1])
 						return
 					}
 					for (const p of FilePatterns) {
 						const match = entry[0].match(p)
 						if (!match) continue
-						console.log('Match!', entry[0], match)
 						const gen = config.generators.find(g => (g.path ?? g.id) === match[2])
 						if (!gen) return
 						const type = gen?.id!
 						if (!match[3].endsWith('.json')) return
 						const id = `${match[1]}:${match[3].replace(/\.json$/, '')}`
-						console.log(gen, type, id)
-						files.push({ type, id, data: JSON.parse(entry[1]) })
+						project.files!.push({ type, id, data: JSON.parse(entry[1]) })
 						return
 					}
 				})
-				console.log('Update files', files, projectUpdater.current)
-				projectUpdater.current({ files })
+				projectUpdater.current(project)
 				route('/project/')
 			})
 		} else {
