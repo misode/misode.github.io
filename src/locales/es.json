@@ -1,6 +1,12 @@
 {
   "add": "Añadir",
+  "add_bottom": "Añadir al fondo",
+  "add_top": "Añadir al parte superior",
   "advancement": "Progreso",
+  "assets": "Bienes",
+  "block_definition": "Estado de Bloque",
+  "changelog.search": "Buscar cambios",
+  "collapse": "Derrumbarse",
   "copy": "Copiar",
   "dimension": "Dimensión",
   "dimension_type": "Tipo de dimensión",
