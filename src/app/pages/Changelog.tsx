@@ -9,7 +9,7 @@ interface Props {
 }
 export function Changelog({}: Props) {
 	const { locale } = useLocale()
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState<Error | null>(null)
 	useTitle(locale('title.changelog'))
 
 	const [changelogs, setChangelogs] = useState<Change[]>([])

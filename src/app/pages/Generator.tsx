@@ -18,10 +18,11 @@ export function Generator({}: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion } = useVersion()
 	const { project, file, updateFile, openFile, closeFile } = useProject()
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
-		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`} onDismiss={errorRetry} /></main>
+		errorBoundary.message = `Something went wrong rendering the generator: ${errorBoundary.message}`
+		return <main><ErrorPanel error={errorBoundary} onDismiss={errorRetry} /></main>
 	}
 
 	const gen = getGenerator(getCurrentUrl())
@@ -69,7 +70,7 @@ export function Generator({}: Props) {
 				}
 				setModel(m)
 			})
-			.catch(e => { console.error(e); setError(message(e)) })
+			.catch(e => { console.error(e); setError(e) })
 	}, [version, gen.id])
 
 	const [dirty, setDirty] = useState(false)
@@ -172,7 +173,7 @@ export function Generator({}: Props) {
 		getCollections(version).then(collections => {
 			setPresets(collections.get(gen.id).map(p => p.slice(10)))
 		})
-			.catch(e => { console.error(e); setError(e.message) })
+			.catch(e => { console.error(e); setError(e) })
 	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
@@ -192,7 +193,7 @@ export function Generator({}: Props) {
 			}
 			return preset
 		} catch (e) {
-			setError(message(e))
+			setError(e instanceof Error ? e : message(e))
 		}
 	}
 

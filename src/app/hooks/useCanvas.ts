@@ -76,7 +76,11 @@ export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
 		canvas.current.height = s[1]
 		const img = ctx.getImageData(0, 0, s[0], s[1])
 		const ownCount = redrawCount.current += 1
-		await draw(img)
+		try {
+			await draw(img)
+		} catch (e) {
+			throw e
+		}
 		if (ownCount === redrawCount.current) {
 			ctx.putImageData(img, 0, 0)
 		}
