@@ -24,10 +24,8 @@
 		if (typeof BigInt !== 'function') {
 			BigInt = function(e) { return e }
 		}
-		if (!(BigInt64Array instanceof Constructor)) {
-			class BigInt64Array {
-				constructor () {}
-			}
+		if (typeof BigInt64Array !== 'function') {
+			BigInt64Array = function() { }
 		}
 	</script>
 </head>
