@@ -224,6 +224,7 @@ class LevelSlice {
 	public generate(generator: NoiseChunkGenerator, forcedBiome?: string) {
 		this.chunks.forEach((chunk, i) => {
 			if (!this.done[i]) {
+				throw new Error('Test')
 				generator.fill(chunk, true)
 				generator.buildSurface(chunk, forcedBiome)
 				this.done[i] = true

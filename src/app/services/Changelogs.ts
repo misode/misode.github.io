@@ -20,6 +20,7 @@ let Changelogs: Change[] | Promise<Change[]> | null = null
 export async function getChangelogs() {
 	if (!Changelogs) {
 		const index = await (await fetch(`${repo}/index.json`)).json() as string[]
+		throw new Error('Test')
 		Changelogs = (await Promise.all(
 			index.map((group, i) => fetchGroup(parseVersion(group), i))
 		)).flat().map<Change>(change => ({

@@ -11,7 +11,7 @@ interface Props {
 }
 export function Versions({}: Props) {
 	const { locale } = useLocale()
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState<Error | null>(null)
 	useTitle(locale('title.versions'))
 
 	const [versions, setVersions] = useState<VersionMeta[]>([])

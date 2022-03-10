@@ -52,7 +52,7 @@ type SourcePanelProps = {
 	doDownload?: number,
 	doImport?: number,
 	copySuccess: () => unknown,
-	onError: (message: string) => unknown,
+	onError: (message: string | Error) => unknown,
 }
 export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
@@ -78,7 +78,12 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				const output = getSerializedOutput(model, blockStates)
 				editor.current.setValue(output)
 			} catch (e) {
-				onError(`Error getting JSON output: ${message(e)}`)
+				if (e instanceof Error) {
+					e.message = `Error getting JSON output: ${e.message}`
+					onError(e)
+				} else {
+					onError(`Error getting JSON output: ${message(e)}`)
+				}
 				console.error(e)
 				editor.current.setValue('')
 			}
@@ -91,7 +96,12 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				const data = FORMATS[format].parse(value)
 				model?.reset(DataModel.wrapLists(data), false)
 			} catch (e) {
-				onError(`Error importing: ${message(e)}`)
+				if (e instanceof Error) {
+					e.message = `Error importing: ${e.message}`
+					onError(e)
+				} else {
+					onError(`Error importing: ${message(e)}`)
+				}
 				console.error(e)
 			}
 		}

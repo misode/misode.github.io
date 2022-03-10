@@ -749,6 +749,11 @@ main.has-preview {
 	margin: 10px 0;
 }
 
+.error h3 span {
+	margin-left: 8px;
+	cursor: pointer;
+}
+
 .error .error-dismiss {
 	float: right;
 	cursor: pointer;

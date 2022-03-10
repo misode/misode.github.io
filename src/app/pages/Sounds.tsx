@@ -4,7 +4,7 @@ import { Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import type { SoundEvents, VersionId } from '../services'
 import { fetchSounds } from '../services'
-import { hexId, message } from '../Utils'
+import { hexId } from '../Utils'
 
 interface Props {
 	path?: string,
@@ -12,7 +12,7 @@ interface Props {
 export function Sounds({}: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion } = useVersion()
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState<Error | null>(null)
 	useTitle(locale('title.sounds'))
 
 	const [sounds, setSounds] = useState<SoundEvents>({})
@@ -20,7 +20,7 @@ export function Sounds({}: Props) {
 	useEffect(() => {
 		fetchSounds(version)
 			.then(setSounds)
-			.catch(e => { console.error(e); setError(message(e)) })
+			.catch(e => { console.error(e); setError(e) })
 	}, [version])
 
 	const [search, setSearch] = useState('')
