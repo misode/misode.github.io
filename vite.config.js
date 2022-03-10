@@ -45,6 +45,7 @@ export default defineConfig({
 					targets: [
 						{ src: 'src/sitemap.txt', dest: 'dist' },
 						{ src: 'src/sitemap.txt', dest: 'dist', rename: 'sitemap2.txt' },
+						{ src: 'src/styles/giscus.css', dest: 'dist/assets' },
 					],
 					hook: 'writeBundle',
 				}),

@@ -1432,6 +1432,10 @@ hr {
 	background-color: var(--selection) !important;
 }
 
+.giscus {
+	margin-top: 16px;
+}
+
 @media screen and (max-width: 720px) {
 	.sound-search-group {
 		margin-bottom: 8px;
