@@ -54,6 +54,7 @@ const versionGetter: {
 export let CachedDecorator: INode<any>
 export let CachedFeature: INode<any>
 export let CachedCollections: CollectionRegistry
+export let CachedSchemas: SchemaRegistry
 
 async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
@@ -122,6 +123,12 @@ export async function getCollections(version: VersionId): Promise<CollectionRegi
 export async function getBlockStates(version: VersionId): Promise<BlockStateRegistry> {
 	const versionData = await getVersion(version)
 	return versionData.blockStates
+}
+
+export async function getSchemas(version: VersionId): Promise<SchemaRegistry> {
+	const versionData = await getVersion(version)
+	CachedSchemas = versionData.schemas
+	return versionData.schemas
 }
 
 export function checkVersion(versionId: string, minVersionId: string | undefined, maxVersionId?: string) {

@@ -976,6 +976,14 @@ hr {
 	box-shadow: none;
 }
 
+.problems {
+	background-color: var(--background-2);
+	margin-bottom: 16px;
+	border-radius: 6px;
+	padding: 8px;
+	color: var(--accent-danger);
+}
+
 .input-group {
 	display: flex;
 	align-items: center;
@@ -1002,6 +1010,8 @@ hr {
 }
 
 .tree-view .entry {
+	display: flex;
+	align-items: center;
 	cursor: pointer;
 	padding: 4px 2px;
 	padding-left: calc(var(--indent, 0) * 24px);
@@ -1017,8 +1027,18 @@ hr {
 	background-color: var(--background-3);
 }
 
+.tree-view .entry.has-error {
+	color: var(--accent-danger);
+	fill: var(--accent-danger);
+}
+
 .tree-view .entry svg {
 	margin-right: 4px;
+}
+
+.tree-view .entry .status-icon {
+	margin-left: 4px;
+	display: flex;
 }
 
 [data-ea-publisher] {

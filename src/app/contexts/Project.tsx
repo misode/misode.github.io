@@ -137,7 +137,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	</Project.Provider>
 }
 
-export function getFilePath(file: ProjectFile) {
+export function getFilePath(file: { id: string, type: string }) {
 	const [namespace, id] = file.id.includes(':') ? file.id.split(':') : ['minecraft', file.id]
 	const gen = config.generators.find(g => g.id === file.type)
 	if (!gen) {
