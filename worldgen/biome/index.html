@@ -8,10 +8,10 @@
 		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 		ga('create', 'UA-73024255-2', 'auto');
 		ga('set', 'page', location.pathname);
-		ga('set', 'dimension1', localStorage.getItem('theme') ?? 'default');
+		ga('set', 'dimension1', localStorage.getItem('theme') || 'default');
 		ga('set', 'dimension2', 'v2');
-		ga('set', 'dimension3', localStorage.getItem('schema_version') ?? '1.18');
-		ga('set', 'dimension4', localStorage.getItem('language') ?? 'en');
+		ga('set', 'dimension3', localStorage.getItem('schema_version') || '1.18');
+		ga('set', 'dimension4', localStorage.getItem('language') || 'en');
 		ga('set', 'dimension5', 'none');
 		ga('send', 'pageview');
 	</script>
@@ -20,6 +20,14 @@
 	<title>Biome Generator Minecraft 1.17, 1.18, 1.18.2</title>
 	<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IArs4c6QAAABhQTFRFAAAAS6BBkZCPTZibAAAAfLRcqqiocLXDCzuXUAAAAAh0Uk5T/////wD///8thFQlAAAAW0lEQVQ4jb2QQRKAMAjEVkD9/49bHZXaVvbgDLkmhwUYAWbrxfLCg7l/Cnz5u8gI6Eh+Jn/U/2BzpOcIIl8LxF4kI6Aj+ZkZr27YT9TpgsHXArFXTQ7oSH7mjAKW8w5Rgq1rcAAAAABJRU5ErkJggg==" sizes="32x32">
 	<script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
+	<script>
+		if (typeof BigInt !== 'function') {
+			BigInt = function(e) { return e }
+		}
+		if (typeof BigInt64Array !== 'function') {
+			BigInt64Array = function() { }
+		}
+	</script>
 <script type="module" crossorigin src="/assets/index.34dc226a.js"></script>
   <link rel="modulepreload" href="/assets/vendor.905aac25.js">
   <link rel="stylesheet" href="/assets/index.76ac06f6.css">
