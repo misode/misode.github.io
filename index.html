@@ -20,6 +20,11 @@
 	<title>Data Pack Generators Minecraft 1.15, 1.16, 1.17</title>
 	<link rel="icon" href="/src/favicon-32.png" sizes="32x32">
 	<script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
+	<script>
+		if (typeof BigInt !== 'function') {
+			BigInt = function(e) { return e }
+		}
+	</script>
 </head>
 <body>
 	<div data-ea-publisher="misode-github-io" data-ea-manual="true" id="ad-placeholder"></div>
