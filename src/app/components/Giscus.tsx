@@ -1,20 +1,22 @@
-export function Giscus() {
-	const theme = (import.meta as any).env.DEV
-		? 'http://localhost:3000/src/styles/giscus.css'
-		: `https://${location.host}/assets/giscus.css`
+import { Giscus as GiscusReact } from '@giscus/react'
+import { useTheme } from '../contexts'
 
-	return <script src="https://giscus.app/client.js"
-		data-repo="misode/misode.github.io"
-		data-repo-id="MDEwOlJlcG9zaXRvcnkxOTIyNTQyMzA="
-		data-category="Site"
-		data-category-id="DIC_kwDOC3WRFs4COB8r"
-		data-mapping="pathname"
-		data-reactions-enabled="1"
-		data-emit-metadata="0"
-		data-input-position="top"
-		data-theme={theme}
-		data-lang="en"
-		crossOrigin="anonymous"
-		async>
-	</script>
+export function Giscus() {
+	const { actualTheme } = useTheme()
+	const themeSuffix = actualTheme === 'light' ? '-burn' : ''
+	const themeUrl = (import.meta as any).env.DEV
+		? `http://localhost:3000/src/styles/giscus${themeSuffix}.css`
+		: `https://${location.host}/assets/giscus${themeSuffix}.css`
+
+	return <GiscusReact
+		repo="misode/misode.github.io"
+		repoId="MDEwOlJlcG9zaXRvcnkxOTIyNTQyMzA="
+		category="Site"
+		categoryId="DIC_kwDOC3WRFs4COB8r"
+		mapping="pathname"
+		reactionsEnabled="1"
+		emitMetadata="0"
+		inputPosition="top"
+		theme={themeUrl}
+		lang="en" />
 }
