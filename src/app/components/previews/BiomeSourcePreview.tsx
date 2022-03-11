@@ -1,7 +1,7 @@
 import { DataModel, Path } from '@mcschema/core'
 import type { NoiseParameters } from 'deepslate'
 import { NoiseGeneratorSettings } from 'deepslate'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
 import { useLocale } from '../../contexts'
@@ -21,8 +21,11 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const refineTimeout = useRef<number>(undefined)
 
 	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
-	const octaves = getOctaves(model.get(new Path(['generator', 'settings'])))
-	const state = shown ? calculateState(data, octaves) : ''
+	const octaves = useMemo(() => {
+		if (!shown) return undefined
+		return getOctaves(model.get(new Path(['generator', 'settings'])))
+	}, [shown])
+	const state = shown ? calculateState(data, octaves!) : ''
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
 	const { canvas, redraw } = useCanvas({
@@ -30,7 +33,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
+			const options = { octaves: octaves!, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -48,7 +51,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
+			const options = { octaves: octaves!, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
