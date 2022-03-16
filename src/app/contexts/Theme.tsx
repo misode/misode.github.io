@@ -23,6 +23,7 @@ export function useTheme() {
 export function ThemeProvider({ children }: { children: ComponentChildren }) {
 	const [theme, setTheme] = useState(Store.getTheme())
 	const prefersLight = useMediaQuery('(prefers-color-scheme: light)')
+	const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
 
 	useEffect(() => {
 		document.documentElement.setAttribute('data-theme', theme)
@@ -33,6 +34,10 @@ export function ThemeProvider({ children }: { children: ComponentChildren }) {
 		Store.setTheme(theme)
 		setTheme(theme)
 	}, [])
+
+	useEffect(() => {
+		Analytics.setPrefersColorScheme(prefersLight ? 'light' : prefersDark ? 'dark' : 'none')
+	}, [prefersLight, prefersDark])
 
 	const value: Theme = {
 		theme,
