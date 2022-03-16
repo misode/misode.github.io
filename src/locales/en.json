@@ -133,6 +133,7 @@
   "versions.data_pack_format": "Data pack format",
   "versions.resource_pack_format": "Resource pack format",
   "versions.technical_changes": "Technical changes",
+  "versions.discussion": "Discussion",
   "world": "World Settings",
   "worldgen": "Worldgen",
   "worldgen/biome": "Biome",

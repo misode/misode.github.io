@@ -7,6 +7,7 @@ export namespace Analytics {
 	const DIM_LANGUAGE = 4
 	const DIM_PREVIEW = 5
 	const DIM_GENERATOR = 6
+	const DIM_PREFERS_COLOR_SCHEME = 7
 
 	function event(category: string, action: string, label?: string) {
 		ga('send', 'event', category, action, label)
@@ -43,6 +44,10 @@ export namespace Analytics {
 
 	export function setGenerator(generator: string) {
 		dimension(DIM_GENERATOR, generator)
+	}
+
+	export function setPrefersColorScheme(colorScheme: string) {
+		dimension(DIM_PREFERS_COLOR_SCHEME, colorScheme)
 	}
 
 	export function generatorEvent(action: string, label?: string) {

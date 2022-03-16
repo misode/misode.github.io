@@ -13,6 +13,7 @@
 		ga('set', 'dimension3', localStorage.getItem('schema_version') || '1.18.2');
 		ga('set', 'dimension4', localStorage.getItem('language') || 'en');
 		ga('set', 'dimension5', 'none');
+		ga('set', 'dimension7', matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none');
 		ga('send', 'pageview');
 	</script>
 	<meta charset="utf-8">

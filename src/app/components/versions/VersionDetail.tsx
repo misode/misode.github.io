@@ -3,13 +3,18 @@ import { VersionMetaData } from '.'
 import { useLocale } from '../../contexts'
 import type { Change, VersionMeta } from '../../services'
 import { getChangelogs } from '../../services'
+import { Giscus } from '../Giscus'
 import { ChangelogList } from './ChangelogList'
+
+type Tab = 'changelog' | 'discussion' 
 
 interface Props {
 	version: VersionMeta
 }
 export function VersionDetail({ version }: Props) {
 	const { locale } = useLocale()
+
+	const [tab, setTab] = useState<Tab>('changelog')
 
 	const [changelogs, setChangelogs] = useState<Change[] | undefined>(undefined)
 	useEffect(() => {
@@ -35,9 +40,13 @@ export function VersionDetail({ version }: Props) {
 				<VersionMetaData label={locale('versions.data_pack_format')} value={version.data_pack_version} />
 				<VersionMetaData label={locale('versions.resource_pack_format')} value={version.resource_pack_version} />
 			</div>
-			<h3>{locale('versions.technical_changes')}</h3>
-			<div class="version-changes">
-				<ChangelogList changes={filteredChangelogs} defaultOrder="asc" />
+			<div class="version-tabs">
+				<span class={tab === 'changelog' ? 'selected' : ''} onClick={() => setTab('changelog')}>{locale('versions.technical_changes')}</span>
+				<span class={tab === 'discussion' ? 'selected' : ''} onClick={() => setTab('discussion')}>{locale('versions.discussion')}</span>
+			</div>
+			<div class="version-tab">
+				{tab === 'changelog' && <ChangelogList changes={filteredChangelogs} defaultOrder="asc" />}
+				{tab === 'discussion' && <Giscus term={`version/${version.id}`} />}
 			</div>
 		</div>
 	</>

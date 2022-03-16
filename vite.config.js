@@ -1,4 +1,5 @@
 import preact from '@preact/preset-vite'
+import alias from '@rollup/plugin-alias'
 import html from '@rollup/plugin-html'
 import { env } from 'process'
 import copy from 'rollup-plugin-copy'
@@ -11,6 +12,14 @@ export default defineConfig({
 		sourcemap: true,
 		rollupOptions: {
 			plugins: [
+				alias({
+					entries: [
+						{ find: 'react', replacement: 'preact/compat' },
+						{ find: 'react-dom/test-utils', replacement: 'preact/test-utils' },
+						{ find: 'react-dom', replacement: 'preact/compat' },
+						{ find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' },
+					],
+				}),
 				html({
 					fileName: '404.html',
 					title: '404',
@@ -45,6 +54,8 @@ export default defineConfig({
 					targets: [
 						{ src: 'src/sitemap.txt', dest: 'dist' },
 						{ src: 'src/sitemap.txt', dest: 'dist', rename: 'sitemap2.txt' },
+						{ src: 'src/styles/giscus.css', dest: 'dist/assets' },
+						{ src: 'src/styles/giscus-burn.css', dest: 'dist/assets' },
 					],
 					hook: 'writeBundle',
 				}),

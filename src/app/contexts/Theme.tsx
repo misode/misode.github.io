@@ -2,14 +2,17 @@ import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks'
 import { Analytics } from '../Analytics'
+import { useMediaQuery } from '../hooks'
 import { Store } from '../Store'
 
 interface Theme {
 	theme: string,
+	actualTheme: 'light' | 'dark',
 	changeTheme: (theme: string) => unknown,
 }
 const Theme = createContext<Theme>({
 	theme: 'dark',
+	actualTheme: 'dark',
 	changeTheme: () => {},
 })
 
@@ -19,6 +22,8 @@ export function useTheme() {
 
 export function ThemeProvider({ children }: { children: ComponentChildren }) {
 	const [theme, setTheme] = useState(Store.getTheme())
+	const prefersLight = useMediaQuery('(prefers-color-scheme: light)')
+	const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
 
 	useEffect(() => {
 		document.documentElement.setAttribute('data-theme', theme)
@@ -30,8 +35,13 @@ export function ThemeProvider({ children }: { children: ComponentChildren }) {
 		setTheme(theme)
 	}, [])
 
+	useEffect(() => {
+		Analytics.setPrefersColorScheme(prefersLight ? 'light' : prefersDark ? 'dark' : 'none')
+	}, [prefersLight, prefersDark])
+
 	const value: Theme = {
 		theme,
+		actualTheme: theme === 'light' || (theme !== 'dark' && prefersLight) ? 'light' : 'dark',
 		changeTheme,
 	}
 

@@ -1,5 +1,5 @@
 import config from '../../config.json'
-import { ToolCard } from '../components'
+import { Giscus, ToolCard } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
@@ -33,6 +33,7 @@ export function Home({}: Props) {
 				desc="Convert your data packs from 1.16 to 1.17 to 1.18" />
 			<ToolCard title="Technical Changelog" link="/changelog/" />
 			<ToolCard title="Minecraft Versions" link="/versions/" />
+			<Giscus />
 		</div>
 	</main>
 }
