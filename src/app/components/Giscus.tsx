@@ -1,7 +1,10 @@
 import { Giscus as GiscusReact } from '@giscus/react'
 import { useTheme } from '../contexts'
 
-export function Giscus() {
+interface Props {
+	term?: string,
+}
+export function Giscus({ term }: Props) {
 	const { actualTheme } = useTheme()
 	const themeSuffix = actualTheme === 'light' ? '-burn' : ''
 	const themeUrl = (import.meta as any).env.DEV
@@ -13,7 +16,8 @@ export function Giscus() {
 		repoId="MDEwOlJlcG9zaXRvcnkxOTIyNTQyMzA="
 		category="Site"
 		categoryId="DIC_kwDOC3WRFs4COB8r"
-		mapping="pathname"
+		mapping={term ? 'specific' : 'pathname'}
+		term={term}
 		reactionsEnabled="1"
 		emitMetadata="0"
 		inputPosition="top"

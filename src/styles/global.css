@@ -1394,6 +1394,23 @@ hr {
 	fill: var(--accent-primary);
 }
 
+.version-tabs {
+	display: flex;
+	margin: 20px 0 10px;
+	box-shadow: inset 0 -1px 0 var(--background-4);
+}
+
+.version-tabs > * {
+	border-bottom: 2px solid transparent;
+	padding: 8px 16px;
+	cursor: pointer;
+}
+
+.version-tabs > .selected {
+	border-color: var(--text-3);
+	color: var(--text-1);
+}
+
 .ace_editor,
 .ace_gutter,
 .ace_gutter .ace_layer,
