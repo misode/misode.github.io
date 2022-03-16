@@ -25,26 +25,16 @@ export default defineConfig({
 					title: '404',
 					template: template,
 				}),
-				html({
-					fileName: 'sounds/index.html',
-					title: getTitle({ id: 'title.sounds', page: true }),
+				...['sounds', 'changelog', 'versions'].map(id => html({
+					fileName: `${id}/index.html`,
+					title: getTitle({ id: `title.${id}`, page: true }),
 					template: template,
-				}),
-				html({
-					fileName: 'changelog/index.html',
-					title: getTitle({ id: 'title.changelog', page: true }),
+				})),
+				...['worldgen', 'assets'].map(id => html({
+					fileName: `${id}/index.html`,
+					title: getTitle({ id, category: true }),
 					template: template,
-				}),
-				html({
-					fileName: 'worldgen/index.html',
-					title: getTitle({ id: 'worldgen', category: true }),
-					template: template,
-				}),
-				html({
-					fileName: 'assets/index.html',
-					title: getTitle({ id: 'assets', category: true }),
-					template: template,
-				}),
+				})),
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
 					title: getTitle(m),
