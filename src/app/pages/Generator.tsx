@@ -9,7 +9,7 @@ import { useActiveTimeout, useModel } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet, SHARE_KEY } from '../services'
-import { cleanUrl, getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
+import { cleanUrl, deepEqual, getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
 interface Props {
 	default?: true,
@@ -218,7 +218,7 @@ export function Generator({}: Props) {
 
 	const [shareUrl, setShareUrl] = useState<string | undefined>(undefined)
 	const [shareShown, setShareShown] = useState(false)
-	const [shareCopyActive, shareCopySuccess] = useActiveTimeout()
+	const [shareCopyActive, shareCopySuccess] = useActiveTimeout({ cooldown: 3000 })
 	const share = () => {
 		if (shareShown) {
 			setShareShown(false)
@@ -227,12 +227,18 @@ export function Generator({}: Props) {
 		if (currentPreset) {
 			setShareUrl(`${location.protocol}//${location.host}/${gen.url}/?version=${version}&preset=${currentPreset}`)
 			setShareShown(true)
+			copySharedId()
 		} else if (model && blockStates) {
 			const output = getOutput(model, blockStates)
-			shareSnippet(gen.id, version, output).then(url => {
-				setShareUrl(url)
+			if (deepEqual(output, model.schema.default())) {
+				setShareUrl(`${location.protocol}//${location.host}/${gen.url}/`)
 				setShareShown(true)
-			})
+			} else {
+				shareSnippet(gen.id, version, output).then(url => {
+					setShareUrl(url)
+					setShareShown(true)
+				})
+			}
 		}
 	}
 	const copySharedId = () => {
@@ -352,7 +358,7 @@ export function Generator({}: Props) {
 		</div>
 		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
 			<TextInput value={shareUrl} readonly />
-			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
+			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} showTooltip={shareCopyActive} />
 		</div>
 	</>
 }

@@ -757,12 +757,15 @@ main.has-preview {
 	opacity: 0;
 }
 
+.tooltipped.tip-shown::before,
+.tooltipped.tip-shown::after,
 .tooltipped:not([disabled]):hover::before,
 .tooltipped:not([disabled]):hover::after {
 	display: inline-block;
 	animation: tooltip-appear 0.1s ease-in 0.4s forwards;
 }
 
+.tooltipped.tip-shown::after,
 .tooltipped:not([disabled]):hover::after {
 	box-shadow: 0 1px 3px 0 #0007;
 }
