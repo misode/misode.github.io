@@ -1,3 +1,4 @@
+import lz from 'lz-string'
 import config from '../../config.json'
 import { message } from '../Utils'
 import type { VersionId } from './Schemas'
@@ -7,7 +8,10 @@ export const SHARE_KEY = 'share'
 
 const ShareCache = new Map<string, string>()
 
-export async function shareSnippet(type: string, version: VersionId, data: any) {
+export async function shareSnippet(type: string, version: VersionId, jsonData: any) {
+	const data = lz.compressToBase64(JSON.stringify(jsonData))
+	const raw = btoa(JSON.stringify(jsonData))
+	console.log('Compression rate', raw.length / data.length)
 	const body = JSON.stringify({ data, type, version })
 	let id = ShareCache.get(body)
 	if (!id) {
@@ -21,8 +25,10 @@ export async function shareSnippet(type: string, version: VersionId, data: any) 
 
 export async function getSnippet(id: string) {
 	const snippet = await fetchApi(`/snippets/${id}`)
-	console.log(snippet)
-	return snippet
+	return {
+		...snippet,
+		data: JSON.parse(lz.decompressFromBase64(snippet.data) ?? '{}'),
+	}
 }
 
 async function fetchApi(url: string, body?: string) {
