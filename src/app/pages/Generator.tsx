@@ -8,8 +8,8 @@ import { useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { useActiveTimeout, useModel } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, VersionId } from '../services'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
-import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
+import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet, SHARE_KEY } from '../services'
+import { cleanUrl, getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
 interface Props {
 	default?: true,
@@ -45,14 +45,30 @@ export function Generator({}: Props) {
 
 	const searchParams = getSearchParams(getCurrentUrl())
 	const currentPreset = searchParams.get('preset')
+	const sharedSnippetId = searchParams.get(SHARE_KEY)
 	useEffect(() => {
 		if (model && currentPreset) {
 			loadPreset(currentPreset).then(preset => {
-				model?.reset(DataModel.wrapLists(preset), false)
-				setSeachParams({ version, preset: currentPreset })
+				model.reset(DataModel.wrapLists(preset), false)
+				setSeachParams({ version, preset: currentPreset, [SHARE_KEY]: undefined })
 			})
+		} else if (model && sharedSnippetId) {
+			getSnippet(sharedSnippetId).then(s => loadSnippet(model, s))
 		}
-	}, [currentPreset])
+	}, [currentPreset, sharedSnippetId])
+
+	const loadSnippet = (model: DataModel, snippet: any) => {
+		if (snippet.version) {
+			changeVersion(snippet.version, false)
+		}
+		if (snippet.type && snippet.type !== gen.id) {
+			const snippetGen = config.generators.find(g => g.id === snippet.type)
+			if (snippetGen) {
+				route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
+			}
+		}
+		model.reset(DataModel.wrapLists(snippet.data), false)
+	}
 
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
@@ -67,6 +83,9 @@ export function Generator({}: Props) {
 				if (currentPreset) {
 					const preset = await loadPreset(currentPreset)
 					m.reset(DataModel.wrapLists(preset), false)
+				} else if (sharedSnippetId) {
+					const snippet = await getSnippet(sharedSnippetId)
+					loadSnippet(m, snippet)
 				}
 				setModel(m)
 			})
@@ -75,7 +94,7 @@ export function Generator({}: Props) {
 
 	const [dirty, setDirty] = useState(false)
 	useModel(model, () => {
-		setSeachParams({ version: undefined, preset: undefined })
+		setSeachParams({ version: undefined, preset: undefined, [SHARE_KEY]: undefined })
 		setError(null)
 		setDirty(true)
 	})
@@ -178,7 +197,7 @@ export function Generator({}: Props) {
 
 	const selectPreset = (id: string) => {
 		Analytics.generatorEvent('load-preset', id)
-		setSeachParams({ version, preset: id })
+		setSeachParams({ version, preset: id, [SHARE_KEY]: undefined })
 	}
 
 	const loadPreset = async (id: string) => {
@@ -196,6 +215,36 @@ export function Generator({}: Props) {
 			setError(e instanceof Error ? e : message(e))
 		}
 	}
+
+	const [shareUrl, setShareUrl] = useState<string | undefined>(undefined)
+	const [shareShown, setShareShown] = useState(false)
+	const [shareCopyActive, shareCopySuccess] = useActiveTimeout()
+	const share = () => {
+		if (shareShown) {
+			setShareShown(false)
+			return
+		}
+		if (currentPreset) {
+			setShareUrl(`${location.protocol}//${location.host}/${gen.url}/?version=${version}&preset=${currentPreset}`)
+			setShareShown(true)
+		} else if (model && blockStates) {
+			const output = getOutput(model, blockStates)
+			shareSnippet(gen.id, version, output).then(url => {
+				setShareUrl(url)
+				setShareShown(true)
+			})
+		}
+	}
+	const copySharedId = () => {
+		navigator.clipboard.writeText(shareUrl ?? '')
+		shareCopySuccess()
+	}
+	useEffect(() => {
+		if (!shareCopyActive) {
+			setShareUrl(undefined)
+			setShareShown(false)
+		}
+	}, [shareCopyActive])
 
 	const [sourceShown, setSourceShown] = useState(window.innerWidth > 820)
 	const [doCopy, setCopy] = useState(0)
@@ -228,7 +277,7 @@ export function Generator({}: Props) {
 	const [previewShown, setPreviewShown] = useState(false)
 	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
 	if (previewShown && !hasPreview) setPreviewShown(false)
-	let actionsShown = 1
+	let actionsShown = 2
 	if (hasPreview) actionsShown += 1
 	if (sourceShown) actionsShown += 2
 
@@ -282,6 +331,9 @@ export function Generator({}: Props) {
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
+			<div class={'popup-action action-share shown tooltipped tip-nw'} aria-label={locale('share')} onClick={share}>
+				{Octicon.link}
+			</div>
 			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
 				{Octicon.download}
 			</div>
@@ -297,6 +349,10 @@ export function Generator({}: Props) {
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
 			<SourcePanel {...{model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
+		</div>
+		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
+			<TextInput value={shareUrl} readonly />
+			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
 		</div>
 	</>
 }

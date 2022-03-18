@@ -12,7 +12,7 @@ const VERSION_PARAM = 'version'
 
 interface Version {
 	version: VersionId,
-	changeVersion: (version: VersionId) => unknown,
+	changeVersion: (version: VersionId, store?: boolean) => unknown,
 }
 const Version = createContext<Version>({
 	version: '1.18.2',
@@ -34,12 +34,14 @@ export function VersionProvider({ children }: { children: ComponentChildren }) {
 		}
 	}, [version, targetVersion])
 
-	const changeVersion = useCallback((version: VersionId) => {
+	const changeVersion = useCallback((version: VersionId, store = true) => {
 		if (getSearchParams(getCurrentUrl()).has(VERSION_PARAM)) {
 			setSeachParams({ version })
 		}
-		Analytics.setVersion(version)
-		Store.setVersion(version)
+		if (store) {
+			Analytics.setVersion(version)
+			Store.setVersion(version)
+		}
 		setVersion(version)
 	}, [])
 
