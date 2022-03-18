@@ -5,11 +5,12 @@ import * as java16 from '@mcschema/java-1.16'
 import * as java17 from '@mcschema/java-1.17'
 import * as java18 from '@mcschema/java-1.18'
 import * as java182 from '@mcschema/java-1.18.2'
+import * as java19 from '@mcschema/java-1.19'
 import config from '../../config.json'
 import { message } from '../Utils'
 import { fetchData } from './DataFetcher'
 
-export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2'] as const
+export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19'] as const
 export type VersionId = typeof VersionIds[number]
 
 export type BlockStateRegistry = {
@@ -47,6 +48,7 @@ const versionGetter: {
 	1.17: java17,
 	1.18: java18,
 	'1.18.2': java182,
+	1.19: java19,
 }
 
 export let CachedDecorator: INode<any>

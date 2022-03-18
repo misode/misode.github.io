@@ -69,6 +69,10 @@
     },
     {
       "id": "1.18.2",
+      "ref": "1.18.1"
+    },
+    {
+      "id": "1.19",
       "dynamic": true
     }
   ],
@@ -179,7 +183,15 @@
       "url": "worldgen/structure-feature",
       "category": "worldgen",
       "schema": "configured_structure_feature",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "maxVersion": "1.18.2"
+    },
+    {
+      "id": "worldgen/structure",
+      "url": "worldgen/structure",
+      "category": "worldgen",
+      "schema": "structure",
+      "minVersion": "1.19"
     },
     {
       "id": "worldgen/structure_set",
@@ -209,6 +221,20 @@
       "category": "worldgen",
       "schema": "template_pool",
       "minVersion": "1.16"
+    },
+    {
+      "id": "worldgen/world_preset",
+      "url": "worldgen/world-preset",
+      "category": "worldgen",
+      "schema": "world_preset",
+      "minVersion": "1.19"
+    },
+    {
+      "id": "worldgen/flat_level_generator_preset",
+      "url": "worldgen/flat-world-preset",
+      "category": "worldgen",
+      "schema": "flat_level_generator_preset",
+      "minVersion": "1.19"
     },
     {
       "id": "block_definition",

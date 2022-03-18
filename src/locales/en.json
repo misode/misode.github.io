@@ -145,9 +145,12 @@
   "worldgen/noise_settings": "Noise Settings",
   "worldgen/processor_list": "Processor List",
   "worldgen/configured_structure_feature": "Structure Feature",
+  "worldgen/structure": "Structure",
   "worldgen/structure_set": "Structure Set",
   "worldgen/configured_surface_builder": "Surface Builder",
   "worldgen/template_pool": "Template Pool",
+  "worldgen/world_preset": "World Preset",
+  "worldgen/flat_level_generator_preset": "Flat World Preset",
   "zoom_in": "Zoom in",
   "zoom_out": "Zoom out"
 }
