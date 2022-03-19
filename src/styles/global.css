@@ -421,6 +421,41 @@ main.has-preview {
 	-ms-user-select: none;
 }
 
+.popup-share {
+	position: fixed;
+	display: flex;
+	width: 40vw;
+	min-height: 108px;
+	left: 100%;
+	bottom: 0;
+	z-index: 3;
+	padding: 12px;
+	background-color: var(--background-3);
+	box-shadow: 0 0 7px -3px #000;
+	color: var(--text-2);
+	transition: transform 0.3s;
+	border-radius: 6px 0 0 0;
+}
+
+.popup-share.shown {
+	transform: translateX(-100%);
+}
+
+.popup-share > input {
+	height: 32px;
+	background-color: var(--background-1);
+	color: var(--text-2);
+	border: none;
+	border-radius: 6px;
+	padding: 7px 11px;
+	margin-right: 8px;
+	width: 100%;
+}
+
+.popup-share > .btn.active {
+	fill: var(--accent-success);
+}
+
 .btn {
 	display: flex;
 	align-items: center;
@@ -722,12 +757,15 @@ main.has-preview {
 	opacity: 0;
 }
 
+.tooltipped.tip-shown::before,
+.tooltipped.tip-shown::after,
 .tooltipped:not([disabled]):hover::before,
 .tooltipped:not([disabled]):hover::after {
 	display: inline-block;
 	animation: tooltip-appear 0.1s ease-in 0.4s forwards;
 }
 
+.tooltipped.tip-shown::after,
 .tooltipped:not([disabled]):hover::after {
 	box-shadow: 0 1px 3px 0 #0007;
 }

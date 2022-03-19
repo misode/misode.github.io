@@ -88,7 +88,7 @@ export function setSeachParams(modifications: Record<string, string | undefined>
 		else searchParams.set(key, value)
 	})
 	const search = Array.from(searchParams).map(([key, value]) =>
-		`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+		`${encodeURIComponent(key)}=${encodeURIComponent(value).replaceAll('%2F', '/')}`)
 	route(`${newPath ? cleanUrl(newPath) : getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
 }
 
