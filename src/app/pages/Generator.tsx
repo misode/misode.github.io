@@ -234,10 +234,16 @@ export function Generator({}: Props) {
 				setShareUrl(`${location.protocol}//${location.host}/${gen.url}/`)
 				setShareShown(true)
 			} else {
-				shareSnippet(gen.id, version, output).then(url => {
-					setShareUrl(url)
-					setShareShown(true)
-				})
+				shareSnippet(gen.id, version, output)
+					.then(url => {
+						setShareUrl(url)
+						setShareShown(true)
+					})
+					.catch(e => {
+						if (e instanceof Error) {
+							setError(e)
+						}
+					})
 			}
 		}
 	}
