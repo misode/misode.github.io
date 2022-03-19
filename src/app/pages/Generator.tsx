@@ -220,6 +220,11 @@ export function Generator({}: Props) {
 		}
 	}
 
+	const selectVersion = (version: VersionId) => {
+		setSeachParams({ [SHARE_KEY]: undefined })
+		changeVersion(version)
+	}
+
 	const [shareUrl, setShareUrl] = useState<string | undefined>(undefined)
 	const [shareShown, setShareShown] = useState(false)
 	const [shareCopyActive, shareCopySuccess] = useActiveTimeout({ cooldown: 3000 })
@@ -330,7 +335,7 @@ export function Generator({}: Props) {
 					</BtnMenu>
 					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
 						{allowedVersions.reverse().map(v =>
-							<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
+							<Btn label={v} active={v === version} onClick={() => selectVersion(v)} />
 						)}
 					</BtnMenu>
 					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>

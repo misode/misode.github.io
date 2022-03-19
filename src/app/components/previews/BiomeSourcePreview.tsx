@@ -99,7 +99,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => newSeed(model)} />}
 		</div>
-		{focused?.temperature && <div class="controls secondary-controls">
+		{focused?.temperature !== undefined && <div class="controls secondary-controls">
 			<Btn class="no-pointer" label={Object.entries(focused)
 				.filter(([k]) => k !== 'biome')
 				.map(([k, v]) => `${k[0].toUpperCase()}: ${(v as number).toFixed(2)}`).join('  ')}/>
