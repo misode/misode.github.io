@@ -24,8 +24,8 @@ export async function shareSnippet(type: string, version: VersionId, jsonData: a
 	} catch (e) {
 		if (e instanceof Error) {
 			e.message = `Error creating share link: ${e.message}`
-			throw e
 		}
+		throw e
 	}
 }
 
@@ -39,8 +39,8 @@ export async function getSnippet(id: string) {
 	} catch (e) {
 		if (e instanceof Error) {
 			e.message = `Error loading shared content: ${e.message}`
-			throw e
 		}
+		throw e
 	}
 }
 
