@@ -67,6 +67,10 @@ export function Generator({}: Props) {
 				route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
 			}
 		}
+		if (snippet.show_preview && !previewShown) {
+			setPreviewShown(true)
+			setSourceShown(false)
+		}
 		model.reset(DataModel.wrapLists(snippet.data), false)
 	}
 
@@ -231,10 +235,10 @@ export function Generator({}: Props) {
 		} else if (model && blockStates) {
 			const output = getOutput(model, blockStates)
 			if (deepEqual(output, model.schema.default())) {
-				setShareUrl(`${location.protocol}//${location.host}/${gen.url}/`)
+				setShareUrl(`${location.protocol}//${location.host}/${gen.url}/?version=${version}`)
 				setShareShown(true)
 			} else {
-				shareSnippet(gen.id, version, output)
+				shareSnippet(gen.id, version, output, previewShown)
 					.then(url => {
 						setShareUrl(url)
 						setShareShown(true)

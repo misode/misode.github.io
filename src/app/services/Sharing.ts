@@ -7,12 +7,12 @@ export const SHARE_KEY = 'share'
 
 const ShareCache = new Map<string, string>()
 
-export async function shareSnippet(type: string, version: VersionId, jsonData: any) {
+export async function shareSnippet(type: string, version: VersionId, jsonData: any, show_preview: boolean) {
 	try {
 		const data = lz.compressToBase64(JSON.stringify(jsonData))
 		const raw = btoa(JSON.stringify(jsonData))
 		console.log('Compression rate', raw.length / data.length)
-		const body = JSON.stringify({ data, type, version })
+		const body = JSON.stringify({ data, type, version, show_preview })
 		let id = ShareCache.get(body)
 		if (!id) {
 			const snippet = await fetchApi('/snippets', body)
