@@ -58,7 +58,7 @@ export function Generator({}: Props) {
 	}, [currentPreset, sharedSnippetId])
 
 	const loadSnippet = (model: DataModel, snippet: any) => {
-		if (snippet.version) {
+		if (snippet.version && snippet.version !== version) {
 			changeVersion(snippet.version, false)
 		}
 		if (snippet.type && snippet.type !== gen.id) {
