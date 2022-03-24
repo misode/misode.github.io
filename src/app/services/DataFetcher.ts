@@ -30,7 +30,7 @@ function mcmeta(version: { dynamic: true } | { dynamic?: false, ref?: string}, t
 async function validateCache(version: Version) {
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
-			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`))
+			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`) || url.startsWith(`${mcmetaUrl}/assets/`) || url.startsWith(`${mcmetaUrl}/registries/`))
 			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
 		}
 		version.ref = latestVersion
