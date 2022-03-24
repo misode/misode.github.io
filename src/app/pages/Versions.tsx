@@ -33,7 +33,7 @@ export function Versions({}: Props) {
 		<Ad type="text" id="versions" />
 		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 		<div class="versions">
-			{selected ? <>
+			{selectedId ? <>
 				<div class="version-navigation">
 					<a class="btn btn-link" href="/versions/">
 						{Octicon.three_bars}
@@ -48,7 +48,13 @@ export function Versions({}: Props) {
 						{Octicon.arrow_right}
 					</a>
 				</div>
-				<VersionDetail version={selected} />
+				{selected ? <VersionDetail version={selected} />
+					: <div class="version-detail">
+						<h2>{selectedId}</h2>
+						<div class="version-info">
+							<p>This version does not exist. Only versions since 1.14 are tracked, or it may be too recent.</p>
+						</div>
+					</div>}
 			</> : <VersionList versions={versions} link={id => `/versions/?id=${id}`} />}
 		</div>
 	</main>
