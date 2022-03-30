@@ -7,12 +7,13 @@ import { Btn, BtnMenu } from '..'
 import { useLocale } from '../../contexts'
 import { useCanvas } from '../../hooks'
 import { biomeMap, getBiome } from '../../previews'
-import { newSeed } from '../../Utils'
+import { newSeed, randomSeed } from '../../Utils'
 
 const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness'] as const
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
+	const [configuredSeed, _setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
@@ -20,7 +21,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const res = useRef(1)
 	const refineTimeout = useRef<number>(undefined)
 
-	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
+	const seed = BigInt(model.get(new Path(['generator', 'seed'])) ?? configuredSeed)
 	const octaves = useMemo(() => {
 		if (!shown) return undefined
 		return getOctaves(model.get(new Path(['generator', 'settings'])))
@@ -51,21 +52,21 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves: octaves!, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
+			const options = { octaves: octaves!, biomeColors: {}, layers, offset: offset.current, scale, seed: configuredSeed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, scale, seed, layers])
+	}, [state, scale, configuredSeed, layers])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [state, scale, seed, layers, shown])
+	}, [state, scale, configuredSeed, layers, shown])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale
