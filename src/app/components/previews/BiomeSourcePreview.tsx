@@ -13,7 +13,7 @@ const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
-	const [configuredSeed, _setSeed] = useState(randomSeed())
+	const [configuredSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
