@@ -1,7 +1,8 @@
 import type { DataModel } from '@mcschema/core'
+import type { Inputs } from 'preact/hooks'
 import { useEffect } from 'preact/hooks'
 
-export function useModel(model: DataModel | undefined | null, invalidated: (model: DataModel) => unknown) {
+export function useModel(model: DataModel | undefined | null, invalidated: (model: DataModel) => unknown, inputs?: Inputs) {
 	const listener = {
 		invalidated() {
 			if (model) {
@@ -15,5 +16,5 @@ export function useModel(model: DataModel | undefined | null, invalidated: (mode
 		return () => {
 			model?.removeListener(listener)
 		}
-	}, [model])
+	}, [model, ...inputs ?? []])
 }

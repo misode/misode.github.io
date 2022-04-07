@@ -66,6 +66,7 @@
   "recipe": "Recipe",
   "redo": "Redo",
   "reset": "Reset",
+  "restore_backup": "Restore last backup",
   "settings": "Settings",
   "settings.fields.description": "Customize advanced field settings",
   "settings.fields.path": "Context",

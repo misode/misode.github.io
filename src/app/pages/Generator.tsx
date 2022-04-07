@@ -1,6 +1,6 @@
 import { DataModel, Path } from '@mcschema/core'
 import { getCurrentUrl, route } from 'preact-router'
-import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
+import { useEffect, useErrorBoundary, useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
@@ -9,6 +9,7 @@ import { useActiveTimeout, useModel } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet, SHARE_KEY } from '../services'
+import { Store } from '../Store'
 import { cleanUrl, deepEqual, getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
 
 interface Props {
@@ -74,6 +75,14 @@ export function Generator({}: Props) {
 		model.reset(DataModel.wrapLists(snippet.data), false)
 	}
 
+	const backup = useMemo(() => Store.getBackup(gen.id), [gen.id])
+
+	const loadBackup = () => {
+		if (backup !== undefined) {
+			model?.reset(DataModel.wrapLists(backup), false)
+		}
+	}
+
 	const [model, setModel] = useState<DataModel | null>(null)
 	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
 	useEffect(() => {
@@ -99,9 +108,10 @@ export function Generator({}: Props) {
 	const [dirty, setDirty] = useState(false)
 	useModel(model, () => {
 		setSeachParams({ version: undefined, preset: undefined, [SHARE_KEY]: undefined })
+		Store.setBackup(gen.id, DataModel.unwrapLists(model?.data))
 		setError(null)
 		setDirty(true)
-	})
+	}, [gen.id])
 
 	const [fileRename, setFileRename] = useState('')
 	const [fileSaved, doSave] = useActiveTimeout()
@@ -319,6 +329,7 @@ export function Generator({}: Props) {
 						<BtnMenu icon="repo" label={project.name} relative={false}>
 							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
 							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
+							{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
 							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
 						</BtnMenu>
 						<TextInput class="btn btn-input" placeholder={locale('project.unsaved_file')} value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
