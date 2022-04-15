@@ -109,6 +109,11 @@
       "schema": "recipe"
     },
     {
+      "id": "text_component",
+      "url": "text-component",
+      "schema": "text_component"
+    },
+    {
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",
