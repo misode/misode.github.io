@@ -4,7 +4,7 @@ import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
-import { Category, Changelog, Generator, Home, Project, Sounds, Versions } from './pages'
+import { Category, Changelog, Generator, Guide, Guides, Home, Project, Sounds, Versions } from './pages'
 import { cleanUrl } from './Utils'
 
 export function App() {
@@ -23,6 +23,8 @@ export function App() {
 			<Changelog path="/changelog" />
 			<Versions path="/versions" />
 			<Project path="/project" />
+			<Guides path="/guides/" />
+			<Guide path="/guides/:id" />
 			<Generator default />
 		</Router>
 	</>

@@ -808,7 +808,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category, .project, .versions {
+.home, .category, .project, .versions, .guides, .guide {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -1386,11 +1386,11 @@ hr {
 	font-size: 1.1rem;
 }
 
-.version-navigation {
+.navigation {
 	display: flex;
 }
 
-.version-navigation > *:not(:last-child) {
+.navigation > *:not(:last-child) {
 	margin-right: 8px;
 }
 
@@ -1494,6 +1494,87 @@ hr {
 
 .giscus {
 	margin-top: 16px;
+}
+
+.guide .navigation > :first-child {
+	margin-right: auto;
+}
+
+.guide-content {
+	color: var(--text-2);
+	margin-top: 12px;
+	overflow: hidden;
+}
+
+.guide-content p {
+	margin: 0.2em 0 0.5em;
+}
+
+.guide-content h1,
+.guide-content h2,
+.guide-content h3,
+.guide-content h4,
+.guide-content h5,
+.guide-content h6 {
+	margin: 1.2em 0 0.4em;
+}
+
+.guide-content blockquote {
+	border-left: 3px solid var(--background-6);
+	color: var(--text-3);
+	padding-left: 0.7em;
+	margin: 0.7em 0;
+}
+
+.guide-content blockquote > p {
+	padding: 0.3em 0;
+}
+
+.guide-content a {
+	text-decoration: underline;
+	color: var(--accent-primary);
+}
+
+.guide-content ul, .guide-content ol {
+	padding-left: 1.6em;
+	margin: 0.2em 0 0.5em;
+}
+
+.guide-content img {
+	border-radius: 0.2em;
+	max-width: 100%;
+}
+
+.guide-content code {
+	display: inline-block;
+	padding: 0.1em 0.3em;
+	background-color: var(--background-2);
+	border-radius: 0.2em;
+	overflow-wrap: break-word;
+	word-break: break-all;
+}
+
+.guide-content pre > code {
+	display: block;
+	padding: 0.8em;
+	margin: 0.2em 0 0.5em;
+	overflow-x: auto;
+}
+
+.guide-content code .hljs-attr {
+	color: var(--editor-variable);
+}
+
+.guide-content code .hljs-string {
+	color: var(--editor-string);
+}
+
+.guide-content code .hljs-number {
+	color: var(--editor-number);
+}
+
+.guide-content code .hljs-keyword {
+	color: var(--editor-constant);
 }
 
 @media screen and (max-width: 720px) {

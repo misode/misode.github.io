@@ -34,7 +34,7 @@ export function Versions({}: Props) {
 		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 		<div class="versions">
 			{selectedId ? <>
-				<div class="version-navigation">
+				<div class="navigation">
 					<a class="btn btn-link" href="/versions/">
 						{Octicon.three_bars}
 						{locale('versions.all')}

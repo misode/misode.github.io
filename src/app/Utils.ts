@@ -93,6 +93,15 @@ export function setSeachParams(modifications: Record<string, string | undefined>
 	route(`${newPath ? cleanUrl(newPath) : getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
 }
 
+export function parseFrontMatter(source: string) {
+	return Object.fromEntries(
+		source.substring(3, source.indexOf('---', 3))
+			.trim().split('\n')
+			.filter(line => line.includes(':'))
+			.map(line => line.split(':').map(s => s.trim()))
+	)
+}
+
 export function stringToColor(str: string): [number, number, number] {
 	const h = Math.abs(hashString(str))
 	return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
