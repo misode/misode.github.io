@@ -1,5 +1,6 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
+import yaml from 'js-yaml'
 import { getCurrentUrl, route } from 'preact-router'
 import rfdc from 'rfdc'
 import config from '../config.json'
@@ -8,7 +9,7 @@ export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
 }
 
-export function isObject(obj: any) {
+export function isObject(obj: any): obj is Record<string, any> {
 	return typeof obj === 'object' && obj !== null
 }
 
@@ -93,13 +94,29 @@ export function setSeachParams(modifications: Record<string, string | undefined>
 	route(`${newPath ? cleanUrl(newPath) : getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
 }
 
-export function parseFrontMatter(source: string) {
-	return Object.fromEntries(
-		source.substring(3, source.indexOf('---', 3))
-			.trim().split('\n')
-			.filter(line => line.includes(':'))
-			.map(line => line.split(':').map(s => s.trim()))
-	)
+export function parseFrontMatter(source: string): Record<string, any> {
+	const data = yaml.load(source.substring(3, source.indexOf('---', 3)))
+	if (!isObject(data)) return {}
+	console.log(data)
+	return data
+}
+
+export function versionContent(content: string, version: string) {
+	let cursor = 0
+	while (true) {
+		const start = content.indexOf('{#', cursor)
+		const end = content.indexOf('#}', start + 2)
+		if (start < 0 && end < 0) {
+			break
+		}
+		const vStart = content.indexOf('#[', start + 1)
+		const vEnd = content.indexOf(']', vStart + 2)
+		const v = content.substring(vStart + 2, vEnd)
+		const sub = v === version ? content.substring(vEnd + 1, end).trim() : ''
+		content = content.substring(0, start) + sub + content.substring(end + 2)
+		cursor = cursor - (end - start + 2) + sub.length
+	}
+	return content
 }
 
 export function stringToColor(str: string): [number, number, number] {

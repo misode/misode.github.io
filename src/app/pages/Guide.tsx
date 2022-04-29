@@ -1,10 +1,11 @@
 import hljs from 'highlight.js'
 import { marked } from 'marked'
 import { useEffect, useMemo, useState } from 'preact/hooks'
+import config from '../../config.json'
 import { Btn, BtnMenu, Giscus, Octicon } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import type { VersionId } from '../services'
-import { parseFrontMatter } from '../Utils'
+import { parseFrontMatter, versionContent } from '../Utils'
 
 interface Props {
 	path?: string
@@ -17,26 +18,41 @@ export function Guide({ id }: Props) {
 	const [content, setContent] = useState<string | undefined>(undefined)
 
 	const frontMatter = useMemo(() => {
-		return content && parseFrontMatter(content)
+		if (!content) return undefined
+		return parseFrontMatter(content)
 	}, [content])
 
 	useTitle(frontMatter?.title, frontMatter?.versions?.split(' '))
 
+	const allowedVersions = useMemo(() => {
+		const versionString = frontMatter?.versions?.toString() as string
+		if (!versionString) return undefined
+		const orderedVersions = config.versions.map(v => v.id)
+		return versionString.split(' ')
+			.sort((a, b) => orderedVersions.indexOf(b) - orderedVersions.indexOf(a))
+	}, [frontMatter?.versions])
+
 	const guideVersion = useMemo(() => {
-		if (!frontMatter?.versions) return version
-		const allowedVersions: string[] = frontMatter.versions.split(' ')
+		if (!allowedVersions) return version
 		if (allowedVersions.includes(version)) return version
-		return allowedVersions[allowedVersions.length - 1]
+		return allowedVersions[0]
 	}, [version, frontMatter?.versions])
 
+	const versionedContent = useMemo(() => {
+		if (!content) return undefined
+		const guide = content.substring(content.indexOf('---', 3) + 3)
+		return versionContent(guide, guideVersion)
+	}, [guideVersion, content])
+
 	const html = useMemo(() => {
-		return content && marked(content.substring(content.indexOf('---', 3) + 3), {
+		if (!versionedContent) return undefined
+		return marked(versionedContent, {
 			highlight: (code, lang) => {
 				if (lang === '') return undefined
 				return hljs.highlight(code, { language: lang }).value
 			},
 		})
-	}, [content])
+	}, [versionedContent])
 
 
 	useEffect(() => {
@@ -54,8 +70,8 @@ export function Guide({ id }: Props) {
 					{Octicon.arrow_left}
 					{locale('guides.all')}
 				</a>
-				{frontMatter?.versions && <BtnMenu icon="tag" label={guideVersion}>
-					{frontMatter.versions.split('\n').map((v: string) =>
+				{allowedVersions && <BtnMenu icon="tag" label={guideVersion}>
+					{allowedVersions.map((v: string) =>
 						<Btn label={v} onClick={() => changeVersion(v as VersionId)} />)}
 				</BtnMenu>}
 			</div>
