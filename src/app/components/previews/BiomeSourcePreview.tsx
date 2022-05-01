@@ -1,6 +1,5 @@
-import { DataModel, Path } from '@mcschema/core'
+import { Path } from '@mcschema/core'
 import type { NoiseParameters } from 'deepslate'
-import { NoiseGeneratorSettings } from 'deepslate'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
@@ -115,8 +114,7 @@ function calculateState(data: any, octaves: Record<string, NoiseParameters>) {
 
 export function getOctaves(obj: any): Record<string, NoiseParameters> {
 	if (typeof obj !== 'string') {
-		const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(obj))
-		obj = settings.legacyRandomSource ? 'minecraft:nether' : 'minecraft:overworld'
+		obj = obj.legacy_random_source ? 'minecraft:nether' : 'minecraft:overworld'
 	}
 	switch (obj.replace(/^minecraft:/, '')) {
 		case 'overworld':
