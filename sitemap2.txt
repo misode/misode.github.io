@@ -5,6 +5,7 @@ https://misode.github.io/item-modifier/
 https://misode.github.io/advancement/
 https://misode.github.io/recipe/
 https://misode.github.io/text-component/
+https://misode.github.io/chat-type/
 https://misode.github.io/dimension/
 https://misode.github.io/dimension-type/
 https://misode.github.io/world/
