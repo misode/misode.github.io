@@ -114,6 +114,12 @@
       "schema": "text_component"
     },
     {
+      "id": "chat_type",
+      "url": "chat-type",
+      "schema": "chat_type",
+      "minVersion": "1.19"
+    },
+    {
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",
