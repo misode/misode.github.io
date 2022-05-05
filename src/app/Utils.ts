@@ -97,7 +97,6 @@ export function setSeachParams(modifications: Record<string, string | undefined>
 export function parseFrontMatter(source: string): Record<string, any> {
 	const data = yaml.load(source.substring(3, source.indexOf('---', 3)))
 	if (!isObject(data)) return {}
-	console.log(data)
 	return data
 }
 
@@ -105,18 +104,62 @@ export function versionContent(content: string, version: string) {
 	let cursor = 0
 	while (true) {
 		const start = content.indexOf('{#', cursor)
-		const end = content.indexOf('#}', start + 2)
-		if (start < 0 && end < 0) {
+		if (start < 0) {
 			break
 		}
+		const end = findMatchingClose(content, start + 2)
 		const vStart = content.indexOf('#[', start + 1)
-		const vEnd = content.indexOf(']', vStart + 2)
-		const v = content.substring(vStart + 2, vEnd)
-		const sub = v === version ? content.substring(vEnd + 1, end).trim() : ''
+		let sub = ''
+		if (vStart >= 0 && vStart < end) {
+			const vEnd = content.indexOf(']', vStart + 2)
+			const v = content.substring(vStart + 2, vEnd)
+			if (v === version) {
+				sub = content.substring(vEnd + 1, end).trim()
+			}
+		} else {
+			const key = content.substring(start + 2, end)
+			const versionConfig = config.versions.find(v => v.id === version)
+			sub = ({
+				version: versionConfig?.id,
+				pack_format: versionConfig?.pack_format.toString(),
+			} as Record<string, string | undefined>)[key] ?? ''
+		}
 		content = content.substring(0, start) + sub + content.substring(end + 2)
-		cursor = cursor - (end - start + 2) + sub.length
+		cursor = start
+		
 	}
 	return content
+}
+
+function findMatchingClose(source: string, index: number) {
+	let depth = 0
+	let iteration = 0
+	while (iteration++ < 1000) {
+		const close = source.indexOf('#}', index)
+		const open = source.indexOf('{#', index)
+		if (close < 0) {
+			console.warn('Missing closing bracket')
+			return source.length
+		}
+		if (open < 0) {
+			if (depth === 0) {
+				return close
+			} else {
+				depth -= 1
+				index = close + 2
+			}
+		} else if (open < close) {
+			depth += 1
+			index = open + 2
+		} else if (depth === 0) {
+			return close
+		} else {
+			depth -= 1
+			index = close + 2
+		}
+	}
+	console.warn('Exceeded max iterations while finding closing bracket')
+	return source.length
 }
 
 export function stringToColor(str: string): [number, number, number] {

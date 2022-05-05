@@ -22,14 +22,13 @@ export function Guide({ id }: Props) {
 		return parseFrontMatter(content)
 	}, [content])
 
-	useTitle(frontMatter?.title, frontMatter?.versions?.split(' '))
+	useTitle(frontMatter?.title, frontMatter?.versions)
 
 	const allowedVersions = useMemo(() => {
-		const versionString = frontMatter?.versions?.toString() as string
-		if (!versionString) return undefined
+		console.log(frontMatter?.versions)
 		const orderedVersions = config.versions.map(v => v.id)
-		return versionString.split(' ')
-			.sort((a, b) => orderedVersions.indexOf(b) - orderedVersions.indexOf(a))
+		return (frontMatter?.versions as string[])
+			?.sort((a, b) => orderedVersions.indexOf(b) - orderedVersions.indexOf(a))
 	}, [frontMatter?.versions])
 
 	const guideVersion = useMemo(() => {

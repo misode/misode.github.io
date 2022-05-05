@@ -53,27 +53,33 @@
   "versions": [
     {
       "id": "1.15",
-      "ref": "1.15.2"
+      "ref": "1.15.2",
+      "pack_format": 5
     },
     {
       "id": "1.16",
-      "ref": "1.16.5"
+      "ref": "1.16.5",
+      "pack_format": 6
     },
     {
       "id": "1.17",
-      "ref": "1.17.1"
+      "ref": "1.17.1",
+      "pack_format": 7
     },
     {
       "id": "1.18",
-      "ref": "1.18.1"
+      "ref": "1.18.1",
+      "pack_format": 8
     },
     {
       "id": "1.18.2",
-      "ref": "1.18.2"
+      "ref": "1.18.2",
+      "pack_format": 9
     },
     {
       "id": "1.19",
-      "dynamic": true
+      "dynamic": true,
+      "pack_format": 10
     }
   ],
   "generators": [

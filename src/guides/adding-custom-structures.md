@@ -1,6 +1,8 @@
 ---
 title: Adding custom structures
-versions: 1.18.2 1.19
+versions:
+  - '1.18.2'
+  - '1.19'
 ---
 
 This guide will showcase how to create a data pack that adds a custom structure to the world. {#[1.18.2] There is also a [data pack download](https://gist.github.com/misode/45559d34627755ecaa52497daea83544/raw/8b41b3e273210e0455e4bd4fa97b5504b65aff2c/structure-example.zip) of this complete example. #}
@@ -8,18 +10,18 @@ This guide will showcase how to create a data pack that adds a custom structure 
 > **Always leave the world and rejoin to apply the new changes!**
 
 ## Pack.mcmeta
-Like every data pack, we need a `pack.mcmeta`. In this version, the pack format is {#[1.18.2] 9 #}{#[1.19] 10 #}.
+Like every data pack, we need a `pack.mcmeta`. In this version, the pack format is {#pack_format#}.
 ```json
 {
   "pack": {
-    "pack_format": {#[1.18.2] 9 #}{#[1.19] 10 #},
+    "pack_format": {#pack_format#},
     "description": "A tall tower"
   }
 }
 ```
 
 ## The structure set
-A structure set is where the placement starts. It defines where in the world the structure should be placed, and how rare it is. It takes a weighted list of different structures, allowing structure variants (for example the [vanilla nether](https://github.com/misode/mcmeta/blob/{#[1.18.2] 1.18.2- #}data/data/minecraft/worldgen/structure_set/nether_complexes.json) has a structure set with both the bastion and fortress).
+A structure set is where the placement starts. It defines where in the world the structure should be placed, and how rare it is. It takes a weighted list of different structures, allowing structure variants (for example the [vanilla nether](/worldgen/structure-set/?preset=nether_complexes&version={#version#}) has a structure set with both the bastion and fortress).
 
 **`data/example/worldgen/structure_set/tall_towers.json`**
 ```json
@@ -59,7 +61,7 @@ When using the `random_spread` placement type, it generates structures grid-base
 ..XXX..XXX..X
 ```
 
-## The {#[1.18.2] configured #} structure
+## The {#[1.18.2] configured structure #}{#[1.19] structure #}
 The {#[1.18.2] configured structure (feature) #}{#[1.19] structure #} is the ID you will be able to reference in `/locate`.
 
 **`data/example/worldgen/{#[1.18.2] configured_structure_feature #}{#[1.19] structure #}/tall_tower.json`**
@@ -100,12 +102,12 @@ Let's go over all the fields.
 * `config.size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
 * `biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
 * `adapt_noise`: When true, it will add extra terrain below each structure piece.
-* `spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](https://github.com/misode/mcmeta/blob/1.18.2-data/data/minecraft/worldgen/configured_structure_feature/monument.json) structure feature as a reference.
+* `spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure-feature/?preset=monument&version={#version#}) structure feature as a reference.
 #}{#[1.19]
-* `type`: This is the structure feature type. When making custom structures, you almost always want to set this to `jigsaw`.
+* `type`: This is the structure type. When making custom structures, you almost always want to set this to `jigsaw`.
 * `biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
 * `step`: The generation step to place the features in. This matches the steps in a biome's `feature` list. Possible values: `raw_generation`, `lakes`, `local_modifications`, `underground_structures`, `surface_structures`, `strongholds`, `underground_ores`, `underground_decoration`, `fluid_springs`, `vegetal_decoration`, and `top_layer_modification`.
-* `spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](https://github.com/misode/mcmeta/blob/data/data/minecraft/worldgen/structure/monument.json) structure feature as a reference.
+* `spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure/?preset=monument&version={#version#}) structure feature as a reference.
 * `start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
 * `size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
 * `start_height`: A height provider specifying at which height the structure should spawn. The example uses the constant shorthand so it just specifies a vertical anchor.
