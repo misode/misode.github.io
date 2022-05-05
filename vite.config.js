@@ -46,7 +46,7 @@ export default defineConfig({
 					title: '404',
 					template,
 				}),
-				...['sounds', 'changelog', 'versions'].map(id => html({
+				...['sounds', 'changelog', 'versions', 'guides'].map(id => html({
 					fileName: `${id}/index.html`,
 					title: getTitle({ id: `title.${id}`, page: true }),
 					template,

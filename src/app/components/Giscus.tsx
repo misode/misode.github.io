@@ -9,7 +9,7 @@ export function Giscus({ term }: Props) {
 	const themeSuffix = actualTheme === 'light' ? '-burn' : ''
 	const themeUrl = (import.meta as any).env.DEV
 		? `http://localhost:3000/src/styles/giscus${themeSuffix}.css`
-		: `https://${location.host}/assets/giscus${themeSuffix}.css`
+		: `${location.protocol}//${location.host}/assets/giscus${themeSuffix}.css`
 
 	return <GiscusReact
 		repo="misode/misode.github.io"
