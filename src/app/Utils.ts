@@ -1,7 +1,7 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import yaml from 'js-yaml'
-import { getCurrentUrl, route } from 'preact-router'
+import { route } from 'preact-router'
 import rfdc from 'rfdc'
 import config from '../config.json'
 
@@ -69,29 +69,11 @@ export function getGenerator(url: string) {
 	return config.generators.find(g => g.url === trimmedUrl)
 }
 
-export function getSearchParams(url: string) {
-	const searchIndex = url.indexOf('?')
-	if (searchIndex >= 0) {
-		url = url.slice(searchIndex + 1)
-		return new Map(url.split('&').map<[string, string]>(param => {
-			const index = param.indexOf('=')
-			if (index === -1) return [param, 'true']
-			return [decodeURIComponent(param.slice(0, index)), decodeURIComponent(param.slice(index + 1))]
-		}))
-	}
-	return new Map<string, string>()
-}
-
-export function setSeachParams(modifications: Record<string, string | undefined>, newPath?: string) {
-	const url = getCurrentUrl()
-	const searchParams = getSearchParams(url)
-	Object.entries(modifications).forEach(([key, value]) => {
-		if (value === undefined) searchParams.delete(key)
-		else searchParams.set(key, value)
-	})
-	const search = Array.from(searchParams).map(([key, value]) =>
-		`${encodeURIComponent(key)}=${encodeURIComponent(value).replaceAll('%2F', '/')}`)
-	route(`${newPath ? cleanUrl(newPath) : getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
+export function changeUrl({ path, search, hash, replace }: { path?: string, search?: string, hash?: string, replace?: boolean }) {
+	const url = (path !== undefined ? cleanUrl(path) : location.pathname)
+		+ (search !== undefined ? (search.startsWith('?') || search.length === 0 ? search : '?' + search) : location.search)
+		+ (hash !== undefined ? (hash.startsWith('#') ? hash : '#' + hash) : location.hash)
+	route(url, replace)
 }
 
 export function parseFrontMatter(source: string): Record<string, any> {

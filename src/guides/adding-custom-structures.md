@@ -3,6 +3,9 @@ title: Adding custom structures
 versions:
   - '1.18.2'
   - '1.19'
+tags:
+  - worldgen
+  - structures
 ---
 
 This guide will showcase how to create a data pack that adds a custom structure to the world. {#[1.18.2] There is also a [data pack download](https://gist.github.com/misode/45559d34627755ecaa52497daea83544/raw/8b41b3e273210e0455e4bd4fa97b5504b65aff2c/structure-example.zip) of this complete example. #}

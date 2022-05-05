@@ -32,7 +32,7 @@ export function TitleProvider({ children }: { children: ComponentChildren }) {
 
 	const changeTitle = useCallback((title: string, versions?: VersionId[]) => {
 		versions ??= config.versions.map(v => v.id as VersionId)
-		const titleVersions = versions.slice(versions.length - VERSIONS_IN_TITLE)
+		const titleVersions = versions.slice(-VERSIONS_IN_TITLE)
 		document.title = `${title} Minecraft ${titleVersions.join(', ')}`
 		setTitle(title)
 	}, [])

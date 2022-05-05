@@ -1,5 +1,7 @@
 export * from './useActiveTimout'
 export * from './useCanvas'
 export * from './useFocus'
+export * from './useHash'
 export * from './useMediaQuery'
 export * from './useModel'
+export * from './useSearchParam'

@@ -1,10 +1,9 @@
-import { getCurrentUrl } from 'preact-router'
 import { useEffect, useState } from 'preact/hooks'
 import { Ad, ErrorPanel, Octicon, VersionDetail, VersionList } from '../components'
 import { useLocale, useTitle } from '../contexts'
+import { useSearchParam } from '../hooks'
 import type { VersionMeta } from '../services'
 import { fetchVersions } from '../services'
-import { getSearchParams } from '../Utils'
 
 interface Props {
 	path?: string,
@@ -21,7 +20,7 @@ export function Versions({}: Props) {
 			.catch(e => { console.error(e); setError(e) })
 	}, [])
 
-	const selectedId = getSearchParams(getCurrentUrl()).get('id')
+	const [selectedId] = useSearchParam('id')
 	const selected = versions.find(v => v.id === selectedId)
 
 	useTitle(selected ? selected.name : 'Versions Explorer', selected ? [] : undefined)

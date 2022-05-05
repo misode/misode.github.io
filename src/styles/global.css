@@ -1500,10 +1500,15 @@ hr {
 	margin-right: auto;
 }
 
+.guide-tags {
+	margin: 12px 0;
+	display: flex;
+	flex-wrap: wrap;
+}
+
 .guide-content {
 	color: var(--text-2);
 	margin-top: 12px;
-	overflow: hidden;
 	line-height: 1.5;
 	word-wrap: break-word;
 }
@@ -1520,6 +1525,40 @@ hr {
 .guide-content h5,
 .guide-content h6 {
 	margin: 1.2em 0 0.4em;
+	position: relative;
+}
+
+.guide-content h1 > [id],
+.guide-content h2 > [id],
+.guide-content h3 > [id],
+.guide-content h4 > [id],
+.guide-content h5 > [id],
+.guide-content h6 > [id] {
+	fill: var(--text-3);
+	opacity: 0;
+	transition: opacity 0.2s;
+	float: left;
+	padding-right: 4px;
+	margin-left: -20px;
+	cursor: pointer;
+}
+
+.guide-content h1 > [id] *,
+.guide-content h2 > [id] *,
+.guide-content h3 > [id] *,
+.guide-content h4 > [id] *,
+.guide-content h5 > [id] *,
+.guide-content h6 > [id] * {
+	pointer-events: none;
+}
+
+.guide-content h1:hover > [id],
+.guide-content h2:hover > [id],
+.guide-content h3:hover > [id],
+.guide-content h4:hover > [id],
+.guide-content h5:hover > [id],
+.guide-content h6:hover > [id] {
+	opacity: 1;
 }
 
 .guide-content blockquote {

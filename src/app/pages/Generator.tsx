@@ -1,23 +1,23 @@
 import { DataModel, Path } from '@mcschema/core'
 import { getCurrentUrl, route } from 'preact-router'
-import { useEffect, useErrorBoundary, useMemo, useState } from 'preact/hooks'
+import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { useLocale, useProject, useTitle, useVersion } from '../contexts'
-import { useActiveTimeout, useModel } from '../hooks'
+import { useActiveTimeout, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet, SHARE_KEY } from '../services'
 import { Store } from '../Store'
-import { cleanUrl, deepEqual, getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
+import { cleanUrl, deepEqual, getGenerator } from '../Utils'
 
 interface Props {
 	default?: true,
 }
 export function Generator({}: Props) {
 	const { locale } = useLocale()
-	const { version, changeVersion } = useVersion()
+	const { version, changeVersion, changeTargetVersion } = useVersion()
 	const { project, file, updateFile, openFile, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
@@ -44,14 +44,15 @@ export function Generator({}: Props) {
 		setError(`This generator is not available in versions above ${gen.maxVersion}`)
 	}
 
-	const searchParams = getSearchParams(getCurrentUrl())
-	const currentPreset = searchParams.get('preset')
-	const sharedSnippetId = searchParams.get(SHARE_KEY)
+	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
+	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
+	const ignoreChange = useRef(false)
 	useEffect(() => {
 		if (model && currentPreset) {
 			loadPreset(currentPreset).then(preset => {
+				ignoreChange.current = true
 				model.reset(DataModel.wrapLists(preset), false)
-				setSeachParams({ version, preset: currentPreset, [SHARE_KEY]: undefined })
+				setSharedSnippetId(undefined)
 			})
 		} else if (model && sharedSnippetId) {
 			getSnippet(sharedSnippetId).then(s => loadSnippet(model, s))
@@ -107,11 +108,15 @@ export function Generator({}: Props) {
 
 	const [dirty, setDirty] = useState(false)
 	useModel(model, () => {
-		setSeachParams({ version: undefined, preset: undefined, [SHARE_KEY]: undefined })
+		if (!ignoreChange.current) {
+			setCurrentPreset(undefined, true)
+			setSharedSnippetId(undefined, true)
+		}
+		ignoreChange.current = false
 		Store.setBackup(gen.id, DataModel.unwrapLists(model?.data))
 		setError(null)
 		setDirty(true)
-	}, [gen.id])
+	}, [gen.id, setCurrentPreset, setSharedSnippetId])
 
 	const [fileRename, setFileRename] = useState('')
 	const [fileSaved, doSave] = useActiveTimeout()
@@ -211,7 +216,9 @@ export function Generator({}: Props) {
 
 	const selectPreset = (id: string) => {
 		Analytics.generatorEvent('load-preset', id)
-		setSeachParams({ version, preset: id, [SHARE_KEY]: undefined })
+		setSharedSnippetId(undefined, true)
+		changeTargetVersion(version, true)
+		setCurrentPreset(id)
 	}
 
 	const loadPreset = async (id: string) => {
@@ -226,12 +233,13 @@ export function Generator({}: Props) {
 			}
 			return preset
 		} catch (e) {
-			setError(e instanceof Error ? e : message(e))
+			setError(`Cannot load preset ${id} in ${version}`)
+			setCurrentPreset(undefined, true)
 		}
 	}
 
 	const selectVersion = (version: VersionId) => {
-		setSeachParams({ [SHARE_KEY]: undefined })
+		setSharedSnippetId(undefined, true)
 		changeVersion(version)
 	}
 
@@ -244,13 +252,13 @@ export function Generator({}: Props) {
 			return
 		}
 		if (currentPreset) {
-			setShareUrl(`${location.protocol}//${location.host}/${gen.url}/?version=${version}&preset=${currentPreset}`)
+			setShareUrl(`${location.origin}/${gen.url}/?version=${version}&preset=${currentPreset}`)
 			setShareShown(true)
 			copySharedId()
 		} else if (model && blockStates) {
 			const output = getOutput(model, blockStates)
 			if (deepEqual(output, model.schema.default())) {
-				setShareUrl(`${location.protocol}//${location.host}/${gen.url}/?version=${version}`)
+				setShareUrl(`${location.origin}/${gen.url}/?version=${version}`)
 				setShareShown(true)
 			} else {
 				shareSnippet(gen.id, version, output, previewShown)

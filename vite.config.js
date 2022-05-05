@@ -1,24 +1,22 @@
 import preact from '@preact/preset-vite'
 import alias from '@rollup/plugin-alias'
 import html from '@rollup/plugin-html'
-import { env } from 'process'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-import { defineConfig } from 'vite'
-import config from './src/config.json'
-import English from './src/locales/en.json'
 import glob from 'fast-glob'
 import fs from 'fs'
+import yaml from 'js-yaml'
+import { env } from 'process'
+import { defineConfig } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+import config from './src/config.json'
+import English from './src/locales/en.json'
 
 const guides = glob.sync('src/guides/**/*.md').flatMap(g => {
 	const content = fs.readFileSync(g).toString('utf-8')
 	if (!content.startsWith('---')) return []
 	try {
-		const frontMatter = Object.fromEntries(
-			content.substring(3, content.indexOf('---', 3))
-				.trim().split('\n')
-				.filter(line => line.includes(':'))
-				.map(line => line.split(':').map(s => s.trim()))
-		)
+		const frontMatter = yaml.load(content.substring(3, content.indexOf('---', 3)))
+
+		if (typeof frontMatter !== 'object') return []
 		return [{
 			id: g.replace('src/guides/', '').replace('.md', ''),
 			...frontMatter,
@@ -64,7 +62,7 @@ export default defineConfig({
 				...guides.map(g => {
 					return html({
 						fileName: `guides/${g.id}/index.html`,
-						title: `${g.title} Minecraft${g.versions ? ` ${g.versions}` : ''}`,
+						title: `${g.title} Minecraft${g.versions ? ` ${g.versions.join(' ')}` : ''}`,
 						template,
 					})
 				}),
