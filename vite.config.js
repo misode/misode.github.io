@@ -9,13 +9,13 @@ import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import config from './src/config.json'
 import English from './src/locales/en.json'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 const guides = glob.sync('src/guides/**/*.md').flatMap(g => {
 	const content = fs.readFileSync(g).toString('utf-8')
 	if (!content.startsWith('---')) return []
 	try {
 		const frontMatter = yaml.load(content.substring(3, content.indexOf('---', 3)))
-
 		if (typeof frontMatter !== 'object') return []
 		return [{
 			id: g.replace('src/guides/', '').replace('.md', ''),
@@ -87,6 +87,7 @@ export default defineConfig({
 				{ src: 'src/guides/*', dest: 'guides' },
 			],
 		}),
+		visualizer(),
 	],
 })
 
