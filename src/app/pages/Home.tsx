@@ -33,6 +33,7 @@ export function Home({}: Props) {
 				desc="Convert your data packs from 1.16 to 1.17 to 1.18" />
 			<ToolCard title="Technical Changelog" link="/changelog/" />
 			<ToolCard title="Minecraft Versions" link="/versions/" />
+			<ToolCard title="Data Pack Guides" link="/guides/" />
 			<Giscus />
 		</div>
 	</main>

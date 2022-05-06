@@ -56,9 +56,9 @@ export function ChangelogList({ changes, defaultOrder }: Props) {
 		</div>}
 		<div class="changelog-list">
 			{sortedChangelogs === undefined
-				? <span>{locale('loading')}</span>
+				? <span class="note">{locale('loading')}</span>
 				: sortedChangelogs.length === 0
-					? <span>{locale('changelog.no_results')}</span>
+					? <span class="note">{locale('changelog.no_results')}</span>
 					:	sortedChangelogs.map(change =>
 						<ChangelogEntry change={change} activeTags={tags} toggleTag={toggleTag} />)}
 		</div>

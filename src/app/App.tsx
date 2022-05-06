@@ -4,11 +4,12 @@ import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics'
 import { Header } from './components'
-import { Category, Changelog, Generator, Home, Project, Sounds, Versions } from './pages'
+import { Category, Changelog, Generator, Guide, Guides, Home, Project, Sounds, Versions } from './pages'
 import { cleanUrl } from './Utils'
 
 export function App() {
 	const changeRoute = (e: RouterOnChangeArgs) => {
+		window.dispatchEvent(new CustomEvent('replacestate'))
 		// Needs a timeout to ensure the title is set correctly
 		setTimeout(() => Analytics.pageview(cleanUrl(e.url)))
 	}
@@ -23,6 +24,8 @@ export function App() {
 			<Changelog path="/changelog" />
 			<Versions path="/versions" />
 			<Project path="/project" />
+			<Guides path="/guides/" />
+			<Guide path="/guides/:id" />
 			<Generator default />
 		</Router>
 	</>

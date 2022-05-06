@@ -1,11 +1,30 @@
 import preact from '@preact/preset-vite'
 import alias from '@rollup/plugin-alias'
 import html from '@rollup/plugin-html'
+import glob from 'fast-glob'
+import fs from 'fs'
+import yaml from 'js-yaml'
 import { env } from 'process'
-import copy from 'rollup-plugin-copy'
 import { defineConfig } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import config from './src/config.json'
 import English from './src/locales/en.json'
+
+const guides = glob.sync('src/guides/**/*.md').flatMap(g => {
+	const content = fs.readFileSync(g).toString('utf-8')
+	if (!content.startsWith('---')) return []
+	try {
+		const frontMatter = yaml.load(content.substring(3, content.indexOf('---', 3)))
+
+		if (typeof frontMatter !== 'object') return []
+		return [{
+			id: g.replace('src/guides/', '').replace('.md', ''),
+			...frontMatter,
+		}]
+	} catch (e) {
+		return []
+	}
+})
 
 export default defineConfig({
 	build: {
@@ -23,31 +42,29 @@ export default defineConfig({
 				html({
 					fileName: '404.html',
 					title: '404',
-					template: template,
+					template,
 				}),
-				...['sounds', 'changelog', 'versions'].map(id => html({
+				...['sounds', 'changelog', 'versions', 'guides'].map(id => html({
 					fileName: `${id}/index.html`,
 					title: getTitle({ id: `title.${id}`, page: true }),
-					template: template,
+					template,
 				})),
 				...['worldgen', 'assets'].map(id => html({
 					fileName: `${id}/index.html`,
 					title: getTitle({ id, category: true }),
-					template: template,
+					template,
 				})),
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
 					title: getTitle(m),
-					template: template,
+					template,
 				})),
-				copy({
-					targets: [
-						{ src: 'src/sitemap.txt', dest: 'dist' },
-						{ src: 'src/sitemap.txt', dest: 'dist', rename: 'sitemap2.txt' },
-						{ src: 'src/styles/giscus.css', dest: 'dist/assets' },
-						{ src: 'src/styles/giscus-burn.css', dest: 'dist/assets' },
-					],
-					hook: 'writeBundle',
+				...guides.map(g => {
+					return html({
+						fileName: `guides/${g.id}/index.html`,
+						title: `${g.title} Minecraft${g.versions ? ` ${g.versions.join(' ')}` : ''}`,
+						template,
+					})
 				}),
 			],
 		},
@@ -57,8 +74,19 @@ export default defineConfig({
 	},
 	define: {
 		__LATEST_VERSION__: env.latest_version,
+		__GUIDES__: guides,
 	},
-	plugins: [preact()],
+	plugins: [
+		preact(),
+		viteStaticCopy({
+			targets: [
+				{ src: 'src/sitemap.txt', dest: '' },
+				{ src: 'src/styles/giscus.css', dest: 'assets' },
+				{ src: 'src/styles/giscus-burn.css', dest: 'assets' },
+				{ src: 'src/guides/*', dest: 'guides' },
+			],
+		}),
+	],
 })
 
 function getTitle(m) {

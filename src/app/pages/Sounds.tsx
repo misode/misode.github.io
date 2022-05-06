@@ -64,8 +64,8 @@ export function Sounds({}: Props) {
 				{configs.length > 1 && <Btn icon="play" label={ locale('sounds.play_all')} class="play-all-sounds" onClick={playAll} />}
 				<div class="spacer"></div>
 				<Btn icon="download" label={locale('download')} tooltip={locale('sounds.download_function')} class="download-sounds" onClick={downloadFunction} />
-				<BtnMenu icon="tag" label={version}>
-					{config.versions.reverse().map(v =>
+				<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')}>
+					{config.versions.slice().reverse().map(v =>
 						<Btn label={v.id} active={v.id === version} onClick={() => changeVersion(v.id as VersionId)} />
 					)}
 				</BtnMenu>

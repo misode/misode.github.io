@@ -86,7 +86,7 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 		const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
 		const url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
 		const res = await fetch(url)
-		return res.json()
+		return await res.json()
 	} catch (e) {
 		throw new Error(`Error occurred while fetching ${registry} preset ${id}: ${message(e)}`)
 	}

@@ -22,7 +22,7 @@ export function VersionList({ versions, link }: Props) {
 
 	return <>
 		<div class="versions-controls">
-			<TextInput class="btn btn-input version-search" list="sound-list" placeholder={locale('versions.search')}
+			<TextInput class="btn btn-input version-search" placeholder={locale('versions.search')}
 				value={search} onChange={setSearch} />
 			<Checkbox label="Include snapshots" value={snapshots} onChange={setSnapshots} />
 		</div>
