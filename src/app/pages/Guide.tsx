@@ -126,10 +126,10 @@ export function Guide({ id }: Props) {
 					{Octicon.arrow_left}
 					{locale('guides.all')}
 				</a>
-				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')}/>
+				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')} class="guide-share" />
 				{allowedVersions && <BtnMenu icon="tag" label={guideVersion} tooltip={locale('switch_version')}>
-					{allowedVersions.map((v: string) =>
-						<Btn label={v} onClick={() => changeVersion(v as VersionId)} />)}
+					{allowedVersions.map((v: string) => 
+						<Btn label={v} active={v === guideVersion} onClick={() => changeVersion(v as VersionId)} />)}
 				</BtnMenu>}
 			</div>
 			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="guide-tags">

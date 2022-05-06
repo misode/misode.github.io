@@ -8,7 +8,7 @@ tags:
   - structures
 ---
 
-This guide will showcase how to create a data pack that adds a custom structure to the world. {#[1.18.2] There is also a [data pack download](https://gist.github.com/misode/45559d34627755ecaa52497daea83544/raw/8b41b3e273210e0455e4bd4fa97b5504b65aff2c/structure-example.zip) of this complete example. #}
+This guide will showcase how to create a data pack that adds a custom structure to the world. There is also a [data pack download]({#[1.18.2] https://gist.github.com/misode/45559d34627755ecaa52497daea83544/raw/8ece848257e6ce17769ca17eccdf89b5889afbe2/tall-towers-1.18.2.zip #}{#[1.19] https://gist.github.com/misode/45559d34627755ecaa52497daea83544/raw/b7d7c44a132641d308cbdc93ce4cf061759d15c5/tall-towers-1.19.zip #}) of this complete example.
 
 > **Always leave the world and rejoin to apply the new changes!**
 
