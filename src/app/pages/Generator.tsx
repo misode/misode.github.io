@@ -31,9 +31,12 @@ export function Generator({}: Props) {
 		return <main><ErrorPanel error={`Cannot find generator "${getCurrentUrl()}"`} /></main>
 	}
 
-	const allowedVersions = config.versions
-		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
-		.map(v => v.id as VersionId)
+	const allowedVersions = useMemo(() => {
+		return config.versions
+			.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
+			.map(v => v.id as VersionId)
+			.reverse()
+	}, [gen.minVersion, gen.maxVersion])
 
 	useTitle(locale('title.generator', locale(gen.id)), allowedVersions)
 
@@ -353,7 +356,7 @@ export function Generator({}: Props) {
 						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
 					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
-						{allowedVersions.reverse().map(v =>
+						{allowedVersions.map(v =>
 							<Btn label={v} active={v === version} onClick={() => selectVersion(v)} />
 						)}
 					</BtnMenu>

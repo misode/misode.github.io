@@ -10,5 +10,9 @@
 			"source.organizeImports": true,
 			"source.fixAll.eslint": true
 		}
-	}
+	},
+	"typescript.format.semicolons": "remove",
+	"editor.insertSpaces": false,
+	"files.insertFinalNewline": true,
+	"files.trimFinalNewlines": true
 }

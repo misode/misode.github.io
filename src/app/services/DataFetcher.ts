@@ -1,7 +1,7 @@
-import type { CollectionRegistry } from '@mcschema/core';
-import config from '../../config.json';
-import { message } from '../Utils';
-import type { BlockStateRegistry, VersionId } from './Schemas';
+import type { CollectionRegistry } from '@mcschema/core'
+import config from '../../config.json'
+import { message } from '../Utils'
+import type { BlockStateRegistry, VersionId } from './Schemas'
 
 // Cleanup old caches
 ['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));

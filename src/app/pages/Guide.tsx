@@ -1,10 +1,11 @@
 import hljs from 'highlight.js'
 import { marked } from 'marked'
+import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
-import { Btn, BtnMenu, ChangelogTag, Giscus, Octicon } from '../components'
+import { Ad, Btn, BtnMenu, ChangelogTag, Giscus, Octicon } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
-import { useHash } from '../hooks'
+import { useActiveTimeout, useHash } from '../hooks'
 import type { VersionId } from '../services'
 import { parseFrontMatter, versionContent } from '../Utils'
 
@@ -104,6 +105,20 @@ export function Guide({ id }: Props) {
 		})()
 	}, [id])
 
+	const [shareActive, shareSuccess] = useActiveTimeout()
+
+	const onShare = useCallback(() => {
+		const url = `${location.origin}/guides/${id}/?version=${version}`
+		navigator.clipboard.writeText(url)
+		shareSuccess()
+	}, [id, version])
+
+	const onClickTag = (tag: string) => {
+		route(`/guides/?tags=${tag}`)
+	}
+
+	const [largeWidth] = useState(window.innerWidth > 600)
+
 	return <main>
 		<div class="guide">
 			<div class="navigation">
@@ -111,16 +126,19 @@ export function Guide({ id }: Props) {
 					{Octicon.arrow_left}
 					{locale('guides.all')}
 				</a>
-				<Btn icon="link" label={locale('share')} />
-				{allowedVersions && <BtnMenu icon="tag" label={guideVersion}>
+				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')}/>
+				{allowedVersions && <BtnMenu icon="tag" label={guideVersion} tooltip={locale('switch_version')}>
 					{allowedVersions.map((v: string) =>
 						<Btn label={v} onClick={() => changeVersion(v as VersionId)} />)}
 				</BtnMenu>}
 			</div>
 			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="guide-tags">
-				{frontMatter.tags.map((tag: string) => <ChangelogTag label={tag} active />)}
+				{frontMatter.tags.map((tag: string) =>
+					<ChangelogTag label={tag} active onClick={() => onClickTag(tag)} />
+				)}
 			</div>}
 			{html && <>
+				<Ad id="guide" type={largeWidth ? 'image' : 'text'} />
 				<div class="guide-content" dangerouslySetInnerHTML={{ __html: html }} onClick={clickGuideContent}></div>
 				<Giscus />
 			</>}

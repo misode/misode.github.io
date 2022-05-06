@@ -882,6 +882,10 @@ hr {
 	border: none;
 }
 
+.note {
+	color: var(--text-3);
+}
+
 .settings {
 	padding: 20px;
 }
@@ -1496,14 +1500,47 @@ hr {
 	margin-top: 16px;
 }
 
+.guide-card {
+	display: block;
+	text-decoration: none;
+	color: var(--text-2);
+	background-color: var(--background-2);
+	padding: 12px;
+	border-radius: 6px;
+}
+
+.guide-versions {
+	color: var(--text-3);
+	float: right;
+}
+
+.guide {
+	padding-left: 32px;
+	padding-right: 32px;
+}
+
 .guide .navigation > :first-child {
 	margin-right: auto;
 }
 
+.guide .navigation .btn.active {
+	fill: var(--accent-success);
+	color: var(--text-2);
+}
+
 .guide-tags {
-	margin: 12px 0;
+	margin-top: 12px;
 	display: flex;
 	flex-wrap: wrap;
+}
+
+.guide .ad {
+	margin: 12px 0 8px;
+}
+
+.guide .ad[data-ea-type="image"] {
+	float: right;
+	margin-left: 12px;
 }
 
 .guide-content {
@@ -1750,6 +1787,10 @@ hr {
 	}
 
 	.version-metadata-hide {
+		display: none;
+	}
+
+	.guide-versions {
 		display: none;
 	}
 }

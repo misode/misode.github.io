@@ -26,12 +26,12 @@ export function useSearchParam(param: string): [string | undefined, (value: stri
 	const changeValue = useCallback((newValue: string | undefined, replace?: boolean) => {
 		if (newValue !== value) {
 			const params = new URLSearchParams(location.search)
-			if (newValue === undefined) {
+			if (newValue === undefined || newValue.length === 0) {
 				params.delete(param)
 			} else {
 				params.set(param, newValue)
 			}
-			changeUrl({ search: params.toString(), replace })
+			changeUrl({ search: params.toString().replaceAll('%7C', '|'), replace })
 		}
 	}, [value])
 
