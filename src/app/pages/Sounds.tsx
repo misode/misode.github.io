@@ -1,3 +1,4 @@
+import type { Howl, HowlOptions } from 'howler'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
@@ -14,6 +15,14 @@ export function Sounds({}: Props) {
 	const { version, changeVersion } = useVersion()
 	const [error, setError] = useState<Error | null>(null)
 	useTitle(locale('title.sounds'))
+
+	const [howler, setHowler] = useState<undefined | ((options: HowlOptions) => Howl)>(undefined)
+	useEffect(() => {
+		(async () => {
+			const howler = await import('howler')
+			setHowler(() => (options: HowlOptions) => new howler.Howl(options))
+		})()
+	}, [])
 
 	const [sounds, setSounds] = useState<SoundEvents>({})
 	const soundKeys = Object.keys(sounds ?? {})
@@ -71,7 +80,9 @@ export function Sounds({}: Props) {
 				</BtnMenu>
 			</div>
 			<div class="sounds">
-				{configs.map(c => <SoundConfig key={c.id} {...c} {...{ sounds, delayedPlay }} onEdit={editConfig(c.id)} onDelete={deleteConfig(c.id)} />)}
+				{howler && configs.map(c =>
+					<SoundConfig key={c.id} {...c} {...{ howler, sounds, delayedPlay }} onEdit={editConfig(c.id)} onDelete={deleteConfig(c.id)} />
+				)}
 			</div>
 			<a ref={download} style="display: none;"></a>
 		</>}

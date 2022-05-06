@@ -1,4 +1,4 @@
-import { Howl } from 'howler'
+import type { Howl, HowlOptions } from 'howler'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, NumberInput, RangeInput, TextInput } from '..'
 import { useLocale, useVersion } from '../../contexts'
@@ -13,12 +13,13 @@ export interface SoundConfig {
 	volume: number,
 }
 type SoundConfigProps = SoundConfig & {
+	howler: (options: HowlOptions) => Howl,
 	sounds: SoundEvents,
 	onEdit: (changes: Partial<SoundConfig>) => unknown,
 	onDelete: () => unknown,
 	delayedPlay?: number,
 }
-export function SoundConfig({ sounds, sound, delay, pitch, volume, onEdit, onDelete, delayedPlay }: SoundConfigProps) {
+export function SoundConfig({ howler, sounds, sound, delay, pitch, volume, onEdit, onDelete, delayedPlay }: SoundConfigProps) {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const [loading, setLoading] = useState(true)
@@ -34,7 +35,7 @@ export function SoundConfig({ sounds, sound, delay, pitch, volume, onEdit, onDel
 		howls.current = (soundEvent?.sounds ?? []).map(entry => {
 			const soundPath = typeof entry === 'string' ? entry : entry.name
 			const url = getSoundUrl(version, soundPath)
-			const howl = new Howl({
+			const howl = howler({
 				src: [url],
 				format: ['ogg'],
 				volume,
