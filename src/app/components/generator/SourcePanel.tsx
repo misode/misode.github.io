@@ -1,7 +1,4 @@
 import { DataModel } from '@mcschema/core'
-import brace from 'brace'
-import 'brace/mode/json'
-import 'brace/mode/yaml'
 import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
@@ -59,6 +56,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
 	const [highlighting, setHighlighting] = useState(Store.getHighlighting())
+	const [braceLoaded, setBraceLoaded] = useState(false)
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>()
 	const onImport = useRef<(e: any) => any>()
@@ -109,32 +107,46 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 
 	useEffect(() => {
 		if (highlighting) {
-			const braceEditor = brace.edit('editor')
-			braceEditor.setOptions({
-				fontSize: 14,
-				showFoldWidgets: false,
-				highlightSelectedWord: false,
-			})
-			braceEditor.$blockScrolling = Infinity
-			braceEditor.on('blur', e => onImport.current(e))
-			braceEditor.getSession().setMode('ace/mode/json')
-
+			setBraceLoaded(false)
 			editor.current = {
-				getValue() {
-					return braceEditor.getSession().getValue()
-				},
-				setValue(value) {
-					braceEditor.getSession().setValue(value)
-				},
-				configure(indent, format) {
-					braceEditor.setOption('useSoftTabs', indent !== 'tabs')
-					braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
-					braceEditor.getSession().setMode(`ace/mode/${format}`)
-				},
-				select() {
-					braceEditor.selectAll()
-				},
+				getValue() { return ''},
+				setValue() {},
+				configure() {},
+				select() {},
 			}
+			import('brace').then(async (brace) => {
+				await Promise.all([
+					import('brace/mode/json'),
+					import('brace/mode/yaml'),
+				])
+				const braceEditor = brace.edit('editor')
+				braceEditor.setOptions({
+					fontSize: 14,
+					showFoldWidgets: false,
+					highlightSelectedWord: false,
+				})
+				braceEditor.$blockScrolling = Infinity
+				braceEditor.on('blur', e => onImport.current(e))
+				braceEditor.getSession().setMode('ace/mode/json')
+
+				editor.current = {
+					getValue() {
+						return braceEditor.getSession().getValue()
+					},
+					setValue(value) {
+						braceEditor.getSession().setValue(value)
+					},
+					configure(indent, format) {
+						braceEditor.setOption('useSoftTabs', indent !== 'tabs')
+						braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
+						braceEditor.getSession().setMode(`ace/mode/${format}`)
+					},
+					select() {
+						braceEditor.selectAll()
+					},
+				}
+				setBraceLoaded(true)
+			})
 		} else {
 			editor.current = {
 				getValue() {
@@ -157,9 +169,11 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [model])
 
 	useEffect(() => {
-		editor.current.configure(indent, format)
-		retransform.current()
-	}, [indent, format, highlighting])
+		if (!highlighting || braceLoaded) {
+			editor.current.configure(indent, format)
+			retransform.current()
+		}
+	}, [indent, format, highlighting, braceLoaded])
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {
