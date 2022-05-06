@@ -1,5 +1,4 @@
 import { DataModel } from '@mcschema/core'
-import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
@@ -10,6 +9,7 @@ import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
 
+
 const INDENT: Record<string, number | string | undefined> = {
 	'2_spaces': 2,
 	'4_spaces': 4,
@@ -17,16 +17,25 @@ const INDENT: Record<string, number | string | undefined> = {
 	minified: undefined,
 }
 
+let commentJson: typeof import('comment-json') | null = null
+
 const FORMATS: Record<string, {
-	parse: (v: string) => any,
+	parse: (v: string) => Promise<any>,
 	stringify: (v: any, indentation: string | number | undefined) => string,
 }> = {
 	json: {
-		parse: json.parse,
-		stringify: (v, i) => json.stringify(v, null, i) + '\n',
+		parse: async (v) => {
+			try {
+				return JSON.parse(v)
+			} catch (e) {
+				commentJson = await import('comment-json')
+				return commentJson.parse(v)
+			}
+		},
+		stringify: (v, i) => (commentJson ?? JSON).stringify(v, null, i) + '\n',
 	},
 	yaml: {
-		parse: yaml.load,
+		parse: async (v) => yaml.load(v),
 		stringify: (v, i) => yaml.dump(v, {
 			flowLevel: i === undefined ? 0 : -1,
 			indent: typeof i === 'string' ? 4 : i,
@@ -59,7 +68,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const [braceLoaded, setBraceLoaded] = useState(false)
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>(() => {})
-	const onImport = useRef<(e: any) => any>(() => {})
+	const onImport = useRef<() => Promise<void>>(async () => {})
 
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
@@ -88,12 +97,12 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			}
 		}
 
-		onImport.current = () => {
+		onImport.current = async () => {
 			if (!editor.current) return
 			const value = editor.current.getValue()
 			if (value.length === 0) return
 			try {
-				const data = FORMATS[format].parse(value)
+				const data = await FORMATS[format].parse(value)
 				model?.reset(DataModel.wrapLists(data), false)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -128,7 +137,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 					highlightSelectedWord: false,
 				})
 				braceEditor.$blockScrolling = Infinity
-				braceEditor.on('blur', e => onImport.current(e))
+				braceEditor.on('blur', () => onImport.current())
 				braceEditor.getSession().setMode('ace/mode/json')
 
 				editor.current = {
