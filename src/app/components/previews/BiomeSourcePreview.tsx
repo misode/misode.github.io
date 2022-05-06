@@ -1,5 +1,5 @@
 import { Path } from '@mcschema/core'
-import type { NoiseParameters } from 'deepslate'
+import type { NoiseParameters } from 'deepslate/worldgen'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
@@ -18,7 +18,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
-	const refineTimeout = useRef<number>(undefined)
+	const refineTimeout = useRef<number>()
 
 	const seed = BigInt(model.get(new Path(['generator', 'seed'])) ?? configuredSeed)
 	const octaves = useMemo(() => {

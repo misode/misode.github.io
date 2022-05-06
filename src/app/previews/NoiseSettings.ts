@@ -1,7 +1,6 @@
 import { DataModel } from '@mcschema/core'
-import type { BlockState } from 'deepslate'
-import { BlockPos, Chunk, ChunkPos, clampedMap, DensityFunction, FixedBiome, Identifier, NoiseChunkGenerator, NoiseGeneratorSettings, NoiseParameters, NoiseRouter, NoiseSettings, Registry, WorldgenRegistries, XoroshiroRandom } from 'deepslate'
-import * as deepslate18 from 'deepslate-1.18'
+import type { BlockState } from 'deepslate/worldgen'
+import { BlockPos, Chunk, ChunkPos, clampedMap, DensityFunction, FixedBiome, Identifier, NoiseChunkGenerator, NoiseGeneratorSettings, NoiseParameters, NoiseRouter, NoiseSettings, Registry, WorldgenRegistries, XoroshiroRandom } from 'deepslate/worldgen'
 import type { VersionId } from '../services'
 import { checkVersion, fetchAllPresets } from '../services'
 import { deepClone, deepEqual } from '../Utils'
@@ -49,7 +48,7 @@ export async function noiseSettings(state: any, img: ImageData, options: NoiseSe
 			await initRegistries(options.version)
 		}
 
-		const { settings, generator } = getCached(state, options)
+		const { settings, generator } = await getCached(state, options)
 
 		const slice = new LevelSlice(-options.offset, options.width, settings.noise.minY, settings.noise.height)
 		slice.generate(generator, options.biome)
@@ -167,7 +166,7 @@ async function fetchRegistry<T extends { fromJson(obj: unknown): T }>(version: V
 	root.register(registry.key, registry)
 }
 
-function getCached(state: unknown, options: NoiseSettingsOptions) {
+async function getCached(state: unknown, options: NoiseSettingsOptions) {
 	const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(state))
 
 	const newState = [state, `${options.seed}`, options.biome]
@@ -178,6 +177,7 @@ function getCached(state: unknown, options: NoiseSettingsOptions) {
 			const biomeSource = new FixedBiome(Identifier.create('unknown'))
 			generatorCache = new NoiseChunkGenerator(options.seed, biomeSource, settings)
 		} else {
+			const deepslate18 = await import('deepslate-1.18')
 			const biomeSource = new deepslate18.FixedBiome('unknown')
 			generatorCache = new deepslate18.NoiseChunkGenerator(options.seed, biomeSource, settings as any) as any
 		}

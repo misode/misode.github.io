@@ -87,7 +87,7 @@ export default defineConfig({
 				{ src: 'src/guides/*', dest: 'guides' },
 			],
 		}),
-		visualizer(),
+		visualizer({ open: true }),
 	],
 })
 

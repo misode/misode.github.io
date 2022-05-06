@@ -58,10 +58,10 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const [highlighting, setHighlighting] = useState(Store.getHighlighting())
 	const [braceLoaded, setBraceLoaded] = useState(false)
 	const download = useRef<HTMLAnchorElement>(null)
-	const retransform = useRef<Function>()
-	const onImport = useRef<(e: any) => any>()
+	const retransform = useRef<Function>(() => {})
+	const onImport = useRef<(e: any) => any>(() => {})
 
-	const textarea = useRef<HTMLTextAreaElement>()
+	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
 	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
@@ -71,6 +71,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 
 	useEffect(() => {
 		retransform.current = () => {
+			if (!editor.current) return
 			if (!model || !blockStates) return
 			try {
 				const output = getSerializedOutput(model, blockStates)
@@ -88,6 +89,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		}
 
 		onImport.current = () => {
+			if (!editor.current) return
 			const value = editor.current.getValue()
 			if (value.length === 0) return
 			try {
@@ -150,9 +152,11 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		} else {
 			editor.current = {
 				getValue() {
+					if (!textarea.current) return ''
 					return textarea.current.value
 				},
 				setValue(value: string) {
+					if (!textarea.current) return
 					textarea.current.value = value
 				},
 				configure() {},
@@ -162,13 +166,16 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [highlighting])
 
 	useModel(model, () => {
+		if (!retransform.current) return
 		retransform.current()
 	})
 	useEffect(() => {
+		if (!retransform.current) return
 		if (model) retransform.current()
 	}, [model])
 
 	useEffect(() => {
+		if (!editor.current || !retransform.current) return
 		if (!highlighting || braceLoaded) {
 			editor.current.configure(indent, format)
 			retransform.current()

@@ -51,6 +51,7 @@ export function Sounds({}: Props) {
 
 	const download = useRef<HTMLAnchorElement>(null)
 	const downloadFunction = () => {
+		if (!download.current) return
 		const hasDelay = configs.some(c => c.delay > 0)
 		const content = configs
 			.sort((a, b) => a.delay - b.delay)

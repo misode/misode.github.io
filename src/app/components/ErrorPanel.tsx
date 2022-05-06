@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { mapStackTrace } from 'sourcemapped-stacktrace'
 import { Octicon } from './Octicon'
 
 type ErrorPanelProps = {
@@ -16,11 +15,13 @@ export function ErrorPanel({ error, onDismiss }: ErrorPanelProps) {
 				return line.replace(/^(\s+)at (?:async )?(https?:.*)/, '$1at ($2)')
 			})
 			setStack(stack.join('\n'))
-			mapStackTrace(stack.join('\n'), (mapped) => {
-				const mappedStack = mapped.map(line => {
-					return line.replace(/..\/..\/src\//, 'src/')
-				}).join('\n')
-				setStack(mappedStack)
+			import('sourcemapped-stacktrace').then(({ mapStackTrace }) => {
+				mapStackTrace(stack.join('\n'), (mapped) => {
+					const mappedStack = mapped.map(line => {
+						return line.replace(/..\/..\/src\//, 'src/')
+					}).join('\n')
+					setStack(mappedStack)
+				})
 			})
 		}
 	}, [error])

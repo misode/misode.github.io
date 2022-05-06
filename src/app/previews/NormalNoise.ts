@@ -1,5 +1,5 @@
 import { DataModel } from '@mcschema/core'
-import { LegacyRandom, NoiseParameters, NormalNoise } from 'deepslate'
+import { LegacyRandom, NoiseParameters, NormalNoise } from 'deepslate/worldgen'
 import type { VersionId } from '../services'
 
 export type NoiseOptions = {

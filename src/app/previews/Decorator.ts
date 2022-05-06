@@ -1,6 +1,6 @@
 import { DataModel } from '@mcschema/core'
-import type { Random } from 'deepslate'
-import { LegacyRandom, PerlinNoise } from 'deepslate'
+import type { Random } from 'deepslate/worldgen'
+import { LegacyRandom, PerlinNoise } from 'deepslate/worldgen'
 import type { VersionId } from '../services'
 import { checkVersion } from '../services'
 import { clamp, isObject, stringToColor } from '../Utils'
