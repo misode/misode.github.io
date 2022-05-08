@@ -7,8 +7,10 @@ import { deepClone, deepEqual } from '../Utils'
 export class Deepslate {
 	private d = deepslate19
 	private loadedVersion: VersionId | undefined
-	private readonly registriesLoaded = new Set<VersionId>()
-	private static readonly Z = 0
+	private loadingVersion: VersionId | undefined
+	private loadingPromise: Promise<void> | undefined
+	private readonly deepslateCache = new Map<VersionId, typeof deepslate19>()
+	private readonly Z = 0
 
 	private cacheState: unknown
 	private settingsCache: NoiseSettings | undefined
@@ -16,18 +18,30 @@ export class Deepslate {
 	private chunksCache: Chunk[] = []
 
 	public async loadVersion(version: VersionId) {
-		console.debug('Load deepslate version', this.loadedVersion, '->', version)
-		if (checkVersion(version, '1.19')) {
-			this.d = deepslate19
-		} else if (checkVersion(version, '1.18.2')) {
-			this.d = await import('deepslate-1.18.2') as any
-		} else {
-			this.d = await import('deepslate-1.18') as any
+		if (this.loadedVersion === version) {
+			return
 		}
-		
-		if (this.d.WorldgenRegistries) {
-			if (!this.registriesLoaded.has(version)) {
-				const REGISTRIES: [string, keyof typeof this.d.WorldgenRegistries, { fromJson(obj: unknown): any}][] = [
+		if (this.loadingVersion !== version || !this.loadingPromise) {
+			this.loadingVersion = version
+			this.loadingPromise = this.doLoadVersion(version)
+		}
+		return this.loadingPromise
+	}
+
+	private async doLoadVersion(version: VersionId) {
+		const cachedDeepslate = this.deepslateCache.get(version)
+		if (cachedDeepslate) {
+			this.d = cachedDeepslate
+		} else {
+			if (checkVersion(version, '1.19')) {
+				this.d = deepslate19
+			} else if (checkVersion(version, '1.18.2')) {
+				this.d = await import('deepslate-1.18.2') as any
+			} else {
+				this.d = await import('deepslate-1.18') as any
+			}
+			if (this.d.WorldgenRegistries) {
+				const REGISTRIES: [string, keyof typeof deepslate19.WorldgenRegistries, { fromJson(obj: unknown): any}][] = [
 					['worldgen/noise', 'NOISE', this.d.NoiseParameters],
 					['worldgen/density_function', 'DENSITY_FUNCTION', this.d.DensityFunction],
 				]
@@ -39,17 +53,21 @@ export class Deepslate {
 					}
 					this.d.WorldgenRegistries[name].assign(registry as any)
 				}))
-				this.registriesLoaded.add(version)
 			}
+			this.deepslateCache.set(version, this.d)
 		}
-		console.debug('Finished loading deepslate version', this.loadedVersion, '->', version)
 		this.loadedVersion = version
+		this.loadingVersion = undefined
 	}
 
 	public loadChunkGenerator(settings: unknown, seed: bigint, biome = 'unknown') {
+		if (!this.loadedVersion) {
+			throw new Error('No deepslate version loaded')
+		}
 		const newCacheState = [settings, `${seed}`, biome]
 		if (!deepEqual(this.cacheState, newCacheState)) {
-			const biomeSource = new this.d.FixedBiome(this.d.Identifier.parse(biome))
+			const biomeSource = new this.d.FixedBiome(checkVersion(this.loadedVersion, '1.18.2') ? this.d.Identifier.parse(biome) : biome as any)
+			console.log(this.d)
 			const noiseSettings = this.d.NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(settings))
 			const chunkGenerator = new this.d.NoiseChunkGenerator(seed, biomeSource, noiseSettings)
 			this.settingsCache = noiseSettings.noise
@@ -73,7 +91,7 @@ export class Deepslate {
 			if (cached) {
 				return cached
 			}
-			const chunk = new this.d.Chunk(minY, height, this.d.ChunkPos.create(x, Deepslate.Z >> 4))
+			const chunk = new this.d.Chunk(minY, height, this.d.ChunkPos.create(x, this.Z >> 4))
 			if (!this.generatorCache) {
 				throw new Error('Tried to generate chunks before generator is loaded')
 			}
@@ -112,7 +130,7 @@ export class Deepslate {
 		x = Math.floor(x)
 		y = Math.floor(y)
 		const chunk = this.chunksCache.find(c => this.d.ChunkPos.minBlockX(c.pos) <= x && this.d.ChunkPos.maxBlockX(c.pos) >= x)
-		return chunk?.getBlockState(this.d.BlockPos.create(x, y, Deepslate.Z))
+		return chunk?.getBlockState(this.d.BlockPos.create(x, y, this.Z))
 	}
 }
 
