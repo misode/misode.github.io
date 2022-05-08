@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Ad, Btn, BtnMenu, ChangelogTag, Giscus, Octicon } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
-import { useActiveTimeout, useHash } from '../hooks'
+import { useActiveTimeout, useAsync, useHash } from '../hooks'
 import type { VersionId } from '../services'
 import { parseFrontMatter, versionContent } from '../Utils'
 
@@ -30,7 +30,10 @@ export function Guide({ id }: Props) {
 	const { version, changeVersion } = useVersion()
 	const { changeTitle } = useTitle()
 
-	const [content, setContent] = useState<string | undefined>(undefined)
+	const { value: content } = useAsync(async () => {
+		const res = await fetch(`../../guides/${id}.md`)
+		return await res.text()
+	}, [id])
 
 	const frontMatter = useMemo(() => {
 		if (!content) return undefined
@@ -51,14 +54,8 @@ export function Guide({ id }: Props) {
 		return allowedVersions[0]
 	}, [version, frontMatter?.versions])
 
-	const versionedContent = useMemo(() => {
-		if (!content) return undefined
-		const guide = content.substring(content.indexOf('---', 3) + 3)
-		return versionContent(guide, guideVersion)
-	}, [guideVersion, content])
-
 	const html = useMemo(() => {
-		if (!versionedContent) return undefined
+		if (!content) return undefined
 		marked.use({ renderer: {
 			link(href, title, text) {
 				if (href === null) return text
@@ -72,8 +69,10 @@ export function Guide({ id }: Props) {
 				return `<h${level}>${link}${text}</h${level}>`
 			},
 		}})
+		const guide = content.substring(content.indexOf('---', 3) + 3)
+		const versionedContent = versionContent(guide, guideVersion)
 		return marked(versionedContent, { version: '1.19' } as any)
-	}, [versionedContent])
+	}, [guideVersion, content])
 
 	const [hash, setHash] = useHash()
 
@@ -100,14 +99,6 @@ export function Guide({ id }: Props) {
 		}
 	}, [scrollToHeading, hash, version])
 
-	useEffect(() => {
-		(async () => {
-			const res = await fetch(`../../guides/${id}.md`)
-			const text = await res.text()
-			setContent(text)
-		})()
-	}, [id])
-
 	const [shareActive, shareSuccess] = useActiveTimeout()
 
 	const onShare = useCallback(() => {
@@ -116,9 +107,9 @@ export function Guide({ id }: Props) {
 		shareSuccess()
 	}, [id, version])
 
-	const onClickTag = (tag: string) => {
+	const onClickTag = useCallback((tag: string) => {
 		route(`/guides/?tags=${tag}`)
-	}
+	}, [])
 
 	const [largeWidth] = useState(window.innerWidth > 600)
 

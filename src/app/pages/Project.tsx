@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks'
+import { useCallback, useMemo } from 'preact/hooks'
 import { Ad, TreeView } from '../components'
 import { getFilePath, useLocale, useProject, useTitle } from '../contexts'
 
@@ -11,10 +11,10 @@ export function Project({}: Props) {
 	useTitle(locale('title.project', project.name))
 	const entries = useMemo(() => project.files.map(getFilePath), project.files)
 
-	const selectFile = (entry: string) => {
+	const selectFile = useCallback((entry: string) => {
 		const [, namespace, type, ...id] = entry.split('/')
 		openFile(type, `${namespace}:${id}`)
-	}
+	}, [openFile])
 
 	return <main>
 		<Ad id="data-pack-project" type="text" />

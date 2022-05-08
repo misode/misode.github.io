@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'preact/hooks'
 import { Ad, ErrorPanel, Octicon, VersionDetail, VersionList } from '../components'
 import { useLocale, useTitle } from '../contexts'
-import { useSearchParam } from '../hooks'
+import { useAsync, useSearchParam } from '../hooks'
 import type { VersionMeta } from '../services'
 import { fetchVersions } from '../services'
 
@@ -10,27 +9,21 @@ interface Props {
 }
 export function Versions({}: Props) {
 	const { locale } = useLocale()
-	const [error, setError] = useState<Error | null>(null)
 	useTitle(locale('title.versions'))
 
-	const [versions, setVersions] = useState<VersionMeta[]>([])
-	useEffect(() => {
-		fetchVersions()
-			.then(versions => setVersions(versions))
-			.catch(e => { console.error(e); setError(e) })
-	}, [])
+	const { value: versions, error } = useAsync(fetchVersions, [])
 
 	const [selectedId] = useSearchParam('id')
-	const selected = versions.find(v => v.id === selectedId)
+	const selected = (versions ?? []).find(v => v.id === selectedId)
 
 	useTitle(selected ? selected.name : 'Versions Explorer', selected ? [] : undefined)
 
-	const nextVersion = selected && getOffsetVersion(versions, selected, -1)
-	const previousVersion = selected && getOffsetVersion(versions, selected, 1)
+	const nextVersion = selected && getOffsetVersion(versions ?? [], selected, -1)
+	const previousVersion = selected && getOffsetVersion(versions ?? [], selected, 1)
 
 	return <main>
 		<Ad type="text" id="versions" />
-		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
+		{error && <ErrorPanel error={error} />}
 		<div class="versions">
 			{selectedId ? <>
 				<div class="navigation">
@@ -54,7 +47,7 @@ export function Versions({}: Props) {
 							<p>This version does not exist. Only versions since 1.14 are tracked, or it may be too recent.</p>
 						</div>
 					</div>}
-			</> : <VersionList versions={versions} link={id => `/versions/?id=${id}`} />}
+			</> : <VersionList versions={versions ?? []} link={id => `/versions/?id=${id}`} />}
 		</div>
 	</main>
 }
