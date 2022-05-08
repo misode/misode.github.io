@@ -60,6 +60,7 @@ export class Deepslate {
 	}
 
 	public generateChunks(minX: number, width: number, biome = 'unknown') {
+		minX = Math.floor(minX)
 		if (!this.settingsCache) {
 			throw new Error('Tried to generate chunks before settings are loaded')
 		}
@@ -108,6 +109,8 @@ export class Deepslate {
 	}
 
 	public getBlockState(x: number, y: number) {
+		x = Math.floor(x)
+		y = Math.floor(y)
 		const chunk = this.chunksCache.find(c => this.d.ChunkPos.minBlockX(c.pos) <= x && this.d.ChunkPos.maxBlockX(c.pos) >= x)
 		return chunk?.getBlockState(this.d.BlockPos.create(x, y, Deepslate.Z))
 	}

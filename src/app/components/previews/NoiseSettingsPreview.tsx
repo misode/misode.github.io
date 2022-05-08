@@ -62,7 +62,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 				}
 			})()
 		}
-	}, [state, seed, shown, biome, biomeScale, biomeDepth, autoScroll])
+	}, [version, state, seed, shown, biome, biomeScale, biomeDepth, autoScroll])
 
 	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
 

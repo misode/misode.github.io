@@ -26,13 +26,13 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 			offset.current[1] = offset.current[1] + dy * 256
 			redraw()
 		},
-	}, [state, scale, seed])
+	}, [version, state, scale, seed])
 
 	useEffect(() => {
 		if (shown) {
 			redraw()
 		}
-	}, [state, scale, seed, shown])
+	}, [version, state, scale, seed, shown])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale

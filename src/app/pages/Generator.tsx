@@ -5,9 +5,9 @@ import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { useLocale, useProject, useTitle, useVersion } from '../contexts'
-import { useActiveTimeout, useModel, useSearchParam } from '../hooks'
+import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
-import type { BlockStateRegistry, VersionId } from '../services'
+import type { VersionId } from '../services'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet, SHARE_KEY } from '../services'
 import { Store } from '../Store'
 import { cleanUrl, deepEqual, getGenerator } from '../Utils'
@@ -50,35 +50,6 @@ export function Generator({}: Props) {
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
 	const ignoreChange = useRef(false)
-	useEffect(() => {
-		if (model && currentPreset) {
-			loadPreset(currentPreset).then(preset => {
-				ignoreChange.current = true
-				model.reset(DataModel.wrapLists(preset), false)
-				setSharedSnippetId(undefined)
-			})
-		} else if (model && sharedSnippetId) {
-			getSnippet(sharedSnippetId).then(s => loadSnippet(model, s))
-		}
-	}, [currentPreset, sharedSnippetId])
-
-	const loadSnippet = (model: DataModel, snippet: any) => {
-		if (snippet.version && snippet.version !== version) {
-			changeVersion(snippet.version, false)
-		}
-		if (snippet.type && snippet.type !== gen.id) {
-			const snippetGen = config.generators.find(g => g.id === snippet.type)
-			if (snippetGen) {
-				route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
-			}
-		}
-		if (snippet.show_preview && !previewShown) {
-			setPreviewShown(true)
-			setSourceShown(false)
-		}
-		model.reset(DataModel.wrapLists(snippet.data), false)
-	}
-
 	const backup = useMemo(() => Store.getBackup(gen.id), [gen.id])
 
 	const loadBackup = () => {
@@ -87,27 +58,51 @@ export function Generator({}: Props) {
 		}
 	}
 
-	const [model, setModel] = useState<DataModel | null>(null)
-	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
-	useEffect(() => {
-		setError(null)
-		setModel(null)
-		getBlockStates(version)
-			.then(b => setBlockStates(b))
-		getModel(version, gen.id)
-			.then(async m => {
-				Analytics.setGenerator(gen.id)
-				if (currentPreset) {
-					const preset = await loadPreset(currentPreset)
-					m.reset(DataModel.wrapLists(preset), false)
-				} else if (sharedSnippetId) {
-					const snippet = await getSnippet(sharedSnippetId)
-					loadSnippet(m, snippet)
+	const { value } = useAsync(async () => {
+		let data: unknown = undefined
+		if (currentPreset && sharedSnippetId) {
+			setSharedSnippetId(undefined)
+			return AsyncCancel
+		}
+		if (currentPreset) {
+			data = await loadPreset(currentPreset)
+		} else if (sharedSnippetId) {
+			const snippet = await getSnippet(sharedSnippetId)
+			let cancel = false
+			if (snippet.version && snippet.version !== version) {
+				changeVersion(snippet.version, false)
+				cancel = true
+			}
+			if (snippet.type && snippet.type !== gen.id) {
+				const snippetGen = config.generators.find(g => g.id === snippet.type)
+				if (snippetGen) {
+					route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
+					cancel = true
 				}
-				setModel(m)
-			})
-			.catch(e => { console.error(e); setError(e) })
-	}, [version, gen.id])
+			}
+			if (cancel) {
+				return AsyncCancel
+			}
+			if (snippet.show_preview && !previewShown) {
+				setPreviewShown(true)
+				setSourceShown(false)
+			}
+			data = snippet.data
+		}
+		const [model, blockStates] = await Promise.all([
+			getModel(version, gen.id),
+			getBlockStates(version),
+		])
+		if (data) {
+			ignoreChange.current = true
+			model.reset(DataModel.wrapLists(data), false)
+		}
+		Analytics.setGenerator(gen.id)
+		return { model, blockStates }
+	}, [gen.id, version, sharedSnippetId, currentPreset])
+
+	const model = value?.model
+	const blockStates = value?.blockStates
 
 	const [dirty, setDirty] = useState(false)
 	useModel(model, () => {

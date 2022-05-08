@@ -25,6 +25,7 @@ export function useSearchParam(param: string): [string | undefined, (value: stri
 
 	const changeValue = useCallback((newValue: string | undefined, replace?: boolean) => {
 		if (newValue !== value) {
+			setValue(newValue)
 			const params = new URLSearchParams(location.search)
 			if (newValue === undefined || newValue.length === 0) {
 				params.delete(param)

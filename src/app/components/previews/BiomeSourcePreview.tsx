@@ -58,14 +58,14 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, scale, configuredSeed, layers])
+	}, [version, state, scale, configuredSeed, layers])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [state, scale, configuredSeed, layers, shown])
+	}, [version, state, scale, configuredSeed, layers, shown])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale

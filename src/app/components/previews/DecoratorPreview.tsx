@@ -11,6 +11,8 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 	const [scale, setScale] = useState(4)
 	const [seed, setSeed] = useState(randomSeed())
 
+	const state = JSON.stringify(data)
+
 	const { canvas, redraw } = useCanvas({
 		size() {
 			return [scale * 16, scale * 16]
@@ -18,14 +20,13 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 		async draw(img) {
 			decorator(data, img, { seed, version, size: [scale * 16, 128, scale * 16] })
 		},
-	})
+	}, [version, state, seed])
 
-	const state = JSON.stringify(data)
 	useEffect(() => {
 		if (shown) {
 			redraw()
 		}
-	}, [state, scale, seed, shown])
+	}, [version, state, scale, seed, shown])
 
 	return <>
 		<div class="controls preview-controls">

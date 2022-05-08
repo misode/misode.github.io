@@ -1,13 +1,14 @@
 import type { Inputs } from 'preact/hooks'
 import { useEffect } from 'preact/hooks'
-import type { AsyncState } from './useAsyncFn'
+import type { AsyncCancel, AsyncState } from './useAsyncFn'
 import { useAsyncFn } from './useAsyncFn'
 
-export function useAsync<T>(
-	fn: () => Promise<T>,
+export function useAsync<R>(
+	fn: () => Promise<R | typeof AsyncCancel>,
 	inputs: Inputs = [],
-): AsyncState<T> {
-	const [state, callback] = useAsyncFn<T, () => Promise<T>>(fn, inputs, { loading: true })
+	initialState: AsyncState<R> = { loading: true },
+): AsyncState<R> {
+	const [state, callback] = useAsyncFn<R, () => Promise<R | typeof AsyncCancel>>(fn, inputs, initialState)
 
 	useEffect(() => {
 		callback()

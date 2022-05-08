@@ -52,8 +52,8 @@ interface Editor {
 
 type SourcePanelProps = {
 	name: string,
-	model: DataModel | null,
-	blockStates: BlockStateRegistry | null,
+	model: DataModel | undefined,
+	blockStates: BlockStateRegistry | undefined,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,

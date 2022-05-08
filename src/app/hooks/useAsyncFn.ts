@@ -20,11 +20,13 @@ export type AsyncState<T> = {
 	value: T,
 }
 
-export function useAsyncFn<R, T extends (...args: any[]) => Promise<R>>(
+export const AsyncCancel = Symbol('async-cancel')
+
+export function useAsyncFn<R, T extends (...args: any[]) => Promise<R | typeof AsyncCancel>>(
 	fn: T,
 	inputs: Inputs = [],
 	initialState: AsyncState<R> = { loading: false },
-): [AsyncState<R>, (...args: Parameters<T>) => Promise<R | undefined>] {
+): [AsyncState<R>, (...args: Parameters<T>) => Promise<R | typeof AsyncCancel | undefined>] {
 	const [state, setState] = useState<AsyncState<R>>(initialState)
 	const isMounted = useRef<boolean>(false)
 	const lastCallId = useRef(0)
@@ -34,7 +36,7 @@ export function useAsyncFn<R, T extends (...args: any[]) => Promise<R>>(
 		return () => isMounted.current = false
 	}, [])
 
-	const callback = useCallback((...args: Parameters<T>): Promise<R | undefined> => {
+	const callback = useCallback((...args: Parameters<T>): Promise<R | typeof AsyncCancel | undefined> => {
 		const callId = ++lastCallId.current
 		if (!state.loading) {
 			setState(prev => ({ ...prev, loading: true }))
@@ -42,7 +44,7 @@ export function useAsyncFn<R, T extends (...args: any[]) => Promise<R>>(
 
 		return fn(...args).then(
 			value => {
-				if (isMounted.current && callId === lastCallId.current) {
+				if (isMounted.current && callId === lastCallId.current && value !== AsyncCancel) {
 					setState({ value, loading: false })
 				}
 				return value
