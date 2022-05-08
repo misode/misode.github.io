@@ -36,8 +36,9 @@ export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
 			if (!(dx === 0 && dy === 0)) {
 				dragPending.current = [dragPending.current[0] + dx, dragPending.current[1] + dy]
 				if (!dragBusy.current) {
-					if (!dragRequest.current) return
-					cancelAnimationFrame(dragRequest.current)
+					if (dragRequest.current) {
+						cancelAnimationFrame(dragRequest.current)
+					}
 					dragRequest.current = requestAnimationFrame(async () => {
 						if (!canvas.current) return
 						dragBusy.current = true

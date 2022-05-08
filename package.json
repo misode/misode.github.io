@@ -29,6 +29,7 @@
     "comment-json": "^4.1.1",
     "deepslate": "^0.11.0-beta.1",
     "deepslate-1.18": "npm:deepslate@^0.9.0-beta.9",
+    "deepslate-1.18.2": "npm:deepslate@^0.9.0-beta.13",
     "deepslate-rs": "^0.1.6",
     "highlight.js": "^11.5.1",
     "howler": "^2.2.3",
