@@ -168,21 +168,21 @@ export function Generator({}: Props) {
 	}
 	const undo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.undoGenerator(gen.id, (model?.historyIndex ?? 1) - 1, 'menu')
+		Analytics.undoGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
 		model?.undo()
 	}
 	const redo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.redoGenerator(gen.id, (model?.historyIndex ?? 1) + 1, 'menu')
+		Analytics.redoGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
 		model?.redo()
 	}
 
 	const onKeyUp = (e: KeyboardEvent) => {
 		if (e.ctrlKey && e.key === 'z') {
-			Analytics.undoGenerator(gen.id, (model?.historyIndex ?? 1) - 1, 'hotkey')
+			Analytics.undoGenerator(gen.id, model?.historyIndex ?? 1, 'hotkey')
 			model?.undo()
 		} else if (e.ctrlKey && e.key === 'y') {
-			Analytics.redoGenerator(gen.id, (model?.historyIndex ?? 1) + 1, 'hotkey')
+			Analytics.redoGenerator(gen.id, model?.historyIndex ?? 1, 'hotkey')
 			model?.redo()
 		}
 	}

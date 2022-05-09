@@ -31,6 +31,7 @@ export function VersionProvider({ children }: { children: ComponentChildren }) {
 
 	useEffect(() => {
 		if (VersionIds.includes(targetVersion as VersionId) && version !== targetVersion) {
+			Analytics.setVersion(targetVersion as VersionId)
 			setVersion(targetVersion as VersionId)
 		}
 	}, [version, targetVersion])
@@ -45,6 +46,10 @@ export function VersionProvider({ children }: { children: ComponentChildren }) {
 		}
 		setVersion(newVersion)
 	}, [targetVersion])
+
+	useEffect(() => {
+		Analytics.setVersion(version)
+	}, [])
 
 	const value: Version = {
 		version,
