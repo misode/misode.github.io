@@ -41,7 +41,7 @@ export namespace Analytics {
 
 	export function setLocale(locale: string) {
 		dimension(DIM_LANGUAGE, locale)
-		gtag('event', 'use_locale', {
+		gtag('set', {
 			locale,
 		})
 	}
