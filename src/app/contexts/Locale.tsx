@@ -69,6 +69,7 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 	useEffect(() => {
 		(async () => {
 			const target = Store.getLanguage()
+			Analytics.setLocale(target)
 			await Promise.all([
 				loadLocale('en'),
 				...(target !== 'en' ? [loadLocale(target)] : []),

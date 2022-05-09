@@ -11,7 +11,6 @@ export namespace Analytics {
 	const DIM_THEME = 1
 	const DIM_VERSION = 3
 	const DIM_LANGUAGE = 4
-	const DIM_PREVIEW = 5
 	const DIM_GENERATOR = 6
 	const DIM_PREFERS_COLOR_SCHEME = 7
 
@@ -64,15 +63,11 @@ export namespace Analytics {
 		})
 	}
 
-	export function setPreview(preview: string) {
-		dimension(DIM_PREVIEW, preview)
-		event(ID_GENERATOR, 'set-preview', preview)
-	}
-
-	export function setGenerator(file_type: string) {
+	export function setGenerator(file_type: string, version: string) {
 		dimension(DIM_GENERATOR, file_type)
 		gtag('event', 'use_generator', {
 			file_type,
+			version,
 		})
 	}
 

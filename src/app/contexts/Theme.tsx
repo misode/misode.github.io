@@ -39,6 +39,10 @@ export function ThemeProvider({ children }: { children: ComponentChildren }) {
 		Analytics.setPrefersColorScheme(prefersLight ? 'light' : prefersDark ? 'dark' : 'none')
 	}, [prefersLight, prefersDark])
 
+	useEffect(() => {
+		Analytics.setTheme(theme)
+	}, [])
+
 	const value: Theme = {
 		theme,
 		actualTheme: theme === 'light' || (theme !== 'dark' && prefersLight) ? 'light' : 'dark',
