@@ -16,7 +16,10 @@ export function Versions({}: Props) {
 	const [selectedId] = useSearchParam('id')
 	const selected = (versions ?? []).find(v => v.id === selectedId)
 
-	useTitle(selected ? selected.name : 'Versions Explorer', selected ? [] : undefined)
+	useTitle(
+		selected ? `Minecraft ${selected.name}` : 'Versions Explorer',
+		selected ? [] : undefined,
+		selected ? 'Changes and metadata' : undefined)
 
 	const nextVersion = selected && getOffsetVersion(versions ?? [], selected, -1)
 	const previousVersion = selected && getOffsetVersion(versions ?? [], selected, 1)

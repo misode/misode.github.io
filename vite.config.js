@@ -62,7 +62,7 @@ export default defineConfig({
 				...guides.map(g => {
 					return html({
 						fileName: `guides/${g.id}/index.html`,
-						title: `${g.title} Minecraft${g.versions ? ` ${g.versions.join(' ')}` : ''}`,
+						title: `${g.title} - Minecraft${g.versions ? ` ${g.versions.join(' ')}` : ''}`,
 						template,
 					})
 				}),
@@ -95,7 +95,7 @@ function getTitle(m) {
 	const minVersion = Math.max(0, config.versions.findIndex(v => m.minVersion === v.id))
 	const versions = config.versions.slice(minVersion).map(v => v.id)
 	versions.splice(0, versions.length - 3)
-	return `${English[m.id] ?? ''}${m.page ? '' : ` Generator${m.category === true ? 's' : ''}`} Minecraft ${versions.join(', ')}`
+	return `${English[m.id] ?? ''}${m.page ? '' : ` Generator${m.category === true ? 's' : ''}`} - Minecraft ${versions.join(', ')}`
 }
 
 function template({ files, title }) {
