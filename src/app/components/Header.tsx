@@ -12,7 +12,7 @@ const Themes: Record<string, keyof typeof Octicon> = {
 }
 
 export function Header() {
-	const { lang, locale, changeLanguage } = useLocale()
+	const { lang, locale, changeLocale: changeLanguage } = useLocale()
 	const { theme, changeTheme } = useTheme()
 	const { version } = useVersion()
 	const { title } = useTitle()

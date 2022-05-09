@@ -26,6 +26,7 @@ export type ProjectFile = {
 }
 
 interface ProjectContext {
+	projects: Project[],
 	project: Project,
 	file?: ProjectFile,
 	changeProject: (name: string) => unknown,
@@ -35,6 +36,7 @@ interface ProjectContext {
 	closeFile: () => unknown,
 }
 const Project = createContext<ProjectContext>({
+	projects: [DRAFT_PROJECT],
 	project: DRAFT_PROJECT,
 	changeProject: () => {},
 	updateProject: () => {},
@@ -105,6 +107,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	}, [])
 
 	const value: ProjectContext = {
+		projects,
 		project,
 		file,
 		changeProject: setProjectName,

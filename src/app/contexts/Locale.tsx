@@ -9,12 +9,12 @@ import { Store } from '../Store'
 interface Locale {
 	lang: string,
 	locale: (key: string, ...params: string[]) => string,
-	changeLanguage: (lang: string) => unknown,
+	changeLocale: (lang: string) => unknown,
 }
 const Locale = createContext<Locale>({
 	lang: 'none',
 	locale: key => key,
-	changeLanguage: () => {},
+	changeLocale: () => {},
 })
 
 export const Locales: {
@@ -59,9 +59,9 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 		return localize(lang, key, ...params)
 	}, [lang])
 
-	const changeLanguage = useCallback(async (lang: string) => {
+	const changeLocale = useCallback(async (lang: string) => {
 		await loadLocale(lang)
-		Analytics.setLanguage(lang)
+		Analytics.setLocale(lang)
 		Store.setLanguage(lang)
 		setLanguage(lang)
 	}, [])
@@ -79,8 +79,8 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 
 	const value: Locale = {
 		lang,
-		locale: locale,
-		changeLanguage,
+		locale,
+		changeLocale,
 	}
 
 	return <Locale.Provider value={value}>

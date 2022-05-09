@@ -8,9 +8,11 @@ import { useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
 import type { VersionId } from '../services'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet, SHARE_KEY } from '../services'
+import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../services'
 import { Store } from '../Store'
 import { cleanUrl, deepEqual, getGenerator } from '../Utils'
+
+export const SHARE_KEY = 'share'
 
 interface Props {
 	default?: true,
@@ -18,7 +20,7 @@ interface Props {
 export function Generator({}: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { project, file, updateFile, openFile, closeFile } = useProject()
+	const { projects, project, file, updateFile, openFile, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -87,6 +89,7 @@ export function Generator({}: Props) {
 				setPreviewShown(true)
 				setSourceShown(false)
 			}
+			Analytics.openSnippet(gen.id, sharedSnippetId, version)
 			data = snippet.data
 		}
 		const [model, blockStates] = await Promise.all([
@@ -160,26 +163,26 @@ export function Generator({}: Props) {
 	}, [file, model])
 
 	const reset = () => {
-		Analytics.generatorEvent('reset')
+		Analytics.resetGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
 		model?.reset(DataModel.wrapLists(model.schema.default()), true)
 	}
 	const undo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.generatorEvent('undo', 'Menu')
+		Analytics.undoGenerator(gen.id, (model?.historyIndex ?? 1) - 1, 'menu')
 		model?.undo()
 	}
 	const redo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.generatorEvent('redo', 'Menu')
+		Analytics.redoGenerator(gen.id, (model?.historyIndex ?? 1) + 1, 'menu')
 		model?.redo()
 	}
 
 	const onKeyUp = (e: KeyboardEvent) => {
 		if (e.ctrlKey && e.key === 'z') {
-			Analytics.generatorEvent('undo', 'Hotkey')
+			Analytics.undoGenerator(gen.id, (model?.historyIndex ?? 1) - 1, 'hotkey')
 			model?.undo()
 		} else if (e.ctrlKey && e.key === 'y') {
-			Analytics.generatorEvent('redo', 'Hotkey')
+			Analytics.redoGenerator(gen.id, (model?.historyIndex ?? 1) + 1, 'hotkey')
 			model?.redo()
 		}
 	}
@@ -187,7 +190,7 @@ export function Generator({}: Props) {
 		if (e.ctrlKey && e.key === 's') {
 			e.preventDefault()
 			if (model && blockStates && file) {
-				Analytics.generatorEvent('save', 'Hotkey')
+				Analytics.saveProjectFile(gen.id, project.files.length, projects.length, 'hotkey')
 				const data = getOutput(model, blockStates)
 				updateFile(gen.id, file?.id, { id: file?.id, data })
 				setDirty(false)
@@ -213,7 +216,7 @@ export function Generator({}: Props) {
 	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
-		Analytics.generatorEvent('load-preset', id)
+		Analytics.loadPreset(gen.id, id)
 		setSharedSnippetId(undefined, true)
 		changeTargetVersion(version, true)
 		setCurrentPreset(id)
@@ -260,7 +263,9 @@ export function Generator({}: Props) {
 				setShareShown(true)
 			} else {
 				shareSnippet(gen.id, version, output, previewShown)
-					.then(url => {
+					.then(({ id, length, compressed, rate }) => {
+						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
+						const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`
 						setShareUrl(url)
 						setShareShown(true)
 					})
@@ -289,11 +294,11 @@ export function Generator({}: Props) {
 	const [doImport, setImport] = useState(0)
 
 	const copySource = () => {
-		Analytics.generatorEvent('copy')
+		Analytics.copyOutput(gen.id, 'menu')
 		setCopy(doCopy + 1)
 	}
 	const downloadSource = () => {
-		Analytics.generatorEvent('download')
+		Analytics.downloadOutput(gen.id, 'menu')
 		setDownload(doDownload + 1)
 	}
 	const importSource = () => {
@@ -302,7 +307,11 @@ export function Generator({}: Props) {
 		setImport(doImport + 1)
 	}
 	const toggleSource = () => {
-		Analytics.generatorEvent('toggle-output', !sourceShown ? 'visible' : 'hidden')
+		if (sourceShown) {
+			Analytics.hideOutput(gen.id, 'menu')
+		} else {
+			Analytics.showOutput(gen.id, 'menu')
+		}
 		setSourceShown(!sourceShown)
 		setCopy(0)
 		setDownload(0)
@@ -319,7 +328,11 @@ export function Generator({}: Props) {
 	if (sourceShown) actionsShown += 2
 
 	const togglePreview = () => {
-		Analytics.generatorEvent('toggle-preview', !previewShown ? 'visible' : 'hidden')
+		if (sourceShown) {
+			Analytics.hidePreview(gen.id, 'menu')
+		} else {
+			Analytics.showPreview(gen.id, 'menu')
+		}
 		setPreviewShown(!previewShown)
 		if (!previewShown && sourceShown) {
 			setSourceShown(false)

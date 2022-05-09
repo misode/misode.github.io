@@ -1,17 +1,15 @@
 import lz from 'lz-string'
-import config from '../../config.json'
 import type { VersionId } from './Schemas'
 
 const API_PREFIX = 'https://z15g7can.directus.app/items'
-export const SHARE_KEY = 'share'
 
 const ShareCache = new Map<string, string>()
 
 export async function shareSnippet(type: string, version: VersionId, jsonData: any, show_preview: boolean) {
 	try {
-		const data = lz.compressToBase64(JSON.stringify(jsonData))
-		const raw = btoa(JSON.stringify(jsonData))
-		console.log('Compression rate', raw.length / data.length)
+		const raw = JSON.stringify(jsonData)
+		const data = lz.compressToBase64(raw)
+		console.log('Compression rate', raw.length / raw.length)
 		const body = JSON.stringify({ data, type, version, show_preview })
 		let id = ShareCache.get(body)
 		if (!id) {
@@ -19,8 +17,7 @@ export async function shareSnippet(type: string, version: VersionId, jsonData: a
 			ShareCache.set(body, snippet.id)
 			id = snippet.id as string
 		}
-		const gen = config.generators.find(g => g.id === type)!
-		return `${location.protocol}//${location.host}/${gen.url}/?${SHARE_KEY}=${id}`
+		return { id, length: raw.length, compressed: data.length, rate: raw.length / data.length }
 	} catch (e) {
 		if (e instanceof Error) {
 			e.message = `Error creating share link: ${e.message}`
