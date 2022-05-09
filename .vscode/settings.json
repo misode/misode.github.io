@@ -11,6 +11,10 @@
 			"source.fixAll.eslint": true
 		}
 	},
+	"[markdown]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	},
 	"typescript.format.semicolons": "remove",
 	"editor.insertSpaces": false,
 	"files.insertFinalNewline": true,

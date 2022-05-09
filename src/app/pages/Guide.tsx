@@ -30,10 +30,16 @@ export function Guide({ id }: Props) {
 	const { version, changeVersion } = useVersion()
 	const { changeTitle } = useTitle()
 
-	const { value: content } = useAsync(async () => {
+	const { value: content, refresh } = useAsync(async () => {
 		const res = await fetch(`../../guides/${id}.md`)
 		return await res.text()
 	}, [id])
+
+	if ((import.meta as any).hot) {
+		(import.meta as any).hot.on('guide-update', (updateId: string) => {
+			if (id === updateId) refresh()
+		})
+	}
 
 	const frontMatter = useMemo(() => {
 		if (!content) return undefined

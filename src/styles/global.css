@@ -1509,6 +1509,10 @@ hr {
 	border-radius: 6px;
 }
 
+.guide-card:not(:last-child) {
+	margin-bottom: 8px;
+}
+
 .guide-versions {
 	color: var(--text-3);
 	float: right;

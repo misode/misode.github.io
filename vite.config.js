@@ -22,6 +22,7 @@ const guides = glob.sync('src/guides/**/*.md').flatMap(g => {
 			...frontMatter,
 		}]
 	} catch (e) {
+		console.warn('Failed loading guide', g, e.message)
 		return []
 	}
 })
@@ -88,6 +89,20 @@ export default defineConfig({
 			],
 		}),
 		visualizer({ open: true }),
+		{
+			name: 'watch-guides',
+			enforce: 'post',
+			handleHotUpdate({ file, server }) {
+				const match = file.match(/src\/guides\/([a-z0-9-]+)\.md/)
+				if (match && match[1]) {
+					server.ws.send({
+						type: 'custom',
+						event: 'guide-update',
+						data: match[1],
+					})
+				}
+			},
+		},
 	],
 })
 
