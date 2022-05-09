@@ -100,7 +100,7 @@ export function Generator({}: Props) {
 			ignoreChange.current = true
 			model.reset(DataModel.wrapLists(data), false)
 		}
-		Analytics.setGenerator(gen.id, version)
+		Analytics.setGenerator(gen.id)
 		return { model, blockStates }
 	}, [gen.id, version, sharedSnippetId, currentPreset])
 

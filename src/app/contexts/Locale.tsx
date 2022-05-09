@@ -59,12 +59,12 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 		return localize(lang, key, ...params)
 	}, [lang])
 
-	const changeLocale = useCallback(async (lang: string) => {
-		await loadLocale(lang)
-		Analytics.setLocale(lang)
-		Store.setLanguage(lang)
-		setLanguage(lang)
-	}, [])
+	const changeLocale = useCallback(async (newLang: string) => {
+		await loadLocale(newLang)
+		Analytics.changeLocale(lang, newLang)
+		Store.setLanguage(newLang)
+		setLanguage(newLang)
+	}, [lang])
 
 	useEffect(() => {
 		(async () => {

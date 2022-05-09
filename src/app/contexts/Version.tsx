@@ -41,11 +41,11 @@ export function VersionProvider({ children }: { children: ComponentChildren }) {
 			changeTargetVersion(newVersion, true)
 		}
 		if (store) {
-			Analytics.setVersion(newVersion)
+			Analytics.changeVersion(version, newVersion)
 			Store.setVersion(newVersion)
 		}
 		setVersion(newVersion)
-	}, [targetVersion])
+	}, [version, targetVersion])
 
 	useEffect(() => {
 		Analytics.setVersion(version)

@@ -41,40 +41,60 @@ export namespace Analytics {
 
 	export function setLocale(locale: string) {
 		dimension(DIM_LANGUAGE, locale)
-		event(ID_SITE, 'set-language', locale)
 		gtag('event', 'use_locale', {
 			locale,
 		})
 	}
 
+	export function changeLocale(prev_locale: string, locale: string) {
+		setLocale(locale)
+		event(ID_SITE, 'set-language', locale)
+		gtag('event', 'change_locale', {
+			prev_locale,
+		})
+	}
+
 	export function setTheme(theme: string) {
 		dimension(DIM_THEME, theme)
-		event(ID_SITE, 'set-theme', theme)
-		gtag('event', 'use_theme', {
+		gtag('set', {
 			theme,
+		})
+	}
+
+	export function changeTheme(prev_theme: string, theme: string) {
+		setTheme(theme)
+		event(ID_SITE, 'set-theme', theme)
+		gtag('event', 'change_theme', {
+			prev_theme,
 		})
 	}
 
 	export function setVersion(version: string) {
 		dimension(DIM_VERSION, version)
-		event(ID_GENERATOR, 'set-version', version)
-		gtag('event', 'use_version', {
+		gtag('set', {
 			version,
 		})
 	}
 
-	export function setGenerator(file_type: string, version: string) {
+	export function changeVersion(prev_version: string, version: string) {
+		setVersion(version)
+		event(ID_GENERATOR, 'set-version', version)
+		gtag('event', 'change_version', {
+			prev_version,
+		})
+	}
+
+	export function setGenerator(file_type: string) {
 		dimension(DIM_GENERATOR, file_type)
 		gtag('event', 'use_generator', {
 			file_type,
-			version,
 		})
 	}
 
-	export function setPrefersColorScheme(color_scheme: string) {
-		dimension(DIM_PREFERS_COLOR_SCHEME, color_scheme)
-		gtag('event', 'prefers_color_scheme', {
-			color_scheme,
+	export function setPrefersColorScheme(prefers_color_scheme: string) {
+		dimension(DIM_PREFERS_COLOR_SCHEME, prefers_color_scheme)
+		gtag('set', {
+			prefers_color_scheme,
 		})
 	}
 

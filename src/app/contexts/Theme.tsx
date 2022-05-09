@@ -29,11 +29,11 @@ export function ThemeProvider({ children }: { children: ComponentChildren }) {
 		document.documentElement.setAttribute('data-theme', theme)
 	}, [theme])
 
-	const changeTheme = useCallback((theme: string) => {
-		Analytics.setTheme(theme)
-		Store.setTheme(theme)
-		setTheme(theme)
-	}, [])
+	const changeTheme = useCallback((newTheme: string) => {
+		Analytics.changeTheme(theme, newTheme)
+		Store.setTheme(newTheme)
+		setTheme(newTheme)
+	}, [theme])
 
 	useEffect(() => {
 		Analytics.setPrefersColorScheme(prefersLight ? 'light' : prefersDark ? 'dark' : 'none')
