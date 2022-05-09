@@ -170,6 +170,7 @@ export namespace Analytics {
 	}
 
 	export function copyOutput(file_type: string, method: Method) {
+		event(ID_GENERATOR, 'copy')
 		gtag('event', 'copy_generator_output', {
 			file_type,
 			method,
@@ -177,6 +178,7 @@ export namespace Analytics {
 	}
 
 	export function downloadOutput(file_type: string, method: Method) {
+		event(ID_GENERATOR, 'download')
 		gtag('event', 'download_generator_output', {
 			file_type,
 			method,
