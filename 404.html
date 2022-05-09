@@ -7,7 +7,12 @@
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}
 		gtag('js', new Date());
-		gtag('config', 'G-S982VZS08T');
+		gtag('config', 'G-S982VZS08T', {
+			theme: localStorage.getItem('theme') || 'default',
+			version: localStorage.getItem('schema_version') || '1.18.2',
+			locale: localStorage.getItem('language') || 'en',
+			prefers_color_scheme: matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none',
+		});
 	</script>
 	<script>
 		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -37,7 +42,7 @@
 			BigInt64Array = function() { }
 		}
 	</script>
-  <script type="module" crossorigin src="/assets/index.b990f5f5.js"></script>
+  <script type="module" crossorigin src="/assets/index.38fdde83.js"></script>
   <link rel="stylesheet" href="/assets/index.9501af8b.css">
 </head>
 <body>
