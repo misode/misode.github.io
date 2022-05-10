@@ -63,7 +63,7 @@ With this information we can make the most basic noise router, one where every d
 }
 ```
 
-## Density function files
+## Density functions
 In the above example all the density functions are constant numbers, but they don't have to be. Another option is to reference a density function file. Vanilla has some builtin density functions, for example:
 
 ```json
@@ -72,7 +72,6 @@ In the above example all the density functions are constant numbers, but they do
 
 You can create your own density functions in the `worldgen/density_function` folder.
 
-## Complex density functions
 All the other density function types are defined as an object with a `"type"` field and optionally more fields. For example:
 ```json
 {
