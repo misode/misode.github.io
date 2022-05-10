@@ -62,19 +62,37 @@ export function Guide({ id }: Props) {
 
 	const html = useMemo(() => {
 		if (!content) return undefined
-		marked.use({ renderer: {
-			link(href, title, text) {
-				if (href === null) return text
-				const title2 = title ? ` title="${title}"` : '' 
-				const target = href?.match(/^https?:\/\//) ? ' target="_blank"' : ''
-				return `<a href="${href}"${title2}${target}>${text}</a>`
+		const headings: marked.Tokens.Heading[] = []
+		let insertedToc = false
+		marked.use({
+			walkTokens(token) {
+				if (token.type === 'heading') {
+					headings.push(token)
+				}
 			},
-			heading(text, level, raw, slugger) {
-				const id = slugger.slug(raw)
-				const link = `<span id="guide-${id}" href="?version=${version}#${id}">${HASH}</span>`
-				return `<h${level}>${link}${text}</h${level}>`
+			renderer: {
+				link(href, title, text) {
+					if (href === null) return text
+					const title2 = title ? ` title="${title}"` : '' 
+					const target = href?.match(/^https?:\/\//) ? ' target="_blank"' : ''
+					return `<a href="${href}"${title2}${target}>${text}</a>`
+				},
+				heading(text, level, raw, slugger) {
+					let toc = ''
+					if (!insertedToc) {
+						toc = `<ol class="guide-toc">${headings.filter(t => t.depth === 2).map(t => {
+							const id = slugger.slug(t.raw.match(/^#+ (.*)/)?.[1] ?? '', { dryrun: true })
+							const text = t.text.replaceAll('`', '')
+							return `<li><a href="#${id}">${text}</a></li>`
+						}).join('')}</ol>`
+						insertedToc = true
+					}
+					const id = slugger.slug(raw)
+					const link = `<span id="guide-${id}" href="?version=${version}#${id}">${HASH}</span>`
+					return `${toc}<h${level}>${link}${text}</h${level}>`
+				},
 			},
-		}})
+		})
 		const guide = content.substring(content.indexOf('---', 3) + 3)
 		const versionedContent = versionContent(guide, guideVersion)
 		return marked(versionedContent, { version: '1.19' } as any)

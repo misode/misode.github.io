@@ -1547,6 +1547,15 @@ hr {
 	margin-left: 12px;
 }
 
+.guide-toc {
+	display: inline-block;
+	border: 2px solid var(--background-6);
+	border-radius: 6px;
+	padding: 8px 16px;
+	line-height: 1.2;
+	font-size: 90%;
+}
+
 .guide-content {
 	color: var(--text-2);
 	margin-top: 12px;
