@@ -1643,6 +1643,15 @@ hr {
 	font-size: 85%;
 }
 
+.guide-content h1 code,
+.guide-content h2 code,
+.guide-content h3 code,
+.guide-content h4 code,
+.guide-content h5 code,
+.guide-content h6 code {
+	font-size: 100%;
+}
+
 .guide-content pre > code {
 	display: block;
 	padding: 0.8em;
