@@ -1668,19 +1668,19 @@ hr {
 	overflow-x: auto;
 }
 
-.guide-content code .hljs-attr {
+.guide-content .hljs-attr {
 	color: var(--editor-variable);
 }
 
-.guide-content code .hljs-string {
+.guide-content .hljs-string {
 	color: var(--editor-string);
 }
 
-.guide-content code .hljs-number {
+.guide-content .hljs-number {
 	color: var(--editor-number);
 }
 
-.guide-content code .hljs-keyword {
+.guide-content .hljs-keyword {
 	color: var(--editor-constant);
 }
 

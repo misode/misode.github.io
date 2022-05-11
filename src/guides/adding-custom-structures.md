@@ -44,14 +44,14 @@ A structure set is where the placement starts. It defines where in the world the
 }
 ```
 Structure sets are made up of two parts:
-* `structures`: A weighted list of configured structure features [(see next step)](#the{#[1.18.2] -configured #}-structure).
-* `placement`: The structure placement
-  * `placement.type`: Either `random_spread` or `concentric_rings`. The latter is only used by strongholds in vanilla, so we'll focus on `random_spread`
-  * `placement.spacing`: Roughly the average distance in chunks between two structures in this set.
-  * `placement.separation`: The minimum distance in chunks. Needs to be smaller than spacing.
-  * `placement.salt`: A random number that is combined with the world seed. Always use a different random number for different structures, otherwise they will end up being placed in the same spot!
+* f`structures`: A weighted list of configured structure features [(see next step)](#the{#[1.18.2] -configured #}-structure).
+* f`placement`: The structure placement
+  * f`type`: Either s`random_spread` or s`concentric_rings`. The latter is only used by strongholds in vanilla, so we'll focus on s`random_spread`
+  * f`spacing`: Roughly the average distance in chunks between two structures in this set.
+  * f`separation`: The minimum distance in chunks. Needs to be smaller than spacing.
+  * f`salt`: A random number that is combined with the world seed. Always use a different random number for different structures, otherwise they will end up being placed in the same spot!
 
-When using the `random_spread` placement type, it generates structures grid-based. Here's an illustration of the above example with `spacing = 5`, `separation = 2`. There will be one structure attempt in each 5x5 chunk grid, and only at `X` a structure can spawn. 
+When using the s`random_spread` placement type, it generates structures grid-based. Here's an illustration of the above example with `spacing = 5`, `separation = 2`. There will be one structure attempt in each 5x5 chunk grid, and only at `X` a structure can spawn. 
 ```
 .............
 ..XXX..XXX..X
@@ -100,23 +100,24 @@ The {#[1.18.2] configured structure (feature) #}{#[1.19] structure #} is the ID 
 ```
 Let's go over all the fields.
 {#[1.18.2]
-* `type`: This is the structure feature type. When making custom structures, you almost always want to set this to `village` or `bastion_remnant`. There is one important difference between the two: using `village` will spawn the structure on the surface, while `bastion_remnant` will always spawn the structure at Y=33.
-* `config.start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
-* `config.size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
-* `biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
-* `adapt_noise`: When true, it will add extra terrain below each structure piece.
-* `spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure-feature/?preset=monument&version={#version#}) structure feature as a reference.
+* f`type`: This is the structure feature type. When making custom structures, you almost always want to set this to s`village` or s`bastion_remnant`. There is one important difference between the two: using s`village` will spawn the structure on the surface, while s`bastion_remnant` will always spawn the structure at Y=33.
+* f`config`:
+  * f`start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
+  * f`size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
+* f`biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
+* f`adapt_noise`: When true, it will add extra terrain below each structure piece.
+* f`spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure-feature/?preset=monument&version={#version#}) structure feature as a reference.
 #}{#[1.19]
-* `type`: This is the structure type. When making custom structures, you almost always want to set this to `jigsaw`.
-* `biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
-* `step`: The generation step to place the features in. This matches the steps in a biome's `feature` list. Possible values: `raw_generation`, `lakes`, `local_modifications`, `underground_structures`, `surface_structures`, `strongholds`, `underground_ores`, `underground_decoration`, `fluid_springs`, `vegetal_decoration`, and `top_layer_modification`.
-* `spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure/?preset=monument&version={#version#}) structure feature as a reference.
-* `start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
-* `size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
-* `start_height`: A height provider specifying at which height the structure should spawn. The example uses the constant shorthand so it just specifies a vertical anchor.
-* `project_start_to_heightmap`: An optional heightmap type. Possible values: `WORLD_SURFACE_WG`, `WORLD_SURFACE`, `OCEAN_FLOOR_WG`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, and `MOTION_BLOCKING_NO_LEAVES`. If `start_height` is not 0, will move the start relative to the heightmap.
-* `max_distance_from_center`: Value between 1 and 128. The maximum distance that a jigsaw can branch out.
-* `use_expansion_hack`: You should always set this to false. Vanilla villages set this to true to fix an issue with their streets.
+* f`type`: This is the structure type. When making custom structures, you almost always want to set this to s`jigsaw`.
+* f`biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
+* f`step`: The generation step to place the features in. This matches the steps in a biome's `feature` list. Possible values: s`raw_generation`, s`lakes`, s`local_modifications`, s`underground_structures`, s`surface_structures`, s`strongholds`, s`underground_ores`, s`underground_decoration`, s`fluid_springs`, s`vegetal_decoration`, and s`top_layer_modification`.
+* f`spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure/?preset=monument&version={#version#}) structure feature as a reference.
+* f`start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
+* f`size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
+* f`start_height`: A height provider specifying at which height the structure should spawn. The example uses the constant shorthand so it just specifies a vertical anchor.
+* f`project_start_to_heightmap`: An optional heightmap type. Possible values: s`WORLD_SURFACE_WG`, s`WORLD_SURFACE`, s`OCEAN_FLOOR_WG`, s`OCEAN_FLOOR`, s`MOTION_BLOCKING`, and s`MOTION_BLOCKING_NO_LEAVES`. If f`start_height` is not 0, will move the start relative to the heightmap.
+* f`max_distance_from_center`: Value between 1 and 128. The maximum distance that a jigsaw can branch out.
+* f`use_expansion_hack`: You should always set this to false. Vanilla villages set this to true to fix an issue with their streets.
 #}
 
 ## The template pool
@@ -141,13 +142,13 @@ The template pool defines how to build up your structure. Since we're not using 
 }
 ```
 Again, let's go over the fields:
-* `name`: For some reason, the game needs the name of this template pool. Just set this to the ID of the template pool.
-* `fallback`: Used in jigsaw structures, but we can simply use `minecraft:empty`.
-* `elements`: A weighted list of pool elements to choose from. You can add multiple elements here if your structure has different starting structure files. For example in vanilla a plains village has different town center variants.
-  * `element_type`: The type of this element. One of `empty_pool_element` (placing nothing), `feature_pool_element` (placing a placed feature), `legacy_single_pool_element`, `list_pool_element`, and `single_pool_element` (placing a structure). 
-  * `location`: The path to the structure NBT file. [(see next step)](#the-structure-nbt).
-  * `projection`: Either `rigid` or `terrain_matching`. Use the latter if you want the structure to match the terrain, just like village paths do.
-  * `processors`: If you want to run any processor lists, this is quite complicated so again we'll skip this for now and set it to `minecraft:empty`.
+* f`name`: For some reason, the game needs the name of this template pool. Just set this to the ID of the template pool.
+* f`fallback`: Used in jigsaw structures, but we can simply use s`minecraft:empty`.
+* f`elements`: A weighted list of pool elements to choose from. You can add multiple elements here if your structure has different starting structure files. For example in vanilla a plains village has different town center variants.
+  * f`element_type`: The type of this element. One of s`empty_pool_element` (placing nothing), s`feature_pool_element` (placing a placed feature), s`legacy_single_pool_element`, s`list_pool_element`, and s`single_pool_element` (placing a structure). 
+  * f`location`: The path to the structure NBT file. [(see next step)](#the-structure-nbt).
+  * f`projection`: Either s`rigid` or s`terrain_matching`. Use the latter if you want the structure to match the terrain, just like village paths do.
+  * f`processors`: If you want to run any processor lists, this is quite complicated so again we'll skip this for now and set it to s`minecraft:empty`.
 
 ## The structure NBT
 Creating the structure NBT file is entirely up to you. In this example I'm going to use a tower structure from [Gamemode 4](https://gm4.co/modules/tower-structures).

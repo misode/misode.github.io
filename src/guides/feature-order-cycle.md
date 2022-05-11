@@ -49,10 +49,10 @@ Let's try with an example. We have two biomes here:
 }
 ```
 
-When we try to load these biomes, data pack validation will fail because in the `example:forest` biome in step 2, `blue_tree` is before `rocks`; while in the `example:plains` biome, `rocks` is before `blue_tree`.
+When we try to load these biomes, data pack validation will fail because in the `example:forest` biome in step 2, s`blue_tree` is before s`rocks`; while in the `example:plains` biome, s`rocks` is before s`blue_tree`.
 
 ## How to fix it
-The rule is that for each step in `"features"`, all features need to be ordered consistently across biomes.
+The rule is that for each step in f`"features"`, all feature IDs need to be ordered consistently across biomes.
 
 The above example can be fixed by swapping the features in step 2 of the `plains` biome:  
 **`data/example/worldgen/biome/plains.json`**

@@ -65,6 +65,40 @@ export function Guide({ id }: Props) {
 		const headings: marked.Tokens.Heading[] = []
 		let insertedToc = false
 		marked.use({
+			extensions: [
+				{
+					name: 'styledCode',
+					level: 'inline',
+					start(src) {
+						return src.match(/\b[fsnj]`/)?.index ?? -1
+					},
+					tokenizer(src) {
+						const match = src.match(/^([fsnj])`([^`]+)`/)
+						if (match) {
+							return {
+								type: 'styledCode',
+								raw: match[0],
+								prefix: match[1],
+								text: match[2],
+							}
+						}
+						return undefined
+					},
+					renderer(token) {
+						let content = token.text
+						let c = {
+							f: 'hljs-attr',
+							s: 'hljs-string',
+							n: 'hljs-number',
+						}[token.prefix as string]
+						if (token.prefix === 'j') {
+							content = hljs.highlight('json', token.text).value
+							c = 'language-json'
+						}
+						return `<code${c ? ` class="${c}"` : ''}>${content}</code>`
+					},
+				},
+			],
 			walkTokens(token) {
 				if (token.type === 'heading') {
 					headings.push(token)
