@@ -25,6 +25,14 @@ export function randomSeed() {
 	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 }
 
+export function generateUUID() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		const r = Math.random()*16|0
+		const v = c == 'x' ? r : (r&0x3|0x8)
+		return v.toString(16)
+	})
+}
+
 export function newSeed(model: DataModel) {
 	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
 	const dimensions = model.get(new Path(['dimensions']))

@@ -9,7 +9,7 @@ import { localize } from '../contexts'
 import { useFocus } from '../hooks'
 import type { BlockStateRegistry, VersionId } from '../services'
 import { CachedDecorator, CachedFeature } from '../services'
-import { deepClone, deepEqual, hexId, isObject, newSeed } from '../Utils'
+import { deepClone, deepEqual, generateUUID, hexId, isObject, newSeed } from '../Utils'
 import { ModelWrapper } from './ModelWrapper'
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.cat.variant', 'entity.type_specific.frog.variant']
@@ -424,6 +424,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 			{values.length > 0 && <datalist id={datalistId}>
 				{values.map(v => <option value={v} />)}
 			</datalist>}
+			{['attribute_modifier.id', 'text_component_object.hoverEvent.show_entity.contents.id'].includes(path.getContext().join('.')) && <button onClick={() => path.set(generateUUID())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_uuid')}>{Octicon.sync}</button>}
 			{gen && values.includes(value) && value.startsWith('minecraft:') &&
 				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={localize(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>

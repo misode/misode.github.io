@@ -34,6 +34,7 @@
   "format.yaml": "YAML",
   "fields": "Fields",
   "generate_new_seed": "Generate new seed",
+  "generate_new_uuid": "Generate new UUID",
   "github": "GitHub",
   "guides.all": "All guides",
   "guides.search": "Search guides",
