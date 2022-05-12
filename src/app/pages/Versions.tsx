@@ -43,13 +43,7 @@ export function Versions({}: Props) {
 						{Octicon.arrow_right}
 					</a>
 				</div>
-				{selected ? <VersionDetail version={selected} />
-					: <div class="version-detail">
-						<h2>{selectedId}</h2>
-						<div class="version-info">
-							<p>This version does not exist. Only versions since 1.14 are tracked, or it may be too recent.</p>
-						</div>
-					</div>}
+				<VersionDetail id={selectedId} version={selected} />
 			</> : <VersionList versions={versions ?? []} link={id => `/versions/?id=${id}`} />}
 		</div>
 	</main>

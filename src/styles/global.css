@@ -1446,6 +1446,15 @@ hr {
 	border-bottom: 2px solid transparent;
 	padding: 8px 16px;
 	cursor: pointer;
+	color: var(--text-3);
+	fill: var(--text-3);
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+}
+
+.version-tabs > * > svg {
+	margin-left: 8px;
 }
 
 .version-tabs > .selected {
@@ -1496,8 +1505,9 @@ hr {
 	background-color: var(--selection) !important;
 }
 
-.giscus {
+.giscus-container {
 	margin-top: 16px;
+	min-height: 325.667px;
 }
 
 .guide-card {
