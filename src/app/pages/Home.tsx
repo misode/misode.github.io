@@ -22,6 +22,7 @@ export function Home({}: Props) {
 					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 				)}
 			</ToolCard>
+			<ToolCard title="Partners" link="/partners/" />
 			<ToolCard title="Report Inspector" icon="report"
 				link="https://misode.github.io/report/"
 				desc="Analyse your performance reports" />

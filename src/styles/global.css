@@ -819,9 +819,14 @@ main.has-preview {
 	grid-template-columns: 1fr 1fr;
 	gap: 0 8px;
 	align-items: flex-start;
+	grid-template-rows: min-content 1fr repeat(6, auto);
 }
 
-.home > *:nth-child(n+3) {
+.home > *:first-child {
+	grid-row: 1 / 3;
+}
+
+.home > *:nth-child(n+4) {
 	grid-column: 1 / 3;
 }
 

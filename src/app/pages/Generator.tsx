@@ -40,7 +40,7 @@ export function Generator({}: Props) {
 			.reverse()
 	}, [gen.minVersion, gen.maxVersion])
 
-	useTitle(locale('title.generator', locale(gen.id)), allowedVersions)
+	useTitle(locale('title.generator', locale(gen.partner ? `partner.${gen.partner}.${gen.id}` : gen.id)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
@@ -341,7 +341,7 @@ export function Generator({}: Props) {
 
 	return <>
 		<main class={previewShown ? 'has-preview' : ''}>
-			<Ad id="data-pack-generator" type="text" />
+			{!gen.partner && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls">
 				<div class={`project-controls ${file && 'has-file'}`}>
 					<div class="btn-row">
