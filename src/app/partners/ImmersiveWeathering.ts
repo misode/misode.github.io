@@ -1,5 +1,5 @@
 import type { CollectionRegistry, ResourceType, SchemaRegistry } from '@mcschema/core'
-import { BooleanNode, Case, ChoiceNode, ListNode, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
+import { BooleanNode, Case, ChoiceNode, ListNode, MapNode, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
 
 const ID = 'immersive_weathering'
 
@@ -84,9 +84,17 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 	}, { context: `${ID}.area_condition` }))
 
 	schemas.register(`${ID}:block_pair`, ObjectNode({
-		block: Reference('block_state'),
-		above_block: Opt(Reference('block_state')),
+		block: Reference(`${ID}:block_state`),
+		above_block: Opt(Reference(`${ID}:block_state`)),
 	}, { context: `${ID}.block_pair` }))
+
+	schemas.register(`${ID}:block_state`, ObjectNode({
+		Name: StringNode({ validator: 'resource', params: { pool: 'block' } }),
+		Properties: Opt(MapNode(
+			StringNode(),
+			StringNode(),
+		)),
+	}, { context: 'block_state' }))
 
 	schemas.register(`${ID}:position_test`, ObjectNode({
 		predicate_type: StringNode({ enum: ['biome_match', 'day_test', 'nand', 'precipitation_test', 'temperature_range'] }),
@@ -112,5 +120,5 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 				use_local_pos: Opt(BooleanNode()),
 			},
 		},
-	}))
+	}, { context: `${ID}.position_test`}))
 }
