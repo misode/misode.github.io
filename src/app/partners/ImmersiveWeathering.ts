@@ -48,7 +48,7 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 						weight: NumberNode({ integer: true }),
 					})
 				),
-			})
+			}, { category: 'pool' })
 		),
 		owners: ListNode(
 			StringNode({ validator: 'resource', params: { pool: 'block' } })
@@ -120,5 +120,5 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 				use_local_pos: Opt(BooleanNode()),
 			},
 		},
-	}, { context: `${ID}.position_test`}))
+	}, { context: `${ID}.position_test`, category: 'predicate' }))
 }
