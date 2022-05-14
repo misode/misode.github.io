@@ -51,6 +51,7 @@
   "immersive_weathering:rule_test.blockstate_match": "Block state match",
   "immersive_weathering:rule_test.random_block_match": "Random block match",
   "immersive_weathering:rule_test.random_blockstate_match": "Random block state match",
+  "immersive_weathering:rule_test.tag_match": "Tag match",
   "immersive_weathering:rule_test.immersive_weathering:block_set_match": "Block set match",
   "immersive_weathering:rule_test.immersive_weathering:fluid_match": "Fluid match",
   "immersive_weathering:rule_test.immersive_weathering:tree_log": "Tree log",
