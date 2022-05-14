@@ -3,7 +3,7 @@ import type { NoiseParameters } from 'deepslate/worldgen'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
-import { useLocale } from '../../contexts'
+import { useLocale, useStore } from '../../contexts'
 import { useCanvas } from '../../hooks'
 import { biomeMap, getBiome } from '../../previews'
 import { newSeed, randomSeed } from '../../Utils'
@@ -16,6 +16,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
+	const { biomeColors } = useStore()
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
 	const refineTimeout = useRef<number>()
@@ -33,7 +34,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { octaves: octaves!, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
+			const options = { octaves: octaves!, biomeColors, layers, offset: offset.current, scale, seed, res: res.current, version }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -51,21 +52,21 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves: octaves!, biomeColors: {}, layers, offset: offset.current, scale, seed: configuredSeed, res: 1, version }
+			const options = { octaves: octaves!, biomeColors, layers, offset: offset.current, scale, seed: configuredSeed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [version, state, scale, configuredSeed, layers])
+	}, [version, state, scale, configuredSeed, layers, biomeColors])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [version, state, scale, configuredSeed, layers, shown])
+	}, [version, state, scale, configuredSeed, layers, shown, biomeColors])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale

@@ -246,7 +246,7 @@ function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
 	return [xx, zz]
 }
 
-const VanillaColors: Record<string, Triple> = {
+export const VanillaColors: Record<string, Triple> = {
 	'minecraft:badlands': [217,69,21],
 	'minecraft:badlands_plateau': [202,140,101],
 	'minecraft:bamboo_jungle': [118,142,20],

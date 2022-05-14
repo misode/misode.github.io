@@ -13,12 +13,14 @@ export function isObject(obj: any): obj is Record<string, any> {
 	return typeof obj === 'object' && obj !== null
 }
 
-const dec2hex = (dec: number) => ('0' + dec.toString(16)).substr(-2)
+function decToHex(n: number) {
+	return n.toString(16).padStart(2, '0')
+}
 
 export function hexId(length = 12) {
 	var arr = new Uint8Array(length / 2)
 	window.crypto.getRandomValues(arr)
-	return Array.from(arr, dec2hex).join('')
+	return Array.from(arr, decToHex).join('')
 }
 
 export function randomSeed() {
@@ -152,9 +154,26 @@ function findMatchingClose(source: string, index: number) {
 	return source.length
 }
 
-export function stringToColor(str: string): [number, number, number] {
+export type Color = [number, number, number]
+
+export function stringToColor(str: string): Color {
 	const h = Math.abs(hashString(str))
 	return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
+}
+
+export function rgbToHex(color: Color): string {
+	if (!Array.isArray(color) || color.length !== 3) return '#000000'
+	const [r, g, b] = color
+	return '#' + decToHex(r) + decToHex(g) + decToHex(b)
+}
+
+export function hexToRgb(hex: string | undefined): Color {
+	if (typeof hex !== 'string') return [0, 0, 0]
+	const num = parseInt(hex.startsWith('#') ? hex.slice(1) : hex, 16)
+	const r = (num >> 16) & 255
+	const g = (num >> 8) & 255
+	const b = num & 255
+	return [r, g, b]
 }
 
 export function square(a: number) {
