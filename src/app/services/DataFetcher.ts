@@ -83,8 +83,13 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
 	const version = config.versions.find(v => v.id === versionId)!
 	try {
-		const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
-		const url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
+		let url
+		if (id.startsWith('immersive_weathering:')) {
+			url = `https://raw.githubusercontent.com/AstralOrdana/Immersive-Weathering/main/src/main/resources/data/immersive_weathering/block_growths/${id.slice(21)}.json`
+		} else {
+			const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
+			url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
+		}
 		const res = await fetch(url)
 		return await res.json()
 	} catch (e) {

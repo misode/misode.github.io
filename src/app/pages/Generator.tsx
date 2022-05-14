@@ -210,7 +210,7 @@ export function Generator({}: Props) {
 	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
 		getCollections(version).then(collections => {
-			setPresets(collections.get(gen.id).map(p => p.slice(10)))
+			setPresets(collections.get(gen.id).map(p => p.startsWith('minecraft:') ? p.slice(10) : p))
 		})
 			.catch(e => { console.error(e); setError(e) })
 	}, [version, gen.id])
