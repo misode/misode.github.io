@@ -40,7 +40,7 @@ export function Generator({}: Props) {
 			.reverse()
 	}, [gen.minVersion, gen.maxVersion])
 
-	useTitle(locale('title.generator', locale(gen.id)), allowedVersions)
+	useTitle(locale('title.generator', locale(gen.partner ? `partner.${gen.partner}.${gen.id}` : gen.id)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
@@ -210,7 +210,7 @@ export function Generator({}: Props) {
 	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
 		getCollections(version).then(collections => {
-			setPresets(collections.get(gen.id).map(p => p.slice(10)))
+			setPresets(collections.get(gen.id).map(p => p.startsWith('minecraft:') ? p.slice(10) : p))
 		})
 			.catch(e => { console.error(e); setError(e) })
 	}, [version, gen.id])
@@ -341,7 +341,7 @@ export function Generator({}: Props) {
 
 	return <>
 		<main class={previewShown ? 'has-preview' : ''}>
-			<Ad id="data-pack-generator" type="text" />
+			{!gen.partner && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls">
 				<div class={`project-controls ${file && 'has-file'}`}>
 					<div class="btn-row">

@@ -266,6 +266,15 @@
       "path": "models",
       "category": "assets",
       "schema": "model"
+    },
+    {
+      "id": "block_growth",
+      "url": "partners/immersive-weathering/block-growth",
+      "path": "block_growths",
+      "category": "partners",
+      "partner": "immersive_weathering",
+      "schema": "immersive_weathering:block_growth",
+      "minVersion": "1.18.2"
     }
   ]
 }

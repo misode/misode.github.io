@@ -1,6 +1,7 @@
 import type { CollectionRegistry, INode, SchemaRegistry } from '@mcschema/core'
 import { ChoiceNode, DataModel, Reference, StringNode } from '@mcschema/core'
 import config from '../../config.json'
+import { initPartners } from '../partners'
 import { message } from '../Utils'
 import { fetchData } from './DataFetcher'
 
@@ -58,6 +59,7 @@ async function getVersion(id: VersionId): Promise<VersionData> {
 				const blockStates: BlockStateRegistry = {}
 				await fetchData(id, collections, blockStates)
 				const schemas = mcschema.getSchemas(collections)
+				initPartners(schemas, collections)
 				Versions[id] = { collections, schemas, blockStates }
 				return Versions[id]
 			} catch (e) {
