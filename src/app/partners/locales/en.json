@@ -45,5 +45,15 @@
   "immersive_weathering.position_test.precipitation_test.precipitation": "Precipitation",
   "immersive_weathering.position_test.temperature_range.min": "Min",
   "immersive_weathering.position_test.temperature_range.max": "Max",
-  "immersive_weathering.position_test.temperature_range.use_local_pos": "Use local pos"
+  "immersive_weathering.position_test.temperature_range.use_local_pos": "Use local pos",
+  "immersive_weathering:rule_test.always_true": "Always true",
+  "immersive_weathering:rule_test.block_match": "Block match",
+  "immersive_weathering:rule_test.blockstate_match": "Block state match",
+  "immersive_weathering:rule_test.random_block_match": "Random block match",
+  "immersive_weathering:rule_test.random_blockstate_match": "Random block state match",
+  "immersive_weathering:rule_test.immersive_weathering:block_set_match": "Block set match",
+  "immersive_weathering:rule_test.immersive_weathering:fluid_match": "Fluid match",
+  "immersive_weathering:rule_test.immersive_weathering:tree_log": "Tree log",
+  "rule_test.blocks": "Blocks",
+  "rule_test.fluid": "Fluid"
 }

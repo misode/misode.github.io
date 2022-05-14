@@ -53,7 +53,7 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 		owners: ListNode(
 			StringNode({ validator: 'resource', params: { pool: 'block' } })
 		),
-		replacing_target: Reference('rule_test'),
+		replacing_target: Reference(`${ID}:rule_test`),
 		target_self: Opt(BooleanNode()),
 		destroy_target: Opt(BooleanNode()),
 	}, { context: `${ID}.block_growth` }))
@@ -68,13 +68,13 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 				radiusZ: NumberNode({ integer: true }),
 				requiredAmount: NumberNode({ integer: true }),
 				yOffset: Opt(NumberNode({ integer: true })),
-				must_have: Opt(Reference('rule_test')),
-				must_not_have: Opt(Reference('rule_test')),
+				must_have: Opt(Reference(`${ID}:rule_test`)),
+				must_not_have: Opt(Reference(`${ID}:rule_test`)),
 				includes: Opt(Tag('block')),
 			},
 			neighbor_based_generation: {
-				must_have: Reference('rule_test'),
-				must_not_have: Opt(Reference('rule_test')),
+				must_have: Reference(`${ID}:rule_test`),
+				must_not_have: Opt(Reference(`${ID}:rule_test`)),
 				required_amount: Opt(NumberNode({ integer: true })),
 				directions: ListNode(
 					StringNode({ enum: 'direction' })
@@ -121,4 +121,42 @@ export function initImmersiveWeathering(schemas: SchemaRegistry, collections: Co
 			},
 		},
 	}, { context: `${ID}.position_test`, category: 'predicate' }))
+
+	collections.register(`${ID}:rule_test`, [
+		...collections.get('rule_test'),
+		'immersive_weathering:block_set_match',
+		'immersive_weathering:fluid_match',
+		'immersive_weathering:tree_log',
+	])
+
+	schemas.register(`${ID}:rule_test`, ObjectNode({
+		predicate_type: StringNode({ validator: 'resource', params: { pool: `${ID}:rule_test` as any } }),
+		[Switch]: [{ push: 'predicate_type' }],
+		[Case]: {
+			'minecraft:block_match': {
+				block: StringNode({ validator: 'resource', params: { pool: 'block' } }),
+			},
+			'minecraft:blockstate_match': {
+				block_state: Reference('block_state'),
+			},
+			'minecraft:random_block_match': {
+				block: StringNode({ validator: 'resource', params: { pool: 'block' } }),
+				probability: NumberNode({ min: 0, max: 1 }),
+			},
+			'minecraft:random_blockstate_match': {
+				block_state: Reference('block_state'),
+				probability: NumberNode({ min: 0, max: 1 }),
+			},
+			'minecraft:tag_match': {
+				tag: StringNode({ validator: 'resource', params: { pool: '$tag/block' }}),
+			},
+			'immersive_weathering:block_set_match': {
+				blocks: Tag('block'),
+				probability: Opt(NumberNode({ min: 0, max: 1 })),
+			},
+			'immersive_weathering:fluid_match': {
+				fluid: StringNode({ validator: 'resource', params: { pool: 'fluid' } }),
+			},
+		},
+	}, { context: 'rule_test', disableSwitchContext: true }))
 }
