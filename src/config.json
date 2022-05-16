@@ -275,6 +275,13 @@
       "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
+    },
+    {
+      "id": "obsidian_item",
+      "url": "partners/obsidian/item",
+      "category": "partners",
+      "partner": "obsidian",
+      "schema": "obsidian:item"
     }
   ]
 }
