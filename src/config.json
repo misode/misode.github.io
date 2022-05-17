@@ -271,7 +271,6 @@
       "id": "block_growth",
       "url": "partners/immersive-weathering/block-growth",
       "path": "block_growths",
-      "category": "partners",
       "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
@@ -279,9 +278,14 @@
     {
       "id": "obsidian_item",
       "url": "partners/obsidian/item",
-      "category": "partners",
       "partner": "obsidian",
       "schema": "obsidian:item"
+    },
+    {
+      "id": "obsidian_block",
+      "url": "partners/obsidian/block",
+      "partner": "obsidian",
+      "schema": "obsidian:block"
     }
   ]
 }
