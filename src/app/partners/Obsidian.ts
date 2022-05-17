@@ -11,19 +11,21 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	schemas.register(`${ID}:item`, Mod(ObjectNode({
 		information: Opt(Reference(`${ID}:item_information`)),
 		display: Opt(ObjectNode({
-			model: Opt(Reference(`${ID}:item_model`)),
-			itemModel: Opt(Reference(`${ID}:item_model`)),
+			model: Opt(Reference(`${ID}:model`)),
+			item_model: Opt(Reference(`${ID}:model`)),
 			lore: ListNode(
 				ObjectNode({
 					text: Reference(`${ID}:name_information`),
 				}),
 			),
 		})),
-		useAction: Opt(ObjectNode({
-			action: StringNode({ enum: ['none', 'eat', 'drink', 'block', 'bow', 'spear', 'crossbow', 'spyglass'] }),
-			rightClickAction: Opt(StringNode()),
-			guiSize: Opt(NumberNode({ integer: true })),
-			inventoryName: Opt(StringNode()),
+		use_action: Opt(ObjectNode({
+			action: Opt(StringNode({ enum: ['none', 'eat', 'drink', 'block', 'bow', 'spear', 'crossbow', 'spyglass'] })),
+			right_click_action: Opt(StringNode({ enum: ['open_gui', 'run_command', 'open_url']})) ,
+			command: Opt(StringNode()),
+			url: Opt(StringNode()),
+			gui_size: Opt(NumberNode({ integer: true, min: 1, max: 6 })),
+			gui_title: Opt(Reference(`${ID}:name_information`)),
 		})),
 	}, { context: `${ID}:item` }), {
 		default: () => ({}),
@@ -31,20 +33,20 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 
 	schemas.register(`${ID}:item_information`, ObjectNode({
 		rarity: Opt(StringNode({ enum: ['common', 'uncommon', 'rare', 'epic']})),
-		item_group: Opt(StringNode()),
-		max_count: Opt(NumberNode({ integer: true, min: 1 })),
+		creative_tab: Opt(StringNode()),
+		max_stack_size: Opt(NumberNode({ integer: true, min: 1 })),
 		name: Opt(Reference(`${ID}:name_information`)),
-		has_glint: Opt(BooleanNode()),
+		has_enchantment_glint: Opt(BooleanNode()),
 		is_enchantable: Opt(BooleanNode()),
 		enchantability: Opt(NumberNode({ integer: true })),
 		use_duration: Opt(NumberNode({ integer: true })),
 		can_place_block: Opt(BooleanNode()),
 		placable_block: Opt(StringNode({ validator: 'resource', params: { pool: 'block' } })),
 		wearable: Opt(BooleanNode()),
-		defaultColor: Opt(NumberNode({ color: true })),
-		wearableSlot: Opt(StringNode()),
-		customRenderMode: Opt(BooleanNode()),
-		renderModeModels: Opt(ListNode(
+		default_color: Opt(NumberNode({ color: true })),
+		wearable_slot: Opt(StringNode()),
+		custom_render_mode: Opt(BooleanNode()),
+		render_mode_models: Opt(ListNode(
 			ObjectNode({
 				model: Reference('model_identifier'),
 				modes: ListNode(StringNode()),
@@ -60,12 +62,19 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		parent: StringNode({ validator: 'resource', params: { pool: '$model'} }),
 	}, { context: `${ID}:item_model` }))
 
-
-	// BLOCKS
-	schemas.register(`${ID}:block`, ObjectNode({
+	schemas.register(`${ID}:block`, Mod(ObjectNode({
 		block_type: Opt(StringNode({ enum: `${ID}:block_type`})),
 		information: Opt(Reference(`${ID}:block_information`)),
-		display: Opt(Reference(`${ID}:display_information`)),
+		display: Opt(ObjectNode({
+			model: Opt(Reference(`${ID}:model`)),
+			item_model: Opt(Reference(`${ID}:model`)),
+			block_model: Opt(Reference(`${ID}:model`)),
+			lore: ListNode(
+				ObjectNode({
+					text: Reference(`${ID}:item_name_information`),
+				}),
+			),
+		})),
 		additional_information: Opt(ObjectNode({
 			extraBlocksName: Opt(StringNode()),
 			slab: Opt(BooleanNode()),
@@ -107,10 +116,10 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			})),
 		})),
 		functions: Opt(ObjectNode({
-			random_tick: StringNode({ validator: 'resource', params: { pool: '$function' } }),
-			scheduled_tick: StringNode({ validator: 'resource', params: { pool: '$function' } }),
-			on_use: StringNode({ validator: 'resource', params: { pool: '$function' } }),
-			random_display_tick: StringNode({ validator: 'resource', params: { pool: '$function' } }),
+			random_tick: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
+			scheduled_tick: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
+			on_use: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
+			random_display_tick: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
 		})),
 		ore_information: Opt(ObjectNode({
 			test_type: Opt(StringNode({ enum: ['tag', 'always', 'block_match', 'block_state_match', 'random_block_match', 'random_block_state_match']})),
@@ -171,7 +180,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			StringNode(),
 			Reference(`${ID}:block_property`)
 		)),
-		dropInformation: Opt(ObjectNode({
+		drop_information: Opt(ObjectNode({
 			drops: Opt(ListNode(
 				ObjectNode({
 					name: StringNode({ validator: 'resource', params: { pool: 'item' } }),
@@ -181,23 +190,74 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			survives_explosion: Opt(BooleanNode()),
 			xp_drop_amount: Opt(NumberNode({ integer: true })),
 		})),
-		isMultiBlock: Opt(BooleanNode()),
-		multiBlockInformation: Opt(ObjectNode({
+		is_multi_block: Opt(BooleanNode()),
+		multiblock_information: Opt(ObjectNode({
 			width: Opt(NumberNode({ integer: true })),
 			height: Opt(NumberNode({ integer: true })),
 		})),
-		treeFeature: Opt(StringNode()),
-	}))
-
-	schemas.register(`${ID}:block_y_offset`, ObjectNode({
-		type: Opt(StringNode({enum: ['fixed', 'above_bottom', 'below_top', 'bottom', 'top']})),
-		offset: Opt(NumberNode({ integer: true })),
+		placable_feature: Opt(StringNode({ validator: 'resource', params: { pool: '$worldgen/configured_feature' } })),
+	}, { context: `${ID}:block` }), {
+		default: () => ({}),
 	}))
 
 	schemas.register(`${ID}:block_information`, ObjectNode({
-		// TODO
-	}))
+		rarity: Opt(StringNode({ enum: ['common', 'uncommon', 'rare', 'epic']})),
+		creative_tab: Opt(StringNode()),
+		collidable: Opt(BooleanNode()),
+		max_stack_size: Opt(NumberNode({ integer: true, min: 1 })),
+		name: Opt(Reference(`${ID}:name_information`)),
+		vanilla_sound_group: Opt(StringNode({ validator: 'resource', params: { pool: '$sound_event' } })),
+		custom_sound_group: Opt(Reference(`${ID}:sound_group`)),
+		vanilla_material: Opt(StringNode()),
+		custom_material: Opt(Reference(`${ID}:material`)),
+		vanilla_harvest_tool: Opt(StringNode({ validator: 'resource', params: { pool: '$tool' } })),
+		has_glint: Opt(BooleanNode()),
+		is_enchantable: Opt(BooleanNode()),
+		enchantability: Opt(NumberNode({ integer: true })),
+		fireproof: Opt(BooleanNode()),
+		translucent: Opt(BooleanNode()),
+		dynamic_boundaries: Opt(BooleanNode()),
+		has_item: Opt(BooleanNode()),
+		cake_slices: Opt(NumberNode({integer: true, min: 1})),
+		wearable: Opt(BooleanNode()),
+		defaultColor: Opt(NumberNode({ color: true })),
+		wearableSlot: Opt(StringNode()),
+		customRenderMode: Opt(BooleanNode()),
+		renderModeModels: Opt(ListNode(
+			ObjectNode({
+				model: Reference('model_identifier'),
+				modes: ListNode(StringNode()),
+			})
+		)),
+	}, { context: `${ID}:block_information` }))
 
+	schemas.register(`${ID}:model`, ObjectNode({
+		textures: Opt(MapNode(
+			StringNode(),
+			StringNode({ validator: 'resource', params: { pool: '$texture' } }),
+		)),
+		parent: StringNode({ validator: 'resource', params: { pool: '$model'} }),
+	}, { context: `${ID}:model` }))
+
+	schemas.register(`${ID}:sound_group`, ObjectNode({
+		id: Opt(StringNode()),
+		break_sound: Opt(StringNode()),
+		step_sound: Opt(StringNode()),
+		place_sound: Opt(StringNode()),
+		hit_sound: Opt(StringNode())
+	}, { context: `${ID}:sound_group` }))
+
+	schemas.register(`${ID}:material`, ObjectNode({
+		id: Opt(StringNode()),
+		map_color: Opt(StringNode()),
+		allows_movement: Opt(BooleanNode()),
+		burnable: Opt(BooleanNode()),
+		liquid: Opt(BooleanNode()),
+		allows_light: Opt(BooleanNode()),
+		replacable: Opt(BooleanNode()),
+		solid: Opt(BooleanNode()),
+		piston_behaviour: Opt(StringNode({ enum: ['NORMAL', 'DESTROY', 'BLOCK', 'IGNORE', 'PUSH_ONLY'] })),
+	}, { context: `${ID}:material` }))
 
 	// COMMON
 	schemas.register(`${ID}:name_information`, ObjectNode({

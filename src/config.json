@@ -271,21 +271,59 @@
       "id": "block_growth",
       "url": "partners/immersive-weathering/block-growth",
       "path": "block_growths",
+      "category": "partners",
       "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
     },
     {
-      "id": "obsidian_item",
+      "id": "item",
       "url": "partners/obsidian/item",
+      "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:item"
     },
     {
-      "id": "obsidian_block",
+      "id": "food_item",
+      "url": "partners/obsidian/food_item",
+      "category": "partners/obsidian",
+      "partner": "obsidian",
+      "schema": "obsidian:food_item"
+    },
+    {
+      "id": "weapon",
+      "url": "partners/obsidian/weapon",
+      "category": "partners/obsidian",
+      "partner": "obsidian",
+      "schema": "obsidian:weapon"
+    },
+    {
+      "id": "tool",
+      "url": "partners/obsidian/tool",
+      "category": "partners/obsidian",
+      "partner": "obsidian",
+      "schema": "obsidian:tool"
+    },
+    {
+      "id": "block",
       "url": "partners/obsidian/block",
+      "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:block"
+    },
+    {
+      "id": "creative_tab",
+      "url": "partners/obsidian/creative_tab",
+      "category": "partners/obsidian",
+      "partner": "obsidian",
+      "schema": "obsidian:creative_tab"
+    },
+    {
+      "id": "tabbed_creative_tab",
+      "url": "partners/obsidian/tabbed_creative_tab",
+      "category": "partners/obsidian",
+      "partner": "obsidian",
+      "schema": "obsidian:tabbed_creative_tab"
     }
   ]
 }
