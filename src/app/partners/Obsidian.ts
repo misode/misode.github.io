@@ -147,7 +147,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			topOffset: Reference(`${ID}:block_y_offset`),
 			bottomOffset: Reference(`${ID}:block_y_offset`),
 		})),
-		food_information: ObjectNode({
+		food_information: Opt(ObjectNode({
 			hunger: Opt(NumberNode({ integer: true, min: 0 })),
 			saturation: Opt(NumberNode({ integer: true, min: 0 })),
 			effects: ListNode(
@@ -158,28 +158,19 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 					chance: Opt(NumberNode({ integer: true, min: 0, max: 1 })),
 				})
 			),
-		}),
-		[Switch]: [{ push: 'block_type' }],
-		[Case]: {
-			CAKE: {
-				cake_slices: NumberNode({integer: true, min: 1})
-			},
-			CAMPFIRE: {
-				campfire_properties: Opt(ObjectNode({
-					emits_particles: Opt(BooleanNode()),
-					fire_damage: Opt(NumberNode({ integer: true })),
-					luminance: Opt(NumberNode({ integer: true })),
-				})),
-			},
-			TORCH: {
-				particle_type: Opt(StringNode())
-			}
-		},
+		})),
+		cake_slices: Opt(NumberNode({integer: true, min: 1})),
+		campfire_properties: Opt(ObjectNode({
+			emits_particles: Opt(BooleanNode()),
+			fire_damage: Opt(NumberNode({ integer: true })),
+			luminance: Opt(NumberNode({ integer: true })),
+		})),
+		particle_type: Opt(StringNode()),
 		can_plant_on: Opt(ListNode(
 			StringNode({ validator: 'resource', params: { pool: 'block' } })
 		)),
 		growable: Opt(ObjectNode({
-			min_age: Opt(NumberNode({ integer: true })),
+			min_age: Opt(NumberNode({ integer: true, min: 1 })),
 			max_age: Opt(NumberNode({ integer: true })),
 		})),
 		oxidizable_properties: Opt(ObjectNode({
@@ -329,28 +320,45 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			play_sound: {
 				target: StringNode(),
 				sound_type: StringNode({ validator: 'resource', params: { pool: '$sound_event' } }),
-			},	
-			spawn_entity: {
-				entity_type: StringNode({ validator: 'resource', params: { pool: '$entity_type' } }),
-				x_pos: NumberNode(),
-				y_pos: NumberNode(),
-				z_pos: NumberNode(),
-				amount: NumberNode({ integer: true }),
-			},	
-			spawn_loot: {
-				table: StringNode({ validator: 'resource', params: { pool: '$loot_table' } }),
-				amount: NumberNode({ integer: true }),
-			},	
+			},
+			remove_effect: {
+				effect: StringNode({ validator: 'resource', params: { pool: '$mob_effect' } }),
+				target: StringNode(),
+			},
+			run_command: {
+				command: StringNode(),
+				target: StringNode(),
+			},
 			set_block: {
 				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
 				x_pos: NumberNode(),
 				y_pos: NumberNode(),
 				z_pos: NumberNode(),
 			},
+			set_block_at_pos: {
+				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
+				x_pos: NumberNode(),
+				y_pos: NumberNode(),
+				z_pos: NumberNode(),
+			},
 			set_block_property: {
+				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
 				property: StringNode(),
 				value: StringNode(),
-			}
+			},
+			spawn_loot: {
+				loot_table: StringNode({ validator: 'resource', params: { pool: '$loot_table' } }),
+				x_pos: NumberNode(),
+				y_pos: NumberNode(),
+				z_pos: NumberNode(),
+			},
+			spawn_entity: {
+				entity_type: StringNode({ validator: 'resource', params: { pool: '$entity_type' } }),
+				x_pos: NumberNode(),
+				y_pos: NumberNode(),
+				z_pos: NumberNode(),
+				amount: NumberNode({ integer: true }),
+			},
 		},
 	}))
 
