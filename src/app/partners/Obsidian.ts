@@ -1,5 +1,5 @@
 import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
-import { BooleanNode, ListNode, MapNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode } from '@mcschema/core'
+import { BooleanNode, Case, ListNode, MapNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
 
 const ID = 'obsidian'
 
@@ -116,10 +116,12 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			})),
 		})),
 		functions: Opt(ObjectNode({
-			random_tick: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
-			scheduled_tick: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
-			on_use: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
-			random_display_tick: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
+			random_tick: Opt(Reference(`${ID}:function`)),
+			scheduled_tick: Opt(Reference(`${ID}:function`)),
+			on_use: Opt(Reference(`${ID}:function`)),
+			random_display_tick: Opt(Reference(`${ID}:function`)),
+			walk_on: Opt(Reference(`${ID}:function`)),
+			on_shift_use: Opt(Reference(`${ID}:function`)),
 		})),
 		ore_information: Opt(ObjectNode({
 			test_type: Opt(StringNode({ enum: ['tag', 'always', 'block_match', 'block_state_match', 'random_block_match', 'random_block_state_match']})),
@@ -146,17 +148,36 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			bottomOffset: Reference(`${ID}:block_y_offset`),
 		})),
 		food_information: ObjectNode({
-
+			hunger: Opt(NumberNode({ integer: true, min: 0 })),
+			saturation: Opt(NumberNode({ integer: true, min: 0 })),
+			effects: ListNode(
+				ObjectNode({
+					effect: StringNode({ validator: 'resource', params: { pool: '$mob_effect' } }),
+					duration: Opt(NumberNode({ integer: true, min: 0 })),
+					amplifier: Opt(NumberNode({ integer: true, min: 0 })),
+					chance: Opt(NumberNode({ integer: true, min: 0, max: 1 })),
+				})
+			),
 		}),
-		campfire_properties: Opt(ObjectNode({
-			emits_particles: Opt(BooleanNode()),
-			fire_damage: Opt(NumberNode({ integer: true })),
-			luminance: Opt(NumberNode({ integer: true })),
-		})),
+		[Switch]: [{ push: 'block_type' }],
+		[Case]: {
+			CAKE: {
+				cake_slices: NumberNode({integer: true, min: 1})
+			},
+			CAMPFIRE: {
+				campfire_properties: Opt(ObjectNode({
+					emits_particles: Opt(BooleanNode()),
+					fire_damage: Opt(NumberNode({ integer: true })),
+					luminance: Opt(NumberNode({ integer: true })),
+				})),
+			},
+			TORCH: {
+				particle_type: Opt(StringNode())
+			}
+		},
 		can_plant_on: Opt(ListNode(
 			StringNode({ validator: 'resource', params: { pool: 'block' } })
 		)),
-		particle_type: Opt(StringNode()),
 		growable: Opt(ObjectNode({
 			min_age: Opt(NumberNode({ integer: true })),
 			max_age: Opt(NumberNode({ integer: true })),
@@ -170,16 +191,13 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 					blocks: Opt(ListNode(
 						ObjectNode({
 							name: Opt(Reference(`${ID}:name_information`)),
-							display: Opt(Reference(`${ID}:display_information`)),
+							display: Opt(Reference(`${ID}:model`)),
 						})
 					)),
 				})
 			)),
 		})),
-		events: Opt(MapNode(
-			StringNode(),
-			Reference(`${ID}:block_property`)
-		)),
+		events: Opt(ListNode(Reference(`${ID}:event`))),
 		drop_information: Opt(ObjectNode({
 			drops: Opt(ListNode(
 				ObjectNode({
@@ -217,18 +235,43 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		translucent: Opt(BooleanNode()),
 		dynamic_boundaries: Opt(BooleanNode()),
 		has_item: Opt(BooleanNode()),
-		cake_slices: Opt(NumberNode({integer: true, min: 1})),
-		wearable: Opt(BooleanNode()),
-		defaultColor: Opt(NumberNode({ color: true })),
-		wearableSlot: Opt(StringNode()),
-		customRenderMode: Opt(BooleanNode()),
-		renderModeModels: Opt(ListNode(
-			ObjectNode({
-				model: Reference('model_identifier'),
-				modes: ListNode(StringNode()),
-			})
-		)),
+		dyeable: Opt(BooleanNode()),
+		[Switch]: [{ push: 'dyeable' }],
+		[Case]: {
+			true: {
+				defaultColor: Opt(NumberNode({ color: true })),
+			}
+		},
+		wearable: Opt(StringNode({ enum: ['true', 'false']})),
+		[Switch]: [{ push: 'wearable' }],
+		[Case]: {
+			true: {
+				wearble_slot: Opt(StringNode()),
+			}
+		},
+		custom_render_mode: Opt(StringNode({ enum: ['true', 'false']})),
+		[Switch]: [{ push: 'custom_render_mode' }],
+		[Case]: {
+			true: {
+				render_mode_models: Opt(ListNode(
+					ObjectNode({
+						model: Reference('model_identifier'),
+						modes: ListNode(StringNode()),
+					})
+				)),
+			}
+		},
 	}, { context: `${ID}:block_information` }))
+
+	schemas.register(`${ID}:block_y_offset`, ObjectNode({
+		type: Opt(StringNode({enum: ['fixed', 'above_bottom', 'below_top', 'bottom', 'top']})),
+		offset: Opt(NumberNode({ integer: true })),
+	}))
+
+	schemas.register(`${ID}:function`, ObjectNode({
+		predicate: Opt(StringNode({ validator: 'resource', params: { pool: '$predicate' } })),
+		function: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
+	}, { context: `${ID}:function` }))
 
 	schemas.register(`${ID}:model`, ObjectNode({
 		textures: Opt(MapNode(
@@ -262,7 +305,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	schemas.register(`${ID}:name_information`, ObjectNode({
 		id: StringNode(),
 		text: Opt(StringNode()),
-		type: Opt(StringNode({ enum: ['literal'] })),
+		type: Opt(StringNode({ enum: ['literal', 'translatable'] })),
 		translated: Opt(MapNode(
 			StringNode(),
 			StringNode(),
@@ -277,8 +320,55 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		// TODO
 	}))
 
-	schemas.register(`${ID}:block_property`, ObjectNode({
-		// TODO
+	schemas.register(`${ID}:event`, ObjectNode({
+		activations: StringNode({enum: ['use', 'shift_use', 'collide', 'walk_on']}),
+		predicate: Opt(StringNode({ validator: 'resource', params: { pool: '$predicate' } })),
+		type: StringNode({ enum: ['give_effect', 'damage', 'decrement_stack', 'kill', 'play_sound', 'remove_effect', 'run_command', 'set_block', 'set_block_at_pos', 'set_block_property', 'spawn_loot', 'spawn_entity'] }),
+		[Switch]: [{ push: 'type' }],
+		[Case]: {
+			give_effect: {
+				amplifier: NumberNode({ integer: true }),
+				duration: NumberNode(),
+				effect: StringNode({ validator: 'resource', params: { pool: '$mob_effect' } }),
+				target: StringNode()
+			},
+			damage: {
+				amount: NumberNode({ integer: true }),
+				target: StringNode(),
+				damage_type: StringNode(),
+			},	
+			decrement_stack: {
+				amount: NumberNode({ integer: true }),
+			},
+			kill: {
+				target: StringNode(),
+			},	
+			play_sound: {
+				target: StringNode(),
+				sound_type: StringNode({ validator: 'resource', params: { pool: '$sound_event' } }),
+			},	
+			spawn_entity: {
+				entity_type: StringNode({ validator: 'resource', params: { pool: '$entity_type' } }),
+				x_pos: NumberNode(),
+				y_pos: NumberNode(),
+				z_pos: NumberNode(),
+				amount: NumberNode({ integer: true }),
+			},	
+			spawn_loot: {
+				table: StringNode({ validator: 'resource', params: { pool: '$loot_table' } }),
+				amount: NumberNode({ integer: true }),
+			},	
+			set_block: {
+				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
+				x_pos: NumberNode(),
+				y_pos: NumberNode(),
+				z_pos: NumberNode(),
+			},
+			set_block_property: {
+				property: StringNode(),
+				value: StringNode(),
+			}
+		},
 	}))
 
 
