@@ -236,31 +236,16 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		dynamic_boundaries: Opt(BooleanNode()),
 		has_item: Opt(BooleanNode()),
 		dyeable: Opt(BooleanNode()),
-		[Switch]: [{ push: 'dyeable' }],
-		[Case]: {
-			true: {
-				defaultColor: Opt(NumberNode({ color: true })),
-			}
-		},
-		wearable: Opt(StringNode({ enum: ['true', 'false']})),
-		[Switch]: [{ push: 'wearable' }],
-		[Case]: {
-			true: {
-				wearble_slot: Opt(StringNode()),
-			}
-		},
-		custom_render_mode: Opt(StringNode({ enum: ['true', 'false']})),
-		[Switch]: [{ push: 'custom_render_mode' }],
-		[Case]: {
-			true: {
-				render_mode_models: Opt(ListNode(
-					ObjectNode({
-						model: Reference('model_identifier'),
-						modes: ListNode(StringNode()),
-					})
-				)),
-			}
-		},
+		defaultColor: Opt(NumberNode({ color: true })),
+		wearable: Opt(BooleanNode()),
+		wearble_slot: Opt(StringNode()),
+		custom_render_mode: Opt(BooleanNode()),
+		render_mode_models: Opt(ListNode(
+			ObjectNode({
+				model: Reference('model_identifier'),
+				modes: ListNode(StringNode()),
+			})
+		)),
 	}, { context: `${ID}:block_information` }))
 
 	schemas.register(`${ID}:block_y_offset`, ObjectNode({
@@ -311,9 +296,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			StringNode(),
 		)),
 		color: Opt(StringNode()),
-		formatting: Opt(ListNode(
-			StringNode(),
-		)),
+		formatting: Opt(ListNode(StringNode())),
 	}))
 
 	schemas.register(`${ID}:display_information`, ObjectNode({
