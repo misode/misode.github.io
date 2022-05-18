@@ -13,11 +13,11 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		display: Opt(ObjectNode({
 			model: Opt(Reference(`${ID}:model`)),
 			item_model: Opt(Reference(`${ID}:model`)),
-			lore: ListNode(
+			lore: Opt(ListNode(
 				ObjectNode({
 					text: Reference(`${ID}:name_information`),
 				}),
-			),
+			)),
 		})),
 		use_action: Opt(ObjectNode({
 			action: Opt(StringNode({ enum: ['none', 'eat', 'drink', 'block', 'bow', 'spear', 'crossbow', 'spyglass'] })),
@@ -152,7 +152,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			saturation: Opt(NumberNode({ integer: true, min: 0 })),
 			effects: ListNode(
 				ObjectNode({
-					effect: StringNode({ validator: 'resource', params: { pool: '$mob_effect' } }),
+					effect: StringNode({ validator: 'resource', params: { pool: 'mob_effect' } }),
 					duration: Opt(NumberNode({ integer: true, min: 0 })),
 					amplifier: Opt(NumberNode({ integer: true, min: 0 })),
 					chance: Opt(NumberNode({ integer: true, min: 0, max: 1 })),
@@ -303,7 +303,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			give_effect: {
 				amplifier: NumberNode({ integer: true }),
 				duration: NumberNode(),
-				effect: StringNode({ validator: 'resource', params: { pool: '$mob_effect' } }),
+				effect: StringNode({ validator: 'resource', params: { pool: 'mob_effect' } }),
 				target: StringNode()
 			},
 			damage: {
@@ -319,10 +319,10 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			},	
 			play_sound: {
 				target: StringNode(),
-				sound_type: StringNode({ validator: 'resource', params: { pool: '$sound_event' } }),
+				sound_type: StringNode({ validator: 'resource', params: { pool: 'sound_event' } }),
 			},
 			remove_effect: {
-				effect: StringNode({ validator: 'resource', params: { pool: '$mob_effect' } }),
+				effect: StringNode({ validator: 'resource', params: { pool: 'mob_effect' } }),
 				target: StringNode(),
 			},
 			run_command: {
@@ -330,19 +330,19 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 				target: StringNode(),
 			},
 			set_block: {
-				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
+				block: StringNode({ validator: 'resource', params: { pool: 'block' } }),
 				x_pos: NumberNode(),
 				y_pos: NumberNode(),
 				z_pos: NumberNode(),
 			},
 			set_block_at_pos: {
-				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
+				block: StringNode({ validator: 'resource', params: { pool: 'block' } }),
 				x_pos: NumberNode(),
 				y_pos: NumberNode(),
 				z_pos: NumberNode(),
 			},
 			set_block_property: {
-				block: StringNode({ validator: 'resource', params: { pool: '$block' } }),
+				block: StringNode({ validator: 'resource', params: { pool: 'block' } }),
 				property: StringNode(),
 				value: StringNode(),
 			},
@@ -353,7 +353,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 				z_pos: NumberNode(),
 			},
 			spawn_entity: {
-				entity_type: StringNode({ validator: 'resource', params: { pool: '$entity_type' } }),
+				entity_type: StringNode({ validator: 'resource', params: { pool: 'entity_type' } }),
 				x_pos: NumberNode(),
 				y_pos: NumberNode(),
 				z_pos: NumberNode(),
