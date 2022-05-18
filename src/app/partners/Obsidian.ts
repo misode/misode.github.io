@@ -316,10 +316,6 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			},
 			kill: {
 				target: StringNode(),
-			},	
-			play_sound: {
-				target: StringNode(),
-				sound_type: StringNode({ validator: 'resource', params: { pool: 'sound_event' } }),
 			},
 			remove_effect: {
 				effect: StringNode({ validator: 'resource', params: { pool: 'mob_effect' } }),
