@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'preact/hooks'
 import { Checkbox, TextInput } from '..'
 import { useLocale } from '../../contexts'
+import { useSearchParam } from '../../hooks'
 import type { VersionMeta } from '../../services'
 import { VersionEntry } from './VersionEntry'
+
+const SEARCH_KEY = 'search'
 
 interface Props {
 	versions: VersionMeta[]
@@ -12,11 +15,11 @@ export function VersionList({ versions, link }: Props) {
 	const { locale } = useLocale()
 	
 	const [snapshots, setSnapshots] = useState(true)
-	const [search, setSearch] = useState('')
+	const [search, setSearch] = useSearchParam(SEARCH_KEY)
 
 	const filteredVersions = useMemo(() => versions.filter(v => {
 		if (v.type === 'snapshot' && !snapshots) return false
-		return v.id.includes(search)
+		return v.id.includes(search ?? '')
 	}), [versions, snapshots, search])
 
 

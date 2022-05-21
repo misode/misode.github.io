@@ -2,7 +2,7 @@ import { useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Btn, BtnMenu, ChangelogTag, GuideCard, TextInput } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
-import { useSearchParam } from '../hooks'
+import { useTags } from '../hooks/useTags'
 import type { VersionId } from '../services'
 
 interface Guide {
@@ -14,9 +14,6 @@ interface Guide {
 
 declare var __GUIDES__: Guide[]
 
-const TAG_KEY = 'tags'
-const TAG_SEP = '|'
-
 interface Props {
 	path?: string
 }
@@ -26,15 +23,7 @@ export function Guides({}: Props) {
 	useTitle(locale('title.guides'))
 
 	const [search, setSearch] = useState('')
-	const [tags, setTags] = useSearchParam(TAG_KEY)
-	const activeTags = useMemo(() => tags?.split(TAG_SEP) ?? [], [tags])
-	const toggleTag = (tag: string) => {
-		if (activeTags.includes(tag)) {
-			setTags(activeTags.filter(t => t !== tag).join(TAG_SEP))
-		} else {
-			setTags([...activeTags, tag].sort().join(TAG_SEP))
-		}
-	}
+	const [activeTags, toggleTag] = useTags()
 
 	const [versionFilter, setVersionFiler] = useState(false)
 
@@ -59,7 +48,7 @@ export function Guides({}: Props) {
 				return content.includes(q)
 			})
 		})
-	}, [versionedGuides, search, tags])
+	}, [versionedGuides, search, activeTags])
 
 	return <main>
 		<div class="guides">
