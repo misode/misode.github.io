@@ -3,13 +3,9 @@ import config from '../../config.json'
 import { message } from '../Utils'
 import type { BlockStateRegistry, VersionId } from './Schemas'
 
-// Cleanup old caches
-['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
-['mcdata_master', 'vanilla_datapack_summary'].forEach(v => localStorage.removeItem(`cached_${v}`))
-caches.delete('misode-v1')
-
 const CACHE_NAME = 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'
+const CACHE_PATCH = 'misode_cache_patch'
 
 type Version = {
 	id: string,
@@ -28,6 +24,7 @@ function mcmeta(version: { dynamic: true } | { dynamic?: false, ref?: string}, t
 }
 
 async function validateCache(version: Version) {
+	await applyPatches()
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
 			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`) || url.startsWith(`${mcmetaUrl}/assets/`) || url.startsWith(`${mcmetaUrl}/registries/`))
@@ -198,5 +195,27 @@ async function deleteMatching(matches: (url: string) => boolean) {
 		await Promise.all(promises)
 	} catch (e) {
 		console.warn(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${message(e)}`)
+	}
+}
+
+const PATCHES: (() => Promise<void>)[] = [
+	async () => {
+		['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
+		['mcdata_master', 'vanilla_datapack_summary'].forEach(v => localStorage.removeItem(`cached_${v}`))
+		caches.delete('misode-v1')
+	},
+	async () => {
+		await deleteMatching(url => url.startsWith(`${mcmetaUrl}/1.18.2-summary/`))
+	},
+]
+
+async function applyPatches() {
+	const start = parseInt(localStorage.getItem(CACHE_PATCH) ?? '0')
+	for (let i = start + 1; i <= PATCHES.length; i +=1) {
+		const patch = PATCHES[i - 1]
+		if (patch) {
+			await patch()
+		}
+		localStorage.setItem(CACHE_PATCH, i.toFixed())
 	}
 }
