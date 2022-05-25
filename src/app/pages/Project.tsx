@@ -9,7 +9,10 @@ export function Project({}: Props) {
 	const { locale } = useLocale()
 	const { project, openFile } = useProject()
 	useTitle(locale('title.project', project.name))
-	const entries = useMemo(() => project.files.map(getFilePath), project.files)
+	const entries = useMemo(() => project.files.flatMap(f => {
+		const path = getFilePath(f)
+		return path ? [path] : []
+	}), project.files)
 
 	const selectFile = useCallback((entry: string) => {
 		const [, namespace, type, ...id] = entry.split('/')

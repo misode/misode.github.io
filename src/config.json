@@ -254,6 +254,50 @@
       "minVersion": "1.19"
     },
     {
+      "id": "tag/block",
+      "url": "tags/block",
+      "category": "tags",
+      "path": "tags/blocks",
+      "schema": "block_tag"
+    },
+    {
+      "id": "tag/entity_type",
+      "url": "tags/entity-type",
+      "category": "tags",
+      "path": "tags/entity_types",
+      "schema": "entity_type_tag"
+    },
+    {
+      "id": "tag/fluid",
+      "url": "tags/fluid",
+      "category": "tags",
+      "path": "tags/fluids",
+      "schema": "fluid_tag"
+    },
+    {
+      "id": "tag/game_event",
+      "url": "tags/game-event",
+      "category": "tags",
+      "path": "tags/game_events",
+      "schema": "game_event_tag",
+      "minVersion": "1.17"
+    },
+    {
+      "id": "tag/item",
+      "url": "tags/item",
+      "category": "tags",
+      "path": "tags/items",
+      "schema": "item_tag"
+    },
+    {
+      "id": "tag/worldgen/biome",
+      "url": "tags/biome",
+      "category": "tags",
+      "path": "tags/worldgen/biome",
+      "schema": "biome_tag",
+      "minVersion": "1.18.2"
+    },
+    {
       "id": "block_definition",
       "url": "assets/blockstate",
       "path": "blockstates",

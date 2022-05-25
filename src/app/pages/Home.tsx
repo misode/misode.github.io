@@ -15,6 +15,7 @@ export function Home({}: Props) {
 				{config.generators.filter(g => !g.category).map(g => 
 					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 				)}
+				<ToolCard title={locale('tags')} link="/tags/" />
 				<ToolCard title={locale('worldgen')} link="/worldgen/" />
 			</ToolCard>
 			<ToolCard title="Resource packs">

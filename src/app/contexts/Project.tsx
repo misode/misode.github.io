@@ -129,7 +129,8 @@ export function getFilePath(file: ProjectFile) {
 	}
 	const gen = config.generators.find(g => g.id === file.type)
 	if (!gen) {
-		throw new Error(`Cannot find generator of type ${file.type}`)
+		console.error(`Cannot find generator of type ${file.type}`)
+		return undefined
 	}
 	return `data/${namespace}/${gen.path ?? gen.id}/${id}`
 }

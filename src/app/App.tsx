@@ -19,6 +19,7 @@ export function App() {
 		<Router onChange={changeRoute}>
 			<Home path="/" />
 			<Category path="/worldgen" category="worldgen" />
+			<Category path="/tags" category="tags" />
 			<Category path="/assets" category="assets" />
 			<Partners path="/partners" />
 			<Sounds path="/sounds" />
