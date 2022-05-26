@@ -1679,7 +1679,8 @@ hr {
 .guide-content pre > code {
 	display: block;
 	padding: 0.8em;
-	margin: 0.2em 0 0.5em;
+	margin-top: 4px;
+	margin-bottom: 20px;
 	overflow-x: auto;
 }
 
