@@ -37,7 +37,28 @@ With this information we can make the most basic noise router, one where every d
     "min_y": -64,
     "height": 384,
     "size_horizontal": 2,
-    "size_vertical": 2
+    "size_vertical": 2{#[1.18.2] ,
+    "sampling": {
+      "xz_scale": 1,
+      "y_scale": 1,
+      "xz_factor": 80,
+      "y_factor": 160
+    },
+    "bottom_slide": {
+      "target": 0,
+      "size": 0,
+      "offset": 0
+    },
+    "top_slide": {
+      "target": 0,
+      "size": 0,
+      "offset": 0
+    },
+    "terrain_shaper": {
+      "offset": 0,
+      "factor": 0,
+      "jaggedness": 0
+    } #}
   },
   "noise_router": {
     "barrier": 0,
