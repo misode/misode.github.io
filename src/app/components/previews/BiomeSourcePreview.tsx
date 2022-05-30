@@ -128,15 +128,14 @@ export function getOctaves(obj: any): Record<string, NoiseParameters> {
 				weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
 				shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
 			}
-		case 'end':
-		case 'floating_islands':
+		case 'large_biomes':
 			return {
-				temperature: { firstOctave: 0, amplitudes: [0] },
-				humidity: { firstOctave: 0, amplitudes: [0] },
-				continentalness: { firstOctave: 0, amplitudes: [0] },
-				erosion: { firstOctave: 0, amplitudes: [0] },
-				weirdness: { firstOctave: 0, amplitudes: [0] },
-				shift: { firstOctave: 0, amplitudes: [0] },
+				temperature: { firstOctave: -12, amplitudes: [1.5, 0, 1, 0, 0, 0] },
+				humidity: { firstOctave: -10, amplitudes: [1, 1, 0, 0, 0, 0] },
+				continentalness: { firstOctave: -11, amplitudes: [1, 1, 2, 2, 2, 1, 1, 1, 1] },
+				erosion: { firstOctave: -11, amplitudes: [1, 1, 0, 1, 1] },
+				weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
+				shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
 			}
 		default:
 			return {
