@@ -1656,6 +1656,24 @@ hr {
 	max-width: 100%;
 }
 
+.guide-content table {
+	border-spacing: 0;
+}
+
+.guide-content th {
+	border-bottom: 2px solid var(--background-6);
+	padding: 4px 8px;
+}
+
+.guide-content td {
+	border-bottom: 1px solid var(--background-6);
+	padding: 4px 8px;
+}
+
+.guide-content tbody tr:last-child td {
+	border-bottom: none;
+}
+
 .guide-content code {
 	display: inline-block;
 	padding: 0.1em 0.4em;

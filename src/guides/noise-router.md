@@ -11,6 +11,16 @@ tags:
 
 The noise router is a piece of configuration in [noise settings](/worldgen/noise-settings/). It's a collection of [density functions](/guides/density-functions/), some used for the biome layout, aquifers, or ore veins.
 
+## Noise router
+The different parts of the noise router and their uses.
+|Density function|Usage|
+|---|---|
+|f`barrier`<br>f`fluid_level_floodedness`<br>f`fluid_level_spread`<br>f`lava`|Aquifers
+|f`vein_toggle`<br>f`vein_ridged`<br>f`vein_gap`|Ore veins|
+|f`temperature`<br>f`vegetation`<br>f`continents`<br>f`erosion`<br>f`ridges`<br>f`depth`|Biome climate parameters|
+|f`initial_density_without_jaggedness`|Approximate surface height|
+|f`final_density`|Terrain|
+
 ## Final density
 The density function that decides the terrain is f`final_density`. This density function will be computed for every block position. If it returns a value greater than n`0` the default block will be placed, otherwise either air or the default fluid will be placed.
 
