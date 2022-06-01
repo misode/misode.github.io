@@ -94,7 +94,6 @@
 
 .node-header > * {
   height: 34px;
-  /* border: none; */
   border: 1px solid;
   color: var(--node-text);
   border-color: var(--node-border);
@@ -107,6 +106,21 @@
   white-space: nowrap;
   user-select: none;
   background-color: var(--node-background-label);
+}
+
+.node-header > label > img {
+  height: 80%;
+  position: relative;
+  top: 10%;
+  image-rendering: pixelated;
+}
+
+.node-header > label > svg {
+  width: 25.59px;
+  height: 20px;
+  position: relative;
+  top: 5px;
+  fill: var(--node-text-dimmed);
 }
 
 .node-header > input {

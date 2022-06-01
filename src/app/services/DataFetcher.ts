@@ -154,6 +154,11 @@ export async function fetchVersions(): Promise<VersionMeta[]> {
 	}
 }
 
+export function getTextureUrl(versionId: VersionId, path: string): string {
+	const version = config.versions.find(v => v.id === versionId)!
+	return `${mcmeta(version, 'assets')}/assets/minecraft/textures/${path}.png`
+}
+
 async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
 	try {
 		const cache = await caches.open(CACHE_NAME)
