@@ -139,9 +139,13 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 
 export function getFilePath(file: { id: string, type: string }) {
 	const [namespace, id] = file.id.includes(':') ? file.id.split(':') : ['minecraft', file.id]
+	if (file.type === 'pack_mcmeta') {
+		return 'pack.mcmeta'
+	}
 	const gen = config.generators.find(g => g.id === file.type)
 	if (!gen) {
-		throw new Error(`Cannot find generator of type ${file.type}`)
+		console.error(`Cannot find generator of type ${file.type}`)
+		return undefined
 	}
 	return `data/${namespace}/${gen.path ?? gen.id}/${id}`
 }

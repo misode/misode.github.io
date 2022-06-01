@@ -9,7 +9,7 @@ import { BiomeSourcePreview, DecoratorPreview, DensityFunctionPreview, NoisePrev
 export const HasPreview = ['dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
 
 type PreviewPanelProps = {
-	model: DataModel | null,
+	model: DataModel | undefined,
 	version: VersionId,
 	id: string,
 	shown: boolean,

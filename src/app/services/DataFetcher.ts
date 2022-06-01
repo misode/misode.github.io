@@ -3,13 +3,9 @@ import config from '../../config.json'
 import { message } from '../Utils'
 import type { BlockStateRegistry, VersionId } from './Schemas'
 
-// Cleanup old caches
-['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
-['mcdata_master', 'vanilla_datapack_summary'].forEach(v => localStorage.removeItem(`cached_${v}`))
-caches.delete('misode-v1')
-
 const CACHE_NAME = 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'
+const CACHE_PATCH = 'misode_cache_patch'
 
 type Version = {
 	id: string,
@@ -28,9 +24,10 @@ function mcmeta(version: { dynamic: true } | { dynamic?: false, ref?: string}, t
 }
 
 async function validateCache(version: Version) {
+	await applyPatches()
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
-			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`))
+			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`) || url.startsWith(`${mcmetaUrl}/assets/`) || url.startsWith(`${mcmetaUrl}/registries/`))
 			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
 		}
 		version.ref = latestVersion
@@ -83,10 +80,15 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
 	const version = config.versions.find(v => v.id === versionId)!
 	try {
-		const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
-		const url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
+		let url
+		if (id.startsWith('immersive_weathering:')) {
+			url = `https://raw.githubusercontent.com/AstralOrdana/Immersive-Weathering/main/src/main/resources/data/immersive_weathering/block_growths/${id.slice(21)}.json`
+		} else {
+			const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
+			url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
+		}
 		const res = await fetch(url)
-		return res.json()
+		return await res.json()
 	} catch (e) {
 		throw new Error(`Error occurred while fetching ${registry} preset ${id}: ${message(e)}`)
 	}
@@ -152,6 +154,11 @@ export async function fetchVersions(): Promise<VersionMeta[]> {
 	}
 }
 
+export function getTextureUrl(versionId: VersionId, path: string): string {
+	const version = config.versions.find(v => v.id === versionId)!
+	return `${mcmeta(version, 'assets')}/assets/minecraft/textures/${path}.png`
+}
+
 async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
 	try {
 		const cache = await caches.open(CACHE_NAME)
@@ -193,5 +200,27 @@ async function deleteMatching(matches: (url: string) => boolean) {
 		await Promise.all(promises)
 	} catch (e) {
 		console.warn(`[deleteMatching] Failed to open cache ${CACHE_NAME}: ${message(e)}`)
+	}
+}
+
+const PATCHES: (() => Promise<void>)[] = [
+	async () => {
+		['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
+		['mcdata_master', 'vanilla_datapack_summary'].forEach(v => localStorage.removeItem(`cached_${v}`))
+		caches.delete('misode-v1')
+	},
+	async () => {
+		await deleteMatching(url => url.startsWith(`${mcmetaUrl}/1.18.2-summary/`))
+	},
+]
+
+async function applyPatches() {
+	const start = parseInt(localStorage.getItem(CACHE_PATCH) ?? '0')
+	for (let i = start + 1; i <= PATCHES.length; i +=1) {
+		const patch = PATCHES[i - 1]
+		if (patch) {
+			await patch()
+		}
+		localStorage.setItem(CACHE_PATCH, i.toFixed())
 	}
 }

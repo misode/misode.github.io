@@ -1,28 +1,32 @@
-import { DataModel, Path } from '@mcschema/core'
-import type { NoiseParameters } from 'deepslate'
-import { NoiseGeneratorSettings } from 'deepslate'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { Path } from '@mcschema/core'
+import type { NoiseParameters } from 'deepslate/worldgen'
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { PreviewProps } from '.'
 import { Btn, BtnMenu } from '..'
-import { useLocale } from '../../contexts'
+import { useLocale, useStore } from '../../contexts'
 import { useCanvas } from '../../hooks'
 import { biomeMap, getBiome } from '../../previews'
-import { newSeed } from '../../Utils'
+import { newSeed, randomSeed } from '../../Utils'
 
 const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness'] as const
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
+	const [configuredSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
+	const { biomeColors } = useStore()
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
-	const refineTimeout = useRef<number>(undefined)
+	const refineTimeout = useRef<number>()
 
-	const seed = BigInt(model.get(new Path(['generator', 'seed'])))
-	const octaves = getOctaves(model.get(new Path(['generator', 'settings'])))
-	const state = shown ? calculateState(data, octaves) : ''
+	const seed = BigInt(model.get(new Path(['generator', 'seed'])) ?? configuredSeed)
+	const octaves = useMemo(() => {
+		if (!shown) return undefined
+		return getOctaves(model.get(new Path(['generator', 'settings'])))
+	}, [shown])
+	const state = shown ? calculateState(data, octaves!) : ''
 	const type: string = data.type?.replace(/^minecraft:/, '')
 
 	const { canvas, redraw } = useCanvas({
@@ -30,7 +34,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: res.current, version }
+			const options = { octaves: octaves!, biomeColors, layers, offset: offset.current, scale, seed, res: res.current, version }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -48,21 +52,21 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves, biomeColors: {}, layers, offset: offset.current, scale, seed, res: 1, version }
+			const options = { octaves: octaves!, biomeColors, layers, offset: offset.current, scale, seed: configuredSeed, res: 1, version }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, scale, seed, layers])
+	}, [version, state, scale, configuredSeed, layers, biomeColors])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [state, scale, seed, layers, shown])
+	}, [version, state, scale, configuredSeed, layers, shown, biomeColors])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale
@@ -96,7 +100,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => newSeed(model)} />}
 		</div>
-		{focused?.temperature && <div class="controls secondary-controls">
+		{focused?.temperature !== undefined && <div class="controls secondary-controls">
 			<Btn class="no-pointer" label={Object.entries(focused)
 				.filter(([k]) => k !== 'biome')
 				.map(([k, v]) => `${k[0].toUpperCase()}: ${(v as number).toFixed(2)}`).join('  ')}/>
@@ -111,8 +115,7 @@ function calculateState(data: any, octaves: Record<string, NoiseParameters>) {
 
 export function getOctaves(obj: any): Record<string, NoiseParameters> {
 	if (typeof obj !== 'string') {
-		const settings = NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(obj))
-		obj = settings.legacyRandomSource ? 'minecraft:nether' : 'minecraft:overworld'
+		obj = obj.legacy_random_source ? 'minecraft:nether' : 'minecraft:overworld'
 	}
 	switch (obj.replace(/^minecraft:/, '')) {
 		case 'overworld':
@@ -125,15 +128,14 @@ export function getOctaves(obj: any): Record<string, NoiseParameters> {
 				weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
 				shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
 			}
-		case 'end':
-		case 'floating_islands':
+		case 'large_biomes':
 			return {
-				temperature: { firstOctave: 0, amplitudes: [0] },
-				humidity: { firstOctave: 0, amplitudes: [0] },
-				continentalness: { firstOctave: 0, amplitudes: [0] },
-				erosion: { firstOctave: 0, amplitudes: [0] },
-				weirdness: { firstOctave: 0, amplitudes: [0] },
-				shift: { firstOctave: 0, amplitudes: [0] },
+				temperature: { firstOctave: -12, amplitudes: [1.5, 0, 1, 0, 0, 0] },
+				humidity: { firstOctave: -10, amplitudes: [1, 1, 0, 0, 0, 0] },
+				continentalness: { firstOctave: -11, amplitudes: [1, 1, 2, 2, 2, 1, 1, 1, 1] },
+				erosion: { firstOctave: -11, amplitudes: [1, 1, 0, 1, 1] },
+				weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
+				shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
 			}
 		default:
 			return {

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'preact/hooks'
 import { Ad, ChangelogList, ErrorPanel } from '../components'
 import { useLocale, useTitle } from '../contexts'
-import type { Change } from '../services'
+import { useAsync } from '../hooks'
 import { getChangelogs } from '../services'
 
 interface Props {
@@ -9,20 +8,13 @@ interface Props {
 }
 export function Changelog({}: Props) {
 	const { locale } = useLocale()
-	const [error, setError] = useState<string | null>(null)
 	useTitle(locale('title.changelog'))
 
-	const [changelogs, setChangelogs] = useState<Change[]>([])
-	useEffect(() => {
-		getChangelogs()
-			.then(changelogs => setChangelogs(changelogs))
-			.catch(e => { console.error(e); setError(e) })
-	}, [])
-
+	const { value: changelogs, error } = useAsync(getChangelogs, [])
 
 	return <main>
 		<Ad type="text" id="changelog" />
-		{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
+		{error && <ErrorPanel error={error} />}
 		<div class="changelog">
 			<ChangelogList changes={changelogs} defaultOrder="desc" />
 		</div>

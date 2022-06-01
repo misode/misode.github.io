@@ -18,11 +18,13 @@ export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
 	const dragBusy = useRef(false)
 
 	useEffect(() => {
+		if (!canvas.current) return
 		const onMouseDown = (e: MouseEvent) => {
 			dragStart.current = [e.offsetX, e.offsetY]
 		}
 		const onMouseMove = (e: MouseEvent) => {
 			if (dragStart.current === undefined) {
+				if (!canvas.current) return
 				const x = e.offsetX  / canvas.current.clientWidth
 				const y = e.offsetY  / canvas.current.clientHeight
 				onHover?.(x, y)
@@ -34,8 +36,11 @@ export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
 			if (!(dx === 0 && dy === 0)) {
 				dragPending.current = [dragPending.current[0] + dx, dragPending.current[1] + dy]
 				if (!dragBusy.current) {
-					cancelAnimationFrame(dragRequest.current)
+					if (dragRequest.current) {
+						cancelAnimationFrame(dragRequest.current)
+					}
 					dragRequest.current = requestAnimationFrame(async () => {
+						if (!canvas.current) return
 						dragBusy.current = true
 						const dx = dragPending.current[0] / canvas.current.clientWidth
 						const dy = dragPending.current[1] / canvas.current.clientHeight
@@ -70,13 +75,18 @@ export function useCanvas({ size, draw, onDrag, onHover, onLeave }: {
 	const redraw = useRef<() => Promise<unknown>>()
 	const redrawCount = useRef(0)
 	redraw.current = async () => {
+		if (!canvas.current) return
 		const ctx = canvas.current.getContext('2d')!
 		const s = size()
 		canvas.current.width = s[0]
 		canvas.current.height = s[1]
 		const img = ctx.getImageData(0, 0, s[0], s[1])
 		const ownCount = redrawCount.current += 1
-		await draw(img)
+		try {
+			await draw(img)
+		} catch (e) {
+			throw e
+		}
 		if (ownCount === redrawCount.current) {
 			ctx.putImageData(img, 0, 0)
 		}

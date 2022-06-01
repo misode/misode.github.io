@@ -422,6 +422,41 @@ main.has-preview {
 	-ms-user-select: none;
 }
 
+.popup-share {
+	position: fixed;
+	display: flex;
+	width: 40vw;
+	min-height: 108px;
+	left: 100%;
+	bottom: 0;
+	z-index: 3;
+	padding: 12px;
+	background-color: var(--background-3);
+	box-shadow: 0 0 7px -3px #000;
+	color: var(--text-2);
+	transition: transform 0.3s;
+	border-radius: 6px 0 0 0;
+}
+
+.popup-share.shown {
+	transform: translateX(-100%);
+}
+
+.popup-share > input {
+	height: 32px;
+	background-color: var(--background-1);
+	color: var(--text-2);
+	border: none;
+	border-radius: 6px;
+	padding: 7px 11px;
+	margin-right: 8px;
+	width: 100%;
+}
+
+.popup-share > .btn.active {
+	fill: var(--accent-success);
+}
+
 .btn {
 	display: flex;
 	align-items: center;
@@ -732,12 +767,15 @@ main.has-preview {
 	opacity: 0;
 }
 
+.tooltipped.tip-shown::before,
+.tooltipped.tip-shown::after,
 .tooltipped:not([disabled]):hover::before,
 .tooltipped:not([disabled]):hover::after {
 	display: inline-block;
 	animation: tooltip-appear 0.1s ease-in 0.4s forwards;
 }
 
+.tooltipped.tip-shown::after,
 .tooltipped:not([disabled]):hover::after {
 	box-shadow: 0 1px 3px 0 #0007;
 }
@@ -759,6 +797,11 @@ main.has-preview {
 	margin: 10px 0;
 }
 
+.error h3 span {
+	margin-left: 8px;
+	cursor: pointer;
+}
+
 .error .error-dismiss {
 	float: right;
 	cursor: pointer;
@@ -775,7 +818,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category, .project, .new-project, .versions {
+.home, .category, .project, .new-project, .versions, .guides, .guide {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -786,9 +829,14 @@ main.has-preview {
 	grid-template-columns: 1fr 1fr;
 	gap: 0 8px;
 	align-items: flex-start;
+	grid-template-rows: min-content 1fr repeat(6, auto);
 }
 
-.home > *:nth-child(n+3) {
+.home > *:first-child {
+	grid-row: 1 / 3;
+}
+
+.home > *:nth-child(n+4) {
 	grid-column: 1 / 3;
 }
 
@@ -847,6 +895,10 @@ a.tool-card:hover {
 hr {
 	margin: 12px 0;
 	border: none;
+}
+
+.note {
+	color: var(--text-3);
 }
 
 .settings {
@@ -1434,11 +1486,11 @@ hr {
 	font-size: 1.1rem;
 }
 
-.version-navigation {
+.navigation {
 	display: flex;
 }
 
-.version-navigation > *:not(:last-child) {
+.navigation > *:not(:last-child) {
 	margin-right: 8px;
 }
 
@@ -1478,6 +1530,32 @@ hr {
 
 .version-metadata-link:hover {
 	fill: var(--accent-primary);
+}
+
+.version-tabs {
+	display: flex;
+	margin: 20px 0 10px;
+	box-shadow: inset 0 -1px 0 var(--background-4);
+}
+
+.version-tabs > * {
+	border-bottom: 2px solid transparent;
+	padding: 8px 16px;
+	cursor: pointer;
+	color: var(--text-3);
+	fill: var(--text-3);
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+}
+
+.version-tabs > * > svg {
+	margin-left: 8px;
+}
+
+.version-tabs > .selected {
+	border-color: var(--text-3);
+	color: var(--text-1);
 }
 
 .ace_editor,
@@ -1521,6 +1599,214 @@ hr {
 
 .ace_marker-layer .ace_selection {
 	background-color: var(--selection) !important;
+}
+
+.giscus-container {
+	margin-top: 16px;
+	min-height: 325.667px;
+}
+
+.guide-card {
+	display: block;
+	text-decoration: none;
+	color: var(--text-2);
+	background-color: var(--background-2);
+	padding: 12px;
+	border-radius: 6px;
+}
+
+.guide-card:not(:last-child) {
+	margin-bottom: 8px;
+}
+
+.guide-versions {
+	color: var(--text-3);
+	float: right;
+}
+
+.guide {
+	padding-left: 32px;
+	padding-right: 32px;
+}
+
+.guide .navigation > :first-child {
+	margin-right: auto;
+}
+
+.guide-share.active {
+	fill: var(--accent-success);
+	color: var(--text-2);
+}
+
+.guide-tags {
+	margin-top: 12px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.guide .ad {
+	margin: 12px 0 8px;
+}
+
+.guide .ad[data-ea-type="image"] {
+	float: right;
+	margin-left: 12px;
+}
+
+.guide-toc {
+	display: inline-block;
+	border: 2px solid var(--background-6);
+	border-radius: 6px;
+	padding: 8px 16px;
+	line-height: 1.2;
+	font-size: 90%;
+}
+
+.guide-content {
+	color: var(--text-2);
+	margin-top: 12px;
+	line-height: 1.5;
+	word-wrap: break-word;
+}
+
+.guide-content p {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+
+.guide-content h1,
+.guide-content h2,
+.guide-content h3,
+.guide-content h4,
+.guide-content h5,
+.guide-content h6 {
+	margin: 1.2em 0 0.4em;
+	position: relative;
+}
+
+.guide-content h1 > [id],
+.guide-content h2 > [id],
+.guide-content h3 > [id],
+.guide-content h4 > [id],
+.guide-content h5 > [id],
+.guide-content h6 > [id] {
+	fill: var(--text-3);
+	opacity: 0;
+	transition: opacity 0.2s;
+	float: left;
+	padding-right: 4px;
+	margin-left: -20px;
+	cursor: pointer;
+}
+
+.guide-content h1 > [id] *,
+.guide-content h2 > [id] *,
+.guide-content h3 > [id] *,
+.guide-content h4 > [id] *,
+.guide-content h5 > [id] *,
+.guide-content h6 > [id] * {
+	pointer-events: none;
+}
+
+.guide-content h1:hover > [id],
+.guide-content h2:hover > [id],
+.guide-content h3:hover > [id],
+.guide-content h4:hover > [id],
+.guide-content h5:hover > [id],
+.guide-content h6:hover > [id] {
+	opacity: 1;
+}
+
+.guide-content blockquote {
+	border-left: 4px solid var(--background-6);
+	color: var(--text-3);
+	padding-left: 0.7em;
+	margin: 0.7em 0;
+}
+
+.guide-content blockquote > p {
+	padding: 0.3em 0;
+}
+
+.guide-content a {
+	text-decoration: underline;
+	color: var(--accent-primary);
+}
+
+.guide-content ul, .guide-content ol {
+	padding-left: 1.6em;
+	margin: 0.2em 0 0.5em;
+}
+
+.guide-content li + li {
+	margin-top: 0.25em;
+}
+
+.guide-content img {
+	border-radius: 0.2em;
+	max-width: 100%;
+}
+
+.guide-content table {
+	border-spacing: 0;
+}
+
+.guide-content th {
+	border-bottom: 2px solid var(--background-6);
+	padding: 4px 8px;
+}
+
+.guide-content td {
+	border-bottom: 1px solid var(--background-6);
+	padding: 4px 8px;
+}
+
+.guide-content tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.guide-content code {
+	display: inline-block;
+	padding: 0.1em 0.4em;
+	margin: 0;
+	background-color: var(--background-2);
+	border-radius: 6px;
+	overflow-wrap: break-word;
+	word-break: break-all;
+	font-size: 85%;
+}
+
+.guide-content h1 code,
+.guide-content h2 code,
+.guide-content h3 code,
+.guide-content h4 code,
+.guide-content h5 code,
+.guide-content h6 code {
+	font-size: 100%;
+}
+
+.guide-content pre > code {
+	display: block;
+	padding: 0.8em;
+	margin-top: 4px;
+	margin-bottom: 20px;
+	overflow-x: auto;
+}
+
+.guide-content .hljs-attr {
+	color: var(--editor-variable);
+}
+
+.guide-content .hljs-string {
+	color: var(--editor-string);
+}
+
+.guide-content .hljs-number {
+	color: var(--editor-number);
+}
+
+.guide-content .hljs-keyword {
+	color: var(--editor-constant);
 }
 
 @media screen and (max-width: 720px) {
@@ -1648,6 +1934,10 @@ hr {
 	}
 
 	.version-metadata-hide {
+		display: none;
+	}
+
+	.guide-versions {
 		display: none;
 	}
 }

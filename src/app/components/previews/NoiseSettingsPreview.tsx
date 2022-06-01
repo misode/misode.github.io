@@ -48,15 +48,21 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 			clearInterval(scrollInterval.current)
 		}
 		if (shown) {
-			redraw()
-			if (autoScroll) {
-				scrollInterval.current = setInterval(() => {
-					offset.current -= 8
-					redraw()
-				}, 100) as any
-			}
+			(async () => {
+				try {
+					await redraw()
+					if (autoScroll) {
+						scrollInterval.current = setInterval(() => {
+							offset.current -= 8
+							redraw()
+						}, 100) as any
+					}
+				} catch (e) {
+					throw e
+				}
+			})()
 		}
-	}, [state, seed, shown, biome, biomeScale, biomeDepth, autoScroll])
+	}, [version, state, seed, shown, biome, biomeScale, biomeDepth, autoScroll])
 
 	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
 

@@ -5,21 +5,24 @@ import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Btn, Octicon } from '../components'
-import { localize } from '../contexts'
+import { localize, useStore } from '../contexts'
 import { useFocus } from '../hooks'
+import { VanillaColors } from '../previews'
 import type { BlockStateRegistry, VersionId } from '../services'
-import { CachedDecorator, CachedFeature } from '../services'
-import { deepClone, deepEqual, hexId, isObject, newSeed } from '../Utils'
+import { CachedCollections, CachedDecorator, CachedFeature, getTextureUrl } from '../services'
+import { deepClone, deepEqual, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils'
 import { ModelWrapper } from './ModelWrapper'
 
-const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type']
+const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.cat.variant', 'entity.type_specific.frog.variant']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element', 'decorator.block_survives_filter.state', 'material_rule.block.result_state']
-const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'density_function.type']
+const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.type', 'immersive_weathering.area_condition.type', 'immersive_weathering.block_growth.growth_for_face.entry.direction', 'immersive_weathering.position_test.predicate_type']
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
 const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale', 'generator_structure.random_spread.locate_offset']
 const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
 const collapsableFields = ['density_function.argument', 'density_function.argument1', 'density_function.argument2', 'density_function.input', 'density_function.when_in_range', 'density_function.when_out_of_range']
+
+const PACKAGE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8.878.392a1.75 1.75 0 00-1.756 0l-5.25 3.045A1.75 1.75 0 001 4.951v6.098c0 .624.332 1.2.872 1.514l5.25 3.045a1.75 1.75 0 001.756 0l5.25-3.045c.54-.313.872-.89.872-1.514V4.951c0-.624-.332-1.2-.872-1.514L8.878.392zM7.875 1.69a.25.25 0 01.25 0l4.63 2.685L8 7.133 3.245 4.375l4.63-2.685zM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432L2.5 5.677zm6.25 8.271l4.625-2.683a.25.25 0 00.125-.216V5.677L8.75 8.432v5.516z"></path></svg>'
 
 const findGenerator = (id: string) => {
 	return config.generators.find(g => g.id === id.replace(/^\$/, ''))
@@ -133,11 +136,24 @@ const renderHtml: RenderHook = {
 				const cPath = path.push(index).contextPush('entry')
 				const canToggle = children.type(cPath) === 'object'
 				const toggle = isToggled(cId)
+
+				let label: undefined | string | JSX.Element
+				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
+					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
+						const texturePath = `item/${cValue.name.replace(/^minecraft:/, '')}`
+						if (CachedCollections.get('texture').includes('minecraft:' + texturePath)) {
+							label = <img src={getTextureUrl(version, texturePath)} alt="" onError={e => e.currentTarget.outerHTML = PACKAGE} />
+						} else {
+							label = Octicon.package
+						}
+					}
+				}
+
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
 					return <div class="node node-header" data-category={children.category(cPath)}>
 						<ErrorPopup lang={lang} path={cPath} nested />
 						<button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'expand')}\n${localize(lang, 'expand_all', 'Ctrl')}`} onClick={expand(cId)}>{Octicon.chevron_right}</button>
-						<label>{pathLocale(lang, cPath, `${index}`)}</label>
+						<label>{label ?? pathLocale(lang, cPath, `${index}`)}</label>
 						<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
 					</div>
 				}
@@ -164,7 +180,7 @@ const renderHtml: RenderHook = {
 						},
 					},
 				]
-				return <MemoedTreeNode key={cId} path={cPath} schema={children} value={cValue} {...{lang, version, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
+				return <MemoedTreeNode key={cId} label={label} path={cPath} schema={children} value={cValue} {...{lang, version, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
 					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'collapse')}\n${localize(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
 					<button class="remove tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 					{value.length > 1 && <div class="node-move">
@@ -377,7 +393,7 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 	return <>
 		<input type="text" value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
-		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
+		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed', 'structure_placement.salt'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
 	</>
 }
 
@@ -416,6 +432,8 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 			{values.map(v => <option>{v}</option>)}
 		</select>
 	} else {
+		const { biomeColors, setBiomeColor } = useStore()
+		const fullId = typeof value === 'string' ? value.includes(':') ? value : 'minecraft:' + value : 'unknown'
 		const datalistId = hexId()
 		const gen = id ? findGenerator(id) : undefined
 		return <>
@@ -424,6 +442,8 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 			{values.length > 0 && <datalist id={datalistId}>
 				{values.map(v => <option value={v} />)}
 			</datalist>}
+			{['generator_biome.biome'].includes(context) && <input type="color" value={rgbToHex(biomeColors[fullId] ?? VanillaColors[fullId] ?? stringToColor(fullId))} onChange={v => setBiomeColor(fullId, hexToRgb(v.currentTarget.value))}></input>}
+			{['attribute_modifier.id', 'text_component_object.hoverEvent.show_entity.contents.id'].includes(context) && <button onClick={() => path.set(generateUUID())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_uuid')}>{Octicon.sync}</button>}
 			{gen && values.includes(value) && value.startsWith('minecraft:') &&
 				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={localize(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>
@@ -446,7 +466,7 @@ type TreeNodeProps = {
 	states: BlockStateRegistry,
 	ctx: Record<string, any>,
 	compare?: any,
-	label?: string,
+	label?: string | ComponentChildren,
 	actions?: MenuAction[],
 	children?: ComponentChildren,
 }

@@ -19,7 +19,10 @@ export function Project({}: Props) {
 	const { locale } = useLocale()
 	const { project, openFile } = useProject()
 	useTitle(locale('title.project', project.name))
-	const entries = useMemo(() => project.files.map(getFilePath), project.files)
+	const entries = useMemo(() => project.files.flatMap(f => {
+		const path = getFilePath(f)
+		return path ? [path] : []
+	}), project.files)
 
 	const [problems, setProblems] = useState<Problem[]>([])
 
@@ -30,9 +33,10 @@ export function Project({}: Props) {
 		}
 	}
 
-	const download = useRef<HTMLAnchorElement>()
+	const download = useRef<HTMLAnchorElement>(null)
 
 	const onDownload = async () => {
+		if (!download.current) return
 		const entries = project.files.map(file => {
 			const path = getFilePath(file)
 			return [`${path}.json`, JSON.stringify(file.data, null, Store.getIndent())] as [string, string]
@@ -86,7 +90,11 @@ export function Project({}: Props) {
 				{entries.length === 0
 					? <span>{locale('project.no_files')}</span>
 					: <TreeView entries={entries} onSelect={selectFile}
-						errors={problems.map(p => ({ path: getFilePath(p), message: p.message }))}/>}
+						errors={problems.flatMap(p => {
+							const path = getFilePath(p)
+							if (path === undefined) return []
+							return [{ path, message: p.message }]
+						})}/>}
 			</div>
 		</div>
 		<a ref={download} style="display: none;"></a>

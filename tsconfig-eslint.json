@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "./src",
+    "**/*.d.ts",
     "./cypress",
     "vite.config.js"
   ]

@@ -7,8 +7,8 @@ import type { BlockStateRegistry, VersionId } from '../../services'
 
 type TreePanelProps = {
 	version: VersionId,
-	model: DataModel | null,
-	blockStates: BlockStateRegistry | null,
+	model: DataModel | undefined,
+	blockStates: BlockStateRegistry | undefined,
 	onError: (message: string) => unknown,
 }
 export function Tree({ version, model, blockStates, onError }: TreePanelProps) {

@@ -1,8 +1,4 @@
 import { DataModel } from '@mcschema/core'
-import brace from 'brace'
-import 'brace/mode/json'
-import 'brace/mode/yaml'
-import json from 'comment-json'
 import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
@@ -13,6 +9,7 @@ import type { BlockStateRegistry } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
 
+
 const INDENT: Record<string, number | string | undefined> = {
 	'2_spaces': 2,
 	'4_spaces': 4,
@@ -20,16 +17,25 @@ const INDENT: Record<string, number | string | undefined> = {
 	minified: undefined,
 }
 
+let commentJson: typeof import('comment-json') | null = null
+
 const FORMATS: Record<string, {
-	parse: (v: string) => any,
+	parse: (v: string) => Promise<any>,
 	stringify: (v: any, indentation: string | number | undefined) => string,
 }> = {
 	json: {
-		parse: json.parse,
-		stringify: (v, i) => json.stringify(v, null, i) + '\n',
+		parse: async (v) => {
+			try {
+				return JSON.parse(v)
+			} catch (e) {
+				commentJson = await import('comment-json')
+				return commentJson.parse(v)
+			}
+		},
+		stringify: (v, i) => (commentJson ?? JSON).stringify(v, null, i) + '\n',
 	},
 	yaml: {
-		parse: yaml.load,
+		parse: async (v) => yaml.load(v),
 		stringify: (v, i) => yaml.dump(v, {
 			flowLevel: i === undefined ? 0 : -1,
 			indent: typeof i === 'string' ? 4 : i,
@@ -46,24 +52,25 @@ interface Editor {
 
 type SourcePanelProps = {
 	name: string,
-	model: DataModel | null,
-	blockStates: BlockStateRegistry | null,
+	model: DataModel | undefined,
+	blockStates: BlockStateRegistry | undefined,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
 	copySuccess: () => unknown,
-	onError: (message: string) => unknown,
+	onError: (message: string | Error) => unknown,
 }
 export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
 	const [highlighting, setHighlighting] = useState(Store.getHighlighting())
+	const [braceLoaded, setBraceLoaded] = useState(false)
 	const download = useRef<HTMLAnchorElement>(null)
-	const retransform = useRef<Function>()
-	const onImport = useRef<(e: any) => any>()
+	const retransform = useRef<Function>(() => {})
+	const onImport = useRef<() => Promise<void>>(async () => {})
 
-	const textarea = useRef<HTMLTextAreaElement>()
+	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
 	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
@@ -73,25 +80,37 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 
 	useEffect(() => {
 		retransform.current = () => {
+			if (!editor.current) return
 			if (!model || !blockStates) return
 			try {
 				const output = getSerializedOutput(model, blockStates)
 				editor.current.setValue(output)
 			} catch (e) {
-				onError(`Error getting JSON output: ${message(e)}`)
+				if (e instanceof Error) {
+					e.message = `Error getting JSON output: ${e.message}`
+					onError(e)
+				} else {
+					onError(`Error getting JSON output: ${message(e)}`)
+				}
 				console.error(e)
 				editor.current.setValue('')
 			}
 		}
 
-		onImport.current = () => {
+		onImport.current = async () => {
+			if (!editor.current) return
 			const value = editor.current.getValue()
 			if (value.length === 0) return
 			try {
-				const data = FORMATS[format].parse(value)
+				const data = await FORMATS[format].parse(value)
 				model?.reset(DataModel.wrapLists(data), false)
 			} catch (e) {
-				onError(`Error importing: ${message(e)}`)
+				if (e instanceof Error) {
+					e.message = `Error importing: ${e.message}`
+					onError(e)
+				} else {
+					onError(`Error importing: ${message(e)}`)
+				}
 				console.error(e)
 			}
 		}
@@ -99,38 +118,54 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 
 	useEffect(() => {
 		if (highlighting) {
-			const braceEditor = brace.edit('editor')
-			braceEditor.setOptions({
-				fontSize: 14,
-				showFoldWidgets: false,
-				highlightSelectedWord: false,
-			})
-			braceEditor.$blockScrolling = Infinity
-			braceEditor.on('blur', e => onImport.current(e))
-			braceEditor.getSession().setMode('ace/mode/json')
-
+			setBraceLoaded(false)
 			editor.current = {
-				getValue() {
-					return braceEditor.getSession().getValue()
-				},
-				setValue(value) {
-					braceEditor.getSession().setValue(value)
-				},
-				configure(indent, format) {
-					braceEditor.setOption('useSoftTabs', indent !== 'tabs')
-					braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
-					braceEditor.getSession().setMode(`ace/mode/${format}`)
-				},
-				select() {
-					braceEditor.selectAll()
-				},
+				getValue() { return ''},
+				setValue() {},
+				configure() {},
+				select() {},
 			}
+			import('brace').then(async (brace) => {
+				await Promise.all([
+					import('brace/mode/json'),
+					import('brace/mode/yaml'),
+				])
+				const braceEditor = brace.edit('editor')
+				braceEditor.setOptions({
+					fontSize: 14,
+					showFoldWidgets: false,
+					highlightSelectedWord: false,
+				})
+				braceEditor.$blockScrolling = Infinity
+				braceEditor.on('blur', () => onImport.current())
+				braceEditor.getSession().setMode('ace/mode/json')
+
+				editor.current = {
+					getValue() {
+						return braceEditor.getSession().getValue()
+					},
+					setValue(value) {
+						braceEditor.getSession().setValue(value)
+					},
+					configure(indent, format) {
+						braceEditor.setOption('useSoftTabs', indent !== 'tabs')
+						braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
+						braceEditor.getSession().setMode(`ace/mode/${format}`)
+					},
+					select() {
+						braceEditor.selectAll()
+					},
+				}
+				setBraceLoaded(true)
+			})
 		} else {
 			editor.current = {
 				getValue() {
+					if (!textarea.current) return ''
 					return textarea.current.value
 				},
 				setValue(value: string) {
+					if (!textarea.current) return
 					textarea.current.value = value
 				},
 				configure() {},
@@ -140,16 +175,21 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [highlighting])
 
 	useModel(model, () => {
+		if (!retransform.current) return
 		retransform.current()
 	})
 	useEffect(() => {
+		if (!retransform.current) return
 		if (model) retransform.current()
 	}, [model])
 
 	useEffect(() => {
-		editor.current.configure(indent, format)
-		retransform.current()
-	}, [indent, format, highlighting])
+		if (!editor.current || !retransform.current) return
+		if (!highlighting || braceLoaded) {
+			editor.current.configure(indent, format)
+			retransform.current()
+		}
+	}, [indent, format, highlighting, braceLoaded])
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {

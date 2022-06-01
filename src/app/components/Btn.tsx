@@ -11,7 +11,7 @@ type BtnProps = {
 	disabled?: boolean,
 }
 export function Btn({ icon, label, active, class: clazz, tooltip, tooltipLoc, onClick, disabled }: BtnProps) {
-	return <div class={`btn${active ? ' active' : ''}${clazz ? ` ${clazz}` : ''}${tooltip ? ` tooltipped tip-${tooltipLoc ?? 'sw'}` : ''}${disabled ? ' disabled' : ''}`} onClick={disabled ? undefined : onClick} aria-label={tooltip}>
+	return <div class={`btn${active ? ' active' : ''}${clazz ? ` ${clazz}` : ''}${tooltip ? ` tooltipped tip-${tooltipLoc ?? 'sw'}` : ''}${disabled ? ' disabled' : ''}${active ? ' tip-shown' : ''}`} onClick={disabled ? undefined : onClick} aria-label={tooltip}>
 		{icon && Octicon[icon]}
 		{label && <span>{label}</span>}
 	</div>

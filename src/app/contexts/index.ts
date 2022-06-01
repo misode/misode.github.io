@@ -1,5 +1,6 @@
 export * from './Locale'
 export * from './Project'
+export * from './Store'
 export * from './Theme'
 export * from './Title'
 export * from './Version'

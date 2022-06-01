@@ -36,7 +36,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, seed])
+	}, [version, state, seed])
 
 	useEffect(() => {
 		if (scrollInterval.current) {
@@ -51,7 +51,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 				}, 100) as any
 			}
 		}
-	}, [state, seed, shown, autoScroll])
+	}, [version, state, seed, shown, autoScroll])
 
 	return <>
 		<div class="controls preview-controls">

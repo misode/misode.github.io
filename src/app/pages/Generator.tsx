@@ -1,27 +1,31 @@
 import { DataModel, Path } from '@mcschema/core'
-import { getCurrentUrl } from 'preact-router'
-import { useEffect, useErrorBoundary, useState } from 'preact/hooks'
+import { getCurrentUrl, route } from 'preact-router'
+import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnLink, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { useLocale, useProject, useTitle, useVersion } from '../contexts'
-import { useActiveTimeout, useModel } from '../hooks'
+import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
-import type { BlockStateRegistry, VersionId } from '../services'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel } from '../services'
-import { getGenerator, getSearchParams, message, setSeachParams } from '../Utils'
+import type { VersionId } from '../services'
+import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../services'
+import { Store } from '../Store'
+import { cleanUrl, deepEqual, getGenerator } from '../Utils'
+
+export const SHARE_KEY = 'share'
 
 interface Props {
 	default?: true,
 }
 export function Generator({}: Props) {
 	const { locale } = useLocale()
-	const { version, changeVersion } = useVersion()
-	const { project, file, updateFile, openFile, closeFile } = useProject()
-	const [error, setError] = useState<string | null>(null)
+	const { version, changeVersion, changeTargetVersion } = useVersion()
+	const { projects, project, file, updateFile, openFile, closeFile } = useProject()
+	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
-		return <main><ErrorPanel error={`Something went wrong rendering the generator: ${errorBoundary.message}`} onDismiss={errorRetry} /></main>
+		errorBoundary.message = `Something went wrong rendering the generator: ${errorBoundary.message}`
+		return <main><ErrorPanel error={errorBoundary} onDismiss={errorRetry} /></main>
 	}
 
 	const gen = getGenerator(getCurrentUrl())
@@ -29,11 +33,14 @@ export function Generator({}: Props) {
 		return <main><ErrorPanel error={`Cannot find generator "${getCurrentUrl()}"`} /></main>
 	}
 
-	const allowedVersions = config.versions
-		.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
-		.map(v => v.id as VersionId)
+	const allowedVersions = useMemo(() => {
+		return config.versions
+			.filter(v => checkVersion(v.id, gen.minVersion, gen.maxVersion))
+			.map(v => v.id as VersionId)
+			.reverse()
+	}, [gen.minVersion, gen.maxVersion])
 
-	useTitle(locale('title.generator', locale(gen.id)), allowedVersions)
+	useTitle(locale('title.generator', locale(gen.partner ? `partner.${gen.partner}.${gen.id}` : gen.id)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion)) {
 		setError(`The minimum version for this generator is ${gen.minVersion}`)
@@ -42,42 +49,75 @@ export function Generator({}: Props) {
 		setError(`This generator is not available in versions above ${gen.maxVersion}`)
 	}
 
-	const searchParams = getSearchParams(getCurrentUrl())
-	const currentPreset = searchParams.get('preset')
-	useEffect(() => {
-		if (model && currentPreset) {
-			loadPreset(currentPreset).then(preset => {
-				model?.reset(DataModel.wrapLists(preset), false)
-				setSeachParams({ version, preset: currentPreset })
-			})
-		}
-	}, [currentPreset])
+	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
+	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
+	const ignoreChange = useRef(false)
+	const backup = useMemo(() => Store.getBackup(gen.id), [gen.id])
 
-	const [model, setModel] = useState<DataModel | null>(null)
-	const [blockStates, setBlockStates] = useState<BlockStateRegistry | null>(null)
-	useEffect(() => {
-		setError(null)
-		setModel(null)
-		getBlockStates(version)
-			.then(b => setBlockStates(b))
-		getModel(version, gen.id)
-			.then(async m => {
-				Analytics.setGenerator(gen.id)
-				if (currentPreset) {
-					const preset = await loadPreset(currentPreset)
-					m.reset(DataModel.wrapLists(preset), false)
+	const loadBackup = () => {
+		if (backup !== undefined) {
+			model?.reset(DataModel.wrapLists(backup), false)
+		}
+	}
+
+	const { value } = useAsync(async () => {
+		let data: unknown = undefined
+		if (currentPreset && sharedSnippetId) {
+			setSharedSnippetId(undefined)
+			return AsyncCancel
+		}
+		if (currentPreset) {
+			data = await loadPreset(currentPreset)
+		} else if (sharedSnippetId) {
+			const snippet = await getSnippet(sharedSnippetId)
+			let cancel = false
+			if (snippet.version && snippet.version !== version) {
+				changeVersion(snippet.version, false)
+				cancel = true
+			}
+			if (snippet.type && snippet.type !== gen.id) {
+				const snippetGen = config.generators.find(g => g.id === snippet.type)
+				if (snippetGen) {
+					route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
+					cancel = true
 				}
-				setModel(m)
-			})
-			.catch(e => { console.error(e); setError(message(e)) })
-	}, [version, gen.id])
+			}
+			if (cancel) {
+				return AsyncCancel
+			}
+			if (snippet.show_preview && !previewShown) {
+				setPreviewShown(true)
+				setSourceShown(false)
+			}
+			Analytics.openSnippet(gen.id, sharedSnippetId, version)
+			data = snippet.data
+		}
+		const [model, blockStates] = await Promise.all([
+			getModel(version, gen.id),
+			getBlockStates(version),
+		])
+		if (data) {
+			ignoreChange.current = true
+			model.reset(DataModel.wrapLists(data), false)
+		}
+		Analytics.setGenerator(gen.id)
+		return { model, blockStates }
+	}, [gen.id, version, sharedSnippetId, currentPreset])
+
+	const model = value?.model
+	const blockStates = value?.blockStates
 
 	const [dirty, setDirty] = useState(false)
 	useModel(model, () => {
-		setSeachParams({ version: undefined, preset: undefined })
+		if (!ignoreChange.current) {
+			setCurrentPreset(undefined, true)
+			setSharedSnippetId(undefined, true)
+		}
+		ignoreChange.current = false
+		Store.setBackup(gen.id, DataModel.unwrapLists(model?.data))
 		setError(null)
 		setDirty(true)
-	})
+	}, [gen.id, setCurrentPreset, setSharedSnippetId])
 
 	const [fileRename, setFileRename] = useState('')
 	const [fileSaved, doSave] = useActiveTimeout()
@@ -123,26 +163,26 @@ export function Generator({}: Props) {
 	}, [file, model])
 
 	const reset = () => {
-		Analytics.generatorEvent('reset')
+		Analytics.resetGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
 		model?.reset(DataModel.wrapLists(model.schema.default()), true)
 	}
 	const undo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.generatorEvent('undo', 'Menu')
+		Analytics.undoGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
 		model?.undo()
 	}
 	const redo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.generatorEvent('redo', 'Menu')
+		Analytics.redoGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
 		model?.redo()
 	}
 
 	const onKeyUp = (e: KeyboardEvent) => {
 		if (e.ctrlKey && e.key === 'z') {
-			Analytics.generatorEvent('undo', 'Hotkey')
+			Analytics.undoGenerator(gen.id, model?.historyIndex ?? 1, 'hotkey')
 			model?.undo()
 		} else if (e.ctrlKey && e.key === 'y') {
-			Analytics.generatorEvent('redo', 'Hotkey')
+			Analytics.redoGenerator(gen.id, model?.historyIndex ?? 1, 'hotkey')
 			model?.redo()
 		}
 	}
@@ -150,7 +190,7 @@ export function Generator({}: Props) {
 		if (e.ctrlKey && e.key === 's') {
 			e.preventDefault()
 			if (model && blockStates && file) {
-				Analytics.generatorEvent('save', 'Hotkey')
+				Analytics.saveProjectFile(gen.id, project.files.length, projects.length, 'hotkey')
 				const data = getOutput(model, blockStates)
 				updateFile(gen.id, file?.id, { id: file?.id, data })
 				setDirty(false)
@@ -170,14 +210,16 @@ export function Generator({}: Props) {
 	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
 		getCollections(version).then(collections => {
-			setPresets(collections.get(gen.id).map(p => p.slice(10)))
+			setPresets(collections.get(gen.id).map(p => p.startsWith('minecraft:') ? p.slice(10) : p))
 		})
-			.catch(e => { console.error(e); setError(e.message) })
+			.catch(e => { console.error(e); setError(e) })
 	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
-		Analytics.generatorEvent('load-preset', id)
-		setSeachParams({ version, preset: id })
+		Analytics.loadPreset(gen.id, id)
+		setSharedSnippetId(undefined, true)
+		changeTargetVersion(version, true)
+		setCurrentPreset(id)
 	}
 
 	const loadPreset = async (id: string) => {
@@ -192,9 +234,59 @@ export function Generator({}: Props) {
 			}
 			return preset
 		} catch (e) {
-			setError(message(e))
+			setError(`Cannot load preset ${id} in ${version}`)
+			setCurrentPreset(undefined, true)
 		}
 	}
+
+	const selectVersion = (version: VersionId) => {
+		setSharedSnippetId(undefined, true)
+		changeVersion(version)
+	}
+
+	const [shareUrl, setShareUrl] = useState<string | undefined>(undefined)
+	const [shareShown, setShareShown] = useState(false)
+	const [shareCopyActive, shareCopySuccess] = useActiveTimeout({ cooldown: 3000 })
+	const share = () => {
+		if (shareShown) {
+			setShareShown(false)
+			return
+		}
+		if (currentPreset) {
+			setShareUrl(`${location.origin}/${gen.url}/?version=${version}&preset=${currentPreset}`)
+			setShareShown(true)
+			copySharedId()
+		} else if (model && blockStates) {
+			const output = getOutput(model, blockStates)
+			if (deepEqual(output, model.schema.default())) {
+				setShareUrl(`${location.origin}/${gen.url}/?version=${version}`)
+				setShareShown(true)
+			} else {
+				shareSnippet(gen.id, version, output, previewShown)
+					.then(({ id, length, compressed, rate }) => {
+						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
+						const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`
+						setShareUrl(url)
+						setShareShown(true)
+					})
+					.catch(e => {
+						if (e instanceof Error) {
+							setError(e)
+						}
+					})
+			}
+		}
+	}
+	const copySharedId = () => {
+		navigator.clipboard.writeText(shareUrl ?? '')
+		shareCopySuccess()
+	}
+	useEffect(() => {
+		if (!shareCopyActive) {
+			setShareUrl(undefined)
+			setShareShown(false)
+		}
+	}, [shareCopyActive])
 
 	const [sourceShown, setSourceShown] = useState(window.innerWidth > 820)
 	const [doCopy, setCopy] = useState(0)
@@ -202,11 +294,11 @@ export function Generator({}: Props) {
 	const [doImport, setImport] = useState(0)
 
 	const copySource = () => {
-		Analytics.generatorEvent('copy')
+		Analytics.copyOutput(gen.id, 'menu')
 		setCopy(doCopy + 1)
 	}
 	const downloadSource = () => {
-		Analytics.generatorEvent('download')
+		Analytics.downloadOutput(gen.id, 'menu')
 		setDownload(doDownload + 1)
 	}
 	const importSource = () => {
@@ -215,7 +307,11 @@ export function Generator({}: Props) {
 		setImport(doImport + 1)
 	}
 	const toggleSource = () => {
-		Analytics.generatorEvent('toggle-output', !sourceShown ? 'visible' : 'hidden')
+		if (sourceShown) {
+			Analytics.hideOutput(gen.id, 'menu')
+		} else {
+			Analytics.showOutput(gen.id, 'menu')
+		}
 		setSourceShown(!sourceShown)
 		setCopy(0)
 		setDownload(0)
@@ -227,12 +323,16 @@ export function Generator({}: Props) {
 	const [previewShown, setPreviewShown] = useState(false)
 	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
 	if (previewShown && !hasPreview) setPreviewShown(false)
-	let actionsShown = 1
+	let actionsShown = 2
 	if (hasPreview) actionsShown += 1
 	if (sourceShown) actionsShown += 2
 
 	const togglePreview = () => {
-		Analytics.generatorEvent('toggle-preview', !previewShown ? 'visible' : 'hidden')
+		if (sourceShown) {
+			Analytics.hidePreview(gen.id, 'menu')
+		} else {
+			Analytics.showPreview(gen.id, 'menu')
+		}
 		setPreviewShown(!previewShown)
 		if (!previewShown && sourceShown) {
 			setSourceShown(false)
@@ -241,13 +341,14 @@ export function Generator({}: Props) {
 
 	return <>
 		<main class={previewShown ? 'has-preview' : ''}>
-			<Ad id="data-pack-generator" type="text" />
+			{!gen.partner && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls">
 				<div class={`project-controls ${file && 'has-file'}`}>
 					<div class="btn-row">
 						<BtnMenu icon="repo" label={project.name} relative={false}>
 							<BtnLink link="/project/" icon="arrow_left" label={locale('project.go_to')} />
 							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
+							{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
 							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
 						</BtnMenu>
 						<TextInput class="btn btn-input" placeholder={locale('project.unsaved_file')} value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
@@ -263,8 +364,8 @@ export function Generator({}: Props) {
 						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
 					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
-						{allowedVersions.reverse().map(v =>
-							<Btn label={v} active={v === version} onClick={() => changeVersion(v)} />
+						{allowedVersions.map(v =>
+							<Btn label={v} active={v === version} onClick={() => selectVersion(v)} />
 						)}
 					</BtnMenu>
 					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
@@ -281,6 +382,9 @@ export function Generator({}: Props) {
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
+			<div class={'popup-action action-share shown tooltipped tip-nw'} aria-label={locale('share')} onClick={share}>
+				{Octicon.link}
+			</div>
 			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
 				{Octicon.download}
 			</div>
@@ -296,6 +400,10 @@ export function Generator({}: Props) {
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
 			<SourcePanel {...{model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
+		</div>
+		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
+			<TextInput value={shareUrl} readonly />
+			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
 		</div>
 	</>
 }

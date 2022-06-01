@@ -1,15 +1,11 @@
 import type { CollectionRegistry, INode, SchemaRegistry } from '@mcschema/core'
 import { ChoiceNode, DataModel, Reference, StringNode } from '@mcschema/core'
-import * as java15 from '@mcschema/java-1.15'
-import * as java16 from '@mcschema/java-1.16'
-import * as java17 from '@mcschema/java-1.17'
-import * as java18 from '@mcschema/java-1.18'
-import * as java182 from '@mcschema/java-1.18.2'
 import config from '../../config.json'
+import { initPartners } from '../partners'
 import { message } from '../Utils'
 import { fetchData } from './DataFetcher'
 
-export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2'] as const
+export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19'] as const
 export type VersionId = typeof VersionIds[number]
 
 export const DEFAULT_VERSION: VersionId = '1.18.2'
@@ -39,16 +35,17 @@ type ModelData = {
 const Models: Record<string, ModelData> = {}
 
 const versionGetter: {
-	[versionId in VersionId]: {
+	[versionId in VersionId]: () => Promise<{
 		getCollections: () => CollectionRegistry,
 		getSchemas: (collections: CollectionRegistry) => SchemaRegistry,
-	}
+	}>
 } = {
-	1.15: java15,
-	1.16: java16,
-	1.17: java17,
-	1.18: java18,
-	'1.18.2': java182,
+	1.15: () => import('@mcschema/java-1.15'),
+	1.16: () => import('@mcschema/java-1.16'),
+	1.17: () => import('@mcschema/java-1.17'),
+	1.18: () => import('@mcschema/java-1.18'),
+	'1.18.2': () => import('@mcschema/java-1.18.2'),
+	1.19: () => import('@mcschema/java-1.19'),
 }
 
 export let CachedDecorator: INode<any>
@@ -60,10 +57,12 @@ async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
 		Versions[id] = (async () => {
 			try {
-				const collections = versionGetter[id].getCollections()
+				const mcschema = await versionGetter[id]()
+				const collections = mcschema.getCollections()
 				const blockStates: BlockStateRegistry = {}
 				await fetchData(id, collections, blockStates)
-				const schemas = versionGetter[id].getSchemas(collections)
+				const schemas = mcschema.getSchemas(collections)
+				initPartners(schemas, collections)
 				Versions[id] = { collections, schemas, blockStates }
 				return Versions[id]
 			} catch (e) {

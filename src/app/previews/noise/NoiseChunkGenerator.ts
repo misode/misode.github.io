@@ -1,4 +1,4 @@
-import { LegacyRandom, PerlinNoise } from 'deepslate'
+import { LegacyRandom, PerlinNoise } from 'deepslate/worldgen'
 import { clampedLerp, lerp2 } from '../../Utils'
 
 export class NoiseChunkGenerator {

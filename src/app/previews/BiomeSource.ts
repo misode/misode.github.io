@@ -1,9 +1,9 @@
 import { DataModel } from '@mcschema/core'
-import type { NoiseParameters } from 'deepslate'
-import { FixedBiome, Identifier, LegacyRandom, NormalNoise } from 'deepslate'
 import init, { biome_parameters, climate_noise, climate_sampler, multi_noise } from 'deepslate-rs'
 // @ts-expect-error
 import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
+import type { NoiseParameters } from 'deepslate/worldgen'
+import { FixedBiome, Identifier, LegacyRandom, NormalNoise } from 'deepslate/worldgen'
 import type { VersionId } from '../services'
 import { checkVersion, fetchPreset } from '../services'
 import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
@@ -246,7 +246,7 @@ function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
 	return [xx, zz]
 }
 
-const VanillaColors: Record<string, Triple> = {
+export const VanillaColors: Record<string, Triple> = {
 	'minecraft:badlands': [217,69,21],
 	'minecraft:badlands_plateau': [202,140,101],
 	'minecraft:bamboo_jungle': [118,142,20],

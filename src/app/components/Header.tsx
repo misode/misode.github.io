@@ -12,7 +12,7 @@ const Themes: Record<string, keyof typeof Octicon> = {
 }
 
 export function Header() {
-	const { lang, locale, changeLanguage } = useLocale()
+	const { lang, locale, changeLocale: changeLanguage } = useLocale()
 	const { theme, changeTheme } = useTheme()
 	const { version } = useVersion()
 	const { projects, project, changeProject } = useProject()
@@ -28,7 +28,7 @@ export function Header() {
 				{config.generators
 					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))
 					.map(g =>
-						<Btn label={locale(g.id)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
+						<Btn label={locale(g.partner ? `partner.${g.partner}.${g.id}` : g.id)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
 					)}
 			</BtnMenu>}
 			{!gen && url.match(/\/?project\/?$/) && <BtnMenu icon="chevron_down" tooltip={locale('switch_project')}>

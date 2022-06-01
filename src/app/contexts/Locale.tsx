@@ -9,12 +9,12 @@ import { Store } from '../Store'
 interface Locale {
 	lang: string,
 	locale: (key: string, ...params: string[]) => string,
-	changeLanguage: (lang: string) => unknown,
+	changeLocale: (lang: string) => unknown,
 }
 const Locale = createContext<Locale>({
 	lang: 'none',
 	locale: key => key,
-	changeLanguage: () => {},
+	changeLocale: () => {},
 })
 
 export const Locales: {
@@ -45,7 +45,11 @@ async function loadLocale(language: string) {
 	const data = await import(`../../locales/${language}.json`)
 	const schema = langConfig.schemas !== false
 		&& await import(`../../../node_modules/@mcschema/locales/src/${language}.json`)
-	Locales[language] = { ...data.default, ...schema.default }
+	let partners = { default: {} }
+	if (language === 'en') {
+		partners = await import('../partners/locales/en.json')
+	}
+	Locales[language] = { ...data.default, ...schema.default, ...partners.default }
 }
 
 export function useLocale() {
@@ -59,16 +63,17 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 		return localize(lang, key, ...params)
 	}, [lang])
 
-	const changeLanguage = useCallback(async (lang: string) => {
-		await loadLocale(lang)
-		Analytics.setLanguage(lang)
-		Store.setLanguage(lang)
-		setLanguage(lang)
-	}, [])
+	const changeLocale = useCallback(async (newLang: string) => {
+		await loadLocale(newLang)
+		Analytics.changeLocale(lang, newLang)
+		Store.setLanguage(newLang)
+		setLanguage(newLang)
+	}, [lang])
 
 	useEffect(() => {
 		(async () => {
 			const target = Store.getLanguage()
+			Analytics.setLocale(target)
 			await Promise.all([
 				loadLocale('en'),
 				...(target !== 'en' ? [loadLocale(target)] : []),
@@ -79,8 +84,8 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 
 	const value: Locale = {
 		lang,
-		locale: locale,
-		changeLanguage,
+		locale,
+		changeLocale,
 	}
 
 	return <Locale.Provider value={value}>

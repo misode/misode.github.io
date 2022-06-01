@@ -4,7 +4,7 @@ import { hashString } from '../../Utils'
 type TagProps = {
 	label: string,
 	active?: boolean,
-	onClick?: () => unknown,
+	onClick?: (e: MouseEvent) => unknown,
 }
 export function ChangelogTag({ label, active, onClick }: TagProps) {
 	const color = label === 'breaking' ? 5 : hashString(label) % 360

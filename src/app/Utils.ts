@@ -1,7 +1,8 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
-import { getCurrentUrl, route } from 'preact-router'
+import yaml from 'js-yaml'
+import { route } from 'preact-router'
 import rfdc from 'rfdc'
 import config from '../config.json'
 
@@ -9,32 +10,43 @@ export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
 }
 
-export function isObject(obj: any) {
+export function isObject(obj: any): obj is Record<string, any> {
 	return typeof obj === 'object' && obj !== null
 }
 
-const dec2hex = (dec: number) => ('0' + dec.toString(16)).substr(-2)
+function decToHex(n: number) {
+	return n.toString(16).padStart(2, '0')
+}
 
 export function hexId(length = 12) {
 	var arr = new Uint8Array(length / 2)
 	window.crypto.getRandomValues(arr)
-	return Array.from(arr, dec2hex).join('')
+	return Array.from(arr, decToHex).join('')
 }
 
 export function randomSeed() {
 	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
 }
 
+export function generateUUID() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+		const r = Math.random()*16|0
+		const v = c == 'x' ? r : (r&0x3|0x8)
+		return v.toString(16)
+	})
+}
+
 export function newSeed(model: DataModel) {
 	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
 	const dimensions = model.get(new Path(['dimensions']))
 	model.set(new Path(['seed']), seed, true)
-	if (typeof dimensions === 'object' && dimensions !== null) {
+	if (isObject(dimensions)) {
 		Object.keys(dimensions).forEach(id => {
 			model.set(new Path(['dimensions', id, 'generator', 'seed']), seed, true)
 			model.set(new Path(['dimensions', id, 'generator', 'biome_source', 'seed']), seed, true)
 		})
 	}
+	model.set(new Path(['placement', 'salt']), Math.abs(seed), true)
 	model.set(new Path(['generator', 'seed']), seed, true)
 	model.set(new Path(['generator', 'biome_source', 'seed']), seed)
 }
@@ -68,34 +80,101 @@ export function getGenerator(url: string) {
 	return config.generators.find(g => g.url === trimmedUrl)
 }
 
-export function getSearchParams(url: string) {
-	const searchIndex = url.indexOf('?')
-	if (searchIndex >= 0) {
-		url = url.slice(searchIndex + 1)
-		return new Map(url.split('&').map<[string, string]>(param => {
-			const index = param.indexOf('=')
-			if (index === -1) return [param, 'true']
-			return [decodeURIComponent(param.slice(0, index)), decodeURIComponent(param.slice(index + 1))]
-		}))
+export function changeUrl({ path, search, hash, replace }: { path?: string, search?: string, hash?: string, replace?: boolean }) {
+	const url = (path !== undefined ? cleanUrl(path) : location.pathname)
+		+ (search !== undefined ? (search.startsWith('?') || search.length === 0 ? search : '?' + search) : location.search)
+		+ (hash !== undefined ? (hash.startsWith('#') ? hash : '#' + hash) : location.hash)
+	route(url, replace)
+}
+
+export function parseFrontMatter(source: string): Record<string, any> {
+	const data = yaml.load(source.substring(3, source.indexOf('---', 3)))
+	if (!isObject(data)) return {}
+	return data
+}
+
+export function versionContent(content: string, version: string) {
+	let cursor = 0
+	while (true) {
+		const start = content.indexOf('{#', cursor)
+		if (start < 0) {
+			break
+		}
+		const end = findMatchingClose(content, start + 2)
+		const vStart = content.indexOf('#[', start + 1)
+		let sub = ''
+		if (vStart >= 0 && vStart < end) {
+			const vEnd = content.indexOf(']', vStart + 2)
+			const v = content.substring(vStart + 2, vEnd)
+			if (v === version) {
+				sub = content.substring(vEnd + 1, end).trim()
+			}
+		} else {
+			const key = content.substring(start + 2, end)
+			const versionConfig = config.versions.find(v => v.id === version)
+			sub = ({
+				version: versionConfig?.id,
+				pack_format: versionConfig?.pack_format.toString(),
+			} as Record<string, string | undefined>)[key] ?? ''
+		}
+		content = content.substring(0, start) + sub + content.substring(end + 2)
+		cursor = start
+		
 	}
-	return new Map<string, string>()
+	return content
 }
 
-export function setSeachParams(modifications: Record<string, string | undefined>, newPath?: string) {
-	const url = getCurrentUrl()
-	const searchParams = getSearchParams(url)
-	Object.entries(modifications).forEach(([key, value]) => {
-		if (value === undefined) searchParams.delete(key)
-		else searchParams.set(key, value)
-	})
-	const search = Array.from(searchParams).map(([key, value]) =>
-		`${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-	route(`${newPath ? cleanUrl(newPath) : getPath(url)}${search.length === 0 ? '' : `?${search.join('&')}`}`, true)
+function findMatchingClose(source: string, index: number) {
+	let depth = 0
+	let iteration = 0
+	while (iteration++ < 1000) {
+		const close = source.indexOf('#}', index)
+		const open = source.indexOf('{#', index)
+		if (close < 0) {
+			console.warn('Missing closing bracket')
+			return source.length
+		}
+		if (open < 0) {
+			if (depth === 0) {
+				return close
+			} else {
+				depth -= 1
+				index = close + 2
+			}
+		} else if (open < close) {
+			depth += 1
+			index = open + 2
+		} else if (depth === 0) {
+			return close
+		} else {
+			depth -= 1
+			index = close + 2
+		}
+	}
+	console.warn('Exceeded max iterations while finding closing bracket')
+	return source.length
 }
 
-export function stringToColor(str: string): [number, number, number] {
+export type Color = [number, number, number]
+
+export function stringToColor(str: string): Color {
 	const h = Math.abs(hashString(str))
 	return [h % 256, (h >> 8) % 256, (h >> 16) % 256]
+}
+
+export function rgbToHex(color: Color): string {
+	if (!Array.isArray(color) || color.length !== 3) return '#000000'
+	const [r, g, b] = color
+	return '#' + decToHex(r) + decToHex(g) + decToHex(b)
+}
+
+export function hexToRgb(hex: string | undefined): Color {
+	if (typeof hex !== 'string') return [0, 0, 0]
+	const num = parseInt(hex.startsWith('#') ? hex.slice(1) : hex, 16)
+	const r = (num >> 16) & 255
+	const g = (num >> 8) & 255
+	const b = num & 255
+	return [r, g, b]
 }
 
 export function square(a: number) {

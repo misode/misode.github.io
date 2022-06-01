@@ -1,5 +1,5 @@
 import config from '../../config.json'
-import { ToolCard } from '../components'
+import { Giscus, ToolCard } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
@@ -15,6 +15,7 @@ export function Home({}: Props) {
 				{config.generators.filter(g => !g.category).map(g => 
 					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 				)}
+				<ToolCard title={locale('tags')} link="/tags/" />
 				<ToolCard title={locale('worldgen')} link="/worldgen/" />
 			</ToolCard>
 			<ToolCard title="Resource packs">
@@ -22,6 +23,7 @@ export function Home({}: Props) {
 					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 				)}
 			</ToolCard>
+			<ToolCard title="Partners" link="/partners/" />
 			<ToolCard title="Report Inspector" icon="report"
 				link="https://misode.github.io/report/"
 				desc="Analyse your performance reports" />
@@ -33,6 +35,8 @@ export function Home({}: Props) {
 				desc="Convert your data packs from 1.16 to 1.17 to 1.18" />
 			<ToolCard title="Technical Changelog" link="/changelog/" />
 			<ToolCard title="Minecraft Versions" link="/versions/" />
+			<ToolCard title="Data Pack Guides" link="/guides/" />
+			<Giscus />
 		</div>
 	</main>
 }

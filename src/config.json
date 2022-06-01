@@ -9,6 +9,10 @@
       "name": "English"
     },
     {
+      "code": "es",
+      "name": "Español"
+    },
+    {
       "code": "fr",
       "name": "Français"
     },
@@ -49,23 +53,33 @@
   "versions": [
     {
       "id": "1.15",
-      "ref": "1.15.2"
+      "ref": "1.15.2",
+      "pack_format": 5
     },
     {
       "id": "1.16",
-      "ref": "1.16.5"
+      "ref": "1.16.5",
+      "pack_format": 6
     },
     {
       "id": "1.17",
-      "ref": "1.17.1"
+      "ref": "1.17.1",
+      "pack_format": 7
     },
     {
       "id": "1.18",
-      "ref": "1.18.1"
+      "ref": "1.18.1",
+      "pack_format": 8
     },
     {
       "id": "1.18.2",
-      "dynamic": true
+      "ref": "1.18.2",
+      "pack_format": 9
+    },
+    {
+      "id": "1.19",
+      "dynamic": true,
+      "pack_format": 10
     }
   ],
   "generators": [
@@ -99,6 +113,17 @@
       "url": "recipe",
       "path": "recipes",
       "schema": "recipe"
+    },
+    {
+      "id": "text_component",
+      "url": "text-component",
+      "schema": "text_component"
+    },
+    {
+      "id": "chat_type",
+      "url": "chat-type",
+      "schema": "chat_type",
+      "minVersion": "1.19"
     },
     {
       "id": "dimension",
@@ -175,7 +200,15 @@
       "url": "worldgen/structure-feature",
       "category": "worldgen",
       "schema": "configured_structure_feature",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "maxVersion": "1.18.2"
+    },
+    {
+      "id": "worldgen/structure",
+      "url": "worldgen/structure",
+      "category": "worldgen",
+      "schema": "structure",
+      "minVersion": "1.19"
     },
     {
       "id": "worldgen/structure_set",
@@ -207,6 +240,64 @@
       "minVersion": "1.16"
     },
     {
+      "id": "worldgen/world_preset",
+      "url": "worldgen/world-preset",
+      "category": "worldgen",
+      "schema": "world_preset",
+      "minVersion": "1.19"
+    },
+    {
+      "id": "worldgen/flat_level_generator_preset",
+      "url": "worldgen/flat-world-preset",
+      "category": "worldgen",
+      "schema": "flat_level_generator_preset",
+      "minVersion": "1.19"
+    },
+    {
+      "id": "tag/block",
+      "url": "tags/block",
+      "category": "tags",
+      "path": "tags/blocks",
+      "schema": "block_tag"
+    },
+    {
+      "id": "tag/entity_type",
+      "url": "tags/entity-type",
+      "category": "tags",
+      "path": "tags/entity_types",
+      "schema": "entity_type_tag"
+    },
+    {
+      "id": "tag/fluid",
+      "url": "tags/fluid",
+      "category": "tags",
+      "path": "tags/fluids",
+      "schema": "fluid_tag"
+    },
+    {
+      "id": "tag/game_event",
+      "url": "tags/game-event",
+      "category": "tags",
+      "path": "tags/game_events",
+      "schema": "game_event_tag",
+      "minVersion": "1.17"
+    },
+    {
+      "id": "tag/item",
+      "url": "tags/item",
+      "category": "tags",
+      "path": "tags/items",
+      "schema": "item_tag"
+    },
+    {
+      "id": "tag/worldgen/biome",
+      "url": "tags/biome",
+      "category": "tags",
+      "path": "tags/worldgen/biome",
+      "schema": "biome_tag",
+      "minVersion": "1.18.2"
+    },
+    {
       "id": "block_definition",
       "url": "assets/blockstate",
       "path": "blockstates",
@@ -219,6 +310,15 @@
       "path": "models",
       "category": "assets",
       "schema": "model"
+    },
+    {
+      "id": "block_growth",
+      "url": "partners/immersive-weathering/block-growth",
+      "path": "block_growths",
+      "category": "partners",
+      "partner": "immersive_weathering",
+      "schema": "immersive_weathering:block_growth",
+      "minVersion": "1.18.2"
     }
   ]
 }
