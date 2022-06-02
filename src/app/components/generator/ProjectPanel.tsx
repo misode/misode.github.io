@@ -53,7 +53,7 @@ export function ProjectPanel({}: Props) {
 				{projects.map(p => <Btn label={p.name} onClick={() => changeProject(p.name)} />)}
 			</BtnMenu>
 			<BtnMenu icon="kebab_horizontal" >
-				<Btn icon="file_zip" label="Download" onClick={onDownload} />
+				<Btn icon="file_zip" label={locale('project.download')} onClick={onDownload} />
 			</BtnMenu>
 		</div>
 		<div class="file-view">

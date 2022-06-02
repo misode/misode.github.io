@@ -856,6 +856,38 @@ main.has-project {
 	color: var(--text-1)
 }
 
+.modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: var(--background-2);
+	color: var(--text-2);
+	box-shadow: 0 0 18px -2px #000;
+	border-radius: 6px;
+	padding: 24px;
+	z-index: 101;
+	pointer-events: all;
+}
+
+[data-modals] .tree {
+	pointer-events: none;
+}
+
+.file-creation {
+	display: flex;
+	flex-direction: column;
+}
+
+.file-creation > *:not(:last-child) {
+	margin-bottom: 8px;
+}
+
+.file-creation input {
+	background-color: var(--background-1);
+	box-shadow: none;
+}
+
 .home, .category, .versions, .guides, .guide {
 	padding: 16px;
 	max-width: 960px;

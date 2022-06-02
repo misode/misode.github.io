@@ -3,7 +3,7 @@ import { getCurrentUrl, route } from 'preact-router'
 import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { DRAFT_PROJECT, useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
@@ -151,10 +151,19 @@ export function Generator({}: Props) {
 			model?.redo()
 		}
 	}
+	const onKeyDown = (e: KeyboardEvent) => {
+		if (e.ctrlKey && e.key === 's') {
+			setFileSaving(true)
+			e.preventDefault()
+			e.stopPropagation()
+		}
+	}
 	useEffect(() => {
 		document.addEventListener('keyup', onKeyUp)
+		document.addEventListener('keydown', onKeyDown)
 		return () => {
 			document.removeEventListener('keyup', onKeyUp)
+			document.removeEventListener('keydown', onKeyDown)
 		}
 	}, [model, blockStates, file])
 
@@ -294,6 +303,7 @@ export function Generator({}: Props) {
 	}
 
 	const [projectShown, setProjectShown] = useState(window.innerWidth > 600)
+	const [isFileSaving, setFileSaving] = useState(false)
 
 	const toggleProject = () => {
 		if (projectShown) {
@@ -362,5 +372,6 @@ export function Generator({}: Props) {
 		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
 			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} />
 		</div>
+		{model && isFileSaving && <FileCreation id={gen.id} model={model} onClose={() => setFileSaving(false)} />}
 	</>
 }

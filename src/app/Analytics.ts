@@ -226,4 +226,14 @@ export namespace Analytics {
 			method,
 		})
 	}
+
+	export function saveProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'save-project-file', legacyMethod(method))
+		gtag('event', 'save_project_file', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
 }
