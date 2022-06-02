@@ -11,7 +11,6 @@ export type Project = {
 	name: string,
 	namespace?: string,
 	version?: VersionId,
-	meta?: any,
 	files: ProjectFile[],
 }
 export const DRAFT_PROJECT: Project = {
@@ -140,26 +139,30 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 export function getFilePath(file: { id: string, type: string }) {
 	const [namespace, id] = file.id.includes(':') ? file.id.split(':') : ['minecraft', file.id]
 	if (file.type === 'pack_mcmeta') {
-		return 'pack.mcmeta'
+		if (file.id === 'pack') return 'pack.mcmeta'
+		return undefined
 	}
 	const gen = config.generators.find(g => g.id === file.type)
 	if (!gen) {
-		console.error(`Cannot find generator of type ${file.type}`)
 		return undefined
 	}
-	return `data/${namespace}/${gen.path ?? gen.id}/${id}`
+	return `data/${namespace}/${gen.path ?? gen.id}/${id}.json`
 }
 
 export function disectFilePath(path: string) {
+	if (path === 'pack.mcmeta') {
+		return { type: 'pack_mcmeta', id: 'pack' }
+	}
 	for (const p of FilePatterns) {
 		const match = path.match(p)
 		if (!match) continue
 		const gen = config.generators.find(g => (g.path ?? g.id) === match[2])
-		if (gen) {
-			return {
-				type: gen.id,
-				id: `${match[1]}:${match[3]}`,
-			}
+		if (!gen) continue
+		const namespace = match[1]
+		const name = match[3].replace(/\.[a-z]+$/, '')
+		return {
+			type: gen.id,
+			id: `${namespace}:${name}`,
 		}
 	}
 	return undefined

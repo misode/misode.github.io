@@ -255,9 +255,6 @@ main {
 }
 
 main > .controls {
-	justify-content: space-between;
-	flex-wrap: wrap;
-	position: initial;
 	margin-right: 16px;
 	margin-left: 16px;
 	row-gap: 8px;
@@ -274,6 +271,7 @@ main > .controls {
 .sounds-controls > *:not(:last-child),
 .preview-controls > *:not(:last-child),
 .generator-controls > *:not(:last-child),
+.project-controls > *:not(:last-child),
 .versions-controls > *:not(:last-child) {
 	margin-right: 8px;
 }
@@ -283,30 +281,16 @@ main > .controls {
 }
 
 .project-controls {
-	position: relative;
+	margin: 8px;
 	display: flex;
-	width: max-content;
+	justify-content: space-between;
 	z-index: 2;
 }
 
-.project-controls > .btn-row > .btn-input {
-	background-color: var(--background-2);
-}
-
-.project-controls > .status-icon {
-	position: absolute;
-	right: 0;
-	top: 50%;
-	transform: translateY(-50%);
-	align-self: center;
-	margin-right: 8px;
-	fill: var(--text-3);
-	display: flex;
-	align-items: center;
-}
-
-.project-controls.has-file > .status-icon {
-	right: 38px;
+.project-controls > :first-child {
+	max-width: calc(200px - 62px);
+	max-width: calc(max(200px, 20vw) - 62px);
+	text-overflow: ellipsis;
 }
 
 .status-icon.active {
@@ -318,7 +302,7 @@ main > .controls {
 }
 
 .project-creation .btn-menu .btn-group,
-.project-controls .btn-menu .btn-group {
+.project-controls .btn-menu:first-child .btn-group {
 	left: 0;
 	right: unset;
 }
@@ -329,6 +313,7 @@ main > .controls {
 }
 
 .tree {
+	margin-top: -40px;
 	overflow-x: auto;
 	padding: 8px 16px 50vh;
 }
@@ -457,6 +442,31 @@ main.has-preview {
 	fill: var(--accent-success);
 }
 
+.popup-project {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	height: calc(100% - 56px);
+	width: 200px;
+	width: max(200px, 20vw);
+	right: 100%;
+	bottom: 0;
+	z-index: 3;
+	background-color: var(--background-2);
+	box-shadow: 0 0 7px -3px #000;
+	fill: var(--text-2);
+	transition: transform 0.3s, width 0.3s;
+}
+
+.popup-project.shown {
+	transform: translateX(100%);
+}
+
+main.has-project {
+	padding-left: 200px;
+	padding-left: max(200px, 20vw);
+}
+
 .btn {
 	display: flex;
 	align-items: center;
@@ -501,12 +511,21 @@ main.has-preview {
 	pointer-events: none;
 }
 
+.btn svg {
+	flex-shrink: 0;
+}
+
 .btn svg:not(:last-child) {
 	margin-right: 5px;
 }
 
 .btn svg:not(:first-child) {
 	margin-left: 5px;
+}
+
+.btn span {
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .btn-link {
@@ -629,9 +648,7 @@ main.has-preview {
 	display: flex;
 	position: fixed;
 	bottom: 8px;
-	left: 100%;
 	z-index: 4;
-	padding-right: 16px;
 	background-color: var(--background-4);
 	box-shadow: 0 0 7px -3px #000;
 	user-select: none;
@@ -640,17 +657,38 @@ main.has-preview {
 	-ms-user-select: none;
 	transform: translateX(var(--offset));
 	transition: padding 0.1s, transform 0.3s;
-	border-top-left-radius: 24px;
-	border-bottom-left-radius: 24px;
 }
 
 .popup-action {
 	padding: 12px;
 	fill: var(--text-3);
 	cursor: pointer;
+}
+
+.popup-actions.right-actions {
+	left: 100%;
+	padding-right: 16px;
+	border-top-left-radius: 24px;
+	border-bottom-left-radius: 24px;
+}
+
+.popup-actions.right-actions .popup-action {
+	padding-left: 16px;
 	border-top-left-radius: 50%;
 	border-bottom-left-radius: 50%;
+}
+
+.popup-actions.left-actions {
+	right: 100%;
 	padding-left: 16px;
+	border-top-right-radius: 24px;
+	border-bottom-right-radius: 24px;
+}
+
+.popup-actions.left-actions .popup-action {
+	padding-right: 16px;
+	border-top-right-radius: 50%;
+	border-bottom-right-radius: 50%;
 }
 
 .popup-action.shown ~ .popup-action {
@@ -818,7 +856,7 @@ main.has-preview {
 	color: var(--text-1)
 }
 
-.home, .category, .project, .new-project, .versions, .guides, .guide {
+.home, .category, .versions, .guides, .guide {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -982,27 +1020,10 @@ hr {
 	font-weight: 100;
 }
 
-.project-navigation {
-	display: flex;
-	max-width: 960px;
-	margin: 0 auto;
-	padding: 0 16px;
-}
-
-.project-navigation > *:not(:last-child) {
-	margin-right: 8px;
-}
-
-.project h2 {
-	color: var(--text-1);
-	margin-bottom: 8px;
-}
-
 .file-view {
 	background-color: var(--background-2);
 	color: var(--text-2);
-	border-radius: 6px;
-	padding: 6px;
+	overflow: hidden;
 }
 
 .project-creation {
@@ -1026,14 +1047,6 @@ hr {
 .project-creation input {
 	background-color: var(--background-1);
 	box-shadow: none;
-}
-
-.problems {
-	background-color: var(--background-2);
-	margin-bottom: 16px;
-	border-radius: 6px;
-	padding: 8px;
-	color: var(--accent-danger);
 }
 
 .input-group {
@@ -1066,7 +1079,7 @@ hr {
 	align-items: center;
 	cursor: pointer;
 	padding: 4px 2px;
-	padding-left: calc(var(--indent, 0) * 24px);
+	padding-left: calc(var(--indent, 0) * 15px + 8px);
 	user-select: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -1084,8 +1097,13 @@ hr {
 	fill: var(--accent-danger);
 }
 
+.tree-view .entry.active {
+	background-color: var(--background-4);
+}
+
 .tree-view .entry svg {
 	margin-right: 4px;
+	flex-shrink: 0;
 }
 
 .tree-view .entry .status-icon {
@@ -1872,6 +1890,18 @@ hr {
 	}
 }
 
+@media screen and (max-width: 1300px) {
+	main.has-preview .tree {
+		margin-top: 4px;
+	}
+}
+
+@media screen and (max-width: 800px) {
+	main .tree {
+		margin-top: 4px !important;
+	}
+}
+
 /* SMALL */
 @media screen and (max-width: 580px) {
 	.home {
@@ -1893,6 +1923,10 @@ hr {
 
 	main.has-preview {
 		padding-right: 0;
+	}
+
+	main.has-project {
+		padding-left: 0;
 	}
 
 	main .controls {
@@ -1927,10 +1961,6 @@ hr {
 	.btn.btn.large-input,
 	.btn-menu .result-list {
 		width: calc(100vw - 32px); 
-	}
-
-	.generator-picker {
-		justify-content: center;
 	}
 
 	.version-metadata-hide {

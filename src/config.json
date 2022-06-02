@@ -84,6 +84,11 @@
   ],
   "generators": [
     {
+      "id": "pack_mcmeta",
+      "url": "pack-mcmeta",
+      "schema": "pack_mcmeta"
+    },
+    {
       "id": "loot_table",
       "url": "loot-table",
       "path": "loot_tables",

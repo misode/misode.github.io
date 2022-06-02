@@ -67,7 +67,6 @@ export class Deepslate {
 		const newCacheState = [settings, `${seed}`, biome]
 		if (!deepEqual(this.cacheState, newCacheState)) {
 			const biomeSource = new this.d.FixedBiome(checkVersion(this.loadedVersion, '1.18.2') ? this.d.Identifier.parse(biome) : biome as any)
-			console.log(this.d)
 			const noiseSettings = this.d.NoiseGeneratorSettings.fromJson(DataModel.unwrapLists(settings))
 			const chunkGenerator = new this.d.NoiseChunkGenerator(seed, biomeSource, noiseSettings)
 			this.settingsCache = noiseSettings.noise

@@ -1,47 +1,13 @@
 import { DataModel } from '@mcschema/core'
-import yaml from 'js-yaml'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu } from '..'
 import { useLocale } from '../../contexts'
 import { useModel } from '../../hooks'
 import { getOutput } from '../../schema/transformOutput'
 import type { BlockStateRegistry } from '../../services'
+import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, stringifySource } from '../../services'
 import { Store } from '../../Store'
 import { message } from '../../Utils'
-
-
-const INDENT: Record<string, number | string | undefined> = {
-	'2_spaces': 2,
-	'4_spaces': 4,
-	tabs: '\t',
-	minified: undefined,
-}
-
-let commentJson: typeof import('comment-json') | null = null
-
-const FORMATS: Record<string, {
-	parse: (v: string) => Promise<any>,
-	stringify: (v: any, indentation: string | number | undefined) => string,
-}> = {
-	json: {
-		parse: async (v) => {
-			try {
-				return JSON.parse(v)
-			} catch (e) {
-				commentJson = await import('comment-json')
-				return commentJson.parse(v)
-			}
-		},
-		stringify: (v, i) => (commentJson ?? JSON).stringify(v, null, i) + '\n',
-	},
-	yaml: {
-		parse: async (v) => yaml.load(v),
-		stringify: (v, i) => yaml.dump(v, {
-			flowLevel: i === undefined ? 0 : -1,
-			indent: typeof i === 'string' ? 4 : i,
-		}),
-	},
-}
 
 interface Editor {
 	getValue(): string
@@ -75,7 +41,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 
 	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
 		const data = getOutput(model, blockStates)
-		return FORMATS[format].stringify(data, INDENT[indent])
+		return stringifySource(data, format, indent)
 	}, [indent, format])
 
 	useEffect(() => {
@@ -102,7 +68,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			const value = editor.current.getValue()
 			if (value.length === 0) return
 			try {
-				const data = await FORMATS[format].parse(value)
+				const data = await parseSource(value, format)
 				model?.reset(DataModel.wrapLists(data), false)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -149,7 +115,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 					},
 					configure(indent, format) {
 						braceEditor.setOption('useSoftTabs', indent !== 'tabs')
-						braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : INDENT[indent])
+						braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : getSourceIndent(indent))
 						braceEditor.getSession().setMode(`ace/mode/${format}`)
 					},
 					select() {
@@ -233,12 +199,12 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	return <> 
 		<div class="controls source-controls">
 			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
-				{Object.entries(INDENT).map(([key]) =>
+				{getSourceIndents().map(key =>
 					<Btn label={locale(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>
 				)}
 				<hr />
-				{Object.keys(FORMATS).map(key =>
+				{getSourceFormats().map(key =>
 					<Btn label={locale(`format.${key}`)} active={format === key}
 						onClick={() => changeFormat(key)} />)}
 				<hr />

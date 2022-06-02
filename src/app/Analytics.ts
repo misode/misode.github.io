@@ -125,16 +125,6 @@ export namespace Analytics {
 		})
 	}
 
-	export function saveProjectFile(file_type: string, project_size: number, projects_count: number, method: Method) {
-		event(ID_GENERATOR, 'save-project-file', legacyMethod(method))
-		gtag('event', 'save_project_file', {
-			file_type,
-			project_size,
-			projects_count,
-			method,
-		})
-	}
-
 	export function loadPreset(file_type: string, file_name: string) {
 		event(ID_GENERATOR, 'load-preset', file_name)
 		gtag('event', 'load_generator_preset', {
@@ -213,6 +203,26 @@ export namespace Analytics {
 		event(ID_GENERATOR, 'toggle-preview', 'hidden')
 		gtag('event', 'hide_generator_preview', {
 			file_type,
+			method,
+		})
+	}
+
+	export function showProject(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'show-project', legacyMethod(method))
+		gtag('event', 'show_project', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function hideProject(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'hide-project', legacyMethod(method))
+		gtag('event', 'hide_project', {
+			file_type,
+			projects_count,
+			project_size,
 			method,
 		})
 	}
