@@ -9,15 +9,16 @@ import { TextInput } from '../forms'
 interface Props {
 	model: DataModel,
 	id: string,
+	method: string,
 	onClose: () => void,
 }
-export function FileCreation({ model, id, onClose }: Props) {
+export function FileCreation({ model, id, method, onClose }: Props) {
 	const { locale } = useLocale()
 	const { projects, project, updateFile } = useProject()
 	const [fileId, setFileId] = useState('')
 
 	const doSave = () => {
-		Analytics.saveProjectFile(id, projects.length, project.files.length, 'hotkey')
+		Analytics.saveProjectFile(id, projects.length, project.files.length, method as any)
 		updateFile(id, undefined, { type: id, id: fileId, data: DataModel.unwrapLists(model.data) })
 		onClose()
 	}

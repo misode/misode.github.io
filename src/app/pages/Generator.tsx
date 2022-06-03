@@ -153,7 +153,7 @@ export function Generator({}: Props) {
 	}
 	const onKeyDown = (e: KeyboardEvent) => {
 		if (e.ctrlKey && e.key === 's') {
-			setFileSaving(true)
+			setFileSaving('hotkey')
 			e.preventDefault()
 			e.stopPropagation()
 		}
@@ -303,7 +303,7 @@ export function Generator({}: Props) {
 	}
 
 	const [projectShown, setProjectShown] = useState(window.innerWidth > 600)
-	const [isFileSaving, setFileSaving] = useState(false)
+	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
 	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
 
 	const toggleProject = () => {
@@ -333,6 +333,7 @@ export function Generator({}: Props) {
 					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
 					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
+					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
@@ -373,7 +374,7 @@ export function Generator({}: Props) {
 		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
 			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onRename={setFileRenaming} />
 		</div>
-		{model && isFileSaving && <FileCreation id={gen.id} model={model} onClose={() => setFileSaving(false)} />}
+		{model && fileSaving && <FileCreation id={gen.id} model={model} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
 		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
 	</>
 }

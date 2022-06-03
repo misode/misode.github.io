@@ -127,7 +127,7 @@
   "project.rename": "Rename",
   "project.rename_file": "Rename file",
   "project.save": "Save",
-  "project.save_current_file": "Save current file",
+  "project.save_current_file": "Save file to project",
   "project.search": "Search project",
   "project.search_drafts": "Search drafts",
   "project.unsaved_file": "Unsaved file",
