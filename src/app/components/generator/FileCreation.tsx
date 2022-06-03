@@ -26,7 +26,7 @@ export function FileCreation({ model, id, onClose }: Props) {
 
 	return <div class="modal file-creation" onClick={e => e.stopPropagation()}>
 		<p>{locale('project.save_current_file')}</p>
-		<TextInput autoFocus class="btn btn-input" value={fileId} onChange={setFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} />
+		<TextInput autofocus class="btn btn-input" value={fileId} onChange={setFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} />
 		<Btn icon="file" label={locale('project.save')} onClick={doSave} />
 	</div>
 }
