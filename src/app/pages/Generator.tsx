@@ -3,7 +3,7 @@ import { getCurrentUrl, route } from 'preact-router'
 import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
 import { DRAFT_PROJECT, useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
@@ -304,6 +304,7 @@ export function Generator({}: Props) {
 
 	const [projectShown, setProjectShown] = useState(window.innerWidth > 600)
 	const [isFileSaving, setFileSaving] = useState(false)
+	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
 
 	const toggleProject = () => {
 		if (projectShown) {
@@ -370,8 +371,9 @@ export function Generator({}: Props) {
 			</div>
 		</div>
 		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
-			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} />
+			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onRename={setFileRenaming} />
 		</div>
 		{model && isFileSaving && <FileCreation id={gen.id} model={model} onClose={() => setFileSaving(false)} />}
+		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
 	</>
 }

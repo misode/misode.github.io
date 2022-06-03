@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 
-export function useFocus(): [boolean, () => unknown] {
+export function useFocus(): [boolean, (active?: boolean) => unknown] {
 	const [active, setActive] = useState(false)
 
 	const hider = () => {
@@ -18,5 +18,5 @@ export function useFocus(): [boolean, () => unknown] {
 		}
 	}, [active])
 
-	return [active, () => setActive(true)]
+	return [active, (active = true) => setActive(active)]
 }

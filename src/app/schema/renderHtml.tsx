@@ -565,7 +565,7 @@ function HelpPopup({ lang, path }: { lang: string, path: Path }) {
 const popupIcon = (type: string, icon: keyof typeof Octicon, popup: string) => {
 	const [active, setActive] = useFocus()
 
-	return <div class={`node-icon ${type}${active ? ' show' : ''}`} onClick={setActive}>
+	return <div class={`node-icon ${type}${active ? ' show' : ''}`} onClick={() => setActive()}>
 		{Octicon[icon]}
 		<span class="icon-popup">{popup}</span>
 	</div>

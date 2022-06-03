@@ -236,4 +236,24 @@ export namespace Analytics {
 			method,
 		})
 	}
+
+	export function deleteProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'delete-project-file', legacyMethod(method))
+		gtag('event', 'delete_project_file', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function renameProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'rename-project-file', legacyMethod(method))
+		gtag('event', 'rename_project_file', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
 }

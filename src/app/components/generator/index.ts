@@ -1,4 +1,5 @@
 export * from './FileCreation'
+export * from './FileRenaming'
 export * from './PreviewPanel'
 export * from './ProjectCreation'
 export * from './ProjectPanel'

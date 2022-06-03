@@ -1,11 +1,13 @@
 import type { DataModel } from '@mcschema/core'
 import { useMemo, useRef } from 'preact/hooks'
+import { Analytics } from '../../Analytics'
 import { disectFilePath, getFilePath, useLocale, useProject } from '../../contexts'
 import type { VersionId } from '../../services'
 import { stringifySource } from '../../services'
 import { writeZip } from '../../Utils'
 import { Btn } from '../Btn'
 import { BtnMenu } from '../BtnMenu'
+import type { EntryAction } from '../TreeView'
 import { TreeView } from '../TreeView'
 
 interface Props {
@@ -13,10 +15,11 @@ interface Props {
 	version: VersionId,
 	id: string,
 	onError: (message: string) => unknown,
+	onRename: (file: { type: string, id: string }) => unknown,
 }
-export function ProjectPanel({}: Props) {
+export function ProjectPanel({ onRename }: Props) {
 	const { locale } = useLocale()
-	const { projects, project, changeProject, file, openFile } = useProject()
+	const { projects, project, changeProject, file, openFile, updateFile } = useProject()
 
 	const entries = useMemo(() => project.files.flatMap(f => {
 		const path = getFilePath(f)
@@ -47,10 +50,34 @@ export function ProjectPanel({}: Props) {
 		download.current.click()
 	}
 
+	const actions = useMemo<EntryAction[]>(() => [
+		{
+			icon: 'pencil',
+			label: locale('project.rename_file'),
+			onAction: (e) => {
+				const file = disectFilePath(e)
+				if (file) {
+					onRename(file)
+				}
+			},
+		},
+		{
+			icon: 'trashcan',
+			label: locale('project.delete_file'),
+			onAction: (e) => {
+				const file = disectFilePath(e)
+				if (file) {
+					Analytics.deleteProjectFile(file.type, projects.length, project.files.length, 'menu')
+					updateFile(file.type, file.id, {})
+				}
+			},
+		},
+	], [updateFile, onRename])
+
 	return <>
 		<div class="project-controls">
 			<BtnMenu icon="chevron_down" label={project.name}>
-				{projects.map(p => <Btn label={p.name} onClick={() => changeProject(p.name)} />)}
+				{projects.map(p => <Btn label={p.name} active={p.name === project.name} onClick={() => changeProject(p.name)} />)}
 			</BtnMenu>
 			<BtnMenu icon="kebab_horizontal" >
 				<Btn icon="file_zip" label={locale('project.download')} onClick={onDownload} />
@@ -59,7 +86,7 @@ export function ProjectPanel({}: Props) {
 		<div class="file-view">
 			{entries.length === 0
 				? <span>{locale('project.no_files')}</span>
-				: <TreeView entries={entries} selected={selected} onSelect={selectFile} />}
+				: <TreeView entries={entries} selected={selected} onSelect={selectFile} actions={actions} />}
 		</div>
 		<a ref={download} style="display: none;"></a>
 	</>

@@ -1056,6 +1056,11 @@ hr {
 	background-color: var(--background-2);
 	color: var(--text-2);
 	overflow: hidden;
+	flex-grow: 1;
+}
+
+.file-view > span {
+	padding: 4px 8px;
 }
 
 .project-creation {
@@ -1107,6 +1112,7 @@ hr {
 }
 
 .tree-view .entry {
+	position: relative;
 	display: flex;
 	align-items: center;
 	cursor: pointer;
@@ -1129,6 +1135,13 @@ hr {
 	fill: var(--accent-danger);
 }
 
+.tree-view .entry.focused {
+	background-color: var(--background-3);
+	outline: 1px solid var(--accent-primary);
+	outline-offset: -1px;
+	z-index: 1;
+}
+
 .tree-view .entry.active {
 	background-color: var(--background-4);
 }
@@ -1141,6 +1154,47 @@ hr {
 .tree-view .entry .status-icon {
 	margin-left: 4px;
 	display: flex;
+}
+
+.tree-view .entry-menu {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	background-color: var(--background-4);
+	z-index: 4;
+	margin-top: 5px;
+	margin-left: 24px;
+	border-radius: 6px;
+	box-shadow: 0 0 7px -2px #000;
+}
+
+.tree-view .entry-menu::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-left: 6px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--background-4) transparent;
+}
+
+.tree-view .entry-menu .action {
+	padding: 4px 8px;
+}
+
+.tree-view .entry-menu .action:first-child {
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+}
+
+.tree-view .entry-menu .action:last-child {
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+.tree-view .entry-menu .action:hover {
+	background-color: var(--background-5);
 }
 
 [data-ea-publisher] {

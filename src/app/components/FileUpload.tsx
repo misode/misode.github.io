@@ -10,9 +10,10 @@ interface Props {
 }
 export function FileUpload({ value, onChange, label, accept }: Props) {
 	const { locale } = useLocale()
-	const fileUpload = useRef<HTMLInputElement>()
+	const fileUpload = useRef<HTMLInputElement>(null)
 	
 	const onUpload = () => {
+		if (fileUpload.current === null) return
 		for (let i = 0; i < (fileUpload.current.files?.length ?? 0); i++) {
 			const file = fileUpload.current.files![i]
 			onChange(file)
