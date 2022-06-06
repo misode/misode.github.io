@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
-import { Btn, BtnMenu, ChangelogTag, GuideCard, TextInput } from '../components'
+import { Btn, BtnMenu, ChangelogTag, Footer, GuideCard, TextInput } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import { useTags } from '../hooks/useTags'
 import type { VersionId } from '../services'
@@ -72,5 +72,6 @@ export function Guides({}: Props) {
 				<GuideCard title={g.title} link={`/guides/${g.id}/`} tags={g.tags ?? []} versions={g.versions ?? []} activeTags={activeTags} toggleTag={toggleTag} />
 			)}
 		</div>
+		<Footer />
 	</main>
 }

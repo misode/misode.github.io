@@ -12,6 +12,7 @@
 	--accent-success: #3eb84f;
 	--accent-warning: #b8893e;
 	--accent-danger: #cf4945;
+	--accent-donate: #db61a2;
 	--accent-sounds-1: #451475;
 	--accent-sounds-2: #39155e;
 	--accent-sounds-3: #6a08a3;
@@ -231,6 +232,44 @@ header .btn-menu > .btn {
 
 header .btn-menu > .btn:hover {
 	fill: var(--nav-hover);
+}
+
+footer {
+	display: flex;
+	align-items: flex-end;
+	flex-wrap: wrap;
+	padding: 50px 30px;
+	color: var(--text-3);
+}
+
+footer > * {
+	margin-bottom: 10px;
+}
+
+footer > *:not(:last-child) {
+	margin-right: 30px;
+}
+
+footer p {
+	display: flex;
+	align-items: center;
+}
+
+footer a {
+	color: var(--text-3);
+}
+
+footer a:hover {
+	color: var(--text-1);
+}
+
+footer svg {
+	fill: var(--text-3);
+	margin-right: 8px;
+}
+
+footer .donate svg {
+	fill: var(--accent-donate);
 }
 
 main {

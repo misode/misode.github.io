@@ -1,7 +1,7 @@
 import type { Howl, HowlOptions } from 'howler'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
-import { Btn, BtnMenu, ErrorPanel, SoundConfig, TextInput } from '../components'
+import { Btn, BtnMenu, ErrorPanel, Footer, SoundConfig, TextInput } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import { useAsync } from '../hooks'
 import type { VersionId } from '../services'
@@ -87,5 +87,6 @@ export function Sounds({}: Props) {
 				{soundKeys.map(s => <option key={s} value={s} />)}
 			</datalist>
 		</>}
+		<Footer donate={false} />
 	</main>
 }

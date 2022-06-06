@@ -1,4 +1,4 @@
-import { Ad, ChangelogList, ErrorPanel } from '../components'
+import { Ad, ChangelogList, ErrorPanel, Footer } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { useAsync } from '../hooks'
 import { getChangelogs } from '../services'
@@ -18,5 +18,6 @@ export function Changelog({}: Props) {
 		<div class="changelog">
 			<ChangelogList changes={changelogs} defaultOrder="desc" />
 		</div>
+		<Footer />
 	</main>
 }

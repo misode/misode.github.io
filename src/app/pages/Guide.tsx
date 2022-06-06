@@ -4,7 +4,7 @@ import { marked } from 'marked'
 import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
-import { Ad, Btn, BtnMenu, ChangelogTag, Giscus, Octicon } from '../components'
+import { Ad, Btn, BtnMenu, ChangelogTag, Footer, Giscus, Octicon } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import { useActiveTimeout, useAsync, useHash } from '../hooks'
 import type { VersionId } from '../services'
@@ -195,5 +195,6 @@ export function Guide({ id }: Props) {
 				<Giscus />
 			</>}
 		</div>
+		<Footer />
 	</main>
 }
