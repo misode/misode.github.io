@@ -27,7 +27,7 @@ export namespace Store {
 		if (version && VersionIds.includes(version as VersionId)) {
 			return version as VersionId
 		}
-		return '1.18.2'
+		return '1.19'
 	}
 
 	export function getIndent() {

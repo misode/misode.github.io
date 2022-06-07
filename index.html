@@ -9,7 +9,7 @@
 		gtag('js', new Date());
 		gtag('config', 'G-S982VZS08T', {
 			theme: localStorage.getItem('theme') || 'default',
-			version: localStorage.getItem('schema_version') || '1.18.2',
+			version: localStorage.getItem('schema_version') || '1.19',
 			locale: localStorage.getItem('language') || 'en',
 			prefers_color_scheme: matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none',
 		});
@@ -23,7 +23,7 @@
 		ga('set', 'page', location.pathname);
 		ga('set', 'dimension1', localStorage.getItem('theme') || 'default');
 		ga('set', 'dimension2', 'v2');
-		ga('set', 'dimension3', localStorage.getItem('schema_version') || '1.18.2');
+		ga('set', 'dimension3', localStorage.getItem('schema_version') || '1.19');
 		ga('set', 'dimension4', localStorage.getItem('language') || 'en');
 		ga('set', 'dimension5', 'none');
 		ga('set', 'dimension7', matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none');
@@ -31,7 +31,7 @@
 	</script>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Data Pack Generators Minecraft 1.17, 1.18, 1.18.2</title>
+	<title>Data Pack Generators Minecraft 1.18, 1.18.2, 1.19</title>
 	<link rel="icon" href="/src/favicon-32.png" sizes="32x32">
 	<script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
 	<script>
