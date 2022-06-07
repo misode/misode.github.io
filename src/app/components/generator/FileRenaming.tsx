@@ -1,9 +1,9 @@
 import { useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics'
 import { useLocale, useProject } from '../../contexts'
-import { useModal } from '../../hooks'
 import { Btn } from '../Btn'
 import { TextInput } from '../forms'
+import { Modal } from '../Modal'
 
 interface Props {
 	id: string,
@@ -21,11 +21,9 @@ export function FileRenaming({ id, name, onClose }: Props) {
 		onClose()
 	}
 
-	useModal(onClose)
-
-	return <div class="modal file-creation" onClick={e => e.stopPropagation()}>
+	return <Modal class="file-modal" onDismiss={onClose}>
 		<p>{locale('project.rename_file')}</p>
 		<TextInput autofocus class="btn btn-input" value={fileId} onChange={setFileId} onEnter={doSave} placeholder={locale('resource_location')} spellcheck={false} />
 		<Btn icon="pencil" label={locale('project.rename')} onClick={doSave} />
-	</div>
+	</Modal>
 }

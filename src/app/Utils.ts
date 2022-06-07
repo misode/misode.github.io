@@ -291,10 +291,13 @@ export async function readZip(file: File): Promise<[string, string][]> {
 	const buffer = await file.arrayBuffer()
 	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
 	const entries = await reader.getEntries()
-	return await Promise.all(entries.map(async e => {
-		const writer = new zip.TextWriter('utf-8')
-		return [e.filename, await e.getData?.(writer)] as [string, string]
-	}))
+	return await Promise.all(entries
+		.filter(e => !e.directory)
+		.map(async e => {
+			const writer = new zip.TextWriter('utf-8')
+			return [e.filename, await e.getData?.(writer)] as [string, string]
+		})
+	)
 }
 
 export async function writeZip(entries: [string, string][]): Promise<string> {

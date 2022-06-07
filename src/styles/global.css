@@ -874,16 +874,16 @@ main.has-project {
 	pointer-events: none;
 }
 
-.file-creation {
+.file-modal {
 	display: flex;
 	flex-direction: column;
 }
 
-.file-creation > *:not(:last-child) {
+.file-modal > *:not(:last-child) {
 	margin-bottom: 8px;
 }
 
-.file-creation input {
+.file-modal input {
 	background-color: var(--background-1);
 	box-shadow: none;
 }
@@ -1056,6 +1056,8 @@ hr {
 	background-color: var(--background-2);
 	color: var(--text-2);
 	overflow: hidden;
+	overflow-y: auto;
+	padding-bottom: 64px;
 	flex-grow: 1;
 }
 
@@ -1093,6 +1095,10 @@ hr {
 
 .input-group .status-icon {
 	margin-left: 8px;
+}
+
+.input-group .status-icon svg {
+	display: block;
 }
 
 .file-upload {

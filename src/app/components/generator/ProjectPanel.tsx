@@ -16,8 +16,9 @@ interface Props {
 	id: string,
 	onError: (message: string) => unknown,
 	onRename: (file: { type: string, id: string }) => unknown,
+	onCreate: () => unknown,
 }
-export function ProjectPanel({ onRename }: Props) {
+export function ProjectPanel({ onRename, onCreate }: Props) {
 	const { locale } = useLocale()
 	const { projects, project, changeProject, file, openFile, updateFile } = useProject()
 
@@ -81,6 +82,7 @@ export function ProjectPanel({ onRename }: Props) {
 			</BtnMenu>
 			<BtnMenu icon="kebab_horizontal" >
 				<Btn icon="file_zip" label={locale('project.download')} onClick={onDownload} />
+				<Btn icon="plus_circle" label={locale('project.new')} onClick={onCreate} />
 			</BtnMenu>
 		</div>
 		<div class="file-view">

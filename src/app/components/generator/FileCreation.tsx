@@ -2,9 +2,9 @@ import { DataModel } from '@mcschema/core'
 import { useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics'
 import { useLocale, useProject } from '../../contexts'
-import { useModal } from '../../hooks'
 import { Btn } from '../Btn'
 import { TextInput } from '../forms'
+import { Modal } from '../Modal'
 
 interface Props {
 	model: DataModel,
@@ -23,11 +23,9 @@ export function FileCreation({ model, id, method, onClose }: Props) {
 		onClose()
 	}
 
-	useModal(onClose)
-
-	return <div class="modal file-creation" onClick={e => e.stopPropagation()}>
+	return <Modal class="file-modal" onDismiss={onClose}>
 		<p>{locale('project.save_current_file')}</p>
 		<TextInput autofocus class="btn btn-input" value={fileId} onChange={setFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} />
 		<Btn icon="file" label={locale('project.save')} onClick={doSave} />
-	</div>
+	</Modal>
 }

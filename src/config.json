@@ -84,11 +84,6 @@
   ],
   "generators": [
     {
-      "id": "pack_mcmeta",
-      "url": "pack-mcmeta",
-      "schema": "pack_mcmeta"
-    },
-    {
       "id": "loot_table",
       "url": "loot-table",
       "path": "loot_tables",
@@ -129,6 +124,11 @@
       "url": "chat-type",
       "schema": "chat_type",
       "minVersion": "1.19"
+    },
+    {
+      "id": "pack_mcmeta",
+      "url": "pack-mcmeta",
+      "schema": "pack_mcmeta"
     },
     {
       "id": "dimension",

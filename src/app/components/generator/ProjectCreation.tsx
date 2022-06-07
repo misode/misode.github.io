@@ -1,4 +1,3 @@
-import { route } from 'preact-router'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '..'
 import config from '../../../config.json'
@@ -6,12 +5,13 @@ import type { Project } from '../../contexts'
 import { disectFilePath, useLocale, useProject } from '../../contexts'
 import type { VersionId } from '../../services'
 import { DEFAULT_VERSION, parseSource } from '../../services'
-import { readZip } from '../../Utils'
+import { message, readZip } from '../../Utils'
+import { Modal } from '../Modal'
 
 interface Props {
-	path?: string,
+	onClose: () => unknown,
 }
-export function NewProject({}: Props) {
+export function ProjectCreation({ onClose }: Props) {
 	const { locale } = useLocale()
 	const { projects, createProject, changeProject, updateProject } = useProject()
 
@@ -19,6 +19,7 @@ export function NewProject({}: Props) {
 	const [namespace, setNamespace] = useState('')
 	const [version, setVersion] = useState(DEFAULT_VERSION)
 	const [file, setFile] = useState<File | undefined>(undefined)
+	const [creating, setCreating] = useState(false)
 
 	const onUpload = (file: File) => {
 		if (file.type.match(/^application\/(x-)?zip(-compressed)?$/)) {
@@ -37,23 +38,30 @@ export function NewProject({}: Props) {
 	}, [updateProject])
 
 	const onCreate = () => {
+		setCreating(true)
 		createProject(name, namespace || undefined, version)
 		changeProject(name)
 		if (file) {
-			readZip(file).then((entries) => {
+			readZip(file).then(async (entries) => {
 				const project: Partial<Project> = { files: [] }
-				entries.forEach((entry) => {
+				await Promise.all(entries.map(async (entry) => {
 					const file = disectFilePath(entry[0])
 					if (file) {
-						const data = parseSource(entry[1], 'json')
-						project.files!.push({ ...file, data })
+						try {
+							const data = await parseSource(entry[1], 'json')
+							project.files!.push({ ...file, data })
+						} catch (e) {
+							console.error(`Failed parsing ${file.type} ${file.id}: ${message(e)}`)
+						}
 					}
-				})
+				}))
 				projectUpdater.current(project)
-				route('/project/')
+				onClose()
+			}).catch(() => {
+				onClose()
 			})
 		} else {
-			route('/project/')
+			onClose()
 		}
 	}
 
@@ -67,22 +75,22 @@ export function NewProject({}: Props) {
 
 	const versions = config.versions.map(v => v.id as VersionId).reverse()
 
-	return <div class="project">
-		<div class="project-creation">
-			<div class="input-group">
-				<TextInput class={`btn btn-input${invalidName || name.length === 0 ? ' invalid': ''}`} placeholder={locale('project.name')} value={name} onChange={setName} />
-				{invalidName && <div class="status-icon danger tooltipped tip-e" aria-label="There already exists a project with this name">{Octicon.issue_opened}</div>}
-			</div>
-			<div class="input-group">
-				<TextInput class={`btn btn-input${invalidNamespace ? ' invalid' : ''}`} placeholder={locale('project.namespace')} value={namespace} onChange={setNamespace} />
-			</div>
-			<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
-				{versions.map(v =>
-					<Btn label={v} active={v === version} onClick={() => setVersion(v)} />
-				)}
-			</BtnMenu>
-			<FileUpload value={file} onChange={onUpload} label={locale('choose_zip_file')} accept=".zip"/>
-			<Btn icon="rocket" label="Create!" disabled={invalidName || name.length === 0 || invalidNamespace} onClick={onCreate} />
+	return <Modal class="project-creation" onDismiss={onClose}>
+		<p>{locale('project.create')}</p>
+		<div class="input-group">
+			<TextInput autofocus class={`btn btn-input${!creating && (invalidName || name.length === 0) ? ' invalid': ''}`} placeholder={locale('project.name')} value={name} onChange={setName} />
+			{!creating && invalidName && <div class="status-icon danger tooltipped tip-e" aria-label={locale('project.name.already_exists')}>{Octicon.issue_opened}</div>}
 		</div>
-	</div>
+		<div class="input-group">
+			<TextInput class={`btn btn-input${!creating && invalidNamespace ? ' invalid' : ''}`} placeholder={locale('project.namespace')} value={namespace} onChange={setNamespace} />
+			{!creating && invalidNamespace && <div class="status-icon danger tooltipped tip-e" aria-label={locale('project.namespace.invalid')}>{Octicon.issue_opened}</div>}
+		</div>
+		<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
+			{versions.map(v =>
+				<Btn label={v} active={v === version} onClick={() => setVersion(v)} />
+			)}
+		</BtnMenu>
+		<FileUpload value={file} onChange={onUpload} label={locale('choose_zip_file')} accept=".zip"/>
+		<Btn icon="rocket" label="Create!" disabled={creating || invalidName || name.length === 0 || invalidNamespace} onClick={onCreate} />
+	</Modal>
 }
