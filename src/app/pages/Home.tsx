@@ -1,5 +1,5 @@
 import config from '../../config.json'
-import { Giscus, ToolCard } from '../components'
+import { Footer, Giscus, ToolCard } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
@@ -37,6 +37,7 @@ export function Home({}: Props) {
 			<ToolCard title="Minecraft Versions" link="/versions/" />
 			<ToolCard title="Data Pack Guides" link="/guides/" />
 			<Giscus />
+			<Footer />
 		</div>
 	</main>
 }

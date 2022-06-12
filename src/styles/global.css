@@ -12,6 +12,9 @@
 	--accent-success: #3eb84f;
 	--accent-warning: #b8893e;
 	--accent-danger: #cf4945;
+	--accent-donate: #db61a2;
+	--accent-site-1: #307328;
+	--accent-site-2: #296422;
 	--accent-sounds-1: #451475;
 	--accent-sounds-2: #39155e;
 	--accent-sounds-3: #6a08a3;
@@ -46,6 +49,9 @@
 	--accent-success: #1a7f37;
 	--accent-warning: #a36f1c;
 	--accent-danger: #bd2f2a;
+	--accent-donate: #bf3989;
+	--accent-site-1: #2da44e;
+	--accent-site-2: #2c974b;
 	--accent-sounds-1: #b481e7;
 	--accent-sounds-2: #c18df5;
 	--accent-sounds-3: #af72d3;
@@ -80,7 +86,10 @@
 		--accent-primary: #088cdb;
 		--accent-success: #1a7f37;
 		--accent-warning: #a36f1c;
-	--accent-danger: #bd2f2a;
+		--accent-danger: #bd2f2a;
+		--accent-donate: #bf3989;
+		--accent-site-1: #2da44e;
+		--accent-site-2: #2c974b;
 		--accent-sounds-1: #b481e7;
 		--accent-sounds-2: #c18df5;
 		--accent-sounds-3: #af72d3;
@@ -231,6 +240,44 @@ header .btn-menu > .btn {
 
 header .btn-menu > .btn:hover {
 	fill: var(--nav-hover);
+}
+
+footer {
+	display: flex;
+	align-items: flex-end;
+	flex-wrap: wrap;
+	padding: 50px 30px;
+	color: var(--text-3);
+}
+
+footer > * {
+	margin-bottom: 10px;
+}
+
+footer > *:not(:last-child) {
+	margin-right: 30px;
+}
+
+footer p {
+	display: flex;
+	align-items: center;
+}
+
+footer a {
+	color: var(--text-3);
+}
+
+footer a:hover {
+	color: var(--text-1);
+}
+
+footer svg {
+	fill: var(--text-3);
+	margin-right: 8px;
+}
+
+footer .donate svg {
+	fill: var(--accent-donate);
 }
 
 main {
@@ -642,6 +689,38 @@ main.has-project {
 	max-height: 240px;
 	border-bottom-left-radius: 6px;
 	border-bottom-right-radius: 6px;
+}
+
+.version-switcher > .btn {
+	background-color: var(--accent-site-1);
+	font-weight: bold;
+}
+
+.version-switcher > .btn::after {
+	font-weight: normal;
+}
+
+.version-switcher > .btn:hover {
+	background-color: var(--accent-site-2);
+}
+
+.version-switcher.attention > .btn {
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+	animation: outline-grow 2s ease-out 1s 4 forwards;
+}
+
+@keyframes outline-grow {
+	0% {
+		outline-offset: -2px;
+		outline-width: 2px;
+		outline-color: var(--accent-site-1);
+	}
+	50%, 100% {
+		outline-offset: 10px;
+		outline-width: 0px;
+		outline-color: transparent;
+	}
 }
 
 .popup-actions {

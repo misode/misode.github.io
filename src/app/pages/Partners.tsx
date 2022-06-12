@@ -1,5 +1,5 @@
 import config from '../../config.json'
-import { ToolCard } from '../components'
+import { Footer, ToolCard } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
@@ -23,5 +23,6 @@ export function Partners({}: Props) {
 				)}
 			</ToolCard>)}
 		</div>
+		<Footer donate={false} />
 	</main>
 }

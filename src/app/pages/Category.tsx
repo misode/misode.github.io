@@ -1,5 +1,5 @@
 import config from '../../config.json'
-import { ToolCard } from '../components'
+import { Footer, ToolCard } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { cleanUrl } from '../Utils'
 
@@ -16,5 +16,6 @@ export function Category({ category }: Props) {
 				<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 			)}
 		</div>
+		<Footer donate={false} />
 	</main>
 }

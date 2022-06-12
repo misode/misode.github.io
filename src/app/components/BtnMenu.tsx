@@ -15,7 +15,7 @@ export function BtnMenu(props: BtnMenuProps) {
 	const { icon, label, relative, tooltip, tooltipLoc, children } = props
 	const [active, setActive] = useFocus()
 
-	return <div class={`btn-menu${relative === false ? ' no-relative' : ''}`} {...props}>
+	return <div {...props} class={`btn-menu${relative === false ? ' no-relative' : ''} ${props.class}`}>
 		<Btn {...{icon, label, tooltip, tooltipLoc}} onClick={() => setActive()} />
 		{active && <div class="btn-group">
 			{children}

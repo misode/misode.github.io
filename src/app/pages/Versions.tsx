@@ -1,4 +1,4 @@
-import { Ad, BtnLink, ErrorPanel, VersionDetail, VersionList } from '../components'
+import { Ad, BtnLink, ErrorPanel, Footer, VersionDetail, VersionList } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { useAsync, useSearchParam } from '../hooks'
 import type { VersionMeta } from '../services'
@@ -39,6 +39,7 @@ export function Versions({}: Props) {
 				<VersionDetail id={selectedId} version={selected} />
 			</> : <VersionList versions={versions ?? []} link={id => `/versions/?id=${id}`} />}
 		</div>
+		<Footer donate={false} />
 	</main>
 }
 

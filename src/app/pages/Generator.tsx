@@ -3,7 +3,7 @@ import { getCurrentUrl, route } from 'preact-router'
 import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../components'
 import { DRAFT_PROJECT, useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
@@ -324,11 +324,7 @@ export function Generator({}: Props) {
 				<BtnMenu icon="archive" label={locale('presets')} relative={false}>
 					<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 				</BtnMenu>
-				<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
-					{allowedVersions.map(v =>
-						<Btn label={v} active={v === version} onClick={() => selectVersion(v)} />
-					)}
-				</BtnMenu>
+				<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
 				<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
 					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
 					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
@@ -339,6 +335,7 @@ export function Generator({}: Props) {
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 			<Tree {...{model, version, blockStates}} onError={setError} />
+			<Footer donate={!gen.partner} />
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
