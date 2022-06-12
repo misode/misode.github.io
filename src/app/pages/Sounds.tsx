@@ -1,10 +1,8 @@
 import type { Howl, HowlOptions } from 'howler'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import config from '../../config.json'
-import { Btn, BtnMenu, ErrorPanel, Footer, SoundConfig, TextInput } from '../components'
+import { Btn, ErrorPanel, Footer, SoundConfig, TextInput, VersionSwitcher } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import { useAsync } from '../hooks'
-import type { VersionId } from '../services'
 import { fetchSounds } from '../services'
 import { hexId } from '../Utils'
 
@@ -71,11 +69,7 @@ export function Sounds({}: Props) {
 				{configs.length > 1 && <Btn icon="play" label={ locale('sounds.play_all')} class="play-all-sounds" onClick={playAll} />}
 				<div class="spacer"></div>
 				<Btn icon="download" label={locale('download')} tooltip={locale('sounds.download_function')} tooltipLoc="se" class="download-sounds" onClick={downloadFunction} />
-				<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')}>
-					{config.versions.slice().reverse().map(v =>
-						<Btn label={v.id} active={v.id === version} onClick={() => changeVersion(v.id as VersionId)} />
-					)}
-				</BtnMenu>
+				<VersionSwitcher value={version} onChange={changeVersion} />
 			</div>
 			<div class="sounds">
 				{sounds && howler && configs.map(c =>

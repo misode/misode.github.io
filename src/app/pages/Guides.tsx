@@ -1,9 +1,7 @@
 import { useMemo, useState } from 'preact/hooks'
-import config from '../../config.json'
-import { Btn, BtnMenu, ChangelogTag, Footer, GuideCard, TextInput } from '../components'
+import { ChangelogTag, Footer, GuideCard, TextInput, VersionSwitcher } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import { useTags } from '../hooks/useTags'
-import type { VersionId } from '../services'
 
 interface Guide {
 	id: string,
@@ -54,12 +52,7 @@ export function Guides({}: Props) {
 		<div class="guides">
 			<div class="changelog-query">
 				<TextInput class="btn btn-input changelog-search" placeholder={locale('guides.search')} value={search} onChange={setSearch} />
-				<BtnMenu icon="tag" label={versionFilter ? version : locale('any_version')} tooltip={locale('switch_version')}>
-					<Btn label={locale('any_version')} active={!versionFilter} onClick={() => setVersionFiler(!versionFilter)} />
-					{config.versions.slice().reverse().map(v =>
-						<Btn label={v.id} active={versionFilter && v.id === version} onClick={() => {changeVersion(v.id as VersionId); setVersionFiler(true)}} />
-					)}
-				</BtnMenu>
+				<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
 			</div>
 			{activeTags.length > 0 && <div class="changelog-tags">
 				{activeTags.map(tag => <ChangelogTag label={tag} onClick={() => toggleTag(tag)} />)}

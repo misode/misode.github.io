@@ -25,7 +25,7 @@ export function useVersion() {
 }
 
 export function VersionProvider({ children }: { children: ComponentChildren }) {
-	const [version, setVersion] = useState<VersionId>(Store.getVersion())
+	const [version, setVersion] = useState<VersionId>(Store.getVersionOrDefault())
 
 	const [targetVersion, changeTargetVersion] = useSearchParam(VERSION_PARAM)
 
@@ -49,6 +49,7 @@ export function VersionProvider({ children }: { children: ComponentChildren }) {
 
 	useEffect(() => {
 		Analytics.setVersion(version)
+		Analytics.setSelectedVersion(Store.getVersion() ?? 'default')
 	}, [])
 
 	const value: Version = {

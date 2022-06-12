@@ -654,6 +654,32 @@ main.has-preview {
 	border-bottom-right-radius: 6px;
 }
 
+.version-switcher > .btn {
+	background-color: #307328;
+}
+
+.version-switcher > .btn:hover {
+	background-color: #296422;
+}
+
+.version-switcher.attention > .btn {
+	outline: 2px solid transparent;
+	animation: outline-grow 2s ease-out 1s 4 forwards;
+}
+
+@keyframes outline-grow {
+	0% {
+		outline-offset: 0px;
+		outline-width: 2px;
+		outline-color: #307328;
+	}
+	50%, 100% {
+		outline-offset: 10px;
+		outline-width: 0px;
+		outline-color: transparent;
+	}
+}
+
 .popup-actions {
 	display: flex;
 	position: fixed;

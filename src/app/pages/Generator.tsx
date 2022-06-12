@@ -3,7 +3,7 @@ import { getCurrentUrl, route } from 'preact-router'
 import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, Footer, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
+import { Ad, Btn, BtnMenu, ErrorPanel, Footer, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../components'
 import { useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
@@ -363,11 +363,7 @@ export function Generator({}: Props) {
 					<BtnMenu icon="archive" label={locale('presets')} relative={false}>
 						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 					</BtnMenu>
-					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
-						{allowedVersions.map(v =>
-							<Btn label={v} active={v === version} onClick={() => selectVersion(v)} />
-						)}
-					</BtnMenu>
+					<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
 					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
 						<Btn icon="history" label={locale('reset')} onClick={reset} />
 						<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />

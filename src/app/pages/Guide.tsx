@@ -4,7 +4,7 @@ import { marked } from 'marked'
 import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
-import { Ad, Btn, BtnMenu, ChangelogTag, Footer, Giscus, Octicon } from '../components'
+import { Ad, Btn, ChangelogTag, Footer, Giscus, Octicon, VersionSwitcher } from '../components'
 import { useLocale, useTitle, useVersion } from '../contexts'
 import { useActiveTimeout, useAsync, useHash } from '../hooks'
 import type { VersionId } from '../services'
@@ -50,7 +50,7 @@ export function Guide({ id }: Props) {
 
 	const allowedVersions = useMemo(() => {
 		const orderedVersions = config.versions.map(v => v.id)
-		return (frontMatter?.versions as string[])
+		return (frontMatter?.versions as VersionId[])
 			?.sort((a, b) => orderedVersions.indexOf(b) - orderedVersions.indexOf(a))
 	}, [frontMatter?.versions])
 
@@ -179,10 +179,7 @@ export function Guide({ id }: Props) {
 					{locale('guides.all')}
 				</a>
 				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')} class="guide-share" />
-				{allowedVersions && <BtnMenu icon="tag" label={guideVersion} tooltip={locale('switch_version')}>
-					{allowedVersions.map((v: string) => 
-						<Btn label={v} active={v === guideVersion} onClick={() => changeVersion(v as VersionId)} />)}
-				</BtnMenu>}
+				{allowedVersions && <VersionSwitcher value={guideVersion} allowed={allowedVersions} onChange={changeVersion} />}
 			</div>
 			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="guide-tags">
 				{frontMatter.tags.map((tag: string) =>

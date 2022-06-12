@@ -22,12 +22,20 @@ export namespace Store {
 		return localStorage.getItem(ID_THEME) ?? 'dark'
 	}
 
-	export function getVersion(): VersionId {
+	export function getVersionOrDefault(): VersionId {
 		const version = localStorage.getItem(ID_VERSION)
 		if (version && VersionIds.includes(version as VersionId)) {
 			return version as VersionId
 		}
 		return '1.19'
+	}
+
+	export function getVersion(): VersionId | null {
+		const version = localStorage.getItem(ID_VERSION)
+		if (version && VersionIds.includes(version as VersionId)) {
+			return version as VersionId
+		}
+		return null
 	}
 
 	export function getIndent() {

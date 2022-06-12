@@ -76,6 +76,12 @@ export namespace Analytics {
 		})
 	}
 
+	export function setSelectedVersion(selected_version: string) {
+		gtag('set', {
+			selected_version,
+		})
+	}
+
 	export function changeVersion(prev_version: string, version: string) {
 		setVersion(version)
 		event(ID_GENERATOR, 'set-version', version)
