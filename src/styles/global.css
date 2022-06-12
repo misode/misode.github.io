@@ -700,7 +700,7 @@ main.has-project {
 	font-weight: normal;
 }
 
-.version-switcher > .btn:hover {
+.version-switcher > .btn:not(.btn-input):not(.disabled):hover {
 	background-color: var(--accent-site-2);
 }
 
