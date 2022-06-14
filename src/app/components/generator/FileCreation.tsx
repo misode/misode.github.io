@@ -15,7 +15,7 @@ interface Props {
 export function FileCreation({ model, id, method, onClose }: Props) {
 	const { locale } = useLocale()
 	const { projects, project, updateFile } = useProject()
-	const [fileId, setFileId] = useState('')
+	const [fileId, setFileId] = useState(id === 'pack_mcmeta' ? 'pack' : '')
 
 	const doSave = () => {
 		Analytics.saveProjectFile(id, projects.length, project.files.length, method as any)
@@ -25,7 +25,7 @@ export function FileCreation({ model, id, method, onClose }: Props) {
 
 	return <Modal class="file-modal" onDismiss={onClose}>
 		<p>{locale('project.save_current_file')}</p>
-		<TextInput autofocus class="btn btn-input" value={fileId} onChange={setFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} />
+		<TextInput autofocus={id !== 'pack_mcmeta'} class="btn btn-input" value={fileId} onChange={setFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} readOnly={id === 'pack_mcmeta'} />
 		<Btn icon="file" label={locale('project.save')} onClick={doSave} />
 	</Modal>
 }

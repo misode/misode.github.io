@@ -101,7 +101,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		if (!edits.id) { // remove
 			updateProject({ files: project.files.filter(f => f.type !== type || f.id !== id) })
 		} else {
-			const newId = edits.id.includes(':') ? edits.id : `${project.namespace ?? 'minecraft'}:${edits.id}`
+			const newId = type === 'pack_mcmeta' ? 'pack' : edits.id.includes(':') ? edits.id : `${project.namespace ?? 'minecraft'}:${edits.id}`
 			const exists = project.files.some(f => f.type === type && f.id === newId)
 			if (!id) { // create
 				if (exists) return false

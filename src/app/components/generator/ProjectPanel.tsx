@@ -33,7 +33,7 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 	}, [])
 
 	const disectEntry = useCallback((entry: string) => {
-		if (treeViewMode === 'resources') {
+		if (treeViewMode === 'resources' && entry !== 'pack.mcmeta') {
 			const [type, id] = entry.split('/')
 			return {
 				type: type.replaceAll('\u2215', '/'),
@@ -46,6 +46,7 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 	const entries = useMemo(() => project.files.flatMap(f => {
 		const path = getFilePath(f)
 		if (!path) return []
+		if (f.type === 'pack_mcmeta') return 'pack.mcmeta'
 		if (treeViewMode === 'resources') {
 			return [`${f.type.replaceAll('/', '\u2215')}/${f.id.replaceAll('/', '\u2215')}`]
 		}
