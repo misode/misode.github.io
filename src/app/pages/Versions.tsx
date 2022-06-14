@@ -1,4 +1,4 @@
-import { Ad, ErrorPanel, Footer, Octicon, VersionDetail, VersionList } from '../components'
+import { Ad, BtnLink, ErrorPanel, Footer, VersionDetail, VersionList } from '../components'
 import { useLocale, useTitle } from '../contexts'
 import { useAsync, useSearchParam } from '../hooks'
 import type { VersionMeta } from '../services'
@@ -29,19 +29,12 @@ export function Versions({}: Props) {
 		{error && <ErrorPanel error={error} />}
 		<div class="versions">
 			{selectedId ? <>
-				<div class="navigation">
-					<a class="btn btn-link" href="/versions/">
-						{Octicon.three_bars}
-						{locale('versions.all')}
-					</a>
-					<a class="btn btn-link" {...previousVersion ? {href: `/versions/?id=${previousVersion.id}`} : {disabled: true}}>
-						{Octicon.arrow_left}
-						{locale('versions.previous')}
-					</a>
-					<a class="btn btn-link" {...nextVersion ? {href: `/versions/?id=${nextVersion.id}`} : {disabled: true}}>
-						{locale('versions.next')}
-						{Octicon.arrow_right}
-					</a>
+				<div class="version-navigation">
+					<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
+					<BtnLink link={previousVersion ? `/versions/?id=${previousVersion.id}` : undefined}
+						icon="arrow_left" label={locale('versions.previous')} />
+					<BtnLink link={nextVersion ? `/versions/?id=${nextVersion.id}` : undefined} 
+						icon="arrow_right" label={locale('versions.next')} swapped />
 				</div>
 				<VersionDetail id={selectedId} version={selected} />
 			</> : <VersionList versions={versions ?? []} link={id => `/versions/?id=${id}`} />}

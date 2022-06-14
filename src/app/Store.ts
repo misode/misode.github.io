@@ -13,6 +13,8 @@ export namespace Store {
 	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
 	export const ID_PROJECTS = 'misode_projects'
 	export const ID_BACKUPS = 'misode_generator_backups'
+	export const ID_OPEN_PROJECT = 'misode_open_project'
+	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
 
 	export function getLanguage() {
 		return localStorage.getItem(ID_LANGUAGE) ?? 'en'
@@ -67,6 +69,14 @@ export namespace Store {
 		return backups[id]
 	}
 
+	export function getOpenProject() {
+		return localStorage.getItem(ID_OPEN_PROJECT) ?? DRAFT_PROJECT.name
+	}
+
+	export function getTreeViewMode() {
+		return localStorage.getItem(ID_TREE_VIEW_MODE) ?? 'resources'
+	}
+
 	export function setLanguage(language: string | undefined) {
 		if (language) localStorage.setItem(ID_LANGUAGE, language)
 	}
@@ -107,5 +117,17 @@ export namespace Store {
 			backups[id] = data
 		}
 		localStorage.setItem(ID_BACKUPS, JSON.stringify(backups))
+	}
+
+	export function setOpenProject(projectName: string | undefined) {
+		if (projectName === undefined) {
+			localStorage.removeItem(ID_OPEN_PROJECT)
+		} else {
+			localStorage.setItem(ID_OPEN_PROJECT, projectName)
+		}
+	}
+
+	export function setTreeViewMode(mode: string | undefined) {
+		if (mode) localStorage.setItem(ID_TREE_VIEW_MODE, mode)
 	}
 }

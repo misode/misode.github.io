@@ -126,6 +126,11 @@
       "minVersion": "1.19"
     },
     {
+      "id": "pack_mcmeta",
+      "url": "pack-mcmeta",
+      "schema": "pack_mcmeta"
+    },
+    {
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",

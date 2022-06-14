@@ -9,7 +9,7 @@ import { cleanUrl } from '../Utils'
 
 export type Project = {
 	name: string,
-	namespace: string,
+	namespace?: string,
 	version?: VersionId,
 	files: ProjectFile[],
 }
@@ -25,10 +25,19 @@ export type ProjectFile = {
 	data: any,
 }
 
+export const FilePatterns = [
+	'worldgen/[a-z_]+',
+	'tags/worldgen/[a-z_]+',
+	'tags/[a-z_]+',
+	'[a-z_]+',
+].map(e => RegExp(`^data/([a-z0-9._-]+)/(${e})/([a-z0-9/._-]+)$`))
+
 interface ProjectContext {
 	projects: Project[],
 	project: Project,
 	file?: ProjectFile,
+	createProject: (name: string, namespace?: string, version?: VersionId) => unknown,
+	deleteProject: (name: string) => unknown,
 	changeProject: (name: string) => unknown,
 	updateProject: (project: Partial<Project>) => unknown,
 	updateFile: (type: string, id: string | undefined, file: Partial<ProjectFile>) => boolean,
@@ -38,6 +47,8 @@ interface ProjectContext {
 const Project = createContext<ProjectContext>({
 	projects: [DRAFT_PROJECT],
 	project: DRAFT_PROJECT,
+	createProject: () => {},
+	deleteProject: () => {},
 	changeProject: () => {},
 	updateProject: () => {},
 	updateFile: () => false,
@@ -52,7 +63,7 @@ export function useProject() {
 export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const [projects, setProjects] = useState<Project[]>(Store.getProjects())
 
-	const [projectName, setProjectName] = useState<string>(DRAFT_PROJECT.name)
+	const [projectName, setProjectName] = useState<string>(Store.getOpenProject())
 	const project = useMemo(() => {
 		return projects.find(p => p.name === projectName) ?? DRAFT_PROJECT
 	}, [projects, projectName])
@@ -68,6 +79,20 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		setProjects(projects)
 	}, [])
 
+	const createProject = useCallback((name: string, namespace?: string, version?: VersionId) => {
+		changeProjects([...projects, { name, namespace, version, files: [] }])
+	}, [projects])
+
+	const deleteProject = useCallback((name: string) => {
+		if (name === DRAFT_PROJECT.name) return
+		changeProjects(projects.filter(p => p.name !== name))
+	}, [projects])
+
+	const changeProject = useCallback((name: string) => {
+		Store.setOpenProject(name)
+		setProjectName(name)
+	}, [])
+
 	const updateProject = useCallback((edits: Partial<Project>) => {
 		changeProjects(projects.map(p => p.name === projectName ?	{ ...p, ...edits } : p))
 	}, [projects, projectName])
@@ -76,7 +101,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		if (!edits.id) { // remove
 			updateProject({ files: project.files.filter(f => f.type !== type || f.id !== id) })
 		} else {
-			const newId = edits.id.includes(':') ? edits.id : `${project.namespace}:${edits.id}`
+			const newId = edits.id.includes(':') ? edits.id : `${project.namespace ?? 'minecraft'}:${edits.id}`
 			const exists = project.files.some(f => f.type === type && f.id === newId)
 			if (!id) { // create
 				if (exists) return false
@@ -110,7 +135,9 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		projects,
 		project,
 		file,
-		changeProject: setProjectName,
+		createProject,
+		changeProject,
+		deleteProject,
 		updateProject,
 		updateFile,
 		openFile,
@@ -122,15 +149,34 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	</Project.Provider>
 }
 
-export function getFilePath(file: ProjectFile) {
+export function getFilePath(file: { id: string, type: string }) {
 	const [namespace, id] = file.id.includes(':') ? file.id.split(':') : ['minecraft', file.id]
 	if (file.type === 'pack_mcmeta') {
-		return 'pack.mcmeta'
+		if (file.id === 'pack') return 'pack.mcmeta'
+		return undefined
 	}
 	const gen = config.generators.find(g => g.id === file.type)
 	if (!gen) {
-		console.error(`Cannot find generator of type ${file.type}`)
 		return undefined
 	}
-	return `data/${namespace}/${gen.path ?? gen.id}/${id}`
+	return `data/${namespace}/${gen.path ?? gen.id}/${id}.json`
+}
+
+export function disectFilePath(path: string) {
+	if (path === 'pack.mcmeta') {
+		return { type: 'pack_mcmeta', id: 'pack' }
+	}
+	for (const p of FilePatterns) {
+		const match = path.match(p)
+		if (!match) continue
+		const gen = config.generators.find(g => (g.path ?? g.id) === match[2])
+		if (!gen) continue
+		const namespace = match[1]
+		const name = match[3].replace(/\.[a-z]+$/, '')
+		return {
+			type: gen.id,
+			id: `${namespace}:${name}`,
+		}
+	}
+	return undefined
 }
