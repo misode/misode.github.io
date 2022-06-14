@@ -13,6 +13,7 @@ export namespace Store {
 	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
 	export const ID_PROJECTS = 'misode_projects'
 	export const ID_BACKUPS = 'misode_generator_backups'
+	export const ID_PROJECT_PANEL_OPEN = 'misode_project_panel_open'
 	export const ID_OPEN_PROJECT = 'misode_open_project'
 	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
 
@@ -69,6 +70,12 @@ export namespace Store {
 		return backups[id]
 	}
 
+	export function getProjectPanelOpen(): boolean | undefined {
+		const open = localStorage.getItem(ID_PROJECT_PANEL_OPEN)
+		if (open === null) return undefined
+		return JSON.parse(open)
+	}
+
 	export function getOpenProject() {
 		return localStorage.getItem(ID_OPEN_PROJECT) ?? DRAFT_PROJECT.name
 	}
@@ -117,6 +124,14 @@ export namespace Store {
 			backups[id] = data
 		}
 		localStorage.setItem(ID_BACKUPS, JSON.stringify(backups))
+	}
+
+	export function setProjectPanelOpen(open: boolean | undefined) {
+		if (open === undefined) {
+			localStorage.removeItem(ID_PROJECT_PANEL_OPEN)
+		} else {
+			localStorage.setItem(ID_PROJECT_PANEL_OPEN, JSON.stringify(open))
+		}
 	}
 
 	export function setOpenProject(projectName: string | undefined) {

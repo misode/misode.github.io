@@ -1,6 +1,6 @@
 import { DataModel, Path } from '@mcschema/core'
 import { getCurrentUrl, route } from 'preact-router'
-import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
+import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../components'
@@ -302,20 +302,21 @@ export function Generator({}: Props) {
 		}
 	}
 
-	const [projectShown, setProjectShown] = useState(window.innerWidth > 600)
-	const [projectCreating, setProjectCreating] = useState(false)
-	const [projectDeleting, setprojectDeleting] = useState(false)
-	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
-	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
-
-	const toggleProject = () => {
+	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? window.innerWidth > 600)
+	const toggleProjectShown = useCallback(() => {
 		if (projectShown) {
 			Analytics.hideProject(gen.id, projects.length, project.files.length, 'menu')
 		} else {
 			Analytics.showProject(gen.id, projects.length, project.files.length, 'menu')
 		}
+		Store.setProjectPanelOpen(!projectShown)
 		setProjectShown(!projectShown)
-	}
+	}, [projectShown])
+
+	const [projectCreating, setProjectCreating] = useState(false)
+	const [projectDeleting, setprojectDeleting] = useState(false)
+	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
+	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
 
 	return <>
 		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
@@ -366,7 +367,7 @@ export function Generator({}: Props) {
 			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
 		</div>
 		<div class="popup-actions left-actions" style="--offset: 50px;">
-			<div class={'popup-action action-project shown tooltipped tip-ne'} aria-label={locale(projectShown ? 'hide_project' : 'show_project')} onClick={toggleProject}>
+			<div class={'popup-action action-project shown tooltipped tip-ne'} aria-label={locale(projectShown ? 'hide_project' : 'show_project')} onClick={toggleProjectShown}>
 				{projectShown ? Octicon.chevron_left : Octicon.repo}
 			</div>
 		</div>
