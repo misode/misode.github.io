@@ -3,7 +3,7 @@ import { getCurrentUrl, route } from 'preact-router'
 import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../config.json'
 import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../components'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../components'
 import { DRAFT_PROJECT, useLocale, useProject, useTitle, useVersion } from '../contexts'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
 import { getOutput } from '../schema/transformOutput'
@@ -304,6 +304,7 @@ export function Generator({}: Props) {
 
 	const [projectShown, setProjectShown] = useState(window.innerWidth > 600)
 	const [projectCreating, setProjectCreating] = useState(false)
+	const [projectDeleting, setprojectDeleting] = useState(false)
 	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
 	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
 
@@ -370,9 +371,10 @@ export function Generator({}: Props) {
 			</div>
 		</div>
 		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
-			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onRename={setFileRenaming} onCreate={() => setProjectCreating(true)} />
+			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onDeleteProject={() => setprojectDeleting(true)} onRename={setFileRenaming} onCreate={() => setProjectCreating(true)} />
 		</div>
 		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
+		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
 		{model && fileSaving && <FileCreation id={gen.id} model={model} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
 		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
 	</>

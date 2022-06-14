@@ -104,6 +104,12 @@ export namespace Analytics {
 		})
 	}
 
+	export function setTreeViewMode(tree_view_mode: string) {
+		gtag('set', {
+			tree_view_mode,
+		})
+	}
+
 	export function resetGenerator(file_type: string, history: number, method: Method) {
 		event(ID_GENERATOR, 'reset')
 		gtag('event', 'reset_generator', {
@@ -257,6 +263,15 @@ export namespace Analytics {
 		event(ID_GENERATOR, 'rename-project-file', legacyMethod(method))
 		gtag('event', 'rename_project_file', {
 			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function deleteProject(projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'delete-project', legacyMethod(method))
+		gtag('event', 'delete_project', {
 			projects_count,
 			project_size,
 			method,

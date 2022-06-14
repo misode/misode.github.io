@@ -12,6 +12,7 @@
 			version: localStorage.getItem('schema_version') || '1.19',
 			locale: localStorage.getItem('language') || 'en',
 			prefers_color_scheme: matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none',
+			tree_view_mode: localStorage.getItem('misode_tree_view_mode') || 'default',
 		});
 	</script>
 	<script>

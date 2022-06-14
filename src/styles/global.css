@@ -25,6 +25,7 @@
 	--nav-faded-hover: #6e6e6e;
 	--selection: #445a9599;
 	--errors-background: #62190f;
+	--errors-background-hover: #57140b;
 	--errors-text: #ffffffcc;
   --invalid-text: #fd7951;
 	--text-saturation: 60%;
@@ -330,7 +331,6 @@ main > .controls {
 .project-controls {
 	margin: 8px;
 	display: flex;
-	justify-content: space-between;
 	z-index: 2;
 }
 
@@ -338,6 +338,7 @@ main > .controls {
 	max-width: calc(200px - 62px);
 	max-width: calc(max(200px, 20vw) - 62px);
 	text-overflow: ellipsis;
+	margin-right: auto;
 }
 
 .status-icon.active {
@@ -680,6 +681,14 @@ main.has-project {
 	height: 100%;
 }
 
+.btn.danger {
+	background-color: var(--errors-background);
+}
+
+.btn.danger:not(.btn-input):not(.disabled):hover {
+	background-color: var(--errors-background-hover);
+}
+
 .btn-menu .result-list {
 	display: block;
 	width: 380px;
@@ -721,6 +730,15 @@ main.has-project {
 		outline-width: 0px;
 		outline-color: transparent;
 	}
+}
+
+.button-group {
+	display: flex;
+	justify-content: flex-start;
+}
+
+.button-group > *:not(:last-child) {
+	margin-right: 8px;
 }
 
 .popup-actions {

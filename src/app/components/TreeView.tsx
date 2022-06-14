@@ -85,7 +85,7 @@ function TreeViewEntry({ icon, label, active, onClick, actions, error }: TreeVie
 
 	return <div class={`entry${error ? ' has-error' : ''}${active ? ' active' : ''}${focused ? ' focused' : ''}`} onClick={onClick} onContextMenu={onContextMenu} >
 		{Octicon[icon]}
-		<span>{label}</span>
+		<span>{label.replaceAll('\u2215', '/')}</span>
 		{typeof error === 'string' && <div class="status-icon danger tooltipped tip-se" aria-label={error}>
 			{Octicon.issue_opened}	
 		</div>}

@@ -37,6 +37,7 @@ interface ProjectContext {
 	project: Project,
 	file?: ProjectFile,
 	createProject: (name: string, namespace?: string, version?: VersionId) => unknown,
+	deleteProject: (name: string) => unknown,
 	changeProject: (name: string) => unknown,
 	updateProject: (project: Partial<Project>) => unknown,
 	updateFile: (type: string, id: string | undefined, file: Partial<ProjectFile>) => boolean,
@@ -47,6 +48,7 @@ const Project = createContext<ProjectContext>({
 	projects: [DRAFT_PROJECT],
 	project: DRAFT_PROJECT,
 	createProject: () => {},
+	deleteProject: () => {},
 	changeProject: () => {},
 	updateProject: () => {},
 	updateFile: () => false,
@@ -61,7 +63,7 @@ export function useProject() {
 export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const [projects, setProjects] = useState<Project[]>(Store.getProjects())
 
-	const [projectName, setProjectName] = useState<string>(DRAFT_PROJECT.name)
+	const [projectName, setProjectName] = useState<string>(Store.getOpenProject())
 	const project = useMemo(() => {
 		return projects.find(p => p.name === projectName) ?? DRAFT_PROJECT
 	}, [projects, projectName])
@@ -80,6 +82,16 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const createProject = useCallback((name: string, namespace?: string, version?: VersionId) => {
 		changeProjects([...projects, { name, namespace, version, files: [] }])
 	}, [projects])
+
+	const deleteProject = useCallback((name: string) => {
+		if (name === DRAFT_PROJECT.name) return
+		changeProjects(projects.filter(p => p.name !== name))
+	}, [projects])
+
+	const changeProject = useCallback((name: string) => {
+		Store.setOpenProject(name)
+		setProjectName(name)
+	}, [])
 
 	const updateProject = useCallback((edits: Partial<Project>) => {
 		changeProjects(projects.map(p => p.name === projectName ?	{ ...p, ...edits } : p))
@@ -124,7 +136,8 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		project,
 		file,
 		createProject,
-		changeProject: setProjectName,
+		changeProject,
+		deleteProject,
 		updateProject,
 		updateFile,
 		openFile,
