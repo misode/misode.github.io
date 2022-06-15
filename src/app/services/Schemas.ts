@@ -1,9 +1,9 @@
 import type { CollectionRegistry, INode, SchemaRegistry } from '@mcschema/core'
 import { ChoiceNode, DataModel, Reference, StringNode } from '@mcschema/core'
-import config from '../../config.json'
-import { initPartners } from '../partners'
-import { message } from '../Utils'
-import { fetchData } from './DataFetcher'
+import config from '../Config.js'
+import { initPartners } from '../partners/index.js'
+import { message } from '../Utils.js'
+import { fetchData } from './DataFetcher.js'
 
 export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19'] as const
 export type VersionId = typeof VersionIds[number]

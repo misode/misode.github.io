@@ -2,10 +2,10 @@ import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { route } from 'preact-router'
 import { useCallback, useContext, useMemo, useState } from 'preact/hooks'
-import config from '../../config.json'
-import type { VersionId } from '../services'
-import { Store } from '../Store'
-import { cleanUrl } from '../Utils'
+import config from '../Config.js'
+import type { VersionId } from '../services/index.js'
+import { Store } from '../Store.js'
+import { cleanUrl } from '../Utils.js'
 
 export type Project = {
 	name: string,

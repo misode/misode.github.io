@@ -1,8 +1,8 @@
 import { DataModel } from '@mcschema/core'
 import * as deepslate19 from 'deepslate/worldgen'
-import type { VersionId } from '../services'
-import { checkVersion, fetchAllPresets } from '../services'
-import { deepClone, deepEqual } from '../Utils'
+import type { VersionId } from '../services/index.js'
+import { checkVersion, fetchAllPresets } from '../services/index.js'
+import { deepClone, deepEqual } from '../Utils.js'
 
 export class Deepslate {
 	private d = deepslate19

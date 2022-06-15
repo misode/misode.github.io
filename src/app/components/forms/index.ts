@@ -1,3 +1,3 @@
-export * from './Checkbox'
-export * from './Input'
-export * from './SearchList'
+export * from './Checkbox.js'
+export * from './Input.js'
+export * from './SearchList.js'

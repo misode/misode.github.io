@@ -4,7 +4,7 @@ import * as zip from '@zip.js/zip.js'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
-import config from '../config.json'
+import config from './Config.js'
 
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 

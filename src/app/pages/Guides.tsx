@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'preact/hooks'
-import { ChangelogTag, Footer, GuideCard, TextInput, VersionSwitcher } from '../components'
-import { useLocale, useTitle, useVersion } from '../contexts'
-import { useTags } from '../hooks/useTags'
+import { ChangelogTag, Footer, GuideCard, TextInput, VersionSwitcher } from '../components/index.js'
+import { useLocale, useTitle, useVersion } from '../contexts/index.js'
+import { useTags } from '../hooks/index.js'
 
 interface Guide {
 	id: string,

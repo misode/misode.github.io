@@ -1,7 +1,7 @@
 import type { CollectionRegistry } from '@mcschema/core'
-import config from '../../config.json'
-import { message } from '../Utils'
-import type { BlockStateRegistry, VersionId } from './Schemas'
+import config from '../Config.js'
+import { message } from '../Utils.js'
+import type { BlockStateRegistry, VersionId } from './Schemas.js'
 
 const CACHE_NAME = 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'

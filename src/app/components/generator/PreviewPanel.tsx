@@ -1,10 +1,10 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import { useState } from 'preact/hooks'
-import { useModel } from '../../hooks'
-import type { VersionId } from '../../services'
-import { checkVersion } from '../../services'
-import { BiomeSourcePreview, DecoratorPreview, DensityFunctionPreview, NoisePreview, NoiseSettingsPreview } from '../previews'
+import { useModel } from '../../hooks/index.js'
+import type { VersionId } from '../../services/index.js'
+import { checkVersion } from '../../services/index.js'
+import { BiomeSourcePreview, DecoratorPreview, DensityFunctionPreview, NoisePreview, NoiseSettingsPreview } from '../previews/index.js'
 
 export const HasPreview = ['dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
 

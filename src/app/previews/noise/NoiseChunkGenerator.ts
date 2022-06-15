@@ -1,5 +1,5 @@
 import { LegacyRandom, PerlinNoise } from 'deepslate/worldgen'
-import { clampedLerp, lerp2 } from '../../Utils'
+import { clampedLerp, lerp2 } from '../../Utils.js'
 
 export class NoiseChunkGenerator {
 	private readonly minLimitPerlinNoise: PerlinNoise

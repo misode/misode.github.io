@@ -1,9 +1,9 @@
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks'
-import { useLocale } from '.'
-import config from '../../config.json'
-import type { VersionId } from '../services'
+import config from '../Config.js'
+import type { VersionId } from '../services/index.js'
+import { useLocale } from './index.js'
 
 const VERSIONS_IN_TITLE = 3
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'preact/hooks'
-import { changeUrl } from '../Utils'
+import { changeUrl } from '../Utils.js'
 
 export function useHash(): [string, (hash: string) => unknown] {
 	const [hash, setHash] = useState(window.location.hash)

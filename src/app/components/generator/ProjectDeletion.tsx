@@ -1,7 +1,7 @@
-import { Analytics } from '../../Analytics'
-import { useLocale, useProject } from '../../contexts'
-import { Btn } from '../Btn'
-import { Modal } from '../Modal'
+import { Analytics } from '../../Analytics.js'
+import { useLocale, useProject } from '../../contexts/index.js'
+import { Btn } from '../Btn.js'
+import { Modal } from '../Modal.js'
 
 interface Props {
 	onClose: () => void,

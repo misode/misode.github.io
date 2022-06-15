@@ -1,13 +1,13 @@
 import { DataModel } from '@mcschema/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
-import { Btn, BtnMenu } from '..'
-import { useLocale } from '../../contexts'
-import { useModel } from '../../hooks'
-import { getOutput } from '../../schema/transformOutput'
-import type { BlockStateRegistry } from '../../services'
-import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, stringifySource } from '../../services'
-import { Store } from '../../Store'
-import { message } from '../../Utils'
+import { useLocale } from '../../contexts/index.js'
+import { useModel } from '../../hooks/index.js'
+import { getOutput } from '../../schema/transformOutput.js'
+import type { BlockStateRegistry } from '../../services/index.js'
+import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, stringifySource } from '../../services/index.js'
+import { Store } from '../../Store.js'
+import { message } from '../../Utils.js'
+import { Btn, BtnMenu } from '../index.js'
 
 interface Editor {
 	getValue(): string

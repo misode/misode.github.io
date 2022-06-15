@@ -1,10 +1,10 @@
 import type { Howl, HowlOptions } from 'howler'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { Btn, ErrorPanel, Footer, SoundConfig, TextInput, VersionSwitcher } from '../components'
-import { useLocale, useTitle, useVersion } from '../contexts'
-import { useAsync } from '../hooks'
-import { fetchSounds } from '../services'
-import { hexId } from '../Utils'
+import { Btn, ErrorPanel, Footer, SoundConfig, TextInput, VersionSwitcher } from '../components/index.js'
+import { useLocale, useTitle, useVersion } from '../contexts/index.js'
+import { useAsync } from '../hooks/index.js'
+import { fetchSounds } from '../services/index.js'
+import { hexId } from '../Utils.js'
 
 interface Props {
 	path?: string,

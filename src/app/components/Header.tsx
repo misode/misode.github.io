@@ -1,9 +1,9 @@
 import { getCurrentUrl, Link, route } from 'preact-router'
-import { Btn, BtnMenu, Icons, Octicon } from '.'
-import config from '../../config.json'
-import { useLocale, useProject, useTheme, useTitle, useVersion } from '../contexts'
-import { checkVersion } from '../services'
-import { cleanUrl, getGenerator } from '../Utils'
+import config from '../Config.js'
+import { useLocale, useProject, useTheme, useTitle, useVersion } from '../contexts/index.js'
+import { checkVersion } from '../services/index.js'
+import { cleanUrl, getGenerator } from '../Utils.js'
+import { Btn, BtnMenu, Icons, Octicon } from './index.js'
 
 const Themes: Record<string, keyof typeof Octicon> = {
 	system: 'device_desktop',

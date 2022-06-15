@@ -1,10 +1,10 @@
 import { useMemo } from 'preact/hooks'
-import config from '../../config.json'
-import { useLocale } from '../contexts'
-import type { VersionId } from '../services'
-import { Store } from '../Store'
-import { Btn } from './Btn'
-import { BtnMenu } from './BtnMenu'
+import config from '../Config.js'
+import { useLocale } from '../contexts/index.js'
+import type { VersionId } from '../services/index.js'
+import { Store } from '../Store.js'
+import { Btn } from './Btn.js'
+import { BtnMenu } from './BtnMenu.js'
 
 interface Props {
 	value?: VersionId,

@@ -1,5 +1,5 @@
-import { Octicon } from '.'
-import { useLocale } from '../contexts'
+import { useLocale } from '../contexts/index.js'
+import { Octicon } from './index.js'
 
 interface Props {
 	donate?: boolean,

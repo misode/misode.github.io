@@ -1,7 +1,7 @@
-import type { Project } from './contexts'
-import { DRAFT_PROJECT } from './contexts'
-import type { VersionId } from './services'
-import { VersionIds } from './services'
+import type { Project } from './contexts/index.js'
+import { DRAFT_PROJECT } from './contexts/index.js'
+import type { VersionId } from './services/index.js'
+import { VersionIds } from './services/index.js'
 
 export namespace Store {
 	export const ID_LANGUAGE = 'language'

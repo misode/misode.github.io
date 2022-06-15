@@ -1,8 +1,8 @@
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext } from 'preact/hooks'
-import { useLocalStorage } from '../hooks'
-import type { Color } from '../Utils'
+import { useLocalStorage } from '../hooks/index.js'
+import type { Color } from '../Utils.js'
 
 interface Store {
 	biomeColors: Record<string, [number, number, number]>

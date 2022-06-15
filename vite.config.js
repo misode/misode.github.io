@@ -4,12 +4,14 @@ import html from '@rollup/plugin-html'
 import glob from 'fast-glob'
 import fs from 'fs'
 import yaml from 'js-yaml'
+import { createRequire } from 'module'
 import { env } from 'process'
+import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-import config from './src/config.json'
-import English from './src/locales/en.json'
-import { visualizer } from 'rollup-plugin-visualizer'
+const require = createRequire(import.meta.url)
+const config = require('./src/config.json')
+const English = require('./src/locales/en.json')
 
 const guides = glob.sync('src/guides/**/*.md').flatMap(g => {
 	const content = fs.readFileSync(g).toString('utf-8')

@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'preact/hooks'
-import { Btn, TextInput } from '..'
-import { useLocale } from '../../contexts'
-import { useSearchParam } from '../../hooks'
-import { useTags } from '../../hooks/useTags'
-import type { Change } from '../../services'
-import { ChangelogEntry } from './ChangelogEntry'
-import { ChangelogTag } from './ChangelogTag'
+import { useLocale } from '../../contexts/index.js'
+import { useSearchParam, useTags } from '../../hooks/index.js'
+import type { Change } from '../../services/index.js'
+import { Btn, TextInput } from '../index.js'
+import { ChangelogEntry } from './ChangelogEntry.js'
+import { ChangelogTag } from './ChangelogTag.js'
 
 const SEARCH_KEY = 'search'
 

@@ -1,4 +1,4 @@
-import { ChangelogTag } from './versions'
+import { ChangelogTag } from './index.js'
 
 interface Props {
 	title: string,

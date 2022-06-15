@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'preact/hooks'
-import { Btn, BtnInput } from '..'
+import { Btn, BtnInput } from '../index.js'
 
 interface Props {
 	values?: string[],

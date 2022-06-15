@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import type { PreviewProps } from '.'
-import { Btn } from '..'
-import { useLocale } from '../../contexts'
-import { useCanvas } from '../../hooks'
-import { normalNoise } from '../../previews'
-import { randomSeed } from '../../Utils'
+import { useLocale } from '../../contexts/index.js'
+import { useCanvas } from '../../hooks/index.js'
+import { normalNoise } from '../../previews/index.js'
+import { randomSeed } from '../../Utils.js'
+import { Btn } from '../index.js'
+import type { PreviewProps } from './index.js'
 
 export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()

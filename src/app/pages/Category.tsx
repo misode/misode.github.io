@@ -1,7 +1,7 @@
-import config from '../../config.json'
-import { Footer, ToolCard } from '../components'
-import { useLocale, useTitle } from '../contexts'
-import { cleanUrl } from '../Utils'
+import { Footer, ToolCard } from '../components/index.js'
+import config from '../Config.js'
+import { useLocale, useTitle } from '../contexts/index.js'
+import { cleanUrl } from '../Utils.js'
 
 interface Props {
 	category: string,
