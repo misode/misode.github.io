@@ -1,7 +1,7 @@
+import type { JSX } from 'preact'
 import { useEffect, useRef } from 'preact/hooks'
-import type { JSXInternal } from 'preact/src/jsx'
 
-type InputProps = JSXInternal.HTMLAttributes<HTMLInputElement>
+type InputProps = JSX.HTMLAttributes<HTMLInputElement>
 
 type BaseInputProps<T> = Omit<InputProps, 'onChange' | 'type'> & {
 	onChange?: (value: T) => unknown,

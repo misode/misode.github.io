@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { Octicon } from './Octicon'
+import { Octicon } from './index.js'
 
 type ErrorPanelProps = {
 	error: string | Error,

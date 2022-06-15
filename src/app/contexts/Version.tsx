@@ -1,11 +1,11 @@
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks'
-import { Analytics } from '../Analytics'
-import { useSearchParam } from '../hooks'
-import type { VersionId } from '../services'
-import { VersionIds } from '../services'
-import { Store } from '../Store'
+import { Analytics } from '../Analytics.js'
+import { useSearchParam } from '../hooks/index.js'
+import type { VersionId } from '../services/index.js'
+import { VersionIds } from '../services/index.js'
+import { Store } from '../Store.js'
 
 const VERSION_PARAM = 'version'
 

@@ -1,5 +1,5 @@
 import { Giscus as GiscusReact } from '@giscus/react'
-import { useTheme } from '../contexts'
+import { useTheme } from '../contexts/index.js'
 
 interface Props {
 	term?: string,

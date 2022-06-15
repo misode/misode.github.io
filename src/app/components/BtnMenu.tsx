@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact'
-import type { Octicon } from '.'
-import { Btn } from '.'
-import { useFocus } from '../hooks'
+import { useFocus } from '../hooks/index.js'
+import type { Octicon } from './index.js'
+import { Btn } from './index.js'
 
 interface BtnMenuProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	icon?: keyof typeof Octicon,

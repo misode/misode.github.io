@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { VersionMetaData } from '.'
-import { useLocale } from '../../contexts'
-import type { Change, VersionMeta } from '../../services'
-import { getArticleLink, getChangelogs } from '../../services'
-import { Giscus } from '../Giscus'
-import { Octicon } from '../Octicon'
-import { ChangelogList } from './ChangelogList'
+import { useLocale } from '../../contexts/index.js'
+import type { Change, VersionMeta } from '../../services/index.js'
+import { getArticleLink, getChangelogs } from '../../services/index.js'
+import { Giscus } from '../Giscus.js'
+import { Octicon } from '../Octicon.js'
+import { ChangelogList } from './ChangelogList.js'
+import { VersionMetaData } from './index.js'
 
 type Tab = 'changelog' | 'discussion' 
 

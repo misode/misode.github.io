@@ -1,8 +1,8 @@
-import { Ad, BtnLink, ErrorPanel, Footer, VersionDetail, VersionList } from '../components'
-import { useLocale, useTitle } from '../contexts'
-import { useAsync, useSearchParam } from '../hooks'
-import type { VersionMeta } from '../services'
-import { fetchVersions } from '../services'
+import { Ad, BtnLink, ErrorPanel, Footer, VersionDetail, VersionList } from '../components/index.js'
+import { useLocale, useTitle } from '../contexts/index.js'
+import { useAsync, useSearchParam } from '../hooks/index.js'
+import type { VersionMeta } from '../services/index.js'
+import { fetchVersions } from '../services/index.js'
 
 interface Props {
 	path?: string,

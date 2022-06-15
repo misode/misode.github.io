@@ -1,6 +1,6 @@
 import { DataModel } from '@mcschema/core'
 import { LegacyRandom, NoiseParameters, NormalNoise } from 'deepslate/worldgen'
-import type { VersionId } from '../services'
+import type { VersionId } from '../services/index.js'
 
 export type NoiseOptions = {
 	offset: [number, number],

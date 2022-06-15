@@ -1,9 +1,9 @@
 import type { Howl, HowlOptions } from 'howler'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { Btn, NumberInput, RangeInput, TextInput } from '..'
-import { useLocale, useVersion } from '../../contexts'
-import type { SoundEvents } from '../../services'
-import { getSoundUrl } from '../../services'
+import { useLocale, useVersion } from '../../contexts/index.js'
+import type { SoundEvents } from '../../services/index.js'
+import { getSoundUrl } from '../../services/index.js'
+import { Btn, NumberInput, RangeInput, TextInput } from '../index.js'
 
 export interface SoundConfig {
 	id: string,

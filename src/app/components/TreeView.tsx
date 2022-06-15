@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'preact/hooks'
-import { Octicon } from '.'
-import { useFocus } from '../hooks'
+import { useFocus } from '../hooks/index.js'
+import { Octicon } from './index.js'
 
 const SEPARATOR = '/'
 

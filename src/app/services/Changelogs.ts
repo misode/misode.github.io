@@ -1,4 +1,4 @@
-import { isObject } from '../Utils'
+import { isObject } from '../Utils.js'
 
 const repo = 'https://raw.githubusercontent.com/misode/technical-changes/main'
 

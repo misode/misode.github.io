@@ -1,5 +1,5 @@
 import lz from 'lz-string'
-import type { VersionId } from './Schemas'
+import type { VersionId } from './Schemas.js'
 
 const API_PREFIX = 'https://z15g7can.directus.app/items'
 

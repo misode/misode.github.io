@@ -1,5 +1,5 @@
-import { Octicon } from '..'
-import { hashString } from '../../Utils'
+import { hashString } from '../../Utils.js'
+import { Octicon } from '../index.js'
 
 type TagProps = {
 	label: string,

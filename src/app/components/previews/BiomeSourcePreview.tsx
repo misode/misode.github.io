@@ -1,12 +1,12 @@
 import { Path } from '@mcschema/core'
 import type { NoiseParameters } from 'deepslate/worldgen'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import type { PreviewProps } from '.'
-import { Btn, BtnMenu } from '..'
-import { useLocale, useStore } from '../../contexts'
-import { useCanvas } from '../../hooks'
-import { biomeMap, getBiome } from '../../previews'
-import { newSeed, randomSeed } from '../../Utils'
+import { useLocale, useStore } from '../../contexts/index.js'
+import { useCanvas } from '../../hooks/index.js'
+import { biomeMap, getBiome } from '../../previews/index.js'
+import { newSeed, randomSeed } from '../../Utils.js'
+import { Btn, BtnMenu } from '../index.js'
+import type { PreviewProps } from './index.js'
 
 const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness'] as const
 

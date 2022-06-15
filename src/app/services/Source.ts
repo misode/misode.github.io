@@ -1,5 +1,5 @@
 import yaml from 'js-yaml'
-import { Store } from '../Store'
+import { Store } from '../Store.js'
 
 const INDENTS: Record<string, number | string | undefined> = {
 	'2_spaces': 2,

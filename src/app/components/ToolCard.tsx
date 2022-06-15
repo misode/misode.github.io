@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact'
-import { Icons } from './Icons'
+import { Icons } from './Icons.js'
 
 type ToolCardProps = {
 	title: string,

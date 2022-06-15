@@ -1,7 +1,7 @@
-import { Ad, ChangelogList, ErrorPanel, Footer } from '../components'
-import { useLocale, useTitle } from '../contexts'
-import { useAsync } from '../hooks'
-import { getChangelogs } from '../services'
+import { Ad, ChangelogList, ErrorPanel, Footer } from '../components/index.js'
+import { useLocale, useTitle } from '../contexts/index.js'
+import { useAsync } from '../hooks/index.js'
+import { getChangelogs } from '../services/index.js'
 
 interface Props {
 	path?: string,

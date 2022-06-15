@@ -1,8 +1,8 @@
 import { BlockState, clampedMap, DensityFunction } from 'deepslate/worldgen'
-import type { VersionId } from '../services'
-import { checkVersion } from '../services'
-import { Deepslate } from './Deepslate'
-import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
+import type { VersionId } from '../services/index.js'
+import { checkVersion } from '../services/index.js'
+import { Deepslate } from './Deepslate.js'
+import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator.js'
 
 export type NoiseSettingsOptions = {
 	biome?: string,

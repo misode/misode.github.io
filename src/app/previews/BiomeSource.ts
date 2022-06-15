@@ -1,12 +1,12 @@
 import { DataModel } from '@mcschema/core'
-import init, { biome_parameters, climate_noise, climate_sampler, multi_noise } from 'deepslate-rs'
+import { biome_parameters, climate_noise, climate_sampler, default as init, multi_noise } from 'deepslate-rs'
 // @ts-expect-error
 import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
 import type { NoiseParameters } from 'deepslate/worldgen'
 import { FixedBiome, Identifier, LegacyRandom, NormalNoise } from 'deepslate/worldgen'
-import type { VersionId } from '../services'
-import { checkVersion, fetchPreset } from '../services'
-import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
+import type { VersionId } from '../services/index.js'
+import { checkVersion, fetchPreset } from '../services/index.js'
+import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils.js'
 
 let ready = false
 async function loadWasm() {

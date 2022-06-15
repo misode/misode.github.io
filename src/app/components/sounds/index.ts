@@ -1,1 +1,1 @@
-export * from './SoundConfig'
+export * from './SoundConfig.js'

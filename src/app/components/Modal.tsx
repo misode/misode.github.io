@@ -1,10 +1,10 @@
+import type { JSX } from 'preact'
 import { useCallback, useEffect } from 'preact/hooks'
-import type { JSXInternal } from 'preact/src/jsx'
-import { LOSE_FOCUS } from '../hooks'
+import { LOSE_FOCUS } from '../hooks/index.js'
 
 const MODALS_KEY = 'data-modals'
 
-interface Props extends JSXInternal.HTMLAttributes<HTMLDivElement> {
+interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
 	onDismiss: () => void,
 }
 export function Modal(props: Props) {

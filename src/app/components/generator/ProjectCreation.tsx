@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '..'
-import config from '../../../config.json'
-import type { Project } from '../../contexts'
-import { disectFilePath, useLocale, useProject } from '../../contexts'
-import type { VersionId } from '../../services'
-import { DEFAULT_VERSION, parseSource } from '../../services'
-import { message, readZip } from '../../Utils'
-import { Modal } from '../Modal'
+import config from '../../Config.js'
+import type { Project } from '../../contexts/index.js'
+import { disectFilePath, useLocale, useProject } from '../../contexts/index.js'
+import type { VersionId } from '../../services/index.js'
+import { DEFAULT_VERSION, parseSource } from '../../services/index.js'
+import { message, readZip } from '../../Utils.js'
+import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '../index.js'
+import { Modal } from '../Modal.js'
 
 interface Props {
 	onClose: () => unknown,

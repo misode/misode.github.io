@@ -1,9 +1,9 @@
 import { useState } from 'preact/hooks'
-import { Analytics } from '../../Analytics'
-import { useLocale, useProject } from '../../contexts'
-import { Btn } from '../Btn'
-import { TextInput } from '../forms'
-import { Modal } from '../Modal'
+import { Analytics } from '../../Analytics.js'
+import { useLocale, useProject } from '../../contexts/index.js'
+import { Btn } from '../Btn.js'
+import { TextInput } from '../forms/index.js'
+import { Modal } from '../Modal.js'
 
 interface Props {
 	id: string,

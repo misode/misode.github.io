@@ -1,6 +1,6 @@
 import { marked } from 'marked'
-import { ChangelogTag } from '.'
-import type { Change } from '../../services'
+import type { Change } from '../../services/index.js'
+import { ChangelogTag } from './index.js'
 
 type Props = {
 	change: Change,

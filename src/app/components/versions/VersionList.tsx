@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'preact/hooks'
-import { Checkbox, TextInput } from '..'
-import { useLocale } from '../../contexts'
-import { useSearchParam } from '../../hooks'
-import type { VersionMeta } from '../../services'
-import { VersionEntry } from './VersionEntry'
+import { useLocale } from '../../contexts/index.js'
+import { useSearchParam } from '../../hooks/index.js'
+import type { VersionMeta } from '../../services/index.js'
+import { Checkbox, TextInput } from '../index.js'
+import { VersionEntry } from './VersionEntry.js'
 
 const SEARCH_KEY = 'search'
 

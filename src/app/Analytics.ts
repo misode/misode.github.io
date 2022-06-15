@@ -1,4 +1,4 @@
-import type { VersionId } from './services'
+import type { VersionId } from './services/index.js'
 
 type Method = 'menu' | 'hotkey'
 
