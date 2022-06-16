@@ -1,5 +1,5 @@
 import { DataModel } from '@mcschema/core'
-import { LegacyRandom, NoiseParameters, NormalNoise } from 'deepslate/worldgen'
+import { NoiseParameters, NormalNoise, XoroshiroRandom } from 'deepslate/worldgen'
 import type { VersionId } from '../services/index.js'
 
 export type NoiseOptions = {
@@ -10,7 +10,7 @@ export type NoiseOptions = {
 }
 
 export function normalNoise(state: any, img: ImageData, options: NoiseOptions) {
-	const random = new LegacyRandom(options.seed)
+	const random = XoroshiroRandom.create(options.seed)
 	const params = NoiseParameters.fromJson(DataModel.unwrapLists(state))
 	const noise = new NormalNoise(random, params)
 

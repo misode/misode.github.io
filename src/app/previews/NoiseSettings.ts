@@ -1,4 +1,5 @@
 import { BlockState, clampedMap, DensityFunction } from 'deepslate/worldgen'
+import type { Project } from '../contexts/Project.jsx'
 import type { VersionId } from '../services/index.js'
 import { checkVersion } from '../services/index.js'
 import { Deepslate } from './Deepslate.js'
@@ -12,6 +13,7 @@ export type NoiseSettingsOptions = {
 	width: number,
 	seed: bigint,
 	version: VersionId,
+	project: Project,
 }
 
 const colors: Record<string, [number, number, number]> = {
@@ -37,8 +39,7 @@ const DEEPSLATE = new Deepslate()
 
 export async function noiseSettings(state: any, img: ImageData, options: NoiseSettingsOptions) {
 	if (checkVersion(options.version, '1.18')) {
-
-		await DEEPSLATE.loadVersion(options.version)
+		await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
 		DEEPSLATE.loadChunkGenerator(state, options.seed, options.biome)
 		DEEPSLATE.generateChunks(-options.offset, options.width, options.biome)
 		const noise = DEEPSLATE.getNoiseSettings()
@@ -80,7 +81,7 @@ export function getNoiseBlock(x: number, y: number) {
 }
 
 export async function densityFunction(state: any, img: ImageData, options: NoiseSettingsOptions) {
-	await DEEPSLATE.loadVersion(options.version)
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
 	const fn = DEEPSLATE.loadDensityFunction(state, options.seed)
 	const noise = DEEPSLATE.getNoiseSettings()
 
@@ -105,6 +106,16 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 		data[4 * i + 2] = color
 		data[4 * i + 3] = 255
 	}
+}
+
+function getProjectData(project: Project) {
+	return Object.fromEntries(['worldgen/noise', 'worldgen/density_function'].map(type => {
+		const resources = Object.fromEntries(
+			project.files.filter(file => file.type === type)
+				.map<[string, unknown]>(file => [file.id, file.data])
+		)
+		return [type, resources]
+	}))
 }
 
 function getColor(noise: number[], y: number): number {

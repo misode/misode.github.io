@@ -4,6 +4,13 @@ import type { VersionId } from '../services/index.js'
 import { checkVersion, fetchAllPresets } from '../services/index.js'
 import { deepClone, deepEqual } from '../Utils.js'
 
+export type ProjectData = Record<string, Record<string, unknown>>
+
+const DYNAMIC_REGISTRIES = new Set([
+	'minecraft:worldgen/noise',
+	'minecraft:worldgen/density_function',
+])
+
 export class Deepslate {
 	private d = deepslate19
 	private loadedVersion: VersionId | undefined
@@ -17,18 +24,19 @@ export class Deepslate {
 	private generatorCache: ChunkGenerator | undefined
 	private chunksCache: Chunk[] = []
 
-	public async loadVersion(version: VersionId) {
+	public async loadVersion(version: VersionId, project?: ProjectData) {
 		if (this.loadedVersion === version) {
+			this.applyProjectData(version, project)
 			return
 		}
 		if (this.loadingVersion !== version || !this.loadingPromise) {
 			this.loadingVersion = version
-			this.loadingPromise = this.doLoadVersion(version)
+			this.loadingPromise = this.doLoadVersion(version, project)
 		}
 		return this.loadingPromise
 	}
 
-	private async doLoadVersion(version: VersionId) {
+	private async doLoadVersion(version: VersionId, project?: ProjectData) {
 		const cachedDeepslate = this.deepslateCache.get(version)
 		if (cachedDeepslate) {
 			this.d = cachedDeepslate
@@ -40,24 +48,45 @@ export class Deepslate {
 			} else {
 				this.d = await import('deepslate-1.18') as any
 			}
-			if (this.d.WorldgenRegistries) {
+			if (checkVersion(version, '1.19')) {
+				await Promise.all(this.d.Registry.REGISTRY.map(async (id, registry) => {
+					if (DYNAMIC_REGISTRIES.has(id.toString())) {
+						const entries = await fetchAllPresets(version, id.path)
+						for (const [key, value] of entries.entries()) {
+							registry.register(this.d.Identifier.parse(key), registry.parse(value), true)
+						}
+					}
+				}))
+			} else if (checkVersion(version, '1.18.2')) {
 				const REGISTRIES: [string, keyof typeof deepslate19.WorldgenRegistries, { fromJson(obj: unknown): any}][] = [
 					['worldgen/noise', 'NOISE', this.d.NoiseParameters],
 					['worldgen/density_function', 'DENSITY_FUNCTION', this.d.DensityFunction],
 				]
 				await Promise.all(REGISTRIES.map(async ([id, name, parser]) => {
 					const entries = await fetchAllPresets(version, id)
-					const registry = new this.d.Registry<typeof parser>(this.d.Identifier.create(id))
 					for (const [key, value] of entries.entries()) {
-						registry.register(this.d.Identifier.parse(key), parser.fromJson(value))
+						this.d.WorldgenRegistries[name].register(this.d.Identifier.parse(key), parser.fromJson(value), true)
 					}
-					this.d.WorldgenRegistries[name].assign(registry as any)
 				}))
 			}
 			this.deepslateCache.set(version, this.d)
 		}
+		this.applyProjectData(version, project)
 		this.loadedVersion = version
 		this.loadingVersion = undefined
+	}
+
+	private applyProjectData(version: VersionId, project?: ProjectData) {
+		if (checkVersion(version, '1.19')) {
+			this.d.Registry.REGISTRY.forEach((id, registry) => {
+				if (DYNAMIC_REGISTRIES.has(id.toString())) {
+					registry.clear()
+					for (const [key, value] of Object.entries(project?.[id.path] ?? {})) {
+						registry.register(this.d.Identifier.parse(key), registry.parse(value))
+					}
+				}
+			})
+		}
 	}
 
 	public loadChunkGenerator(settings: unknown, seed: bigint, biome = 'unknown') {
