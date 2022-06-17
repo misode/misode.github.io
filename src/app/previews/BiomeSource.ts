@@ -1,20 +1,10 @@
 import { DataModel } from '@mcschema/core'
-import { biome_parameters, climate_noise, climate_sampler, default as init, multi_noise } from 'deepslate-rs'
-// @ts-expect-error
-import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
-import type { NoiseParameters } from 'deepslate/worldgen'
-import { FixedBiome, Identifier, LegacyRandom, NormalNoise } from 'deepslate/worldgen'
+import type { Project } from '../contexts/Project.jsx'
 import type { VersionId } from '../services/index.js'
-import { checkVersion, fetchPreset } from '../services/index.js'
-import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils.js'
-
-let ready = false
-async function loadWasm() {
-	if (ready) return
-	await init(wasm)
-	ready = true
-	console.debug(`Loaded deepslate-rs from "${wasm}"`)
-}
+import { fetchPreset } from '../services/index.js'
+import { stringToColor } from '../Utils.js'
+import { DEEPSLATE } from './Deepslate.js'
+import { getProjectData } from './NoiseSettings.js'
 
 const LAYERS = {
 	temperature: [-1, 1],
@@ -30,7 +20,6 @@ const LAYERS = {
 type Triple = [number, number, number]
 type BiomeColors = Record<string, Triple>
 type BiomeSourceOptions = {
-	octaves: Record<string, NoiseParameters>,
 	biomeColors: BiomeColors,
 	offset: [number, number],
 	scale: number,
@@ -38,50 +27,45 @@ type BiomeSourceOptions = {
 	seed: bigint,
 	version: VersionId,
 	layers: Set<keyof typeof LAYERS | 'biomes'>,
+	settings: unknown,
+	project: Project,
 }
-
-interface CachedBiomeSource {
-	getBiome(x: number, y: number, z: number): Identifier
-	getBiomes?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): Identifier[]
-	getClimate?(x: number, y: number, z: number): {[k: string]: number}
-	getClimates?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): {[k: string]: number}[]
-}
-
-let cacheState: any
-let biomeSourceCache: CachedBiomeSource
 
 export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
-	const { biomeSource } = await getCached(state, options)
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+	DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists(state), options.seed)
 
 	const data = img.data
-	const ox = -Math.round(options.offset[0]) - 100 + options.res / 2
-	const oz = -Math.round(options.offset[1]) - 100 + options.res / 2
+	const minX = -Math.round(options.offset[0]) - 100 + options.res / 2
+	const minZ = -Math.round(options.offset[1]) - 100 + options.res / 2
 	const row = img.width * 4 / options.res
 	const col = 4 / options.res
 
-	const xRange: Triple = [ox * options.scale, (200 + ox) * options.scale, options.res * options.scale]
-	const zRange: Triple = [oz * options.scale, (200 + oz) * options.scale, options.res * options.scale]
+	// const xRange: Triple = [ox * options.scale, (200 + ox) * options.scale, options.res * options.scale]
+	// const zRange: Triple = [oz * options.scale, (200 + oz) * options.scale, options.res * options.scale]
 
-	const biomes = !options.layers.has('biomes') ? undefined : biomeSource.getBiomes?.(...xRange, 64, 65, 1, ...zRange)
-	const layers = [...options.layers].filter(l => l !== 'biomes') as (keyof typeof LAYERS)[]
-	const noise = layers.length === 0 ? undefined : biomeSource.getClimates?.(...xRange, 64, 65, 1, ...zRange)
+	// const biomes = !options.layers.has('biomes') ? undefined : biomeSource.getBiomes?.(...xRange, 64, 65, 1, ...zRange)
+	// const layers = [...options.layers].filter(l => l !== 'biomes') as (keyof typeof LAYERS)[]
+	// const noise = layers.length === 0 ? undefined : biomeSource.getClimates?.(...xRange, 64, 65, 1, ...zRange)
+
+	const { palette, data: biomes } = DEEPSLATE.fillBiomes(minX * options.scale * 4, (minX + 200) * options.scale * 4, minZ * options.scale * 4, (minZ + 200) * options.scale * 4, options.res * options.scale)
 
 	for (let x = 0; x < 200; x += options.res) {
 		for (let z = 0; z < 200; z += options.res) {
 			const i = z * row + x * col
 			const j = (x / options.res) * 200 / options.res + z / options.res
-			const worldX = (x + ox) * options.scale
-			const worldZ = (z + oz) * options.scale
+			// const worldX = (x + ox) * options.scale
+			// const worldZ = (z + oz) * options.scale
 			let color: Triple = [50, 50, 50]
-			if (options.layers.has('biomes')) {
-				const biome = biomes?.[j] ?? biomeSource.getBiome(worldX, 64, worldZ)
-				color = getBiomeColor(biome.toString(), options.biomeColors)
-			} else if (noise && layers[0]) {
-				const value = noise[j][layers[0]]
-				const [min, max] = LAYERS[layers[0]]
-				const brightness = (value - min) / (max - min) * 256
-				color = [brightness, brightness, brightness]
-			}
+			// if (options.layers.has('biomes')) {
+			const biome = palette.get(biomes[j])
+			color = getBiomeColor(biome ?? '', options.biomeColors)
+			// } else if (noise && layers[0]) {
+			// 	const value = noise[j][layers[0]]
+			// 	const [min, max] = LAYERS[layers[0]]
+			// 	const brightness = (value - min) / (max - min) * 256
+			// 	color = [brightness, brightness, brightness]
+			// }
 			data[i] = color[0]
 			data[i + 1] = color[1]
 			data[i + 2] = color[2]
@@ -91,15 +75,20 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 }
 
 export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<{[k: string]: number | string} | undefined> {
-	const { biomeSource } = await getCached(state, options)
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+	DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists( state), options.seed)
 
 	const [xx, zz] = toWorld([x, z], options)
+
+	const { palette, data } = DEEPSLATE.fillBiomes(xx, xx + 4, zz, zz + 4)
+	const biome = palette.get(data[0])!
+
 	return {
-		biome: biomeSource.getBiome(xx, 64, zz).toString(),
-		...biomeSource.getClimate?.(xx, 64, zz),
+		biome,
 	}
 }
 
+/*
 async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource}> {
 	const newState = [state, options.octaves, `${options.seed}`, options.version]
 	if (!deepEqual(newState, cacheState)) {
@@ -228,6 +217,7 @@ async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<
 	}
 	throw new Error('Unknown biome source')
 }
+*/
 
 function getBiomeColor(biome: string, biomeColors: BiomeColors): Triple {
 	if (!biome) {

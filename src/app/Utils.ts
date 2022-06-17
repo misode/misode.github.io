@@ -256,8 +256,8 @@ export function deepEqual(a: any, b: any) {
 }
 
 export class BiMap<A, B> {
-	private readonly forward: Map<A, B>
-	private readonly backward: Map<B, A>
+	public readonly forward: Map<A, B>
+	public readonly backward: Map<B, A>
 
 	constructor() {
 		this.forward = new Map()
@@ -282,6 +282,16 @@ export class BiMap<A, B> {
 		if (b === undefined) {
 			this.set(key, defaultValue)
 			return defaultValue
+		}
+		return b
+	}
+
+	public computeIfAbsent(key: A, value: () => B) {
+		const b = this.forward.get(key)
+		if (b === undefined) {
+			const newValue = value()
+			this.set(key, newValue)
+			return newValue
 		}
 		return b
 	}
