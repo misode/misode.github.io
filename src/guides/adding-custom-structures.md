@@ -120,7 +120,7 @@ Let's go over all the fields.
 * f`start_pool`: This is a reference to the template pool [(see next step)](#the-template-pool).
 * f`size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
 * f`start_height`: A height provider specifying at which height the structure should spawn. The example uses the constant shorthand so it just specifies a vertical anchor. If used together with f`project_start_to_heightmap`, will offset the height relative to the heightmap.
-* f`project_start_to_heightmap`: An optional heightmap type. Possible values: s`WORLD_SURFACE_WG`, s`WORLD_SURFACE`, s`OCEAN_FLOOR_WG`, s`OCEAN_FLOOR`, s`MOTION_BLOCKING`, and s`MOTION_BLOCKING_NO_LEAVES`. If f`start_height` is not 0, will move the start relative to the heightmap.
+* f`project_start_to_heightmap`: An optional [heightmap type](/guides/heightmap-types/). Possible values: s`WORLD_SURFACE_WG`, s`WORLD_SURFACE`, s`OCEAN_FLOOR_WG`, s`OCEAN_FLOOR`, s`MOTION_BLOCKING`, and s`MOTION_BLOCKING_NO_LEAVES`.
 * f`max_distance_from_center`: Value between 1 and 128. The maximum distance that a jigsaw can branch out.
 * f`use_expansion_hack`: You should always set this to false. Vanilla villages set this to true to fix an issue with their streets.
 #}
