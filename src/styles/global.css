@@ -328,6 +328,14 @@ main > .controls {
 	margin-top: 40px;
 }
 
+.sounds-controls {
+	display: flex;
+	margin: 0 16px;
+	position: sticky;
+	top: 68px;
+	z-index: 1;
+}
+
 .project-controls {
 	margin: 8px;
 	display: flex;
@@ -985,7 +993,7 @@ main.has-project {
 	box-shadow: none;
 }
 
-.home, .category, .versions, .guides, .guide {
+.container {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;

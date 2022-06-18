@@ -11,7 +11,7 @@ export function Category({ category }: Props) {
 	const { locale } = useLocale()
 	useTitle(locale('title.generator_category', locale(category)))
 	return <main>
-		<div class="category">
+		<div class="container">
 			{config.generators.filter(g => g.category === category).map(g => 
 				<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
 			)}

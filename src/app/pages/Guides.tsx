@@ -49,7 +49,7 @@ export function Guides({}: Props) {
 	}, [versionedGuides, search, activeTags])
 
 	return <main>
-		<div class="guides">
+		<div class="container">
 			<div class="changelog-query">
 				<TextInput class="btn btn-input changelog-search" placeholder={locale('guides.search')} value={search} onChange={setSearch} />
 				<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />

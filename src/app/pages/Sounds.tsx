@@ -60,7 +60,7 @@ export function Sounds({}: Props) {
 	return <main>
 		{error && <ErrorPanel error={error} />}
 		{soundKeys.length > 0 && <>
-			<div class="controls sounds-controls">
+			<div class="sounds-controls">
 				<div class="sound-search-group">
 					<TextInput class="btn btn-input sound-search" list="sound-list" placeholder={locale('sounds.search')}
 						value={search} onChange={setSearch} onEnter={addConfig} />

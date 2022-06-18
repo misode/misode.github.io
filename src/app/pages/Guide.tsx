@@ -172,7 +172,7 @@ export function Guide({ id }: Props) {
 	const [largeWidth] = useState(window.innerWidth > 600)
 
 	return <main>
-		<div class="guide">
+		<div class="container guide">
 			<div class="navigation">
 				<a class="btn btn-link" href="/guides/">
 					{Octicon.arrow_left}

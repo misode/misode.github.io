@@ -27,9 +27,9 @@ export function Versions({}: Props) {
 	return <main>
 		<Ad type="text" id="versions" />
 		{error && <ErrorPanel error={error} />}
-		<div class="versions">
+		<div class="container">
 			{selectedId ? <>
-				<div class="version-navigation">
+				<div class="navigation">
 					<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
 					<BtnLink link={previousVersion ? `/versions/?id=${previousVersion.id}` : undefined}
 						icon="arrow_left" label={locale('versions.previous')} />

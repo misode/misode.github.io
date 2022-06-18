@@ -16,7 +16,7 @@ export function Partners({}: Props) {
 	useTitle(locale('title.partners'))
 
 	return <main>
-		<div class="category">
+		<div class="container">
 			{partners.map(p => <ToolCard title={locale(`partner.${p}`)}>
 				{config.generators.filter(g => g.partner === p).map(g =>
 					<ToolCard title={locale(`partner.${p}.${g.id}`)} link={cleanUrl(g.url)} />

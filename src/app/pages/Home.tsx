@@ -10,7 +10,7 @@ export function Home({}: Props) {
 	const { locale } = useLocale()
 	useTitle(locale('title.home'))
 	return <main>
-		<div class="home">
+		<div class="container home">
 			<ToolCard title="Data packs">
 				{config.generators.filter(g => !g.category).map(g => 
 					<ToolCard title={locale(g.id)} link={cleanUrl(g.url)} />
