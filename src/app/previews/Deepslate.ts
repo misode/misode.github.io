@@ -98,7 +98,7 @@ export class Deepslate {
 		const newCacheState = [settings, `${seed}`, biomeState]
 		if (!deepEqual(this.cacheState, newCacheState)) {
 			const biomeSource = checkVersion(this.loadedVersion, '1.19') ? this.d.BiomeSource.fromJson(biomeState)
-				: new this.d.FixedBiome(checkVersion(this.loadedVersion, '1.18.2') ? this.d.Identifier.parse(biomeState as string) : biomeState as any)
+				: new this.d.FixedBiomeSource(checkVersion(this.loadedVersion, '1.18.2') ? this.d.Identifier.parse(biomeState as string) : biomeState as any)
 			const noiseSettings = typeof settings === 'string' ? this.d.WorldgenRegistries.NOISE_SETTINGS.getOrThrow(this.d.Identifier.parse(settings)) : this.d.NoiseGeneratorSettings.fromJson(settings)
 			const chunkGenerator = new this.d.NoiseChunkGenerator(seed, biomeSource, noiseSettings)
 			this.settingsCache = noiseSettings.noise

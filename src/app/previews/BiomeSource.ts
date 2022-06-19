@@ -6,17 +6,6 @@ import { stringToColor } from '../Utils.js'
 import { DEEPSLATE } from './Deepslate.js'
 import { getProjectData } from './NoiseSettings.js'
 
-const LAYERS = {
-	temperature: [-1, 1],
-	humidity: [-1, 1],
-	continentalness: [-1.1, 1],
-	erosion: [-1, 1],
-	weirdness: [-1, 1],
-	offset: [-1, 1],
-	factor: [0, 12],
-	jaggedness: [0, 1],
-}
-
 type Triple = [number, number, number]
 type BiomeColors = Record<string, Triple>
 type BiomeSourceOptions = {
@@ -26,7 +15,6 @@ type BiomeSourceOptions = {
 	res: number,
 	seed: bigint,
 	version: VersionId,
-	layers: Set<keyof typeof LAYERS | 'biomes'>,
 	settings: unknown,
 	project: Project,
 }
@@ -41,31 +29,15 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 	const row = img.width * 4 / options.res
 	const col = 4 / options.res
 
-	// const xRange: Triple = [ox * options.scale, (200 + ox) * options.scale, options.res * options.scale]
-	// const zRange: Triple = [oz * options.scale, (200 + oz) * options.scale, options.res * options.scale]
-
-	// const biomes = !options.layers.has('biomes') ? undefined : biomeSource.getBiomes?.(...xRange, 64, 65, 1, ...zRange)
-	// const layers = [...options.layers].filter(l => l !== 'biomes') as (keyof typeof LAYERS)[]
-	// const noise = layers.length === 0 ? undefined : biomeSource.getClimates?.(...xRange, 64, 65, 1, ...zRange)
-
 	const { palette, data: biomes } = DEEPSLATE.fillBiomes(minX * options.scale * 4, (minX + 200) * options.scale * 4, minZ * options.scale * 4, (minZ + 200) * options.scale * 4, options.res * options.scale)
 
 	for (let x = 0; x < 200; x += options.res) {
 		for (let z = 0; z < 200; z += options.res) {
 			const i = z * row + x * col
 			const j = (x / options.res) * 200 / options.res + z / options.res
-			// const worldX = (x + ox) * options.scale
-			// const worldZ = (z + oz) * options.scale
 			let color: Triple = [50, 50, 50]
-			// if (options.layers.has('biomes')) {
 			const biome = palette.get(biomes[j])
 			color = getBiomeColor(biome ?? '', options.biomeColors)
-			// } else if (noise && layers[0]) {
-			// 	const value = noise[j][layers[0]]
-			// 	const [min, max] = LAYERS[layers[0]]
-			// 	const brightness = (value - min) / (max - min) * 256
-			// 	color = [brightness, brightness, brightness]
-			// }
 			data[i] = color[0]
 			data[i + 1] = color[1]
 			data[i + 2] = color[2]
@@ -257,9 +229,9 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:desert': [250,148,24],
 	'minecraft:desert_hills': [210,95,18],
 	'minecraft:desert_lakes': [255,188,64],
-	'minecraft:end_barrens': [128,128,255],
-	'minecraft:end_highlands': [128,128,255],
-	'minecraft:end_midlands': [128,128,255],
+	'minecraft:end_barrens': [39,30,61],
+	'minecraft:end_highlands': [232,244,178],
+	'minecraft:end_midlands': [194,187,136],
 	'minecraft:eroded_badlands': [255,109,61],
 	'minecraft:flower_forest': [45,142,73],
 	'minecraft:forest': [5,102,33],
@@ -300,7 +272,7 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:shattered_savanna': [229,218,135],
 	'minecraft:windswept_savanna': [229,218,135],
 	'minecraft:shattered_savanna_plateau': [207,197,140],
-	'minecraft:small_end_islands': [128,128,255],
+	'minecraft:small_end_islands': [16,12,28],
 	'minecraft:snowy_beach': [250,240,192],
 	'minecraft:snowy_mountains': [160,160,160],
 	'minecraft:snowy_taiga': [49,85,74],
@@ -320,7 +292,7 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:tall_birch_forest': [88,156,108],
 	'minecraft:old_growth_birch_forest': [88,156,108],
 	'minecraft:tall_birch_hills': [71,135,90],
-	'minecraft:the_end': [128,128,255],
+	'minecraft:the_end': [59,39,84],
 	'minecraft:the_void': [0,0,0],
 	'minecraft:warm_ocean': [0,0,172],
 	'minecraft:warped_forest': [73,144,123],

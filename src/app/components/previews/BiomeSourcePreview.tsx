@@ -4,10 +4,8 @@ import { useLocale, useProject, useStore } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
 import { biomeMap, getBiome } from '../../previews/index.js'
 import { newSeed, randomSeed } from '../../Utils.js'
-import { Btn, BtnMenu } from '../index.js'
+import { Btn } from '../index.js'
 import type { PreviewProps } from './index.js'
-
-const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness'] as const
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
@@ -15,7 +13,6 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const [configuredSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
-	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
 	const { biomeColors } = useStore()
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
@@ -31,7 +28,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { settings, biomeColors, layers, offset: offset.current, scale, seed, res: res.current, version, project }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed, res: res.current, version, project }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -49,21 +46,21 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { settings, biomeColors, layers, offset: offset.current, scale, seed: configuredSeed, res: 1, version, project }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed: configuredSeed, res: 1, version, project }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [version, state, scale, configuredSeed, layers, biomeColors, project])
+	}, [version, state, scale, configuredSeed, biomeColors, project])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [version, state, scale, configuredSeed, layers, shown, biomeColors, project])
+	}, [version, state, scale, configuredSeed, shown, biomeColors, project])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale
@@ -74,20 +71,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	return <>
 		<div class="controls preview-controls">
 			{focused && <Btn label={focused.biome as string} class="no-pointer" />}
-			{type === 'multi_noise' &&
-				<BtnMenu icon="stack" tooltip={locale('configure_layers')}>
-					{LAYERS.map(name => {
-						const enabled = layers.has(name)
-						return <Btn label={locale(`layer.${name}`)} 
-							active={enabled}
-							tooltip={enabled ? locale('enabled') : locale('disabled')}
-							onClick={(e) => {
-								setLayers(new Set([name]))
-								e.stopPropagation()
-							}} />
-					})}
-				</BtnMenu>}
-			{(type === 'multi_noise' || type === 'checkerboard') && <>
+			{type !== 'fixed' && <>
 				<Btn icon="dash" tooltip={locale('zoom_out')}
 					onClick={() => changeScale(scale * 1.5)} />
 				<Btn icon="plus" tooltip={locale('zoom_in')}
