@@ -42,8 +42,8 @@ export function ChangelogList({ changes, defaultOrder }: Props) {
 	}, [filteredChangelogs, sort])
 
 	return <>
-		<div class="changelog-query">
-			<TextInput class="btn btn-input changelog-search" list="sound-list" placeholder={locale('changelog.search')}
+		<div class="query">
+			<TextInput class="btn btn-input query-search" list="sound-list" placeholder={locale('changelog.search')}
 				value={search} onChange={v => setSearch(v, true)} />
 			<Btn icon={sort ? 'sort_desc' : 'sort_asc'} label={sort ? 'Newest first' : 'Oldest first'} onClick={() => setSort(!sort)} />
 		</div>

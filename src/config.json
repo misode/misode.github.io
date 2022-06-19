@@ -117,7 +117,8 @@
     {
       "id": "text_component",
       "url": "text-component",
-      "schema": "text_component"
+      "schema": "text_component",
+      "noPath": true
     },
     {
       "id": "chat_type",
@@ -148,6 +149,7 @@
       "id": "world",
       "url": "world",
       "schema": "world_settings",
+      "noPath": true,
       "category": "worldgen",
       "minVersion": "1.16"
     },

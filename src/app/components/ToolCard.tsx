@@ -1,19 +1,21 @@
 import type { ComponentChildren } from 'preact'
 import { Icons } from './Icons.js'
+import { Octicon } from './Octicon.jsx'
 
 type ToolCardProps = {
 	title: string,
 	desc?: string,
 	link?: string,
 	icon?: keyof typeof Icons,
+	titleIcon?: keyof typeof Octicon,
 	children?: ComponentChildren,
 }
-export function ToolCard({ title, desc, link, icon, children }: ToolCardProps) {
+export function ToolCard({ title, desc, link, icon, titleIcon, children }: ToolCardProps) {
 	const content = <>
 		<div class="tool-head">
 			{icon && Icons[icon]}
 			<div>
-				<h3>{title}</h3>
+				<h3>{title}{titleIcon && Octicon[titleIcon]}</h3>
 				<p>{desc}</p>
 			</div>
 		</div>

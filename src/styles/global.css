@@ -1011,7 +1011,7 @@ main.has-project {
 	grid-row: 1 / 3;
 }
 
-.home > *:nth-child(n+4) {
+.home > *:nth-child(n+3) {
 	grid-column: 1 / 3;
 }
 
@@ -1048,7 +1048,21 @@ a.tool-card:hover {
 }
 
 .tool-head h3 {
+	display: flex;
 	font-weight: unset;
+	align-items: center;
+}
+
+.tool-head h3 svg {
+	fill: var(--text-2);
+	width: 20px;
+	height: 20px;
+	margin-left: 4px;
+	transition: margin 0.2s;
+}
+
+.tool-card:hover > .tool-head h3 svg {
+	margin-left: 10px;
 }
 
 .tool-head p {
@@ -1619,16 +1633,16 @@ hr {
 	color: var(--text-1);
 }
 
-.changelog-query {
+.query {
 	display: flex;
 	margin-bottom: 8px;
 }
 
-.changelog-query > *:not(:first-child) {
+.query > *:not(:first-child) {
 	margin-left: 8px;
 }
 
-.changelog-search {
+.query-search {
 	flex-basis: 100%;
 	background-color: var(--background-2);
 }
@@ -1832,6 +1846,10 @@ hr {
 
 .guide-card:not(:last-child) {
 	margin-bottom: 8px;
+}
+
+.guide-card:hover {
+	background-color: var(--background-3);
 }
 
 .guide-versions {
