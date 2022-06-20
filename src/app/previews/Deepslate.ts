@@ -1,4 +1,5 @@
 import * as deepslate19 from 'deepslate/worldgen'
+import { RandomState } from 'deepslate/worldgen'
 import type { VersionId } from '../services/index.js'
 import { checkVersion, fetchAllPresets } from '../services/index.js'
 import { BiMap, deepClone, deepEqual } from '../Utils.js'
@@ -23,6 +24,7 @@ export class Deepslate {
 	private cacheState: unknown
 	private settingsCache: NoiseSettings | undefined
 	private generatorCache: ChunkGenerator | undefined
+	private randomStateCache: deepslate19.RandomState | undefined
 	private chunksCache: Chunk[] = []
 	private biomeCache: Map<string, string> = new Map()
 
@@ -100,9 +102,16 @@ export class Deepslate {
 			const biomeSource = checkVersion(this.loadedVersion, '1.19') ? this.d.BiomeSource.fromJson(biomeState)
 				: new this.d.FixedBiomeSource(checkVersion(this.loadedVersion, '1.18.2') ? this.d.Identifier.parse(biomeState as string) : biomeState as any)
 			const noiseSettings = typeof settings === 'string' ? this.d.WorldgenRegistries.NOISE_SETTINGS.getOrThrow(this.d.Identifier.parse(settings)) : this.d.NoiseGeneratorSettings.fromJson(settings)
-			const chunkGenerator = new this.d.NoiseChunkGenerator(seed, biomeSource, noiseSettings)
+			const chunkGenerator = checkVersion(this.loadedVersion, '1.19')
+				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
+				: new (this.d.NoiseChunkGenerator as any)(seed, biomeSource, noiseSettings)
 			this.settingsCache = noiseSettings.noise
 			this.generatorCache = chunkGenerator
+			if (checkVersion(this.loadedVersion, '1.19')) {
+				this.randomStateCache = new this.d.RandomState(noiseSettings, seed)
+			} else {
+				this.randomStateCache = undefined
+			}
 			this.chunksCache = []
 			this.biomeCache = new Map()
 			this.cacheState = deepClone(newCacheState)
@@ -110,6 +119,9 @@ export class Deepslate {
 	}
 
 	public generateChunks(minX: number, width: number, biome = 'unknown') {
+		if (!this.loadedVersion) {
+			throw new Error('No deepslate version loaded')
+		}
 		minX = Math.floor(minX)
 		if (!this.settingsCache) {
 			throw new Error('Tried to generate chunks before settings are loaded')
@@ -127,14 +139,25 @@ export class Deepslate {
 			if (!this.generatorCache) {
 				throw new Error('Tried to generate chunks before generator is loaded')
 			}
-			this.generatorCache.fill(chunk, true)
-			this.generatorCache.buildSurface(chunk, biome)
+			if (checkVersion(this.loadedVersion!, '1.19')) {
+				if (!this.randomStateCache) {
+					throw new Error('Tried to generate chunks before random state is loaded')
+				}
+				this.generatorCache.fill(this.randomStateCache, chunk, true)
+				this.generatorCache.buildSurface(this.randomStateCache, chunk, biome)
+			} else {
+				(this.generatorCache as any).fill(chunk, true);
+				(this.generatorCache as any).buildSurface(chunk, biome)
+			}
 			this.chunksCache.push(chunk)
 			return chunk
 		})
 	}
 
 	public fillBiomes(minX: number, maxX: number, minZ: number, maxZ: number, step = 1) {
+		if (!this.loadedVersion) {
+			throw new Error('No deepslate version loaded')
+		}
 		if (!this.generatorCache) {
 			throw new Error('Tried to fill biomes before generator is loaded')
 		}
@@ -156,7 +179,14 @@ export class Deepslate {
 				const posKey = `${x}:${z}`
 				let biome = this.biomeCache.get(posKey)
 				if (!biome) {
-					biome = this.generatorCache.computeBiome(x, quartY, z).toString()
+					if (checkVersion(this.loadedVersion, '1.19')) {
+						if (!this.randomStateCache) {
+							throw new Error('Tried to compute biomes before random state is loaded')
+						}
+						biome = this.generatorCache.computeBiome(this.randomStateCache, x, quartY, z).toString()
+					} else {
+						biome = (this.generatorCache as any).computeBiome(x, quartY, z).toString() as string
+					}
 					this.biomeCache.set(posKey, biome)
 				}
 				data[i++] = biomeIds.computeIfAbsent(biome, () => biomeId++)
@@ -170,20 +200,40 @@ export class Deepslate {
 	}
 
 	public loadDensityFunction(state: unknown, seed: bigint) {
-		const random = this.d.XoroshiroRandom.create(seed).forkPositional()
-		const settings = this.d.NoiseSettings.fromJson({
-			min_y: -64,
-			height: 384,
-			size_horizontal: 1,
-			size_vertical: 2,
-			sampling: { xz_scale: 1, y_scale: 1, xz_factor: 80, y_factor: 160 },
-			bottom_slide: { target: 0.1171875, size: 3, offset: 0 },
-			top_slide: { target: -0.078125, size: 2, offset: 8 },
-			terrain_shaper: { offset: 0.044, factor: 4, jaggedness: 0 },
-		})
-		this.settingsCache = settings
-		const originalFn = this.d.DensityFunction.fromJson(state)
-		return originalFn.mapAll(new this.d.NoiseRouter.Visitor(random, settings))
+		if (!this.loadedVersion) {
+			throw new Error('No deepslate version loaded')
+		}
+		if (checkVersion(this.loadedVersion, '1.19')) {
+			const settings = this.d.NoiseGeneratorSettings.create({
+				noise: {
+					minY: -64,
+					height: 384,
+					xzSize: 1,
+					ySize: 2,
+				},
+				noiseRouter: this.d.NoiseRouter.create({
+					finalDensity: this.d.DensityFunction.fromJson(state),
+				}),
+			})
+			this.settingsCache = settings.noise
+			const randomState = new RandomState(settings, seed)
+			return randomState.router.finalDensity
+		} else {
+			const random = this.d.XoroshiroRandom.create(seed).forkPositional()
+			const settings = this.d.NoiseSettings.fromJson({
+				min_y: -64,
+				height: 384,
+				size_horizontal: 1,
+				size_vertical: 2,
+				sampling: { xz_scale: 1, y_scale: 1, xz_factor: 80, y_factor: 160 },
+				bottom_slide: { target: 0.1171875, size: 3, offset: 0 },
+				top_slide: { target: -0.078125, size: 2, offset: 8 },
+				terrain_shaper: { offset: 0.044, factor: 4, jaggedness: 0 },
+			})
+			this.settingsCache = settings
+			const originalFn = this.d.DensityFunction.fromJson(state)
+			return originalFn.mapAll(new (this.d.NoiseRouter as any).Visitor(random, settings))
+		}
 	}
 
 	public getNoiseSettings(): NoiseSettings {
@@ -209,9 +259,9 @@ interface NoiseSettings {
 }
 
 interface ChunkGenerator {
-	fill(chunk: Chunk, onlyFirstZ?: boolean): void
-	buildSurface(chunk: Chunk, biome: string): void
-	computeBiome(quartX: number, quartY: number, quartZ: number): deepslate19.Identifier
+	fill(randomState: deepslate19.RandomState, chunk: Chunk, onlyFirstZ?: boolean): void
+	buildSurface(randomState: deepslate19.RandomState, chunk: Chunk, biome: string): void
+	computeBiome(randomState: deepslate19.RandomState, quartX: number, quartY: number, quartZ: number): deepslate19.Identifier
 }
 
 interface Chunk {
