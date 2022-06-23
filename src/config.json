@@ -25,6 +25,11 @@
       "name": "日本語"
     },
     {
+      "code": "ko",
+      "name": "한국어",
+      "schemas": false
+    },
+    {
       "code": "pl",
       "name": "Polski"
     },
