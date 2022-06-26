@@ -15,7 +15,7 @@ tags:
 Are you getting this frustrating error? Let's look at why it happens and how to prevent it.
 
 ## Why does it happen?
-Feature order cycles happen when two biomes reference the same placed feature in the same step, but in a different order.
+Feature order cycles happen when two biomes reference the same [placed feature](/guides/placed-feature/) in the same step, but in a different order.
 
 Let's try with an example. We have two biomes here:  
 **`data/example/worldgen/biome/forest.json`**
