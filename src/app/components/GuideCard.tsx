@@ -18,8 +18,8 @@ export function GuideCard({ title, link, versions, tags, activeTags, toggleTag }
 	return <a class="guide-card" href={link} >
 		<span class="guide-versions">{versions.join(' • ')}</span>
 		<h3>{title}</h3>
-		<div class="guide-tags">
+		{tags.length > 0 && <div class="guide-tags">
 			{tags.sort().map(tag => <ChangelogTag label={tag} onClick={onToggleTag(tag)} active={activeTags?.includes(tag)} />)}
-		</div>
+		</div>}
 	</a>
 }
