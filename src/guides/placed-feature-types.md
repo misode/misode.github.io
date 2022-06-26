@@ -30,7 +30,31 @@ There are two fields in the placed feature configuration:
 * f`feature`: The configured feature that the placed feature is going to place. Can either be referencing a configured feature file or be directly inlined.
 * f`placement`: The list of placement modifiers, in order. Each modifier has a f`type` field and depending on the placement modifier, extra fields for configuration.
 
-## Placement modifier types
+## Placement modifiers
+Without any placement modifiers a feature is by default placed once at the most negative corner of the chunk at Y=0. Using a combination of different modifiers, this position can be altered.
+
+In general there are 3 categories of modifiers, although some modifiers fall in multiple categories:
+* **Repeating**: changes how many times the feature should spawn
+  * [`count`](#count): Simple repeating count
+  * [`noise_based_count`](#noise_based_count): Variable count based on a noise map
+  * [`noise_threshold_count`](#noise_threshold_count): Two possible counts based on a noise map
+* **Filter**: whether the feature should spawn based on conditions
+  * [`biome`](#biome): Checks the biome
+  * [`block_predicate_filter`](#block_predicate_filter): Checks a block predicate
+  * [`environment_scan`](#environment_scan): Scans up or down for blocks
+  * [`rarity_filter`](#rarity_filter): Simple probability
+  * [`surface_relative_threshold_filter`](#surface_relative_threshold_filter): Checks the height relative to the surface
+  * [`surface_water_depth_filter`](#surface_water_depth_filter): Checks the depth of the water
+* **Transform**: changes the position of the feature in the chunk
+  * [`carving_mask`](#carving_mask): Returns all carved out blocks
+  * [`count_on_every_layer`](#count_on_every_layer): Count, in-square, and multi-layered heightmap in one
+  * [`environment_scan`](#environment_scan): Moves up or down based on block predicates
+  * [`height_range`](#height_range): Sets the Y coordinate using a height provider
+  * [`heightmap`](#heightmap): Sets the Y coordinate to the surface height
+  * [`in_square`](#in_square): Offsets the X and Z coordinates randomly in the chunk
+  * [`random_offset`](#random_offset): Applies a random offset
+
+## Modifier types
 
 ### `biome`
 Returns the current position if the biome at the current position includes this placed feature. Otherwise, returns nothing.
@@ -58,7 +82,7 @@ Checks for block(s) relative to the current position. If the predicate passes, t
     * s`would_survive`: Contains an offset and a block state. If the block at the offset would survive, the predicate passes.
 
 ### `carving_mask`
-Returns all locations in the current chunk if they have been carved out by any configured carver (Not noise caves)
+Returns all locations in the current chunk if they have been carved out by any configured carver. Importantly, this does not include noise caves.
 
 * f`step`: Either `air` or `liquid`
 
