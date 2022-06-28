@@ -1057,12 +1057,12 @@ a.tool-card:hover {
 	fill: var(--text-2);
 	width: 20px;
 	height: 20px;
-	margin-left: 4px;
+	margin-left: 8px;
 	transition: margin 0.2s;
 }
 
 .tool-card:hover > .tool-head h3 svg {
-	margin-left: 10px;
+	margin-left: 14px;
 }
 
 .tool-head p {
@@ -1850,6 +1850,22 @@ hr {
 
 .guide-card:hover {
 	background-color: var(--background-3);
+}
+
+.guide-card h3 {
+	display: flex;
+	align-items: center;
+}
+
+.guide-card h3 svg {
+	width: 20px;
+	height: 20px;
+	margin-left: 8px;
+	transition: margin 0.2s;
+}
+
+.guide-card:hover h3 svg {
+	margin-left: 14px;
 }
 
 .guide-versions {

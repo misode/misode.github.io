@@ -7,7 +7,7 @@ type ToolCardProps = {
 	desc?: string,
 	link?: string,
 	icon?: keyof typeof Icons,
-	titleIcon?: keyof typeof Octicon,
+	titleIcon?: keyof typeof Octicon | keyof typeof Icons,
 	children?: ComponentChildren,
 }
 export function ToolCard({ title, desc, link, icon, titleIcon, children }: ToolCardProps) {
@@ -15,7 +15,7 @@ export function ToolCard({ title, desc, link, icon, titleIcon, children }: ToolC
 		<div class="tool-head">
 			{icon && Icons[icon]}
 			<div>
-				<h3>{title}{titleIcon && Octicon[titleIcon]}</h3>
+				<h3>{title}{titleIcon && (titleIcon in Octicon ? (Octicon as any)[titleIcon] : (Icons as any)[titleIcon])}</h3>
 				<p>{desc}</p>
 			</div>
 		</div>
