@@ -1,7 +1,8 @@
 import type { DataModel } from '@mcschema/core'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
-import { disectFilePath, DRAFT_PROJECT, getFilePath, useLocale, useProject } from '../../contexts/index.js'
+import config from '../../Config.js'
+import { disectFilePath, DRAFT_PROJECT, getFilePath, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import type { VersionId } from '../../services/index.js'
 import { stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
@@ -22,6 +23,7 @@ interface Props {
 }
 export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const { projects, project, changeProject, file, openFile, updateFile } = useProject()
 
 	const [treeViewMode, setTreeViewMode] = useState(Store.getTreeViewMode())
@@ -66,11 +68,17 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 
 	const onDownload = async () => {
 		if (!download.current) return
+		let hasPack = false
 		const entries = project.files.flatMap(file => {
 			const path = getFilePath(file)
 			if (path === undefined) return []
+			if (path === 'pack.mcmeta') hasPack = true
 			return [[path, stringifySource(file.data)]] as [string, string][]
 		})
+		if (!hasPack) {
+			const pack_format = config.versions.find(v => v.id === version)!.pack_format
+			entries.push(['pack.mcmeta', stringifySource({ pack: { pack_format, description: '' } })])
+		}
 		const url = await writeZip(entries)
 		download.current.setAttribute('href', url)
 		download.current.setAttribute('download', `${project.name.replaceAll(' ', '_')}.zip`)
