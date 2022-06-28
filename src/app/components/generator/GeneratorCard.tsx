@@ -39,8 +39,6 @@ export function GeneratorCard({ id, minimal }: Props) {
 		return []
 	}, [gen])
 
-	console.log(icon)
-
 	return <a class="guide-card" href={cleanUrl(gen.url)} >
 		<span class="guide-versions">
 			{gen.partner ? locale(`partner.${gen.partner}`) : versions.join(' • ')}

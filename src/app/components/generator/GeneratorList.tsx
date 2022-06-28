@@ -29,7 +29,6 @@ export function GeneratorList({ predicate }: Props) {
 		const query = search.split(' ').map(q => q.trim().toLowerCase()).filter(q => q.length > 0)
 		return versionedGenerators.filter(gen => {
 			const content = `${gen.id} ${gen.category ?? ''} ${gen.path ?? ''} ${gen.partner ?? ''} ${locale(gen.id).toLowerCase()}`
-			console.log(content, query)
 			return query.every(q => {
 				if (q.startsWith('!')) {
 					return q.length === 1 || !content.includes(q.slice(1))
