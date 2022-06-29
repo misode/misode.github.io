@@ -16,7 +16,7 @@ export function Changelog({}: Props) {
 		<Ad type="text" id="changelog" />
 		{error && <ErrorPanel error={error} />}
 		<div class="container changelog">
-			<ChangelogList changes={changes} defaultOrder="desc" />
+			<ChangelogList changes={changes} defaultOrder="desc" limit={100} />
 		</div>
 		<Footer />
 	</main>

@@ -11,8 +11,9 @@ const SEARCH_KEY = 'search'
 interface Props {
 	changes: Change[] | undefined,
 	defaultOrder: 'asc' | 'desc',
+	limit?: number,
 }
-export function ChangelogList({ changes, defaultOrder }: Props) {
+export function ChangelogList({ changes, defaultOrder, limit }: Props) {
 	const { locale } = useLocale()
 
 	const [search, setSearch] = useSearchParam(SEARCH_KEY)
@@ -41,6 +42,15 @@ export function ChangelogList({ changes, defaultOrder }: Props) {
 		return filteredChangelogs?.sort((a, b) => sort ? b.order - a.order : a.order - b.order)
 	}, [filteredChangelogs, sort])
 
+	const [limitActive, setLimitActive] = useState(true)
+
+	const limitedChangelogs = useMemo(() => {
+		if (!limitActive || (limit ?? -1) < 0) return sortedChangelogs 
+		return sortedChangelogs?.slice(0, limit)
+	}, [sortedChangelogs, limitActive, limit, sort /* why is this necessary??? */])
+
+	const hiddenChanges = (sortedChangelogs?.length ?? 0) - (limitedChangelogs?.length ?? 0)
+
 	return <>
 		<div class="query">
 			<TextInput class="btn btn-input query-search" list="sound-list" placeholder={locale('changelog.search')}
@@ -51,12 +61,15 @@ export function ChangelogList({ changes, defaultOrder }: Props) {
 			{tags.map(tag => <ChangelogTag label={tag} onClick={() => toggleTag(tag)} />)}
 		</div>}
 		<div class="changelog-list">
-			{sortedChangelogs === undefined
+			{limitedChangelogs === undefined
 				? <span class="note">{locale('loading')}</span>
-				: sortedChangelogs.length === 0
+				: limitedChangelogs.length === 0
 					? <span class="note">{locale('changelog.no_results')}</span>
-					:	sortedChangelogs.map(change =>
+					:	limitedChangelogs.map(change =>
 						<ChangelogEntry change={change} activeTags={tags} toggleTag={toggleTag} />)}
+			{hiddenChanges > 0 && (
+				<Btn label={locale('changelog.show_more', `${hiddenChanges}`)} onClick={() => setLimitActive(false)}/>
+			)}
 		</div>
 	</>
 }
