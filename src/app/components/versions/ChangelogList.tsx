@@ -25,7 +25,7 @@ export function ChangelogList({ changes, defaultOrder }: Props) {
 			if (!tags.every(tag => change.tags.includes(tag))) {
 				return false
 			}
-			const content = change.tags.join(' ') + ' ' + change.content.toLowerCase()
+			const content = `${change.group} ${change.version} ${change.tags.join(' ')} ${change.content.toLowerCase()}`
 			return query.every(q => {
 				if (q.startsWith('!')) {
 					return q.length === 1 || !content.includes(q.slice(1))
