@@ -167,18 +167,18 @@
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/density_function",
-      "url": "worldgen/density-function",
-      "tags": ["worldgen"],
-      "schema": "density_function",
-      "minVersion": "1.18.2"
-    },
-    {
       "id": "worldgen/placed_feature",
       "url": "worldgen/placed-feature",
       "tags": ["worldgen"],
       "schema": "placed_feature",
       "minVersion": "1.18"
+    },
+    {
+      "id": "worldgen/density_function",
+      "url": "worldgen/density-function",
+      "tags": ["worldgen"],
+      "schema": "density_function",
+      "minVersion": "1.18.2"
     },
     {
       "id": "worldgen/noise",
