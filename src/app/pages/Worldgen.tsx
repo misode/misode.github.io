@@ -10,7 +10,10 @@ export function Worldgen({}: Props) {
 
 	return <main>
 		<div class="container worldgen">
-			<GeneratorList predicate={gen => gen.tags?.includes('worldgen')} />
+			<GeneratorList predicate={gen => {
+				console.log(gen.tags, gen.tags?.includes('worldgen'))
+				return gen.tags?.includes('worldgen')
+			}} />
 		</div>
 		<Footer />
 	</main>
