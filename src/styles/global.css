@@ -1037,7 +1037,8 @@ a.tool-card:hover {
 }
 
 .tool-head h3 svg {
-	fill: var(--text-2);
+	color: var(--text-2);
+	fill: currentColor;
 	width: 20px;
 	height: 20px;
 	margin-left: 8px;
@@ -1855,6 +1856,8 @@ hr {
 .card-title svg {
 	width: 20px;
 	height: 20px;
+	color: var(--text-2);
+	fill: currentColor;
 	margin-left: 8px;
 	transition: margin 0.2s;
 }
