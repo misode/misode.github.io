@@ -2,15 +2,7 @@ import { useMemo, useState } from 'preact/hooks'
 import { ChangelogTag, Footer, GuideCard, TextInput, VersionSwitcher } from '../components/index.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import { useTags } from '../hooks/index.js'
-
-interface Guide {
-	id: string,
-	title: string,
-	versions?: string[],
-	tags?: string[],
-}
-
-declare var __GUIDES__: Guide[]
+import { getGuides } from '../services/Guides.js'
 
 interface Props {
 	path?: string
@@ -26,8 +18,8 @@ export function Guides({}: Props) {
 	const [versionFilter, setVersionFiler] = useState(false)
 
 	const versionedGuides = useMemo(() => {
-		if (versionFilter === false) return __GUIDES__
-		return __GUIDES__.filter(guide => {
+		if (versionFilter === false) return getGuides()
+		return getGuides().filter(guide => {
 			return guide.versions?.includes(version)
 		})
 	}, [version, versionFilter])
@@ -62,7 +54,7 @@ export function Guides({}: Props) {
 			</> : filteredGuides.length === 0 ? <>
 				<span class="note">{locale('guides.no_results.query')}</span>
 			</> : filteredGuides.map(g =>
-				<GuideCard title={g.title} link={`/guides/${g.id}/`} tags={g.tags ?? []} versions={g.versions ?? []} activeTags={activeTags} toggleTag={toggleTag} />
+				<GuideCard id={g.id} activeTags={activeTags} toggleTag={toggleTag} />
 			)}
 		</div>
 		<Footer />

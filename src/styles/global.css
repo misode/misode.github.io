@@ -999,31 +999,14 @@ main.has-project {
 	margin: 0 auto;
 }
 
-.home {
+.worldgen {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 0 8px;
-	align-items: flex-start;
-	grid-template-rows: min-content 1fr repeat(6, auto);
-}
-
-.home > *:first-child {
-	grid-row: 1 / 3;
-}
-
-.home > *:nth-child(n+3) {
-	grid-column: 1 / 3;
-}
-
-h2 {
-	font-size: 24px;
-	font-weight: unset;
+	gap: 16px;
 }
 
 .tool-card {
 	display: flex;
 	flex-direction: column;
-	margin-bottom: 8px;
 	color: var(--text-2);
 	background-color: var(--background-2);
 	box-shadow: 1px 1px 7px -3px #000;
@@ -1727,6 +1710,11 @@ hr {
 	color: var(--text-3);
 }
 
+.version-detail h2 {
+	font-size: 24px;
+	font-weight: unset;
+}
+
 .version-detail h2,
 .version-detail h3,
 .version-detail h4 {
@@ -1835,7 +1823,14 @@ hr {
 	min-height: 325.667px;
 }
 
-.guide-card {
+.card-group {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	align-items: flex-start;
+}
+
+.card {
 	display: block;
 	text-decoration: none;
 	color: var(--text-2);
@@ -1844,33 +1839,44 @@ hr {
 	border-radius: 6px;
 }
 
-.guide-card:not(:last-child) {
+.card:not(:last-child) {
 	margin-bottom: 8px;
 }
 
-.guide-card:hover {
+.card:hover {
 	background-color: var(--background-3);
 }
 
-.guide-card h3 {
+.card-title {
 	display: flex;
 	align-items: center;
 }
 
-.guide-card h3 svg {
+.card-title svg {
 	width: 20px;
 	height: 20px;
 	margin-left: 8px;
 	transition: margin 0.2s;
 }
 
-.guide-card:hover h3 svg {
+.card:hover .card-title svg {
 	margin-left: 14px;
 }
 
-.guide-versions {
+.card-overlay {
 	color: var(--text-3);
 	float: right;
+}
+
+.card-subtitle {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.card-tags {
+	margin-top: 12px;
+	display: flex;
+	flex-wrap: wrap;
 }
 
 .guide {
@@ -1885,12 +1891,6 @@ hr {
 .guide-share.active {
 	fill: var(--accent-success);
 	color: var(--text-2);
-}
-
-.guide-tags {
-	margin-top: 12px;
-	display: flex;
-	flex-wrap: wrap;
 }
 
 .guide .ad {
@@ -2135,13 +2135,8 @@ hr {
 
 /* SMALL */
 @media screen and (max-width: 580px) {
-	.home {
+	.card-group {
 		grid-template-columns: 1fr;
-		gap: 0;
-	}
-
-	.home > * {
-		grid-column: 1 / 2;
 	}
 
 	.title h1 {
@@ -2198,7 +2193,7 @@ hr {
 		display: none;
 	}
 
-	.guide-versions {
+	.card-overlay {
 		display: none;
 	}
 }

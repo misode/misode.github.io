@@ -1,4 +1,3 @@
-export * from './Category.js'
 export * from './Changelog.js'
 export * from './Generator.js'
 export * from './Generators.jsx'

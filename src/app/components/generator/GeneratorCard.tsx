@@ -4,7 +4,7 @@ import { useLocale } from '../../contexts/Locale.jsx'
 import type { VersionId } from '../../services/Schemas.js'
 import { checkVersion } from '../../services/Schemas.js'
 import { cleanUrl } from '../../Utils.js'
-import { ChangelogTag, Icons, ToolCard } from '../index.js'
+import { Card, ChangelogTag, Icons, ToolCard } from '../index.js'
 
 interface Props {
 	id: string,
@@ -35,18 +35,14 @@ export function GeneratorCard({ id, minimal }: Props) {
 	}, [gen])
 
 	const tags = useMemo(() => {
-		if (gen.category === 'assets') return ['resource-pack']
+		if (gen.tags?.includes('assets')) return ['resource-pack']
 		return []
 	}, [gen])
 
-	return <a class="guide-card" href={cleanUrl(gen.url)} >
-		<span class="guide-versions">
-			{gen.partner ? locale(`partner.${gen.partner}`) : versions.join(' • ')}
-		</span>
-		<h3>{title}{icon && Icons[icon]}</h3>
-		{!gen.noPath && <p>/{gen.path ?? gen.id}</p>}
-		{tags.length > 0 && <div class="guide-tags">
+	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.partner ? locale(`partner.${gen.partner}`) : versions.join(' • ')} link={cleanUrl(gen.url)}>
+		{!gen.noPath && <p class="card-subtitle">/{gen.path ?? gen.id}</p>}
+		{tags.length > 0 && <div class="card-tags">
 			{tags.sort().map(tag => <ChangelogTag label={tag} />)}
 		</div>}
-	</a>
+	</Card>
 }

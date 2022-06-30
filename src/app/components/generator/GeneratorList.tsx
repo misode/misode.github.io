@@ -7,7 +7,7 @@ import { GeneratorCard, TextInput, VersionSwitcher } from '../index.js'
 
 interface Props {
 	path?: string,
-	predicate?: (gen: ConfigGenerator) => boolean,
+	predicate?: (gen: ConfigGenerator) => boolean | undefined,
 }
 export function GeneratorList({ predicate }: Props) {
 	const { locale } = useLocale()
@@ -28,7 +28,7 @@ export function GeneratorList({ predicate }: Props) {
 	const filteredGenerators = useMemo(() => {
 		const query = search.split(' ').map(q => q.trim().toLowerCase()).filter(q => q.length > 0)
 		return versionedGenerators.filter(gen => {
-			const content = `${gen.id} ${gen.category ?? ''} ${gen.path ?? ''} ${gen.partner ?? ''} ${locale(gen.id).toLowerCase()}`
+			const content = `${gen.id} ${gen.tags?.join(' ') ?? ''} ${gen.path ?? ''} ${gen.partner ?? ''} ${locale(gen.id).toLowerCase()}`
 			return query.every(q => {
 				if (q.startsWith('!')) {
 					return q.length === 1 || !content.includes(q.slice(1))
@@ -38,7 +38,7 @@ export function GeneratorList({ predicate }: Props) {
 		})
 	}, [versionedGenerators, search, locale])
 
-	return <>
+	return <div class="generator-list">
 		<div class="query">
 			<TextInput class="btn btn-input query-search" placeholder={locale('generators.search')} value={search} onChange={setSearch} />
 			<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
@@ -48,5 +48,5 @@ export function GeneratorList({ predicate }: Props) {
 		</> : filteredGenerators.map(gen =>
 			<GeneratorCard id={gen.id} />
 		)}
-	</>
+	</div>
 }

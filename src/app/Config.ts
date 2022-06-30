@@ -19,7 +19,7 @@ export interface ConfigGenerator {
 	schema: string,
 	path?: string,
 	noPath?: boolean,
-	category?: string,
+	tags?: string[],
 	partner?: string,
 	minVersion?: string,
 	maxVersion?: string,

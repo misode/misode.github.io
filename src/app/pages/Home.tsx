@@ -24,30 +24,31 @@ export function Home({}: Props) {
 	}, [])
 
 	return <main>
-		<div class="container home">
-			<ToolCard title="Popular Generators">
-				<GeneratorCard minimal id="loot_table" />
-				<GeneratorCard minimal id="advancement" />
-				<GeneratorCard minimal id="predicate" />
-				<GeneratorCard minimal id="dimension" />
-				<ToolCard title="Worldgen" link="/worldgen/" titleIcon="arrow_right" />
-				<ToolCard title="More" link="/generators/" titleIcon="arrow_right" />
-			</ToolCard>
-			{favorites.length >= MIN_FAVORITES && <ToolCard title="Recently Used Generators">
-				{favorites.map(f => <GeneratorCard minimal id={f} />)}
-			</ToolCard>}
-			<ToolCard title="Report Inspector" icon="report"
-				link="https://misode.github.io/report/"
-				desc="Analyse your performance reports" />
-			<ToolCard title="Minecraft Sounds" icon="sounds"
-				link="/sounds/"
-				desc="Browse through and mix all the vanilla sounds" />
-			<ToolCard title="Data Pack Upgrader"
-				link="https://misode.github.io/upgrader/"
-				desc="Convert your data packs from 1.16 to 1.17 to 1.18" />
-			<ToolCard title="Technical Changelog" link="/changelog/" />
-			<ToolCard title="Minecraft Versions" link="/versions/" />
-			<ToolCard title="Data Pack Guides" link="/guides/" />
+		<div class="container">
+			<div class="card-group">
+				<ToolCard title="Popular Generators">
+					<GeneratorCard minimal id="loot_table" />
+					<GeneratorCard minimal id="advancement" />
+					<GeneratorCard minimal id="predicate" />
+					<ToolCard title="Worldgen" link="/worldgen/" titleIcon="worldgen" />
+					<ToolCard title="More" link="/generators/" titleIcon="arrow_right" />
+				</ToolCard>
+				{favorites.length >= MIN_FAVORITES && <ToolCard title="Recently Used Generators">
+					{favorites.map(f => <GeneratorCard minimal id={f} />)}
+				</ToolCard>}
+				<ToolCard title="Report Inspector" icon="report"
+					link="https://misode.github.io/report/"
+					desc="Analyse your performance reports" />
+				<ToolCard title="Minecraft Sounds" icon="sounds"
+					link="/sounds/"
+					desc="Browse through and mix all the vanilla sounds" />
+				<ToolCard title="Data Pack Upgrader"
+					link="https://misode.github.io/upgrader/"
+					desc="Convert your data packs from 1.16 to 1.17 to 1.18" />
+				<ToolCard title="Technical Changelog" link="/changelog/" />
+				<ToolCard title="Minecraft Versions" link="/versions/" />
+				<ToolCard title="Data Pack Guides" link="/guides/" />
+			</div>
 			<Giscus />
 			<Footer />
 		</div>

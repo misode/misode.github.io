@@ -6,11 +6,11 @@ interface Props {
 }
 export function Worldgen({}: Props) {
 	const { locale } = useLocale()
-	useTitle(locale('title.generator_category', locale('worldgen')))
+	useTitle(locale('title.worldgen'))
 
 	return <main>
-		<div class="container">
-			<GeneratorList predicate={gen => gen.category === 'worldgen'} />
+		<div class="container worldgen">
+			<GeneratorList predicate={gen => gen.tags?.includes('worldgen')} />
 		</div>
 		<Footer />
 	</main>

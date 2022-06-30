@@ -26,7 +26,7 @@ export function Header() {
 			<h1>{title}</h1>
 			{gen && <BtnMenu icon="chevron_down" tooltip={locale('switch_generator')} data-cy="generator-switcher">
 				{config.generators
-					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))
+					.filter(g => g.tags?.[0] === gen?.tags?.[0] && checkVersion(version, g.minVersion))
 					.map(g =>
 						<Btn label={locale(g.partner ? `partner.${g.partner}.${g.id}` : g.id)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
 					)}

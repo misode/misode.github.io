@@ -4,7 +4,7 @@ import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics.js'
 import { Header } from './components/index.js'
-import { Category, Changelog, Generator, Generators, Guide, Guides, Home, Partners, Sounds, Versions, Worldgen } from './pages/index.js'
+import { Changelog, Generator, Generators, Guide, Guides, Home, Partners, Sounds, Versions, Worldgen } from './pages/index.js'
 import { cleanUrl } from './Utils.js'
 
 export function App() {
@@ -18,11 +18,9 @@ export function App() {
 		<Header />
 		<Router onChange={changeRoute}>
 			<Home path="/" />
-			<Category path="/tags" category="tags" />
-			<Category path="/assets" category="assets" />
-			<Partners path="/partners" />
-			<Worldgen path="/worldgen" />
 			<Generators path="/generators" />
+			<Worldgen path="/worldgen" />
+			<Partners path="/partners" />
 			<Sounds path="/sounds" />
 			<Changelog path="/changelog" />
 			<Versions path="/versions" />
