@@ -9,7 +9,7 @@
   "block_definition": "Blockstate",
   "changelog": "Technical changelog",
   "changelog.search": "Search changes",
-  "changelog.no_results": "No changes",
+  "changelog.no_results": "No documented changes",
   "changelog.show_more": "Show %0% more changes",
   "choose_file": "Choose file",
   "choose_zip_file": "Choose zip file",
