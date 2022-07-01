@@ -169,7 +169,8 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		if (doDownload && model && blockStates && download.current) {
 			const content = encodeURIComponent(getSerializedOutput(model, blockStates))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
-			download.current.setAttribute('download', `${name}.${format}`)
+			const fileName = name === 'pack_mcmeta' ? 'pack.mcmeta' : `${name}.${format}`
+			download.current.setAttribute('download', fileName)
 			download.current.click()
 		}
 	}, [doDownload])
