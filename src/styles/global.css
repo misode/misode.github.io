@@ -218,9 +218,11 @@ nav li.dimmed:hover svg {
 }
 
 nav li > *,
-nav li svg {
+nav li svg,
+nav li .btn svg {
 	width: 24px;
 	height: 24px;
+	fill: inherit;
 }
 
 .title .btn-menu {
