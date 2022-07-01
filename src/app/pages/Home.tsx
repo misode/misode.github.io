@@ -31,7 +31,7 @@ export function Home({}: Props) {
 					<GeneratorCard minimal id="advancement" />
 					<GeneratorCard minimal id="predicate" />
 					<ToolCard title="Worldgen" link="/worldgen/" titleIcon="worldgen" />
-					<ToolCard title="More" link="/generators/" titleIcon="arrow_right" />
+					<ToolCard title="All Generators" link="/generators/" titleIcon="arrow_right" />
 				</ToolCard>
 				{favorites.length >= MIN_FAVORITES && <ToolCard title="Recently Used Generators">
 					{favorites.map(f => <GeneratorCard minimal id={f} />)}

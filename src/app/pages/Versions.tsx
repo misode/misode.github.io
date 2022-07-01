@@ -1,4 +1,4 @@
-import { Ad, BtnLink, ErrorPanel, Footer, VersionDetail, VersionList } from '../components/index.js'
+import { BtnLink, ErrorPanel, Footer, VersionDetail, VersionList } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync, useSearchParam } from '../hooks/index.js'
 import type { VersionMeta } from '../services/index.js'
@@ -9,7 +9,6 @@ interface Props {
 }
 export function Versions({}: Props) {
 	const { locale } = useLocale()
-	useTitle(locale('title.versions'))
 
 	const { value: versions, error } = useAsync(fetchVersions, [])
 
@@ -25,7 +24,6 @@ export function Versions({}: Props) {
 	const previousVersion = selected && getOffsetVersion(versions ?? [], selected, 1)
 
 	return <main>
-		<Ad type="text" id="versions" />
 		{error && <ErrorPanel error={error} />}
 		<div class="container">
 			{selectedId ? <>
@@ -37,7 +35,11 @@ export function Versions({}: Props) {
 						icon="arrow_right" label={locale('versions.next')} swapped />
 				</div>
 				<VersionDetail id={selectedId} version={selected} />
-			</> : <VersionList versions={versions ?? []} link={id => `/versions/?id=${id}`} />}
+			</> : <>
+				<VersionList versions={versions} link={id => `/versions/?id=${id}`} navigation={(
+					<BtnLink link="/changelog" icon="git_commit" label="Technical changes" />
+				)} />
+			</>}
 		</div>
 		<Footer donate={false} />
 	</main>

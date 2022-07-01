@@ -1,7 +1,7 @@
 import { useMemo } from 'preact/hooks'
 import { getGuide } from '../services/Guides.js'
 import { Card } from './Card.jsx'
-import { ChangelogTag } from './index.js'
+import { Badge } from './index.js'
 
 interface Props {
 	id: string,
@@ -18,8 +18,8 @@ export function GuideCard({ id, activeTags, toggleTag }: Props) {
 	}
 
 	return <Card title={title} overlay={versions?.join(' • ')} link={`/guides/${id}/`}>
-		<div class="card-tags">
-			{tags?.sort().map(tag => <ChangelogTag label={tag} onClick={onToggleTag(tag)} active={activeTags?.includes(tag)} />)}
+		<div class="badges-list">
+			{tags?.sort().map(tag => <Badge label={tag} onClick={onToggleTag(tag)} active={activeTags?.includes(tag)} />)}
 		</div>
 	</Card>
 }

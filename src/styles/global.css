@@ -319,8 +319,7 @@ main > .controls {
 .sounds-controls > *:not(:last-child),
 .preview-controls > *:not(:last-child),
 .generator-controls > *:not(:last-child),
-.project-controls > *:not(:last-child),
-.versions-controls > *:not(:last-child) {
+.project-controls > *:not(:last-child) {
 	margin-right: 8px;
 }
 
@@ -1522,20 +1521,11 @@ hr {
 	padding: 16px;
 }
 
-.changelog-entry {
-	background: var(--background-2);
-	border-radius: 4px;
-	margin-bottom: 8px;
-	padding: 8px;
-	color: var(--text-2);
+.changelog > .badges-list {
+	margin-top: 12px;
 }
 
-.changelog-tags {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-.changelog-tag {
+.badge {
 	--color: hsl(var(--tint, 0), var(--text-saturation), var(--text-lightness));
 	display: flex;
 	align-items: center;
@@ -1553,43 +1543,40 @@ hr {
 	-ms-user-select: none;
 }
 
-.changelog-entry .changelog-tag {
-	margin-bottom: 8px;
-}
-
-.changelog-tag svg {
+.badge svg {
 	margin-right: 4px;
 	width: 20px;
 	height: 20px;
 }
 
-.changelog-tag.clickable {
+.badge.clickable {
 	cursor: pointer;
 }
 
-.changelog-tag.active {
+.badge.active {
 	background-color: var(--color);
 	color: var(--background-2);
 	fill: var(--background-2);
 }
 
-.changelog-version {
-	float: right;
+.badges-list {
+	display: flex;
+	flex-wrap: wrap;
 }
 
-.changelog-version > * {
+.changelog-version {
 	margin-left: auto;
 	font-size: 15px;
 	color: var(--text-3);
 	text-decoration: none;
 }
 
-.changelog-version > *:first-child {
+.changelog-version:not(:last-child) {
 	position: relative;
 	margin-right: 19px;
 }
 
-.changelog-version > *:first-child::after {
+.changelog-version:not(:last-child)::after {
 	content: '•';
 	position: absolute;
 	text-decoration: none;
@@ -1598,7 +1585,7 @@ hr {
 	pointer-events: none;
 }
 
-.changelog-version a:hover {
+.changelog-version:hover {
 	text-decoration: underline;
 }
 
@@ -1610,38 +1597,15 @@ hr {
 	padding-left: 24px;
 }
 
-.changelog-entry code {
+.changelog-content code {
 	background-color: var(--background-5);
 	padding: 1px 4px;
 	border-radius: 4px;
 	color: var(--text-1);
 }
 
-.query {
-	display: flex;
-	margin-bottom: 8px;
-}
-
-.query > *:not(:first-child) {
-	margin-left: 8px;
-}
-
 .query-search {
 	flex-basis: 100%;
-	background-color: var(--background-2);
-}
-
-.changelog-tags {
-	margin-bottom: 8px;
-}
-
-.versions-controls {
-	display: flex;
-	padding-bottom: 16px;
-}
-
-.version-search {
-	min-width: 0px;
 	background-color: var(--background-2);
 }
 
@@ -1652,6 +1616,7 @@ hr {
 	border-radius: 6px;
 	height: 32px;
 	font-size: 1rem;
+	white-space: nowrap;
 	color: var(--text-2);
 	background-color: var(--background-2);
 	box-shadow: 0 1px 7px -2px #000;
@@ -1665,11 +1630,8 @@ hr {
 	margin-right: 8px;
 }
 
-.versions-controls .checkbox {
-	white-space: nowrap;
-}
-
 .version-list {
+	margin-top: 16px;
 	display: flex;
 	flex-direction: column;
 }
@@ -1705,6 +1667,16 @@ hr {
 
 .navigation > *:not(:last-child) {
 	margin-right: 8px;
+}
+
+.result-list {
+	margin-top: 16px;
+	display: flex;
+	flex-direction: column;
+}
+
+.result-list > *:not(:last-child) {
+	margin-bottom: 8px;
 }
 
 .version-detail {
@@ -1840,12 +1812,17 @@ hr {
 	border-radius: 6px;
 }
 
-.card:not(:last-child) {
-	margin-bottom: 8px;
-}
-
 .card:hover {
 	background-color: var(--background-3);
+}
+
+.card-content {
+	display: flex;
+	flex-direction: column;
+}
+
+.card-content > *:not(:last-child) {
+	margin-bottom: 12px;
 }
 
 .card-title {
@@ -1876,12 +1853,6 @@ hr {
 	text-overflow: ellipsis;
 }
 
-.card-tags {
-	margin-top: 12px;
-	display: flex;
-	flex-wrap: wrap;
-}
-
 .guide {
 	padding-left: 32px;
 	padding-right: 32px;
@@ -1889,6 +1860,10 @@ hr {
 
 .guide .navigation > :first-child {
 	margin-right: auto;
+}
+
+.guide > .badges-list {
+	margin-top: 12px;
 }
 
 .guide-share.active {

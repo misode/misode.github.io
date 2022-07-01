@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'preact/hooks'
-import { ChangelogTag, Footer, GuideCard, TextInput, VersionSwitcher } from '../components/index.js'
+import { Badge, Footer, GuideCard, TextInput, VersionSwitcher } from '../components/index.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import { useTags } from '../hooks/index.js'
 import { getGuides } from '../services/Guides.js'
@@ -42,20 +42,22 @@ export function Guides({}: Props) {
 
 	return <main>
 		<div class="container">
-			<div class="query">
+			<div class="navigation">
 				<TextInput class="btn btn-input query-search" placeholder={locale('guides.search')} value={search} onChange={setSearch} />
 				<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
 			</div>
-			{activeTags.length > 0 && <div class="changelog-tags">
-				{activeTags.map(tag => <ChangelogTag label={tag} onClick={() => toggleTag(tag)} />)}
+			{activeTags.length > 0 && <div class="badges-list">
+				{activeTags.map(tag => <Badge label={tag} onClick={() => toggleTag(tag)} />)}
 			</div>}
-			{versionedGuides.length === 0 ? <>
-				<span class="note">{locale('guides.no_results.version')}</span>
-			</> : filteredGuides.length === 0 ? <>
-				<span class="note">{locale('guides.no_results.query')}</span>
-			</> : filteredGuides.map(g =>
-				<GuideCard id={g.id} activeTags={activeTags} toggleTag={toggleTag} />
-			)}
+			<div class="result-list">
+				{versionedGuides.length === 0 ? <>
+					<span class="note">{locale('guides.no_results.version')}</span>
+				</> : filteredGuides.length === 0 ? <>
+					<span class="note">{locale('guides.no_results.query')}</span>
+				</> : filteredGuides.map(g =>
+					<GuideCard id={g.id} activeTags={activeTags} toggleTag={toggleTag} />
+				)}
+			</div>
 		</div>
 		<Footer />
 	</main>

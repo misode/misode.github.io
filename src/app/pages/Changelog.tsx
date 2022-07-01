@@ -1,4 +1,4 @@
-import { Ad, ChangelogList, ErrorPanel, Footer } from '../components/index.js'
+import { BtnLink, ChangelogList, ErrorPanel, Footer } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/index.js'
 import { fetchChangelogs } from '../services/index.js'
@@ -13,10 +13,11 @@ export function Changelog({}: Props) {
 	const { value: changes, error } = useAsync(fetchChangelogs, [])
 
 	return <main>
-		<Ad type="text" id="changelog" />
 		{error && <ErrorPanel error={error} />}
 		<div class="container changelog">
-			<ChangelogList changes={changes} defaultOrder="desc" limit={100} />
+			<ChangelogList changes={changes} defaultOrder="desc" limit={100} navigation={(
+				<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
+			)} />
 		</div>
 		<Footer />
 	</main>

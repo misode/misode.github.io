@@ -4,7 +4,7 @@ import { useLocale } from '../../contexts/Locale.jsx'
 import type { VersionId } from '../../services/Schemas.js'
 import { checkVersion } from '../../services/Schemas.js'
 import { cleanUrl } from '../../Utils.js'
-import { Card, ChangelogTag, Icons, ToolCard } from '../index.js'
+import { Badge, Card, Icons, ToolCard } from '../index.js'
 
 interface Props {
 	id: string,
@@ -41,8 +41,8 @@ export function GeneratorCard({ id, minimal }: Props) {
 
 	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.partner ? locale(`partner.${gen.partner}`) : versions.join(' • ')} link={cleanUrl(gen.url)}>
 		{!gen.noPath && <p class="card-subtitle">/{gen.path ?? gen.id}</p>}
-		{tags.length > 0 && <div class="card-tags">
-			{tags.sort().map(tag => <ChangelogTag label={tag} />)}
+		{tags.length > 0 && <div class="badges-list">
+			{tags.sort().map(tag => <Badge label={tag} />)}
 		</div>}
 	</Card>
 }

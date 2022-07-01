@@ -39,14 +39,16 @@ export function GeneratorList({ predicate }: Props) {
 	}, [versionedGenerators, search, locale])
 
 	return <div class="generator-list">
-		<div class="query">
+		<div class="navigation">
 			<TextInput class="btn btn-input query-search" placeholder={locale('generators.search')} value={search} onChange={setSearch} />
 			<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
 		</div>
 		{filteredGenerators.length === 0 ? <>
 			<span class="note">{locale('generators.no_results')}</span>
-		</> : filteredGenerators.map(gen =>
-			<GeneratorCard id={gen.id} />
-		)}
+		</> : <div class="result-list">
+			{filteredGenerators.map(gen =>
+				<GeneratorCard id={gen.id} />
+			)}
+		</div>}
 	</div>
 }

@@ -1,10 +1,11 @@
+import type { ComponentChildren } from 'preact'
 import { useMemo, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useSearchParam, useTags } from '../../hooks/index.js'
 import type { Change } from '../../services/index.js'
+import { Badge } from '../Badge.jsx'
 import { Btn, TextInput } from '../index.js'
 import { ChangelogEntry } from './ChangelogEntry.js'
-import { ChangelogTag } from './ChangelogTag.js'
 
 const SEARCH_KEY = 'search'
 
@@ -12,8 +13,9 @@ interface Props {
 	changes: Change[] | undefined,
 	defaultOrder: 'asc' | 'desc',
 	limit?: number,
+	navigation?: ComponentChildren,
 }
-export function ChangelogList({ changes, defaultOrder, limit }: Props) {
+export function ChangelogList({ changes, defaultOrder, limit, navigation }: Props) {
 	const { locale } = useLocale()
 
 	const [search, setSearch] = useSearchParam(SEARCH_KEY)
@@ -52,15 +54,16 @@ export function ChangelogList({ changes, defaultOrder, limit }: Props) {
 	const hiddenChanges = (sortedChangelogs?.length ?? 0) - (limitedChangelogs?.length ?? 0)
 
 	return <>
-		<div class="query">
+		<div class="navigation">
+			{navigation}
 			<TextInput class="btn btn-input query-search" list="sound-list" placeholder={locale('changelog.search')}
 				value={search} onChange={v => setSearch(v, true)} />
 			<Btn icon={sort ? 'sort_desc' : 'sort_asc'} label={sort ? 'Newest first' : 'Oldest first'} onClick={() => setSort(!sort)} />
 		</div>
-		{tags.length > 0 && <div class="changelog-tags">
-			{tags.map(tag => <ChangelogTag label={tag} onClick={() => toggleTag(tag)} />)}
+		{tags.length > 0 && <div class="badges-list">
+			{tags.map(tag => <Badge label={tag} onClick={() => toggleTag(tag)} />)}
 		</div>}
-		<div class="changelog-list">
+		<div class="result-list">
 			{limitedChangelogs === undefined
 				? <span class="note">{locale('loading')}</span>
 				: limitedChangelogs.length === 0

@@ -3,7 +3,7 @@ import json from 'highlight.js/lib/languages/json'
 import { marked } from 'marked'
 import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
-import { Ad, Btn, ChangelogTag, Footer, Giscus, Octicon, VersionSwitcher } from '../components/index.js'
+import { Ad, Badge, Btn, Footer, Giscus, Octicon, VersionSwitcher } from '../components/index.js'
 import config from '../Config.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import { useActiveTimeout, useAsync, useHash } from '../hooks/index.js'
@@ -181,9 +181,9 @@ export function Guide({ id }: Props) {
 				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')} class="guide-share" />
 				{allowedVersions && <VersionSwitcher value={guideVersion} allowed={allowedVersions} onChange={changeVersion} />}
 			</div>
-			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="guide-tags">
+			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="badges-list">
 				{frontMatter.tags.map((tag: string) =>
-					<ChangelogTag label={tag} active onClick={() => onClickTag(tag)} />
+					<Badge label={tag} active onClick={() => onClickTag(tag)} />
 				)}
 			</div>}
 			{html && <>

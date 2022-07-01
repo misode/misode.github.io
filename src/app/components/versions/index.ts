@@ -1,6 +1,6 @@
+export * from '../Badge.jsx'
 export * from './ChangelogEntry.js'
 export * from './ChangelogList.js'
-export * from './ChangelogTag.js'
 export * from './VersionDetail.js'
 export * from './VersionEntry.js'
 export * from './VersionList.js'
