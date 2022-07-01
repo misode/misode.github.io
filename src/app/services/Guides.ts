@@ -11,6 +11,10 @@ export function getGuides() {
 	return __GUIDES__
 }
 
-export function getGuide(id: string) {
-	return getGuides().find(g => g.id === id)
+export function getGuide(id: string): Guide {
+	const guide = getGuides().find(g => g.id === id)
+	if (guide === undefined) {
+		return { id, title: 'Unknown Guide' }
+	}
+	return guide
 }

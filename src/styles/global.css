@@ -568,6 +568,9 @@ main.has-project {
 
 .btn svg {
 	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
 }
 
 .btn svg:not(:last-child) {
@@ -1005,37 +1008,41 @@ main.has-project {
 
 .tool-card {
 	display: flex;
+	padding: 10px;
+	color: var(--text-2);
+	background-color: var(--background-2);
+	border-radius: 6px;
+	text-decoration: none;
+}
+
+a.tool-card:hover,
+a.tool-head:hover {
+	background-color: var(--background-3);
+}
+
+.tool-group {
+	display: flex;
 	flex-direction: column;
 	color: var(--text-2);
 	background-color: var(--background-2);
 	box-shadow: 1px 1px 7px -3px #000;
 	border-radius: 6px;
-	text-decoration: none;
 }
 
-a.tool-card:hover {
-	background-color: var(--background-3);
-}
-
-.tool-head {
-	display: flex;
-	padding: 10px;
-}
-
-.tool-head svg {
+.tool-card svg {
 	width: 32px;
 	height: 32px;
 	flex-shrink: 0;
 	margin-right: 8px;
 }
 
-.tool-head h3 {
+.tool-card h3 {
 	display: flex;
 	font-weight: unset;
 	align-items: center;
 }
 
-.tool-head h3 svg {
+.tool-card h3 svg {
 	color: var(--text-2);
 	fill: currentColor;
 	width: 20px;
@@ -1044,7 +1051,7 @@ a.tool-card:hover {
 	transition: margin 0.2s;
 }
 
-.tool-card:hover > .tool-head h3 svg {
+.tool-card:hover h3 > svg {
 	margin-left: 14px;
 }
 
@@ -1669,8 +1676,12 @@ hr {
 	margin-right: 8px;
 }
 
+.navigation-divider {
+	flex-basis: 100%;
+}
+
 .result-list {
-	margin-top: 16px;
+	margin-top: 8px;
 	display: flex;
 	flex-direction: column;
 }
@@ -1853,13 +1864,13 @@ hr {
 	text-overflow: ellipsis;
 }
 
+.guides > .badges-list {
+	margin-top: 8px;
+}
+
 .guide {
 	padding-left: 32px;
 	padding-right: 32px;
-}
-
-.guide .navigation > :first-child {
-	margin-right: auto;
 }
 
 .guide > .badges-list {
@@ -1909,6 +1920,7 @@ hr {
 .guide-content h6 {
 	margin: 1.2em 0 0.4em;
 	position: relative;
+	font-weight: normal;
 }
 
 .guide-content h1 > [id],
@@ -1942,6 +1954,10 @@ hr {
 .guide-content h5:hover > [id],
 .guide-content h6:hover > [id] {
 	opacity: 1;
+}
+
+.guide-content h2 {
+	font-size: 24px;
 }
 
 .guide-content blockquote {

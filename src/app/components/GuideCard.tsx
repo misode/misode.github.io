@@ -9,7 +9,7 @@ interface Props {
 	toggleTag?: (tag: string) => unknown,
 }
 export function GuideCard({ id, activeTags, toggleTag }: Props) {
-	const { title, versions, tags } = useMemo(() => getGuide(id)!, [id])
+	const { title, versions, tags } = useMemo(() => getGuide(id), [id])
 
 	const onToggleTag = (tag: string) => (e: MouseEvent) => {
 		if (toggleTag) toggleTag(tag)

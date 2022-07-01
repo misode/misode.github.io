@@ -1,4 +1,4 @@
-import { Footer, GeneratorList } from '../components/index.js'
+import { Footer, GeneratorCard, GeneratorList, GuideCard, ToolGroup } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 
 interface Props {
@@ -10,10 +10,20 @@ export function Worldgen({}: Props) {
 
 	return <main>
 		<div class="container worldgen">
-			<GeneratorList predicate={gen => {
-				console.log(gen.tags, gen.tags?.includes('worldgen'))
-				return gen.tags?.includes('worldgen')
-			}} />
+			<div class="card-group">
+				<ToolGroup title={locale('popular_generators')}>
+					<GeneratorCard minimal id="dimension" />
+					<GeneratorCard minimal id="worldgen/biome" />
+					<GeneratorCard minimal id="worldgen/noise_settings" />
+					<GeneratorCard minimal id="worldgen/configured_feature" />
+					<GeneratorCard minimal id="worldgen/placed_feature" />
+				</ToolGroup>
+				<ToolGroup title={locale('guides')} link="/guides/?tags=worldgen" titleIcon="arrow_right">
+					<GuideCard id="adding-custom-structures" />
+					<GuideCard id="placed-features" />
+				</ToolGroup>
+			</div>
+			<GeneratorList predicate={gen => gen.tags?.includes('worldgen')} />
 		</div>
 		<Footer />
 	</main>

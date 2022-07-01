@@ -1,11 +1,12 @@
 import type { ComponentChildren } from 'preact'
-import { useMemo, useState } from 'preact/hooks'
+import { useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useSearchParam } from '../../hooks/index.js'
+import { useLocalStorage, useSearchParam } from '../../hooks/index.js'
 import type { VersionMeta } from '../../services/index.js'
 import { Checkbox, TextInput } from '../index.js'
 import { VersionEntry } from './VersionEntry.js'
 
+const INCLUDE_SNAPSHOTS = 'misode_include_snapshots'
 const SEARCH_KEY = 'search'
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 export function VersionList({ versions, link, navigation }: Props) {
 	const { locale } = useLocale()
 	
-	const [snapshots, setSnapshots] = useState(true)
+	const [snapshots, setSnapshots] = useLocalStorage(INCLUDE_SNAPSHOTS, true, v => v === 'true', b => `${b}`)
 	const [search, setSearch] = useSearchParam(SEARCH_KEY)
 
 	const filteredVersions = useMemo(() => versions?.filter(v => {

@@ -3,7 +3,7 @@ import json from 'highlight.js/lib/languages/json'
 import { marked } from 'marked'
 import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
-import { Ad, Badge, Btn, Footer, Giscus, Octicon, VersionSwitcher } from '../components/index.js'
+import { Ad, Badge, Btn, Footer, Giscus, Icons, Octicon, VersionSwitcher } from '../components/index.js'
 import config from '../Config.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import { useActiveTimeout, useAsync, useHash } from '../hooks/index.js'
@@ -176,8 +176,13 @@ export function Guide({ id }: Props) {
 			<div class="navigation">
 				<a class="btn btn-link" href="/guides/">
 					{Octicon.arrow_left}
-					{locale('guides.all')}
+					<span>{locale('guides.all')}</span>
 				</a>
+				<a class="btn btn-link" href="/worldgen/">
+					{Icons.worldgen}
+					<span>{locale('worldgen')}</span>
+				</a>
+				<div class="navigation-divider" />
 				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')} class="guide-share" />
 				{allowedVersions && <VersionSwitcher value={guideVersion} allowed={allowedVersions} onChange={changeVersion} />}
 			</div>

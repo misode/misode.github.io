@@ -1,4 +1,5 @@
 import { useMemo } from 'preact/hooks'
+import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import type { VersionId } from '../../services/Schemas.js'
@@ -13,9 +14,11 @@ interface Props {
 export function GeneratorCard({ id, minimal }: Props) {
 	const { locale } = useLocale()
 
-	const gen = useMemo(() => {
+	const gen = useMemo<ConfigGenerator>(() => {
 		const gen = config.generators.find(g => g.id === id)
-		if (!gen) throw new Error(`Cannot find generator ${id}`)
+		if (gen === undefined) {
+			return { id, schema: id, url: id }
+		}
 		return gen
 	}, [id])
 
