@@ -11,7 +11,7 @@ export function Worldgen({}: Props) {
 	return <main>
 		<div class="container worldgen">
 			<div class="card-group">
-				<ToolGroup title={locale('popular_generators')}>
+				<ToolGroup title={locale('generators.popular')}>
 					<GeneratorCard minimal id="dimension" />
 					<GeneratorCard minimal id="worldgen/biome" />
 					<GeneratorCard minimal id="worldgen/noise_settings" />

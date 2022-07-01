@@ -1571,6 +1571,7 @@ hr {
 .badges-list {
 	display: flex;
 	flex-wrap: wrap;
+	gap: 8px 0;
 }
 
 .changelog-version {
@@ -1814,6 +1815,15 @@ hr {
 	grid-template-columns: 1fr 1fr;
 	gap: 8px;
 	align-items: flex-start;
+}
+
+.card-column {
+	display: flex;
+	flex-direction: column;
+}
+
+.card-column > *:not(:last-child) {
+	margin-bottom: 8px;
 }
 
 .card {
@@ -2132,6 +2142,10 @@ hr {
 /* SMALL */
 @media screen and (max-width: 580px) {
 	.card-group {
+		grid-template-columns: 1fr;
+	}
+
+	.card-columns {
 		grid-template-columns: 1fr;
 	}
 
