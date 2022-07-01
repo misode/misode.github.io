@@ -122,7 +122,8 @@
     {
       "id": "text_component",
       "url": "text-component",
-      "schema": "text_component"
+      "schema": "text_component",
+      "noPath": true
     },
     {
       "id": "chat_type",
@@ -139,76 +140,69 @@
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "minVersion": "1.16"
     },
     {
       "id": "dimension_type",
       "url": "dimension-type",
       "schema": "dimension_type",
-      "category": "worldgen",
-      "minVersion": "1.16"
-    },
-    {
-      "id": "world",
-      "url": "world",
-      "schema": "world_settings",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "minVersion": "1.16"
     },
     {
       "id": "worldgen/biome",
       "url": "worldgen/biome",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "biome",
       "minVersion": "1.16"
     },
     {
       "id": "worldgen/configured_carver",
       "url": "worldgen/carver",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "configured_carver",
       "minVersion": "1.16"
     },
     {
       "id": "worldgen/configured_feature",
       "url": "worldgen/feature",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "configured_feature",
       "minVersion": "1.16"
     },
     {
-      "id": "worldgen/density_function",
-      "url": "worldgen/density-function",
-      "category": "worldgen",
-      "schema": "density_function",
-      "minVersion": "1.18.2"
-    },
-    {
       "id": "worldgen/placed_feature",
       "url": "worldgen/placed-feature",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "placed_feature",
       "minVersion": "1.18"
     },
     {
+      "id": "worldgen/density_function",
+      "url": "worldgen/density-function",
+      "tags": ["worldgen"],
+      "schema": "density_function",
+      "minVersion": "1.18.2"
+    },
+    {
       "id": "worldgen/noise",
       "url": "worldgen/noise",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "noise_parameters",
       "minVersion": "1.18"
     },
     {
       "id": "worldgen/noise_settings",
       "url": "worldgen/noise-settings",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "noise_settings",
       "minVersion": "1.16"
     },
     {
       "id": "worldgen/configured_structure_feature",
       "url": "worldgen/structure-feature",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "configured_structure_feature",
       "minVersion": "1.16",
       "maxVersion": "1.18.2"
@@ -216,21 +210,21 @@
     {
       "id": "worldgen/structure",
       "url": "worldgen/structure",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "structure",
       "minVersion": "1.19"
     },
     {
       "id": "worldgen/structure_set",
       "url": "worldgen/structure-set",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "structure_set",
       "minVersion": "1.18.2"
     },
     {
       "id": "worldgen/configured_surface_builder",
       "url": "worldgen/surface-builder",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "configured_surface_builder",
       "minVersion": "1.16",
       "maxVersion": "1.17"
@@ -238,56 +232,64 @@
     {
       "id": "worldgen/processor_list",
       "url": "worldgen/processor-list",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "processor_list",
       "minVersion": "1.16"
     },
     {
       "id": "worldgen/template_pool",
       "url": "worldgen/template-pool",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "template_pool",
       "minVersion": "1.16"
     },
     {
       "id": "worldgen/world_preset",
       "url": "worldgen/world-preset",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "world_preset",
       "minVersion": "1.19"
     },
     {
       "id": "worldgen/flat_level_generator_preset",
       "url": "worldgen/flat-world-preset",
-      "category": "worldgen",
+      "tags": ["worldgen"],
       "schema": "flat_level_generator_preset",
       "minVersion": "1.19"
     },
     {
+      "id": "world",
+      "url": "world",
+      "schema": "world_settings",
+      "noPath": true,
+      "tags": ["worldgen"],
+      "minVersion": "1.16"
+    },
+    {
       "id": "tag/block",
       "url": "tags/block",
-      "category": "tags",
+      "tags": ["tags"],
       "path": "tags/blocks",
       "schema": "block_tag"
     },
     {
       "id": "tag/entity_type",
       "url": "tags/entity-type",
-      "category": "tags",
+      "tags": ["tags"],
       "path": "tags/entity_types",
       "schema": "entity_type_tag"
     },
     {
       "id": "tag/fluid",
       "url": "tags/fluid",
-      "category": "tags",
+      "tags": ["tags"],
       "path": "tags/fluids",
       "schema": "fluid_tag"
     },
     {
       "id": "tag/game_event",
       "url": "tags/game-event",
-      "category": "tags",
+      "tags": ["tags"],
       "path": "tags/game_events",
       "schema": "game_event_tag",
       "minVersion": "1.17"
@@ -295,14 +297,14 @@
     {
       "id": "tag/item",
       "url": "tags/item",
-      "category": "tags",
+      "tags": ["tags"],
       "path": "tags/items",
       "schema": "item_tag"
     },
     {
       "id": "tag/worldgen/biome",
       "url": "tags/biome",
-      "category": "tags",
+      "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/biome",
       "schema": "biome_tag",
       "minVersion": "1.18.2"
@@ -311,21 +313,21 @@
       "id": "block_definition",
       "url": "assets/blockstate",
       "path": "blockstates",
-      "category": "assets",
+      "tags": ["assets"],
       "schema": "block_definition"
     },
     {
       "id": "model",
       "url": "assets/model",
       "path": "models",
-      "category": "assets",
+      "tags": ["assets"],
       "schema": "model"
     },
     {
       "id": "block_growth",
       "url": "partners/immersive-weathering/block-growth",
       "path": "block_growths",
-      "category": "partners",
+      "tags": ["partners"],
       "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"

@@ -49,6 +49,8 @@ export function Generator({}: Props) {
 		setError(`This generator is not available in versions above ${gen.maxVersion}`)
 	}
 
+	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
+
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
 	const ignoreChange = useRef(false)
