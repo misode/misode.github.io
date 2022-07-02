@@ -1,8 +1,7 @@
 import * as deepslate19 from 'deepslate/worldgen'
-import { RandomState } from 'deepslate/worldgen'
 import type { VersionId } from '../services/index.js'
 import { checkVersion, fetchAllPresets } from '../services/index.js'
-import { BiMap, deepClone, deepEqual } from '../Utils.js'
+import { BiMap, clamp, deepClone, deepEqual, isObject, square } from '../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
 
@@ -24,6 +23,7 @@ export class Deepslate {
 	private cacheState: unknown
 	private settingsCache: NoiseSettings | undefined
 	private generatorCache: ChunkGenerator | undefined
+	private biomeSourceCache: BiomeSource | undefined
 	private randomStateCache: deepslate19.RandomState | undefined
 	private chunksCache: Chunk[] = []
 	private biomeCache: Map<string, string> = new Map()
@@ -63,7 +63,7 @@ export class Deepslate {
 				}))
 			} else if (checkVersion(version, '1.18.2')) {
 				await Promise.all([...DYNAMIC_REGISTRIES].map(async (id) => {
-					const entries = await fetchAllPresets(version, id)
+					const entries = await fetchAllPresets(version, id.replace(/^minecraft:/, ''))
 					for (const [key, value] of entries.entries()) {
 						if (id === 'minecraft:worldgen/noise') {
 							this.d.WorldgenRegistries.NOISE.register(this.d.Identifier.parse(key), this.d.NoiseParameters.fromJson(value), true)
@@ -94,23 +94,22 @@ export class Deepslate {
 	}
 
 	public loadChunkGenerator(settings: unknown, biomeState: unknown, seed: bigint) {
-		if (!this.loadedVersion) {
-			throw new Error('No deepslate version loaded')
-		}
 		const newCacheState = [settings, `${seed}`, biomeState]
 		if (!deepEqual(this.cacheState, newCacheState)) {
-			const biomeSource = checkVersion(this.loadedVersion, '1.19') ? this.d.BiomeSource.fromJson(biomeState)
-				: new this.d.FixedBiomeSource(checkVersion(this.loadedVersion, '1.18.2') ? this.d.Identifier.parse(biomeState as string) : biomeState as any)
-			const noiseSettings = typeof settings === 'string' ? this.d.WorldgenRegistries.NOISE_SETTINGS.getOrThrow(this.d.Identifier.parse(settings)) : this.d.NoiseGeneratorSettings.fromJson(settings)
-			const chunkGenerator = checkVersion(this.loadedVersion, '1.19')
+			const noiseSettings = this.createNoiseSettings(settings)
+			const biomeSource = this.createBiomeSource(noiseSettings, biomeState, seed)
+			const chunkGenerator = this.isVersion('1.19')
 				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
 				: new (this.d.NoiseChunkGenerator as any)(seed, biomeSource, noiseSettings)
 			this.settingsCache = noiseSettings.noise
 			this.generatorCache = chunkGenerator
-			if (checkVersion(this.loadedVersion, '1.19')) {
+			if (this.isVersion('1.19')) {
 				this.randomStateCache = new this.d.RandomState(noiseSettings, seed)
 			} else {
 				this.randomStateCache = undefined
+			}
+			this.biomeSourceCache = {
+				getBiome: (x, y, z) => biomeSource.getBiome(x, y, z, undefined!),
 			}
 			this.chunksCache = []
 			this.biomeCache = new Map()
@@ -118,10 +117,89 @@ export class Deepslate {
 		}
 	}
 
-	public generateChunks(minX: number, width: number, biome = 'unknown') {
-		if (!this.loadedVersion) {
-			throw new Error('No deepslate version loaded')
+	private createBiomeSource(noiseSettings: deepslate19.NoiseGeneratorSettings, biomeState: unknown, seed: bigint): deepslate19.BiomeSource {
+		if (this.isVersion('1.19')) {
+			return this.d.BiomeSource.fromJson(biomeState)
+		} else {
+			const root = isObject(biomeState) ? biomeState : {}
+			const type = typeof root.type === 'string' ? root.type.replace(/^minecraft:/, '') : undefined
+			switch (type) {
+				case 'fixed':
+					return new (this.d as any).FixedBiome(this.isVersion('1.18.2') ? this.d.Identifier.parse(biomeState as string) : biomeState as any)
+				case 'checkerboard':
+					const shift = (root.scale ?? 2) + 2
+					const numBiomes = root.biomes?.length ?? 0
+					return { getBiome: (x: number, _y: number, z: number) => {
+						const i = (((x >> shift) + (z >> shift)) % numBiomes + numBiomes) % numBiomes
+						const biome = root.biomes?.[i]
+						return this.isVersion('1.18.2') ? this.d.Identifier.parse(biome) : biome
+					} }
+				case 'multi_noise':
+					if (this.isVersion('1.18')) {
+						const parameters = new this.d.Climate.Parameters(root.biomes.map((b: any) => {
+							const biome = this.isVersion('1.18.2') ? this.d.Identifier.parse(b.biome) : b.biome
+							return [this.d.Climate.ParamPoint.fromJson(b.parameters), () => biome]
+						}))
+						const multiNoise = new (this.d as any).MultiNoise(parameters)
+						let sampler: any
+						if (this.isVersion('1.18.2')) {
+							const router = this.d.NoiseRouter.create({
+								temperature: new this.d.DensityFunction.Noise(0.25, 0, (this.d as any).Noises.TEMPERATURE),
+								vegetation: new this.d.DensityFunction.Noise(0.25, 0, (this.d as any).Noises.VEGETATION),
+								continents: new this.d.DensityFunction.Noise(0.25, 0, (this.d as any).Noises.CONTINENTALNESS),
+								erosion: new this.d.DensityFunction.Noise(0.25, 0, (this.d as any).Noises.EROSION),
+								ridges: new this.d.DensityFunction.Noise(0.25, 0, (this.d as any).Noises.RIDGE),
+							})
+							sampler = this.d.Climate.Sampler.fromRouter((this.d.NoiseRouter as any).withSettings(router, noiseSettings, seed))
+						} else {
+							const noiseSampler = new (this.d as any).NoiseSampler(this.d.NoiseSettings.fromJson(null), true, seed, true)
+							sampler = (x: number, y: number, z: number) => noiseSampler.sample(x, y, z)
+						}
+						return { getBiome: (x: number, y: number, z: number) => {
+							return multiNoise.getBiome(x, y, z, sampler)
+						} }
+					} else {
+						const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
+							.map((id, i) => {
+								const config = root[`${id}_noise`]
+								config.firstOctave = clamp(config.firstOctave ?? -7, -100, -1)
+								return new this.d.NormalNoise(new this.d.LegacyRandom(seed + BigInt(i)), config)
+							})
+						if (!Array.isArray(root.biomes) || root.biomes.length === 0) {
+							return { getBiome: () => this.d.Identifier.create('unknown') }
+						}
+						return { getBiome: (x: number, _y: number, z: number) => {
+							const n = noise.map(n => n.sample(x, z, 0))
+							let minDist = Infinity
+							let minBiome = 'unknown'
+							for (const { biome, parameters: p } of root.biomes) {
+								const dist = square(p.altitude - n[0]) + square(p.temperature - n[1]) + square(p.humidity - n[2]) + square(p.weirdness - n[3]) + square(p.offset)
+								if (dist < minDist) {
+									minDist = dist
+									minBiome = biome
+								}
+							}
+							return minBiome as unknown as deepslate19.Identifier
+						} }
+					}
+				default: throw new Error(`Unsupported biome source ${type}`)
+			}
 		}
+	}
+
+	private createNoiseSettings(settings: unknown): deepslate19.NoiseGeneratorSettings {
+		if (typeof settings === 'string') {
+			if (this.isVersion('1.19')) {
+				return this.d.WorldgenRegistries.NOISE_SETTINGS.getOrThrow(this.d.Identifier.parse(settings))
+			} else {
+				return this.d.NoiseGeneratorSettings.fromJson(undefined)
+			}
+		} else {
+			return this.d.NoiseGeneratorSettings.fromJson(settings)
+		}
+	}
+
+	public generateChunks(minX: number, width: number, biome = 'unknown') {
 		minX = Math.floor(minX)
 		if (!this.settingsCache) {
 			throw new Error('Tried to generate chunks before settings are loaded')
@@ -155,9 +233,6 @@ export class Deepslate {
 	}
 
 	public fillBiomes(minX: number, maxX: number, minZ: number, maxZ: number, step = 1) {
-		if (!this.loadedVersion) {
-			throw new Error('No deepslate version loaded')
-		}
 		if (!this.generatorCache) {
 			throw new Error('Tried to fill biomes before generator is loaded')
 		}
@@ -179,13 +254,16 @@ export class Deepslate {
 				const posKey = `${x}:${z}`
 				let biome = this.biomeCache.get(posKey)
 				if (!biome) {
-					if (checkVersion(this.loadedVersion, '1.19')) {
+					if (this.isVersion('1.19')) {
 						if (!this.randomStateCache) {
 							throw new Error('Tried to compute biomes before random state is loaded')
 						}
 						biome = this.generatorCache.computeBiome(this.randomStateCache, x, quartY, z).toString()
 					} else {
-						biome = (this.generatorCache as any).computeBiome(x, quartY, z).toString() as string
+						if(!this.biomeSourceCache) {
+							throw new Error('Tried to compute biomes before biome source is loaded')
+						}
+						biome = this.biomeSourceCache.getBiome(x, quartY, z).toString()
 					}
 					this.biomeCache.set(posKey, biome)
 				}
@@ -200,10 +278,7 @@ export class Deepslate {
 	}
 
 	public loadDensityFunction(state: unknown, seed: bigint) {
-		if (!this.loadedVersion) {
-			throw new Error('No deepslate version loaded')
-		}
-		if (checkVersion(this.loadedVersion, '1.19')) {
+		if (this.isVersion('1.19')) {
 			const settings = this.d.NoiseGeneratorSettings.create({
 				noise: {
 					minY: -64,
@@ -216,7 +291,7 @@ export class Deepslate {
 				}),
 			})
 			this.settingsCache = settings.noise
-			const randomState = new RandomState(settings, seed)
+			const randomState = new this.d.RandomState(settings, seed)
 			return randomState.router.finalDensity
 		} else {
 			const random = this.d.XoroshiroRandom.create(seed).forkPositional()
@@ -249,6 +324,13 @@ export class Deepslate {
 		const chunk = this.chunksCache.find(c => this.d.ChunkPos.minBlockX(c.pos) <= x && this.d.ChunkPos.maxBlockX(c.pos) >= x)
 		return chunk?.getBlockState(this.d.BlockPos.create(x, y, this.Z))
 	}
+
+	private isVersion(min?: VersionId, max?: VersionId) {
+		if (!this.loadedVersion) {
+			throw new Error('No deepslate version loaded')
+		}
+		return checkVersion(this.loadedVersion, min, max)
+	}
 }
 
 export const DEEPSLATE = new Deepslate()
@@ -267,4 +349,8 @@ interface ChunkGenerator {
 interface Chunk {
 	readonly pos: deepslate19.ChunkPos
 	getBlockState(pos: deepslate19.BlockPos): deepslate19.BlockState
+}
+
+interface BiomeSource {
+	getBiome(x: number, y: number, z: number): deepslate19.Identifier
 }
