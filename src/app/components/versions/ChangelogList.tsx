@@ -63,13 +63,15 @@ export function ChangelogList({ changes, defaultOrder, limit, navigation }: Prop
 		{tags.length > 0 && <div class="badges-list">
 			{tags.map(tag => <Badge label={tag} onClick={() => toggleTag(tag)} />)}
 		</div>}
-		<div class="result-list">
-			{limitedChangelogs === undefined
-				? <span class="note">{locale('loading')}</span>
-				: limitedChangelogs.length === 0
-					? <span class="note">{locale('changelog.no_results')}</span>
-					:	limitedChangelogs.map(change =>
-						<ChangelogEntry change={change} activeTags={tags} toggleTag={toggleTag} />)}
+		<div class="card-column">
+			{limitedChangelogs === undefined ? <>
+				<span class="note">{locale('loading')}</span>
+			</> : limitedChangelogs.length === 0 ? <>
+				<span class="note">{locale('changelog.no_results')}</span>
+			</> :	<>
+				{limitedChangelogs.map(change =>
+					<ChangelogEntry change={change} activeTags={tags} toggleTag={toggleTag} />)}
+			</>}
 			{hiddenChanges > 0 && (
 				<Btn label={locale('changelog.show_more', `${hiddenChanges}`)} onClick={() => setLimitActive(false)}/>
 			)}
