@@ -1683,6 +1683,10 @@ hr {
 	flex-basis: 100%;
 }
 
+.navigation + .card-column {
+	margin-top: 8px;
+}
+
 .version-detail {
 	color: var(--text-3);
 }
