@@ -1683,14 +1683,8 @@ hr {
 	flex-basis: 100%;
 }
 
-.result-list {
+.navigation + .card-column {
 	margin-top: 8px;
-	display: flex;
-	flex-direction: column;
-}
-
-.result-list > *:not(:last-child) {
-	margin-bottom: 8px;
 }
 
 .version-detail {
@@ -2142,10 +2136,6 @@ hr {
 /* SMALL */
 @media screen and (max-width: 580px) {
 	.card-group {
-		grid-template-columns: 1fr;
-	}
-
-	.card-columns {
 		grid-template-columns: 1fr;
 	}
 

@@ -49,7 +49,7 @@ export function Guides({}: Props) {
 			{activeTags.length > 0 && <div class="badges-list">
 				{activeTags.map(tag => <Badge label={tag} onClick={() => toggleTag(tag)} />)}
 			</div>}
-			<div class="result-list">
+			<div class="card-column">
 				{versionedGuides.length === 0 ? <>
 					<span class="note">{locale('guides.no_results.version')}</span>
 				</> : filteredGuides.length === 0 ? <>
