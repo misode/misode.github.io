@@ -116,10 +116,12 @@ function Versions() {
 function Changelog() {
 	const { locale } = useLocale()
 
+	const hugeScreen = useMediaQuery('(min-width: 960px)')
+
 	const { value: changes } = useAsync(fetchChangelogs, [])
 	const latestChanges = useMemo(() => changes?.sort((a, b) => b.order - a.order).slice(0, 2), [changes])
 
 	return <ToolGroup title={locale('changelog')} link="/changelog/" titleIcon="git_commit">
-		{latestChanges?.map(change => <ChangelogEntry change={change} />)}
+		{latestChanges?.map(change => <ChangelogEntry minimal={!hugeScreen} change={change} />)}
 	</ToolGroup>
 }

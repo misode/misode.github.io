@@ -5,11 +5,12 @@ import { Badge } from './index.js'
 
 type Props = {
 	change: Change,
+	minimal?: boolean,
 	activeTags?: string[],
 	toggleTag?: (tag: string) => unknown,
 }
-export function ChangelogEntry({ change, activeTags, toggleTag }: Props) {
-	return <Card overlay={<>
+export function ChangelogEntry({ change, minimal, activeTags, toggleTag }: Props) {
+	return <Card overlay={!minimal && <>
 		<a class="changelog-version" href={`/versions/?id=${change.version}`}>{change.version}</a>
 		<a class="changelog-version" href={`/versions/?id=${change.group}`}>{change.group}</a>
 	</>}>
