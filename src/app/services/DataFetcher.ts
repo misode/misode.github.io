@@ -16,6 +16,7 @@ type Version = {
 declare var __LATEST_VERSION__: string
 const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
+const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 
 type McmetaTypes = 'summary' | 'data' | 'assets' | 'registries'
 
@@ -52,7 +53,7 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 async function fetchRegistries(version: Version, target: CollectionRegistry) {
 	console.debug(`[fetchRegistries] ${version.id}`)
 	try {
-		const data = await getData(`${mcmeta(version, 'summary')}/registries/data.min.json`)
+		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
 		for (const id in data) {
 			target.register(id, data[id].map((e: string) => 'minecraft:' + e))
 		}
@@ -64,7 +65,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) {
 	console.debug(`[fetchBlockStateMap] ${version.id}`)
 	try {
-		const data = await getData(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
+		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
 		for (const id in data) {
 			target['minecraft:' + id] = {
 				properties: data[id][0],
@@ -99,10 +100,10 @@ export async function fetchAllPresets(versionId: VersionId, registry: string) {
 	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
-		const entries = await getData(`${mcmeta(version, 'registries')}/${registry}/data.min.json`)
+		const entries = await cachedFetch<any>(`${mcmeta(version, 'registries')}/${registry}/data.min.json`)
 		return new Map<string, unknown>(await Promise.all(
 			entries.map(async (e: string) =>
-				[e, await getData(`${mcmeta(version, 'data')}/data/minecraft/${registry}/${e}.json`)])
+				[e, await cachedFetch(`${mcmeta(version, 'data')}/data/minecraft/${registry}/${e}.json`)])
 		))
 	} catch (e) {
 		throw new Error(`Error occurred while fetching all ${registry} presets: ${message(e)}`)
@@ -119,7 +120,7 @@ export async function fetchSounds(versionId: VersionId): Promise<SoundEvents> {
 	await validateCache(version)
 	try {
 		const url = `${mcmeta(version, 'summary')}/sounds/data.min.json`
-		return await getData(url)
+		return await cachedFetch(url)
 	} catch (e) {
 		throw new Error(`Error occurred while fetching sounds for ${version}: ${message(e)}`)
 	}
@@ -148,7 +149,7 @@ export async function fetchVersions(): Promise<VersionMeta[]> {
 	const version = config.versions[config.versions.length - 1]
 	await validateCache(version)
 	try {
-		return getData(`${mcmeta(version, 'summary')}/versions/data.min.json`)
+		return cachedFetch(`${mcmeta(version, 'summary')}/versions/data.min.json`, { refresh: true })
 	} catch (e) {
 		throw new Error(`Error occured while fetching versions: ${message(e)}`)
 	}
@@ -159,30 +160,82 @@ export function getTextureUrl(versionId: VersionId, path: string): string {
 	return `${mcmeta(version, 'assets')}/assets/minecraft/textures/${path}.png`
 }
 
-async function getData<T = any>(url: string, fn: (v: any) => T = (v: any) => v): Promise<T> {
+export interface Change {
+	group: string,
+	version: string,
+	order: number,
+	tags: string[],
+	content: string,
+}
+
+export async function fetchChangelogs(): Promise<Change[]> {
+	try {
+		const [changes, versions] = await Promise.all([
+			cachedFetch<Omit<Change, 'order'>[]>(`${changesUrl}/generated/changes.json`, { refresh: true }),
+			fetchVersions(),
+		])
+		const versionMap = new Map(versions.map((v, i) => [v.id, versions.length - i]))
+		return changes.map(c => ({ ...c, order: versionMap.get(c.version) ?? 0 }))
+	} catch (e) {
+		throw new Error(`Error occured while fetching technical changes: ${message(e)}`)
+	}
+}
+
+interface FetchOptions<D> {
+	decode?: (r: Response) => Promise<D>
+	refresh?: boolean
+}
+
+const REFRESHED = new Set<string>()
+
+async function cachedFetch<D = unknown>(url: string, { decode = (r => r.json()), refresh }: FetchOptions<D> = {}): Promise<D> {
 	try {
 		const cache = await caches.open(CACHE_NAME)
-		console.debug(`[getData] Opened cache ${CACHE_NAME} ${url}`)
+		console.debug(`[cachedFetch] Opened cache ${CACHE_NAME} ${url}`)
 		const cacheResponse = await cache.match(url)
-    
-		if (cacheResponse && cacheResponse.ok) {
-			console.debug(`[getData] Retrieving cached data ${url}`)
-			return await cacheResponse.json()
-		}
-  
-		console.debug(`[getData] fetching data ${url}`)
-		const fetchResponse = await fetch(url)
-		const responseData = fn(await fetchResponse.json())
-		await cache.put(url, new Response(JSON.stringify(responseData)))
-		return responseData
-	} catch (e) {
-		console.warn(`[getData] Failed to open cache ${CACHE_NAME}: ${message(e)}`)
 
-		console.debug(`[getData] fetching data ${url}`)
+		if (refresh) {
+			if (REFRESHED.has(url)) {
+				refresh = false
+			} else {
+				REFRESHED.add(url)
+			}
+		}
+
+		if (refresh) {
+			try {
+				return await fetchAndCache(cache, url, decode)
+			} catch (e) {
+				if (cacheResponse && cacheResponse.ok) {
+					console.debug(`[cachedFetch] Cannot refresh, using cache ${url}`)
+					return await decode(cacheResponse)
+				}
+				throw new Error('Failed to fetch')
+			}
+		} else {
+			if (cacheResponse && cacheResponse.ok) {
+				console.debug(`[cachedFetch] Retrieving cached data ${url}`)
+				return await decode(cacheResponse)
+			}
+			return await fetchAndCache(cache, url, decode)
+		}
+	} catch (e: any) {
+		console.warn(`[cachedFetch] Failed to open cache ${CACHE_NAME}: ${e.message}`)
+
+		console.debug(`[cachedFetch] Fetching data ${url}`)
 		const fetchResponse = await fetch(url)
-		const responseData = fn(await fetchResponse.json())
-		return responseData
+		const fetchData = await decode(fetchResponse)
+		return fetchData
 	}
+}
+
+async function fetchAndCache<D>(cache: Cache, url: string, decode: (r: Response) => Promise<D>) {
+	console.debug(`[cachedFetch] Fetching data ${url}`)
+	const fetchResponse = await fetch(url)
+	const fetchClone = fetchResponse.clone()
+	const fetchData = await decode(fetchResponse)
+	await cache.put(url, fetchClone)
+	return fetchData
 }
 
 async function deleteMatching(matches: (url: string) => boolean) {

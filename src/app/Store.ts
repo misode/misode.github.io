@@ -16,6 +16,7 @@ export namespace Store {
 	export const ID_PROJECT_PANEL_OPEN = 'misode_project_panel_open'
 	export const ID_OPEN_PROJECT = 'misode_open_project'
 	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
+	export const ID_GENERATOR_HISTORY = 'misode_generator_history'
 
 	export function getLanguage() {
 		return localStorage.getItem(ID_LANGUAGE) ?? 'en'
@@ -84,6 +85,10 @@ export namespace Store {
 		return localStorage.getItem(ID_TREE_VIEW_MODE) ?? 'resources'
 	}
 
+	export function getGeneratorHistory(): string[] {
+		return JSON.parse(localStorage.getItem(ID_GENERATOR_HISTORY) ?? '[]')
+	}
+
 	export function setLanguage(language: string | undefined) {
 		if (language) localStorage.setItem(ID_LANGUAGE, language)
 	}
@@ -144,5 +149,11 @@ export namespace Store {
 
 	export function setTreeViewMode(mode: string | undefined) {
 		if (mode) localStorage.setItem(ID_TREE_VIEW_MODE, mode)
+	}
+
+	export function visitGenerator(id: string) {
+		const history = getGeneratorHistory()
+		history.push(id)
+		localStorage.setItem(ID_GENERATOR_HISTORY, JSON.stringify(history.slice(-50)))
 	}
 }
