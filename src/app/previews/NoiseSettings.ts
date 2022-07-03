@@ -40,7 +40,7 @@ export async function noiseSettings(state: any, img: ImageData, options: NoiseSe
 	if (checkVersion(options.version, '1.18')) {
 		await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
 		const biomeSource = { type: 'fixed', biome: options.biome }
-		DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(state), biomeSource, options.seed)
+		await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(state), biomeSource, options.seed)
 		DEEPSLATE.generateChunks(-options.offset, options.width)
 		const noise = DEEPSLATE.getNoiseSettings()
 

@@ -317,3 +317,23 @@ export async function writeZip(entries: [string, string][]): Promise<string> {
 	}))
 	return await writer.close()
 }
+
+export function computeIfAbsent<K, V>(map: Map<K, V>, key: K, getter: (key: K) => V): V {
+	const existing = map.get(key)
+	if (existing) {
+		return existing
+	}
+	const value = getter(key)
+	map.set(key, value)
+	return value
+}
+
+export async function computeIfAbsentAsync<K, V>(map: Map<K, V>, key: K, getter: (key: K) => Promise<V>): Promise<V> {
+	const existing = map.get(key)
+	if (existing) {
+		return existing
+	}
+	const value = await getter(key)
+	map.set(key, value)
+	return value
+}

@@ -1,7 +1,7 @@
 import * as deepslate19 from 'deepslate/worldgen'
 import type { VersionId } from '../services/index.js'
-import { checkVersion, fetchAllPresets } from '../services/index.js'
-import { BiMap, clamp, deepClone, deepEqual, isObject, square } from '../Utils.js'
+import { checkVersion, fetchAllPresets, fetchPreset } from '../services/index.js'
+import { BiMap, clamp, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
 
@@ -27,6 +27,7 @@ export class Deepslate {
 	private randomStateCache: deepslate19.RandomState | undefined
 	private chunksCache: Chunk[] = []
 	private biomeCache: Map<string, string> = new Map()
+	private readonly presetCache: Map<string, unknown> = new Map()
 
 	public async loadVersion(version: VersionId, project?: ProjectData) {
 		if (this.loadedVersion === version) {
@@ -93,11 +94,11 @@ export class Deepslate {
 		}
 	}
 
-	public loadChunkGenerator(settings: unknown, biomeState: unknown, seed: bigint) {
+	public async loadChunkGenerator(settings: unknown, biomeState: unknown, seed: bigint) {
 		const newCacheState = [settings, `${seed}`, biomeState]
 		if (!deepEqual(this.cacheState, newCacheState)) {
 			const noiseSettings = this.createNoiseSettings(settings)
-			const biomeSource = this.createBiomeSource(noiseSettings, biomeState, seed)
+			const biomeSource = await this.createBiomeSource(noiseSettings, biomeState, seed)
 			const chunkGenerator = this.isVersion('1.19')
 				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
 				: new (this.d.NoiseChunkGenerator as any)(seed, biomeSource, noiseSettings)
@@ -117,7 +118,16 @@ export class Deepslate {
 		}
 	}
 
-	private createBiomeSource(noiseSettings: deepslate19.NoiseGeneratorSettings, biomeState: unknown, seed: bigint): deepslate19.BiomeSource {
+	private async createBiomeSource(noiseSettings: deepslate19.NoiseGeneratorSettings, biomeState: unknown, seed: bigint): Promise<deepslate19.BiomeSource> {
+		if (this.loadedVersion && isObject(biomeState) && typeof biomeState.preset === 'string') {
+			const version = this.loadedVersion
+			const preset = biomeState.preset.replace(/^minecraft:/, '')
+			const biomes = await computeIfAbsentAsync(this.presetCache, `${version}-${preset}`, async () => {
+				const dimension = await fetchPreset(version, 'dimension', preset === 'overworld' ? 'overworld' : 'the_nether')
+				return dimension.generator.biome_source.biomes
+			})
+			biomeState = { type: biomeState.type, biomes }
+		}
 		if (this.isVersion('1.19')) {
 			return this.d.BiomeSource.fromJson(biomeState)
 		} else {
@@ -125,7 +135,7 @@ export class Deepslate {
 			const type = typeof root.type === 'string' ? root.type.replace(/^minecraft:/, '') : undefined
 			switch (type) {
 				case 'fixed':
-					return new (this.d as any).FixedBiome(this.isVersion('1.18.2') ? this.d.Identifier.parse(biomeState as string) : biomeState as any)
+					return new (this.d as any).FixedBiome(this.isVersion('1.18.2') ? this.d.Identifier.parse(root.biome as string) : root.biome as any)
 				case 'checkerboard':
 					const shift = (root.scale ?? 2) + 2
 					const numBiomes = root.biomes?.length ?? 0

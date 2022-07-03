@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale, useProject, useStore } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
 import { biomeMap, getBiome } from '../../previews/index.js'
-import { newSeed, randomSeed } from '../../Utils.js'
+import { randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { PreviewProps } from './index.js'
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { project } = useProject()
-	const [configuredSeed] = useState(randomSeed())
+	const [seed, setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const { biomeColors } = useStore()
@@ -18,7 +18,6 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const res = useRef(1)
 	const refineTimeout = useRef<number>()
 
-	const seed = BigInt(model.get(new Path(['generator', 'seed'])) ?? configuredSeed)
 	const settings = DataModel.unwrapLists(model.get(new Path(['generator', 'settings'])))
 	const state = JSON.stringify([data, settings])
 	const type: string = data.type?.replace(/^minecraft:/, '')
@@ -46,21 +45,21 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { settings, biomeColors, offset: offset.current, scale, seed: configuredSeed, res: 1, version, project }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed: seed, res: 1, version, project }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [version, state, scale, configuredSeed, biomeColors, project])
+	}, [version, state, scale, seed, biomeColors, project])
 
 	useEffect(() => {
 		if (shown) {
 			res.current = type === 'multi_noise' ? 4 : 1
 			redraw()
 		}
-	}, [version, state, scale, configuredSeed, shown, biomeColors, project])
+	}, [version, state, scale, seed, shown, biomeColors, project])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale
@@ -77,9 +76,9 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 				<Btn icon="plus" tooltip={locale('zoom_in')}
 					onClick={() => changeScale(scale / 1.5)} />
 			</>}
-			{type === 'multi_noise' &&
+			{(type === 'multi_noise' || type === 'the_end') &&
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
-					onClick={() => newSeed(model)} />}
+					onClick={() => setSeed(randomSeed())} />}
 		</div>
 		{focused?.temperature !== undefined && <div class="controls secondary-controls">
 			<Btn class="no-pointer" label={Object.entries(focused)

@@ -1,7 +1,6 @@
 import { DataModel } from '@mcschema/core'
 import type { Project } from '../contexts/Project.jsx'
 import type { VersionId } from '../services/index.js'
-import { fetchPreset } from '../services/index.js'
 import { stringToColor } from '../Utils.js'
 import { DEEPSLATE } from './Deepslate.js'
 import { getProjectData } from './NoiseSettings.js'
@@ -21,7 +20,7 @@ type BiomeSourceOptions = {
 
 export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists(state), options.seed)
+	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists(state), options.seed)
 
 	const data = img.data
 	const minX = -Math.round(options.offset[0]) - 100 + options.res / 2
@@ -48,7 +47,7 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 
 export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<{[k: string]: number | string} | undefined> {
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists( state), options.seed)
+	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists( state), options.seed)
 
 	const [xx, zz] = toWorld([x, z], options)
 
@@ -180,13 +179,4 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:meadow': [169, 197, 80],
 	'minecraft:lush_caves': [112, 255, 79],
 	'minecraft:dripstone_caves': [140, 124, 0],
-}
-
-const NetherPreset = {type:'minecraft:multi_noise',seed:0,altitude_noise:{firstOctave:-7,amplitudes:[1,1]},temperature_noise:{firstOctave:-7,amplitudes:[1,1]},humidity_noise:{firstOctave:-7,amplitudes:[1,1]},weirdness_noise:{firstOctave:-7,amplitudes:[1,1]},biomes:[{biome:'minecraft:nether_wastes',parameters:{altitude:0,temperature:0,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{altitude:0,temperature:0,humidity:-0.5,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{altitude:0,temperature:0.4,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{altitude:0,temperature:0,humidity:0.5,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{altitude:0,temperature:-0.5,humidity:0,weirdness:0,offset:0.175}}]}
-
-const NetherPreset18 = {type:'minecraft:multi_noise',biomes:[{biome:'minecraft:nether_wastes',parameters:{temperature:0,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{temperature:0,humidity:-0.5,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{temperature:0.4,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{temperature:0,humidity:0.5,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{temperature:-0.5,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0.175}}]}
-
-async function OverworldPreset18() {
-	const overworld = await fetchPreset('1.18', 'dimension', 'overworld')
-	return overworld.generator.biome_source
 }
