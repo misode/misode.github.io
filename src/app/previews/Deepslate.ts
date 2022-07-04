@@ -243,10 +243,10 @@ export class Deepslate {
 	}
 
 	public fillBiomes(minX: number, maxX: number, minZ: number, maxZ: number, step = 1) {
-		if (!this.generatorCache) {
+		if (!this.generatorCache || !this.settingsCache) {
 			throw new Error('Tried to fill biomes before generator is loaded')
 		}
-		const quartY = this.Y >> 2
+		const quartY = (this.Y - this.settingsCache.minY) >> 2
 		const minQuartX = Math.floor(minX) >> 2
 		const maxQuartX = Math.floor(maxX) >> 2
 		const minQuartZ = Math.floor(minZ) >> 2

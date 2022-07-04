@@ -49,9 +49,13 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
 	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists( state), options.seed)
 
-	const [xx, zz] = toWorld([x, z], options)
+	const minX = -Math.round(options.offset[0]) - 100 + options.res / 2
+	const minZ = -Math.round(options.offset[1]) - 100 + options.res / 2
 
-	const { palette, data } = DEEPSLATE.fillBiomes(xx, xx + 4, zz, zz + 4)
+	const xx = (x + minX) * options.scale
+	const zz = (z + minZ) * options.scale
+
+	const { palette, data } = DEEPSLATE.fillBiomes(xx * 4, xx * 4 + 4, zz * 4, zz * 4 + 4)
 	const biome = palette.get(data[0])!
 
 	return {
@@ -68,12 +72,6 @@ function getBiomeColor(biome: string, biomeColors: BiomeColors): Triple {
 		return stringToColor(biome)
 	}
 	return color
-}
-
-function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
-	const xx = (x - options.offset[0] - 100 + options.res / 2) * options.scale
-	const zz = (z - options.offset[1] - 100 + options.res / 2) * options.scale
-	return [xx, zz]
 }
 
 export const VanillaColors: Record<string, Triple> = {
