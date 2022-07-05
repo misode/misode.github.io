@@ -188,4 +188,6 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:meadow': [169, 197, 80],
 	'minecraft:lush_caves': [112, 255, 79],
 	'minecraft:dripstone_caves': [140, 124, 0],
+	'minecraft:deep_dark': [10, 14, 19],
+	'minecraft:mangrove_swamp': [36,196,142],
 }
