@@ -62,6 +62,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	}, [version, state, scale, seed, shown, biomeColors, project])
 
 	const changeScale = (newScale: number) => {
+		newScale = Math.max(1, Math.round(newScale))
 		offset.current[0] = offset.current[0] * scale / newScale
 		offset.current[1] = offset.current[1] * scale / newScale
 		setScale(newScale)
@@ -71,9 +72,10 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 		<div class="controls preview-controls">
 			{focused && <Btn label={focused.biome as string} class="no-pointer" />}
 			<Btn icon="dash" tooltip={locale('zoom_out')}
-				onClick={() => changeScale(scale * 1.5)} />
-			<Btn icon="plus" tooltip={locale('zoom_in')}
-				onClick={() => changeScale(scale / 1.5)} />
+				onClick={() => changeScale(scale * 2)} />
+			<Btn icon="plus" tooltip={locale(Math.round(scale) <= 1 ? 'zoom_in_limit' : 'zoom_in')}
+				disabled={Math.round(scale) <= 1}
+				onClick={() => changeScale(scale / 2)} />
 			{(type === 'multi_noise' || type === 'the_end') &&
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => setSeed(randomSeed())} />}
