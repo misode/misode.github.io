@@ -70,12 +70,10 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	return <>
 		<div class="controls preview-controls">
 			{focused && <Btn label={focused.biome as string} class="no-pointer" />}
-			{type !== 'fixed' && <>
-				<Btn icon="dash" tooltip={locale('zoom_out')}
-					onClick={() => changeScale(scale * 1.5)} />
-				<Btn icon="plus" tooltip={locale('zoom_in')}
-					onClick={() => changeScale(scale / 1.5)} />
-			</>}
+			<Btn icon="dash" tooltip={locale('zoom_out')}
+				onClick={() => changeScale(scale * 1.5)} />
+			<Btn icon="plus" tooltip={locale('zoom_in')}
+				onClick={() => changeScale(scale / 1.5)} />
 			{(type === 'multi_noise' || type === 'the_end') &&
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => setSeed(randomSeed())} />}

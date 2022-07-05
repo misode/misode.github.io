@@ -19,6 +19,7 @@ export class Deepslate {
 	private readonly deepslateCache = new Map<VersionId, typeof deepslate19>()
 	private readonly Y = 64
 	private readonly Z = 0
+	private readonly DEBUG = false
 
 	private cacheState: unknown
 	private settingsCache: NoiseSettings | undefined
@@ -247,10 +248,10 @@ export class Deepslate {
 			throw new Error('Tried to fill biomes before generator is loaded')
 		}
 		const quartY = (this.Y - this.settingsCache.minY) >> 2
-		const minQuartX = Math.floor(minX) >> 2
-		const maxQuartX = Math.floor(maxX) >> 2
-		const minQuartZ = Math.floor(minZ) >> 2
-		const maxQuartZ = Math.floor(maxZ) >> 2
+		const minQuartX = minX >> 2
+		const maxQuartX = maxX >> 2
+		const minQuartZ = minZ >> 2
+		const maxQuartZ = maxZ >> 2
 		const countX = Math.floor((maxQuartX - minQuartX) / step)
 		const countZ = Math.floor((maxQuartZ - minQuartZ) / step)
 
@@ -264,7 +265,9 @@ export class Deepslate {
 				const posKey = `${x}:${z}`
 				let biome = this.biomeCache.get(posKey)
 				if (!biome) {
-					if (this.isVersion('1.19')) {
+					if (this.DEBUG) {
+						biome = this.computeDebugBiome(x, z)
+					} else if (this.isVersion('1.19')) {
 						if (!this.randomStateCache) {
 							throw new Error('Tried to compute biomes before random state is loaded')
 						}
@@ -284,6 +287,16 @@ export class Deepslate {
 		return {
 			palette: biomeIds.backward,
 			data,
+			width: countX,
+			height: countZ,
+		}
+	}
+
+	private computeDebugBiome(x: number, z: number) {
+		if (x > 0) {
+			return z > 0 ? 'minecraft:plains' : 'minecraft:forest'
+		} else {
+			return z > 0 ? 'minecraft:badlands' : 'minecraft:desert'
 		}
 	}
 

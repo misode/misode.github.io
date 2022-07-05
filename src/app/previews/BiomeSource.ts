@@ -22,25 +22,34 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
 	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists(state), options.seed)
 
-	const data = img.data
-	const minX = -Math.round(options.offset[0]) - 100 + options.res / 2
-	const minZ = -Math.round(options.offset[1]) - 100 + options.res / 2
-	const row = img.width * 4 / options.res
-	const col = 4 / options.res
+	const quartStep = Math.max(1, Math.round(options.scale))
+	const quartWidth = 200 * quartStep
 
-	const { palette, data: biomes } = DEEPSLATE.fillBiomes(minX * options.scale * 4, (minX + 200) * options.scale * 4, minZ * options.scale * 4, (minZ + 200) * options.scale * 4, options.res * options.scale)
+	const centerX = Math.round(-options.offset[0] * options.scale)
+	const centerZ = Math.round(-options.offset[1] * options.scale)
 
-	for (let x = 0; x < 200; x += options.res) {
-		for (let z = 0; z < 200; z += options.res) {
-			const i = z * row + x * col
-			const j = (x / options.res) * 200 / options.res + z / options.res
-			let color: Triple = [50, 50, 50]
-			const biome = palette.get(biomes[j])
-			color = getBiomeColor(biome ?? '', options.biomeColors)
-			data[i] = color[0]
-			data[i + 1] = color[1]
-			data[i + 2] = color[2]
-			data[i + 3] = 255
+	const minX = Math.floor(centerX - quartWidth / 2)
+	const minZ = Math.floor(centerZ - quartWidth / 2)
+	const maxX = minX + quartWidth
+	const maxZ = minZ + quartWidth
+
+	const { palette, data, width, height } = DEEPSLATE.fillBiomes(minX * 4, maxX * 4, minZ * 4, maxZ * 4, quartStep * options.res)
+
+	let x = 0
+	let z = 0
+	for (let i = 0; i < data.length; i += 1) {
+		const biome = palette.get(data[i])
+		const color = getBiomeColor(biome ?? '', options.biomeColors)
+		const j = z * width + x
+		img.data[j * 4] = color[0]
+		img.data[j * 4 + 1] = color[1]
+		img.data[j * 4 + 2] = color[2]
+		img.data[j * 4 + 3] = 255
+
+		z += 1
+		if (z >= height) {
+			z = 0
+			x += 1
 		}
 	}
 }
@@ -49,11 +58,13 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
 	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists( state), options.seed)
 
-	const minX = -Math.round(options.offset[0]) - 100 + options.res / 2
-	const minZ = -Math.round(options.offset[1]) - 100 + options.res / 2
+	const quartStep = Math.max(1, Math.round(options.scale))
 
-	const xx = (x + minX) * options.scale
-	const zz = (z + minZ) * options.scale
+	const centerX = Math.round(-options.offset[0] * options.scale)
+	const centerZ = Math.round(-options.offset[1] * options.scale)
+
+	const xx = Math.floor(centerX + ((x - 100) * quartStep))
+	const zz = Math.floor(centerZ + ((z - 100) * quartStep))
 
 	const { palette, data } = DEEPSLATE.fillBiomes(xx * 4, xx * 4 + 4, zz * 4, zz * 4 + 4)
 	const biome = palette.get(data[0])!
