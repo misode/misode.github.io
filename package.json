@@ -7,10 +7,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "npm run wasmfixer && tsc && vite build",
+    "build": "tsc && vite build",
     "serve": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx",
-    "wasmfixer": "sed -i \"s/{: number, |: number/aa: number, ab: number/\" ./node_modules/deepslate-rs/deepslate_rs.d.ts"
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "keywords": [],
   "author": "Misode",
@@ -32,7 +31,6 @@
     "deepslate": "^0.12.0-beta.1",
     "deepslate-1.18": "npm:deepslate@^0.9.0-beta.9",
     "deepslate-1.18.2": "npm:deepslate@^0.9.0-beta.13",
-    "deepslate-rs": "^0.1.6",
     "highlight.js": "^11.5.1",
     "howler": "^2.2.3",
     "js-yaml": "^3.14.1",
