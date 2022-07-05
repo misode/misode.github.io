@@ -256,8 +256,8 @@ export function deepEqual(a: any, b: any) {
 }
 
 export class BiMap<A, B> {
-	private readonly forward: Map<A, B>
-	private readonly backward: Map<B, A>
+	public readonly forward: Map<A, B>
+	public readonly backward: Map<B, A>
 
 	constructor() {
 		this.forward = new Map()
@@ -285,6 +285,16 @@ export class BiMap<A, B> {
 		}
 		return b
 	}
+
+	public computeIfAbsent(key: A, value: () => B) {
+		const b = this.forward.get(key)
+		if (b === undefined) {
+			const newValue = value()
+			this.set(key, newValue)
+			return newValue
+		}
+		return b
+	}
 }
 
 export async function readZip(file: File): Promise<[string, string][]> {
@@ -306,4 +316,24 @@ export async function writeZip(entries: [string, string][]): Promise<string> {
 		await writer.add(name, new zip.TextReader(data))
 	}))
 	return await writer.close()
+}
+
+export function computeIfAbsent<K, V>(map: Map<K, V>, key: K, getter: (key: K) => V): V {
+	const existing = map.get(key)
+	if (existing) {
+		return existing
+	}
+	const value = getter(key)
+	map.set(key, value)
+	return value
+}
+
+export async function computeIfAbsentAsync<K, V>(map: Map<K, V>, key: K, getter: (key: K) => Promise<V>): Promise<V> {
+	const existing = map.get(key)
+	if (existing) {
+		return existing
+	}
+	const value = await getter(key)
+	map.set(key, value)
+	return value
 }
