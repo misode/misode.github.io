@@ -120,6 +120,8 @@
   "title.worldgen": "Worldgen Generators and Guides",
   "tools": "Tools",
   "pack_mcmeta": "Pack.mcmeta",
+  "partner.dawn": "Dawn API",
+  "partner.dawn.configured_shape": "Configured Shape",
   "partner.immersive_weathering": "Immersive Weathering",
   "partner.immersive_weathering.block_growth": "Block Growth",
   "presets": "Presets",

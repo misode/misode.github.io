@@ -82,7 +82,10 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 	const version = config.versions.find(v => v.id === versionId)!
 	try {
 		let url
-		if (id.startsWith('immersive_weathering:')) {
+		if (registry == 'dawn:configured_shape' && id.startsWith('dawn:')) {
+			url = `https://raw.githubusercontent.com/DawnTeamMC/DawnAPI/tree/1.19/src/main/resources/data/dawn/configured_shape/${id.slice(21)}.json`
+		}
+		else if (id.startsWith('immersive_weathering:')) {
 			url = `https://raw.githubusercontent.com/AstralOrdana/Immersive-Weathering/main/src/main/resources/data/immersive_weathering/block_growths/${id.slice(21)}.json`
 		} else {
 			const type = ['blockstates', 'models'].includes(registry) ? 'assets' : 'data'
