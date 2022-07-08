@@ -24,7 +24,10 @@ const ARTICLE_OVERRIDES = new Map(Object.entries({
 	1.18: 'caves---cliffs--part-ii-out-today-java',
 	'1.18.2-pre3': 'minecraft-1-18-2-pre-release-2',
 	'1.18.2-pre5': 'minecraft-1-18-2-pre-release-4',
+	'1.19-pre3': 'minecraft-1-19-pre-release-2',
+	'1.19-pre5': 'minecraft-1-19-pre-release-4',
 	1.19: 'the-wild-update-out-today-java',
+	'1.19.1-pre4': 'minecraft-1-19-1-pre-release-3',
 }))
 
 export function getArticleLink(version: string): string | undefined {
