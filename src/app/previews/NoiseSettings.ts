@@ -109,7 +109,7 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 }
 
 export function getProjectData(project: Project) {
-	return Object.fromEntries(['worldgen/noise', 'worldgen/density_function'].map(type => {
+	return Object.fromEntries(['worldgen/noise_settings', 'worldgen/noise', 'worldgen/density_function'].map(type => {
 		const resources = Object.fromEntries(
 			project.files.filter(file => file.type === type)
 				.map<[string, unknown]>(file => [file.id, file.data])
