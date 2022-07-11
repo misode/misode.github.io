@@ -324,6 +324,14 @@
       "schema": "model"
     },
     {
+      "id": "font",
+      "url": "assets/font",
+      "path": "font",
+      "tags": ["assets"],
+      "schema": "font",
+      "minVersion": "1.16"
+    },
+    {
       "id": "block_growth",
       "url": "partners/immersive-weathering/block-growth",
       "path": "block_growths",
