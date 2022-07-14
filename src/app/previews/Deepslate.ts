@@ -17,7 +17,6 @@ export class Deepslate {
 	private loadingVersion: VersionId | undefined
 	private loadingPromise: Promise<void> | undefined
 	private readonly deepslateCache = new Map<VersionId, typeof deepslate19>()
-	private readonly Y = 64
 	private readonly Z = 0
 	private readonly DEBUG = false
 
@@ -243,11 +242,11 @@ export class Deepslate {
 		})
 	}
 
-	public fillBiomes(minX: number, maxX: number, minZ: number, maxZ: number, step = 1) {
+	public fillBiomes(minX: number, maxX: number, minZ: number, maxZ: number, step = 1, y = 64) {
 		if (!this.generatorCache || !this.settingsCache) {
 			throw new Error('Tried to fill biomes before generator is loaded')
 		}
-		const quartY = (this.Y - this.settingsCache.minY) >> 2
+		const quartY = (y - this.settingsCache.minY) >> 2
 		const minQuartX = minX >> 2
 		const maxQuartX = maxX >> 2
 		const minQuartZ = minZ >> 2
@@ -262,7 +261,7 @@ export class Deepslate {
 
 		for (let x = minQuartX; x < maxQuartX; x += step) {
 			for (let z = minQuartZ; z < maxQuartZ; z += step) {
-				const posKey = `${x}:${z}`
+				const posKey = `${x}:${quartY}:${z}`
 				let biome = this.biomeCache.get(posKey)
 				if (!biome) {
 					if (this.DEBUG) {

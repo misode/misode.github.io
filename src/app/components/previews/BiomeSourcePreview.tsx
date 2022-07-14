@@ -4,7 +4,7 @@ import { useLocale, useProject, useStore } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
 import { biomeMap, getBiome } from '../../previews/index.js'
 import { randomSeed } from '../../Utils.js'
-import { Btn } from '../index.js'
+import { Btn, BtnMenu, NumberInput } from '../index.js'
 import type { PreviewProps } from './index.js'
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
@@ -12,6 +12,7 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const { project } = useProject()
 	const [seed, setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
+	const [yOffset, setYOffset] = useState(64)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
 	const { biomeColors } = useStore()
 	const offset = useRef<[number, number]>([0, 0])
@@ -21,13 +22,14 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	const settings = DataModel.unwrapLists(model.get(new Path(['generator', 'settings'])))
 	const state = JSON.stringify([data, settings])
 	const type: string = data.type?.replace(/^minecraft:/, '')
+	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 
 	const { canvas, redraw } = useCanvas({
 		size() {
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { settings, biomeColors, offset: offset.current, scale, seed, res: res.current, version, project }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed, res: res.current, version, project, y: yOffset }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -41,25 +43,27 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			offset.current[0] = offset.current[0] + dx * 200
 			offset.current[1] = offset.current[1] + dy * 200
 			clearTimeout(refineTimeout.current)
-			res.current = type === 'multi_noise' ? 4 : 1
+			res.current = hasRandomness ? 4 : 1
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { settings, biomeColors, offset: offset.current, scale, seed: seed, res: 1, version, project }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed: seed, res: 1, version, project, y: yOffset }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [version, state, scale, seed, biomeColors, project])
+	}, [version, state, scale, seed, yOffset, biomeColors, project])
 
 	useEffect(() => {
 		if (shown) {
-			res.current = type === 'multi_noise' ? 4 : 1
+			res.current = hasRandomness ? 4 : 1
 			redraw()
 		}
-	}, [version, state, scale, seed, shown, biomeColors, project])
+	}, [version, state, scale, seed, yOffset, shown, biomeColors, project])
+
+	console.log(yOffset)
 
 	const changeScale = (newScale: number) => {
 		newScale = Math.max(1, Math.round(newScale))
@@ -76,9 +80,16 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			<Btn icon="plus" tooltip={locale(Math.round(scale) <= 1 ? 'zoom_in_limit' : 'zoom_in')}
 				disabled={Math.round(scale) <= 1}
 				onClick={() => changeScale(scale / 2)} />
-			{(type === 'multi_noise' || type === 'the_end') &&
+			{hasRandomness && <>
+				<BtnMenu icon="stack">
+					<div class="btn btn-input" onClick={e => e.stopPropagation()}>
+						<span>{locale('y')}</span>
+						<NumberInput value={yOffset} onChange={setYOffset} />
+					</div>
+				</BtnMenu>
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
-					onClick={() => setSeed(randomSeed())} />}
+					onClick={() => setSeed(randomSeed())} />
+			</>}
 		</div>
 		{focused?.temperature !== undefined && <div class="controls secondary-controls">
 			<Btn class="no-pointer" label={Object.entries(focused)

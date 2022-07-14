@@ -16,6 +16,7 @@ type BiomeSourceOptions = {
 	version: VersionId,
 	settings: unknown,
 	project: Project,
+	y: number,
 }
 
 export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
@@ -33,7 +34,7 @@ export async function biomeMap(state: any, img: ImageData, options: BiomeSourceO
 	const maxX = minX + quartWidth
 	const maxZ = minZ + quartWidth
 
-	const { palette, data, width, height } = DEEPSLATE.fillBiomes(minX * 4, maxX * 4, minZ * 4, maxZ * 4, quartStep * options.res)
+	const { palette, data, width, height } = DEEPSLATE.fillBiomes(minX * 4, maxX * 4, minZ * 4, maxZ * 4, quartStep * options.res, options.y)
 
 	let x = 0
 	let z = 0
@@ -66,7 +67,9 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 	const xx = Math.floor(centerX + ((x - 100) * quartStep))
 	const zz = Math.floor(centerZ + ((z - 100) * quartStep))
 
-	const { palette, data } = DEEPSLATE.fillBiomes(xx * 4, xx * 4 + 4, zz * 4, zz * 4 + 4)
+	console.log('get biome', options.y)
+
+	const { palette, data } = DEEPSLATE.fillBiomes(xx * 4, xx * 4 + 4, zz * 4, zz * 4 + 4, 1, options.y)
 	const biome = palette.get(data[0])!
 
 	return {
