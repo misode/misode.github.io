@@ -20,11 +20,16 @@ const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 
 type McmetaTypes = 'summary' | 'data' | 'assets' | 'registries'
 
-function mcmeta(version: { dynamic: true } | { dynamic?: false, ref?: string}, type: McmetaTypes) {
+interface RefInfo {
+	dynamic?: boolean
+	ref?: string
+}
+
+function mcmeta(version: RefInfo, type: McmetaTypes) {
 	return `${mcmetaUrl}/${version.dynamic ? type : `${version.ref}-${type}`}`
 }
 
-async function validateCache(version: Version) {
+async function validateCache(version: RefInfo) {
 	await applyPatches()
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
@@ -146,10 +151,9 @@ export type VersionMeta = {
 	sha1: string,
 }
 export async function fetchVersions(): Promise<VersionMeta[]> {
-	const version = config.versions[config.versions.length - 1]
-	await validateCache(version)
+	await validateCache({ dynamic: true })
 	try {
-		return cachedFetch(`${mcmeta(version, 'summary')}/versions/data.min.json`, { refresh: true })
+		return cachedFetch(`${mcmeta({ dynamic: true }, 'summary')}/versions/data.min.json`, { refresh: true })
 	} catch (e) {
 		throw new Error(`Error occured while fetching versions: ${message(e)}`)
 	}
