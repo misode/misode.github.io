@@ -118,10 +118,11 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		functions: Opt(ObjectNode({
 			random_tick: Opt(Reference(`${ID}:function`)),
 			scheduled_tick: Opt(Reference(`${ID}:function`)),
-			on_use: Opt(Reference(`${ID}:function`)),
 			random_display_tick: Opt(Reference(`${ID}:function`)),
+			place: Opt(Reference(`${ID}:function`)),
+			break: Opt(Reference(`${ID}:function`)),
+			use: Opt(Reference(`${ID}:function`)),
 			walk_on: Opt(Reference(`${ID}:function`)),
-			on_shift_use: Opt(Reference(`${ID}:function`)),
 		})),
 		ore_information: Opt(ObjectNode({
 			test_type: Opt(StringNode({ enum: ['tag', 'always', 'block_match', 'block_state_match', 'random_block_match', 'random_block_state_match']})),
@@ -245,9 +246,32 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	}))
 
 	schemas.register(`${ID}:function`, ObjectNode({
-		predicate: Opt(StringNode({ validator: 'resource', params: { pool: '$predicate' } })),
-		function: Opt(StringNode({ validator: 'resource', params: { pool: '$function' } })),
+		predicate: Opt(Reference(`${ID}:predicate`)),
+		function_type: StringNode({ enum: ['NONE', 'REQUIRES_SHIFTING', 'REQUIRES_ITEM', 'REQUIRES_SHIFTING_AND_ITEM'] }),
+		[Switch]: [{ push: 'function_type' }],
+		[Case]: {
+			'NONE': {},
+			'REQUIRES_SHIFTING': {},
+			'REQUIRES_ITEM': { item: StringNode({ validator: 'resource', params: { pool: 'item' } }) },
+			'REQUIRES_SHIFTING_AND_ITEM': { item: StringNode({ validator: 'resource', params: { pool: 'item' } }) },
+		},
+		function_file: StringNode(),
 	}, { context: `${ID}:function` }))
+
+	schemas.register(`${ID}:predicate`, ObjectNode({
+		predicate_type: Opt(StringNode({ enum: ['ALWAYS', 'EQUALS', 'NOT_EQUALS', 'CONTAINS', 'NOT_CONTAINS', 'BEGINS_WITH', 'ENDS_WITH', 'REGEX'] })),
+		[Switch]: [{ push: 'predicate_type' }],
+		[Case]: {
+			ALWAYS: {},
+			EQUALS: { left: StringNode(), right: StringNode(), },
+			NOT_EQUALS: { left: StringNode(), right: StringNode(), },
+			CONTAINS: { left: StringNode(), right: StringNode(), },
+			NOT_CONTAINS: { left: StringNode(), right: StringNode(), },
+			BEGINS_WITH: { left: StringNode(), right: StringNode(), },
+			ENDS_WITH: { left: StringNode(), right: StringNode(), },
+			REGEX: { left: StringNode(), right: StringNode(), },
+		},
+	}, { context: `${ID}:predicate` }))
 
 	schemas.register(`${ID}:model`, ObjectNode({
 		textures: Opt(MapNode(
