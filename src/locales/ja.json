@@ -6,7 +6,7 @@
   "any_version": "どれか",
   "assets": "アセット",
   "back": "戻る",
-  "block_definition": "ブロックの状態(Blockstate)",
+  "block_definition": "ブロックの状態",
   "changelog": "技術的変更履歴",
   "changelog.no_results": "文章化された変更はありません",
   "changelog.search": "変更点を検索",
