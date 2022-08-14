@@ -83,7 +83,7 @@
     },
     {
       "id": "1.19",
-      "ref": "1.19",
+      "dynamic": true,
       "pack_format": 10
     }
   ],
