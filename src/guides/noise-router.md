@@ -108,7 +108,7 @@ Let's continue with a simple density function that creates a flat world at Y=n`1
 ```
 The image below illustrates how s`y_clamped_gradient` works. In this example positions at Y=n`-64` will get a density of n`1` and positions at Y=n`320` will get a density of n`-1`.
 
-![illustration of Y coordinates getting mapped the [-1, 1] range](https://user-images.githubusercontent.com/17352009/170406782-f7331402-0149-47e1-871e-6aff0c1ab1be.png)
+![illustration of Y coordinates getting mapped the [-1, 1] range](https://user-images.githubusercontent.com/17352009/184545378-5e00870e-35d5-4b9c-9336-269571f6c194.png)
 
 And the result looks like this:
 
