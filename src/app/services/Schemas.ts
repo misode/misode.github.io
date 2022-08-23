@@ -1,12 +1,14 @@
 import type { CollectionRegistry, INode, SchemaRegistry } from '@mcschema/core'
 import { ChoiceNode, DataModel, Reference, StringNode } from '@mcschema/core'
-import config from '../../config.json'
-import { initPartners } from '../partners'
-import { message } from '../Utils'
-import { fetchData } from './DataFetcher'
+import config from '../Config.js'
+import { initPartners } from '../partners/index.js'
+import { message } from '../Utils.js'
+import { fetchData } from './DataFetcher.js'
 
 export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19'] as const
 export type VersionId = typeof VersionIds[number]
+
+export const DEFAULT_VERSION: VersionId = '1.19'
 
 export type BlockStateRegistry = {
 	[block: string]: {
@@ -49,6 +51,7 @@ const versionGetter: {
 export let CachedDecorator: INode<any>
 export let CachedFeature: INode<any>
 export let CachedCollections: CollectionRegistry
+export let CachedSchemas: SchemaRegistry
 
 async function getVersion(id: VersionId): Promise<VersionData> {
 	if (!Versions[id]) {
@@ -119,6 +122,12 @@ export async function getCollections(version: VersionId): Promise<CollectionRegi
 export async function getBlockStates(version: VersionId): Promise<BlockStateRegistry> {
 	const versionData = await getVersion(version)
 	return versionData.blockStates
+}
+
+export async function getSchemas(version: VersionId): Promise<SchemaRegistry> {
+	const versionData = await getVersion(version)
+	CachedSchemas = versionData.schemas
+	return versionData.schemas
 }
 
 export function checkVersion(versionId: string, minVersionId: string | undefined, maxVersionId?: string) {

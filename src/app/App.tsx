@@ -2,10 +2,10 @@ import type { RouterOnChangeArgs } from 'preact-router'
 import { Router } from 'preact-router'
 import '../styles/global.css'
 import '../styles/nodes.css'
-import { Analytics } from './Analytics'
-import { Header } from './components'
-import { Category, Changelog, Generator, Guide, Guides, Home, Partners, Project, Sounds, Versions } from './pages'
-import { cleanUrl } from './Utils'
+import { Analytics } from './Analytics.js'
+import { Header } from './components/index.js'
+import { Changelog, Generator, Generators, Guide, Guides, Home, Partners, Sounds, Versions, Worldgen } from './pages/index.js'
+import { cleanUrl } from './Utils.js'
 
 export function App() {
 	const changeRoute = (e: RouterOnChangeArgs) => {
@@ -18,14 +18,13 @@ export function App() {
 		<Header />
 		<Router onChange={changeRoute}>
 			<Home path="/" />
-			<Category path="/worldgen" category="worldgen" />
-			<Category path="/assets" category="assets" />
+			<Generators path="/generators" />
+			<Worldgen path="/worldgen" />
 			<Partners path="/partners" />
 			<Sounds path="/sounds" />
 			<Changelog path="/changelog" />
 			<Versions path="/versions" />
-			<Project path="/project" />
-			<Guides path="/guides/" />
+			<Guides path="/guides" />
 			<Guide path="/guides/:id" />
 			<Generator default />
 		</Router>

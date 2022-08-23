@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import type { PreviewProps } from '.'
-import { Btn, BtnMenu } from '..'
-import { useLocale } from '../../contexts'
-import { useCanvas } from '../../hooks'
-import { densityFunction } from '../../previews'
-import { randomSeed } from '../../Utils'
+import { useLocale, useProject } from '../../contexts/index.js'
+import { useCanvas } from '../../hooks/index.js'
+import { densityFunction } from '../../previews/index.js'
+import { randomSeed } from '../../Utils.js'
+import { Btn, BtnMenu } from '../index.js'
+import type { PreviewProps } from './index.js'
 
 export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { project } = useProject()
 	const [seed, setSeed] = useState(randomSeed())
 	const [autoScroll, setAutoScroll] = useState(false)
 	const [focused, setFocused] = useState<string | undefined>(undefined)
@@ -21,7 +22,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 			return [size, size]
 		},
 		async draw(img) {
-			const options = { offset: offset.current, width: img.width, seed, version }
+			const options = { offset: offset.current, width: img.width, seed, version, project }
 			await densityFunction(data, img, options)
 		},
 		async onDrag(dx) {
@@ -36,7 +37,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [version, state, seed])
+	}, [version, state, seed, project])
 
 	useEffect(() => {
 		if (scrollInterval.current) {
@@ -51,7 +52,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 				}, 100) as any
 			}
 		}
-	}, [version, state, seed, shown, autoScroll])
+	}, [version, state, seed, project, shown, autoScroll])
 
 	return <>
 		<div class="controls preview-controls">

@@ -1,9 +1,10 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
+import * as zip from '@zip.js/zip.js'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
-import config from '../config.json'
+import config from './Config.js'
 
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
@@ -255,8 +256,8 @@ export function deepEqual(a: any, b: any) {
 }
 
 export class BiMap<A, B> {
-	private readonly forward: Map<A, B>
-	private readonly backward: Map<B, A>
+	public readonly forward: Map<A, B>
+	public readonly backward: Map<B, A>
 
 	constructor() {
 		this.forward = new Map()
@@ -284,4 +285,55 @@ export class BiMap<A, B> {
 		}
 		return b
 	}
+
+	public computeIfAbsent(key: A, value: () => B) {
+		const b = this.forward.get(key)
+		if (b === undefined) {
+			const newValue = value()
+			this.set(key, newValue)
+			return newValue
+		}
+		return b
+	}
+}
+
+export async function readZip(file: File): Promise<[string, string][]> {
+	const buffer = await file.arrayBuffer()
+	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
+	const entries = await reader.getEntries()
+	return await Promise.all(entries
+		.filter(e => !e.directory)
+		.map(async e => {
+			const writer = new zip.TextWriter('utf-8')
+			return [e.filename, await e.getData?.(writer)] as [string, string]
+		})
+	)
+}
+
+export async function writeZip(entries: [string, string][]): Promise<string> {
+	const writer = new zip.ZipWriter(new zip.Data64URIWriter('application/zip'))
+	await Promise.all(entries.map(async ([name, data]) => {
+		await writer.add(name, new zip.TextReader(data))
+	}))
+	return await writer.close()
+}
+
+export function computeIfAbsent<K, V>(map: Map<K, V>, key: K, getter: (key: K) => V): V {
+	const existing = map.get(key)
+	if (existing) {
+		return existing
+	}
+	const value = getter(key)
+	map.set(key, value)
+	return value
+}
+
+export async function computeIfAbsentAsync<K, V>(map: Map<K, V>, key: K, getter: (key: K) => Promise<V>): Promise<V> {
+	const existing = map.get(key)
+	if (existing) {
+		return existing
+	}
+	const value = await getter(key)
+	map.set(key, value)
+	return value
 }

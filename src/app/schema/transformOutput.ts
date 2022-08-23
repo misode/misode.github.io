@@ -1,6 +1,6 @@
 import type { DataModel, Hook } from '@mcschema/core'
 import { ModelPath, relativePath } from '@mcschema/core'
-import type { BlockStateRegistry } from '../services'
+import type { BlockStateRegistry } from '../services/index.js'
 
 export function getOutput(model: DataModel, blockStates: BlockStateRegistry): any {
 	return model.schema.hook(transformOutput, new ModelPath(model), model.data, { blockStates })

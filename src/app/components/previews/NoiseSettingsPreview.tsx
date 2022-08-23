@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import type { PreviewProps } from '.'
-import { Btn, BtnInput, BtnMenu } from '..'
-import { useLocale } from '../../contexts'
-import { useCanvas } from '../../hooks'
-import { getNoiseBlock, noiseSettings } from '../../previews'
-import { CachedCollections, checkVersion } from '../../services'
-import { randomSeed } from '../../Utils'
+import { useLocale, useProject } from '../../contexts/index.js'
+import { useCanvas } from '../../hooks/index.js'
+import { getNoiseBlock, noiseSettings } from '../../previews/index.js'
+import { CachedCollections, checkVersion } from '../../services/index.js'
+import { randomSeed } from '../../Utils.js'
+import { Btn, BtnInput, BtnMenu } from '../index.js'
+import type { PreviewProps } from './index.js'
 
 export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { project } = useProject()
 	const [seed, setSeed] = useState(randomSeed())
 	const [biome, setBiome] = useState('minecraft:plains')
 	const [biomeScale, setBiomeScale] = useState(0.2)
@@ -25,7 +26,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 			return [size, size]
 		},
 		async draw(img) {
-			const options = { biome, biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version }
+			const options = { biome, biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version, project }
 			await noiseSettings(data, img, options)
 		},
 		async onDrag(dx) {
@@ -41,7 +42,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [state, seed])
+	}, [state, seed, project])
 
 	useEffect(() => {
 		if (scrollInterval.current) {
@@ -62,7 +63,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 				}
 			})()
 		}
-	}, [version, state, seed, shown, biome, biomeScale, biomeDepth, autoScroll])
+	}, [version, state, seed, project, shown, biome, biomeScale, biomeDepth, autoScroll])
 
 	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
 

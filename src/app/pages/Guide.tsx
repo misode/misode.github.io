@@ -3,12 +3,12 @@ import json from 'highlight.js/lib/languages/json'
 import { marked } from 'marked'
 import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
-import config from '../../config.json'
-import { Ad, Btn, BtnMenu, ChangelogTag, Giscus, Octicon } from '../components'
-import { useLocale, useTitle, useVersion } from '../contexts'
-import { useActiveTimeout, useAsync, useHash } from '../hooks'
-import type { VersionId } from '../services'
-import { parseFrontMatter, versionContent } from '../Utils'
+import { Ad, Badge, Btn, Footer, Giscus, Icons, Octicon, VersionSwitcher } from '../components/index.js'
+import config from '../Config.js'
+import { useLocale, useTitle, useVersion } from '../contexts/index.js'
+import { useActiveTimeout, useAsync, useHash } from '../hooks/index.js'
+import type { VersionId } from '../services/index.js'
+import { parseFrontMatter, versionContent } from '../Utils.js'
 
 const HASH = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M6.368 1.01a.75.75 0 01.623.859L6.57 4.5h3.98l.46-2.868a.75.75 0 011.48.237L12.07 4.5h2.18a.75.75 0 010 1.5h-2.42l-.64 4h2.56a.75.75 0 010 1.5h-2.8l-.46 2.869a.75.75 0 01-1.48-.237l.42-2.632H5.45l-.46 2.869a.75.75 0 01-1.48-.237l.42-2.632H1.75a.75.75 0 010-1.5h2.42l.64-4H2.25a.75.75 0 010-1.5h2.8l.46-2.868a.75.75 0 01.858-.622zM9.67 10l.64-4H6.33l-.64 4h3.98z"></path></svg>'
 
@@ -50,7 +50,7 @@ export function Guide({ id }: Props) {
 
 	const allowedVersions = useMemo(() => {
 		const orderedVersions = config.versions.map(v => v.id)
-		return (frontMatter?.versions as string[])
+		return (frontMatter?.versions as VersionId[])
 			?.sort((a, b) => orderedVersions.indexOf(b) - orderedVersions.indexOf(a))
 	}, [frontMatter?.versions])
 
@@ -172,21 +172,23 @@ export function Guide({ id }: Props) {
 	const [largeWidth] = useState(window.innerWidth > 600)
 
 	return <main>
-		<div class="guide">
+		<div class="container guide">
 			<div class="navigation">
 				<a class="btn btn-link" href="/guides/">
 					{Octicon.arrow_left}
-					{locale('guides.all')}
+					<span>{locale('guides.all')}</span>
 				</a>
+				<a class="btn btn-link" href="/worldgen/">
+					{Icons.worldgen}
+					<span>{locale('worldgen')}</span>
+				</a>
+				<div class="navigation-divider" />
 				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')} class="guide-share" />
-				{allowedVersions && <BtnMenu icon="tag" label={guideVersion} tooltip={locale('switch_version')}>
-					{allowedVersions.map((v: string) => 
-						<Btn label={v} active={v === guideVersion} onClick={() => changeVersion(v as VersionId)} />)}
-				</BtnMenu>}
+				{allowedVersions && <VersionSwitcher value={guideVersion} allowed={allowedVersions} onChange={changeVersion} />}
 			</div>
-			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="guide-tags">
+			{(frontMatter?.tags && frontMatter.tags.length > 0) && <div class="badges-list">
 				{frontMatter.tags.map((tag: string) =>
-					<ChangelogTag label={tag} active onClick={() => onClickTag(tag)} />
+					<Badge label={tag} active onClick={() => onClickTag(tag)} />
 				)}
 			</div>}
 			{html && <>
@@ -195,5 +197,6 @@ export function Guide({ id }: Props) {
 				<Giscus />
 			</>}
 		</div>
+		<Footer />
 	</main>
 }

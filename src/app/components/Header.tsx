@@ -1,9 +1,9 @@
 import { getCurrentUrl, Link, route } from 'preact-router'
-import { Btn, BtnMenu, Icons, Octicon } from '.'
-import config from '../../config.json'
-import { useLocale, useTheme, useTitle, useVersion } from '../contexts'
-import { checkVersion } from '../services'
-import { cleanUrl, getGenerator } from '../Utils'
+import config from '../Config.js'
+import { useLocale, useProject, useTheme, useTitle, useVersion } from '../contexts/index.js'
+import { checkVersion } from '../services/index.js'
+import { cleanUrl, getGenerator } from '../Utils.js'
+import { Btn, BtnMenu, Icons, Octicon } from './index.js'
 
 const Themes: Record<string, keyof typeof Octicon> = {
 	system: 'device_desktop',
@@ -15,8 +15,10 @@ export function Header() {
 	const { lang, locale, changeLocale: changeLanguage } = useLocale()
 	const { theme, changeTheme } = useTheme()
 	const { version } = useVersion()
+	const { projects, project, changeProject } = useProject()
 	const { title } = useTitle()
-	const gen = getGenerator(getCurrentUrl())
+	const url = getCurrentUrl()
+	const gen = getGenerator(url)
 
 	return <header>
 		<div class="title">
@@ -24,10 +26,15 @@ export function Header() {
 			<h1>{title}</h1>
 			{gen && <BtnMenu icon="chevron_down" tooltip={locale('switch_generator')} data-cy="generator-switcher">
 				{config.generators
-					.filter(g => g.category === gen?.category && checkVersion(version, g.minVersion))
+					.filter(g => g.tags?.[0] === gen?.tags?.[0] && checkVersion(version, g.minVersion))
 					.map(g =>
 						<Btn label={locale(g.partner ? `partner.${g.partner}.${g.id}` : g.id)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
 					)}
+			</BtnMenu>}
+			{!gen && url.match(/\/?project\/?$/) && <BtnMenu icon="chevron_down" tooltip={locale('switch_project')}>
+				{projects.map(p =>
+					<Btn label={p.name} active={p.name === project.name} onClick={() => changeProject(p.name)} />
+				)}
 			</BtnMenu>}
 		</div>
 		<nav>

@@ -1,4 +1,4 @@
-import type { VersionId } from './services'
+import type { VersionId } from './services/index.js'
 
 type Method = 'menu' | 'hotkey'
 
@@ -76,6 +76,12 @@ export namespace Analytics {
 		})
 	}
 
+	export function setSelectedVersion(selected_version: string) {
+		gtag('set', {
+			selected_version,
+		})
+	}
+
 	export function changeVersion(prev_version: string, version: string) {
 		setVersion(version)
 		event(ID_GENERATOR, 'set-version', version)
@@ -95,6 +101,12 @@ export namespace Analytics {
 		dimension(DIM_PREFERS_COLOR_SCHEME, prefers_color_scheme)
 		gtag('set', {
 			prefers_color_scheme,
+		})
+	}
+
+	export function setTreeViewMode(tree_view_mode: string) {
+		gtag('set', {
+			tree_view_mode,
 		})
 	}
 
@@ -121,16 +133,6 @@ export namespace Analytics {
 		gtag('event', 'redo_generator', {
 			file_type,
 			history,
-			method,
-		})
-	}
-
-	export function saveProjectFile(file_type: string, project_size: number, projects_count: number, method: Method) {
-		event(ID_GENERATOR, 'save-project-file', legacyMethod(method))
-		gtag('event', 'save_project_file', {
-			file_type,
-			project_size,
-			projects_count,
 			method,
 		})
 	}
@@ -213,6 +215,65 @@ export namespace Analytics {
 		event(ID_GENERATOR, 'toggle-preview', 'hidden')
 		gtag('event', 'hide_generator_preview', {
 			file_type,
+			method,
+		})
+	}
+
+	export function showProject(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'show-project', legacyMethod(method))
+		gtag('event', 'show_project', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function hideProject(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'hide-project', legacyMethod(method))
+		gtag('event', 'hide_project', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function saveProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'save-project-file', legacyMethod(method))
+		gtag('event', 'save_project_file', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function deleteProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'delete-project-file', legacyMethod(method))
+		gtag('event', 'delete_project_file', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function renameProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'rename-project-file', legacyMethod(method))
+		gtag('event', 'rename_project_file', {
+			file_type,
+			projects_count,
+			project_size,
+			method,
+		})
+	}
+
+	export function deleteProject(projects_count: number, project_size: number, method: Method) {
+		event(ID_GENERATOR, 'delete-project', legacyMethod(method))
+		gtag('event', 'delete_project', {
+			projects_count,
+			project_size,
 			method,
 		})
 	}

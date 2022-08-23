@@ -1,9 +1,9 @@
 import type { DataModel } from '@mcschema/core'
 import { useErrorBoundary, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts'
-import { useModel } from '../../hooks'
-import { FullNode } from '../../schema/renderHtml'
-import type { BlockStateRegistry, VersionId } from '../../services'
+import { useLocale } from '../../contexts/index.js'
+import { useModel } from '../../hooks/index.js'
+import { FullNode } from '../../schema/renderHtml.js'
+import type { BlockStateRegistry, VersionId } from '../../services/index.js'
 
 type TreePanelProps = {
 	version: VersionId,

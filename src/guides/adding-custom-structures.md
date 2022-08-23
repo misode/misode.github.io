@@ -102,7 +102,7 @@ Let's go over all the fields.
 {#[1.18.2]
 * f`type`: This is the structure feature type. When making custom structures, you almost always want to set this to s`village` or s`bastion_remnant`. There is one important difference between the two: using s`village` will spawn the structure on the surface, while s`bastion_remnant` will always spawn the structure at Y=33.
 * f`config`:
-  * f`start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
+  * f`start_pool`: This is a reference to the template pool [(see next step)](#the-template-pool).
   * f`size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
 * f`biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
 * f`adapt_noise`: When true, it will add extra terrain below each structure piece.
@@ -111,11 +111,16 @@ Let's go over all the fields.
 * f`type`: This is the structure type. When making custom structures, you almost always want to set this to s`jigsaw`.
 * f`biomes`: This controls in which biomes this structure is allowed to generate. You can give it any biome tag, a list of biomes, or a single biome. For easy testing we'll set it to every biome with mineshafts.
 * f`step`: The generation step to place the features in. This matches the steps in a biome's `feature` list. Possible values: s`raw_generation`, s`lakes`, s`local_modifications`, s`underground_structures`, s`surface_structures`, s`strongholds`, s`underground_ores`, s`underground_decoration`, s`fluid_springs`, s`vegetal_decoration`, and s`top_layer_modification`.
+* f`terrain_adaptation`: Controls how the structure will affect the terrain. It has 4 options:
+  * s`none`: (default) No effect on the terrain.
+  * s`beard_thin`: Adds terrain below the structure and removes inside the structure. This is what villages use.
+  * s`beard_box`: Stronger version of s`beard_thin`. This is what ancient cities use.
+  * s`bury`: Adds terrain completely around the structure. This is what strongholds use.
 * f`spawn_overrides`: This field allows you to override mob spawning inside the structure bounding boxes. This is outside the scope of this guide, but you could look at the [vanilla monument](/worldgen/structure/?preset=monument&version={#version#}) structure feature as a reference.
-* f`start_pool`: This is a reference to the **template pool** [(see next step)](#the-template-pool).
+* f`start_pool`: This is a reference to the template pool [(see next step)](#the-template-pool).
 * f`size`: This is a number between 1 and 7. This is important if your structure uses jigsaw. In this simple example, we'll leave it at 1.
-* f`start_height`: A height provider specifying at which height the structure should spawn. The example uses the constant shorthand so it just specifies a vertical anchor.
-* f`project_start_to_heightmap`: An optional heightmap type. Possible values: s`WORLD_SURFACE_WG`, s`WORLD_SURFACE`, s`OCEAN_FLOOR_WG`, s`OCEAN_FLOOR`, s`MOTION_BLOCKING`, and s`MOTION_BLOCKING_NO_LEAVES`. If f`start_height` is not 0, will move the start relative to the heightmap.
+* f`start_height`: A height provider specifying at which height the structure should spawn. The example uses the constant shorthand so it just specifies a vertical anchor. If used together with f`project_start_to_heightmap`, will offset the height relative to the heightmap.
+* f`project_start_to_heightmap`: An optional [heightmap type](/guides/heightmap-types/). Possible values: s`WORLD_SURFACE_WG`, s`WORLD_SURFACE`, s`OCEAN_FLOOR_WG`, s`OCEAN_FLOOR`, s`MOTION_BLOCKING`, and s`MOTION_BLOCKING_NO_LEAVES`.
 * f`max_distance_from_center`: Value between 1 and 128. The maximum distance that a jigsaw can branch out.
 * f`use_expansion_hack`: You should always set this to false. Vanilla villages set this to true to fix an issue with their streets.
 #}

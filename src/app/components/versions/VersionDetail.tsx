@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from 'preact/hooks'
-import { VersionMetaData } from '.'
-import { useLocale } from '../../contexts'
-import type { Change, VersionMeta } from '../../services'
-import { getArticleLink, getChangelogs } from '../../services'
-import { Giscus } from '../Giscus'
-import { Octicon } from '../Octicon'
-import { ChangelogList } from './ChangelogList'
+import { useMemo, useState } from 'preact/hooks'
+import { useLocale } from '../../contexts/index.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import type { VersionMeta } from '../../services/index.js'
+import { fetchChangelogs, getArticleLink } from '../../services/index.js'
+import { Giscus } from '../Giscus.js'
+import { Octicon } from '../Octicon.js'
+import { ChangelogList } from './ChangelogList.js'
+import { VersionMetaData } from './index.js'
 
 type Tab = 'changelog' | 'discussion' 
 
@@ -18,18 +19,11 @@ export function VersionDetail({ id, version }: Props) {
 
 	const [tab, setTab] = useState<Tab>('changelog')
 
-	const [changelogs, setChangelogs] = useState<Change[] | undefined>(undefined)
-	useEffect(() => {
-		getChangelogs()
-			.then(changelogs => setChangelogs(
-				changelogs.map(c => ({ ...c, tags: c.tags.filter(t => t !== c.group) }))
-			))
-			.catch(e => console.error(e))
-	}, [])
+	const { value: changes } = useAsync(fetchChangelogs, [])
 
 	const filteredChangelogs = useMemo(() =>
-		changelogs?.filter(c => c.version === id || c.group === id),
-	[id, changelogs])
+		changes?.filter(c => c.version === id || c.group === id),
+	[id, changes])
 
 	const articleLink = version && getArticleLink(version.id)
 

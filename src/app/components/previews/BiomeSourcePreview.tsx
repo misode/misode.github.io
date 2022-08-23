@@ -1,40 +1,35 @@
-import { Path } from '@mcschema/core'
-import type { NoiseParameters } from 'deepslate/worldgen'
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import type { PreviewProps } from '.'
-import { Btn, BtnMenu } from '..'
-import { useLocale, useStore } from '../../contexts'
-import { useCanvas } from '../../hooks'
-import { biomeMap, getBiome } from '../../previews'
-import { newSeed, randomSeed } from '../../Utils'
-
-const LAYERS = ['biomes', 'temperature', 'humidity', 'continentalness', 'erosion', 'weirdness'] as const
+import { DataModel, Path } from '@mcschema/core'
+import { useEffect, useRef, useState } from 'preact/hooks'
+import { useLocale, useProject, useStore } from '../../contexts/index.js'
+import { useCanvas } from '../../hooks/index.js'
+import { biomeMap, getBiome } from '../../previews/index.js'
+import { randomSeed } from '../../Utils.js'
+import { Btn, BtnMenu, NumberInput } from '../index.js'
+import type { PreviewProps } from './index.js'
 
 export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
-	const [configuredSeed] = useState(randomSeed())
+	const { project } = useProject()
+	const [seed, setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
+	const [yOffset, setYOffset] = useState(64)
 	const [focused, setFocused] = useState<{[k: string]: number | string} | undefined>(undefined)
-	const [layers, setLayers] = useState(new Set<typeof LAYERS[number]>(['biomes']))
 	const { biomeColors } = useStore()
 	const offset = useRef<[number, number]>([0, 0])
 	const res = useRef(1)
 	const refineTimeout = useRef<number>()
 
-	const seed = BigInt(model.get(new Path(['generator', 'seed'])) ?? configuredSeed)
-	const octaves = useMemo(() => {
-		if (!shown) return undefined
-		return getOctaves(model.get(new Path(['generator', 'settings'])))
-	}, [shown])
-	const state = shown ? calculateState(data, octaves!) : ''
+	const settings = DataModel.unwrapLists(model.get(new Path(['generator', 'settings'])))
+	const state = JSON.stringify([data, settings])
 	const type: string = data.type?.replace(/^minecraft:/, '')
+	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 
 	const { canvas, redraw } = useCanvas({
 		size() {
 			return [200 / res.current, 200 / res.current]
 		},
 		async draw(img) {
-			const options = { octaves: octaves!, biomeColors, layers, offset: offset.current, scale, seed, res: res.current, version }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed, res: res.current, version, project, y: yOffset }
 			await biomeMap(data, img, options)
 			if (res.current === 4) {
 				clearTimeout(refineTimeout.current)
@@ -48,27 +43,30 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 			offset.current[0] = offset.current[0] + dx * 200
 			offset.current[1] = offset.current[1] + dy * 200
 			clearTimeout(refineTimeout.current)
-			res.current = type === 'multi_noise' ? 4 : 1
+			res.current = hasRandomness ? 4 : 1
 			redraw()
 		},
 		async onHover(x, y) {
-			const options = { octaves: octaves!, biomeColors, layers, offset: offset.current, scale, seed: configuredSeed, res: 1, version }
+			const options = { settings, biomeColors, offset: offset.current, scale, seed: seed, res: 1, version, project, y: yOffset }
 			const biome = await getBiome(data, Math.floor(x * 200), Math.floor(y * 200), options)
 			setFocused(biome)
 		},
 		onLeave() {
 			setFocused(undefined)
 		},
-	}, [version, state, scale, configuredSeed, layers, biomeColors])
+	}, [version, state, scale, seed, yOffset, biomeColors, project])
 
 	useEffect(() => {
 		if (shown) {
-			res.current = type === 'multi_noise' ? 4 : 1
+			res.current = hasRandomness ? 4 : 1
 			redraw()
 		}
-	}, [version, state, scale, configuredSeed, layers, shown, biomeColors])
+	}, [version, state, scale, seed, yOffset, shown, biomeColors, project])
+
+	console.log(yOffset)
 
 	const changeScale = (newScale: number) => {
+		newScale = Math.max(1, Math.round(newScale))
 		offset.current[0] = offset.current[0] * scale / newScale
 		offset.current[1] = offset.current[1] * scale / newScale
 		setScale(newScale)
@@ -77,28 +75,21 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 	return <>
 		<div class="controls preview-controls">
 			{focused && <Btn label={focused.biome as string} class="no-pointer" />}
-			{type === 'multi_noise' &&
-				<BtnMenu icon="stack" tooltip={locale('configure_layers')}>
-					{LAYERS.map(name => {
-						const enabled = layers.has(name)
-						return <Btn label={locale(`layer.${name}`)} 
-							active={enabled}
-							tooltip={enabled ? locale('enabled') : locale('disabled')}
-							onClick={(e) => {
-								setLayers(new Set([name]))
-								e.stopPropagation()
-							}} />
-					})}
-				</BtnMenu>}
-			{(type === 'multi_noise' || type === 'checkerboard') && <>
-				<Btn icon="dash" tooltip={locale('zoom_out')}
-					onClick={() => changeScale(scale * 1.5)} />
-				<Btn icon="plus" tooltip={locale('zoom_in')}
-					onClick={() => changeScale(scale / 1.5)} />
-			</>}
-			{type === 'multi_noise' &&
+			<Btn icon="dash" tooltip={locale('zoom_out')}
+				onClick={() => changeScale(scale * 2)} />
+			<Btn icon="plus" tooltip={locale(Math.round(scale) <= 1 ? 'zoom_in_limit' : 'zoom_in')}
+				disabled={Math.round(scale) <= 1}
+				onClick={() => changeScale(scale / 2)} />
+			{hasRandomness && <>
+				<BtnMenu icon="stack">
+					<div class="btn btn-input" onClick={e => e.stopPropagation()}>
+						<span>{locale('y')}</span>
+						<NumberInput value={yOffset} onChange={setYOffset} />
+					</div>
+				</BtnMenu>
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
-					onClick={() => newSeed(model)} />}
+					onClick={() => setSeed(randomSeed())} />
+			</>}
 		</div>
 		{focused?.temperature !== undefined && <div class="controls secondary-controls">
 			<Btn class="no-pointer" label={Object.entries(focused)
@@ -107,45 +98,4 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 		</div>}
 		<canvas ref={canvas} width="200" height="200"></canvas>
 	</>
-}
-
-function calculateState(data: any, octaves: Record<string, NoiseParameters>) {
-	return JSON.stringify([data, octaves])
-}
-
-export function getOctaves(obj: any): Record<string, NoiseParameters> {
-	if (typeof obj !== 'string') {
-		obj = obj.legacy_random_source ? 'minecraft:nether' : 'minecraft:overworld'
-	}
-	switch (obj.replace(/^minecraft:/, '')) {
-		case 'overworld':
-		case 'amplified':
-			return {
-				temperature: { firstOctave: -9, amplitudes: [1.5, 0, 1, 0, 0, 0] },
-				humidity: { firstOctave: -7, amplitudes: [1, 1, 0, 0, 0, 0] },
-				continentalness: { firstOctave: -9, amplitudes: [1, 1, 2, 2, 2, 1, 1, 1, 1] },
-				erosion: { firstOctave: -9, amplitudes: [1, 1, 0, 1, 1] },
-				weirdness: { firstOctave: -7, amplitudes: [1, 2, 1, 0, 0, 0] },
-				shift: { firstOctave: -3, amplitudes: [1, 1, 1, 0] },
-			}
-		case 'end':
-		case 'floating_islands':
-			return {
-				temperature: { firstOctave: 0, amplitudes: [0] },
-				humidity: { firstOctave: 0, amplitudes: [0] },
-				continentalness: { firstOctave: 0, amplitudes: [0] },
-				erosion: { firstOctave: 0, amplitudes: [0] },
-				weirdness: { firstOctave: 0, amplitudes: [0] },
-				shift: { firstOctave: 0, amplitudes: [0] },
-			}
-		default:
-			return {
-				temperature: { firstOctave: -7, amplitudes: [1, 1] },
-				humidity: { firstOctave: -7, amplitudes: [1, 1] },
-				continentalness: { firstOctave: -7, amplitudes: [1, 1] },
-				erosion: { firstOctave: -7, amplitudes: [1, 1] },
-				weirdness: { firstOctave: -7, amplitudes: [1, 1] },
-				shift: { firstOctave: 0, amplitudes: [0] },
-			}
-	}
 }

@@ -1,8 +1,10 @@
+import { DataModel } from '@mcschema/core'
 import { BlockState, clampedMap, DensityFunction } from 'deepslate/worldgen'
-import type { VersionId } from '../services'
-import { checkVersion } from '../services'
-import { Deepslate } from './Deepslate'
-import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator'
+import type { Project } from '../contexts/Project.jsx'
+import type { VersionId } from '../services/index.js'
+import { checkVersion } from '../services/index.js'
+import { DEEPSLATE } from './Deepslate.js'
+import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator.js'
 
 export type NoiseSettingsOptions = {
 	biome?: string,
@@ -12,6 +14,7 @@ export type NoiseSettingsOptions = {
 	width: number,
 	seed: bigint,
 	version: VersionId,
+	project: Project,
 }
 
 const colors: Record<string, [number, number, number]> = {
@@ -33,14 +36,12 @@ const colors: Record<string, [number, number, number]> = {
 	'minecraft:end_stone': [200, 200, 140],
 }
 
-const DEEPSLATE = new Deepslate()
-
 export async function noiseSettings(state: any, img: ImageData, options: NoiseSettingsOptions) {
 	if (checkVersion(options.version, '1.18')) {
-
-		await DEEPSLATE.loadVersion(options.version)
-		DEEPSLATE.loadChunkGenerator(state, options.seed, options.biome)
-		DEEPSLATE.generateChunks(-options.offset, options.width, options.biome)
+		await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+		const biomeSource = { type: 'fixed', biome: options.biome }
+		await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(state), biomeSource, options.seed)
+		DEEPSLATE.generateChunks(-options.offset, options.width)
 		const noise = DEEPSLATE.getNoiseSettings()
 
 		const data = img.data
@@ -80,8 +81,8 @@ export function getNoiseBlock(x: number, y: number) {
 }
 
 export async function densityFunction(state: any, img: ImageData, options: NoiseSettingsOptions) {
-	await DEEPSLATE.loadVersion(options.version)
-	const fn = DEEPSLATE.loadDensityFunction(state, options.seed)
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.seed)
 	const noise = DEEPSLATE.getNoiseSettings()
 
 	const arr = Array(options.width * noise.height)
@@ -105,6 +106,16 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 		data[4 * i + 2] = color
 		data[4 * i + 3] = 255
 	}
+}
+
+export function getProjectData(project: Project) {
+	return Object.fromEntries(['worldgen/noise_settings', 'worldgen/noise', 'worldgen/density_function'].map(type => {
+		const resources = Object.fromEntries(
+			project.files.filter(file => file.type === type)
+				.map<[string, unknown]>(file => [file.id, file.data])
+		)
+		return [type, resources]
+	}))
 }
 
 function getColor(noise: number[], y: number): number {

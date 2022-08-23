@@ -1,16 +1,16 @@
 import { DataModel, Path } from '@mcschema/core'
 import { getCurrentUrl, route } from 'preact-router'
-import { useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
-import config from '../../config.json'
-import { Analytics } from '../Analytics'
-import { Ad, Btn, BtnMenu, ErrorPanel, HasPreview, Octicon, PreviewPanel, SearchList, SourcePanel, TextInput, Tree } from '../components'
-import { useLocale, useProject, useTitle, useVersion } from '../contexts'
-import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks'
-import { getOutput } from '../schema/transformOutput'
-import type { VersionId } from '../services'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../services'
-import { Store } from '../Store'
-import { cleanUrl, deepEqual, getGenerator } from '../Utils'
+import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
+import { Analytics } from '../Analytics.js'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../components/index.js'
+import config from '../Config.js'
+import { DRAFT_PROJECT, useLocale, useProject, useTitle, useVersion } from '../contexts/index.js'
+import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../hooks/index.js'
+import { getOutput } from '../schema/transformOutput.js'
+import type { VersionId } from '../services/index.js'
+import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../services/index.js'
+import { Store } from '../Store.js'
+import { cleanUrl, deepEqual, getGenerator } from '../Utils.js'
 
 export const SHARE_KEY = 'share'
 
@@ -20,7 +20,7 @@ interface Props {
 export function Generator({}: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { projects, project, file, updateFile, openFile, closeFile } = useProject()
+	const { projects, project, file, updateProject, updateFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -48,6 +48,8 @@ export function Generator({}: Props) {
 	if (!checkVersion(version, undefined, gen.maxVersion)) {
 		setError(`This generator is not available in versions above ${gen.maxVersion}`)
 	}
+
+	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
@@ -91,6 +93,12 @@ export function Generator({}: Props) {
 			}
 			Analytics.openSnippet(gen.id, sharedSnippetId, version)
 			data = snippet.data
+		} else if (file) {
+			if (project.version && project.version !== version) {
+				changeVersion(project.version, false)
+				return AsyncCancel
+			}
+			data = file.data
 		}
 		const [model, blockStates] = await Promise.all([
 			getModel(version, gen.id),
@@ -102,65 +110,24 @@ export function Generator({}: Props) {
 		}
 		Analytics.setGenerator(gen.id)
 		return { model, blockStates }
-	}, [gen.id, version, sharedSnippetId, currentPreset])
+	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id])
 
 	const model = value?.model
 	const blockStates = value?.blockStates
 
-	const [dirty, setDirty] = useState(false)
-	useModel(model, () => {
+	useModel(model, model => {
 		if (!ignoreChange.current) {
 			setCurrentPreset(undefined, true)
 			setSharedSnippetId(undefined, true)
 		}
-		ignoreChange.current = false
-		Store.setBackup(gen.id, DataModel.unwrapLists(model?.data))
-		setError(null)
-		setDirty(true)
-	}, [gen.id, setCurrentPreset, setSharedSnippetId])
-
-	const [fileRename, setFileRename] = useState('')
-	const [fileSaved, doSave] = useActiveTimeout()
-	const [fileError, doFileError] = useActiveTimeout()
-
-	const doFileRename = () => {
-		if (fileRename !== file?.id && fileRename && model && blockStates) {
+		if (file && model && blockStates) {
 			const data = getOutput(model, blockStates)
-			const success = updateFile(gen.id, file?.id, { id: fileRename, data })
-			if (success) {
-				doSave()
-			} else {
-				doFileError()
-				if (file) {
-					setFileRename(file?.id)
-				}
-			}
-		} else if (file) {
-			setFileRename(file?.id)
+			updateFile(gen.id, file.id, { id: file.id, data })
 		}
-	}
-
-	const deleteFile = () => {
-		if (file) {
-			updateFile(gen.id, file.id, {})
-		}
-	}
-
-	useEffect(() => {
-		if (file) {
-			setFileRename(file.id)
-		}
-	}, [file])
-
-	useEffect(() => {
-		if (model) {
-			setFileRename(file?.id ?? '')
-			if (file && gen.id === file.type) {
-				model.reset(DataModel.wrapLists(file.data))
-			}
-			setDirty(false)
-		}
-	}, [file, model])
+		ignoreChange.current = false
+		Store.setBackup(gen.id, DataModel.unwrapLists(model.data))
+		setError(null)
+	}, [gen.id, setCurrentPreset, setSharedSnippetId, blockStates, file?.id])
 
 	const reset = () => {
 		Analytics.resetGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
@@ -188,14 +155,9 @@ export function Generator({}: Props) {
 	}
 	const onKeyDown = (e: KeyboardEvent) => {
 		if (e.ctrlKey && e.key === 's') {
+			setFileSaving('hotkey')
 			e.preventDefault()
-			if (model && blockStates && file) {
-				Analytics.saveProjectFile(gen.id, project.files.length, projects.length, 'hotkey')
-				const data = getOutput(model, blockStates)
-				updateFile(gen.id, file?.id, { id: file?.id, data })
-				setDirty(false)
-				doSave()
-			}
+			e.stopPropagation()
 		}
 	}
 	useEffect(() => {
@@ -242,6 +204,9 @@ export function Generator({}: Props) {
 	const selectVersion = (version: VersionId) => {
 		setSharedSnippetId(undefined, true)
 		changeVersion(version)
+		if (project.name !== DRAFT_PROJECT.name && project.version !== version) {
+			updateProject({ version })
+		}
 	}
 
 	const [shareUrl, setShareUrl] = useState<string | undefined>(undefined)
@@ -339,46 +304,44 @@ export function Generator({}: Props) {
 		}
 	}
 
+	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? window.innerWidth > 600)
+	const toggleProjectShown = useCallback(() => {
+		if (projectShown) {
+			Analytics.hideProject(gen.id, projects.length, project.files.length, 'menu')
+		} else {
+			Analytics.showProject(gen.id, projects.length, project.files.length, 'menu')
+		}
+		Store.setProjectPanelOpen(!projectShown)
+		setProjectShown(!projectShown)
+	}, [projectShown])
+
+	const [projectCreating, setProjectCreating] = useState(false)
+	const [projectDeleting, setprojectDeleting] = useState(false)
+	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
+	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
+
 	return <>
-		<main class={previewShown ? 'has-preview' : ''}>
+		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
 			{!gen.partner && <Ad id="data-pack-generator" type="text" />}
-			<div class="controls">
-				<div class={`project-controls ${file && 'has-file'}`}>
-					<div class="btn-row">
-						<BtnMenu icon="repo" label={project.name} relative={false}>
-							<Btn icon="arrow_left" label={locale('project.go_to')} onClick={() => route('/project')} />
-							{file && <Btn icon="file" label={locale('project.new_file')} onClick={closeFile} />}
-							{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
-							<SearchList searchPlaceholder={locale(project.name === 'Drafts' ? 'project.search_drafts' : 'project.search')} noResults={locale('project.no_files')} values={project.files.filter(f => f.type === gen.id).map(f => f.id)} onSelect={(id) => openFile(gen.id, id)} />
-						</BtnMenu>
-						<TextInput class="btn btn-input" placeholder={locale('project.unsaved_file')} value={fileRename} onChange={setFileRename} onEnter={doFileRename} onBlur={doFileRename} />
-						{file && <Btn icon="trashcan" tooltip={locale('project.delete_file')} onClick={deleteFile} />}
-					</div>
-					{dirty ? <div class="status-icon">{Octicon.dot_fill}</div>
-						: fileSaved ? <div class="status-icon active">{Octicon.check}</div>
-							: fileError && <div class="status-icon danger">{Octicon.x}</div> }
-				</div>
-				<div class="generator-controls">
-					<Btn icon="upload" label={locale('import')} onClick={importSource} />
-					<BtnMenu icon="archive" label={locale('presets')} relative={false}>
-						<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
-					</BtnMenu>
-					<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
-						{allowedVersions.map(v =>
-							<Btn label={v} active={v === version} onClick={() => selectVersion(v)} />
-						)}
-					</BtnMenu>
-					<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
-						<Btn icon="history" label={locale('reset')} onClick={reset} />
-						<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
-						<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
-					</BtnMenu>
-				</div>
+			<div class="controls generator-controls">
+				<Btn icon="upload" label={locale('import')} onClick={importSource} />
+				<BtnMenu icon="archive" label={locale('presets')} relative={false}>
+					<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
+				</BtnMenu>
+				<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
+				<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
+					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
+					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
+					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
+					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
+					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
+				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 			<Tree {...{model, version, blockStates}} onError={setError} />
+			<Footer donate={!gen.partner} />
 		</main>
-		<div class="popup-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
+		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
@@ -403,7 +366,19 @@ export function Generator({}: Props) {
 		</div>
 		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
 			<TextInput value={shareUrl} readonly />
-			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} showTooltip={shareCopyActive} />
+			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
 		</div>
+		<div class="popup-actions left-actions" style="--offset: 50px;">
+			<div class={'popup-action action-project shown tooltipped tip-ne'} aria-label={locale(projectShown ? 'hide_project' : 'show_project')} onClick={toggleProjectShown}>
+				{projectShown ? Octicon.chevron_left : Octicon.repo}
+			</div>
+		</div>
+		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
+			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onDeleteProject={() => setprojectDeleting(true)} onRename={setFileRenaming} onCreate={() => setProjectCreating(true)} />
+		</div>
+		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
+		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
+		{model && fileSaving && <FileCreation id={gen.id} model={model} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
+		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
 	</>
 }

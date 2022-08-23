@@ -1,6 +1,6 @@
-import { releaseDate, VersionMetaData } from '.'
-import { useLocale } from '../../contexts'
-import type { VersionMeta } from '../../services'
+import { useLocale } from '../../contexts/index.js'
+import type { VersionMeta } from '../../services/index.js'
+import { releaseDate, VersionMetaData } from './index.js'
 
 interface Props {
 	version: VersionMeta,

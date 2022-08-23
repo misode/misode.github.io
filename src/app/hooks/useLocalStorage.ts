@@ -2,7 +2,7 @@ import { useCallback, useState } from 'preact/hooks'
 
 type Result<T> = [T, (value: T | null | undefined) => void]
 
-export function useLocalStorage<T = string>(key: string, defaultValue: T): Result<T>
+export function useLocalStorage(key: string, defaultValue: string): Result<string>
 export function useLocalStorage<T>(key: string, defaultValue: T, parse: (s: string) => T, stringify: (e: T) => string): Result<T>
 export function useLocalStorage<T>(key: string, defaultValue: T, parse?: (s: string) => T, stringify?: (e: T) => string): Result<T> {
 	const getter = useCallback(() => {

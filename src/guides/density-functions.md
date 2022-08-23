@@ -1,78 +1,28 @@
 ---
-title: How the noise router and density functions work
+title: Density function types and their configuration
 versions:
   - '1.18.2'
   - '1.19'
 tags:
   - worldgen
   - noise
+  - density
 ---
 
-[Density functions](/worldgen/density-function/) are used by the dimension generator to generate the terrain. They make up mathematical expressions that decide whether or not a block should be solid terrain.
-
-## Noise router
-The noise router is a piece of configuration in [noise settings](/worldgen/noise-settings/). It's a collection of density functions, some used for the biome layout, aquifers, or ore veins. The one that decides the terrain is **f`final_density`**. This density function will be computed for every block position. If it returns a value greater than n`0` the default block will be placed, otherwise either air or the default fluid will be placed.
-
-With this information we can make the most basic noise router, one where every density function is set to n`0`. As predicted, this will result in a void world. Similarly, setting `"final_density": 1` will result in a world completely filled with stone.
-
-**`data/minecraft/worldgen/noise_settings/overworld.json`**
-```json
-{
-  "sea_level": 0,
-  "disable_mob_generation": false,
-  "aquifers_enabled": false,
-  "ore_veins_enabled": false,
-  "legacy_random_source": false,
-  "default_block": {
-    "Name": "minecraft:stone"
-  },
-  "default_fluid": {
-    "Name": "minecraft:water",
-    "Properties": {
-      "level": "0"
-    }
-  },
-  "noise": {
-    "min_y": 0,
-    "height": 256,
-    "size_horizontal": 2,
-    "size_vertical": 2
-  },
-  "noise_router": {
-    "barrier": 0,
-    "fluid_level_floodedness": 0,
-    "fluid_level_spread": 0,
-    "lava": 0,
-    "temperature": 0,
-    "vegetation": 0,
-    "continents": 0,
-    "erosion": 0,
-    "depth": 0,
-    "ridges": 0,
-    "initial_density_without_jaggedness": 0,
-    "final_density": 0,
-    "vein_toggle": 0,
-    "vein_ridged": 0,
-    "vein_gap": 0
-  },
-  "spawn_target": [],
-  "surface_rule": {
-    "type": "minecraft:sequence",
-    "sequence": []
-  }
-}
-```
+[Density functions](/worldgen/density-function/) are used by the dimension generator to generate the terrain. They make up mathematical expressions that decide whether or not a block should be solid terrain. 
 
 ## Density functions
-In the above example all the density functions are constant numbers, but they don't have to be. Another option is to reference a density function file. Vanilla has some builtin density functions, for example:
-
+There are 3 ways to specify a density function. The first is simply as a constant number. The density function will always return that value
 ```json
-"final_density": "minecraft:overworld/base_3d_noise"
+0.58
 ```
 
-You can create your own density functions in the `worldgen/density_function` folder.
+Another option is to reference a density function file. Vanilla has some builtin density functions, but you can create your own density functions in the `worldgen/density_function` folder.
+```json
+"minecraft:overworld/base_3d_noise"
+```
 
-All the other density function types are defined as an object with a `"type"` field and optionally more fields. For example:
+All the other density function types are defined as an object with a f`type` field and optionally more fields.
 ```json
 {
   "type": "minecraft:noise",
@@ -81,8 +31,8 @@ All the other density function types are defined as an object with a `"type"` fi
   "y_scale": 0.5
 }
 ```
-<br/>
-The following is a list of all density functions in {#version#}
+
+## Types
 
 ### `abs`
 Calculates the absolute value of another density function.
@@ -94,7 +44,7 @@ Adds two density functions together.
 * f`argument2`: The second density function
 
 ### `beardifier`
-Adds beards for structures (see the `terrain_adaptation` field).
+Adds beards for structures ({#[1.18.2] see the f`adapt_noise` field in [structures](/worldgen/structure-feature/) #}{#[1.19] see the f`terrain_adaptation` field in [structures](/worldgen/structure/) #}).
 
 *This density function has no extra fields*
 
@@ -166,7 +116,7 @@ Multiplies two density functions.
 * f`argument2`: The second density function
 
 ### `noise`
-The noise density function samples a noise.
+The noise density function samples a [noise](/worldgen/noise/).
 * f`noise`: A reference to a `worldgen/noise` file
 * f`xz_scale`: Scales the X and Z inputs before sampling
 * f`y_scale`: Scales the Y input before sampling
@@ -184,7 +134,7 @@ If the input is negative, returns a quarter of the input. Otherwise returns the 
 * f`argument`: The input density function
 
 ### `range_choice`
-Computes the input value, and depending on that result returns one of two other density functions.
+Computes the input value, and depending on that result returns one of two other density functions. Basically an if-then-else statement.
 * f`input`: The input density function
 * f`min_inclusive`: The lower bound of the range
 * f`max_exclusive`: The upper bound of the range
@@ -192,16 +142,16 @@ Computes the input value, and depending on that result returns one of two other 
 * f`when_out_of_range`: Density function that will be returned When the input is outside the range
 
 ### `shift`
-Computes the input density at `(x/4, y/4, z/4)`.
-* f`argument`: The input density function
+Samples a noise at `(x/4, y/4, z/4)`.
+* f`argument`: A reference to a `worldgen/noise` file
 
 ### `shift_a`
-Computes the input density at `(x/4, 0, z/4)`.
-* f`argument`: The input density function
+Samples a noise at `(x/4, 0, z/4)`.
+* f`argument`: A reference to a `worldgen/noise` file
 
 ### `shift_b`
-Computes the input density at `(z/4, x/4, 0)`.
-* f`argument`: The input density function
+Samples a noise at `(z/4, x/4, 0)`.
+* f`argument`: A reference to a `worldgen/noise` file
 
 ### `shifted_noise`
 Similar to [`noise`](#noise), but first shifts the input coordinates.

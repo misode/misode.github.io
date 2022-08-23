@@ -1,21 +1,8 @@
 import { useMemo, useState } from 'preact/hooks'
-import config from '../../config.json'
-import { Btn, BtnMenu, ChangelogTag, GuideCard, TextInput } from '../components'
-import { useLocale, useTitle, useVersion } from '../contexts'
-import { useSearchParam } from '../hooks'
-import type { VersionId } from '../services'
-
-interface Guide {
-	id: string,
-	title: string,
-	versions?: string[],
-	tags?: string[],
-}
-
-declare var __GUIDES__: Guide[]
-
-const TAG_KEY = 'tags'
-const TAG_SEP = '|'
+import { Badge, Footer, GuideCard, TextInput, VersionSwitcher } from '../components/index.js'
+import { useLocale, useTitle, useVersion } from '../contexts/index.js'
+import { useTags } from '../hooks/index.js'
+import { getGuides } from '../services/Guides.js'
 
 interface Props {
 	path?: string
@@ -26,21 +13,13 @@ export function Guides({}: Props) {
 	useTitle(locale('title.guides'))
 
 	const [search, setSearch] = useState('')
-	const [tags, setTags] = useSearchParam(TAG_KEY)
-	const activeTags = useMemo(() => tags?.split(TAG_SEP) ?? [], [tags])
-	const toggleTag = (tag: string) => {
-		if (activeTags.includes(tag)) {
-			setTags(activeTags.filter(t => t !== tag).join(TAG_SEP))
-		} else {
-			setTags([...activeTags, tag].sort().join(TAG_SEP))
-		}
-	}
+	const [activeTags, toggleTag] = useTags()
 
 	const [versionFilter, setVersionFiler] = useState(false)
 
 	const versionedGuides = useMemo(() => {
-		if (versionFilter === false) return __GUIDES__
-		return __GUIDES__.filter(guide => {
+		if (versionFilter === false) return getGuides()
+		return getGuides().filter(guide => {
 			return guide.versions?.includes(version)
 		})
 	}, [version, versionFilter])
@@ -59,29 +38,27 @@ export function Guides({}: Props) {
 				return content.includes(q)
 			})
 		})
-	}, [versionedGuides, search, tags])
+	}, [versionedGuides, search, activeTags])
 
 	return <main>
-		<div class="guides">
-			<div class="changelog-query">
-				<TextInput class="btn btn-input changelog-search" placeholder={locale('guides.search')} value={search} onChange={setSearch} />
-				<BtnMenu icon="tag" label={versionFilter ? version : locale('any_version')} tooltip={locale('switch_version')}>
-					<Btn label={locale('any_version')} active={!versionFilter} onClick={() => setVersionFiler(!versionFilter)} />
-					{config.versions.slice().reverse().map(v =>
-						<Btn label={v.id} active={versionFilter && v.id === version} onClick={() => {changeVersion(v.id as VersionId); setVersionFiler(true)}} />
-					)}
-				</BtnMenu>
+		<div class="container guides">
+			<div class="navigation">
+				<TextInput class="btn btn-input query-search" placeholder={locale('guides.search')} value={search} onChange={setSearch} />
+				<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
 			</div>
-			{activeTags.length > 0 && <div class="changelog-tags">
-				{activeTags.map(tag => <ChangelogTag label={tag} onClick={() => toggleTag(tag)} />)}
+			{activeTags.length > 0 && <div class="badges-list">
+				{activeTags.map(tag => <Badge label={tag} onClick={() => toggleTag(tag)} />)}
 			</div>}
-			{versionedGuides.length === 0 ? <>
-				<span class="note">{locale('guides.no_results.version')}</span>
-			</> : filteredGuides.length === 0 ? <>
-				<span class="note">{locale('guides.no_results.query')}</span>
-			</> : filteredGuides.map(g =>
-				<GuideCard title={g.title} link={`/guides/${g.id}/`} tags={g.tags ?? []} versions={g.versions ?? []} activeTags={activeTags} toggleTag={toggleTag} />
-			)}
+			<div class="card-column">
+				{versionedGuides.length === 0 ? <>
+					<span class="note">{locale('guides.no_results.version')}</span>
+				</> : filteredGuides.length === 0 ? <>
+					<span class="note">{locale('guides.no_results.query')}</span>
+				</> : filteredGuides.map(g =>
+					<GuideCard id={g.id} activeTags={activeTags} toggleTag={toggleTag} />
+				)}
+			</div>
 		</div>
+		<Footer />
 	</main>
 }

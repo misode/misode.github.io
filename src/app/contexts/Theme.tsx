@@ -1,9 +1,9 @@
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks'
-import { Analytics } from '../Analytics'
-import { useMediaQuery } from '../hooks'
-import { Store } from '../Store'
+import { Analytics } from '../Analytics.js'
+import { useMediaQuery } from '../hooks/index.js'
+import { Store } from '../Store.js'
 
 interface Theme {
 	theme: string,

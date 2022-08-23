@@ -1,70 +1,5 @@
-import { isObject } from '../Utils'
-
-const repo = 'https://raw.githubusercontent.com/misode/technical-changes/main'
-
-export type Change = {
-	group: string,
-	version: string,
-	order: number,
-	tags: string[],
-	content: string,
-}
-
-let Changelogs: Change[] | Promise<Change[]> | null = null
-
-export async function getChangelogs() {
-	if (!Changelogs) {
-		const index = await (await fetch(`${repo}/index.json`)).json() as string[]
-		Changelogs = (await Promise.all(
-			index.map((group, i) => fetchGroup(parseVersion(group), i))
-		)).flat().map<Change>(change => ({
-			...change,
-			tags: [change.group, ...change.tags],
-		}))
-	}
-	return Changelogs
-}
-
-async function fetchGroup(group: string, groupIndex: number) {
-	const index = await (await fetch(`${repo}/${group}/index.json`)).json() as string[]
-	return (await Promise.all(
-		index.map((version, i) => fetchChangelog(group, parseVersion(version), groupIndex, i))
-	)).flat()
-}
-
-async function fetchChangelog(group: string, version: string, groupIndex: number, versionIndex: number) {
-	const text = await (await fetch(`${repo}/${group}/${version}.md`)).text()
-	return parseChangelog(text).map(change => ({
-		version,
-		group,
-		order: groupIndex * 1000 + versionIndex,
-		...change,
-	}))
-}
-
-function parseChangelog(text: string) {
-	return text.split('\n\n')
-		.map(entry => {
-			const i = entry.indexOf('|')
-			return {
-				tags: entry.substring(0, i).trim().split(' '),
-				content: entry.slice(i + 1).trim()
-					.replaceAll('->', '→')
-					.replaceAll('\n...\n', '\n\n'),
-			}
-		})
-}
-
-function parseVersion(version: unknown): string {
-	if (typeof version === 'string') {
-		return version
-	} else if (isObject(version)) {
-		return version.id
-	}
-	return 'unknown'
-}
-
 const ARTICLE_PREFIX = 'https://www.minecraft.net/article/'
+
 const ARTICLE_OVERRIDES = new Map(Object.entries({
 	'1.16-pre2': 'minecraft-1-16-pre-release-1',
 	'1.16-pre4': 'minecraft-1-16-pre-release-3',
@@ -88,6 +23,11 @@ const ARTICLE_OVERRIDES = new Map(Object.entries({
 	'1.18-pre8': 'minecraft-1-18-pre-release-6',
 	1.18: 'caves---cliffs--part-ii-out-today-java',
 	'1.18.2-pre3': 'minecraft-1-18-2-pre-release-2',
+	'1.18.2-pre5': 'minecraft-1-18-2-pre-release-4',
+	'1.19-pre3': 'minecraft-1-19-pre-release-2',
+	'1.19-pre5': 'minecraft-1-19-pre-release-4',
+	1.19: 'the-wild-update-out-today-java',
+	'1.19.1-pre4': 'minecraft-1-19-1-pre-release-3',
 }))
 
 export function getArticleLink(version: string): string | undefined {

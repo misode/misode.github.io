@@ -1,232 +1,80 @@
 import { DataModel } from '@mcschema/core'
-import init, { biome_parameters, climate_noise, climate_sampler, multi_noise } from 'deepslate-rs'
-// @ts-expect-error
-import wasm from 'deepslate-rs/deepslate_rs_bg.wasm?url'
-import type { NoiseParameters } from 'deepslate/worldgen'
-import { FixedBiome, Identifier, LegacyRandom, NormalNoise } from 'deepslate/worldgen'
-import type { VersionId } from '../services'
-import { checkVersion, fetchPreset } from '../services'
-import { BiMap, clamp, deepClone, deepEqual, square, stringToColor } from '../Utils'
-
-let ready = false
-async function loadWasm() {
-	if (ready) return
-	await init(wasm)
-	ready = true
-	console.debug(`Loaded deepslate-rs from "${wasm}"`)
-}
-
-const LAYERS = {
-	temperature: [-1, 1],
-	humidity: [-1, 1],
-	continentalness: [-1.1, 1],
-	erosion: [-1, 1],
-	weirdness: [-1, 1],
-	offset: [-1, 1],
-	factor: [0, 12],
-	jaggedness: [0, 1],
-}
+import type { Project } from '../contexts/Project.jsx'
+import type { VersionId } from '../services/index.js'
+import { stringToColor } from '../Utils.js'
+import { DEEPSLATE } from './Deepslate.js'
+import { getProjectData } from './NoiseSettings.js'
 
 type Triple = [number, number, number]
 type BiomeColors = Record<string, Triple>
 type BiomeSourceOptions = {
-	octaves: Record<string, NoiseParameters>,
 	biomeColors: BiomeColors,
 	offset: [number, number],
 	scale: number,
 	res: number,
 	seed: bigint,
 	version: VersionId,
-	layers: Set<keyof typeof LAYERS | 'biomes'>,
+	settings: unknown,
+	project: Project,
+	y: number,
 }
-
-interface CachedBiomeSource {
-	getBiome(x: number, y: number, z: number): Identifier
-	getBiomes?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): Identifier[]
-	getClimate?(x: number, y: number, z: number): {[k: string]: number}
-	getClimates?(xFrom: number, xTo: number, xStep: number, yFrom: number, yTo: number, yStep: number, zFrom: number, zTo: number, zStep: number): {[k: string]: number}[]
-}
-
-let cacheState: any
-let biomeSourceCache: CachedBiomeSource
 
 export async function biomeMap(state: any, img: ImageData, options: BiomeSourceOptions) {
-	const { biomeSource } = await getCached(state, options)
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists(state), options.seed)
 
-	const data = img.data
-	const ox = -Math.round(options.offset[0]) - 100 + options.res / 2
-	const oz = -Math.round(options.offset[1]) - 100 + options.res / 2
-	const row = img.width * 4 / options.res
-	const col = 4 / options.res
+	const quartStep = Math.max(1, Math.round(options.scale))
+	const quartWidth = 200 * quartStep
 
-	const xRange: Triple = [ox * options.scale, (200 + ox) * options.scale, options.res * options.scale]
-	const zRange: Triple = [oz * options.scale, (200 + oz) * options.scale, options.res * options.scale]
+	const centerX = Math.round(-options.offset[0] * options.scale)
+	const centerZ = Math.round(-options.offset[1] * options.scale)
 
-	const biomes = !options.layers.has('biomes') ? undefined : biomeSource.getBiomes?.(...xRange, 64, 65, 1, ...zRange)
-	const layers = [...options.layers].filter(l => l !== 'biomes') as (keyof typeof LAYERS)[]
-	const noise = layers.length === 0 ? undefined : biomeSource.getClimates?.(...xRange, 64, 65, 1, ...zRange)
+	const minX = Math.floor(centerX - quartWidth / 2)
+	const minZ = Math.floor(centerZ - quartWidth / 2)
+	const maxX = minX + quartWidth
+	const maxZ = minZ + quartWidth
 
-	for (let x = 0; x < 200; x += options.res) {
-		for (let z = 0; z < 200; z += options.res) {
-			const i = z * row + x * col
-			const j = (x / options.res) * 200 / options.res + z / options.res
-			const worldX = (x + ox) * options.scale
-			const worldZ = (z + oz) * options.scale
-			let color: Triple = [50, 50, 50]
-			if (options.layers.has('biomes')) {
-				const biome = biomes?.[j] ?? biomeSource.getBiome(worldX, 64, worldZ)
-				color = getBiomeColor(biome.toString(), options.biomeColors)
-			} else if (noise && layers[0]) {
-				const value = noise[j][layers[0]]
-				const [min, max] = LAYERS[layers[0]]
-				const brightness = (value - min) / (max - min) * 256
-				color = [brightness, brightness, brightness]
-			}
-			data[i] = color[0]
-			data[i + 1] = color[1]
-			data[i + 2] = color[2]
-			data[i + 3] = 255
+	const { palette, data, width, height } = DEEPSLATE.fillBiomes(minX * 4, maxX * 4, minZ * 4, maxZ * 4, quartStep * options.res, options.y)
+
+	let x = 0
+	let z = 0
+	for (let i = 0; i < data.length; i += 1) {
+		const biome = palette.get(data[i])
+		const color = getBiomeColor(biome ?? '', options.biomeColors)
+		const j = z * width + x
+		img.data[j * 4] = color[0]
+		img.data[j * 4 + 1] = color[1]
+		img.data[j * 4 + 2] = color[2]
+		img.data[j * 4 + 3] = 255
+
+		z += 1
+		if (z >= height) {
+			z = 0
+			x += 1
 		}
 	}
 }
 
 export async function getBiome(state: any, x: number, z: number, options: BiomeSourceOptions): Promise<{[k: string]: number | string} | undefined> {
-	const { biomeSource } = await getCached(state, options)
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+	await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(options.settings), DataModel.unwrapLists( state), options.seed)
 
-	const [xx, zz] = toWorld([x, z], options)
+	const quartStep = Math.max(1, Math.round(options.scale))
+
+	const centerX = Math.round(-options.offset[0] * options.scale)
+	const centerZ = Math.round(-options.offset[1] * options.scale)
+
+	const xx = Math.floor(centerX + ((x - 100) * quartStep))
+	const zz = Math.floor(centerZ + ((z - 100) * quartStep))
+
+	console.log('get biome', options.y)
+
+	const { palette, data } = DEEPSLATE.fillBiomes(xx * 4, xx * 4 + 4, zz * 4, zz * 4 + 4, 1, options.y)
+	const biome = palette.get(data[0])!
+
 	return {
-		biome: biomeSource.getBiome(xx, 64, zz).toString(),
-		...biomeSource.getClimate?.(xx, 64, zz),
+		biome,
 	}
-}
-
-async function getCached(state: any, options: BiomeSourceOptions): Promise<{ biomeSource: CachedBiomeSource}> {
-	const newState = [state, options.octaves, `${options.seed}`, options.version]
-	if (!deepEqual(newState, cacheState)) {
-		cacheState = deepClone(newState)
-
-		biomeSourceCache = await getBiomeSource(state, options)
-	}
-	return {
-		biomeSource: biomeSourceCache,
-	} 
-}
-
-async function getBiomeSource(state: any, options: BiomeSourceOptions): Promise<CachedBiomeSource> {
-	switch (state?.type?.replace(/^minecraft:/, '')) {
-		case 'fixed':
-			return new FixedBiome(Identifier.parse(state.biome as string))
-
-		case 'checkerboard':
-			const shift = (state.scale ?? 2) + 2
-			const numBiomes = state.biomes?.length ?? 0
-			return {
-				getBiome(x: number, _y: number, z: number) {
-					const i = (((x >> shift) + (z >> shift)) % numBiomes + numBiomes) % numBiomes
-					return Identifier.parse(state.biomes?.[i].node as string)
-				},
-			}
-
-		case 'multi_noise':
-			switch(state.preset?.replace(/^minecraft:/, '')) {
-				case 'nether':
-					state = checkVersion(options.version, '1.18') ? NetherPreset18 : NetherPreset
-					break
-				case 'overworld':
-					state = checkVersion(options.version, '1.18') ? await OverworldPreset18() : state
-					break
-			}
-			state = DataModel.unwrapLists(state)
-			if (checkVersion(options.version, '1.18')) {
-				await loadWasm()
-				const BiomeIds = new BiMap<string, number>()
-				const param = (p: number | number[]) => {
-					return typeof p === 'number' ? [p, p] : p
-				}
-				const [t0, t1, h0, h1, c0, c1, e0, e1, w0, w1, d0, d1, o, b] = [[], [], [], [], [], [], [], [], [], [], [], [], [], []] as number[][]
-				for (const i of state.biomes) {
-					const { temperature, humidity, continentalness, erosion, weirdness, depth, offset } = i.parameters
-					t0.push(param(temperature)[0])
-					t1.push(param(temperature)[1])
-					h0.push(param(humidity)[0])
-					h1.push(param(humidity)[1])
-					c0.push(param(continentalness)[0])
-					c1.push(param(continentalness)[1])
-					e0.push(param(erosion)[0])
-					e1.push(param(erosion)[1])
-					w0.push(param(weirdness)[0])
-					w1.push(param(weirdness)[1])
-					d0.push(param(depth)[0])
-					d1.push(param(depth)[1])
-					o.push(offset)
-					b.push(BiomeIds.getOrPut(i.biome, Math.floor(Math.random() * 2147483647)))
-				}
-				const parameters = biome_parameters(new Float64Array(t0), new Float64Array(t1), new Float64Array(h0), new Float64Array(h1), new Float64Array(c0), new Float64Array(c1), new Float64Array(e0), new Float64Array(e1), new Float64Array(w0), new Float64Array(w1), new Float64Array(d0), new Float64Array(d1), new Float64Array(o), new Int32Array(b))
-				const sampler = climate_sampler(options.seed, options.octaves.temperature.firstOctave, new Float64Array(options.octaves.temperature.amplitudes), options.octaves.humidity.firstOctave, new Float64Array(options.octaves.humidity.amplitudes), options.octaves.continentalness.firstOctave, new Float64Array(options.octaves.continentalness.amplitudes), options.octaves.erosion.firstOctave, new Float64Array(options.octaves.erosion.amplitudes), options.octaves.weirdness.firstOctave, new Float64Array(options.octaves.weirdness.amplitudes), options.octaves.shift.firstOctave, new Float64Array(options.octaves.shift.amplitudes))
-				return {
-					getBiome(x, y, z) {
-						const ids = multi_noise(parameters, sampler, x, x + 1, 1, y, y + 1, 1, z, z + 1, 1)
-						return Identifier.parse(BiomeIds.getA(ids[0]) ?? 'unknown')
-					},
-					getBiomes(xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep) {
-						const ids = multi_noise(parameters, sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
-						return [...ids].map(id => Identifier.parse(BiomeIds.getA(id) ?? 'unknown'))
-					},
-					getClimate(x, y, z) {
-						const climate = climate_noise(sampler, x, x + 1, 1, y, y + 1, 1, z, z + 1, 1)
-						const [t, h, c, e, w] = climate.slice(0, 5)
-						return {
-							temperature: t,
-							humidity: h,
-							continentalness: c,
-							erosion: e,
-							weirdness: w,
-						}
-					},
-					getClimates(xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep) {
-						const climate = climate_noise(sampler, xFrom, xTo, xStep, yFrom, yTo, yStep, zFrom, zTo, zStep)
-						const result = []
-						for (let i = 0; i < climate.length; i += 7) {
-							const [t, h, c, e, w] = climate.slice(i, i + 5)
-							result.push({
-								temperature: t,
-								humidity: h,
-								continentalness: c,
-								erosion: e,
-								weirdness: w,
-							})
-						}
-						return result
-					},
-				}
-			} else {
-				const noise = ['altitude', 'temperature', 'humidity', 'weirdness']
-					.map((id, i) => {
-						const config = state[`${id}_noise`]
-						config.firstOctave = clamp(config.firstOctave ?? -7, -100, -1)
-						return new NormalNoise(new LegacyRandom(options.seed + BigInt(i)), config)
-					})
-				if (!Array.isArray(state.biomes) || state.biomes.length === 0) {
-					return new FixedBiome(Identifier.create('unknown'))
-				}
-				return {
-					getBiome(x: number, _y: number, z: number): Identifier {
-						const n = noise.map(n => n.sample(x, z, 0))
-						let minDist = Infinity
-						let minBiome = ''
-						for (const { biome, parameters: p } of state.biomes) {
-							const dist = square(p.altitude - n[0]) + square(p.temperature - n[1]) + square(p.humidity - n[2]) + square(p.weirdness - n[3]) + square(p.offset)
-							if (dist < minDist) {
-								minDist = dist
-								minBiome = biome
-							}
-						}
-						return Identifier.parse(minBiome)
-					},
-				}
-			}
-	}
-	throw new Error('Unknown biome source')
 }
 
 function getBiomeColor(biome: string, biomeColors: BiomeColors): Triple {
@@ -238,12 +86,6 @@ function getBiomeColor(biome: string, biomeColors: BiomeColors): Triple {
 		return stringToColor(biome)
 	}
 	return color
-}
-
-function toWorld([x, z]: [number, number], options: BiomeSourceOptions) {
-	const xx = (x - options.offset[0] - 100 + options.res / 2) * options.scale
-	const zz = (z - options.offset[1] - 100 + options.res / 2) * options.scale
-	return [xx, zz]
 }
 
 export const VanillaColors: Record<string, Triple> = {
@@ -267,9 +109,9 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:desert': [250,148,24],
 	'minecraft:desert_hills': [210,95,18],
 	'minecraft:desert_lakes': [255,188,64],
-	'minecraft:end_barrens': [128,128,255],
-	'minecraft:end_highlands': [128,128,255],
-	'minecraft:end_midlands': [128,128,255],
+	'minecraft:end_barrens': [39,30,61],
+	'minecraft:end_highlands': [232,244,178],
+	'minecraft:end_midlands': [194,187,136],
 	'minecraft:eroded_badlands': [255,109,61],
 	'minecraft:flower_forest': [45,142,73],
 	'minecraft:forest': [5,102,33],
@@ -310,7 +152,7 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:shattered_savanna': [229,218,135],
 	'minecraft:windswept_savanna': [229,218,135],
 	'minecraft:shattered_savanna_plateau': [207,197,140],
-	'minecraft:small_end_islands': [128,128,255],
+	'minecraft:small_end_islands': [16,12,28],
 	'minecraft:snowy_beach': [250,240,192],
 	'minecraft:snowy_mountains': [160,160,160],
 	'minecraft:snowy_taiga': [49,85,74],
@@ -330,7 +172,7 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:tall_birch_forest': [88,156,108],
 	'minecraft:old_growth_birch_forest': [88,156,108],
 	'minecraft:tall_birch_hills': [71,135,90],
-	'minecraft:the_end': [128,128,255],
+	'minecraft:the_end': [59,39,84],
 	'minecraft:the_void': [0,0,0],
 	'minecraft:warm_ocean': [0,0,172],
 	'minecraft:warped_forest': [73,144,123],
@@ -349,13 +191,6 @@ export const VanillaColors: Record<string, Triple> = {
 	'minecraft:meadow': [169, 197, 80],
 	'minecraft:lush_caves': [112, 255, 79],
 	'minecraft:dripstone_caves': [140, 124, 0],
-}
-
-const NetherPreset = {type:'minecraft:multi_noise',seed:0,altitude_noise:{firstOctave:-7,amplitudes:[1,1]},temperature_noise:{firstOctave:-7,amplitudes:[1,1]},humidity_noise:{firstOctave:-7,amplitudes:[1,1]},weirdness_noise:{firstOctave:-7,amplitudes:[1,1]},biomes:[{biome:'minecraft:nether_wastes',parameters:{altitude:0,temperature:0,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{altitude:0,temperature:0,humidity:-0.5,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{altitude:0,temperature:0.4,humidity:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{altitude:0,temperature:0,humidity:0.5,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{altitude:0,temperature:-0.5,humidity:0,weirdness:0,offset:0.175}}]}
-
-const NetherPreset18 = {type:'minecraft:multi_noise',biomes:[{biome:'minecraft:nether_wastes',parameters:{temperature:0,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:soul_sand_valley',parameters:{temperature:0,humidity:-0.5,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:crimson_forest',parameters:{temperature:0.4,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0}},{biome:'minecraft:warped_forest',parameters:{temperature:0,humidity:0.5,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0.375}},{biome:'minecraft:basalt_deltas',parameters:{temperature:-0.5,humidity:0,continentalness:0,erosion:0,depth:0,weirdness:0,offset:0.175}}]}
-
-async function OverworldPreset18() {
-	const overworld = await fetchPreset('1.18', 'dimension', 'overworld')
-	return overworld.generator.biome_source
+	'minecraft:deep_dark': [10, 14, 19],
+	'minecraft:mangrove_swamp': [36,196,142],
 }

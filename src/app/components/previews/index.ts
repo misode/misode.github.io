@@ -1,11 +1,11 @@
 import type { DataModel } from '@mcschema/core'
-import type { VersionId } from '../../services'
+import type { VersionId } from '../../services/index.js'
 
-export * from './BiomeSourcePreview'
-export * from './DecoratorPreview'
-export * from './DensityFunctionPreview'
-export * from './NoisePreview'
-export * from './NoiseSettingsPreview'
+export * from './BiomeSourcePreview.js'
+export * from './DecoratorPreview.js'
+export * from './DensityFunctionPreview.js'
+export * from './NoisePreview.js'
+export * from './NoiseSettingsPreview.js'
 
 export type PreviewProps = {
 	model: DataModel,

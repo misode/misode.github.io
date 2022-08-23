@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks'
-import { Octicon } from '.'
-import { hexId } from '../Utils'
+import { hexId } from '../Utils.js'
+import { Octicon } from './index.js'
 
 type BtnInputProps = {
 	icon?: keyof typeof Octicon,

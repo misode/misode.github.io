@@ -1,8 +1,8 @@
 import { render } from 'preact'
 import '../styles/global.css'
 import '../styles/nodes.css'
-import { App } from './App'
-import { LocaleProvider, ProjectProvider, StoreProvider, ThemeProvider, TitleProvider, VersionProvider } from './contexts'
+import { App } from './App.js'
+import { LocaleProvider, ProjectProvider, StoreProvider, ThemeProvider, TitleProvider, VersionProvider } from './contexts/index.js'
 
 function Main() {
 	return (
