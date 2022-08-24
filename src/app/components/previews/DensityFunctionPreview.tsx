@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale, useProject } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
-import { densityFunction } from '../../previews/index.js'
+import { densityFunction, densityPoint } from '../../previews/index.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
 import type { PreviewProps } from './index.js'
@@ -32,7 +32,9 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 		async onHover(x, y) {
 			const worldX = Math.floor(x * size - offset.current)
 			const worldY = size - Math.max(1, Math.ceil(y * size)) + (data?.noise?.min_y ?? 0)
-			setFocused(`X=${worldX} Y=${worldY}`)
+			const options = { offset: offset.current, width: size, seed, version, project }
+			const density = await densityPoint(data, worldX, worldY, options)
+			setFocused(`X=${worldX} Y=${worldY} Density=${Math.floor(density * 1000)/1000}`)
 		},
 		onLeave() {
 			setFocused(undefined)

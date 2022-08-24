@@ -108,6 +108,14 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 	}
 }
 
+export async function densityPoint(state: any, x: number, y: number, options: NoiseSettingsOptions) {
+	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
+	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.seed)
+
+	const density = fn.compute(DensityFunction.context(x, y, 0))
+	return density
+}
+
 export function getProjectData(project: Project) {
 	return Object.fromEntries(['worldgen/noise_settings', 'worldgen/noise', 'worldgen/density_function'].map(type => {
 		const resources = Object.fromEntries(
