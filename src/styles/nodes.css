@@ -108,21 +108,6 @@
   background-color: var(--node-background-label);
 }
 
-.node-header > label > img {
-  height: 80%;
-  position: relative;
-  top: 10%;
-  image-rendering: pixelated;
-}
-
-.node-header > label > svg {
-  width: 25.59px;
-  height: 20px;
-  position: relative;
-  top: 5px;
-  fill: var(--node-text-dimmed);
-}
-
 .node-header > input {
   font-size: 18px;
   padding-left: 9px;

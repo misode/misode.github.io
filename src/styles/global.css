@@ -1163,6 +1163,27 @@ hr {
 	font-weight: 100;
 }
 
+.item-display {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.item-display > img {
+  width: 26px;
+  position: relative;
+  image-rendering: pixelated;
+}
+
+.item-display > svg {
+  width: 26px;
+  height: 20px;
+  position: relative;
+  fill: var(--node-text-dimmed);
+}
+
 .file-view {
 	background-color: var(--background-2);
 	color: var(--text-2);
