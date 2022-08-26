@@ -339,6 +339,15 @@
       "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
+    },
+    {
+      "id": "faction",
+      "url": "partners/faction-craft/faction",
+      "path": "faction-craft/faction",
+      "tags": ["partners"],
+      "partner": "faction_craft",
+      "schema": "faction_craft:faction",
+      "minVersion": "1.16"
     }
   ]
 }
