@@ -1,6 +1,5 @@
+import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
 import { initFaction } from './Faction.js'
-
-const ID = 'faction_craft'
 
 export * from './Faction.js'
 

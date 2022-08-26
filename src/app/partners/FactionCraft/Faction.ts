@@ -1,5 +1,5 @@
-import type { CollectionRegistry, ResourceType, SchemaRegistry } from '@mcschema/core'
-import { BooleanNode, Case, ChoiceNode, ListNode, MapNode, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
+import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
+import { BooleanNode, ListNode, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode } from '@mcschema/core'
 
 const ID = 'faction_craft'
 
@@ -8,8 +8,8 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 	const StringNode = RawStringNode.bind(undefined, collections)
 
 	schemas.register(`${ID}:faction`, ObjectNode({
-		name: StringNode({ validator: 'resource', params: { pool: `` } }),
-		replace: Opt(BooleanNode({ default: false })),
+		name: StringNode({ validator: 'resource', params: { pool: [] }  }),
+		replace: Opt(BooleanNode()),
 		banner: Opt(Reference(`${ID}:banner_itemstack`)),
 		relations: Opt(Reference(`${ID}:faction_relations`)),
 		raid_config: Opt(Reference(`${ID}:faction_raid_config`)),
@@ -18,52 +18,51 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 	}, { context: `${ID}.faction` }))
 
 	schemas.register(`${ID}:faction_relations`, ObjectNode({
-		allies: ListNode(StringNode({ validator: 'resource', params: { pool: `` } })),
-		enemies: ListNode(StringNode({ validator: 'resource', params: { pool: `` } }))
+		allies: ListNode(StringNode({ validator: 'resource', params: { pool: [] }  })),
+		enemies: ListNode(StringNode({ validator: 'resource', params: { pool: [] }}))
 	}, { context: `${ID}.faction_relations` }))
 
 	schemas.register(`${ID}:faction_raid_config`, ObjectNode({
-	    name_alt: Opt(StringNode({ validator: ''})),
-        victory_alt: Opt(StringNode({ validator: ''})),
-        defeat_alt: Opt(StringNode({ validator: ''})),
+	    name_alt: Opt(StringNode()),
+        victory_alt: Opt(StringNode()),
+        defeat_alt: Opt(StringNode()),
         mobs_fraction: Opt(NumberNode({ integer: false, min: 0, max: 1 })),
-        wave_sound: Opt(StringNode({ validator: 'resource', params: { pool: `sounds` } })),
-        victory_sound: Opt(StringNode({ validator: 'resource', params: { pool: `sounds` } })),
-        defeat_sound: Opt(StringNode({ validator: 'resource', params: { pool: `sounds` } }))
+        wave_sound: Opt(StringNode({ validator: 'resource', params: { pool: [] } })),
+        victory_sound: Opt(StringNode({ validator: 'resource', params: { pool: [] } })),
+        defeat_sound: Opt(StringNode({ validator: 'resource', params: { pool: [] } }))
 	}, { context: `${ID}.faction_raid_config` }))
 
 	schemas.register(`${ID}:faction_boost_config`, ObjectNode({
 		distribution: StringNode({ enum: ["random","uniform_all", "uniform_type"]  }),
-		mandatory: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } })),
-		whitelist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } })),
-		blacklist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } })),
+		mandatory: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } })),
+		whitelist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } })),
+		blacklist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } })),
 		rarity_overrides: ListNode(Reference(`${ID}:boost_rarity_override`))
 	}, { context: `${ID}.faction_boost_config` }))
 
 	schemas.register(`${ID}:faction_entity_type`, ObjectNode({
 		entity_type: StringNode({ validator: 'resource', params: { pool: "entity_type" } }),
 		rank: StringNode({ enum: ["soldier","captain", "general", "support", "leader", "mount"]  }),
-		maximum_rank: StringNode({ enum: ["soldier","captain", "general", "support", "leader", "mount"]  }),
-		weight: NumberNode({ integer: true, min: 1  }),
+		maximum_rank: StringNode({ enum: ["soldier","captain", "general", "support", "leader", "mount"]  }), weight: NumberNode({ integer: true, min: 1  }),
 		strength: NumberNode({ integer: true, min: 1  }),
 		boosts: Reference(`${ID}:entity_type_boost_config`),
 		minimum_wave: NumberNode({ min: 1, max: 99999 })
 	}, { context: `${ID}.faction_entity_type` }))
 
 	schemas.register(`${ID}:entity_type_boost_config`, ObjectNode({
-		mandatory: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } })),
-		whitelist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } })),
-		blacklist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } })),
+		mandatory: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } })),
+		whitelist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } })),
+		blacklist: ListNode(StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } })),
 		rarity_overrides: ListNode(Reference(`${ID}:boost_rarity_override`))
 	}, { context: `${ID}.entity_type_boost_config` }))
 
 	schemas.register(`${ID}:boost_rarity_override`, ObjectNode({
-		boost: StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` } }),
+		boost: StringNode({ validator: 'resource', params: { pool: `${ID}:boosts` as any } }),
 		rarity: StringNode({ enum: ["super_common", "common", "uncommon", "rare", "very_rare", "none"]  })
 	}, { context: `${ID}.boost_rarity_override` }))
 
 	schemas.register(`${ID}:banner_itemstack`, ObjectNode({
-		id: StringNode({ validator: 'resource', params: { pool: `${ID}:banners` } }),
+		id: StringNode({ validator: 'resource', params: { pool: `${ID}:banners` as any } }),
 		count: NumberNode({ integer: true, min: 1, max: 1 }),
 		tag: Reference(`${ID}:banner_tag`)
 	}, { context: `${ID}.banner_itemstack` }))
@@ -80,17 +79,13 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 
 	schemas.register(`${ID}:banner_pattern`, ObjectNode({
 		color: NumberNode({ integer: true, min: 0, max: 15 }),
-		Pattern: StringNode({ validator: 'resource', params: { pool: `${ID}:banner_patterns` } })
+		Pattern: StringNode({ validator: 'resource', params: { pool: `${ID}:banner_patterns` as any } })
 	}, { context: `${ID}.banner_pattern` }))
 
 	schemas.register(`${ID}:banner_display`, ObjectNode({
 		color: NumberNode({ color: true }),
-		translate: StringNode({ validator: ''})
+		translate: StringNode()
 	}, { context: `${ID}.banner_display` }))
-
-	collections.register(`${ID}:banner_display_colors`, [
-        "gold"
-	])
 
     collections.register(`${ID}:banner_patterns`, [
         "b",
