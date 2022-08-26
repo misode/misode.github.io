@@ -8,7 +8,6 @@ import { Store } from '../Store.js'
 // const require = createRequire(import.meta.url)
 // const English = require('../../locales/en.json')
 import English from '../../locales/en.json'
-import {loadPartnersLocale} from '../partners/index.js'
 
 interface Locale {
 	lang: string,
@@ -51,7 +50,7 @@ async function loadLocale(language: string) {
 		&& await import(`../../../node_modules/@mcschema/locales/src/${language}.json`)
 	let partners = { default: {} }
 	if (language === 'en') {
-		partners = await loadPartnersLocale(language)
+		partners = await import('../partners/locales/en.json')
 	}
 	Locales[language] = { ...data.default, ...schema.default, ...partners.default }
 }
