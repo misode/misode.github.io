@@ -128,8 +128,6 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 		translate: StringNode()
 	}, { context: `${ID}.banner_display` }))
 
-    collections.register(`${ID}:banner_patterns`, )
-
 	collections.register(`${ID}:banners`, [
         'minecraft:black_banner',
         'minecraft:blue_banner',
