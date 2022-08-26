@@ -9,11 +9,3 @@ export function initPartners(schemas: SchemaRegistry, collections: CollectionReg
 	initImmersiveWeathering(schemas, collections)
 	initFactionCraft(schemas, collections)
 }
-
-export async function loadPartnersLocale(language: string){
-    let factioncraft = { default: {} }
-    factioncraft = await import(`./FactionCraft/locales/${language}.json`)
-    let other = { default: {} }
-    other = await import(`./locales/${language}.json`)
-    return { default: {...other.default, ...factioncraft.default}}
-}
