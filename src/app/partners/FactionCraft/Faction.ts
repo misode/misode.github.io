@@ -15,6 +15,7 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 		raid_config: Opt(Reference(`${ID}:faction_raid_config`)),
 		boosts: Opt(Reference(`${ID}:faction_boost_config`)),
 		entities: ListNode(Reference(`${ID}:faction_entity_type`)),
+		activation_advancement: Opt(StringNode({ validator: 'resource', params: { pool: [] }  })),
 	}, { context: `${ID}.faction` }))
 
 	schemas.register(`${ID}:faction_relations`, ObjectNode({
@@ -42,11 +43,13 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 
 	schemas.register(`${ID}:faction_entity_type`, ObjectNode({
 		entity_type: StringNode({ validator: 'resource', params: { pool: "entity_type" } }),
+		tag: Opt(StringNode()),
 		rank: StringNode({ enum: ["soldier","captain", "general", "support", "leader", "mount"]  }),
 		maximum_rank: StringNode({ enum: ["soldier","captain", "general", "support", "leader", "mount"]  }), weight: NumberNode({ integer: true, min: 1  }),
 		strength: NumberNode({ integer: true, min: 1  }),
-		boosts: Reference(`${ID}:entity_type_boost_config`),
+		boosts: Opt(Reference(`${ID}:entity_type_boost_config`)),
 		minimum_wave: NumberNode({ min: 1, max: 99999 })
+		maximum_wave: Opt(NumberNode({ min: 1, max: 99999 }))
 	}, { context: `${ID}.faction_entity_type` }))
 
 	schemas.register(`${ID}:entity_type_boost_config`, ObjectNode({
