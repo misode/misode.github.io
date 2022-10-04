@@ -16,24 +16,25 @@ type Version = {
 declare var __LATEST_VERSION__: string
 const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
+const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
 const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 
-type McmetaTypes = 'summary' | 'data' | 'assets' | 'registries'
+type McmetaTypes = 'summary' | 'data' | 'data-json' | 'assets' | 'assets-json' | 'registries' | 'atlas'
 
 interface RefInfo {
 	dynamic?: boolean
 	ref?: string
 }
 
-function mcmeta(version: RefInfo, type: McmetaTypes) {
-	return `${mcmetaUrl}/${version.dynamic ? type : `${version.ref}-${type}`}`
+function mcmeta(version: RefInfo, type: McmetaTypes, tarball?: boolean) {
+	return `${tarball ? mcmetaTarballUrl : mcmetaUrl}/${version.dynamic ? type : `${version.ref}-${type}`}`
 }
 
 async function validateCache(version: RefInfo) {
 	await applyPatches()
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
-			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`) || url.startsWith(`${mcmetaUrl}/assets/`) || url.startsWith(`${mcmetaUrl}/registries/`))
+			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`) || url.startsWith(`${mcmetaUrl}/assets/`) || url.startsWith(`${mcmetaUrl}/registries/`) || url.startsWith(`${mcmetaUrl}/atlas/`) || url.startsWith(`${mcmetaTarballUrl}/assets-json/`))
 			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
 		}
 		version.ref = latestVersion
@@ -105,11 +106,8 @@ export async function fetchAllPresets(versionId: VersionId, registry: string) {
 	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
-		const entries = await cachedFetch<any>(`${mcmeta(version, 'registries')}/${registry}/data.min.json`)
-		return new Map<string, unknown>(await Promise.all(
-			entries.map(async (e: string) =>
-				[e, await cachedFetch(`${mcmeta(version, 'data')}/data/minecraft/${registry}/${e}.json`)])
-		))
+		const type = ['block_definition', 'model', 'font'].includes(registry) ? 'assets' : 'data'
+		return new Map<string, unknown>(Object.entries(await cachedFetch(`${mcmeta(version, 'summary')}/${type}/${registry}/data.min.json`)))
 	} catch (e) {
 		throw new Error(`Error occurred while fetching all ${registry} presets: ${message(e)}`)
 	}
@@ -159,10 +157,52 @@ export async function fetchVersions(): Promise<VersionMeta[]> {
 	}
 }
 
-export function getTextureUrl(versionId: VersionId, path: string): string {
+export function getAssetUrl(versionId: VersionId, type: string, path: string): string {
 	const version = config.versions.find(v => v.id === versionId)!
-	return `${mcmeta(version, 'assets')}/assets/minecraft/textures/${path}.png`
+	return `${mcmeta(version, 'assets')}/assets/minecraft/${type}/${path}.png`
 }
+
+export async function fetchResources(versionId: VersionId) {
+	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
+	try {
+		const [models, uvMapping, atlas] = await Promise.all([
+			fetchAllPresets(versionId, 'model'),
+			cachedFetch(`${mcmeta(version, 'atlas')}/all/data.min.json`),
+			loadImage(`${mcmeta(version, 'atlas')}/all/atlas.png`),
+		])
+		return { models, uvMapping, atlas }
+	} catch (e) {
+		throw new Error(`Error occured while fetching resources: ${message(e)}`)
+	}
+}
+
+async function loadImage(src: string) {
+	return new Promise<HTMLImageElement>(res => {
+		const image = new Image()
+		image.onload = () => res(image)
+		image.crossOrigin = 'Anonymous'
+		image.src = src
+	})
+}
+
+/*
+async function loadImage(src: string) {
+	const buffer = await cachedFetch(src, { decode: r => r.arrayBuffer() })
+	const blob = new Blob([buffer], { type: 'image/png' })
+	const img = new Image()
+	img.src = URL.createObjectURL(blob)
+	return new Promise<ImageData>((res) => {
+		img.onload = () => {
+			const canvas = document.createElement('canvas')
+			const ctx = canvas.getContext('2d')!
+			ctx.drawImage(img, 0, 0)
+			const imgData = ctx.getImageData(0, 0, img.width, img.height)
+			res(imgData)
+		}
+	})
+}
+*/
 
 export interface Change {
 	group: string,

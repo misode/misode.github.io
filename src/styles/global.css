@@ -1184,6 +1184,11 @@ hr {
   fill: var(--node-text-dimmed);
 }
 
+.item-display > canvas {
+	width: 32px;
+	height: 32px;
+}
+
 .file-view {
 	background-color: var(--background-2);
 	color: var(--text-2);

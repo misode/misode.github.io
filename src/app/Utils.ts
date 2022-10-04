@@ -297,12 +297,12 @@ export class BiMap<A, B> {
 	}
 }
 
-export async function readZip(file: File): Promise<[string, string][]> {
-	const buffer = await file.arrayBuffer()
+export async function readZip(file: File | ArrayBuffer, predicate: (name: string) => boolean = () => true): Promise<[string, string][]> {
+	const buffer = file instanceof File ? await file.arrayBuffer() : file
 	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
 	const entries = await reader.getEntries()
 	return await Promise.all(entries
-		.filter(e => !e.directory)
+		.filter(e => !e.directory && predicate(e.filename))
 		.map(async e => {
 			const writer = new zip.TextWriter('utf-8')
 			return [e.filename, await e.getData?.(writer)] as [string, string]
