@@ -1,5 +1,5 @@
 import type { BlockModelProvider, TextureAtlasProvider, UV } from 'deepslate/render'
-import { BlockModel, Identifier, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
+import { BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
 import { message } from '../Utils.js'
 import { fetchResources } from './DataFetcher.js'
 import type { VersionId } from './Schemas.js'
@@ -21,6 +21,33 @@ export async function getResources(version: VersionId) {
 		return Resources[version]
 	}
 	return Resources[version]
+}
+
+const RENDER_SIZE = 128
+const ItemRenderCache = new Map<string, Promise<string>>()
+
+export async function renderItem(version: VersionId, item: string) {
+	const cache_key = `${version} ${item}`
+	const cached = ItemRenderCache.get(cache_key)
+	if (cached !== undefined) {
+		return cached
+	}
+
+	const promise = (async () => {
+		const canvas = document.createElement('canvas')
+		canvas.width = RENDER_SIZE
+		canvas.height = RENDER_SIZE
+		const resources = await getResources(version)
+		const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true })
+		if (!gl) {
+			throw new Error('Cannot get WebGL2 context')
+		}
+		const renderer = new ItemRenderer(gl, Identifier.parse(item), resources)
+		renderer.drawItem()
+		return canvas.toDataURL()
+	})()
+	ItemRenderCache.set(cache_key, promise)
+	return promise
 }
 
 export class ResourceManager implements BlockModelProvider, TextureAtlasProvider {

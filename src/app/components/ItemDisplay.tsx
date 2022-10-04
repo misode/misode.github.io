@@ -1,13 +1,10 @@
-import { Identifier, ItemRenderer } from 'deepslate'
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getAssetUrl } from '../services/DataFetcher.js'
-import { getResources } from '../services/Resources.js'
+import { renderItem } from '../services/Resources.js'
 import { getCollections } from '../services/Schemas.js'
 import { Octicon } from './Octicon.jsx'
-
-const RENDER_SIZE = 128
 
 interface Props {
 	item: string,
@@ -48,36 +45,14 @@ export function ItemDisplay({ item }: Props) {
 }
 
 function RenderedItem({ item }: Props) {
-	const canvas = useRef<HTMLCanvasElement>(null)
 	const { version } = useVersion()
+	const { value: src } = useAsync(() => renderItem(version, item), [version, item])
 
-	const [loaded, setLoaded] = useState(false)
+	if (src) {
+		return <img src={src} alt={item} />
+	}
 
-	const { value: resources } = useAsync(() => getResources(version), [item])
-
-	const gl = useMemo(() => {
-		if (!canvas.current) return undefined
-		return canvas.current?.getContext('webgl2') ?? undefined
-	}, [canvas.current])
-
-	const renderer = useMemo(() => {
-		if (!resources || !gl) return undefined
-		return new ItemRenderer(gl, Identifier.parse(item), resources, {})
-	}, [resources, gl])
-
-	useEffect(() => {
-		if (renderer) {
-			renderer.setItem(Identifier.parse(item))
-			renderer.setViewport(0, 0, RENDER_SIZE, RENDER_SIZE)
-			renderer.drawItem()
-			setLoaded(true)
-		}
-	}, [renderer, item])
-
-	return <>
-		<canvas ref={canvas} width={RENDER_SIZE} height={RENDER_SIZE} style={loaded ? undefined : {display: 'none'}}/>
-		{!loaded && <div class="item-display">
-			{Octicon.package}
-		</div>}
-	</>
+	return <div class="item-display">
+		{Octicon.package}
+	</div>
 }
