@@ -4,7 +4,6 @@ import { useLocale, useProject, useTheme, useTitle, useVersion } from '../contex
 import { checkVersion } from '../services/index.js'
 import { cleanUrl, getGenerator } from '../Utils.js'
 import { Btn, BtnMenu, Icons, Octicon } from './index.js'
-import { TextComponent } from './TextComponent.jsx'
 
 const Themes: Record<string, keyof typeof Octicon> = {
 	system: 'device_desktop',
@@ -38,7 +37,6 @@ export function Header() {
 				)}
 			</BtnMenu>}
 		</div>
-		<TextComponent component={['',{ text: 'hello', color: 'red', bold: true },' ',{ text: 'world', color: '#ffccaa', underline: true, extra: ['!'] }, '!']}/>
 		<nav>
 			<ul>
 				<li data-cy="language-switcher">
