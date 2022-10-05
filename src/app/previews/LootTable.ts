@@ -13,14 +13,16 @@ type ItemConsumer = (item: Item) => void
 interface LootOptions {
 	version: VersionId,
 	seed: bigint,
-
 }
 
 interface LootContext extends LootOptions {
 	random: Random,
 	luck: number
+	weather: string,
+	dayTime: number,
 	getItemTag(id: string): string[],
 	getLootTable(id: string): any,
+	getPredicate(id: string): any,
 }
 
 export function generateLootTable(lootTable: any, options: LootOptions) {
@@ -43,8 +45,11 @@ function createLootContext(options: LootOptions): LootContext {
 		...options,
 		random: new LegacyRandom(options.seed),
 		luck: 0,
+		weather: 'clear',
+		dayTime: 0,
 		getItemTag: () => [],
 		getLootTable: () => ({ pools: [] }),
+		getPredicate: () => [],
 	}
 }
 
@@ -100,7 +105,7 @@ function expandEntry(entry: any, ctx: LootContext, consumer: (entry: any) => voi
 				expandEntry(child, ctx, consumer)
 			}
 			return true
-		case 'alternative':
+		case 'alternatives':
 			for (const child of entry.children ?? []) {
 				if (expandEntry(child, ctx, consumer)) {
 					return true
@@ -179,11 +184,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		return { ...item, count: computeInt(count, ctx) }
 	},
 	limit_count: ({ limit }) => (item, ctx) => {
-		if (typeof limit === 'number') {
-			limit = { min: limit, max: limit }
-		}
-		const min = computeInt(limit.min, ctx)
-		const max = computeInt(limit.max, ctx)
+		const { min, max } = prepareIntRange(limit, ctx)
 		return { ...item, count: clamp(item.count, min, max )}
 	},
 }
@@ -193,8 +194,7 @@ type LootCondition = (ctx: LootContext) => boolean
 function composeConditions(conditions: any[]): LootCondition {
 	return (ctx) => {
 		for (const cond of conditions) {
-			const type = cond.condition?.replace(/^minecraft:/, '')
-			if ((LootConditions[type]?.(cond) ?? (() => true))(ctx) === false) {
+			if (!testCondition(cond, ctx)) {
 				return false
 			}
 		}
@@ -202,8 +202,84 @@ function composeConditions(conditions: any[]): LootCondition {
 	}
 }
 
-const LootConditions: Record<string, (params: any) => LootCondition> = {
+function testCondition(condition: any, ctx: LootContext): boolean {
+	const type = condition.condition?.replace(/^minecraft:/, '')
+	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
+}
 
+const LootConditions: Record<string, (params: any) => LootCondition> = {
+	alternative: ({ terms }) => (ctx) => {
+		for (const term of terms) {
+			if (testCondition(term, ctx)) {
+				return true
+			}
+		}
+		return false
+	},
+	block_state_property: () => () => {
+		return false // TODO
+	},
+	damage_source_properties: ({ predicate }) => (ctx) => {
+		return testDamageSourcePredicate(predicate, ctx)
+	},
+	entity_properties: ({ predicate }) => (ctx) => {
+		return testEntityPredicate(predicate, ctx)
+	},
+	entity_scores: () => () => {
+		return false // TODO,
+	},
+	inverted: ({ term }) => (ctx) => {
+		return !testCondition(term, ctx)
+	},
+	killed_by_player: ({ inverted }) => () => {
+		return (inverted ?? false) === false // TODO
+	},
+	location_check: ({ predicate }) => (ctx) => {
+		return testLocationPredicate(predicate, ctx)
+	},
+	match_tool: ({ predicate }) => (ctx) => {
+		return testItemPredicate(predicate, ctx)
+	},
+	random_chance: ({ chance }) => (ctx) => {
+		return ctx.random.nextFloat() < chance
+	},
+	random_chance_with_looting: ({ chance, looting_multiplier }) => (ctx) => {
+		const level = 0 // TODO: get looting level from killer
+		const probability = chance + level * looting_multiplier
+		return ctx.random.nextFloat() < probability
+
+	},
+	reference: ({ name }) => (ctx) => {
+		const predicate = ctx.getPredicate(name) ?? []
+		if (Array.isArray(predicate)) {
+			return composeConditions(predicate)(ctx)
+		}
+		return testCondition(predicate, ctx)
+	},
+	survives_explosion: () => () => true,
+	table_bonus: ({ chances }) => (ctx) => {
+		const level = 0 // TODO: get enchantment level from tool
+		const chance = chances[clamp(level, 0, chances.length - 1)]
+		return ctx.random.nextFloat() < chance
+	},
+	time_check: ({ value, period }) => (ctx) => {
+		let time = ctx.dayTime
+		if (period !== undefined) {
+			time = time % period
+		}
+		const { min, max } = prepareIntRange(value, ctx)
+		return min <= value && value <= max
+	},
+	value_check: () => () => {
+		return false // TODO
+	},
+	weather_check: ({ raining, thundering }) => (ctx) => {
+		const isRaining = ctx.weather === 'rain' || ctx.weather === 'thunder'
+		const isThundering = ctx.weather === 'thunder'
+		if (raining !== undefined && raining !== isRaining) return false
+		if (thundering !== undefined && thundering !== isThundering) return false
+		return true
+	},
 }
 
 function computeInt(provider: any, ctx: LootContext): number {
@@ -256,4 +332,29 @@ function computeFloat(provider: any, ctx: LootContext): number {
 			return result 
 	}
 	return 0
+}
+
+function prepareIntRange(range: any, ctx: LootContext) {
+	if (typeof range === 'number') {
+		range = { min: range, max: range }
+	}
+	const min = computeInt(range.min, ctx)
+	const max = computeInt(range.max, ctx)
+	return { min, max }
+}
+
+function testItemPredicate(_predicate: any, _ctx: LootContext) {
+	return false // TODO
+}
+
+function testLocationPredicate(_predicate: any, _ctx: LootContext) {
+	return false // TODO
+}
+
+function testEntityPredicate(_predicate: any, _ctx: LootContext) {
+	return false // TODO
+}
+
+function testDamageSourcePredicate(_predicate: any, _ctx: LootContext) {
+	return false // TODO
 }

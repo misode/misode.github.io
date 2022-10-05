@@ -14,7 +14,7 @@ export function ItemDisplay({ item, count = 1 }: Props) {
 	return <div class="item-display">
 		<ItemItself item={item} />
 		{count !== 1 && <>
-			<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMinYMid meet">
+			<svg class="item-count" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMinYMid meet">
 				<text x="95" y="93" font-size="50" textAnchor="end" fontFamily="MinecraftSeven" fill="#373737">{count}</text>
 				<text x="90" y="88" font-size="50" textAnchor="end" fontFamily="MinecraftSeven" fill="#ffffff">{count}</text>
 			</svg>

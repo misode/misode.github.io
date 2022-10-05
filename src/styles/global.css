@@ -1205,14 +1205,14 @@ hr {
 	filter: brightness(0.9) contrast(1.1);
 }
 
-.item-display > svg {
+.item-display > svg:not(.item-count) {
   width: 81.25%;
   height: 62.5%;
   position: relative;
   fill: var(--node-text-dimmed);
 }
 
-.item-display > svg {
+.item-display > svg.item-count {
 	position: absolute;
 	right: 0;
 	bottom: 0;
