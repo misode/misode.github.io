@@ -1,7 +1,7 @@
 import type { Random } from 'deepslate'
 import { LegacyRandom } from 'deepslate'
 import type { VersionId } from '../services/Schemas.js'
-import { isObject } from '../Utils.js'
+import { clamp, isObject } from '../Utils.js'
 
 export interface Item {
 	id: string,
@@ -27,7 +27,8 @@ export function generateLootTable(lootTable: any, options: LootOptions) {
 	const ctx = createLootContext(options)
 	const result: Item[] = []
 	const compositeFunction = composeFunctions(lootTable.functions ?? [])
-	generateTable(lootTable, e => result.push(compositeFunction(e, ctx)), ctx)
+	const tableConsumer = (item: Item) => result.push(compositeFunction(item, ctx))
+	generateTable(lootTable, tableConsumer, ctx)
 	return result
 }
 
@@ -133,18 +134,21 @@ function canEntryRun(entry: any, ctx: LootContext): boolean {
 }
 
 function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
+	const compositeFunction = composeFunctions(entry.functions ?? [])
+	const entryConsumer = (item: Item) => consumer(compositeFunction(item, ctx))
+	
 	const type = entry.type?.replace(/^minecraft:/, '')
 	switch (type) {
 		case 'item':
-			consumer({ id: entry.name, count: Math.round(Math.random() * 20) })
+			entryConsumer({ id: entry.name, count: 1 })
 			break
 		case 'tag':
 			ctx.getItemTag(entry.name ?? '').forEach(tagEntry => {
-				consumer({ id: tagEntry, count: 1 })
+				entryConsumer({ id: tagEntry, count: 1 })
 			})
 			break
 		case 'loot_table':
-			generateTable(ctx.getLootTable(entry.name), consumer, ctx)
+			generateTable(ctx.getLootTable(entry.name), entryConsumer, ctx)
 			break
 		case 'dynamic':
 			// not relevant for this simulation
@@ -161,15 +165,27 @@ type LootFunction = (item: Item, ctx: LootContext) => Item
 function composeFunctions(functions: any[]): LootFunction {
 	return (item, ctx) => {
 		for (const fn of functions) {
-			const type = fn.type?.replace(/^minecraft:/, '')
-			item = (LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
+			if (composeFunctions(fn.conditions ?? [])(item, ctx)) {
+				const type = fn.function?.replace(/^minecraft:/, '')
+				item = (LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
+			}
 		}
 		return item
 	}
 }
 
 const LootFunctions: Record<string, (params: any) => LootFunction> = {
-	set_count: ({ count }) => (item, ctx) => ({ ...item, count: computeInt(count, ctx) }),
+	set_count: ({ count }) => (item, ctx) => {
+		return { ...item, count: computeInt(count, ctx) }
+	},
+	limit_count: ({ limit }) => (item, ctx) => {
+		if (typeof limit === 'number') {
+			limit = { min: limit, max: limit }
+		}
+		const min = computeInt(limit.min, ctx)
+		const max = computeInt(limit.max, ctx)
+		return { ...item, count: clamp(item.count, min, max )}
+	},
 }
 
 type LootCondition = (ctx: LootContext) => boolean
@@ -177,7 +193,7 @@ type LootCondition = (ctx: LootContext) => boolean
 function composeConditions(conditions: any[]): LootCondition {
 	return (ctx) => {
 		for (const cond of conditions) {
-			const type = cond.type?.replace(/^minecraft:/, '')
+			const type = cond.condition?.replace(/^minecraft:/, '')
 			if ((LootConditions[type]?.(cond) ?? (() => true))(ctx) === false) {
 				return false
 			}
