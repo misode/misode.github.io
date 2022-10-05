@@ -10,9 +10,10 @@ import { Octicon } from './Octicon.jsx'
 
 interface Props {
 	item: Item,
+	slotOverlay?: boolean,
 	advancedTooltip?: boolean,
 }
-export function ItemDisplay({ item, advancedTooltip }: Props) {
+export function ItemDisplay({ item, slotOverlay, advancedTooltip }: Props) {
 	const el = useRef<HTMLDivElement>(null)
 	const [tooltipOffset, setTooltipOffset] = useState<[number, number]>([0, 0])
 	const [tooltipSwap, setTooltipSwap] = useState(false)
@@ -23,7 +24,7 @@ export function ItemDisplay({ item, advancedTooltip }: Props) {
 				const { right, width } = el.current!.getBoundingClientRect()
 				const swap = right + 200 > document.body.clientWidth
 				setTooltipSwap(swap)
-				setTooltipOffset([swap ? width - e.offsetX : e.offsetX, e.offsetY])
+				setTooltipOffset([(swap ? width - e.offsetX : e.offsetX) + 20, e.offsetY - 40])
 			})
 		}
 		el.current?.addEventListener('mousemove', onMove)
@@ -37,6 +38,7 @@ export function ItemDisplay({ item, advancedTooltip }: Props) {
 				<text x="90" y="88" font-size="50" textAnchor="end" fontFamily="MinecraftSeven" fill="#ffffff">{item.count}</text>
 			</svg>
 		</>}
+		{slotOverlay && <div class="item-slot-overlay"></div>}
 		<ItemTooltip {...item} advanced={advancedTooltip} offset={tooltipOffset} swap={tooltipSwap} />
 	</div>
 }

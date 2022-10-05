@@ -1224,6 +1224,18 @@ hr {
 	-ms-user-select: none;
 }
 
+.item-slot-overlay {
+	position: absolute;
+	left: 5.555%;
+	top: 5.555%;
+	width: 88.888%;
+	height: 88.888%;
+}
+
+.item-display:hover > .item-slot-overlay {
+	background-color: #fff4;
+}
+
 .item-tooltip {
 	background: #0d020fee;
 	border: solid 2px #220044ee;
