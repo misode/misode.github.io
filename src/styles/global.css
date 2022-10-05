@@ -1223,7 +1223,7 @@ hr {
 .item-tooltip {
 	background: #0d020f;
 	border: solid 2px #220044;
-	padding: 5px 5px 3px 7px;
+	padding: 3px 1px 1px 5px;
 }
 
 .item-display > .item-tooltip {
@@ -1242,6 +1242,7 @@ hr {
 	font-family: MinecraftSeven;
 	font-size: 20px;
 	position: relative;
+  white-space: nowrap;
 }
 
 .text-component > .text-foreground {

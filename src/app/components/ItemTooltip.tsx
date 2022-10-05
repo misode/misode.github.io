@@ -3,10 +3,11 @@ import { TextComponent } from './TextComponent.jsx'
 interface Props {
 	id: string,
 	tag?: any,
+	advanced?: boolean,
 	offset?: [number, number],
 	swap?: boolean,
 }
-export function ItemTooltip({ id, tag, offset = [0, 0], swap }: Props) {
+export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props) {
 	const displayName = tag?.display?.Name
 	const name = displayName ? JSON.parse(displayName) : fakeTranslation(id.replace(/^minecraft:/, ''))
 
@@ -19,7 +20,7 @@ export function ItemTooltip({ id, tag, offset = [0, 0], swap }: Props) {
 	}}>
 		<TextComponent component={name} base={{ color: 'white' }} />
 		{lore.map(line => <TextComponent component={JSON.parse(line)} base={{ color: 'dark_purple', italic: true }} />)}
-		<TextComponent component={{ text: id, color: 'dark_gray'}} />
+		{advanced && <TextComponent component={{ text: id, color: 'dark_gray'}} />}
 	</div>
 }
 

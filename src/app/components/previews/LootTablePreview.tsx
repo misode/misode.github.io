@@ -34,7 +34,7 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 			<img src="/images/container.png" alt="Container background" class="pixelated" draggable={false} />
 			{items.map(({ slot, item }) =>
 				<div key={slot} style={slotStyle(slot)}>
-					<ItemDisplay item={item} />
+					<ItemDisplay item={item} advancedTooltip={true} />
 				</div>
 			)}
 		</div>
