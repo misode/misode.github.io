@@ -1218,11 +1218,15 @@ hr {
 	bottom: 0;
 	width: 100%;
 	height: 100%;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 }
 
 .item-tooltip {
-	background: #0d020f;
-	border: solid 2px #220044;
+	background: #0d020fee;
+	border: solid 2px #220044ee;
 	padding: 3px 1px 1px 5px;
 }
 
