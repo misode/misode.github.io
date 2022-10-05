@@ -139,7 +139,7 @@ const renderHtml: RenderHook = {
 				let label: undefined | string | JSX.Element
 				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
 					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
-						label = <ItemDisplay item={cValue.name} />
+						label = <ItemDisplay item={{ id: cValue.name, count: 1 }} />
 					}
 				}
 

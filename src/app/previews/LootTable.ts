@@ -6,6 +6,7 @@ import { clamp, isObject } from '../Utils.js'
 export interface Item {
 	id: string,
 	count: number,
+	tag?: any,
 }
 
 type ItemConsumer = (item: Item) => void
@@ -186,6 +187,12 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	limit_count: ({ limit }) => (item, ctx) => {
 		const { min, max } = prepareIntRange(limit, ctx)
 		return { ...item, count: clamp(item.count, min, max )}
+	},
+	set_name: ({ name }) => (item) => {
+		return { ...item, tag: { ...item.tag, display: { ...item.tag?.display, Name: JSON.stringify(name) } }}
+	},
+	set_lore: ({ lore }) => (item) => {
+		return { ...item, tag: { ...item.tag, display: { ...item.tag?.display, Lore: lore.map((line: any) => JSON.stringify(line)) } }}
 	},
 }
 
