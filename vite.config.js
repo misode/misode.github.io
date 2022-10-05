@@ -83,8 +83,6 @@ export default defineConfig({
 		preact(),
 		viteStaticCopy({
 			targets: [
-				{ src: 'src/.nojekyll', dest: '' },
-				{ src: 'src/sitemap.txt', dest: '' },
 				{ src: 'src/styles/giscus.css', dest: 'assets' },
 				{ src: 'src/styles/giscus-burn.css', dest: 'assets' },
 				{ src: 'src/guides/*', dest: 'guides' },
