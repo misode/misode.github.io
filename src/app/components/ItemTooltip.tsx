@@ -1,3 +1,6 @@
+import { useVersion } from '../contexts/Version.jsx'
+import { useAsync } from '../hooks/useAsync.js'
+import { getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
@@ -8,8 +11,13 @@ interface Props {
 	swap?: boolean,
 }
 export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props) {
+	const { version } = useVersion()
+	const { value: translatedName } = useAsync(() => {
+		const key = id.split(':').join('.')
+		return getTranslation(version, `item.${key}`, `block.${key}`)
+	}, [version, id])
 	const displayName = tag?.display?.Name
-	const name = displayName ? JSON.parse(displayName) : fakeTranslation(id.replace(/^minecraft:/, ''))
+	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(id))
 
 	const lore: string[] = tag?.display?.Lore ?? []
 
@@ -25,6 +33,6 @@ export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props)
 }
 
 function fakeTranslation(str: string) {
-	const raw = str.replaceAll('_', ' ')
+	const raw = str.replace(/minecraft:/, '').replaceAll('_', ' ')
 	return raw[0].toUpperCase() + raw.slice(1)
 }

@@ -204,6 +204,16 @@ async function loadImage(src: string) {
 }
 */
 
+export async function fetchLanguage(versionId: VersionId, lang: string = 'en_us') {
+	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
+	try {
+		return await cachedFetch<Record<string, string>>(`${mcmeta(version, 'assets')}/assets/minecraft/lang/${lang}.json`)
+	} catch (e) {
+		throw new Error(`Error occured while fetching language: ${message(e)}`)
+	}
+}
+
 export interface Change {
 	group: string,
 	version: string,

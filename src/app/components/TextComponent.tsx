@@ -1,4 +1,7 @@
 import { useMemo } from 'preact/hooks'
+import { useVersion } from '../contexts/Version.jsx'
+import { useAsync } from '../hooks/useAsync.js'
+import { getTranslation } from '../services/Resources.js'
 
 interface StyleData {
 	color?: string,
@@ -9,7 +12,8 @@ interface StyleData {
 }
 
 interface PartData extends StyleData {
-	text: string,
+	text?: string,
+	translate?: string,
 }
 
 interface Props {
@@ -46,9 +50,9 @@ function visitComponent(component: unknown, consumer: (c: PartData) => void) {
 		}
 	} else if (typeof component === 'object' && component !== null) {
 		if ('text' in component) {
-			consumer(component as any)
+			consumer(component)
 		} else if ('translate' in component) {
-			consumer({ ...component, text: (component as any).translate })
+			consumer(component)
 		} else if ('score' in component) {
 			consumer({ ...component, text: '123' })
 		} else if ('selector' in component) {
@@ -89,6 +93,13 @@ type TextColorKey = keyof typeof TextColors
 const TextColorKeys = Object.keys(TextColors)
 
 function TextPart({ part, shadow }: { part: PartData, shadow?: boolean }) {
+	if (part.translate) {
+		const { version } = useVersion()
+		const { value: translated } = useAsync(() => {
+			return getTranslation(version, part.translate!)
+		}, [version, part.translate])
+		return <span style={createStyle(part, shadow)}>{translated ?? part.translate}</span>
+	}
 	return <span style={createStyle(part, shadow)}>{part.text}</span>
 }
 

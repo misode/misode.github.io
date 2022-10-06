@@ -1,7 +1,7 @@
 import type { BlockModelProvider, TextureAtlasProvider, UV } from 'deepslate/render'
 import { BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
 import { message } from '../Utils.js'
-import { fetchResources } from './DataFetcher.js'
+import { fetchLanguage, fetchResources } from './DataFetcher.js'
 import type { VersionId } from './Schemas.js'
 
 const Resources: Record<string, ResourceManager | Promise<ResourceManager>> = {}
@@ -98,4 +98,27 @@ export class ResourceManager implements BlockModelProvider, TextureAtlasProvider
 		})
 		this.textureAtlas = new TextureAtlas(imageData, idMap)
 	}
+}
+
+const Languages: Record<string, Record<string, string> | Promise<Record<string, string>>> = {}
+
+export async function getLanguage(version: VersionId) {
+	if (!Languages[version]) {
+		Languages[version] = (async () => {
+			try {
+				Languages[version] = await fetchLanguage(version)
+				return Languages[version]
+			} catch (e) {
+				console.error('Error: ', e)
+				throw new Error(`Cannot get language for version ${version}: ${message(e)}`)
+			}
+		})()
+		return Languages[version]
+	}
+	return Languages[version]
+}
+
+export async function getTranslation(version: VersionId, key: string, fallback?: string) {
+	const lang = await getLanguage(version)
+	return lang[key] ?? (fallback ? lang[fallback] : null) ?? null
 }
