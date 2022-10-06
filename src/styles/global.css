@@ -1192,23 +1192,17 @@ hr {
 }
 
 .item-display > img {
-  width: 81.25%;
-  position: relative;
+  width: 88.888%;
   image-rendering: pixelated;
 }
 
 .item-display > img.model {
 	image-rendering: auto;
-	width: 100%;
-
-	/* temporary adjustment until the shading is fixed in deepslate */
-	filter: brightness(0.9) contrast(1.1);
 }
 
 .item-display > svg:not(.item-count) {
   width: 81.25%;
   height: 62.5%;
-  position: relative;
   fill: var(--node-text-dimmed);
 }
 
@@ -1230,6 +1224,10 @@ hr {
 	top: 5.555%;
 	width: 88.888%;
 	height: 88.888%;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 }
 
 .item-display:hover > .item-slot-overlay {
@@ -1255,7 +1253,7 @@ hr {
 }
 
 .text-component {
-	font-family: MinecraftSeven;
+	font-family: MinecraftSeven, sans-serif;
 	font-size: 20px;
 	position: relative;
   white-space: nowrap;

@@ -62,7 +62,7 @@ function ItemItself({ item }: Props) {
 		return <img src={getAssetUrl(version, 'textures', texturePath)} alt="" onError={() => setErrored(true)} draggable={false} />
 	}
 
-	const modelPath = `block/${item.id.replace(/^minecraft:/, '')}`
+	const modelPath = `item/${item.id.replace(/^minecraft:/, '')}`
 	if (collections.get('model').includes('minecraft:' + modelPath)) {
 		return <RenderedItem item={item} />
 	}
