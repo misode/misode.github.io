@@ -29,15 +29,14 @@ interface LootContext extends LootOptions {
 export function generateLootTable(lootTable: any, options: LootOptions) {
 	const ctx = createLootContext(options)
 	const result: Item[] = []
-	const compositeFunction = composeFunctions(lootTable.functions ?? [])
-	const tableConsumer = (item: Item) => result.push(compositeFunction(item, ctx))
-	generateTable(lootTable, tableConsumer, ctx)
+	generateTable(lootTable, item => result.push(item), ctx)
 	return result
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
+	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
 	for (const pool of table.pools ?? []) {
-		generatePool(pool, consumer, ctx)
+		generatePool(pool, tableConsumer, ctx)
 	}
 }
 
@@ -56,8 +55,7 @@ function createLootContext(options: LootOptions): LootContext {
 
 function generatePool(pool: any, consumer: ItemConsumer, ctx: LootContext) {
 	if (composeConditions(pool.conditions ?? [])(ctx)) {
-		const compositeFunction = composeFunctions(pool.functions ?? [])
-		const poolConsumer = (item: Item) => consumer(compositeFunction(item, ctx))
+		const poolConsumer = decorateFunctions(pool.functions ?? [], consumer, ctx)
 
 		const rolls = computeInt(pool.rolls, ctx) + Math.floor(computeFloat(pool.bonus_rolls, ctx) * ctx.luck)
 		for (let i = 0; i < rolls; i += 1) {
@@ -140,9 +138,8 @@ function canEntryRun(entry: any, ctx: LootContext): boolean {
 }
 
 function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
-	const compositeFunction = composeFunctions(entry.functions ?? [])
-	const entryConsumer = (item: Item) => consumer(compositeFunction(item, ctx))
-	
+	const entryConsumer = decorateFunctions(entry.functions ?? [], consumer, ctx)
+
 	const type = entry.type?.replace(/^minecraft:/, '')
 	switch (type) {
 		case 'item':
@@ -166,33 +163,52 @@ function computeWeight(entry: any, luck: number) {
 	return Math.max(Math.floor((entry.weight ?? 1) + (entry.quality ?? 0) * luck), 0)
 }
 
-type LootFunction = (item: Item, ctx: LootContext) => Item
+type LootFunction = (item: Item, ctx: LootContext) => void
+
+function decorateFunctions(functions: any[], consumer: ItemConsumer, ctx: LootContext): ItemConsumer {
+	const compositeFunction = composeFunctions(functions)
+	return (item) => {
+		compositeFunction(item, ctx)
+		consumer(item)
+	}
+}
 
 function composeFunctions(functions: any[]): LootFunction {
 	return (item, ctx) => {
 		for (const fn of functions) {
-			if (composeFunctions(fn.conditions ?? [])(item, ctx)) {
-				const type = fn.function?.replace(/^minecraft:/, '')
-				item = (LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
+			if (composeConditions(fn.conditions ?? [])(ctx)) {
+				const type = fn.function?.replace(/^minecraft:/, '');
+				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
 		}
-		return item
 	}
 }
 
 const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_count: ({ count }) => (item, ctx) => {
-		return { ...item, count: computeInt(count, ctx) }
+		item.count = computeInt(count, ctx)
 	},
 	limit_count: ({ limit }) => (item, ctx) => {
 		const { min, max } = prepareIntRange(limit, ctx)
-		return { ...item, count: clamp(item.count, min, max )}
+		item.count = clamp(item.count, min, max )
+	},
+	set_damage: ({ damage, add }) => (item, ctx) => {
+		const maxDamage = MaxDamageItems.get(item.id)
+		if (maxDamage) {
+			const oldDamage = add ? 1 - (item.tag?.Damage ?? 0) / maxDamage : 0
+			const newDamage = 1 - clamp(computeFloat(damage, ctx) + oldDamage, 0, 1)
+			const finalDamage = Math.floor(newDamage * maxDamage)
+			item.tag = { ...item.tag, Damage: finalDamage }
+		}
+	},
+	set_lore: ({ lore, replace }) => (item) => {
+		const lines = lore.map((line: any) => JSON.stringify(line))
+		const newLore = replace ? lines : [...(item.tag?.display?.Lore ?? []), ...lines]
+		item.tag = { ...item.tag, display: { ...item.tag?.display, Lore: newLore } }
 	},
 	set_name: ({ name }) => (item) => {
-		return { ...item, tag: { ...item.tag, display: { ...item.tag?.display, Name: JSON.stringify(name) } }}
-	},
-	set_lore: ({ lore }) => (item) => {
-		return { ...item, tag: { ...item.tag, display: { ...item.tag?.display, Lore: lore.map((line: any) => JSON.stringify(line)) } }}
+		const newName = JSON.stringify(name)
+		item.tag = { ...item.tag, display: { ...item.tag?.display, Name: newName } }
 	},
 }
 
@@ -365,3 +381,46 @@ function testEntityPredicate(_predicate: any, _ctx: LootContext) {
 function testDamageSourcePredicate(_predicate: any, _ctx: LootContext) {
 	return false // TODO
 }
+
+export const MaxDamageItems = new Map<string, number>(Object.entries({
+	'minecraft:carrot_on_a_stick': 25,
+	'minecraft:warped_fungus_on_a_stick': 100,
+	'minecraft:elytra': 432,
+	'minecraft:flint_and_steel': 64,
+	'minecraft:bow': 384,
+	'minecraft:fishing_rod': 64,
+	'minecraft:shears': 238,
+	'minecraft:shield': 336,
+	'minecraft:trident': 250,
+	'minecraft:crossbow': 465,
+	'minecraft:wooden_sword': 59,
+	'minecraft:wooden_shovel': 59,
+	'minecraft:wooden_pickaxe': 59,
+	'minecraft:wooden_axe': 59,
+	'minecraft:wooden_hoe': 59,
+	'minecraft:stone_sword': 131,
+	'minecraft:stone_shovel': 131,
+	'minecraft:stone_pickaxe': 131,
+	'minecraft:stone_axe': 131,
+	'minecraft:stone_hoe': 131,
+	'minecraft:iron_sword': 250,
+	'minecraft:iron_shovel': 250,
+	'minecraft:iron_pickaxe': 250,
+	'minecraft:iron_axe': 250,
+	'minecraft:iron_hoe': 250,
+	'minecraft:diamond_sword': 250,
+	'minecraft:diamond_shovel': 250,
+	'minecraft:diamond_pickaxe': 250,
+	'minecraft:diamond_axe': 250,
+	'minecraft:diamond_hoe': 250,
+	'minecraft:gold_sword': 32,
+	'minecraft:gold_shovel': 32,
+	'minecraft:gold_pickaxe': 32,
+	'minecraft:gold_axe': 32,
+	'minecraft:gold_hoe': 32,
+	'minecraft:netherite_sword': 2031,
+	'minecraft:netherite_shovel': 2031,
+	'minecraft:netherite_pickaxe': 2031,
+	'minecraft:netherite_axe': 2031,
+	'minecraft:netherite_hoe': 2031,
+}))

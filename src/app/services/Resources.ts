@@ -118,7 +118,64 @@ export async function getLanguage(version: VersionId) {
 	return Languages[version]
 }
 
-export async function getTranslation(version: VersionId, key: string, fallback?: string) {
+export async function getTranslation(version: VersionId, key: string, params?: string[]) {
 	const lang = await getLanguage(version)
-	return lang[key] ?? (fallback ? lang[fallback] : null) ?? null
+	const str = lang[key]
+	if (!str) return null
+	return replaceTranslation(str, params)
+}
+
+export function replaceTranslation(src: string, params?: string[]) {
+	let out = ''
+	let i = 0
+	let p = 0
+	while (i < src.length) {
+		const c0 = src[i++]
+		if (c0 === '%') { // percent character
+			if (i >= src.length) { // INVALID: %<end>
+				out += c0
+				break
+			}
+			let c1 = src[i++]
+			if (c1 === '%') { // escape
+				out += '%'
+			} else if (c1 === 's' || c1 === 'd') { // short form %s
+				out += params?.[p++] ?? ''
+			} else if (c1 >= '0' && c1 <= '9') {
+				if (i >= src.length) { // INVALID: %2<end>
+					out += c0 + c1
+					break
+				}
+				let num = ''
+				do {
+					num += c1
+					c1 = src[i++]
+				} while (i < src.length && c1 >= '0' && c1 <= '9')
+				if (c1 === '$') {
+					if (i >= src.length) { // INVALID: %2$<end>
+						out += c0 + num + c1
+						break
+					}
+					const c2 = src[i++]
+					if (c2 === 's' || c2 === 'd') { // long form %2$s
+						const pos = parseInt(num) - 1
+						if (!params || isNaN(pos) || pos < 0 || pos >= params.length) {
+							out += ''
+						} else {
+							out += params[pos]
+						}
+					} else { // INVALID: %2$...
+						out += c0 + num + c1
+					}
+				} else { // INVALID: %2...
+					out += c0 + num
+				}
+			} else { // INVALID: %...
+				out += c0
+			}
+		} else { // normal character
+			out += c0
+		}
+	}
+	return out
 }

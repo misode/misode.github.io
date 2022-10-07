@@ -10,10 +10,10 @@ import { Octicon } from './Octicon.jsx'
 
 interface Props {
 	item: Item,
-	slotOverlay?: boolean,
+	slotDecoration?: boolean,
 	advancedTooltip?: boolean,
 }
-export function ItemDisplay({ item, slotOverlay, advancedTooltip }: Props) {
+export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 	const el = useRef<HTMLDivElement>(null)
 	const [tooltipOffset, setTooltipOffset] = useState<[number, number]>([0, 0])
 	const [tooltipSwap, setTooltipSwap] = useState(false)
@@ -38,7 +38,7 @@ export function ItemDisplay({ item, slotOverlay, advancedTooltip }: Props) {
 				<text x="90" y="88" font-size="50" textAnchor="end" fontFamily="MinecraftSeven" fill="#ffffff">{item.count}</text>
 			</svg>
 		</>}
-		{slotOverlay && <div class="item-slot-overlay"></div>}
+		{slotDecoration && <div class="item-slot-overlay"></div>}
 		<ItemTooltip {...item} advanced={advancedTooltip} offset={tooltipOffset} swap={tooltipSwap} />
 	</div>
 }

@@ -14,6 +14,7 @@ interface StyleData {
 interface PartData extends StyleData {
 	text?: string,
 	translate?: string,
+	with?: string[],
 }
 
 interface Props {
@@ -96,8 +97,8 @@ function TextPart({ part, shadow }: { part: PartData, shadow?: boolean }) {
 	if (part.translate) {
 		const { version } = useVersion()
 		const { value: translated } = useAsync(() => {
-			return getTranslation(version, part.translate!)
-		}, [version, part.translate])
+			return getTranslation(version, part.translate!, part.with)
+		}, [version, part.translate, ...part.with ?? []])
 		return <span style={createStyle(part, shadow)}>{translated ?? part.translate}</span>
 	}
 	return <span style={createStyle(part, shadow)}>{part.text}</span>
