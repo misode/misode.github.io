@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import type { Item } from '../previews/LootTable.js'
+import { MaxDamageItems } from '../previews/LootTable.js'
 import { getAssetUrl } from '../services/DataFetcher.js'
 import { renderItem } from '../services/Resources.js'
 import { getCollections } from '../services/Schemas.js'
@@ -30,6 +31,9 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 		el.current?.addEventListener('mousemove', onMove)
 		return () => el.current?.removeEventListener('mousemove', onMove)
 	}, [])
+
+	const maxDamage = MaxDamageItems.get(item.id)
+
 	return <div class="item-display" ref={el}>
 		<ItemItself item={item} />
 		{item.count !== 1 && <>
@@ -38,7 +42,13 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 				<text x="90" y="88" font-size="50" textAnchor="end" fontFamily="MinecraftSeven" fill="#ffffff">{item.count}</text>
 			</svg>
 		</>}
-		{slotDecoration && <div class="item-slot-overlay"></div>}
+		{slotDecoration && <>
+			{(maxDamage && (item.tag?.Damage ?? 0) > 0) && <svg class="item-durability" width="100%" height="100%" viewBox="0 0 18 18">
+				<rect x="3" y="14" width="13" height="2" fill="#000" />
+				<rect x="3" y="14" width={`${(maxDamage - item.tag.Damage) / maxDamage * 13}`} height="1" fill={`hsl(${(maxDamage - item.tag.Damage) / maxDamage * 120}deg, 100%, 50%)`} />
+			</svg>}
+			<div class="item-slot-overlay"></div>
+		</>}
 		<ItemTooltip {...item} advanced={advancedTooltip} offset={tooltipOffset} swap={tooltipSwap} />
 	</div>
 }

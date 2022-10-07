@@ -1200,13 +1200,14 @@ hr {
 	image-rendering: auto;
 }
 
-.item-display > svg:not(.item-count) {
+.item-display > svg:not(.item-count):not(.item-durability) {
   width: 81.25%;
   height: 62.5%;
   fill: var(--node-text-dimmed);
 }
 
-.item-display > svg.item-count {
+.item-display > svg.item-count,
+.item-display > svg.item-durability {
 	position: absolute;
 	right: 0;
 	bottom: 0;
