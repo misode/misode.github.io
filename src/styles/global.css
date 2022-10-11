@@ -1193,7 +1193,10 @@ hr {
 
 .item-display > img {
   width: 88.888%;
-  image-rendering: pixelated;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
 }
 
 .item-display > img.model {
@@ -1236,9 +1239,15 @@ hr {
 }
 
 .item-tooltip {
-	background: #0d020fee;
-	border: solid 2px #220044ee;
 	padding: 3px 1px 1px 5px;
+	border: solid 4px #220044;
+	border-image-source: url(/images/tooltip.png);
+	border-image-slice: 2 fill;
+	border-image-outset: 2px;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
 }
 
 .item-display > .item-tooltip {
