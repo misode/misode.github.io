@@ -1,7 +1,7 @@
 import type { Random } from 'deepslate'
 import { LegacyRandom } from 'deepslate'
 import type { VersionId } from '../services/Schemas.js'
-import { clamp, isObject } from '../Utils.js'
+import { clamp, deepClone, isObject } from '../Utils.js'
 
 export interface Item {
 	id: string,
@@ -9,11 +9,24 @@ export interface Item {
 	tag?: any,
 }
 
+export interface SlottedItem {
+	slot: number,
+	item: Item,
+}
+
 type ItemConsumer = (item: Item) => void
+
+const StackMixers = {
+	container: fillContainer,
+	default: assignSlots,
+}
+
+type StackMixer = keyof typeof StackMixers
 
 interface LootOptions {
 	version: VersionId,
 	seed: bigint,
+	stackMixer: StackMixer,
 }
 
 interface LootContext extends LootOptions {
@@ -30,7 +43,68 @@ export function generateLootTable(lootTable: any, options: LootOptions) {
 	const ctx = createLootContext(options)
 	const result: Item[] = []
 	generateTable(lootTable, item => result.push(item), ctx)
-	return result
+	const mixer = StackMixers[options.stackMixer]
+	return mixer(result, ctx)
+}
+
+const SLOT_COUNT = 27
+
+function fillContainer(items: Item[], ctx: LootContext): SlottedItem[] {
+	const slots = shuffle([...Array(SLOT_COUNT)].map((_, i) => i), ctx)
+	
+	const queue = items.filter(i => i.id !== 'minecraft:air' && i.count > 1)
+	items = items.filter(i => i.id !== 'minecraft:air' && i.count === 1)
+
+	while (SLOT_COUNT - items.length - queue.length > 0 && queue.length > 0) { 
+		const [itemA] = queue.splice(ctx.random.nextInt(queue.length), 1)
+		const splitCount = ctx.random.nextInt(Math.floor(itemA.count / 2)) + 1
+		const itemB = splitItem(itemA, splitCount)
+
+		for (const item of [itemA, itemB]) {
+			if (item.count > 1 && ctx.random.nextFloat() < 0.5) {
+				queue.push(item)
+			} else {
+				items.push(item)
+			}
+		}
+	}
+
+	items.push(...queue)
+	shuffle(items, ctx)
+
+	const results: SlottedItem[] = []
+	for (const item of items) {
+		const slot = slots.pop()
+		if (slot === undefined) {
+			break
+		}
+		if (item.id !== 'minecraft:air' && item.count > 0) {
+			results.push({ slot, item })
+		}
+	}
+	return results
+}
+
+function assignSlots(items: Item[]): SlottedItem[] {
+	return items.map((item, i) => ({ slot: i, item }))
+}
+
+function splitItem(item: Item, count: number): Item {
+	const splitCount = Math.min(count, item.count)
+	const other = deepClone(item)
+	other.count = splitCount
+	item.count = item.count - splitCount
+	return other
+}
+
+function shuffle<T>(array: T[], ctx: LootContext) {
+	let i = array.length
+	while (i > 0) {
+		const j = ctx.random.nextInt(i)
+		i -= 1;
+		[array[i], array[j]] = [array[j], array[i]]
+	}
+	return array
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {

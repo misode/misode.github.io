@@ -1,22 +1,18 @@
 import { DataModel } from '@mcschema/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
-import type { Item } from '../../previews/LootTable.js'
+import type { SlottedItem } from '../../previews/LootTable.js'
 import { generateLootTable } from '../../previews/LootTable.js'
 import { clamp, randomSeed } from '../../Utils.js'
-import { Btn } from '../index.js'
+import { Btn, BtnMenu } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
-
-interface SlottedItem {
-	slot: number,
-	item: Item,
-}
 
 export const LootTablePreview = ({ data }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
+	const [mixItems, setMixItems] = useState(true)
 	const overlay = useRef<HTMLDivElement>(null)
 
 	const [items, setItems] = useState<SlottedItem[]>([])
@@ -24,10 +20,10 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const table = DataModel.unwrapLists(data)
 	const state = JSON.stringify(table)
 	useEffect(() => {
-		const items = generateLootTable(table, { version, seed })
+		const items = generateLootTable(table, { version, seed, stackMixer: mixItems ? 'container' : 'default' })
 		console.log('Generated items!', table, items)
-		setItems(items.map((item, i) => ({ slot: i, item })))
-	}, [version, seed, state])
+		setItems(items)
+	}, [version, seed, mixItems, state])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">
@@ -39,6 +35,9 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 			)}
 		</div>
 		<div class="controls preview-controls">
+			<BtnMenu icon="gear" tooltip={locale('settings')} >
+				<Btn icon={mixItems ? 'square_fill' : 'square'} label="Fill container randomly" onClick={()  => setMixItems(!mixItems)} />
+			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')} onClick={() => setSeed(randomSeed())} />
 		</div>
 	</>
