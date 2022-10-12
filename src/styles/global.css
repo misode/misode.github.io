@@ -1210,7 +1210,9 @@ hr {
 }
 
 .item-display > svg.item-count,
-.item-display > svg.item-durability {
+.item-display > svg.item-durability,
+.item-display > .item-glint,
+.item-display > .item-slot-overlay {
 	position: absolute;
 	right: 0;
 	bottom: 0;
@@ -1222,16 +1224,57 @@ hr {
 	-ms-user-select: none;
 }
 
-.item-slot-overlay {
-	position: absolute;
+.item-display > .item-glint,
+.item-display > .item-slot-overlay {
 	left: 5.555%;
 	top: 5.555%;
 	width: 88.888%;
 	height: 88.888%;
-	user-select: none;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
+}
+
+.item-display > .item-glint,
+.item-display > .item-glint::after {
+	background: url(/images/glint.png) repeat;
+	filter: brightness(1.4) blur(1px) opacity(0.8);
+	animation: glint 20s linear 0s infinite;
+	background-size: 400%;
+	background-blend-mode: overlay;
+	-webkit-mask-image: var(--mask-image);
+	mask-image: var(--mask-image);
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.item-display > .item-glint::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	animation: glint2 30s linear 0s infinite;
+}
+
+@keyframes glint {
+	from {
+		background-position: 0 0;
+	}
+	to {
+		background-position: -400% 400%;
+	}
+}
+
+@keyframes glint2 {
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: 500% 0;
+	}
 }
 
 .item-display:hover > .item-slot-overlay {

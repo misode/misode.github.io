@@ -57,6 +57,8 @@ function ItemItself({ item }: Props) {
 	const { version } = useVersion()
 	const [errored, setErrored] = useState(false)
 
+	const isEnchanted = (item.tag?.Enchantments?.length ?? 0) > 0 || (item.tag?.StoredEnchantments?.length ?? 0) > 0
+
 	if (errored || (item.id.includes(':') && !item.id.startsWith('minecraft:'))) {
 		return Octicon.package
 	}
@@ -69,23 +71,30 @@ function ItemItself({ item }: Props) {
 
 	const texturePath = `item/${item.id.replace(/^minecraft:/, '')}`
 	if (collections.get('texture').includes('minecraft:' + texturePath)) {
-		return <img src={getAssetUrl(version, 'textures', texturePath)} alt="" onError={() => setErrored(true)} draggable={false} />
+		const src = getAssetUrl(version, 'textures', texturePath)
+		return <>
+			<img src={src} alt="" onError={() => setErrored(true)} draggable={false} />
+			{isEnchanted && <div class="item-glint" style={{'--mask-image': `url("${src}")`}}></div>}
+		</>
 	}
 
 	const modelPath = `item/${item.id.replace(/^minecraft:/, '')}`
 	if (collections.get('model').includes('minecraft:' + modelPath)) {
-		return <RenderedItem item={item} />
+		return <RenderedItem item={item} isEnchanted={isEnchanted} />
 	}
 
 	return Octicon.package
 }
 
-function RenderedItem({ item }: Props) {
+function RenderedItem({ item, isEnchanted }: Props & { isEnchanted: boolean }) {
 	const { version } = useVersion()
 	const { value: src } = useAsync(() => renderItem(version, item.id), [version, item])
 
 	if (src) {
-		return <img src={src} alt={item.id} class="model" draggable={false} />
+		return <>
+			<img src={src} alt={item.id} class="model" draggable={false} />
+			{isEnchanted && <div class="item-glint" style={{'--mask-image': `url("${src}")`}}></div>}
+		</>
 	}
 
 	return <div class="item-display">
