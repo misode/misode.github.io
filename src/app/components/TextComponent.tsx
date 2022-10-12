@@ -47,7 +47,7 @@ function visitComponent(component: unknown, consumer: (c: PartData) => void) {
 		const base = component[0]
 		visitComponent(base, consumer)
 		for (const c of component.slice(1)) {
-			visitComponent(c, d => consumer({ ...base, ...d }))
+			visitComponent(c, d => consumer(inherit(d, base)))
 		}
 	} else if (typeof component === 'object' && component !== null) {
 		if ('text' in component) {
@@ -65,9 +65,20 @@ function visitComponent(component: unknown, consumer: (c: PartData) => void) {
 		}
 		if ('extra' in component) {
 			for (const e of (component as any).extra) {
-				visitComponent(e, c => consumer({ ...component, ...c }))
+				visitComponent(e, c => consumer(inherit(c, component)))
 			}
 		}
+	}
+}
+
+function inherit(component: object, base: PartData) {
+	return {
+		color: base.color,
+		bold: base.bold,
+		italic: base.italic,
+		underlined: base.underlined,
+		strikethrough: base.strikethrough,
+		...component,
 	}
 }
 

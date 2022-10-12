@@ -1,6 +1,6 @@
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { MaxDamageItems } from '../previews/LootTable.js'
+import { getEnchantmentData, MaxDamageItems } from '../previews/LootTable.js'
 import { getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
 
@@ -28,6 +28,14 @@ export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props)
 		top: `${offset[1]}px`,
 	}}>
 		<TextComponent component={name} base={{ color: 'white' }} />
+		{tag?.Enchantments?.map(({ id, lvl }: { id: string, lvl: number }) => {
+			const ench = getEnchantmentData(id)
+			const component: any[] = [{ translate: `enchantment.${id.replace(':', '.')}`, color: ench?.curse ? 'red' : 'gray' }]
+			if (lvl !== 1 || ench?.maxLevel !== 1) {
+				component.push(' ', { translate: `enchantment.level.${lvl}`})
+			}
+			return <TextComponent component={component} />
+		})}
 		{tag?.display && <>
 			{tag?.display?.color && (advanced
 				? <TextComponent component={{ translate: 'item.color', with: [`#${tag.display.color.toString(16).padStart(6, '0')}`], color: 'gray' }} />

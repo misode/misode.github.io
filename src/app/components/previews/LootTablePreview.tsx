@@ -13,6 +13,7 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
 	const [mixItems, setMixItems] = useState(true)
+	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const overlay = useRef<HTMLDivElement>(null)
 
 	const [items, setItems] = useState<SlottedItem[]>([])
@@ -30,13 +31,14 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 			<img src="/images/container.png" alt="Container background" class="pixelated" draggable={false} />
 			{items.map(({ slot, item }) =>
 				<div key={slot} style={slotStyle(slot)}>
-					<ItemDisplay item={item} slotDecoration={true} advancedTooltip={true} />
+					<ItemDisplay item={item} slotDecoration={true} advancedTooltip={advancedTooltips} />
 				</div>
 			)}
 		</div>
 		<div class="controls preview-controls">
 			<BtnMenu icon="gear" tooltip={locale('settings')} >
 				<Btn icon={mixItems ? 'square_fill' : 'square'} label="Fill container randomly" onClick={()  => setMixItems(!mixItems)} />
+				<Btn icon={advancedTooltips ? 'square_fill' : 'square'} label="Advanced tooltips" onClick={()  => setAdvancedTooltips(!advancedTooltips)} />
 			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')} onClick={() => setSeed(randomSeed())} />
 		</div>

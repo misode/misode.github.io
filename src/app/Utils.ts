@@ -1,6 +1,7 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
+import type { Random } from 'deepslate/core'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
@@ -336,4 +337,22 @@ export async function computeIfAbsentAsync<K, V>(map: Map<K, V>, key: K, getter:
 	const value = await getter(key)
 	map.set(key, value)
 	return value
+}
+
+export function getWeightedRandom<T>(random: Random, entries: T[], getWeight: (entry: T) => number) {
+	let totalWeight = 0
+	for (const entry of entries) {
+		totalWeight += getWeight(entry)
+	}
+	if (totalWeight <= 0) {
+		return undefined
+	}
+	let n = random.nextInt(totalWeight)
+	for (const entry of entries) {
+		n -= getWeight(entry)
+		if (n < 0) {
+			return entry
+		}
+	}
+	return undefined
 }
