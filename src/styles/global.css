@@ -1285,7 +1285,7 @@ hr {
 }
 
 .item-tooltip {
-	padding: 3px 1px 1px 5px;
+	padding: 3px 1px 1px 3px;
 	border: solid 4px #220044;
 	border-image-source: url(/images/tooltip.png);
 	border-image-slice: 2 fill;
@@ -1306,6 +1306,11 @@ hr {
 
 .item-display:hover > .item-tooltip {
 	display: block;
+}
+
+.item-display > .item-tooltip > :first-child {
+	margin-bottom: 4px;
+	margin-top: -2px;
 }
 
 .text-component {
