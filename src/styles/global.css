@@ -1308,9 +1308,12 @@ hr {
 	display: block;
 }
 
-.item-display > .item-tooltip > :first-child {
-	margin-bottom: 4px;
+.item-display > .item-tooltip > :nth-child(1) {
 	margin-top: -2px;
+}
+
+.item-display > .item-tooltip > :nth-child(2) {
+	margin-top: 4px;
 }
 
 .text-component {
@@ -1318,6 +1321,7 @@ hr {
 	font-size: 20px;
 	position: relative;
   white-space: nowrap;
+	line-height: 1.1	;
 }
 
 .text-component > .text-foreground {
