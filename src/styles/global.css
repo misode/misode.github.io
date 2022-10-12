@@ -688,7 +688,8 @@ main.has-project {
 	padding-right: 7px;
 }
 
-.btn-input input {
+.btn-input input,
+.btn-input select {
 	background: var(--background-1);
 	color: var(--text-1);
 	font-size: 17px;
@@ -698,7 +699,8 @@ main.has-project {
 	width: 100px;
 }
 
-.btn-input.larger-input input {
+.btn-input.larger-input input,
+.btn-input.larger-input select {
 	width: 200px;
 }
 
@@ -707,7 +709,8 @@ main.has-project {
 	padding-left: 11px;
 }
 
-.btn-input.large-input input {
+.btn-input.large-input input,
+.btn-input.large-input select {
 	width: 100%;
 	height: 100%;
 }
@@ -1572,12 +1575,14 @@ hr {
 
 .sound-config input[type=range] {
   -webkit-appearance: none;
+	appearance: none;
   width: 100%;
   background: transparent;
 }
 
 .sound-config input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
+	appearance: none;
 }
 
 .sound-config input[type=range]:focus {
@@ -1586,6 +1591,7 @@ hr {
 
 .sound-config input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
+	appearance: none;
   border: none;
   height: 16px;
   width: 16px;

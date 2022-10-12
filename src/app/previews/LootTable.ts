@@ -26,6 +26,9 @@ type StackMixer = keyof typeof StackMixers
 interface LootOptions {
 	version: VersionId,
 	seed: bigint,
+	luck: number,
+	daytime: number,
+	weather: string,
 	stackMixer: StackMixer,
 }
 
@@ -118,9 +121,9 @@ function createLootContext(options: LootOptions): LootContext {
 	return {
 		...options,
 		random: new LegacyRandom(options.seed),
-		luck: 0,
-		weather: 'clear',
-		dayTime: 0,
+		luck: options.luck,
+		weather: options.weather,
+		dayTime: options.daytime,
 		getItemTag: () => [],
 		getLootTable: () => ({ pools: [] }),
 		getPredicate: () => [],
@@ -397,7 +400,7 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 			time = time % period
 		}
 		const { min, max } = prepareIntRange(value, ctx)
-		return min <= value && value <= max
+		return min <= time && time <= max
 	},
 	value_check: () => () => {
 		return false // TODO

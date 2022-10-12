@@ -4,7 +4,7 @@ import { useLocale, useVersion } from '../../contexts/index.js'
 import type { SlottedItem } from '../../previews/LootTable.js'
 import { generateLootTable } from '../../previews/LootTable.js'
 import { clamp, randomSeed } from '../../Utils.js'
-import { Btn, BtnMenu } from '../index.js'
+import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
 
@@ -12,6 +12,9 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
+	const [luck, setLuck] = useState(0)
+	const [daytime, setDaytime] = useState(0)
+	const [weather, setWeather] = useState('clear')
 	const [mixItems, setMixItems] = useState(true)
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const overlay = useRef<HTMLDivElement>(null)
@@ -21,10 +24,10 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const table = DataModel.unwrapLists(data)
 	const state = JSON.stringify(table)
 	useEffect(() => {
-		const items = generateLootTable(table, { version, seed, stackMixer: mixItems ? 'container' : 'default' })
-		console.log('Generated items!', table, items)
+		const items = generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
+		console.log('Generated loot', items)
 		setItems(items)
-	}, [version, seed, mixItems, state])
+	}, [version, seed, luck, daytime, weather, mixItems, state])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">
@@ -37,8 +40,23 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 		</div>
 		<div class="controls preview-controls">
 			<BtnMenu icon="gear" tooltip={locale('settings')} >
-				<Btn icon={mixItems ? 'square_fill' : 'square'} label="Fill container randomly" onClick={()  => setMixItems(!mixItems)} />
-				<Btn icon={advancedTooltips ? 'square_fill' : 'square'} label="Advanced tooltips" onClick={()  => setAdvancedTooltips(!advancedTooltips)} />
+				<div class="btn btn-input" onClick={e => e.stopPropagation()}>
+					<span>{locale('preview.luck')}</span>
+					<NumberInput value={luck} onChange={setLuck} />
+				</div>
+				<div class="btn btn-input" onClick={e => e.stopPropagation()}>
+					<span>{locale('preview.daytime')}</span>
+					<NumberInput value={daytime} onChange={setDaytime} />
+				</div>
+				<div class="btn btn-input" onClick={e => e.stopPropagation()}>
+					<span>{locale('preview.weather')}</span>
+					<select value={weather} onChange={e => setWeather((e.target as HTMLSelectElement).value)} >
+						{['clear', 'rain', 'thunder'].map(v =>
+							<option value={v}>{locale(`preview.weather.${v}`)}</option>)}
+					</select>
+				</div>
+				<Btn icon={mixItems ? 'square_fill' : 'square'} label="Fill container randomly" onClick={e => {setMixItems(!mixItems); e.stopPropagation()}} />
+				<Btn icon={advancedTooltips ? 'square_fill' : 'square'} label="Advanced tooltips" onClick={e => {setAdvancedTooltips(!advancedTooltips); e.stopPropagation()}} />
 			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')} onClick={() => setSeed(randomSeed())} />
 		</div>
