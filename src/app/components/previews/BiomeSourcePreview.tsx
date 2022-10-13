@@ -63,8 +63,6 @@ export const BiomeSourcePreview = ({ model, data, shown, version }: PreviewProps
 		}
 	}, [version, state, scale, seed, yOffset, shown, biomeColors, project])
 
-	console.log(yOffset)
-
 	const changeScale = (newScale: number) => {
 		newScale = Math.max(1, Math.round(newScale))
 		offset.current[0] = offset.current[0] * scale / newScale

@@ -108,6 +108,11 @@
   background-color: var(--node-background-label);
 }
 
+.node-header > label > .item-display {
+  width: 32px;
+  height: 32px;
+}
+
 .node-header > input {
   font-size: 18px;
   padding-left: 9px;

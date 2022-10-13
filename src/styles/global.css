@@ -132,6 +132,7 @@ body {
 	min-height: 100vh;
 	overflow-x: hidden;
 	background-color: var(--background-1);
+	--full-width: calc(100vw - (100vw - 100%));
 }
 
 header {
@@ -454,6 +455,10 @@ main.has-preview {
 	background-color: var(--nav-faded);
 	display: block;
 	cursor: crosshair;
+}
+
+.popup-preview canvas,
+.popup-preview .pixelated {
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-crisp-edges;
 	image-rendering: crisp-edges;
@@ -522,6 +527,20 @@ main.has-preview {
 main.has-project {
 	padding-left: 200px;
 	padding-left: max(200px, 20vw);
+}
+
+.preview-overlay {
+	height: min-content;
+	position: relative;
+}
+
+.preview-overlay > img {
+	display: block;
+	width: 100%;
+}
+
+.preview-overlay > div {
+	position: absolute;
 }
 
 .btn {
@@ -669,7 +688,8 @@ main.has-project {
 	padding-right: 7px;
 }
 
-.btn-input input {
+.btn-input input,
+.btn-input select {
 	background: var(--background-1);
 	color: var(--text-1);
 	font-size: 17px;
@@ -679,7 +699,8 @@ main.has-project {
 	width: 100px;
 }
 
-.btn-input.larger-input input {
+.btn-input.larger-input input,
+.btn-input.larger-input select {
 	width: 200px;
 }
 
@@ -688,7 +709,8 @@ main.has-project {
 	padding-left: 11px;
 }
 
-.btn-input.large-input input {
+.btn-input.large-input input,
+.btn-input.large-input select {
 	width: 100%;
 	height: 100%;
 }
@@ -1164,29 +1186,149 @@ hr {
 }
 
 .item-display {
-	width: 32px;
-	height: 32px;
+	position: relative;
+	width: 100%;
+	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
 .item-display > img {
-  width: 26px;
-  position: relative;
-  image-rendering: pixelated;
+  width: 88.888%;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
 }
 
-.item-display > svg {
-  width: 26px;
-  height: 20px;
-  position: relative;
+.item-display > img.model {
+	image-rendering: auto;
+}
+
+.item-display > svg:not(.item-count):not(.item-durability) {
+  width: 81.25%;
+  height: 62.5%;
   fill: var(--node-text-dimmed);
 }
 
-.item-display > canvas {
-	width: 32px;
-	height: 32px;
+.item-display > svg.item-count,
+.item-display > svg.item-durability,
+.item-display > .item-glint,
+.item-display > .item-slot-overlay {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+
+.item-display > .item-glint,
+.item-display > .item-slot-overlay {
+	left: 5.555%;
+	top: 5.555%;
+	width: 88.888%;
+	height: 88.888%;
+}
+
+.item-display > .item-glint,
+.item-display > .item-glint::after {
+	background: url(/images/glint.png) repeat;
+	filter: brightness(1.4) blur(1px) opacity(0.8);
+	animation: glint 20s linear 0s infinite;
+	background-size: 400%;
+	background-blend-mode: overlay;
+	-webkit-mask-image: var(--mask-image);
+	mask-image: var(--mask-image);
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.item-display > .item-glint::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	animation: glint2 30s linear 0s infinite;
+}
+
+@keyframes glint {
+	from {
+		background-position: 0 0;
+	}
+	to {
+		background-position: -400% 400%;
+	}
+}
+
+@keyframes glint2 {
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: 500% 0;
+	}
+}
+
+.item-display:hover > .item-slot-overlay {
+	background-color: #fff4;
+}
+
+.item-tooltip {
+	padding: 3px 1px 1px 3px;
+	border: solid 4px #220044;
+	border-image-source: url(/images/tooltip.png);
+	border-image-slice: 2 fill;
+	border-image-outset: 2px;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.item-display > .item-tooltip {
+	display: none;
+	position: absolute;
+	margin: 4px;
+	pointer-events: none;
+	z-index: 5;
+}
+
+.item-display:hover > .item-tooltip {
+	display: block;
+}
+
+.item-display > .item-tooltip > :nth-child(1) {
+	margin-top: -2px;
+}
+
+.item-display > .item-tooltip > :nth-child(2) {
+	margin-top: 4px;
+}
+
+.text-component {
+	font-family: MinecraftSeven, sans-serif;
+	font-size: 20px;
+	position: relative;
+  white-space: nowrap;
+	line-height: 1.1	;
+}
+
+.text-component > .text-foreground {
+	position: absolute;
+	z-index: 1;
+	left: -2px;
+	top: -2px;
 }
 
 .file-view {
@@ -1442,12 +1584,14 @@ hr {
 
 .sound-config input[type=range] {
   -webkit-appearance: none;
+	appearance: none;
   width: 100%;
   background: transparent;
 }
 
 .sound-config input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
+	appearance: none;
 }
 
 .sound-config input[type=range]:focus {
@@ -1456,6 +1600,7 @@ hr {
 
 .sound-config input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
+	appearance: none;
   border: none;
   height: 16px;
   width: 16px;
@@ -2191,7 +2336,7 @@ hr {
 	}
 
 	.popup-source {
-		width: 100vw;
+		width: var(--full-width);
 	}
 
 	.source {
@@ -2199,7 +2344,7 @@ hr {
 	}
 
 	.popup-preview {
-		width: 100vw;
+		width: var(--full-width);
 		height: unset;
 		bottom: 0;
 		background-color: transparent;
@@ -2222,4 +2367,9 @@ hr {
 	.card-overlay {
 		display: none;
 	}
+}
+
+@font-face {
+	font-family: "MinecraftSeven";
+	src: url("/fonts/seven.ttf") format("truetype");
 }
