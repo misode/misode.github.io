@@ -25,6 +25,7 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const state = JSON.stringify(table)
 	useEffect(() => {
 		const items = generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
+		console.log('Generated loot', items)
 		setItems(items)
 	}, [version, seed, luck, daytime, weather, mixItems, state])
 

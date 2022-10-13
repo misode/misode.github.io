@@ -1238,7 +1238,7 @@ hr {
 .item-display > .item-glint,
 .item-display > .item-glint::after {
 	background: url(/images/glint.png) repeat;
-	filter: brightness(1.4) blur(1px) opacity(0.8);
+	filter: brightness(1.6) blur(1px) opacity(0.7);
 	animation: glint 20s linear 0s infinite;
 	background-size: 400%;
 	background-blend-mode: overlay;

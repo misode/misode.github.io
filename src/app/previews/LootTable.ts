@@ -271,21 +271,32 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 					return data.discoverable && (isBook || data.canEnchant(item.id))
 				})
 		}
-		const id = enchantments[ctx.random.nextInt(enchantments.length)]
-		const data = getEnchantmentData(id)
-		const lvl = ctx.random.nextInt(data.maxLevel - data.minLevel + 1) + data.minLevel
-		enchantItem(item, { id, lvl })
+		if (enchantments.length > 0) {
+			const id = enchantments[ctx.random.nextInt(enchantments.length)]
+			const data = getEnchantmentData(id)
+			const lvl = ctx.random.nextInt(data.maxLevel - data.minLevel + 1) + data.minLevel
+			if (isBook) {
+				item.tag = {}
+				item.count = 1
+			}
+			enchantItem(item, { id, lvl })
+			if (isBook) {
+				item.id = 'minecraft:enchanted_book'
+			}
+		}
 	},
 	enchant_with_levels: ({ levels, treasure }) => (item, ctx) => {
 		const enchants = selectEnchantments(ctx.random, item, computeInt(levels, ctx), treasure)
 		const isBook = item.id === 'minecraft:book'
 		if (isBook) {
-			item.id = 'minecraft:enchanted_book'
 			item.count = 1
 			item.tag = {}
 		}
 		for (const enchant of enchants) {
 			enchantItem(item, enchant)
+		}
+		if (isBook) {
+			item.id = 'minecraft:enchanted_book'
 		}
 	},
 	limit_count: ({ limit }) => (item, ctx) => {

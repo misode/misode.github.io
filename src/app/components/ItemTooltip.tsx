@@ -21,6 +21,7 @@ export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props)
 	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(id))
 
 	const maxDamage = MaxDamageItems.get(id)
+	const enchantments = (id === 'minecraft:enchanted_book' ? tag?.StoredEnchantments : tag?.Enchantments) ?? []
 
 	return <div class="item-tooltip" style={offset && {
 		left: (swap ? undefined : `${offset[0]}px`),
@@ -28,7 +29,7 @@ export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props)
 		top: `${offset[1]}px`,
 	}}>
 		<TextComponent component={name} base={{ color: 'white' }} />
-		{tag?.Enchantments?.map(({ id, lvl }: { id: string, lvl: number }) => {
+		{enchantments.map(({ id, lvl }: { id: string, lvl: number }) => {
 			const ench = getEnchantmentData(id)
 			const component: any[] = [{ translate: `enchantment.${id.replace(':', '.')}`, color: ench?.curse ? 'red' : 'gray' }]
 			if (lvl !== 1 || ench?.maxLevel !== 1) {
