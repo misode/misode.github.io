@@ -13,6 +13,7 @@ export namespace Store {
 	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
 	export const ID_PROJECTS = 'misode_projects'
 	export const ID_BACKUPS = 'misode_generator_backups'
+	export const ID_PREVIEW_PANEL_OPEN = 'misode_preview_panel_open'
 	export const ID_PROJECT_PANEL_OPEN = 'misode_project_panel_open'
 	export const ID_OPEN_PROJECT = 'misode_open_project'
 	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
@@ -69,6 +70,12 @@ export namespace Store {
 	export function getBackup(id: string): object | undefined {
 		const backups = JSON.parse(localStorage.getItem(ID_BACKUPS) ?? '{}')
 		return backups[id]
+	}
+
+	export function getPreviewPanelOpen(): boolean | undefined {
+		const open = localStorage.getItem(ID_PREVIEW_PANEL_OPEN)
+		if (open === null) return undefined
+		return JSON.parse(open)
 	}
 
 	export function getProjectPanelOpen(): boolean | undefined {
@@ -129,6 +136,14 @@ export namespace Store {
 			backups[id] = data
 		}
 		localStorage.setItem(ID_BACKUPS, JSON.stringify(backups))
+	}
+
+	export function setPreviewPanelOpen(open: boolean | undefined) {
+		if (open === undefined) {
+			localStorage.removeItem(ID_PREVIEW_PANEL_OPEN)
+		} else {
+			localStorage.setItem(ID_PREVIEW_PANEL_OPEN, JSON.stringify(open))
+		}
 	}
 
 	export function setProjectPanelOpen(open: boolean | undefined) {

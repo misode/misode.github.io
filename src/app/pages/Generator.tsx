@@ -285,7 +285,7 @@ export function Generator({}: Props) {
 
 	const [copyActive, copySuccess] = useActiveTimeout()
 
-	const [previewShown, setPreviewShown] = useState(false)
+	const [previewShown, setPreviewShown] = useState(Store.getPreviewPanelOpen() ?? window.innerWidth > 800)
 	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
 	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 2
@@ -304,7 +304,7 @@ export function Generator({}: Props) {
 		}
 	}
 
-	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? window.innerWidth > 600)
+	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? window.innerWidth > 1000)
 	const toggleProjectShown = useCallback(() => {
 		if (projectShown) {
 			Analytics.hideProject(gen.id, projects.length, project.files.length, 'menu')
