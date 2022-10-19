@@ -33,7 +33,7 @@ export function VersionDetail({ id, version }: Props) {
 			<div class="version-info">
 				{version ? <>
 					<VersionMetaData label={locale('versions.released')} value={releaseDate(version)} />
-					<VersionMetaData label={locale('versions.release_target')} value={version.release_target} link={version.id !== version.release_target ? `/versions/?id=${version.release_target}` : undefined} />
+					{version.release_target !== null && <VersionMetaData label={locale('versions.release_target')} value={version.release_target} link={version.id !== version.release_target ? `/versions/?id=${version.release_target}` : undefined} />}
 					<VersionMetaData label={locale('versions.data_version')} value={version.data_version} />
 					<VersionMetaData label={locale('versions.protocol_version')} value={version.protocol_version} />
 					<VersionMetaData label={locale('versions.data_pack_format')} value={version.data_pack_version} />
