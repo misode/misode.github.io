@@ -183,7 +183,7 @@ export function square(a: number) {
 }
 
 export function clamp(a: number, b: number, c: number) {
-	return Math.max(a, Math.min(b, c))
+	return Math.max(b, Math.min(a, c))
 }
 
 export function clampedLerp(a: number, b: number, c: number): number {

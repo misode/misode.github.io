@@ -46,6 +46,7 @@ export function generateLootTable(lootTable: any, options: LootOptions) {
 	const ctx = createLootContext(options)
 	const result: Item[] = []
 	generateTable(lootTable, item => result.push(item), ctx)
+	console.log('...', result)
 	const mixer = StackMixers[options.stackMixer]
 	return mixer(result, ctx)
 }
@@ -303,8 +304,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		const { min, max } = prepareIntRange(limit, ctx)
 		item.count = clamp(item.count, min, max )
 	},
-	set_count: ({ count }) => (item, ctx) => {
-		item.count = computeInt(count, ctx)
+	set_count: ({ count, add }) => (item, ctx) => {
+		const oldCount = add ? (item.count) : 0
+		item.count = clamp(oldCount + computeInt(count, ctx), 0, 64)
 	},
 	set_damage: ({ damage, add }) => (item, ctx) => {
 		const maxDamage = MaxDamageItems.get(item.id)

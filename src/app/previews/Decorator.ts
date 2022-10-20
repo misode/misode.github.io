@@ -69,9 +69,9 @@ export function decorator(state: any, img: ImageData, options: DecoratorOptions)
 		if (pos[0] < 0 || pos[1] < 0 || pos[2] < 0 || pos[0] >= options.size[0] || pos[1] >= options.size[1] || pos[2] >= options.size[2]) continue
 		const i = (pos[2] * (img.width * 4)) + (pos[0] * 4)
 		const color = feature < featureColors.length ? featureColors[feature] : stringToColor(ctx.features[feature])
-		data[i] = clamp(50, 205, color[0])
-		data[i + 1] = clamp(50, 205, color[1])
-		data[i + 2] = clamp(50, 205, color[2])
+		data[i] = clamp(color[0], 50, 205)
+		data[i + 1] = clamp(color[1], 50, 205)
+		data[i + 2] = clamp(color[2], 50, 205)
 		data[i + 3] = 255
 	}
 
