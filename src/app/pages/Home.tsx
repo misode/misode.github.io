@@ -35,6 +35,7 @@ export function Home({}: Props) {
 					<Tools />
 				</div>}
 			</div>
+			<Sponsors />
 			<Giscus />
 			<Footer />
 		</div>
@@ -124,4 +125,21 @@ function Changelog() {
 	return <ToolGroup title={locale('changelog')} link="/changelog/" titleIcon="git_commit">
 		{latestChanges?.map(change => <ChangelogEntry minimal={!hugeScreen} short={true} change={change} />)}
 	</ToolGroup>
+}
+
+function Sponsors() {
+	const { value } = useAsync(() => {
+		return fetch('https://ghs.vercel.app/sponsors/misode').then(r => r.json())
+	}, [])
+
+	return <div class="sponsors">
+		<h3>Sponsored by</h3>
+		<div class="sponsors-list">
+			{value?.sponsors?.map((s: any) =>
+				<a class="tooltipped tip-se" href={s.profile} target="_blank" aria-label={`@${s.handle}`}>
+					<img width={48} height={48} src={s.avatar} alt={`@${s.handle}`} />
+				</a>
+			)}
+		</div>
+	</div>
 }
