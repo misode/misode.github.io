@@ -168,7 +168,7 @@ export async function fetchResources(versionId: VersionId) {
 	try {
 		const [models, uvMapping, atlas] = await Promise.all([
 			fetchAllPresets(versionId, 'model'),
-			cachedFetch(`${mcmeta(version, 'atlas')}/all/data.min.json`),
+			fetch(`${mcmeta(version, 'atlas')}/all/data.min.json`).then(r => r.json()),
 			loadImage(`${mcmeta(version, 'atlas')}/all/atlas.png`),
 		])
 		return { models, uvMapping, atlas }
