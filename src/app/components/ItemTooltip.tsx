@@ -53,6 +53,10 @@ export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props)
 }
 
 function fakeTranslation(str: string) {
-	const raw = str.replace(/minecraft:/, '').replaceAll('_', ' ')
-	return raw[0].toUpperCase() + raw.slice(1)
+	const colon = str.indexOf(':')
+	return str.slice(colon + 1)
+		.replace(/[_\/]/g, ' ')
+		.split(' ')
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ')
 }
