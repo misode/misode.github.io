@@ -46,7 +46,6 @@ export function generateLootTable(lootTable: any, options: LootOptions) {
 	const ctx = createLootContext(options)
 	const result: Item[] = []
 	generateTable(lootTable, item => result.push(item), ctx)
-	console.log('...', result)
 	const mixer = StackMixers[options.stackMixer]
 	return mixer(result, ctx)
 }
@@ -219,12 +218,15 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	const entryConsumer = decorateFunctions(entry.functions ?? [], consumer, ctx)
 
 	const type = entry.type?.replace(/^minecraft:/, '')
+	if (typeof entry.name !== 'string') {
+		return
+	}
 	switch (type) {
 		case 'item':
 			entryConsumer({ id: entry.name, count: 1 })
 			break
 		case 'tag':
-			ctx.getItemTag(entry.name ?? '').forEach(tagEntry => {
+			ctx.getItemTag(entry.name).forEach(tagEntry => {
 				entryConsumer({ id: tagEntry, count: 1 })
 			})
 			break
