@@ -205,6 +205,8 @@
   "versions.resource_pack_format": "Resource pack format",
   "versions.technical_changes": "Technical changes",
   "versions.discussion": "Discussion",
+  "versions.fixes": "Fixed bugs",
+  "versions.fixes.no_results": "No fixes",
   "versions.minecraft_versions": "Minecraft Versions",
   "versions.latest_snapshot": "Latest snapshot",
   "versions.latest_release": "Latest release",

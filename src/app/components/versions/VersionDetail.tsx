@@ -1,14 +1,15 @@
-import { useMemo, useState } from 'preact/hooks'
+import { useEffect, useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { useSearchParam } from '../../hooks/useSearchParam.js'
 import type { VersionMeta } from '../../services/index.js'
 import { fetchChangelogs, getArticleLink } from '../../services/index.js'
 import { Giscus } from '../Giscus.js'
 import { Octicon } from '../Octicon.js'
 import { ChangelogList } from './ChangelogList.js'
-import { VersionMetaData } from './index.js'
+import { IssueList, VersionMetaData } from './index.js'
 
-type Tab = 'changelog' | 'discussion' 
+const Tabs = ['changelog', 'discussion', 'fixes']
 
 interface Props {
 	id: string,
@@ -17,7 +18,12 @@ interface Props {
 export function VersionDetail({ id, version }: Props) {
 	const { locale } = useLocale()
 
-	const [tab, setTab] = useState<Tab>('changelog')
+	const [tab, setTab] = useSearchParam('tab')
+	useEffect(() => {
+		if (tab === undefined || !Tabs.includes(tab)) {
+			setTab(Tabs[0])
+		}
+	}, [tab])
 
 	const { value: changes } = useAsync(fetchChangelogs, [])
 
@@ -47,6 +53,7 @@ export function VersionDetail({ id, version }: Props) {
 			<div class="version-tabs">
 				<span class={tab === 'changelog' ? 'selected' : ''} onClick={() => setTab('changelog')}>{locale('versions.technical_changes')}</span>
 				<span class={tab === 'discussion' ? 'selected' : ''} onClick={() => setTab('discussion')}>{locale('versions.discussion')}</span>
+				<span class={tab === 'fixes' ? 'selected' : ''} onClick={() => setTab('fixes')}>{locale('versions.fixes')}</span>
 				{articleLink && <a href={articleLink} target="_blank">
 					{locale('versions.article')}
 					{Octicon.link_external}
@@ -55,6 +62,7 @@ export function VersionDetail({ id, version }: Props) {
 			<div class="version-tab">
 				{tab === 'changelog' && <ChangelogList changes={filteredChangelogs} defaultOrder="asc" />}
 				{tab === 'discussion' && <Giscus term={`version/${id}/`} />}
+				{tab === 'fixes' && <IssueList version={id} />}
 			</div>
 		</div>
 	</>
