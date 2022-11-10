@@ -20,6 +20,7 @@ export type NoiseSettingsOptions = {
 	minY?: number,
 	height?: number,
 	colormap?: ColormapType,
+	hardZero?: boolean,
 }
 
 const colors: Record<string, [number, number, number]> = {
@@ -93,20 +94,21 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 	const arr = Array(options.width * noise.height)
 	let limit = 0.01
 	for (let x = 0; x < options.width; x += 1) {
-		for (let y = 0; y < noise.height - noise.minY; y += 1) {
+		for (let y = 0; y < noise.height; y += 1) {
 			const i = x + y * options.width
-			const density = fn.compute(DensityFunction.context(x - options.offset, noise.height - y - 1, 0))
+			const density = fn.compute(DensityFunction.context(x - options.offset, noise.height - y - 1 + noise.minY, 0))
 			limit = Math.max(limit, Math.min(1, Math.abs(density)))
 			arr[i] = density
 		}
 	}
 
 	const colormap = getColormap(options.colormap ?? 'viridis')
+	const colorPicker = options.hardZero ? (t: number) => colormap(t <= 0.5 ? t - 0.08 : t + 0.08) : colormap
 	const min = -limit
 	const max = limit
 	const data = img.data
 	for (let i = 0; i < options.width * noise.height; i += 1) {
-		const color = colormap(clampedMap(arr[i], min, max, 1, 0))
+		const color = colorPicker(clampedMap(arr[i], min, max, 1, 0))
 		data[4 * i] = color[0] * 256
 		data[4 * i + 1] = color[1] * 256
 		data[4 * i + 2] = color[2] * 256
