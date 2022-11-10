@@ -139,6 +139,8 @@
   "preview.weather.rain": "Rain",
   "preview.weather.thunder": "Thunder",
   "preview.width": "Width",
+  "preview.height": "Height",
+  "preview.min_y": "Min Y",
   "project.new": "New project",
   "project.cancel": "Cancel",
   "project.create": "Create a new project",

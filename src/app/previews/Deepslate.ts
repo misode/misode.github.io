@@ -299,12 +299,12 @@ export class Deepslate {
 		}
 	}
 
-	public loadDensityFunction(state: unknown, seed: bigint) {
+	public loadDensityFunction(state: unknown, minY: number, height: number, seed: bigint) {
 		if (this.isVersion('1.19')) {
 			const settings = this.d.NoiseGeneratorSettings.create({
 				noise: {
-					minY: -64,
-					height: 384,
+					minY: minY,
+					height: height,
 					xzSize: 1,
 					ySize: 2,
 				},
@@ -318,8 +318,8 @@ export class Deepslate {
 		} else {
 			const random = this.d.XoroshiroRandom.create(seed).forkPositional()
 			const settings = this.d.NoiseSettings.fromJson({
-				min_y: -64,
-				height: 384,
+				min_y: minY,
+				height: height,
 				size_horizontal: 1,
 				size_vertical: 2,
 				sampling: { xz_scale: 1, y_scale: 1, xz_factor: 80, y_factor: 160 },
