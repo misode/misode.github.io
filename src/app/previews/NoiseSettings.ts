@@ -15,6 +15,8 @@ export type NoiseSettingsOptions = {
 	seed: bigint,
 	version: VersionId,
 	project: Project,
+	minY?: number,
+	height?: number,
 }
 
 const colors: Record<string, [number, number, number]> = {
@@ -82,22 +84,22 @@ export function getNoiseBlock(x: number, y: number) {
 
 export async function densityFunction(state: any, img: ImageData, options: NoiseSettingsOptions) {
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.seed)
+	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.minY ?? 0, options.height ?? 256, options.seed)
 	const noise = DEEPSLATE.getNoiseSettings()
 
 	const arr = Array(options.width * noise.height)
-	let min = Infinity
-	let max = -Infinity
+	let limit = 0
 	for (let x = 0; x < options.width; x += 1) {
-		for (let y = 0; y < noise.height; y += 1) {
-			const i = x + (noise.height-y-1) * options.width
-			const density = fn.compute(DensityFunction.context(x - options.offset, y, 0))
-			min = Math.min(min, density)
-			max = Math.max(max, density)
+		for (let y = 0; y < noise.height - noise.minY; y += 1) {
+			const i = x + y * options.width
+			const density = fn.compute(DensityFunction.context(x - options.offset, noise.height - y - 1, 0))
+			limit = Math.max(limit, Math.abs(density))
 			arr[i] = density
 		}
 	}
 
+	const min = -limit
+	const max = limit
 	const data = img.data
 	for (let i = 0; i < options.width * noise.height; i += 1) {
 		const color = Math.floor(clampedMap(arr[i], min, max, 0, 256))
@@ -110,10 +112,9 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 
 export async function densityPoint(state: any, x: number, y: number, options: NoiseSettingsOptions) {
 	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.seed)
+	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.minY ?? 0, options.height ?? 256, options.seed)
 
-	const density = fn.compute(DensityFunction.context(x, y, 0))
-	return density
+	return fn.compute(DensityFunction.context(Math.floor(x - options.offset), (options.height ?? 256) - y, 0))
 }
 
 export function getProjectData(project: Project) {

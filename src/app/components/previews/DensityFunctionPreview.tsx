@@ -10,19 +10,21 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 	const { locale } = useLocale()
 	const { project } = useProject()
 	const [seed, setSeed] = useState(randomSeed())
+	const [minY] = useState(0)
+	const [height] = useState(256)
 	const [autoScroll, setAutoScroll] = useState(false)
-	const [focused, setFocused] = useState<string | undefined>(undefined)
+	const [focused, setFocused] = useState<string[]>([])
 	const offset = useRef(0)
 	const scrollInterval = useRef<number | undefined>(undefined)
 	const state = JSON.stringify([data])
 
-	const size = data?.noise?.height ?? 256
+	const size = 256
 	const { canvas, redraw } = useCanvas({
 		size() {
 			return [size, size]
 		},
 		async draw(img) {
-			const options = { offset: offset.current, width: img.width, seed, version, project }
+			const options = { offset: offset.current, width: img.width, seed, version, project, minY, height }
 			await densityFunction(data, img, options)
 		},
 		async onDrag(dx) {
@@ -30,16 +32,16 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 			redraw()
 		},
 		async onHover(x, y) {
-			const worldX = Math.floor(x * size - offset.current)
-			const worldY = size - Math.max(1, Math.ceil(y * size)) + (data?.noise?.min_y ?? 0)
-			const options = { offset: offset.current, width: size, seed, version, project }
+			const worldX = Math.floor(x * size)
+			const worldY = Math.floor(y * (height - minY))
+			const options = { offset: offset.current, width: size, seed, version, project, minY, height }
 			const density = await densityPoint(data, worldX, worldY, options)
-			setFocused(`X=${worldX} Y=${worldY} Density=${Math.floor(density * 1000)/1000}`)
+			setFocused([density.toPrecision(3), `X=${Math.floor(worldX - offset.current)} Y=${(height - minY) - worldY}`])
 		},
 		onLeave() {
-			setFocused(undefined)
+			setFocused([])
 		},
-	}, [version, state, seed, project])
+	}, [version, state, seed, minY, height, project])
 
 	useEffect(() => {
 		if (scrollInterval.current) {
@@ -54,11 +56,11 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 				}, 100) as any
 			}
 		}
-	}, [version, state, seed, project, shown, autoScroll])
+	}, [version, state, seed, minY, height, project, shown, autoScroll])
 
 	return <>
 		<div class="controls preview-controls">
-			{focused && <Btn label={focused} class="no-pointer" />}
+			{focused.map(s => <Btn label={s} class="no-pointer" /> )}
 			<BtnMenu icon="gear" tooltip={locale('terrain_settings')}>
 				<Btn icon={autoScroll ? 'square_fill' : 'square'} label={locale('preview.auto_scroll')} onClick={() => setAutoScroll(!autoScroll)} />
 			</BtnMenu>
