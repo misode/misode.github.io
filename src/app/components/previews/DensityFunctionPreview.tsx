@@ -3,6 +3,7 @@ import { useLocale, useProject } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
 import type { ColormapType } from '../../previews/Colormap.js'
 import { densityFunction, densityPoint } from '../../previews/index.js'
+import { Store } from '../../Store.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
@@ -16,7 +17,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 	const [height] = useState(256)
 	const [autoScroll, setAutoScroll] = useState(false)
 	const [focused, setFocused] = useState<string[]>([])
-	const [colormap, setColormap] = useState<ColormapType>('viridis')
+	const [colormap, setColormap] = useState<ColormapType>(Store.getColormap() ?? 'viridis')
 	const offset = useRef(0)
 	const scrollInterval = useRef<number | undefined>(undefined)
 	const state = JSON.stringify([data])

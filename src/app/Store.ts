@@ -1,5 +1,7 @@
 import type { Project } from './contexts/index.js'
 import { DRAFT_PROJECT } from './contexts/index.js'
+import type { ColormapType } from './previews/Colormap.js'
+import { ColormapTypes } from './previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 import { VersionIds } from './services/index.js'
 
@@ -17,6 +19,7 @@ export namespace Store {
 	export const ID_PROJECT_PANEL_OPEN = 'misode_project_panel_open'
 	export const ID_OPEN_PROJECT = 'misode_open_project'
 	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
+	export const ID_COLORMAP = 'misode_colormap'
 	export const ID_GENERATOR_HISTORY = 'misode_generator_history'
 
 	export function getLanguage() {
@@ -92,6 +95,14 @@ export namespace Store {
 		return localStorage.getItem(ID_TREE_VIEW_MODE) ?? 'resources'
 	}
 
+	export function getColormap(): ColormapType | undefined {
+		const value = localStorage.getItem(ID_COLORMAP)
+		if (value === null || !ColormapTypes.includes(value as ColormapType)) {
+			return undefined
+		}
+		return value as ColormapType
+	}
+
 	export function getGeneratorHistory(): string[] {
 		return JSON.parse(localStorage.getItem(ID_GENERATOR_HISTORY) ?? '[]')
 	}
@@ -164,6 +175,10 @@ export namespace Store {
 
 	export function setTreeViewMode(mode: string | undefined) {
 		if (mode) localStorage.setItem(ID_TREE_VIEW_MODE, mode)
+	}
+
+	export function setColormap(colormap: ColormapType | undefined) {
+		if (colormap) localStorage.setItem(ID_COLORMAP, colormap)
 	}
 
 	export function visitGenerator(id: string) {

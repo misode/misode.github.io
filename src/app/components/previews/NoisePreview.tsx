@@ -3,6 +3,7 @@ import { useLocale } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
 import type { ColormapType } from '../../previews/Colormap.js'
 import { normalNoise, normalNoisePoint } from '../../previews/index.js'
+import { Store } from '../../Store.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
@@ -13,7 +14,7 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 	const [seed, setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<string[]>([])
-	const [colormap, setColormap] = useState<ColormapType>('viridis')
+	const [colormap, setColormap] = useState<ColormapType>(Store.getColormap() ?? 'viridis')
 	const offset = useRef<[number, number]>([0, 0])
 	const state = JSON.stringify([data])
 
