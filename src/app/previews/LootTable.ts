@@ -89,7 +89,7 @@ function fillContainer(items: Item[], ctx: LootContext): SlottedItem[] {
 }
 
 function assignSlots(items: Item[]): SlottedItem[] {
-	return items.map((item, i) => ({ slot: i, item }))
+	return items.flatMap((item, i) => item.count > 0 ? [({ slot: i, item })] : [])
 }
 
 function splitItem(item: Item, count: number): Item {
