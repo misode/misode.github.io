@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
+import type { ColormapType } from '../../previews/Colormap.js'
 import { normalNoise, normalNoisePoint } from '../../previews/index.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
+import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 
 export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
@@ -11,6 +13,7 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 	const [seed, setSeed] = useState(randomSeed())
 	const [scale, setScale] = useState(2)
 	const [focused, setFocused] = useState<string[]>([])
+	const [colormap, setColormap] = useState<ColormapType>('viridis')
 	const offset = useRef<[number, number]>([0, 0])
 	const state = JSON.stringify([data])
 
@@ -19,7 +22,7 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 			return [256, 256]
 		},
 		async draw(img) {
-			const options = { offset: offset.current, scale, seed, version }
+			const options = { offset: offset.current, scale, seed, version, colormap }
 			normalNoise(data, img, options)
 		},
 		async onDrag(dx, dy) {
@@ -30,7 +33,7 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 		onHover(x, y) {
 			const x2 = Math.floor(x * 256)
 			const y2 = Math.floor(y * 256)
-			const options = { offset: offset.current, scale, seed, version }
+			const options = { offset: offset.current, scale, seed, version, colormap }
 			const value = normalNoisePoint(data, x2, y2, options)
 			
 			const ox = -options.offset[0] - 100
@@ -42,13 +45,13 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 		onLeave() {
 			setFocused([])
 		},
-	}, [version, state, scale, seed])
+	}, [version, state, scale, seed, colormap])
 
 	useEffect(() => {
 		if (shown) {
 			redraw()
 		}
-	}, [version, state, scale, seed, shown])
+	}, [version, state, scale, seed, colormap, shown])
 
 	const changeScale = (newScale: number) => {
 		offset.current[0] = offset.current[0] * scale / newScale
@@ -59,6 +62,7 @@ export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
 	return <>
 		<div class="controls preview-controls">
 			{focused.map(s => <Btn label={s} class="no-pointer" /> )}
+			<ColormapSelector value={colormap} onChange={setColormap} />
 			<Btn icon="dash" tooltip={locale('zoom_out')}
 				onClick={() => changeScale(scale * 1.5)} />
 			<Btn icon="plus" tooltip={locale('zoom_in')}

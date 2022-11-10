@@ -3,6 +3,8 @@ import { BlockState, clampedMap, DensityFunction } from 'deepslate/worldgen'
 import type { Project } from '../contexts/Project.jsx'
 import type { VersionId } from '../services/index.js'
 import { checkVersion } from '../services/index.js'
+import type { ColormapType } from './Colormap.js'
+import { getColormap } from './Colormap.js'
 import { DEEPSLATE } from './Deepslate.js'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator.js'
 
@@ -17,6 +19,7 @@ export type NoiseSettingsOptions = {
 	project: Project,
 	minY?: number,
 	height?: number,
+	colormap?: ColormapType,
 }
 
 const colors: Record<string, [number, number, number]> = {
@@ -88,24 +91,25 @@ export async function densityFunction(state: any, img: ImageData, options: Noise
 	const noise = DEEPSLATE.getNoiseSettings()
 
 	const arr = Array(options.width * noise.height)
-	let limit = 0
+	let limit = 0.01
 	for (let x = 0; x < options.width; x += 1) {
 		for (let y = 0; y < noise.height - noise.minY; y += 1) {
 			const i = x + y * options.width
 			const density = fn.compute(DensityFunction.context(x - options.offset, noise.height - y - 1, 0))
-			limit = Math.max(limit, Math.abs(density))
+			limit = Math.max(limit, Math.min(1, Math.abs(density)))
 			arr[i] = density
 		}
 	}
 
+	const colormap = getColormap(options.colormap ?? 'viridis')
 	const min = -limit
 	const max = limit
 	const data = img.data
 	for (let i = 0; i < options.width * noise.height; i += 1) {
-		const color = Math.floor(clampedMap(arr[i], min, max, 0, 256))
-		data[4 * i] = color
-		data[4 * i + 1] = color
-		data[4 * i + 2] = color
+		const color = colormap(clampedMap(arr[i], min, max, 1, 0))
+		data[4 * i] = color[0] * 256
+		data[4 * i + 1] = color[1] * 256
+		data[4 * i + 2] = color[2] * 256
 		data[4 * i + 3] = 255
 	}
 }

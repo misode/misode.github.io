@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale, useProject } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
+import type { ColormapType } from '../../previews/Colormap.js'
 import { densityFunction, densityPoint } from '../../previews/index.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
+import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 
 export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) => {
@@ -14,6 +16,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 	const [height] = useState(256)
 	const [autoScroll, setAutoScroll] = useState(false)
 	const [focused, setFocused] = useState<string[]>([])
+	const [colormap, setColormap] = useState<ColormapType>('viridis')
 	const offset = useRef(0)
 	const scrollInterval = useRef<number | undefined>(undefined)
 	const state = JSON.stringify([data])
@@ -24,7 +27,7 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 			return [size, size]
 		},
 		async draw(img) {
-			const options = { offset: offset.current, width: img.width, seed, version, project, minY, height }
+			const options = { offset: offset.current, width: img.width, seed, version, project, minY, height, colormap }
 			await densityFunction(data, img, options)
 		},
 		async onDrag(dx) {
@@ -34,14 +37,14 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 		async onHover(x, y) {
 			const worldX = Math.floor(x * size)
 			const worldY = Math.floor(y * (height - minY))
-			const options = { offset: offset.current, width: size, seed, version, project, minY, height }
+			const options = { offset: offset.current, width: size, seed, version, project, minY, height, colormap }
 			const density = await densityPoint(data, worldX, worldY, options)
 			setFocused([density.toPrecision(3), `X=${Math.floor(worldX - offset.current)} Y=${(height - minY) - worldY}`])
 		},
 		onLeave() {
 			setFocused([])
 		},
-	}, [version, state, seed, minY, height, project])
+	}, [version, state, seed, minY, height, colormap, project])
 
 	useEffect(() => {
 		if (scrollInterval.current) {
@@ -56,11 +59,12 @@ export const DensityFunctionPreview = ({ data, shown, version }: PreviewProps) =
 				}, 100) as any
 			}
 		}
-	}, [version, state, seed, minY, height, project, shown, autoScroll])
+	}, [version, state, seed, minY, height, colormap, project, shown, autoScroll])
 
 	return <>
 		<div class="controls preview-controls">
 			{focused.map(s => <Btn label={s} class="no-pointer" /> )}
+			<ColormapSelector value={colormap} onChange={setColormap} />
 			<BtnMenu icon="gear" tooltip={locale('terrain_settings')}>
 				<Btn icon={autoScroll ? 'square_fill' : 'square'} label={locale('preview.auto_scroll')} onClick={() => setAutoScroll(!autoScroll)} />
 			</BtnMenu>
