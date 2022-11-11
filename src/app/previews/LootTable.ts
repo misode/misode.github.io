@@ -89,7 +89,18 @@ function fillContainer(items: Item[], ctx: LootContext): SlottedItem[] {
 }
 
 function assignSlots(items: Item[]): SlottedItem[] {
-	return items.flatMap((item, i) => item.count > 0 ? [({ slot: i, item })] : [])
+	const results: SlottedItem[] = []
+	let slot = 0
+	for (const item of items) {
+		if (slot >= 27) {
+			break
+		}
+		if (item.id !== 'minecraft:air' && item.count > 0) {
+			results.push({ slot, item })
+			slot += 1
+		}
+	}
+	return results
 }
 
 function splitItem(item: Item, count: number): Item {
