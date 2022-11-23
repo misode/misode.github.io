@@ -14,7 +14,7 @@ type Version = {
 }
 
 declare var __LATEST_VERSION__: string
-const latestVersion = __LATEST_VERSION__ ?? ''
+export const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
 const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
