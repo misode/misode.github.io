@@ -1,3 +1,5 @@
+import type { ItemStack } from 'deepslate'
+import { Identifier, NbtList, NbtType } from 'deepslate'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getEnchantmentData, MaxDamageItems } from '../previews/LootTable.js'
@@ -5,31 +7,32 @@ import { getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
-	id: string,
-	tag?: any,
+	item: ItemStack,
 	advanced?: boolean,
 	offset?: [number, number],
 	swap?: boolean,
 }
-export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props) {
+export function ItemTooltip({ item, advanced, offset = [0, 0], swap }: Props) {
 	const { version } = useVersion()
 	const { value: translatedName } = useAsync(() => {
-		const key = id.split(':').join('.')
+		const key = `${item.id.namespace}.${item.id.path}`
 		return getTranslation(version, `item.${key}`) ?? getTranslation(version, `block.${key}`)
-	}, [version, id])
-	const displayName = tag?.display?.Name
-	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(id))
+	}, [version, item.id])
+	const displayName = item.tag.getCompound('display').getString('Name')
+	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(item.id.path))
 
-	const maxDamage = MaxDamageItems.get(id)
-	const enchantments = (id === 'minecraft:enchanted_book' ? tag?.StoredEnchantments : tag?.Enchantments) ?? []
+	const maxDamage = MaxDamageItems.get(item.id.toString())
+	const enchantments = (item.id.equals(Identifier.create('enchanted_book')) ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
 
 	return <div class="item-tooltip" style={offset && {
 		left: (swap ? undefined : `${offset[0]}px`),
 		right: (swap ? `${offset[0]}px` : undefined),
 		top: `${offset[1]}px`,
 	}}>
-		<TextComponent component={name} base={{ color: 'white' }} />
-		{enchantments.map(({ id, lvl }: { id: string, lvl: number }) => {
+		<TextComponent component={name} base={{ color: 'white', italic: displayName.length > 0 }} />
+		{enchantments.map(enchantment => {
+			const id = enchantment.getString('id')
+			const lvl = enchantment.getNumber('lvl')
 			const ench = getEnchantmentData(id)
 			const component: any[] = [{ translate: `enchantment.${id.replace(':', '.')}`, color: ench?.curse ? 'red' : 'gray' }]
 			if (lvl !== 1 || ench?.maxLevel !== 1) {
@@ -37,24 +40,23 @@ export function ItemTooltip({ id, tag, advanced, offset = [0, 0], swap }: Props)
 			}
 			return <TextComponent component={component} />
 		})}
-		{tag?.display && <>
-			{tag?.display?.color && (advanced
-				? <TextComponent component={{ translate: 'item.color', with: [`#${tag.display.color.toString(16).padStart(6, '0')}`], color: 'gray' }} />
+		{item.tag.hasCompound('display') && <>
+			{item.tag.getCompound('display').hasNumber('color') && (advanced
+				? <TextComponent component={{ translate: 'item.color', with: [`#${item.tag.getCompound('display').getNumber('color').toString(16).padStart(6, '0')}`], color: 'gray' }} />
 				: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />)}
-			{(tag?.display?.Lore ?? []).map((line: any) => <TextComponent component={JSON.parse(line)} base={{ color: 'dark_purple', italic: true }} />)}
+			{(item.tag.getCompound('display').getList('Lore', NbtType.String)).map((line) => <TextComponent component={JSON.parse(line.getAsString())} base={{ color: 'dark_purple', italic: true }} />)}
 		</>}
-		{tag?.Unbreakable === true && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
-		{(advanced && (tag?.Damage ?? 0) > 0 && maxDamage) && <TextComponent component={{ translate: 'item.durability', with: [`${maxDamage - tag.Damage}`, `${maxDamage}`] }} />}
+		{item.tag.getBoolean('Unbreakable') && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
+		{(advanced && item.tag.getNumber('Damage') > 0 && maxDamage) && <TextComponent component={{ translate: 'item.durability', with: [`${maxDamage - item.tag.getNumber('Damage')}`, `${maxDamage}`] }} />}
 		{advanced && <>
-			<TextComponent component={{ text: id, color: 'dark_gray'}} />
-			{tag && <TextComponent component={{ translate: 'item.nbt_tags', with: [Object.keys(tag).length], color: 'dark_gray' }} />}
+			<TextComponent component={{ text: item.id.toString(), color: 'dark_gray'}} />
+			{item.tag.size > 0 && <TextComponent component={{ translate: 'item.nbt_tags', with: [item.tag.size], color: 'dark_gray' }} />}
 		</>}
 	</div>
 }
 
 function fakeTranslation(str: string) {
-	const colon = str.indexOf(':')
-	return str.slice(colon + 1)
+	return str
 		.replace(/[_\/]/g, ' ')
 		.split(' ')
 		.map(word => word.charAt(0).toUpperCase() + word.slice(1))

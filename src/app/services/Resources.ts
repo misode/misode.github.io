@@ -1,4 +1,4 @@
-import type { BlockModelProvider, TextureAtlasProvider, UV } from 'deepslate/render'
+import type { BlockModelProvider, ItemStack, TextureAtlasProvider, UV } from 'deepslate/render'
 import { BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
 import { message } from '../Utils.js'
 import { fetchLanguage, fetchResources } from './DataFetcher.js'
@@ -26,8 +26,8 @@ export async function getResources(version: VersionId) {
 const RENDER_SIZE = 128
 const ItemRenderCache = new Map<string, Promise<string>>()
 
-export async function renderItem(version: VersionId, item: string) {
-	const cache_key = `${version} ${item}`
+export async function renderItem(version: VersionId, item: ItemStack) {
+	const cache_key = `${version} ${item.toString()}`
 	const cached = ItemRenderCache.get(cache_key)
 	if (cached !== undefined) {
 		return cached
@@ -42,7 +42,8 @@ export async function renderItem(version: VersionId, item: string) {
 		if (!gl) {
 			throw new Error('Cannot get WebGL2 context')
 		}
-		const renderer = new ItemRenderer(gl, Identifier.parse(item), resources)
+		const renderer = new ItemRenderer(gl, item, resources)
+		console.log('Rendering', item.toString())
 		renderer.drawItem()
 		return canvas.toDataURL()
 	})()

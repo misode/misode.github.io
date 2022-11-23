@@ -1,16 +1,16 @@
+import type { ItemStack } from 'deepslate'
+import { Identifier } from 'deepslate-1.18.2'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import type { Item } from '../previews/LootTable.js'
-import { MaxDamageItems } from '../previews/LootTable.js'
-import { getAssetUrl } from '../services/DataFetcher.js'
+import { itemHasGlint, MaxDamageItems } from '../previews/LootTable.js'
 import { renderItem } from '../services/Resources.js'
 import { getCollections } from '../services/Schemas.js'
 import { ItemTooltip } from './ItemTooltip.jsx'
 import { Octicon } from './Octicon.jsx'
 
 interface Props {
-	item: Item,
+	item: ItemStack,
 	slotDecoration?: boolean,
 	advancedTooltip?: boolean,
 }
@@ -32,7 +32,7 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 		return () => el.current?.removeEventListener('mousemove', onMove)
 	}, [])
 
-	const maxDamage = MaxDamageItems.get(item.id)
+	const maxDamage = MaxDamageItems.get(item.id.toString())
 
 	return <div class="item-display" ref={el}>
 		<ItemItself item={item} />
@@ -43,23 +43,22 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 			</svg>
 		</>}
 		{slotDecoration && <>
-			{(maxDamage && (item.tag?.Damage ?? 0) > 0) && <svg class="item-durability" width="100%" height="100%" viewBox="0 0 18 18">
+			{(maxDamage && item.tag.getNumber('Damage') > 0) && <svg class="item-durability" width="100%" height="100%" viewBox="0 0 18 18">
 				<rect x="3" y="14" width="13" height="2" fill="#000" />
-				<rect x="3" y="14" width={`${(maxDamage - item.tag.Damage) / maxDamage * 13}`} height="1" fill={`hsl(${(maxDamage - item.tag.Damage) / maxDamage * 120}deg, 100%, 50%)`} />
+				<rect x="3" y="14" width={`${(maxDamage - item.tag.getNumber('Damage')) / maxDamage * 13}`} height="1" fill={`hsl(${(maxDamage - item.tag.getNumber('Damage')) / maxDamage * 120}deg, 100%, 50%)`} />
 			</svg>}
 			<div class="item-slot-overlay"></div>
 		</>}
-		<ItemTooltip {...item} advanced={advancedTooltip} offset={tooltipOffset} swap={tooltipSwap} />
+		<ItemTooltip item={item} advanced={advancedTooltip} offset={tooltipOffset} swap={tooltipSwap} />
 	</div>
 }
 
 function ItemItself({ item }: Props) {
 	const { version } = useVersion()
-	const [errored, setErrored] = useState(false)
 
-	const isEnchanted = (item.tag?.Enchantments?.length ?? 0) > 0 || (item.tag?.StoredEnchantments?.length ?? 0) > 0
+	const hasGlint = itemHasGlint(item)
 
-	if (errored || (item.id.includes(':') && !item.id.startsWith('minecraft:'))) {
+	if (item.id.namespace !== Identifier.DEFAULT_NAMESPACE) {
 		return Octicon.package
 	}
 
@@ -69,31 +68,22 @@ function ItemItself({ item }: Props) {
 		return null
 	}
 
-	const texturePath = `item/${item.id.replace(/^minecraft:/, '')}`
-	if (collections.get('texture').includes('minecraft:' + texturePath)) {
-		const src = getAssetUrl(version, 'textures', texturePath)
-		return <>
-			<img src={src} alt="" onError={() => setErrored(true)} draggable={false} />
-			{isEnchanted && <div class="item-glint" style={{'--mask-image': `url("${src}")`}}></div>}
-		</>
-	}
-
-	const modelPath = `item/${item.id.replace(/^minecraft:/, '')}`
+	const modelPath = `item/${item.id.path}`
 	if (collections.get('model').includes('minecraft:' + modelPath)) {
-		return <RenderedItem item={item} isEnchanted={isEnchanted} />
+		return <RenderedItem item={item} hasGlint={hasGlint} />
 	}
 
 	return Octicon.package
 }
 
-function RenderedItem({ item, isEnchanted }: Props & { isEnchanted: boolean }) {
+function RenderedItem({ item, hasGlint }: Props & { hasGlint: boolean }) {
 	const { version } = useVersion()
-	const { value: src } = useAsync(() => renderItem(version, item.id), [version, item])
+	const { value: src } = useAsync(() => renderItem(version, item), [version, item])
 
 	if (src) {
 		return <>
-			<img src={src} alt={item.id} class="model" draggable={false} />
-			{isEnchanted && <div class="item-glint" style={{'--mask-image': `url("${src}")`}}></div>}
+			<img src={src} alt={item.id.toString()} class="model" draggable={false} />
+			{hasGlint && <div class="item-glint" style={{'--mask-image': `url("${src}")`}}></div>}
 		</>
 	}
 

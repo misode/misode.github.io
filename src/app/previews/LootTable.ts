@@ -1,20 +1,14 @@
 import type { Random } from 'deepslate'
-import { LegacyRandom } from 'deepslate'
+import { Identifier, ItemStack, LegacyRandom, NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate'
 import type { VersionId } from '../services/Schemas.js'
 import { clamp, deepClone, getWeightedRandom, isObject } from '../Utils.js'
 
-export interface Item {
-	id: string,
-	count: number,
-	tag?: any,
-}
-
 export interface SlottedItem {
 	slot: number,
-	item: Item,
+	item: ItemStack,
 }
 
-type ItemConsumer = (item: Item) => void
+type ItemConsumer = (item: ItemStack) => void
 
 const StackMixers = {
 	container: fillContainer,
@@ -44,7 +38,7 @@ interface LootContext extends LootOptions {
 
 export function generateLootTable(lootTable: any, options: LootOptions) {
 	const ctx = createLootContext(options)
-	const result: Item[] = []
+	const result: ItemStack[] = []
 	generateTable(lootTable, item => result.push(item), ctx)
 	const mixer = StackMixers[options.stackMixer]
 	return mixer(result, ctx)
@@ -52,11 +46,11 @@ export function generateLootTable(lootTable: any, options: LootOptions) {
 
 const SLOT_COUNT = 27
 
-function fillContainer(items: Item[], ctx: LootContext): SlottedItem[] {
+function fillContainer(items: ItemStack[], ctx: LootContext): SlottedItem[] {
 	const slots = shuffle([...Array(SLOT_COUNT)].map((_, i) => i), ctx)
 	
-	const queue = items.filter(i => i.id !== 'minecraft:air' && i.count > 1)
-	items = items.filter(i => i.id !== 'minecraft:air' && i.count === 1)
+	const queue = items.filter(i => !i.id.equals(Identifier.create('air')) && i.count > 1)
+	items = items.filter(i => !i.id.equals(Identifier.create('air')) && i.count === 1)
 
 	while (SLOT_COUNT - items.length - queue.length > 0 && queue.length > 0) { 
 		const [itemA] = queue.splice(ctx.random.nextInt(queue.length), 1)
@@ -81,21 +75,21 @@ function fillContainer(items: Item[], ctx: LootContext): SlottedItem[] {
 		if (slot === undefined) {
 			break
 		}
-		if (item.id !== 'minecraft:air' && item.count > 0) {
+		if (!item.id.equals(Identifier.create('air')) && item.count > 0) {
 			results.push({ slot, item })
 		}
 	}
 	return results
 }
 
-function assignSlots(items: Item[]): SlottedItem[] {
+function assignSlots(items: ItemStack[]): SlottedItem[] {
 	const results: SlottedItem[] = []
 	let slot = 0
 	for (const item of items) {
 		if (slot >= 27) {
 			break
 		}
-		if (item.id !== 'minecraft:air' && item.count > 0) {
+		if (!item.id.equals(Identifier.create('air')) && item.count > 0) {
 			results.push({ slot, item })
 			slot += 1
 		}
@@ -103,7 +97,7 @@ function assignSlots(items: Item[]): SlottedItem[] {
 	return results
 }
 
-function splitItem(item: Item, count: number): Item {
+function splitItem(item: ItemStack, count: number): ItemStack {
 	const splitCount = Math.min(count, item.count)
 	const other = deepClone(item)
 	other.count = splitCount
@@ -234,11 +228,11 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	}
 	switch (type) {
 		case 'item':
-			entryConsumer({ id: entry.name, count: 1 })
+			entryConsumer(new ItemStack(Identifier.parse(entry.name), 1))
 			break
 		case 'tag':
 			ctx.getItemTag(entry.name).forEach(tagEntry => {
-				entryConsumer({ id: tagEntry, count: 1 })
+				entryConsumer(new ItemStack(Identifier.parse(tagEntry), 1))
 			})
 			break
 		case 'loot_table':
@@ -254,7 +248,7 @@ function computeWeight(entry: any, luck: number) {
 	return Math.max(Math.floor((entry.weight ?? 1) + (entry.quality ?? 0) * luck), 0)
 }
 
-type LootFunction = (item: Item, ctx: LootContext) => void
+type LootFunction = (item: ItemStack, ctx: LootContext) => void
 
 function decorateFunctions(functions: any[], consumer: ItemConsumer, ctx: LootContext): ItemConsumer {
 	const compositeFunction = composeFunctions(functions)
@@ -277,12 +271,12 @@ function composeFunctions(functions: any[]): LootFunction {
 
 const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	enchant_randomly: ({ enchantments }) => (item, ctx) => {
-		const isBook = item.id === 'minecraft:book'
+		const isBook = item.id.equals(Identifier.create('book'))
 		if (enchantments === undefined || enchantments.length === 0) {
 			enchantments = [...Enchantments.keys()]
 				.filter(e => {
 					const data = getEnchantmentData(e)
-					return data.discoverable && (isBook || data.canEnchant(item.id))
+					return data.discoverable && (isBook || data.canEnchant(item.id.toString()))
 				})
 		}
 		if (enchantments.length > 0) {
@@ -290,27 +284,37 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 			const data = getEnchantmentData(id)
 			const lvl = ctx.random.nextInt(data.maxLevel - data.minLevel + 1) + data.minLevel
 			if (isBook) {
-				item.tag = {}
+				item.tag = new NbtCompound()
 				item.count = 1
 			}
 			enchantItem(item, { id, lvl })
 			if (isBook) {
-				item.id = 'minecraft:enchanted_book'
+				item.id = Identifier.create('enchanted_book')
 			}
 		}
 	},
 	enchant_with_levels: ({ levels, treasure }) => (item, ctx) => {
 		const enchants = selectEnchantments(ctx.random, item, computeInt(levels, ctx), treasure)
-		const isBook = item.id === 'minecraft:book'
+		const isBook = item.id.equals(Identifier.create('book'))
 		if (isBook) {
 			item.count = 1
-			item.tag = {}
+			item.tag = new NbtCompound()
 		}
 		for (const enchant of enchants) {
 			enchantItem(item, enchant)
 		}
 		if (isBook) {
-			item.id = 'minecraft:enchanted_book'
+			item.id = Identifier.create('enchanted_book')
+		}
+	},
+	exploration_map: ({ decoration }) => (item) => {
+		if (!item.id.equals(Identifier.create('map'))) {
+			return
+		}
+		item.id = Identifier.create('filled_map')
+		const color = decoration === 'mansion' ? 5393476 : decoration === 'monument' ? 3830373 : -1
+		if (color >= 0) {
+			getOrCreateTag(item, 'display').set('MapColor', new NbtInt(color))
 		}
 	},
 	limit_count: ({ limit }) => (item, ctx) => {
@@ -322,12 +326,12 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		item.count = clamp(oldCount + computeInt(count, ctx), 0, 64)
 	},
 	set_damage: ({ damage, add }) => (item, ctx) => {
-		const maxDamage = MaxDamageItems.get(item.id)
+		const maxDamage = MaxDamageItems.get(item.id.toString())
 		if (maxDamage) {
-			const oldDamage = add ? 1 - (item.tag?.Damage ?? 0) / maxDamage : 0
+			const oldDamage = add ? 1 - item.tag.getNumber('Damage') / maxDamage : 0
 			const newDamage = 1 - clamp(computeFloat(damage, ctx) + oldDamage, 0, 1)
 			const finalDamage = Math.floor(newDamage * maxDamage)
-			item.tag = { ...item.tag, Damage: finalDamage }
+			item.tag.set('Damage', new NbtInt(finalDamage))
 		}
 	},
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
@@ -337,13 +341,23 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		})
 	},
 	set_lore: ({ lore, replace }) => (item) => {
-		const lines = lore.map((line: any) => JSON.stringify(line))
-		const newLore = replace ? lines : [...(item.tag?.display?.Lore ?? []), ...lines]
-		item.tag = { ...item.tag, display: { ...item.tag?.display, Lore: newLore } }
+		const lines: string[] = lore.flatMap((line: any) => line !== undefined ? [JSON.stringify(line)] : [])
+		const newLore = replace ? lines : [...item.tag.getCompound('display').getList('Lore', NbtType.String).map(s => s.getAsString()), ...lines]
+		getOrCreateTag(item, 'display').set('Lore', new NbtList(newLore.map(l => new NbtString(l))))
 	},
 	set_name: ({ name }) => (item) => {
-		const newName = JSON.stringify(name)
-		item.tag = { ...item.tag, display: { ...item.tag?.display, Name: newName } }
+		if (name !== undefined) {
+			const newName = JSON.stringify(name)
+			getOrCreateTag(item, 'display').set('Name', new NbtString(newName))
+		}
+	},
+	set_nbt: ({ tag }) => (item) => {
+		try {
+			const newTag = NbtTag.fromString(tag)
+			if (newTag.isCompound()) {
+				item.tag = newTag
+			}
+		} catch (e) {}
 	},
 }
 
@@ -517,30 +531,28 @@ function testDamageSourcePredicate(_predicate: any, _ctx: LootContext) {
 	return false // TODO
 }
 
-function enchantItem(item: Item, enchant: Enchant, additive?: boolean) {
-	if (!item.tag) {
-		item.tag = {}
+function enchantItem(item: ItemStack, enchant: Enchant, additive?: boolean) {
+	const listKey = item.id.equals(Identifier.create('book')) ? 'StoredEnchantments' : 'Enchantments'
+	if (!item.tag.hasList(listKey, NbtType.Compound)) {
+		item.tag.set(listKey, new NbtList())
 	}
-	const listKey = (item.id === 'minecraft:book') ? 'StoredEnchantments' : 'Enchantments'
-	if (!item.tag[listKey] || !Array.isArray(item.tag[listKey])) {
-		item.tag[listKey] = []
-	}
-	const enchantments = item.tag[listKey] as any[]
+	const enchantments = item.tag.getList(listKey, NbtType.Compound).getItems()
 	let index = enchantments.findIndex((e: any) => e.id === enchant.id)
 	if (index !== -1) {
 		const oldEnch = enchantments[index]
-		oldEnch.lvl = Math.max(additive ? oldEnch.lvl + enchant.lvl : enchant.lvl, 0)
+		oldEnch.set('lvl', new NbtShort(Math.max(additive ? oldEnch.getNumber('lvl') + enchant.lvl : enchant.lvl, 0)))
 	} else {
-		enchantments.push(enchant)
+		enchantments.push(new NbtCompound().set('id', new NbtString(enchant.id)).set('lvl', new NbtShort(enchant.lvl)))
 		index = enchantments.length - 1
 	}
-	if (enchantments[index].lvl === 0) {
+	if (enchantments[index].getNumber('lvl') === 0) {
 		enchantments.splice(index, 1)
 	}
+	item.tag.set(listKey, new NbtList(enchantments))
 }
 
-function selectEnchantments(random: Random, item: Item, levels: number, treasure: boolean): Enchant[] {
-	const enchantmentValue = EnchantmentItems.get(item.id) ?? 0
+function selectEnchantments(random: Random, item: ItemStack, levels: number, treasure: boolean): Enchant[] {
+	const enchantmentValue = EnchantmentItems.get(item.id.toString()) ?? 0
 	if (enchantmentValue <= 0) {
 		return []
 	}
@@ -573,13 +585,13 @@ function getEnchantWeight(ench: Enchant) {
 	return EnchantmentsRarityWeights.get(getEnchantmentData(ench.id)?.rarity ?? 'common') ?? 0
 }
 
-function getAvailableEnchantments(item: Item, levels: number, treasure: boolean): Enchant[] {
+function getAvailableEnchantments(item: ItemStack, levels: number, treasure: boolean): Enchant[] {
 	const result = []
-	const isBook = item.id === 'minecraft:book'
+	const isBook = item.id.equals(Identifier.create('book'))
 
 	for (const id of Enchantments.keys()) {
 		const ench = getEnchantmentData(id)!
-		if ((!ench.treasure || treasure) && ench.discoverable && (ench.canEnchant(item.id) || isBook)) {
+		if ((!ench.treasure || treasure) && ench.discoverable && (ench.canEnchant(item.id.toString()) || isBook)) {
 			for (let lvl = ench.maxLevel; lvl > ench.minLevel - 1; lvl -= 1) {
 				if (levels >= ench.minCost(lvl) && levels <= ench.maxCost(lvl)) {
 					result.push({ id, lvl })
@@ -1018,3 +1030,38 @@ const EnchantmentsCategories = new Map(Object.entries<string[]>({
 	crossbow: ['minecraft:crossbow'],
 	vanishable: [...BREAKABLE, 'minecraft:compass'],
 }))
+
+const AlwaysHasGlint = new Set([
+	'minecraft:debug_stick',
+	'minecraft:enchanted_golden_apple',
+	'minecraft:enchanted_book',
+	'minecraft:end_crystal',
+	'minecraft:experience_bottle',
+	'minecraft:written_book',
+])
+
+export function itemHasGlint(item: ItemStack) {
+	if (AlwaysHasGlint.has(item.id.toString())) {
+		return true
+	}
+	if (item.id.equals(Identifier.create('compass')) && (item.tag.has('LodestoneDimension') || item.tag.has('LodestonePos'))) {
+		return true
+	}
+	if ((item.id.equals(Identifier.create('potion')) || item.id.equals(Identifier.create('splash_potion')) || item.id.equals(Identifier.create('lingering_potion'))) && (item.tag.has('Potion') || item.tag.has('CustomPotionEffects'))) {
+		return true
+	}
+	if (item.tag.getList('Enchantments').length > 0 || item.tag.getList('StoredEnchantments').length > 0) {
+		return true
+	}
+	return false
+}
+
+function getOrCreateTag(item: ItemStack, key: string) {
+	if (item.tag.hasCompound(key)) {
+		return item.tag.getCompound(key)
+	} else {
+		const tag = new NbtCompound()
+		item.tag.set(key, tag)
+		return tag
+	}
+}

@@ -1,5 +1,6 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
 import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
+import { Identifier, ItemStack } from 'deepslate'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
@@ -139,7 +140,7 @@ const renderHtml: RenderHook = {
 				let label: undefined | string | JSX.Element
 				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
 					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
-						label = <ItemDisplay item={{ id: cValue.name, count: 1 }} />
+						label = <ItemDisplay item={new ItemStack(Identifier.parse(cValue.name), 1)} />
 					}
 				}
 
