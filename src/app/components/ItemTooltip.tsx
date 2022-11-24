@@ -1,5 +1,5 @@
 import type { ItemStack } from 'deepslate'
-import { Identifier, NbtList, NbtType } from 'deepslate'
+import { NbtList, NbtType } from 'deepslate'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getEnchantmentData, MaxDamageItems } from '../previews/LootTable.js'
@@ -22,7 +22,7 @@ export function ItemTooltip({ item, advanced, offset = [0, 0], swap }: Props) {
 	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(item.id.path))
 
 	const maxDamage = MaxDamageItems.get(item.id.toString())
-	const enchantments = (item.id.equals(Identifier.create('enchanted_book')) ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
+	const enchantments = (item.is('enchanted_book') ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
 
 	return <div class="item-tooltip" style={offset && {
 		left: (swap ? undefined : `${offset[0]}px`),

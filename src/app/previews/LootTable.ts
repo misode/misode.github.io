@@ -1,7 +1,7 @@
 import type { Random } from 'deepslate'
 import { Identifier, ItemStack, LegacyRandom, NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate'
 import type { VersionId } from '../services/Schemas.js'
-import { clamp, deepClone, getWeightedRandom, isObject } from '../Utils.js'
+import { clamp, getWeightedRandom, isObject } from '../Utils.js'
 
 export interface SlottedItem {
 	slot: number,
@@ -49,8 +49,8 @@ const SLOT_COUNT = 27
 function fillContainer(items: ItemStack[], ctx: LootContext): SlottedItem[] {
 	const slots = shuffle([...Array(SLOT_COUNT)].map((_, i) => i), ctx)
 	
-	const queue = items.filter(i => !i.id.equals(Identifier.create('air')) && i.count > 1)
-	items = items.filter(i => !i.id.equals(Identifier.create('air')) && i.count === 1)
+	const queue = items.filter(i => !i.is('air') && i.count > 1)
+	items = items.filter(i => !i.is('air') && i.count === 1)
 
 	while (SLOT_COUNT - items.length - queue.length > 0 && queue.length > 0) { 
 		const [itemA] = queue.splice(ctx.random.nextInt(queue.length), 1)
@@ -75,7 +75,7 @@ function fillContainer(items: ItemStack[], ctx: LootContext): SlottedItem[] {
 		if (slot === undefined) {
 			break
 		}
-		if (!item.id.equals(Identifier.create('air')) && item.count > 0) {
+		if (!item.is('air') && item.count > 0) {
 			results.push({ slot, item })
 		}
 	}
@@ -89,7 +89,7 @@ function assignSlots(items: ItemStack[]): SlottedItem[] {
 		if (slot >= 27) {
 			break
 		}
-		if (!item.id.equals(Identifier.create('air')) && item.count > 0) {
+		if (!item.is('air') && item.count > 0) {
 			results.push({ slot, item })
 			slot += 1
 		}
@@ -99,7 +99,7 @@ function assignSlots(items: ItemStack[]): SlottedItem[] {
 
 function splitItem(item: ItemStack, count: number): ItemStack {
 	const splitCount = Math.min(count, item.count)
-	const other = deepClone(item)
+	const other = item.clone()
 	other.count = splitCount
 	item.count = item.count - splitCount
 	return other
@@ -271,7 +271,7 @@ function composeFunctions(functions: any[]): LootFunction {
 
 const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	enchant_randomly: ({ enchantments }) => (item, ctx) => {
-		const isBook = item.id.equals(Identifier.create('book'))
+		const isBook = item.is('book')
 		if (enchantments === undefined || enchantments.length === 0) {
 			enchantments = [...Enchantments.keys()]
 				.filter(e => {
@@ -295,7 +295,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	},
 	enchant_with_levels: ({ levels, treasure }) => (item, ctx) => {
 		const enchants = selectEnchantments(ctx.random, item, computeInt(levels, ctx), treasure)
-		const isBook = item.id.equals(Identifier.create('book'))
+		const isBook = item.is('book')
 		if (isBook) {
 			item.count = 1
 			item.tag = new NbtCompound()
@@ -308,7 +308,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	exploration_map: ({ decoration }) => (item) => {
-		if (!item.id.equals(Identifier.create('map'))) {
+		if (!item.is('map')) {
 			return
 		}
 		item.id = Identifier.create('filled_map')
@@ -532,7 +532,7 @@ function testDamageSourcePredicate(_predicate: any, _ctx: LootContext) {
 }
 
 function enchantItem(item: ItemStack, enchant: Enchant, additive?: boolean) {
-	const listKey = item.id.equals(Identifier.create('book')) ? 'StoredEnchantments' : 'Enchantments'
+	const listKey = item.is('book') ? 'StoredEnchantments' : 'Enchantments'
 	if (!item.tag.hasList(listKey, NbtType.Compound)) {
 		item.tag.set(listKey, new NbtList())
 	}
@@ -587,7 +587,7 @@ function getEnchantWeight(ench: Enchant) {
 
 function getAvailableEnchantments(item: ItemStack, levels: number, treasure: boolean): Enchant[] {
 	const result = []
-	const isBook = item.id.equals(Identifier.create('book'))
+	const isBook = item.is('book')
 
 	for (const id of Enchantments.keys()) {
 		const ench = getEnchantmentData(id)!
@@ -1044,10 +1044,10 @@ export function itemHasGlint(item: ItemStack) {
 	if (AlwaysHasGlint.has(item.id.toString())) {
 		return true
 	}
-	if (item.id.equals(Identifier.create('compass')) && (item.tag.has('LodestoneDimension') || item.tag.has('LodestonePos'))) {
+	if (item.is('compass') && (item.tag.has('LodestoneDimension') || item.tag.has('LodestonePos'))) {
 		return true
 	}
-	if ((item.id.equals(Identifier.create('potion')) || item.id.equals(Identifier.create('splash_potion')) || item.id.equals(Identifier.create('lingering_potion'))) && (item.tag.has('Potion') || item.tag.has('CustomPotionEffects'))) {
+	if ((item.is('potion') || item.is('splash_potion') || item.is('lingering_potion')) && (item.tag.has('Potion') || item.tag.has('CustomPotionEffects'))) {
 		return true
 	}
 	if (item.tag.getList('Enchantments').length > 0 || item.tag.getList('StoredEnchantments').length > 0) {
