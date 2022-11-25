@@ -1331,6 +1331,10 @@ hr {
 	top: -2px;
 }
 
+.text-component span:empty:before {
+	content: '\200b';
+}
+
 .file-view {
 	background-color: var(--background-2);
 	color: var(--text-2);

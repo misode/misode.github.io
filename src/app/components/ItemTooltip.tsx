@@ -1,5 +1,6 @@
 import type { ItemStack } from 'deepslate'
-import { NbtList, NbtType } from 'deepslate'
+import { AttributeModifierOperation, MobEffectInstance, NbtList, NbtType, Potion } from 'deepslate'
+import { useMemo } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getEnchantmentData, MaxDamageItems } from '../previews/LootTable.js'
@@ -9,27 +10,64 @@ import { TextComponent } from './TextComponent.jsx'
 interface Props {
 	item: ItemStack,
 	advanced?: boolean,
-	offset?: [number, number],
-	swap?: boolean,
 }
-export function ItemTooltip({ item, advanced, offset = [0, 0], swap }: Props) {
+export function ItemTooltip({ item, advanced }: Props) {
 	const { version } = useVersion()
+
+	const isPotion = item.is('potion') || item.is('splash_potion') || item.is('lingering_potion')
+	const descriptionId = useMemo(() => {
+		const d = `${item.id.namespace}.${item.id.path}`
+		if (isPotion) {
+			return `${d}.effect.${Potion.fromNbt(item).name}`
+		}
+		return d
+	}, [item])
 	const { value: translatedName } = useAsync(() => {
-		const key = `${item.id.namespace}.${item.id.path}`
-		return getTranslation(version, `item.${key}`) ?? getTranslation(version, `block.${key}`)
-	}, [version, item.id])
+		return getTranslation(version, `item.${descriptionId}`) ?? getTranslation(version, `block.${descriptionId}`)
+	}, [version, descriptionId])
 	const displayName = item.tag.getCompound('display').getString('Name')
 	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(item.id.path))
 
 	const maxDamage = MaxDamageItems.get(item.id.toString())
 	const enchantments = (item.is('enchanted_book') ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
 
-	return <div class="item-tooltip" style={offset && {
-		left: (swap ? undefined : `${offset[0]}px`),
-		right: (swap ? `${offset[0]}px` : undefined),
-		top: `${offset[1]}px`,
-	}}>
+	const effects = isPotion ? Potion.getAllEffects(item) : []
+	const attributeModifiers = isPotion ? Potion.getAllAttributeModifiers(item) : []
+
+	return <>
 		<TextComponent component={name} base={{ color: 'white', italic: displayName.length > 0 }} />
+		{(!advanced && displayName.length === 0 && item.is('filled_map') && item.tag.hasNumber('map')) && <>
+			<TextComponent component={{ text: `#${item.tag.getNumber('map')}`, color: 'gray' }} />
+		</>}
+		{(item.is('filled_map') && advanced) && <>
+			<TextComponent component={{ translate: 'filled_map.unknown', color: 'gray' }} />
+		</>}
+		{isPotion && effects.length === 0
+			? <TextComponent component={{ translate: 'effect.none', color: 'gray' }} />
+			: effects.map(e => {
+				const color = e.effect.category === 'harmful' ? 'red' : 'blue'
+				let component: any = { translate: `effect.${e.effect.id.namespace}.${e.effect.id.path}` }
+				if (e.amplifier > 0) {
+					component = { translate: 'potion.withAmplifier', with: [component, { translate: `potion.potency.${e.amplifier}` }] }
+				}
+				if (e.duration > 20) {
+					component = { translate: 'potion.withDuration', with: [component, MobEffectInstance.formatDuration(e)] }
+				}
+				return <TextComponent component={{ ...component, color }} />
+			})}
+		{attributeModifiers.length > 0 && <>
+			<TextComponent component='' />
+			<TextComponent component={{ translate: 'potion.whenDrank', color: 'dark_purple' }} />
+			{attributeModifiers.map(([attr, { amount, operation }]) => {
+				const a = operation === AttributeModifierOperation.addition ? amount * 100 : amount
+				if (amount > 0) {
+					return <TextComponent component={{ translate: `attribute.modifier.plus.${operation}`, with: [Math.floor(a * 100) / 100, { translate: `attribute.name.${attr.id.path}` }], color: 'blue' }} />
+				} else if (amount < 0) {
+					return <TextComponent component={{ translate: `attribute.modifier.take.${operation}`, with: [Math.floor(a * -100) / 100, { translate: `attribute.name.${attr.id.path}` }], color: 'red' }} />
+				}
+				return null
+			})}
+		</>}
 		{enchantments.map(enchantment => {
 			const id = enchantment.getString('id')
 			const lvl = enchantment.getNumber('lvl')
@@ -52,7 +90,7 @@ export function ItemTooltip({ item, advanced, offset = [0, 0], swap }: Props) {
 			<TextComponent component={{ text: item.id.toString(), color: 'dark_gray'}} />
 			{item.tag.size > 0 && <TextComponent component={{ translate: 'item.nbt_tags', with: [item.tag.size], color: 'dark_gray' }} />}
 		</>}
-	</div>
+	</>
 }
 
 function fakeTranslation(str: string) {

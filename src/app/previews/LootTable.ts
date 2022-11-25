@@ -359,6 +359,11 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 			}
 		} catch (e) {}
 	},
+	set_potion: ({ id }) => (item) => {
+		if (typeof id === 'string') {
+			item.tag.set('Potion', new NbtString(Identifier.parse(id).toString()))
+		}
+	},
 }
 
 type LootCondition = (ctx: LootContext) => boolean

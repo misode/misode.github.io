@@ -49,7 +49,13 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 			</svg>}
 			<div class="item-slot-overlay"></div>
 		</>}
-		<ItemTooltip item={item} advanced={advancedTooltip} offset={tooltipOffset} swap={tooltipSwap} />
+		<div class="item-tooltip" style={tooltipOffset && {
+			left: (tooltipSwap ? undefined : `${tooltipOffset[0]}px`),
+			right: (tooltipSwap ? `${tooltipOffset[0]}px` : undefined),
+			top: `${tooltipOffset[1]}px`,
+		}}>
+			<ItemTooltip item={item} advanced={advancedTooltip} />
+		</div>
 	</div>
 }
 

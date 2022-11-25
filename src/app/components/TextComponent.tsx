@@ -1,7 +1,7 @@
 import { useMemo } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { getTranslation } from '../services/Resources.js'
+import { getLanguage, replaceTranslation } from '../services/Resources.js'
 
 interface StyleData {
 	color?: string,
@@ -23,6 +23,8 @@ interface Props {
 	shadow?: boolean,
 }
 export function TextComponent({ component, base = { color: 'white' }, shadow = true }: Props) {
+	const { version } = useVersion()
+
 	const state = JSON.stringify(component)
 	const parts = useMemo(() => {
 		const parts: PartData[] = []
@@ -30,12 +32,14 @@ export function TextComponent({ component, base = { color: 'white' }, shadow = t
 		return parts
 	}, [state])
 
+	const { value: language } = useAsync(() => getLanguage(version), [version])
+
 	return <div class="text-component">
 		{shadow && <div style={createStyle(base, true)}>
-			{parts.map(p => <TextPart part={p} shadow={true} />)}
+			{parts.map(p => <TextPart part={p} shadow={true} lang={language ?? {}} />)}
 		</div>}
 		<div class="text-foreground" style={createStyle(base, false)}>
-			{parts.map(p => <TextPart part={p} />)}
+			{parts.map(p => <TextPart part={p} lang={language ?? {}} />)}
 		</div>
 	</div>
 }
@@ -104,15 +108,24 @@ const TextColors = {
 type TextColorKey = keyof typeof TextColors
 const TextColorKeys = Object.keys(TextColors)
 
-function TextPart({ part, shadow }: { part: PartData, shadow?: boolean }) {
+function TextPart({ part, shadow, lang }: { part: PartData, shadow?: boolean, lang: Record<string, string> }) {
 	if (part.translate) {
-		const { version } = useVersion()
-		const { value: translated } = useAsync(() => {
-			return getTranslation(version, part.translate!, part.with)
-		}, [version, part.translate, ...part.with ?? []])
-		return <span style={createStyle(part, shadow)}>{translated ?? part.translate}</span>
+		const str = resolveTranslate(part.translate, part.with, lang)
+		return <span style={createStyle(part, shadow)}>{str}</span>
 	}
 	return <span style={createStyle(part, shadow)}>{part.text}</span>
+}
+
+function resolveTranslate(translate: string, with_: any[] | undefined, lang: Record<string, string>): string {
+	const str = lang[translate]
+	if (typeof str !== 'string') return translate
+	const params = with_?.map((c): string => {
+		if (typeof c === 'string' || typeof c === 'number') return `${c}`
+		if (c.text) return c.text
+		if (c.translate) return resolveTranslate(c.translate, c.with, lang)
+		return ''
+	})
+	return replaceTranslation(str, params)
 }
 
 function createStyle(style: StyleData, shadow?: boolean) {
