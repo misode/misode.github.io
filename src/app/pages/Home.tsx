@@ -150,6 +150,11 @@ const KOFI_SUPPORTERS = [
 		name: 'oitsjustjose',
 		avatar: 'https://ko-fi.com/img/anon10.png',
 	},
+	{
+		name: 'rx97',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/78f6cf72-52e1-4953-99f5-dd38f55a9c6e.png',
+		url: 'https://github.com/RitikShah',
+	},
 ] 
 
 function Sponsors() {
