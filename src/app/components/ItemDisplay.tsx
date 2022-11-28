@@ -3,7 +3,7 @@ import { Identifier } from 'deepslate-1.18.2'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { itemHasGlint, MaxDamageItems } from '../previews/LootTable.js'
+import { itemHasGlint } from '../previews/LootTable.js'
 import { renderItem } from '../services/Resources.js'
 import { getCollections } from '../services/Schemas.js'
 import { ItemTooltip } from './ItemTooltip.jsx'
@@ -32,7 +32,7 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 		return () => el.current?.removeEventListener('mousemove', onMove)
 	}, [])
 
-	const maxDamage = MaxDamageItems.get(item.id.toString())
+	const maxDamage = item.getItem().durability
 
 	return <div class="item-display" ref={el}>
 		<ItemItself item={item} />

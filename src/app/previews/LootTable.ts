@@ -1,5 +1,5 @@
 import type { Random } from 'deepslate'
-import { Identifier, ItemStack, LegacyRandom, NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate'
+import { Enchantment, Identifier, ItemStack, LegacyRandom, NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate'
 import type { VersionId } from '../services/Schemas.js'
 import { clamp, getWeightedRandom, isObject } from '../Utils.js'
 
@@ -273,16 +273,15 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	enchant_randomly: ({ enchantments }) => (item, ctx) => {
 		const isBook = item.is('book')
 		if (enchantments === undefined || enchantments.length === 0) {
-			enchantments = [...Enchantments.keys()]
-				.filter(e => {
-					const data = getEnchantmentData(e)
-					return data.discoverable && (isBook || data.canEnchant(item.id.toString()))
-				})
+			enchantments = Enchantment.REGISTRY.map((_, ench) => ench)
+				.filter(ench => ench.isDiscoverable && (isBook || Enchantment.canEnchant(item, ench)))
+				.map(e => e.id.toString())
 		}
 		if (enchantments.length > 0) {
 			const id = enchantments[ctx.random.nextInt(enchantments.length)]
-			const data = getEnchantmentData(id)
-			const lvl = ctx.random.nextInt(data.maxLevel - data.minLevel + 1) + data.minLevel
+			const ench = Enchantment.REGISTRY.get(Identifier.parse(id))
+			if (ench === undefined) return
+			const lvl = ctx.random.nextInt(ench.maxLevel - ench.minLevel + 1) + ench.minLevel
 			if (isBook) {
 				item.tag = new NbtCompound()
 				item.count = 1
@@ -326,7 +325,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		item.count = clamp(oldCount + computeInt(count, ctx), 0, 64)
 	},
 	set_damage: ({ damage, add }) => (item, ctx) => {
-		const maxDamage = MaxDamageItems.get(item.id.toString())
+		const maxDamage = item.getItem().durability
 		if (maxDamage) {
 			const oldDamage = add ? 1 - item.tag.getNumber('Damage') / maxDamage : 0
 			const newDamage = 1 - clamp(computeFloat(damage, ctx) + oldDamage, 0, 1)
@@ -337,7 +336,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
 		Object.entries(enchantments).forEach(([id, level]) => {
 			const lvl = computeInt(level, ctx)
-			enchantItem(item, { id, lvl }, add)
+			enchantItem(item, { id: Identifier.parse(id), lvl }, add)
 		})
 	},
 	set_lore: ({ lore, replace }) => (item) => {
@@ -547,7 +546,7 @@ function enchantItem(item: ItemStack, enchant: Enchant, additive?: boolean) {
 		const oldEnch = enchantments[index]
 		oldEnch.set('lvl', new NbtShort(Math.max(additive ? oldEnch.getNumber('lvl') + enchant.lvl : enchant.lvl, 0)))
 	} else {
-		enchantments.push(new NbtCompound().set('id', new NbtString(enchant.id)).set('lvl', new NbtShort(enchant.lvl)))
+		enchantments.push(new NbtCompound().set('id', new NbtString(enchant.id.toString())).set('lvl', new NbtShort(enchant.lvl)))
 		index = enchantments.length - 1
 	}
 	if (enchantments[index].getNumber('lvl') === 0) {
@@ -557,8 +556,8 @@ function enchantItem(item: ItemStack, enchant: Enchant, additive?: boolean) {
 }
 
 function selectEnchantments(random: Random, item: ItemStack, levels: number, treasure: boolean): Enchant[] {
-	const enchantmentValue = EnchantmentItems.get(item.id.toString()) ?? 0
-	if (enchantmentValue <= 0) {
+	const enchantmentValue = item.getItem().enchantmentValue
+	if (enchantmentValue === undefined) {
 		return []
 	}
 	levels += 1 + random.nextInt(Math.floor(enchantmentValue / 4 + 1)) + random.nextInt(Math.floor(enchantmentValue / 4 + 1))
@@ -568,14 +567,14 @@ function selectEnchantments(random: Random, item: ItemStack, levels: number, tre
 	if (available.length === 0) {
 		return []
 	}
-	const result = []
+	const result: Enchant[] = []
 	const first = getWeightedRandom(random, available, getEnchantWeight)
 	if (first) result.push(first)
 
 	while (random.nextInt(50) <= levels) {
 		if (result.length > 0) {
 			const lastAdded = result[result.length - 1]
-			available = available.filter(a => isEnchantCompatible(a.id, lastAdded.id))
+			available = available.filter(a => Enchantment.isCompatible(Enchantment.REGISTRY.getOrThrow(a.id), Enchantment.REGISTRY.getOrThrow(lastAdded.id)))
 		}
 		if (available.length === 0) break
 		const ench = getWeightedRandom(random, available, getEnchantWeight)
@@ -586,353 +585,6 @@ function selectEnchantments(random: Random, item: ItemStack, levels: number, tre
 	return result
 }
 
-function getEnchantWeight(ench: Enchant) {
-	return EnchantmentsRarityWeights.get(getEnchantmentData(ench.id)?.rarity ?? 'common') ?? 0
-}
-
-function getAvailableEnchantments(item: ItemStack, levels: number, treasure: boolean): Enchant[] {
-	const result = []
-	const isBook = item.is('book')
-
-	for (const id of Enchantments.keys()) {
-		const ench = getEnchantmentData(id)!
-		if ((!ench.treasure || treasure) && ench.discoverable && (ench.canEnchant(item.id.toString()) || isBook)) {
-			for (let lvl = ench.maxLevel; lvl > ench.minLevel - 1; lvl -= 1) {
-				if (levels >= ench.minCost(lvl) && levels <= ench.maxCost(lvl)) {
-					result.push({ id, lvl })
-				}
-			}
-		}
-	}
-	return result
-}
-
-interface Enchant {
-	id: string,
-	lvl: number,
-}
-
-function isEnchantCompatible(a: string, b: string) {
-	return a !== b && isEnchantCompatibleRaw(a, b) && isEnchantCompatibleRaw(b, a)
-}
-
-function isEnchantCompatibleRaw(a: string, b: string) {
-	const ench = getEnchantmentData(a)
-	return ench?.isCompatible(b)
-}
-
-export const MaxDamageItems = new Map(Object.entries<number>({
-	'minecraft:carrot_on_a_stick': 25,
-	'minecraft:warped_fungus_on_a_stick': 100,
-	'minecraft:flint_and_steel': 64,
-	'minecraft:elytra': 432,
-	'minecraft:bow': 384,
-	'minecraft:fishing_rod': 64,
-	'minecraft:shears': 238,
-	'minecraft:shield': 336,
-	'minecraft:trident': 250,
-	'minecraft:crossbow': 465,
-
-	'minecraft:leather_helmet': 11 * 5,
-	'minecraft:leather_chestplate': 16 * 5,
-	'minecraft:leather_leggings': 15 * 5,
-	'minecraft:leather_boots': 13 * 5,
-	'minecraft:chainmail_helmet': 11 * 15,
-	'minecraft:chainmail_chestplate': 16 * 15,
-	'minecraft:chainmail_leggings': 15 * 15,
-	'minecraft:chainmail_boots': 13 * 15,
-	'minecraft:iron_helmet': 11 * 15,
-	'minecraft:iron_chestplate': 16 * 15,
-	'minecraft:iron_leggings': 15 * 15,
-	'minecraft:iron_boots': 13 * 15,
-	'minecraft:diamond_helmet': 11 * 33,
-	'minecraft:diamond_chestplate': 16 * 33,
-	'minecraft:diamond_leggings': 15 * 33,
-	'minecraft:diamond_boots': 13 * 33,
-	'minecraft:golden_helmet': 11 * 7,
-	'minecraft:golden_chestplate': 16 * 7,
-	'minecraft:golden_leggings': 15 * 7,
-	'minecraft:golden_boots': 13 * 7,
-	'minecraft:netherite_helmet': 11 * 37,
-	'minecraft:netherite_chestplate': 16 * 37,
-	'minecraft:netherite_leggings': 15 * 37,
-	'minecraft:netherite_boots': 13 * 37,
-	'minecraft:turtle_helmet': 11 * 25,
-
-	'minecraft:wooden_sword': 59,
-	'minecraft:wooden_shovel': 59,
-	'minecraft:wooden_pickaxe': 59,
-	'minecraft:wooden_axe': 59,
-	'minecraft:wooden_hoe': 59,
-	'minecraft:stone_sword': 131,
-	'minecraft:stone_shovel': 131,
-	'minecraft:stone_pickaxe': 131,
-	'minecraft:stone_axe': 131,
-	'minecraft:stone_hoe': 131,
-	'minecraft:iron_sword': 250,
-	'minecraft:iron_shovel': 250,
-	'minecraft:iron_pickaxe': 250,
-	'minecraft:iron_axe': 250,
-	'minecraft:iron_hoe': 250,
-	'minecraft:diamond_sword': 1561,
-	'minecraft:diamond_shovel': 1561,
-	'minecraft:diamond_pickaxe': 1561,
-	'minecraft:diamond_axe': 1561,
-	'minecraft:diamond_hoe': 1561,
-	'minecraft:gold_sword': 32,
-	'minecraft:gold_shovel': 32,
-	'minecraft:gold_pickaxe': 32,
-	'minecraft:gold_axe': 32,
-	'minecraft:gold_hoe': 32,
-	'minecraft:netherite_sword': 2031,
-	'minecraft:netherite_shovel': 2031,
-	'minecraft:netherite_pickaxe': 2031,
-	'minecraft:netherite_axe': 2031,
-	'minecraft:netherite_hoe': 2031,
-}))
-
-const EnchantmentItems = new Map(Object.entries<number>({
-	'minecraft:book': 1,
-	'minecraft:fishing_rod': 1,
-	'minecraft:trident': 1,
-	'minecraft:bow': 1,
-	'minecraft:crossbow': 1,
-
-	'minecraft:leather_helmet': 15,
-	'minecraft:leather_chestplate': 15,
-	'minecraft:leather_leggings': 15,
-	'minecraft:leather_boots': 15,
-	'minecraft:chainmail_helmet': 12,
-	'minecraft:chainmail_chestplate': 12,
-	'minecraft:chainmail_leggings': 12,
-	'minecraft:chainmail_boots': 12,
-	'minecraft:iron_helmet': 9,
-	'minecraft:iron_chestplate': 9,
-	'minecraft:iron_leggings': 9,
-	'minecraft:iron_boots': 9,
-	'minecraft:diamond_helmet': 10,
-	'minecraft:diamond_chestplate': 10,
-	'minecraft:diamond_leggings': 10,
-	'minecraft:diamond_boots': 10,
-	'minecraft:golden_helmet': 25,
-	'minecraft:golden_chestplate': 25,
-	'minecraft:golden_leggings': 25,
-	'minecraft:golden_boots': 25,
-	'minecraft:netherite_helmet': 15,
-	'minecraft:netherite_chestplate': 15,
-	'minecraft:netherite_leggings': 15,
-	'minecraft:netherite_boots': 15,
-	'minecraft:turtle_helmet': 15,
-
-	'minecraft:wooden_sword': 15,
-	'minecraft:wooden_shovel': 15,
-	'minecraft:wooden_pickaxe': 15,
-	'minecraft:wooden_axe': 15,
-	'minecraft:wooden_hoe': 15,
-	'minecraft:stone_sword': 5,
-	'minecraft:stone_shovel': 5,
-	'minecraft:stone_pickaxe': 5,
-	'minecraft:stone_axe': 5,
-	'minecraft:stone_hoe': 5,
-	'minecraft:iron_sword': 14,
-	'minecraft:iron_shovel': 14,
-	'minecraft:iron_pickaxe': 14,
-	'minecraft:iron_axe': 14,
-	'minecraft:iron_hoe': 14,
-	'minecraft:diamond_sword': 10,
-	'minecraft:diamond_shovel': 10,
-	'minecraft:diamond_pickaxe': 10,
-	'minecraft:diamond_axe': 10,
-	'minecraft:diamond_hoe': 10,
-	'minecraft:gold_sword': 22,
-	'minecraft:gold_shovel': 22,
-	'minecraft:gold_pickaxe': 22,
-	'minecraft:gold_axe': 22,
-	'minecraft:gold_hoe': 22,
-	'minecraft:netherite_sword': 15,
-	'minecraft:netherite_shovel': 15,
-	'minecraft:netherite_pickaxe': 15,
-	'minecraft:netherite_axe': 15,
-	'minecraft:netherite_hoe': 15,
-}))
-
-interface EnchantmentData {
-	id: string
-	rarity: 'common' | 'uncommon' | 'rare' | 'very_rare'
-	category: 'armor' | 'armor_feet' | 'armor_legs' | 'armor_chest' | 'armor_head' | 'weapon' | 'digger' | 'fishing_rod' | 'trident' | 'breakable' | 'bow' | 'wearable' | 'crossbow' | 'vanishable'
-	minLevel: number
-	maxLevel: number
-	minCost: (lvl: number) => number
-	maxCost: (lvl: number) => number
-	discoverable: boolean
-	treasure: boolean
-	curse: boolean
-	canEnchant: (id: string) => boolean
-	isCompatible: (other: string) => boolean
-}
-
-export function getEnchantmentData(id: string): EnchantmentData {
-	const data = Enchantments.get(id)
-	const category = data?.category ?? 'armor'
-	return {
-		id,
-		rarity: data?.rarity ?? 'common',
-		category,
-		minLevel: data?.minLevel	?? 1,
-		maxLevel: data?.maxLevel	?? 1,
-		minCost: data?.minCost ?? ((lvl) => 1 + lvl * 10),
-		maxCost: data?.maxCost ?? ((lvl) => 6 + lvl * 10),
-		discoverable: data?.discoverable ?? true,
-		treasure: data?.treasure ?? false,
-		curse: data?.curse ?? false,
-		canEnchant: id => EnchantmentsCategories.get(category)!.includes(id),
-		isCompatible: data?.isCompatible ?? (() => true),
-	}
-}
-
-const PROTECTION_ENCHANTS = ['minecraft:protection', 'minecraft:fire_protection', 'minecraft:blast_protection', 'minecraft:projectile_protection']
-const DAMAGE_ENCHANTS = ['minecraft:sharpness', 'minecraft:smite', 'minecraft:bane_of_arthropods']
-
-const Enchantments = new Map(Object.entries<Partial<EnchantmentData>>({
-	'minecraft:protection': { rarity: 'common', category: 'armor', maxLevel: 4,
-		minCost: lvl => 1 + (lvl - 1) * 11,
-		maxCost: lvl => 1 + (lvl - 1) * 11 + 11,
-		isCompatible: other => !PROTECTION_ENCHANTS.includes(other) },
-	'minecraft:fire_protection': { rarity: 'uncommon', category: 'armor', maxLevel: 4,
-		minCost: lvl => 10 + (lvl - 1) * 8,
-		maxCost: lvl => 10 + (lvl - 1) * 8 + 8,
-		isCompatible: other => !PROTECTION_ENCHANTS.includes(other) },
-	'minecraft:feather_falling': { rarity: 'uncommon', category: 'armor_feet', maxLevel: 4,
-		minCost: lvl => 5 + (lvl - 1) * 6,
-		maxCost: lvl => 5 + (lvl - 1) * 6 + 6 },
-	'minecraft:blast_protection': { rarity: 'rare', category: 'armor', maxLevel: 4,
-		minCost: lvl => 5 + (lvl - 1) * 8,
-		maxCost: lvl => 5 + (lvl - 1) * 8 + 8,
-		isCompatible: other => !PROTECTION_ENCHANTS.includes(other) },
-	'minecraft:projectile_protection': { rarity: 'uncommon', category: 'armor', maxLevel: 4,
-		minCost: lvl => 3 + (lvl - 1) * 6,
-		maxCost: lvl => 3 + (lvl - 1) * 6 + 6,
-		isCompatible: other => !PROTECTION_ENCHANTS.includes(other) },
-	'minecraft:respiration': { rarity: 'rare', category: 'armor_head', maxLevel: 3,
-		minCost: lvl => 10 * lvl,
-		maxCost: lvl => 10 * lvl + 30 },
-	'minecraft:aqua_affinity': { rarity: 'rare', category: 'armor_head',
-		minCost: () => 1,
-		maxCost: () => 40 },
-	'minecraft:thorns': { rarity: 'very_rare', category: 'armor_chest', maxLevel: 3,
-		minCost: lvl => 10 + 20 * (lvl - 1),
-		maxCost: lvl => 10 + 20 * (lvl - 1) + 50 },
-	'minecraft:depth_strider': { rarity: 'rare', category: 'armor_feet', maxLevel: 3,
-		minCost: lvl => 10 * lvl,
-		maxCost: lvl => 10 * lvl + 15,
-		isCompatible: other => other !== 'minecraft:frost_walker' },
-	'minecraft:frost_walker': { rarity: 'rare', category: 'armor_feet', maxLevel: 2, treasure: true,
-		minCost: lvl => 10 * lvl,
-		maxCost: lvl => 10 * lvl + 15,
-		isCompatible: other => other !== 'minecraft:depth_strider' },
-	'minecraft:binding_curse': { rarity: 'very_rare', category: 'wearable', treasure: true, curse: true,
-		minCost: () => 25,
-		maxCost: () => 50 },
-	'minecraft:soul_speed': { rarity: 'very_rare', category: 'armor_feet', maxLevel: 3,
-		discoverable: false, treasure: true,
-		minCost: lvl => 10 * lvl,
-		maxCost: lvl => 10 * lvl + 15 },
-	'minecraft:swift_sneak': { rarity: 'very_rare', category: 'armor_legs', maxLevel: 3,
-		discoverable: false, treasure: true,
-		minCost: lvl => 25 * lvl,
-		maxCost: lvl => 25 * lvl + 50 },
-	'minecraft:sharpness': { rarity: 'common', category: 'weapon', maxLevel: 5,
-		minCost: lvl => 1 + (lvl - 1) * 11,
-		maxCost: lvl => 1 + (lvl - 1) * 11 + 20,
-		isCompatible: other => !DAMAGE_ENCHANTS.includes(other) },
-	'minecraft:smite': { rarity: 'common', category: 'weapon', maxLevel: 5,
-		minCost: lvl => 5 + (lvl - 1) * 8,
-		maxCost: lvl => 5 + (lvl - 1) * 8 + 20,
-		isCompatible: other => !DAMAGE_ENCHANTS.includes(other) },
-	'minecraft:bane_of_arthropods': { rarity: 'common', category: 'weapon', maxLevel: 5,
-		minCost: lvl => 5 + (lvl - 1) * 8,
-		maxCost: lvl => 5 + (lvl - 1) * 8 + 20,
-		isCompatible: other => !DAMAGE_ENCHANTS.includes(other) },
-	'minecraft:knockback': { rarity: 'uncommon', category: 'weapon', maxLevel: 2,
-		minCost: lvl => 5 + 20 * (lvl - 1),
-		maxCost: lvl => 1 + lvl * 10 + 50 },
-	'minecraft:fire_aspect': { rarity: 'rare', category: 'weapon', maxLevel: 2,
-		minCost: lvl => 5 + 20 * (lvl - 1),
-		maxCost: lvl => 1 + lvl * 10 + 50 },
-	'minecraft:looting': { rarity: 'rare', category: 'weapon', maxLevel: 3,
-		minCost: lvl => 15 + (lvl - 1) * 9,
-		maxCost: lvl => 1 + lvl * 10 + 50,
-		isCompatible: other => other !== 'minecraft:silk_touch' },
-	'minecraft:sweeping': { rarity: 'rare', category: 'weapon', maxLevel: 3,
-		minCost: lvl => 5 + (lvl - 1) * 9,
-		maxCost: lvl => 5 + (lvl - 1) * 9 + 15 },
-	'minecraft:efficiency': { rarity: 'common', category: 'digger', maxLevel: 5,
-		minCost: lvl => 1 + 10 * (lvl - 1),
-		maxCost: lvl => 1 + lvl * 10 + 50,
-		canEnchant: id => id === 'minecraft:shears' || EnchantmentsCategories.get('digger')!.includes(id) },
-	'minecraft:silk_touch': { rarity: 'very_rare', category: 'digger',
-		minCost: () => 15,
-		maxCost: lvl => 1 + lvl * 10 + 50,
-		isCompatible: other => other !== 'minecraft:fortune' },
-	'minecraft:unbreaking': { rarity: 'uncommon', category: 'breakable', maxLevel: 3,
-		minCost: lvl => 5 + (lvl - 1) * 8,
-		maxCost: lvl => 1 + lvl * 10 + 50 },
-	'minecraft:fortune': { rarity: 'rare', category: 'digger', maxLevel: 3,
-		minCost: lvl => 15 + (lvl - 1) * 9,
-		maxCost: lvl => 1 + lvl * 10 + 50,
-		isCompatible: other => other !== 'minecraft:silk_touch' },
-	'minecraft:power': { rarity: 'common', category: 'bow', maxLevel: 5,
-		minCost: lvl => 1 + (lvl - 1) * 10,
-		maxCost: lvl => 1 + (lvl - 1) * 10 + 15 },
-	'minecraft:punch': { rarity: 'rare', category: 'bow', maxLevel: 2,
-		minCost: lvl => 12 + (lvl - 1) * 20,
-		maxCost: lvl => 12 + (lvl - 1) * 20 + 25 },
-	'minecraft:flame': { rarity: 'rare', category: 'bow',
-		minCost: () => 20,
-		maxCost: () => 50 },
-	'minecraft:infinity': { rarity: 'very_rare', category: 'bow',
-		minCost: () => 20,
-		maxCost: () => 50,
-		isCompatible: other => other !== 'minecraft:mending' },
-	'minecraft:luck_of_the_sea': { rarity: 'rare', category: 'fishing_rod', maxLevel: 3,
-		minCost: lvl => 15 + (lvl - 1) * 9,
-		maxCost: lvl => 1 + lvl * 10 + 50,
-		isCompatible: other => other !== 'minecraft:silk_touch' },
-	'minecraft:lure': { rarity: 'rare', category: 'fishing_rod', maxLevel: 3,
-		minCost: lvl => 15 + (lvl - 1) * 9,
-		maxCost: lvl => 1 + lvl * 10 + 50 },
-	'minecraft:loyalty': { rarity: 'uncommon', category: 'trident', maxLevel: 3,
-		minCost: lvl => 5 + lvl * 7,
-		maxCost: () => 50 },
-	'minecraft:impaling': { rarity: 'rare', category: 'trident', maxLevel: 5,
-		minCost: lvl => 1 + (lvl - 1) * 8,
-		maxCost: lvl => 1 + (lvl - 1) * 8 + 20 },
-	'minecraft:riptide': { rarity: 'rare', category: 'trident', maxLevel: 3,
-		minCost: lvl => 5 + lvl * 7,
-		maxCost: () => 50,
-		isCompatible: other => !['minecraft:riptide', 'minecraft:channeling'].includes(other) },
-	'minecraft:channeling': { rarity: 'very_rare', category: 'trident',
-		minCost: () => 25,
-		maxCost: () => 50 },
-	'minecraft:multishot': { rarity: 'rare', category: 'crossbow',
-		minCost: () => 20,
-		maxCost: () => 50,
-		isCompatible: other => other !== 'minecraft:piercing' },
-	'minecraft:quick_charge': { rarity: 'uncommon', category: 'crossbow', maxLevel: 3,
-		minCost: lvl => 12 + (lvl - 1) * 20,
-		maxCost: () => 50 },
-	'minecraft:piercing': { rarity: 'common', category: 'crossbow', maxLevel: 4,
-		minCost: lvl => 1 + (lvl - 1) * 10,
-		maxCost: () => 50,
-		isCompatible: other => other !== 'minecraft:multishot' },
-	'minecraft:mending': { rarity: 'rare', category: 'breakable', treasure: true,
-		minCost: lvl => lvl * 25,
-		maxCost: lvl => lvl * 25 + 50 },
-	'minecraft:vanishing_curse': { rarity: 'very_rare', category: 'vanishable', treasure: true, curse: true,
-		minCost: () => 25,
-		maxCost: () => 50 },
-}))
-
 const EnchantmentsRarityWeights = new Map(Object.entries<number>({
 	common: 10,
 	uncommon: 5,
@@ -940,101 +592,30 @@ const EnchantmentsRarityWeights = new Map(Object.entries<number>({
 	very_rare: 1,
 }))
 
-const ARMOR_FEET = [
-	'minecraft:leather_boots',
-	'minecraft:chainmail_boots',
-	'minecraft:iron_boots',
-	'minecraft:diamond_boots',
-	'minecraft:golden_boots',
-	'minecraft:netherite_boots',
-]
-const ARMOR_LEGS = [
-	'minecraft:leather_leggings',
-	'minecraft:chainmail_leggings',
-	'minecraft:iron_leggings',
-	'minecraft:diamond_leggings',
-	'minecraft:golden_leggings',
-	'minecraft:netherite_leggings',
-]
-const ARMOR_CHEST = [
-	'minecraft:leather_chestplate',
-	'minecraft:chainmail_chestplate',
-	'minecraft:iron_chestplate',
-	'minecraft:diamond_chestplate',
-	'minecraft:golden_chestplate',
-	'minecraft:netherite_chestplate',
-]
-const ARMOR_HEAD = [
-	'minecraft:leather_helmet',
-	'minecraft:chainmail_helmet',
-	'minecraft:iron_helmet',
-	'minecraft:diamond_helmet',
-	'minecraft:golden_helmet',
-	'minecraft:netherite_helmet',
-	'minecraft:turtle_helmet',
-]
-const ARMOR = [...ARMOR_FEET, ...ARMOR_LEGS, ...ARMOR_CHEST, ...ARMOR_HEAD]
-const SWORD = [
-	'minecraft:wooden_sword',
-	'minecraft:stone_sword',
-	'minecraft:iron_sword',
-	'minecraft:diamond_sword',
-	'minecraft:gold_sword',
-	'minecraft:netherite_sword',
-]
-const DIGGER = [
-	'minecraft:wooden_shovel',
-	'minecraft:wooden_pickaxe',
-	'minecraft:wooden_axe',
-	'minecraft:wooden_hoe',
-	'minecraft:stone_shovel',
-	'minecraft:stone_pickaxe',
-	'minecraft:stone_axe',
-	'minecraft:stone_hoe',
-	'minecraft:iron_shovel',
-	'minecraft:iron_pickaxe',
-	'minecraft:iron_axe',
-	'minecraft:iron_hoe',
-	'minecraft:diamond_shovel',
-	'minecraft:diamond_pickaxe',
-	'minecraft:diamond_axe',
-	'minecraft:diamond_hoe',
-	'minecraft:gold_shovel',
-	'minecraft:gold_pickaxe',
-	'minecraft:gold_axe',
-	'minecraft:gold_hoe',
-	'minecraft:netherite_shovel',
-	'minecraft:netherite_pickaxe',
-	'minecraft:netherite_axe',
-	'minecraft:netherite_hoe',
-]
-const BREAKABLE = [...MaxDamageItems.keys()]
-const WEARABLE = [
-	...ARMOR,
-	'minecraft:elytra',
-	'minecraft:carved_pumpkin',
-	'minecraft:creeper_head',
-	'minecraft:dragon_head',
-	'minecraft:player_head',
-	'minecraft:zombie_head',
-]
+function getEnchantWeight(ench: Enchant) {
+	return EnchantmentsRarityWeights.get(Enchantment.REGISTRY.get(ench.id)?.rarity ?? 'common') ?? 10
+}
 
-const EnchantmentsCategories = new Map(Object.entries<string[]>({
-	armor: ARMOR,
-	armor_feet: ARMOR_FEET,
-	armor_legs: ARMOR_LEGS,
-	armor_chest: ARMOR_CHEST,
-	armor_head: ARMOR_HEAD,
-	weapon: SWORD,
-	digger: DIGGER,
-	fishing_rod: ['minecraft:fishing_rod'],
-	trident: ['minecraft:trident'],
-	breakable: BREAKABLE,
-	bow: ['minecraft:bow'],
-	wearable: WEARABLE,
-	crossbow: ['minecraft:crossbow'],
-	vanishable: [...BREAKABLE, 'minecraft:compass'],
-}))
+function getAvailableEnchantments(item: ItemStack, levels: number, treasure: boolean): Enchant[] {
+	const result: Enchant[] = []
+	const isBook = item.is('book')
+
+	Enchantment.REGISTRY.forEach((id, ench) => {
+		if ((!ench.isTreasure || treasure) && ench.isDiscoverable && (Enchantment.canEnchant(item, ench) || isBook)) {
+			for (let lvl = ench.maxLevel; lvl > ench.minLevel - 1; lvl -= 1) {
+				if (levels >= ench.minCost(lvl) && levels <= ench.maxCost(lvl)) {
+					result.push({ id, lvl })
+				}
+			}
+		}
+	})
+	return result
+}
+
+interface Enchant {
+	id: Identifier,
+	lvl: number,
+}
 
 const AlwaysHasGlint = new Set([
 	'minecraft:debug_stick',

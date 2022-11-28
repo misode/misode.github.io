@@ -1,9 +1,8 @@
 import type { ItemStack } from 'deepslate'
-import { AttributeModifierOperation, MobEffectInstance, NbtList, NbtType, Potion } from 'deepslate'
+import { AttributeModifierOperation, Enchantment, Identifier, MobEffectInstance, NbtList, NbtType, Potion } from 'deepslate'
 import { useMemo } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { getEnchantmentData, MaxDamageItems } from '../previews/LootTable.js'
 import { getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
 
@@ -28,7 +27,7 @@ export function ItemTooltip({ item, advanced }: Props) {
 	const displayName = item.tag.getCompound('display').getString('Name')
 	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(item.id.path))
 
-	const maxDamage = MaxDamageItems.get(item.id.toString())
+	const durability = item.getItem().durability
 	const enchantments = (item.is('enchanted_book') ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
 
 	const effects = isPotion ? Potion.getAllEffects(item) : []
@@ -71,8 +70,8 @@ export function ItemTooltip({ item, advanced }: Props) {
 		{enchantments.map(enchantment => {
 			const id = enchantment.getString('id')
 			const lvl = enchantment.getNumber('lvl')
-			const ench = getEnchantmentData(id)
-			const component: any[] = [{ translate: `enchantment.${id.replace(':', '.')}`, color: ench?.curse ? 'red' : 'gray' }]
+			const ench = Enchantment.REGISTRY.get(Identifier.parse(id))
+			const component: any[] = [{ translate: `enchantment.${id.replace(':', '.')}`, color: ench?.isCurse ? 'red' : 'gray' }]
 			if (lvl !== 1 || ench?.maxLevel !== 1) {
 				component.push(' ', { translate: `enchantment.level.${lvl}`})
 			}
@@ -85,7 +84,7 @@ export function ItemTooltip({ item, advanced }: Props) {
 			{(item.tag.getCompound('display').getList('Lore', NbtType.String)).map((line) => <TextComponent component={JSON.parse(line.getAsString())} base={{ color: 'dark_purple', italic: true }} />)}
 		</>}
 		{item.tag.getBoolean('Unbreakable') && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
-		{(advanced && item.tag.getNumber('Damage') > 0 && maxDamage) && <TextComponent component={{ translate: 'item.durability', with: [`${maxDamage - item.tag.getNumber('Damage')}`, `${maxDamage}`] }} />}
+		{(advanced && item.tag.getNumber('Damage') > 0 && durability) && <TextComponent component={{ translate: 'item.durability', with: [`${durability - item.tag.getNumber('Damage')}`, `${durability}`] }} />}
 		{advanced && <>
 			<TextComponent component={{ text: item.id.toString(), color: 'dark_gray'}} />
 			{item.tag.size > 0 && <TextComponent component={{ translate: 'item.nbt_tags', with: [item.tag.size], color: 'dark_gray' }} />}
