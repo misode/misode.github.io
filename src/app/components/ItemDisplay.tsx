@@ -1,5 +1,5 @@
-import type { ItemStack } from 'deepslate'
-import { Identifier } from 'deepslate-1.18.2'
+import type { ItemStack } from 'deepslate/core'
+import { Identifier } from 'deepslate/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'

@@ -1,5 +1,6 @@
-import type { Random } from 'deepslate'
-import { Enchantment, Identifier, ItemStack, LegacyRandom, NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate'
+import type { Random } from 'deepslate/core'
+import { Enchantment, Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
+import { NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate/nbt'
 import type { VersionId } from '../services/Schemas.js'
 import { clamp, getWeightedRandom, isObject } from '../Utils.js'
 

@@ -1,5 +1,6 @@
-import type { ItemStack } from 'deepslate'
-import { AttributeModifierOperation, Enchantment, Identifier, MobEffectInstance, NbtList, NbtType, Potion } from 'deepslate'
+import type { ItemStack } from 'deepslate/core'
+import { AttributeModifierOperation, Enchantment, Identifier, MobEffectInstance, Potion } from 'deepslate/core'
+import { NbtList, NbtType } from 'deepslate/nbt'
 import { useMemo } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
