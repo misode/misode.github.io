@@ -1,4 +1,4 @@
-import { Giscus as GiscusReact } from '@giscus/react'
+import GiscusReact from '@giscus/react'
 import { useTheme } from '../contexts/index.js'
 
 interface Props {

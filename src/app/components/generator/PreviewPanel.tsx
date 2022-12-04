@@ -5,8 +5,9 @@ import { useModel } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion } from '../../services/index.js'
 import { BiomeSourcePreview, DecoratorPreview, DensityFunctionPreview, NoisePreview, NoiseSettingsPreview } from '../previews/index.js'
+import { LootTablePreview } from '../previews/LootTablePreview.jsx'
 
-export const HasPreview = ['dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
+export const HasPreview = ['loot_table', 'dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature']
 
 type PreviewPanelProps = {
 	model: DataModel | undefined,
@@ -23,6 +24,11 @@ export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
 	})
 
 	if (!model) return <></>
+
+	if (id === 'loot_table') {
+		const data = model.get(new Path([]))
+		if (data) return <LootTablePreview {...{ model, version, shown, data }} />
+	}
 
 	if (id === 'dimension' && model.get(new Path(['generator', 'type']))?.endsWith('noise')) {
 		const data = model.get(new Path(['generator', 'biome_source']))

@@ -17,5 +17,5 @@ export function Card({ title, overlay, link, children }: Props) {
 
 	return link === undefined
 		?	<div class="card">{content}</div>
-		: <a class="card" href={link} >{content}</a>
+		: <a class="card" href={link} target={link.startsWith('https://') ? '_blank' : undefined}>{content}</a>
 }

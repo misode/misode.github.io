@@ -14,6 +14,8 @@ export function Versions({}: Props) {
 
 	const [selectedId] = useSearchParam('id')
 	const selected = (versions ?? []).find(v => v.id === selectedId)
+	
+	const [tab] = useSearchParam('tab')
 
 	useTitle(
 		selected ? `Minecraft ${selected.name}` : 'Versions Explorer',
@@ -29,9 +31,9 @@ export function Versions({}: Props) {
 			{selectedId ? <>
 				<div class="navigation">
 					<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
-					<BtnLink link={previousVersion ? `/versions/?id=${previousVersion.id}` : undefined}
+					<BtnLink link={previousVersion ? `/versions/?id=${previousVersion.id}${tab ? `&tab=${tab}` : ''}` : undefined}
 						icon="arrow_left" label={locale('versions.previous')} />
-					<BtnLink link={nextVersion ? `/versions/?id=${nextVersion.id}` : undefined} 
+					<BtnLink link={nextVersion ? `/versions/?id=${nextVersion.id}${tab ? `&tab=${tab}` : ''}` : undefined} 
 						icon="arrow_right" label={locale('versions.next')} swapped />
 				</div>
 				<VersionDetail id={selectedId} version={selected} />

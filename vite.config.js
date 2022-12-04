@@ -1,5 +1,4 @@
 import preact from '@preact/preset-vite'
-import alias from '@rollup/plugin-alias'
 import html from '@rollup/plugin-html'
 import glob from 'fast-glob'
 import fs from 'fs'
@@ -30,18 +29,21 @@ const guides = glob.sync('src/guides/**/*.md').flatMap(g => {
 })
 
 export default defineConfig({
+	server: {
+		port: 3000,
+	},
+	resolve: {
+		alias: [
+			{ find: 'react', replacement: 'preact/compat' },
+			{ find: 'react-dom/test-utils', replacement: 'preact/test-utils' },
+			{ find: 'react-dom', replacement: 'preact/compat' },
+			{ find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' },
+		],
+	},
 	build: {
 		sourcemap: true,
 		rollupOptions: {
 			plugins: [
-				alias({
-					entries: [
-						{ find: 'react', replacement: 'preact/compat' },
-						{ find: 'react-dom/test-utils', replacement: 'preact/test-utils' },
-						{ find: 'react-dom', replacement: 'preact/compat' },
-						{ find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' },
-					],
-				}),
 				html({
 					fileName: '404.html',
 					title: '404',
@@ -83,8 +85,6 @@ export default defineConfig({
 		preact(),
 		viteStaticCopy({
 			targets: [
-				{ src: 'src/.nojekyll', dest: '' },
-				{ src: 'src/sitemap.txt', dest: '' },
 				{ src: 'src/styles/giscus.css', dest: 'assets' },
 				{ src: 'src/styles/giscus-burn.css', dest: 'assets' },
 				{ src: 'src/guides/*', dest: 'guides' },

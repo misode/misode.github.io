@@ -1,3 +1,4 @@
+import type { ColormapType } from './previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 
 type Method = 'menu' | 'hotkey'
@@ -107,6 +108,12 @@ export namespace Analytics {
 	export function setTreeViewMode(tree_view_mode: string) {
 		gtag('set', {
 			tree_view_mode,
+		})
+	}
+
+	export function setColormap(colormap: ColormapType) {
+		gtag('set', {
+			colormap,
 		})
 	}
 

@@ -1,5 +1,7 @@
 import type { Project } from './contexts/index.js'
 import { DRAFT_PROJECT } from './contexts/index.js'
+import type { ColormapType } from './previews/Colormap.js'
+import { ColormapTypes } from './previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 import { VersionIds } from './services/index.js'
 
@@ -13,9 +15,11 @@ export namespace Store {
 	export const ID_SOUNDS_VERSION = 'minecraft_sounds_version'
 	export const ID_PROJECTS = 'misode_projects'
 	export const ID_BACKUPS = 'misode_generator_backups'
+	export const ID_PREVIEW_PANEL_OPEN = 'misode_preview_panel_open'
 	export const ID_PROJECT_PANEL_OPEN = 'misode_project_panel_open'
 	export const ID_OPEN_PROJECT = 'misode_open_project'
 	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
+	export const ID_COLORMAP = 'misode_colormap'
 	export const ID_GENERATOR_HISTORY = 'misode_generator_history'
 
 	export function getLanguage() {
@@ -71,6 +75,12 @@ export namespace Store {
 		return backups[id]
 	}
 
+	export function getPreviewPanelOpen(): boolean | undefined {
+		const open = localStorage.getItem(ID_PREVIEW_PANEL_OPEN)
+		if (open === null) return undefined
+		return JSON.parse(open)
+	}
+
 	export function getProjectPanelOpen(): boolean | undefined {
 		const open = localStorage.getItem(ID_PROJECT_PANEL_OPEN)
 		if (open === null) return undefined
@@ -83,6 +93,14 @@ export namespace Store {
 
 	export function getTreeViewMode() {
 		return localStorage.getItem(ID_TREE_VIEW_MODE) ?? 'resources'
+	}
+
+	export function getColormap(): ColormapType | undefined {
+		const value = localStorage.getItem(ID_COLORMAP)
+		if (value === null || !ColormapTypes.includes(value as ColormapType)) {
+			return undefined
+		}
+		return value as ColormapType
 	}
 
 	export function getGeneratorHistory(): string[] {
@@ -131,6 +149,14 @@ export namespace Store {
 		localStorage.setItem(ID_BACKUPS, JSON.stringify(backups))
 	}
 
+	export function setPreviewPanelOpen(open: boolean | undefined) {
+		if (open === undefined) {
+			localStorage.removeItem(ID_PREVIEW_PANEL_OPEN)
+		} else {
+			localStorage.setItem(ID_PREVIEW_PANEL_OPEN, JSON.stringify(open))
+		}
+	}
+
 	export function setProjectPanelOpen(open: boolean | undefined) {
 		if (open === undefined) {
 			localStorage.removeItem(ID_PROJECT_PANEL_OPEN)
@@ -149,6 +175,10 @@ export namespace Store {
 
 	export function setTreeViewMode(mode: string | undefined) {
 		if (mode) localStorage.setItem(ID_TREE_VIEW_MODE, mode)
+	}
+
+	export function setColormap(colormap: ColormapType | undefined) {
+		if (colormap) localStorage.setItem(ID_COLORMAP, colormap)
 	}
 
 	export function visitGenerator(id: string) {

@@ -35,6 +35,7 @@ export function Home({}: Props) {
 					<Tools />
 				</div>}
 			</div>
+			<Sponsors />
 			<Giscus />
 			<Footer />
 		</div>
@@ -122,6 +123,62 @@ function Changelog() {
 	const latestChanges = useMemo(() => changes?.sort((a, b) => b.order - a.order).slice(0, 2), [changes])
 
 	return <ToolGroup title={locale('changelog')} link="/changelog/" titleIcon="git_commit">
-		{latestChanges?.map(change => <ChangelogEntry minimal={!hugeScreen} change={change} />)}
+		{latestChanges?.map(change => <ChangelogEntry minimal={!hugeScreen} short={true} change={change} />)}
 	</ToolGroup>
+}
+
+const KOFI_SUPPORTERS = [
+	{
+		name: 'RoarkCats',
+		avatar: 'https://ko-fi.com/img/anon7.png',
+	},
+	{
+		name: 'MC Silver',
+		avatar: 'https://ko-fi.com/img/anon7.png',
+	},
+	{
+		name: 'Hugman',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
+		url: 'https://ko-fi.com/G2G5DNROO',
+	},
+	{
+		name: 'TelepathicGrunt',
+		avatar: 'https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80',
+		url: 'https://github.com/TelepathicGrunt',
+	},
+	{
+		name: 'oitsjustjose',
+		avatar: 'https://ko-fi.com/img/anon10.png',
+	},
+	{
+		name: 'rx97',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/78f6cf72-52e1-4953-99f5-dd38f55a9c6e.png',
+		url: 'https://github.com/RitikShah',
+	},
+] 
+
+function Sponsors() {
+	const { value } = useAsync(() => {
+		return fetch('https://ghs.vercel.app/sponsors/misode').then(r => r.json())
+	}, [])
+
+	const supporters = useMemo(() => {
+		const githubSponsors = value?.sponsors?.map((sponsor: any) => ({
+			name: sponsor.handle,
+			avatar: sponsor.avatar,
+			url: sponsor.profile,
+		})) ?? []
+		return [...githubSponsors, ...KOFI_SUPPORTERS]
+	}, [value])
+
+	return <div class="sponsors">
+		<h3>Supporters</h3>
+		<div class="sponsors-list">
+			{supporters?.map((s: any) =>
+				<a class="tooltipped tip-se" href={s.url} target="_blank" aria-label={s.name}>
+					<img width={48} height={48} src={s.avatar} alt={s.name} />
+				</a>
+			)}
+		</div>
+	</div>
 }

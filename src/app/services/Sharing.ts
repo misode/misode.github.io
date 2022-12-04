@@ -1,7 +1,7 @@
 import lz from 'lz-string'
 import type { VersionId } from './Schemas.js'
 
-const API_PREFIX = 'https://z15g7can.directus.app/items'
+const API_PREFIX = 'https://snippets.misode.workers.dev'
 
 const ShareCache = new Map<string, string>()
 
@@ -13,7 +13,7 @@ export async function shareSnippet(type: string, version: VersionId, jsonData: a
 		const body = JSON.stringify({ data, type, version, show_preview })
 		let id = ShareCache.get(body)
 		if (!id) {
-			const snippet = await fetchApi('/snippets', body)
+			const snippet = await fetchApi('/', body)
 			ShareCache.set(body, snippet.id)
 			id = snippet.id as string
 		}
@@ -28,7 +28,7 @@ export async function shareSnippet(type: string, version: VersionId, jsonData: a
 
 export async function getSnippet(id: string) {
 	try {
-		const snippet = await fetchApi(`/snippets/${id}`)
+		const snippet = await fetchApi(`/${id}`)
 		return {
 			...snippet,
 			data: JSON.parse(lz.decompressFromBase64(snippet.data) ?? '{}'),
@@ -47,9 +47,9 @@ async function fetchApi(url: string, body?: string) {
 		headers: { 'Content-Type': 'application/json' },
 		body,
 	} : undefined)
-	const data = await res.json()
-	if (data.data) {
-		return data.data
+	if (!res.ok) {
+		const message = await res.text()
+		throw new Error(message)
 	}
-	throw new Error(data.errors?.[0]?.message ?? 'Unknown error')
+	return await res.json()
 }

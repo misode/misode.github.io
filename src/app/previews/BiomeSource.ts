@@ -67,8 +67,6 @@ export async function getBiome(state: any, x: number, z: number, options: BiomeS
 	const xx = Math.floor(centerX + ((x - 100) * quartStep))
 	const zz = Math.floor(centerZ + ((z - 100) * quartStep))
 
-	console.log('get biome', options.y)
-
 	const { palette, data } = DEEPSLATE.fillBiomes(xx * 4, xx * 4 + 4, zz * 4, zz * 4 + 4, 1, options.y)
 	const biome = palette.get(data[0])!
 
