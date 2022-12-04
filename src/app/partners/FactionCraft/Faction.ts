@@ -50,8 +50,8 @@ export function initFaction(schemas: SchemaRegistry, collections: CollectionRegi
 		boosts: Opt(Reference(`${ID}:entity_type_boost_config`)),
 		minimum_wave: NumberNode({ min: 1, max: 99999 }),
 		maximum_wave: Opt(NumberNode({ min: 1, max: 99999 })),
-		min_per_wave: Opt(NumberNode({ min: 0, max: 99999 })),
-		max_per_wave: Opt(NumberNode({ min: 1, max: 99999 }))
+		minimum_spawned: Opt(NumberNode({ min: 0, max: 99999 })),
+		maximum_spawned: Opt(NumberNode({ min: 1, max: 99999 }))
 	}, { context: `${ID}.faction_entity_type` }))
 
 	schemas.register(`${ID}:entity_type_boost_config`, ObjectNode({
