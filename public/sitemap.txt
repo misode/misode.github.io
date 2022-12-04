@@ -1,4 +1,5 @@
 https://misode.github.io
+https://misode.github.io/generators/
 https://misode.github.io/loot-table/
 https://misode.github.io/predicate/
 https://misode.github.io/item-modifier/
@@ -34,3 +35,6 @@ https://misode.github.io/guides/
 https://misode.github.io/guides/adding-custom-structures/
 https://misode.github.io/guides/density-functions/
 https://misode.github.io/guides/feature-order-cycle/
+https://misode.github.io/guides/heightmap-types/
+https://misode.github.io/guides/noise-router/
+https://misode.github.io/guides/placed-features/
