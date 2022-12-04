@@ -40,7 +40,9 @@ export function TitleProvider({ children }: { children: ComponentChildren }) {
 			titleSuffix = ` - ${suffix}`
 		}
 		if (!(versionIds?.length === 0)) {
-			const titleVersions = versions.map(v => v.id).slice(-VERSIONS_IN_TITLE)
+			const titleVersions = versions.map(v => v.id)
+				.filter((v, _, arr) => v.length === 4 || arr.length <= 3)
+				.slice(-VERSIONS_IN_TITLE)
 			titleSuffix = ` - Minecraft ${titleVersions.join(', ')}`
 		}
 		document.title = title + titleSuffix

@@ -3,12 +3,10 @@ import html from '@rollup/plugin-html'
 import glob from 'fast-glob'
 import fs from 'fs'
 import yaml from 'js-yaml'
-import { createRequire } from 'module'
 import { env } from 'process'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-const require = createRequire(import.meta.url)
 const config = require('./src/config.json')
 const English = require('./src/locales/en.json')
 
@@ -49,19 +47,14 @@ export default defineConfig({
 					title: '404',
 					template,
 				}),
-				...['sounds', 'changelog', 'versions', 'guides'].map(id => html({
+				...['generators', 'worldgen', 'partners', 'sounds', 'changelog', 'versions', 'guides'].map(id => html({
 					fileName: `${id}/index.html`,
-					title: getTitle({ id: `title.${id}`, page: true }),
-					template,
-				})),
-				...['worldgen', 'assets'].map(id => html({
-					fileName: `${id}/index.html`,
-					title: getTitle({ id, category: true }),
+					title: `${English[`title.${id}`] ?? ''} - ${getVersions()}`,
 					template,
 				})),
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
-					title: getTitle(m),
+					title: `${English[m.id] ?? ''} Generator${m.category === true ? 's' : ''} - ${getVersions(m)}`,
 					template,
 				})),
 				...guides.map(g => {
@@ -108,11 +101,15 @@ export default defineConfig({
 	],
 })
 
-function getTitle(m) {
-	const minVersion = Math.max(0, config.versions.findIndex(v => m.minVersion === v.id))
-	const versions = config.versions.slice(minVersion).map(v => v.id)
-	versions.splice(0, versions.length - 3)
-	return `${English[m.id] ?? ''}${m.page ? '' : ` Generator${m.category === true ? 's' : ''}`} - Minecraft ${versions.join(', ')}`
+function getVersions(m) {
+	const minVersion = Math.max(0, config.versions.findIndex(v => m?.minVersion === v.id))
+	const maxVersion = config.versions.findIndex(v => m?.maxVersion === v.id)
+	const versions = config.versions
+		.filter((_, i) => minVersion <= i && (maxVersion === -1 || i <= maxVersion))
+		.map(v => v.id)
+		.filter((v, _, arr) => v.length === 4 || arr.length <= 3)
+		.slice(-3)
+	return `Minecraft ${versions.join(', ')}`
 }
 
 function template({ files, title }) {
