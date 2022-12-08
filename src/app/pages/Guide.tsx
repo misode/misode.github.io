@@ -178,10 +178,10 @@ export function Guide({ id }: Props) {
 					{Octicon.arrow_left}
 					<span>{locale('guides.all')}</span>
 				</a>
-				<a class="btn btn-link" href="/worldgen/">
+				{frontMatter?.tags?.includes('worldgen') && <a class="btn btn-link" href="/worldgen/">
 					{Icons.worldgen}
 					<span>{locale('worldgen')}</span>
-				</a>
+				</a>}
 				<div class="navigation-divider" />
 				<Btn icon={shareActive ? 'check' : 'link'} label={locale('share')} onClick={onShare} active={shareActive} tooltip={locale(shareActive ? 'copied' : 'copy_share')} class="guide-share" />
 				{allowedVersions && <VersionSwitcher value={guideVersion} allowed={allowedVersions} onChange={changeVersion} />}
