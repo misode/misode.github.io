@@ -214,6 +214,7 @@
   "versions.minecraft_versions": "Minecraft Versions",
   "versions.latest_snapshot": "Latest snapshot",
   "versions.latest_release": "Latest release",
+  "weight": "Weight",
   "world": "World Settings",
   "worldgen": "Worldgen",
   "worldgen/biome": "Biome",

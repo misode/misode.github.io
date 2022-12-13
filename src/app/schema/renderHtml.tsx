@@ -7,7 +7,7 @@ import { useState } from 'preact/hooks'
 import { Btn, Octicon } from '../components/index.js'
 import { ItemDisplay } from '../components/ItemDisplay.jsx'
 import config from '../Config.js'
-import { localize, useStore } from '../contexts/index.js'
+import { localize, useLocale, useStore } from '../contexts/index.js'
 import { useFocus } from '../hooks/index.js'
 import { VanillaColors } from '../previews/index.js'
 import type { BlockStateRegistry, VersionId } from '../services/index.js'
@@ -319,13 +319,20 @@ const renderHtml: RenderHook = {
 }
 
 function Collapsed({ path, value }: { path: ModelPath, value: any, schema: INode<any> }) {
+	const { locale } = useLocale()
 	const context = path.getContext().join('.')
 	switch (context) {
 		case 'loot_table.pools.entry':
-			return <label>{value?.entries?.length ?? 0} entries</label>
+			const count = value?.entries?.length ?? 0
+			return <label>{count} {count == 1 ? 'entry' : 'entries'}</label>
 		case 'function.set_contents.entries.entry':
 		case 'loot_pool.entries.entry':
-			return <label>{value?.name?.replace(/^minecraft:/, '') ?? value?.type?.replace(/^minecraft:/, '')}</label>
+			const name = value?.name?.replace(/^minecraft:/, '') ?? value?.type?.replace(/^minecraft:/, '')
+			const weight = value?.weight || undefined
+			return <>
+				<label>{name}</label>
+				{weight !== undefined && <label class="tooltipped tip-se" aria-label={locale('weight')}>{weight}</label>}
+			</>
 	}
 	for (const child of Object.values(value ?? {})) {
 		if (typeof child === 'string') {
