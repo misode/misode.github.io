@@ -48,7 +48,7 @@ function visitComponent(component: unknown, consumer: (c: PartData) => void) {
 	if (typeof component === 'string' || typeof component === 'number') {
 		consumer({ text: component.toString() })
 	} else if (Array.isArray(component)) {
-		const base = component[0]
+		const base = component[0] ?? {}
 		visitComponent(base, consumer)
 		for (const c of component.slice(1)) {
 			visitComponent(c, d => consumer(inherit(d, base)))
