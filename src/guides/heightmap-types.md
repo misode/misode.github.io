@@ -15,7 +15,7 @@ Heightmaps are essentially a cache that store the height of the terrain for each
 They are computed by starting at the top of the world and iterating downwards, for each block checking if a condition still matches. Let's go over each type to see how they work.
 
 ## `WORLD_SURFACE`
-The world surface heightmap is simplest one. It checks whether the block is air or not. This only matches `air`, `void_air` and `cave_air`.
+The world surface heightmap is the simplest one. It checks whether the block is air or not. This only matches `air`, `void_air` and `cave_air`.
 
 ## `WORLD_SURFACE_WG`
 The worldgen variant of `WORLD_SURFACE`. Works exactly the same, but is updated during worldgen and is discarded after worldgen is finished.
