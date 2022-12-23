@@ -3,7 +3,7 @@ import { DRAFT_PROJECT } from './contexts/index.js'
 import type { ColormapType } from './previews/Colormap.js'
 import { ColormapTypes } from './previews/Colormap.js'
 import type { VersionId } from './services/index.js'
-import { VersionIds } from './services/index.js'
+import { DEFAULT_VERSION, VersionIds } from './services/index.js'
 
 export namespace Store {
 	export const ID_LANGUAGE = 'language'
@@ -35,7 +35,7 @@ export namespace Store {
 		if (version && VersionIds.includes(version as VersionId)) {
 			return version as VersionId
 		}
-		return '1.19'
+		return DEFAULT_VERSION
 	}
 
 	export function getVersion(): VersionId | null {
