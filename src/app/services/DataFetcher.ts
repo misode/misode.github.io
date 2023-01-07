@@ -309,9 +309,22 @@ async function cachedFetch<D = unknown>(url: string, { decode = (r => r.json()),
 	}
 }
 
+const RAWGITHUB_REGEX = /^https:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)$/
+
 async function fetchAndCache<D>(cache: Cache, url: string, decode: (r: Response) => Promise<D>) {
 	console.debug(`[cachedFetch] Fetching data ${url}`)
-	const fetchResponse = await fetch(url)
+	let fetchResponse
+	try {
+		fetchResponse = await fetch(url)
+	} catch (e) {
+		if (url.startsWith('https://raw.githubusercontent.com/')) {
+			const backupUrl = url.replace(RAWGITHUB_REGEX, 'https://cdn.jsdelivr.net/gh/$1/$2@$3/$4')
+			console.debug(`[cachedFetch] Retrying using ${backupUrl}`)
+			fetchResponse = await fetch(backupUrl)
+		} else {
+			throw e
+		}
+	}
 	const fetchClone = fetchResponse.clone()
 	const fetchData = await decode(fetchResponse)
 	await cache.put(url, fetchClone)
