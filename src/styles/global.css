@@ -457,16 +457,26 @@ main.has-preview {
 	cursor: crosshair;
 }
 
-.popup-preview canvas,
+.popup-preview canvas:not(.no-pixelated),
 .popup-preview .pixelated {
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-crisp-edges;
 	image-rendering: crisp-edges;
 	image-rendering: pixelated;
+}
+
+.popup-preview canvas,
+.popup-preview .pixelated {
 	user-select: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+}
+
+
+.popup-preview .full-canvas {
+	width: 100%;
+	height: 100%;
 }
 
 .popup-share {
