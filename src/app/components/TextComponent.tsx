@@ -14,6 +14,7 @@ interface StyleData {
 interface PartData extends StyleData {
 	text?: string,
 	translate?: string,
+	fallback?: string,
 	with?: string[],
 }
 
@@ -110,19 +111,19 @@ const TextColorKeys = Object.keys(TextColors)
 
 function TextPart({ part, shadow, lang }: { part: PartData, shadow?: boolean, lang: Record<string, string> }) {
 	if (part.translate) {
-		const str = resolveTranslate(part.translate, part.with, lang)
+		const str = resolveTranslate(part.translate, part.fallback, part.with, lang)
 		return <span style={createStyle(part, shadow)}>{str}</span>
 	}
 	return <span style={createStyle(part, shadow)}>{part.text}</span>
 }
 
-function resolveTranslate(translate: string, with_: any[] | undefined, lang: Record<string, string>): string {
-	const str = lang[translate]
+function resolveTranslate(translate: string, fallback: string | undefined, with_: any[] | undefined, lang: Record<string, string>): string {
+	const str = lang[translate] ?? fallback
 	if (typeof str !== 'string') return translate
 	const params = with_?.map((c): string => {
 		if (typeof c === 'string' || typeof c === 'number') return `${c}`
 		if (c.text) return c.text
-		if (c.translate) return resolveTranslate(c.translate, c.with, lang)
+		if (c.translate) return resolveTranslate(c.translate, c.fallback, c.with, lang)
 		return ''
 	})
 	return replaceTranslation(str, params)
