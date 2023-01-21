@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useProject } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
 import type { ColormapType } from '../../previews/Colormap.js'
-import { densityFunction, getNoiseBlock, noiseSettings } from '../../previews/index.js'
+import { getNoiseBlock, noiseSettings } from '../../previews/index.js'
 import { CachedCollections, checkVersion } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { randomSeed } from '../../Utils.js'
@@ -32,12 +32,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 		},
 		async draw(img) {
 			const options = { biome, biomeDepth, biomeScale, offset: offset.current, width: img.width, seed, version, project, colormap, minY: data?.noise?.min_y ?? 0, height: data?.noise?.height ?? 256, hardZero: true }
-			if (layer === 'final_density') {
-				const df = data?.noise_router?.final_density ?? 0
-				await densityFunction(df, img, options)
-			} else {
-				await noiseSettings(data, img, options)
-			}
+			await noiseSettings(data, img, options)
 		},
 		async onDrag(dx) {
 			offset.current += dx * size

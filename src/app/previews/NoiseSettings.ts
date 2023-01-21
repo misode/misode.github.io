@@ -1,10 +1,9 @@
 import { DataModel } from '@mcschema/core'
-import { BlockState, clampedMap, DensityFunction, Vector } from 'deepslate/worldgen'
+import { BlockState } from 'deepslate/worldgen'
 import type { Project } from '../contexts/Project.jsx'
 import type { VersionId } from '../services/index.js'
 import { checkVersion } from '../services/index.js'
 import type { ColormapType } from './Colormap.js'
-import { getColormap } from './Colormap.js'
 import { DEEPSLATE } from './Deepslate.js'
 import { NoiseChunkGenerator as OldNoiseChunkGenerator } from './noise/NoiseChunkGenerator.js'
 
@@ -84,70 +83,6 @@ export async function noiseSettings(state: any, img: ImageData, options: NoiseSe
 
 export function getNoiseBlock(x: number, y: number) {
 	return DEEPSLATE.getBlockState(x, y)
-}
-
-export async function densityFunction(state: any, img: ImageData, options: NoiseSettingsOptions) {
-	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.minY ?? 0, options.height ?? 256, options.seed)
-	const noise = DEEPSLATE.getNoiseSettings()
-
-	const arr = Array(options.width * noise.height)
-	let limit = 0.01
-	for (let x = 0; x < options.width; x += 1) {
-		for (let y = 0; y < noise.height; y += 1) {
-			const i = x + y * options.width
-			const density = fn.compute(DensityFunction.context(x - options.offset, noise.height - y - 1 + noise.minY, 0))
-			limit = Math.max(limit, Math.min(1, Math.abs(density)))
-			arr[i] = density
-		}
-	}
-
-	const colormap = getColormap(options.colormap ?? 'viridis')
-	const colorPicker = options.hardZero ? (t: number) => colormap(t <= 0.5 ? t - 0.08 : t + 0.08) : colormap
-	const min = -limit
-	const max = limit
-	const data = img.data
-	for (let i = 0; i < options.width * noise.height; i += 1) {
-		const color = colorPicker(clampedMap(arr[i], min, max, 1, 0))
-		data[4 * i] = color[0] * 256
-		data[4 * i + 1] = color[1] * 256
-		data[4 * i + 2] = color[2] * 256
-		data[4 * i + 3] = 255
-	}
-}
-
-export async function densityPoint(state: any, x: number, y: number, options: NoiseSettingsOptions) {
-	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.minY ?? 0, options.height ?? 256, options.seed)
-
-	return fn.compute(DensityFunction.context(Math.floor(x - options.offset), (options.height ?? 256) - y, 0))
-}
-
-interface DensityFunction3DOptions {
-	seed: bigint,
-	version: VersionId,
-	project: Project,
-	minY: number,
-	height: number,
-	cutoff: number,
-}
-export async function densityFunction3D(state: any, options: DensityFunction3DOptions) {
-	await DEEPSLATE.loadVersion(options.version, getProjectData(options.project))
-	const fn = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(state), options.minY, options.height, options.seed)
-	const maxY = options.minY + options.height
-
-	const voxels: Vector[] = []
-	for (let x = 0; x < 16; x += 1) {
-		for (let y = options.minY; y < maxY; y += 1) {
-			for (let z = 0; z < 16; z += 1) {
-				const density = fn.compute(DensityFunction.context(x, y, z))
-				if (density > options.cutoff) {
-					voxels.push(new Vector(x, y, z))
-				}
-			}
-		}
-	}
-	return voxels
 }
 
 export function getProjectData(project: Project) {

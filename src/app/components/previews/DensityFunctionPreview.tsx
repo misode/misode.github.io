@@ -1,23 +1,129 @@
-import { VoxelRenderer } from 'deepslate/render'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { DataModel } from '@mcschema/core'
+import type { Voxel } from 'deepslate/render'
+import { clampedMap, VoxelRenderer } from 'deepslate/render'
+import type { mat3, mat4 } from 'gl-matrix'
+import { vec2 } from 'gl-matrix'
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale, useProject, useVersion } from '../../contexts/index.js'
-import { useCanvas, useCanvas3D } from '../../hooks/index.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import type { ColormapType } from '../../previews/Colormap.js'
-import { densityFunction, densityFunction3D, densityPoint } from '../../previews/index.js'
+import { getColormap } from '../../previews/Colormap.js'
+import { DEEPSLATE } from '../../previews/Deepslate.js'
+import { getProjectData } from '../../previews/index.js'
 import { Store } from '../../Store.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
+import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
+import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 	const { locale } = useLocale()
-	const [seed, setSeed] = useState(randomSeed())
-	const [autoScroll, setAutoScroll] = useState(false)
+	const { project } = useProject()
+	const { version } = useVersion()
 	const [voxelMode, setVoxelMode] = useState(false)
+	const [seed, setSeed] = useState(randomSeed())
+	const [minY] = useState(0)
+	const [height] = useState(256)
+	const serializedData = JSON.stringify(data)
+
+	const { value: df } = useAsync(async () => {
+		await DEEPSLATE.loadVersion(version, getProjectData(project))
+		const df = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(data), minY, height, seed)
+		return df
+	}, [version, project, minY, height, seed, serializedData])
+
+	// === 2D ===
+	const imageData = useRef<ImageData>()
+	const ctx = useRef<CanvasRenderingContext2D>()
 	const [focused, setFocused] = useState<string[]>([])
-	const [cutoff, setCutoff] = useState(0)
 	const [colormap, setColormap] = useState<ColormapType>(Store.getColormap() ?? 'viridis')
+
+	const onSetup2D = useCallback((canvas: HTMLCanvasElement) => {
+		const ctx2D = canvas.getContext('2d')
+		if (!ctx2D) return
+		ctx.current = ctx2D
+	}, [voxelMode])
+	const onResize2D = useCallback((width: number, height: number) => {
+		if (!ctx.current) return
+		imageData.current = ctx.current.getImageData(0, 0, width, height)
+	}, [voxelMode])
+	const onDraw2D = useCallback((transform: mat3) => {
+		if (!ctx.current || !imageData.current || !df) return
+		const img = imageData.current
+
+		const arr = Array(img.width * img.height)
+		let limit = 0.01
+		const pos = vec2.create()
+		for (let x = 0; x < img.width; x += 1) {
+			for (let y = 0; y < img.height; y += 1) {
+				const i = x + y * img.width
+				vec2.transformMat3(pos, vec2.fromValues(x, y), transform)
+				const worldX = Math.floor(pos[0])
+				const worldY = -Math.floor(pos[1])
+				const density = df.compute({ x: worldX, y: worldY, z: 0 })
+				limit = Math.max(limit, Math.min(1, Math.abs(density)))
+				arr[i] = density
+			}
+		}
+		const colorPicker = getColormap(colormap ?? 'viridis')
+		const min = -limit
+		const max = limit
+		const data = img.data
+		for (let i = 0; i < img.width * img.height; i += 1) {
+			const color = colorPicker(clampedMap(arr[i], min, max, 1, 0))
+			data[4 * i] = color[0] * 256
+			data[4 * i + 1] = color[1] * 256
+			data[4 * i + 2] = color[2] * 256
+			data[4 * i + 3] = 255
+		}
+		ctx.current.putImageData(img, 0, 0)
+	}, [voxelMode, df, colormap])
+	const onHover2D = useCallback((pos: [number, number] | undefined) => {
+		if (!pos || !df) {
+			setFocused([])
+		} else {
+			const [x, y] = pos
+			const density = df.compute({ x: x, y: -y, z: 0 })
+			setFocused([density.toPrecision(3), `X=${x} Y=${-y}`])
+		}
+	}, [voxelMode, df])
+
+
+	// === 3D ===
+	const renderer = useRef<VoxelRenderer | undefined>(undefined)
+	const [state, setState] = useState(0)
+	const [cutoff, setCutoff] = useState(0)
+
+	const onSetup3D = useCallback((canvas: HTMLCanvasElement) => {
+		const gl = canvas.getContext('webgl')
+		if (!gl) return
+		renderer.current = new VoxelRenderer(gl)
+	}, [voxelMode])
+	const onResize3D = useCallback((width: number, height: number) => {
+		renderer.current?.setViewport(0, 0, width, height)
+	}, [voxelMode])
+	const onDraw3D = useCallback((transform: mat4) => {
+		renderer.current?.draw(transform)
+	}, [voxelMode])
+	useEffect(() => {
+		if (!renderer.current || !shown || !df || !voxelMode) return
+		const voxels: Voxel[] = []
+		const maxY = minY + height
+		for (let x = 0; x < 16; x += 1) {
+			for (let y = minY; y < maxY; y += 1) {
+				for (let z = 0; z < 16; z += 1) {
+					const density = df.compute({ x, y, z })
+					if (density > cutoff) {
+						voxels.push({ x, y, z, color: [200, 200, 200] })
+					}
+				}
+			}
+		}
+		renderer.current.setVoxels(voxels)
+		setState(state => state + 1)
+	}, [voxelMode, df, cutoff])
 
 	return <>
 		<div class="controls preview-controls">
@@ -31,141 +137,14 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 				</BtnMenu>
 			</> : <>
 				<ColormapSelector value={colormap} onChange={setColormap} />
-				<BtnMenu icon="gear" tooltip={locale('terrain_settings')}>
-					<Btn icon={autoScroll ? 'square_fill' : 'square'} label={locale('preview.auto_scroll')} onClick={() => setAutoScroll(!autoScroll)} />
-				</BtnMenu>
 			</>}
-			<Btn icon="package" onClick={() => setVoxelMode(!voxelMode)} />
+			<Btn label={voxelMode ? locale('3d') : locale('2d')} onClick={() => setVoxelMode(!voxelMode)} />
 			<Btn icon="sync" tooltip={locale('generate_new_seed')}
 				onClick={() => setSeed(randomSeed())} />
 		</div>
-		{voxelMode
-			? <VoxelMode {...{data, shown, seed, cutoff}} />
-			: <FlatMode {...{data, shown, seed, colormap, autoScroll, setFocused}} />}
+		<div class="full-preview">{voxelMode
+			? <InteractiveCanvas3D onSetup={onSetup3D} onDraw={onDraw3D} onResize={onResize3D} state={state} startDistance={100} startPosition={[8, 120, 8]} />
+			: <InteractiveCanvas2D onSetup={onSetup2D} onDraw={onDraw2D} onHover={onHover2D} onResize={onResize2D} state={state} pixelSize={4} />
+		}</div>
 	</>
-}
-
-interface VoxelModeProps {
-	data: any
-	shown: boolean
-	seed: bigint
-	cutoff: number
-}
-function VoxelMode({ data, shown, seed, cutoff }: VoxelModeProps) {
-	const { project } = useProject()
-	const { version } = useVersion()
-	const renderer = useRef<VoxelRenderer | undefined>(undefined)
-	const state = JSON.stringify([data])
-
-	const { canvas, redraw } = useCanvas3D({
-		view: { distance: 60 },
-		center: [8, 128, 8],
-		setup(gl, canvas) {
-			const container = canvas.parentNode as HTMLElement
-			const width = container.clientWidth
-			const height = container.clientHeight
-			canvas.width = width
-			canvas.height = height
-			renderer.current = new VoxelRenderer(gl)
-			renderer.current.setViewport(0, 0, width, height)
-		},
-		draw(view) {
-			renderer.current?.draw(view)
-		},
-	})
-
-	useEffect(() => {
-		const container = canvas.current?.parentNode
-		if (!container || !renderer.current) return
-		const onResize = () => {
-			const width = (container as HTMLElement).clientWidth
-			const height = (container as HTMLElement).clientHeight
-			canvas.current!.width = width
-			canvas.current!.height = height
-			renderer.current?.setViewport(0, 0, width, height)
-			requestAnimationFrame(() => redraw())
-		}
-		window.addEventListener('resize', onResize)
-		return () => window.removeEventListener('resize', onResize)
-	}, [canvas.current, renderer.current, redraw])
-
-	useEffect(() => {
-		if (shown && renderer.current) {
-			(async () => {
-				const points = await densityFunction3D(data, {
-					project, seed, version, cutoff,
-					minY: 0, height: 256,
-				})
-				renderer.current?.setVoxels(points.map(v => ({
-					x: v.x,
-					y: v.y,
-					z: v.z,
-					color: [200, 200, 200],
-				})))
-				redraw()
-			})()
-		}
-	}, [renderer.current, state, shown, seed, version, cutoff, redraw])
-
-	return <canvas ref={canvas} width="0" height="0" class="no-pixelated full-canvas"></canvas>
-}
-
-interface FlatModeProps {
-	data: any
-	shown: boolean
-	seed: bigint
-	colormap: ColormapType
-	autoScroll: boolean
-	setFocused: (s: string[]) => void
-}
-function FlatMode({ data, shown, seed, colormap, autoScroll, setFocused }: FlatModeProps) {
-	const { project } = useProject()
-	const { version } = useVersion()
-	const [minY] = useState(0)
-	const [height] = useState(256)
-	const offset = useRef(0)
-	const scrollInterval = useRef<number | undefined>(undefined)
-	const state = JSON.stringify([data])
-
-	const size = 256
-	const { canvas, redraw } = useCanvas({
-		size() {
-			return [size, size]
-		},
-		async draw(img) {
-			const options = { offset: offset.current, width: img.width, seed, version, project, minY, height, colormap }
-			await densityFunction(data, img, options)
-		},
-		async onDrag(dx) {
-			offset.current += dx * size
-			redraw()
-		},
-		async onHover(x, y) {
-			const worldX = Math.floor(x * size)
-			const worldY = Math.floor(y * (height - minY))
-			const options = { offset: offset.current, width: size, seed, version, project, minY, height, colormap }
-			const density = await densityPoint(data, worldX, worldY, options)
-			setFocused([density.toPrecision(3), `X=${Math.floor(worldX - offset.current)} Y=${(height - minY) - worldY}`])
-		},
-		onLeave() {
-			setFocused([])
-		},
-	}, [version, state, seed, minY, height, colormap, project])
-
-	useEffect(() => {
-		if (scrollInterval.current) {
-			clearInterval(scrollInterval.current)
-		}
-		if (shown) {
-			redraw()
-			if (autoScroll) {
-				scrollInterval.current = setInterval(() => {
-					offset.current -= 8
-					redraw()
-				}, 100) as any
-			}
-		}
-	}, [version, state, seed, minY, height, colormap, project, shown, autoScroll])
-
-	return <canvas ref={canvas} width={size} height={size}></canvas>
 }
