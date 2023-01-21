@@ -2,13 +2,12 @@ import { DataModel } from '@mcschema/core'
 import type { Voxel } from 'deepslate/render'
 import { clampedMap, VoxelRenderer } from 'deepslate/render'
 import type { mat3, mat4 } from 'gl-matrix'
-import { vec2 } from 'gl-matrix'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { getProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { DEEPSLATE } from '../../previews/Deepslate.js'
 import { Store } from '../../Store.js'
-import { randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -50,34 +49,19 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 	}, [voxelMode])
 	const onDraw2D = useCallback((transform: mat3) => {
 		if (!ctx.current || !imageData.current || !df) return
-		const img = imageData.current
 
-		const arr = Array(img.width * img.height)
+		const colormapFn = getColormap(colormap)
+		const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
 		let limit = 0.01
-		const pos = vec2.create()
-		for (let x = 0; x < img.width; x += 1) {
-			for (let y = 0; y < img.height; y += 1) {
-				const i = x + y * img.width
-				vec2.transformMat3(pos, vec2.fromValues(x, y), transform)
-				const worldX = Math.floor(pos[0])
-				const worldY = -Math.floor(pos[1])
-				const density = df.compute({ x: worldX, y: worldY, z: 0 })
-				limit = Math.max(limit, Math.min(1, Math.abs(density)))
-				arr[i] = density
-			}
-		}
-		const colorPicker = getColormap(colormap ?? 'viridis')
-		const min = -limit
-		const max = limit
-		const data = img.data
-		for (let i = 0; i < img.width * img.height; i += 1) {
-			const color = colorPicker(clampedMap(arr[i], min, max, 1, 0))
-			data[4 * i] = color[0] * 256
-			data[4 * i + 1] = color[1] * 256
-			data[4 * i + 2] = color[2] * 256
-			data[4 * i + 3] = 255
-		}
-		ctx.current.putImageData(img, 0, 0)
+		iterateWorld2D(imageData.current, transform, (x, y) => {
+			const density = df.compute({ x, y, z: 0 })
+			limit = Math.max(limit, Math.min(1, Math.abs(density)))
+			return density
+		}, (density) => {
+			const color = colorPicker(clampedMap(density, -limit, limit, 1, 0))
+			return [color[0] * 256, color[1] * 256, color[2] * 256]
+		})
+		ctx.current.putImageData(imageData.current, 0, 0)
 	}, [voxelMode, df, colormap])
 	const onHover2D = useCallback((pos: [number, number] | undefined) => {
 		if (!pos || !df) {

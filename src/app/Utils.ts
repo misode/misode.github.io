@@ -2,6 +2,8 @@ import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
 import type { Random } from 'deepslate/core'
+import type { mat3 } from 'gl-matrix'
+import { vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
@@ -355,4 +357,23 @@ export function getWeightedRandom<T>(random: Random, entries: T[], getWeight: (e
 		}
 	}
 	return undefined
+}
+
+export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: number, y: number) => D, getColor: (d: D) => [number, number, number]) {
+	const pos = vec2.create()
+	const arr = Array(img.width * img.height)
+	for (let x = 0; x < img.width; x += 1) {
+		for (let y = 0; y < img.height; y += 1) {
+			const i = x + y * img.width
+			vec2.transformMat3(pos, vec2.fromValues(x, y), transform)
+			arr[i] = getData(Math.floor(pos[0]), -Math.floor(pos[1]))
+		}
+	}
+	for (let i = 0; i < img.width * img.height; i += 1) {
+		const color = getColor(arr[i])
+		img.data[4 * i] = color[0]
+		img.data[4 * i + 1] = color[1]
+		img.data[4 * i + 2] = color[2]
+		img.data[4 * i + 3] = 255
+	}
 }

@@ -1,5 +1,5 @@
 import { DataModel } from '@mcschema/core'
-import { BlockState, clampedMap } from 'deepslate'
+import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { vec2 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
@@ -8,7 +8,7 @@ import { useAsync } from '../../hooks/index.js'
 import { DEEPSLATE } from '../../previews/Deepslate.js'
 import { CachedCollections } from '../../services/index.js'
 import { Store } from '../../Store.js'
-import { randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed } from '../../Utils.js'
 import { Btn, BtnInput, BtnMenu } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -51,40 +51,28 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 	}, [])
 	const onDraw = useCallback((transform: mat3) => {
 		if (!ctx.current || !imageData.current || !shown) return
-		const img = imageData.current
-		const pos = vec2.create()
 
 		if (layer === 'terrain') {
+			const pos = vec2.create()
 			const minX = vec2.transformMat3(pos, vec2.fromValues(0, 0), transform)[0]
-			const maxX = vec2.transformMat3(pos, vec2.fromValues(img.width-1, 0), transform)[0]
+			const maxX = vec2.transformMat3(pos, vec2.fromValues(imageData.current.width-1, 0), transform)[0]
 			DEEPSLATE.generateChunks(minX, maxX - minX + 1)
+			iterateWorld2D(imageData.current, transform, (x, y) => {
+				return DEEPSLATE.getBlockState(x, y)?.getName().toString()
+			}, (block) => {
+				return BlockColors[block ?? 'minecraft:air']
+			})
+		} else if (layer === 'final_density') {
+			const colormapFn = getColormap(colormap)
+			const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
+			iterateWorld2D(imageData.current, transform, (x, y) => {
+				return finalDensity?.compute({ x, y, z: 0 }) ?? 0
+			}, (density) => {
+				const color = colorPicker(clampedMap(density, -1, 1, 1, 0))
+				return [color[0] * 256, color[1] * 256, color[2] * 256]
+			})
 		}
-
-		const colormap2 = getColormap(colormap)
-		const colorPicker = (t: number) => colormap2(t <= 0.5 ? t - 0.08 : t + 0.08)
-
-		for (let x = 0; x < img.width; x += 1) {
-			for (let y = 0; y < img.height; y += 1) {
-				const i = x * 4 + y * 4 * img.width
-				vec2.transformMat3(pos, vec2.fromValues(x, y), transform)
-				const worldX = Math.floor(pos[0])
-				const worldY = -Math.floor(pos[1])
-				let color
-				if (layer === 'terrain') {
-					const blockState = DEEPSLATE.getBlockState(worldX, worldY) ?? BlockState.AIR
-					color = BlockColors[blockState.getName().toString()]
-				} else {
-					const output = finalDensity?.compute({ x: worldX, y: worldY, z: 0 }) ?? 0
-					color = colorPicker(clampedMap(output, -1, 1, 1, 0))
-					color = [color[0] * 256, color[1] * 256, color[2] * 256]
-				}
-				img.data[i] = color[0]
-				img.data[i + 1] = color[1]
-				img.data[i + 2] = color[2]
-				img.data[i + 3] = 255
-			}
-		}
-		ctx.current.putImageData(img, 0, 0)
+		ctx.current.putImageData(imageData.current, 0, 0)
 	}, [noiseSettings, finalDensity, layer, colormap, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
 		if (!pos) {

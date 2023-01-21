@@ -1,11 +1,10 @@
 import { DataModel } from '@mcschema/core'
 import { clampedMap, NoiseParameters, NormalNoise, XoroshiroRandom } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
-import { vec2 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { Store } from '../../Store.js'
-import { randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -40,25 +39,15 @@ export const NoisePreview = ({ data, shown }: PreviewProps) => {
 	}, [])
 	const onDraw = useCallback((transform: mat3) => {
 		if (!ctx.current || !imageData.current || !shown) return
-		const img = imageData.current
 
-		const pos = vec2.create()
 		const colorPicker = getColormap(colormap)
-		for (let x = 0; x < img.width; x += 1) {
-			for (let y = 0; y < img.height; y += 1) {
-				const i = x * 4 + y * 4 * img.width
-				vec2.transformMat3(pos, vec2.fromValues(x, y), transform)
-				const worldX = Math.floor(pos[0])
-				const worldY = -Math.floor(pos[1])
-				const output = noise.sample(worldX, worldY, 0)
-				const color = colorPicker(clampedMap(output, -1, 1, 1, 0))
-				img.data[i] = color[0] * 256
-				img.data[i + 1] = color[1] * 256
-				img.data[i + 2] = color[2] * 256
-				img.data[i + 3] = 255
-			}
-		}
-		ctx.current.putImageData(img, 0, 0)
+		iterateWorld2D(imageData.current, transform, (x, y) => {
+			return noise.sample(x, y, 0)
+		}, (value) => {
+			const color = colorPicker(clampedMap(value, -1, 1, 1, 0))
+			return [color[0] * 256, color[1] * 256, color[2] * 256]
+		})
+		ctx.current.putImageData(imageData.current, 0, 0)
 	}, [noise, colormap, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
 		if (!pos) {
