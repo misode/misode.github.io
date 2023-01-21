@@ -98,12 +98,6 @@ export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state,
 			onResize?.(width, height)
 			redraw.current()
 		}
-		function onKeyPress(e: KeyboardEvent) {
-			if (e.key === 'a') {
-				centerPos.current = [centerPos.current[0] + 1, centerPos.current[1]]
-				redraw.current()
-			}
-		}
 
 		onSetup(canvas.current)
 		resizeHandler()
@@ -115,7 +109,6 @@ export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state,
 		canvas.current.addEventListener('wheel', onWheel)
 		canvas.current.addEventListener('contextmenu', onContextMenu)
 		window.addEventListener('resize', resizeHandler)
-		window.addEventListener('keypress', onKeyPress)
 
 		return () => {
 			canvas.current?.removeEventListener('mousedown', onMouseDown)
@@ -125,7 +118,6 @@ export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state,
 			canvas.current?.removeEventListener('wheel', onWheel)
 			canvas.current?.removeEventListener('contextmenu', onContextMenu)
 			window.removeEventListener('resize', resizeHandler)
-			window.removeEventListener('keypress', onKeyPress)
 		}
 	}, [onSetup, onResize, onHover, transform, pixelSize])
 
