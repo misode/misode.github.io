@@ -4,11 +4,11 @@ import type { mat3 } from 'gl-matrix'
 import { vec2 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import type { ColormapType } from '../../previews/Colormap.js'
-import { getColormap } from '../../previews/Colormap.js'
 import { Store } from '../../Store.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
+import type { ColormapType } from './Colormap.js'
+import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
@@ -65,8 +65,8 @@ export const NoisePreview = ({ data, shown }: PreviewProps) => {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const density = noise.sample(x, -y, 0)
-			setFocused([density.toPrecision(3), `X=${x} Y=${-y}`])
+			const output = noise.sample(x, -y, 0)
+			setFocused([output.toPrecision(3), `X=${x} Y=${-y}`])
 		}
 	}, [noise])
 

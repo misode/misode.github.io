@@ -1,9 +1,9 @@
 import { DataModel } from '@mcschema/core'
 import type { Project } from '../contexts/Project.jsx'
+import { getProjectData } from '../contexts/Project.jsx'
 import type { VersionId } from '../services/index.js'
 import { stringToColor } from '../Utils.js'
 import { DEEPSLATE } from './Deepslate.js'
-import { getProjectData } from './NoiseSettings.js'
 
 type Triple = [number, number, number]
 type BiomeColors = Record<string, Triple>

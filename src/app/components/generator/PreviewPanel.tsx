@@ -45,7 +45,7 @@ export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
 		if (data) return <NoisePreview {...{ model, version, shown, data }} />
 	}
 
-	if (id === 'worldgen/noise_settings') {
+	if (id === 'worldgen/noise_settings' && checkVersion(version, '1.18')) {
 		const data = model.get(new Path([]))
 		if (data) return <NoiseSettingsPreview {...{ model, version, shown, data }} />
 	}

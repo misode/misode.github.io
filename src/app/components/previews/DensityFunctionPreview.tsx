@@ -4,15 +4,14 @@ import { clampedMap, VoxelRenderer } from 'deepslate/render'
 import type { mat3, mat4 } from 'gl-matrix'
 import { vec2 } from 'gl-matrix'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
-import { useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { getProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import type { ColormapType } from '../../previews/Colormap.js'
-import { getColormap } from '../../previews/Colormap.js'
 import { DEEPSLATE } from '../../previews/Deepslate.js'
-import { getProjectData } from '../../previews/index.js'
 import { Store } from '../../Store.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
+import type { ColormapType } from './Colormap.js'
+import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
@@ -85,11 +84,10 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const density = df.compute({ x: x, y: -y, z: 0 })
-			setFocused([density.toPrecision(3), `X=${x} Y=${-y}`])
+			const output = df.compute({ x: x, y: -y, z: 0 })
+			setFocused([output.toPrecision(3), `X=${x} Y=${-y}`])
 		}
 	}, [voxelMode, df])
-
 
 	// === 3D ===
 	const renderer = useRef<VoxelRenderer | undefined>(undefined)

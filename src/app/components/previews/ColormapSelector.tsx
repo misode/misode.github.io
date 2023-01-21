@@ -1,10 +1,10 @@
 import { useCallback } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
-import type { ColormapType } from '../../previews/Colormap.js'
-import { ColormapTypes } from '../../previews/Colormap.js'
 import { Store } from '../../Store.js'
 import { Btn } from '../Btn.jsx'
 import { BtnMenu } from '../BtnMenu.jsx'
+import type { ColormapType } from './Colormap.js'
+import { ColormapTypes } from './Colormap.js'
 
 interface Props {
 	value: ColormapType,

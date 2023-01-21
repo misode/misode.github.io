@@ -1,4 +1,4 @@
-import { clamp } from '../Utils.js'
+import { clamp } from '../../Utils.js'
 import colormaps from './colormaps.json'
 
 // Implementation based on https://github.com/politiken-journalism/scale-color-perceptual/blob/master/utils/interpolate.js

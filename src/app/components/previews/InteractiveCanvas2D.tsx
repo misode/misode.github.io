@@ -15,7 +15,7 @@ export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state,
 	const canvas = useRef<HTMLCanvasElement>(null)
 	const dragStart = useRef<[number, number] | undefined>()
 	const dragButton = useRef<number | undefined>()
-	const centerPos = useRef<[number, number]>(startPosition ?? [0, 0])
+	const centerPos = useRef<[number, number]>(startPosition ? [-startPosition[0], -startPosition[1]] : [0, 0])
 	const viewScale = useRef(startScale ?? 1)
 	const frameRequest = useRef<number>()
 

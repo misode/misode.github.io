@@ -1,7 +1,7 @@
+import type { ColormapType } from './components/previews/Colormap.js'
+import { ColormapTypes } from './components/previews/Colormap.js'
 import type { Project } from './contexts/index.js'
 import { DRAFT_PROJECT } from './contexts/index.js'
-import type { ColormapType } from './previews/Colormap.js'
-import { ColormapTypes } from './previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 import { DEFAULT_VERSION, VersionIds } from './services/index.js'
 
