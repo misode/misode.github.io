@@ -1,7 +1,7 @@
 import * as deepslate19 from 'deepslate/worldgen'
 import type { VersionId } from '../services/index.js'
 import { checkVersion, fetchAllPresets, fetchPreset } from '../services/index.js'
-import { BiMap, clamp, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../Utils.js'
+import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
 
@@ -18,10 +18,10 @@ export class Deepslate {
 	private loadingPromise: Promise<void> | undefined
 	private readonly deepslateCache = new Map<VersionId, typeof deepslate19>()
 	private readonly Z = 0
-	private readonly DEBUG = false
 
 	private cacheState: unknown
 	private settingsCache: NoiseSettings | undefined
+	private routerCache: NoiseRouter | undefined
 	private generatorCache: ChunkGenerator | undefined
 	private biomeSourceCache: BiomeSource | undefined
 	private randomStateCache: deepslate19.RandomState | undefined
@@ -102,12 +102,16 @@ export class Deepslate {
 			const chunkGenerator = this.isVersion('1.19')
 				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
 				: new (this.d.NoiseChunkGenerator as any)(seed, biomeSource, noiseSettings)
+			console.log(noiseSettings)
 			this.settingsCache = noiseSettings.noise
 			this.generatorCache = chunkGenerator
 			if (this.isVersion('1.19')) {
 				this.randomStateCache = new this.d.RandomState(noiseSettings, seed)
+				this.routerCache = this.randomStateCache.router
 			} else {
 				this.randomStateCache = undefined
+				
+				this.routerCache = undefined
 			}
 			this.biomeSourceCache = {
 				getBiome: (x, y, z) => biomeSource.getBiome(x, y, z, undefined!),
@@ -129,7 +133,8 @@ export class Deepslate {
 			biomeState = { type: biomeState.type, biomes }
 		}
 		if (this.isVersion('1.19')) {
-			return this.d.BiomeSource.fromJson(biomeState)
+			const bs = this.d.BiomeSource.fromJson(biomeState)
+			return bs
 		} else {
 			const root = isObject(biomeState) ? biomeState : {}
 			const type = typeof root.type === 'string' ? root.type.replace(/^minecraft:/, '') : undefined
@@ -242,61 +247,20 @@ export class Deepslate {
 		})
 	}
 
-	public fillBiomes(minX: number, maxX: number, minZ: number, maxZ: number, step = 1, y = 64) {
-		if (!this.generatorCache || !this.settingsCache) {
-			throw new Error('Tried to fill biomes before generator is loaded')
-		}
-		const quartY = (y - this.settingsCache.minY) >> 2
-		const minQuartX = minX >> 2
-		const maxQuartX = maxX >> 2
-		const minQuartZ = minZ >> 2
-		const maxQuartZ = maxZ >> 2
-		const countX = Math.floor((maxQuartX - minQuartX) / step)
-		const countZ = Math.floor((maxQuartZ - minQuartZ) / step)
-
-		const biomeIds = new BiMap<string, number>()
-		const data = new Int8Array(countX * countZ)
-		let biomeId = 0
-		let i = 0
-
-		for (let x = minQuartX; x < maxQuartX; x += step) {
-			for (let z = minQuartZ; z < maxQuartZ; z += step) {
-				const posKey = `${x}:${quartY}:${z}`
-				let biome = this.biomeCache.get(posKey)
-				if (!biome) {
-					if (this.DEBUG) {
-						biome = this.computeDebugBiome(x, z)
-					} else if (this.isVersion('1.19')) {
-						if (!this.randomStateCache) {
-							throw new Error('Tried to compute biomes before random state is loaded')
-						}
-						biome = this.generatorCache.computeBiome(this.randomStateCache, x, quartY, z).toString()
-					} else {
-						if(!this.biomeSourceCache) {
-							throw new Error('Tried to compute biomes before biome source is loaded')
-						}
-						biome = this.biomeSourceCache.getBiome(x, quartY, z).toString()
-					}
-					this.biomeCache.set(posKey, biome)
+	public getBiome(x: number, y: number, z: number) {
+		return computeIfAbsent(this.biomeCache, `${x}:${y}:${z}`, () => {
+			if (this.isVersion('1.19')) {
+				if (!this.randomStateCache || !this.generatorCache) {
+					throw new Error('Tried to compute biomes before random state is loaded')
 				}
-				data[i++] = biomeIds.computeIfAbsent(biome, () => biomeId++)
+				return this.generatorCache.computeBiome(this.randomStateCache, x, y, z).toString()
+			} else {
+				if(!this.biomeSourceCache) {
+					throw new Error('Tried to compute biomes before biome source is loaded')
+				}
+				return this.biomeSourceCache.getBiome(x, y, z).toString()
 			}
-		}
-
-		return {
-			palette: biomeIds.backward,
-			data,
-			width: countX,
-			height: countZ,
-		}
-	}
-
-	private computeDebugBiome(x: number, z: number) {
-		if (x > 0) {
-			return z > 0 ? 'minecraft:plains' : 'minecraft:forest'
-		} else {
-			return z > 0 ? 'minecraft:badlands' : 'minecraft:desert'
-		}
+		})
 	}
 
 	public loadDensityFunction(state: unknown, minY: number, height: number, seed: bigint) {
@@ -340,6 +304,13 @@ export class Deepslate {
 		return this.settingsCache
 	}
 
+	public getNoiseRouter(): NoiseRouter {
+		if (!this.routerCache) {
+			throw new Error('Tried to access noise router when they are not loaded')
+		}
+		return this.routerCache
+	}
+
 	public getBlockState(x: number, y: number) {
 		x = Math.floor(x)
 		y = Math.floor(y)
@@ -360,6 +331,15 @@ export const DEEPSLATE = new Deepslate()
 interface NoiseSettings {
 	minY: number
 	height: number
+}
+
+interface NoiseRouter {
+	temperature: deepslate19.DensityFunction
+	vegetation: deepslate19.DensityFunction
+	continents: deepslate19.DensityFunction
+	erosion: deepslate19.DensityFunction
+	ridges: deepslate19.DensityFunction
+	depth: deepslate19.DensityFunction
 }
 
 interface ChunkGenerator {
