@@ -1,8 +1,8 @@
 import type { Random } from 'deepslate/core'
 import { Enchantment, Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate/nbt'
-import type { VersionId } from '../services/Schemas.js'
-import { clamp, getWeightedRandom, isObject } from '../Utils.js'
+import type { VersionId } from '../../services/Schemas.js'
+import { clamp, getWeightedRandom, isObject } from '../../Utils.js'
 
 export interface SlottedItem {
 	slot: number,

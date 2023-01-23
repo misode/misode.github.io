@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useCanvas } from '../../hooks/index.js'
-import { decorator } from '../../previews/index.js'
 import { randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
+import { decorator } from './Decorator.js'
 import type { PreviewProps } from './index.js'
 
 export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {

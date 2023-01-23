@@ -1,9 +1,9 @@
 import { DataModel } from '@mcschema/core'
 import type { Random } from 'deepslate/worldgen'
 import { LegacyRandom, PerlinNoise } from 'deepslate/worldgen'
-import type { VersionId } from '../services/index.js'
-import { checkVersion } from '../services/index.js'
-import { clamp, isObject, stringToColor } from '../Utils.js'
+import type { VersionId } from '../../services/index.js'
+import { checkVersion } from '../../services/index.js'
+import { clamp, isObject, stringToColor } from '../../Utils.js'
 
 type BlockPos = [number, number, number]
 type Placement = [BlockPos, number]
