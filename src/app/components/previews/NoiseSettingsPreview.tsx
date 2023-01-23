@@ -75,13 +75,14 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 		ctx.current.putImageData(imageData.current, 0, 0)
 	}, [noiseSettings, finalDensity, layer, colormap, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
-		if (!pos) {
+		if (!pos || !noiseSettings || !finalDensity) {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const inVoid = noiseSettings && (-y < noiseSettings.minY || -y >= noiseSettings.minY + noiseSettings.height)
-			const output = inVoid ? 'void' : DEEPSLATE.getBlockState(x, -y)?.getName().path ?? 'unknown'
-			setFocused([output, `X=${x} Y=${-y}`])
+			const inVoid = -y < noiseSettings.minY || -y >= noiseSettings.minY + noiseSettings.height
+			const density = finalDensity.compute({ x, y: -y, z: 0})
+			const block = inVoid ? 'void' : DEEPSLATE.getBlockState(x, -y)?.getName().path ?? 'unknown'
+			setFocused([`${block} D=${density.toPrecision(3)}`, `X=${x} Y=${-y}`])
 		}
 	}, [noiseSettings, finalDensity])
 
