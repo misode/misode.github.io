@@ -113,7 +113,7 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 			setFocused([])
 		} else {
 			const biome = DEEPSLATE.getBiome(x, yOffset, -y)
-			setFocused([biome, `X=${x*4} Z=${-y*4}`])
+			setFocused([biome.replace(/^minecraft:/, ''), `X=${x*4} Z=${-y*4}`])
 		}
 		if (!pos || !noiseRouter) {
 			setFocused2([])

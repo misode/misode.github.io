@@ -419,6 +419,7 @@ main > .controls {
 	outline: none;
 	resize: none;
 	position: static;
+	opacity: 0.9;
 	background-color: var(--background-2);
 	border-top-left-radius: 6px;
 	color: var(--text-1);

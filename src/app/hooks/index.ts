@@ -1,7 +1,6 @@
 export * from './useActiveTimout.js'
 export * from './useAsync.js'
 export * from './useAsyncFn.js'
-export * from './useCanvas.js'
 export * from './useFocus.js'
 export * from './useHash.js'
 export * from './useLocalStorage.js'

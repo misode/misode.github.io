@@ -10,8 +10,10 @@ interface Props {
 	pixelSize?: number,
 	startPosition?: [number, number],
 	startScale?: number,
+	minScale?: number,
+	maxScale?: number,
 }
-export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state, pixelSize = 1, startPosition, startScale }: Props) {
+export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state, pixelSize = 1, startPosition, startScale, minScale = 1/16, maxScale = 16 }: Props) {
 	const canvas = useRef<HTMLCanvasElement>(null)
 	const dragStart = useRef<[number, number] | undefined>()
 	const dragButton = useRef<number | undefined>()
@@ -80,7 +82,7 @@ export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state,
 		}
 		function onWheel (e: WheelEvent) {
 			const newScale = Math.pow(2, Math.log(viewScale.current) / Math.log(2) + e.deltaY / 200)
-			if (newScale > 1/16 && newScale < 16) {
+			if (newScale > minScale && newScale < maxScale) {
 				viewScale.current = newScale
 				redraw.current()
 			}
@@ -119,7 +121,7 @@ export function InteractiveCanvas2D({ onSetup, onDraw, onHover, onResize, state,
 			canvas.current?.removeEventListener('contextmenu', onContextMenu)
 			window.removeEventListener('resize', resizeHandler)
 		}
-	}, [onSetup, onResize, onHover, transform, pixelSize])
+	}, [onSetup, onResize, onHover, transform, pixelSize, minScale, maxScale])
 
 	return <canvas ref={canvas}></canvas>
 }
