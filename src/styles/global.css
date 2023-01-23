@@ -326,6 +326,11 @@ main > .controls {
 	margin-right: 8px;
 }
 
+.preview-controls,
+.secondary-controls {
+	z-index: 1;
+}
+
 .secondary-controls {
 	margin-top: 40px;
 }
@@ -477,6 +482,18 @@ main.has-preview {
 .full-preview > canvas {
 	width: 100%;
 	height: 100%;
+}
+
+canvas.preview-details {
+	position: absolute;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	visibility: hidden;
+}
+
+canvas.preview-details.visible {
+	visibility: visible;
 }
 
 .popup-share {

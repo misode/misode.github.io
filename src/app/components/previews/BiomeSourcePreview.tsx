@@ -1,9 +1,10 @@
 import { DataModel } from '@mcschema/core'
 import { clampedMap } from 'deepslate'
-import type { mat3 } from 'gl-matrix'
+import { mat3 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
 import { getProjectData, useLocale, useProject, useStore } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
+import { checkVersion } from '../../services/Schemas.js'
 import { Store } from '../../Store.js'
 import { iterateWorld2D, randomSeed, stringToColor } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
@@ -16,6 +17,9 @@ import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
 const LAYERS = ['biomes', 'temperature', 'vegetation', 'continents', 'erosion', 'ridges', 'depth'] as const
 type Layer = typeof LAYERS[number]
+
+const DETAIL_DELAY = 300
+const DETAIL_SCALE = 2
 
 export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
@@ -31,58 +35,89 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const type: string = data?.generator?.biome_source?.type?.replace(/^minecraft:/, '') ?? ''
 	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 
-	const { value } = useAsync(async () => {
+	const { value } = useAsync(async function loadBiomeSource() {
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
 		await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(data?.generator?.settings), DataModel.unwrapLists(data?.generator?.biome_source), seed)
 		return {
 			biomeSource: { loaded: true },
-			noiseRouter: DEEPSLATE.getNoiseRouter(),
+			noiseRouter: checkVersion(version, '1.19') ? DEEPSLATE.getNoiseRouter() : undefined,
 		}
 	}, [state, seed, project, version])
 	const { biomeSource, noiseRouter } = value ?? {}
 
-	const imageData = useRef<ImageData>()
+	const actualLayer = noiseRouter ? layer : 'biomes'
+
 	const ctx = useRef<CanvasRenderingContext2D>()
+	const imageData = useRef<ImageData>()
 	const [colormap, setColormap] = useState<ColormapType>(Store.getColormap() ?? 'viridis')
 
-	const onSetup = useCallback((canvas: HTMLCanvasElement) => {
-		const ctx2D = canvas.getContext('2d')
-		if (!ctx2D) return
-		ctx.current = ctx2D
+	const detailCanvas = useRef<HTMLCanvasElement>(null)
+	const detailCtx = useRef<CanvasRenderingContext2D>()
+	const detailImageData = useRef<ImageData>()
+	const detailTimeout = useRef<number>()
+	
+	const onSetup = useCallback(function onSetup(canvas: HTMLCanvasElement) {
+		ctx.current = canvas.getContext('2d') ?? undefined
+		detailCtx.current = detailCanvas.current?.getContext('2d') ?? undefined
 	}, [])
-	const onResize = useCallback((width: number, height: number) => {
-		if (!ctx.current) return
-		imageData.current = ctx.current.getImageData(0, 0, width, height)
+	const onResize = useCallback(function onResize(width: number, height: number) {
+		if (ctx.current) {
+			imageData.current = ctx.current.getImageData(0, 0, width, height)
+		}
+		if (detailCtx.current && detailCanvas.current) {
+			detailCanvas.current.width = width * DETAIL_SCALE
+			detailCanvas.current.height = height * DETAIL_SCALE
+			detailImageData.current = detailCtx.current.getImageData(0, 0, width * DETAIL_SCALE, height * DETAIL_SCALE)
+		}
 	}, [])
-	const onDraw = useCallback((transform: mat3) => {
+	const onDraw = useCallback(function onDraw(transform: mat3) {
 		if (!ctx.current || !imageData.current || !shown) return
 
-		if (layer === 'biomes' && biomeSource) {
-			iterateWorld2D(imageData.current, transform, (x, y) => {
-				return DEEPSLATE.getBiome(x, yOffset, y)
-			}, (biome) => {
-				return getBiomeColor(biome, biomeColors)
-			})
-		} else if (layer !== 'biomes' && noiseRouter) {
-			const df = noiseRouter[layer]
-			const colorPicker = getColormap(colormap)
-			iterateWorld2D(imageData.current, transform, (x, y) => {
-				return df.compute({ x: x*4, y: yOffset, z: y*4 }) ?? 0
-			}, (density) => {
-				const color = colorPicker(clampedMap(density, -1, 1, 0, 1))
-				return [color[0] * 256, color[1] * 256, color[2] * 256]
-			})
+		function actualDraw(ctx: CanvasRenderingContext2D, img: ImageData, transform: mat3) {
+			if (actualLayer === 'biomes' && biomeSource) {
+				iterateWorld2D(img, transform, (x, y) => {
+					return DEEPSLATE.getBiome(x, yOffset, y)
+				}, (biome) => {
+					return getBiomeColor(biome, biomeColors)
+				})
+			} else if (actualLayer !== 'biomes' && noiseRouter) {
+				const df = noiseRouter[actualLayer]
+				const colorPicker = getColormap(colormap)
+				iterateWorld2D(img, transform, (x, y) => {
+					return df.compute({ x: x*4, y: yOffset, z: y*4 }) ?? 0
+				}, (density) => {
+					const color = colorPicker(clampedMap(density, -1, 1, 0, 1))
+					return [color[0] * 256, color[1] * 256, color[2] * 256]
+				})
+			}
+			ctx.putImageData(img, 0, 0)
 		}
-		ctx.current.putImageData(imageData.current, 0, 0)
-	}, [biomeSource, noiseRouter, layer, colormap, shown, biomeColors, yOffset])
-	const onHover = useCallback((pos: [number, number] | undefined) => {
-		if (!pos || !biomeSource || !noiseRouter) {
+
+		actualDraw(ctx.current, imageData.current, transform)
+		detailCanvas.current?.classList.remove('visible')
+
+		clearTimeout(detailTimeout.current)
+		if (hasRandomness) {
+			detailTimeout.current = setTimeout(function detailTimout() {
+				if (!detailCtx.current || !detailImageData.current || !detailCanvas.current) return
+				const detailTransform = mat3.create()
+				mat3.scale(detailTransform, transform, [1/DETAIL_SCALE, 1/DETAIL_SCALE])
+				actualDraw(detailCtx.current, detailImageData.current, detailTransform)
+				detailCanvas.current.classList.add('visible')
+			}, DETAIL_DELAY) as unknown as number
+		}
+	}, [biomeSource, noiseRouter, actualLayer, colormap, shown, biomeColors, yOffset])
+	const onHover = useCallback(function onHover(pos: [number, number] | undefined) {
+		const [x, y] = pos ?? [0, 0]
+		if (!pos || !biomeSource) {
 			setFocused([])
-			setFocused2([])
 		} else {
-			const [x, y] = pos
 			const biome = DEEPSLATE.getBiome(x, yOffset, -y)
 			setFocused([biome, `X=${x*4} Z=${-y*4}`])
+		}
+		if (!pos || !noiseRouter) {
+			setFocused2([])
+		} else {
 			setFocused2([LAYERS.flatMap(l => {
 				if (l === 'biomes') return []
 				const value = noiseRouter[l].compute({ x: x*4, y: yOffset, z: -y*4 })
@@ -97,14 +132,14 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 		</div>}
 		<div class="controls preview-controls">
 			{focused.map(s => <Btn label={s} class="no-pointer" /> )}
-			{layer !== 'biomes' && <ColormapSelector value={colormap} onChange={setColormap} />}
+			{actualLayer !== 'biomes' && <ColormapSelector value={colormap} onChange={setColormap} />}
 			{hasRandomness && <>
 				<BtnMenu icon="stack" tooltip={locale('layer')}>
 					<div class="btn btn-input" onClick={e => e.stopPropagation()}>
 						<span>{locale('y')}</span>
 						<NumberInput value={yOffset} onChange={setYOffset} />
 					</div>
-					{LAYERS.map(l => <Btn label={locale(`layer.${l}`)} active={l === layer} onClick={() => setLayer(l)} />)}
+					{checkVersion(version, '1.19') && LAYERS.map(l => <Btn label={locale(`layer.${l}`)} active={l === actualLayer} onClick={() => setLayer(l)} />)}
 				</BtnMenu>
 				<Btn icon="sync" tooltip={locale('generate_new_seed')}
 					onClick={() => setSeed(randomSeed())} />
@@ -112,6 +147,7 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 		</div>
 		<div class="full-preview">
 			<InteractiveCanvas2D onSetup={onSetup} onResize={onResize} onDraw={onDraw} onHover={onHover} pixelSize={hasRandomness ? 8 : 2} />
+			{hasRandomness && <canvas class={'preview-details'} ref={detailCanvas} />}
 		</div>
 	</>
 }

@@ -102,7 +102,6 @@ export class Deepslate {
 			const chunkGenerator = this.isVersion('1.19')
 				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
 				: new (this.d.NoiseChunkGenerator as any)(seed, biomeSource, noiseSettings)
-			console.log(noiseSettings)
 			this.settingsCache = noiseSettings.noise
 			this.generatorCache = chunkGenerator
 			if (this.isVersion('1.19')) {
