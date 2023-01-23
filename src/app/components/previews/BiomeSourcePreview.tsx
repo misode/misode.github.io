@@ -92,7 +92,7 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	}, [biomeSource, noiseRouter, yOffset])
 
 	return <>
-		{focused2 && <div class="controls secondary-controls">
+		{(hasRandomness && focused2) && <div class="controls secondary-controls">
 			{focused2.map(s => <Btn label={s} class="no-pointer" /> )}
 		</div>}
 		<div class="controls preview-controls">
@@ -111,7 +111,7 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 			</>}
 		</div>
 		<div class="full-preview">
-			<InteractiveCanvas2D onSetup={onSetup} onResize={onResize} onDraw={onDraw} onHover={onHover} pixelSize={8} />
+			<InteractiveCanvas2D onSetup={onSetup} onResize={onResize} onDraw={onDraw} onHover={onHover} pixelSize={hasRandomness ? 8 : 2} />
 		</div>
 	</>
 }
