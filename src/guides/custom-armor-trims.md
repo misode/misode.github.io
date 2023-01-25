@@ -312,5 +312,135 @@ This item model references the s`trims/items/chestplate_trim_ender` sprite that 
 
 Since we haven't added the override for all the other armor types, they will default to the previous f`trim_type`, in our case n`0.8`, which is diamonds.
 
+## Adding a custom trimmable item
+In this example we're going to add the `iron_axe` as a trimmable item. Since this is not an armor item, we only need to worry about the item model. The trim pattern used will have no effect on the texture, only the trim material can be used in the model overrides.
+
+![trimmable_axe_item](https://user-images.githubusercontent.com/17352009/214477705-5d94a5b2-828d-411f-824e-699689d6f6d1.png)
+
+### Data pack part
+The only change in the data pack is adding the item to the `#minecraft:trimmable_armor` item tag.
+
+**`data/minecraft/tags/items/trimmable_armor.json`**
+```json
+{
+  "values": [
+    "minecraft:iron_axe"
+  ]
+}
+```
+
+### Resource pack part
+We start in the resource pack by customizing the iron axe item model.
+
+**`assets/minecraft/models/item/iron_axe.json`**
+```json
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "example:item/iron_axe_quartz_trim",
+      "predicate": {
+        "trim_type": 0.1
+      }
+    },
+    {
+      "model": "example:item/iron_axe_netherite_trim",
+      "predicate": {
+        "trim_type": 0.3
+      }
+    },
+    {
+      "model": "example:item/iron_axe_redstone_trim",
+      "predicate": {
+        "trim_type": 0.4
+      }
+    },
+    {
+      "model": "example:item/iron_axe_copper_trim",
+      "predicate": {
+        "trim_type": 0.5
+      }
+    },
+    {
+      "model": "example:item/iron_axe_gold_trim",
+      "predicate": {
+        "trim_type": 0.6
+      }
+    },
+    {
+      "model": "example:item/iron_axe_emerald_trim",
+      "predicate": {
+        "trim_type": 0.7
+      }
+    },
+    {
+      "model": "example:item/iron_axe_diamond_trim",
+      "predicate": {
+        "trim_type": 0.8
+      }
+    },
+    {
+      "model": "example:item/iron_axe_lapis_trim",
+      "predicate": {
+        "trim_type": 0.9
+      }
+    },
+    {
+      "model": "example:item/iron_axe_amethyst_trim",
+      "predicate": {
+        "trim_type": 1.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "minecraft:item/iron_axe"
+  }
+}
+```
+This lists all the vanilla trim materials and overrides the model with our custom item models. Each of those looks like this:
+
+**`assets/example/models/item/iron_axe_amethyst_trim.json`**
+```json
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/iron_axe",
+    "layer1": "example:trims/items/axe_trim_amethyst"
+  }
+}
+```
+
+> **Create this file for each of the 10 materials!**
+
+The above item models reference an `axe_trim_amethyst` texture. To make this work we need to add these permutations for the axe to the `blocks.json` atlas.
+
+**`assets/minecraft/atlases/blocks.json`**
+```json
+{
+  "sources": [
+    {
+      "type": "paletted_permutations",
+      "textures": [
+        "example:trims/items/axe_trim"
+      ],
+      "palette_key": "trims/color_palettes/trim_palette",
+      "permutations": {
+        "quartz": "trims/color_palettes/quartz",
+        "iron": "trims/color_palettes/iron",
+        "gold": "trims/color_palettes/gold",
+        "diamond": "trims/color_palettes/diamond",
+        "netherite": "trims/color_palettes/netherite",
+        "redstone": "trims/color_palettes/redstone",
+        "copper": "trims/color_palettes/copper",
+        "emerald": "trims/color_palettes/emerald",
+        "lapis": "trims/color_palettes/lapis",
+        "amethyst": "trims/color_palettes/amethyst"
+      }
+    }
+  ]
+}
+```
+This references the s`axe_trim` texture, which is a mask for which pixels to color with the color palette. You can download this texture here: [`axe_trim.png`](https://raw.githubusercontent.com/misode/trim-examples/main/custom_trimmable_item/custom_trimmable_item_rp/assets/example/textures/trims/items/axe_trim.png). Put it in **`assets/example/textures/trims/items/axe_trim.png`**.
+
 ## Download
 A reminder that the complete data packs and resource packs of these examples can be found in the [trim-examples repository](https://github.com/misode/trim-examples).
