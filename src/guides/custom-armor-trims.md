@@ -315,7 +315,7 @@ Since we haven't added the override for all the other armor types, they will def
 ## Adding a custom trimmable item
 In this example we're going to add the `iron_axe` as a trimmable item. Since this is not an armor item, we only need to worry about the item model. The trim pattern used will have no effect on the texture, only the trim material can be used in the model overrides.
 
-![trimmable_axe_item](https://user-images.githubusercontent.com/17352009/214477705-5d94a5b2-828d-411f-824e-699689d6f6d1.png)
+![trimmable_axe_item](https://user-images.githubusercontent.com/17352009/214481089-dcaa5eee-77f5-4ad7-a35f-3cb5fb9b7565.png)
 
 ### Data pack part
 The only change in the data pack is adding the item to the `#minecraft:trimmable_armor` item tag.
@@ -402,7 +402,7 @@ This lists all the vanilla trim materials and overrides the model with our custo
 **`assets/example/models/item/iron_axe_amethyst_trim.json`**
 ```json
 {
-  "parent": "minecraft:item/generated",
+  "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "minecraft:item/iron_axe",
     "layer1": "example:trims/items/axe_trim_amethyst"
