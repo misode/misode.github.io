@@ -1,4 +1,9 @@
+import { getCurrentUrl } from 'preact-router'
 import { useEffect, useMemo, useState } from 'preact/hooks'
+import { useVersion } from '../contexts/Version.jsx'
+import { latestVersion } from '../services/DataFetcher.js'
+import { Store } from '../Store.js'
+import { getGenerator } from '../Utils.js'
 import { Octicon } from './index.js'
 
 type ErrorPanelProps = {
@@ -6,8 +11,12 @@ type ErrorPanelProps = {
 	onDismiss?: () => unknown,
 }
 export function ErrorPanel({ error, onDismiss }: ErrorPanelProps) {
+	const { version } = useVersion()
 	const [stackVisible, setStackVisible] = useState(false)
 	const [stack, setStack] = useState<string | undefined>(undefined)
+
+	const gen = getGenerator(getCurrentUrl())
+	const source = gen ? Store.getBackup(gen.id) : undefined
 
 	useEffect(() => {
 		if (error instanceof Error) {
@@ -28,16 +37,23 @@ export function ErrorPanel({ error, onDismiss }: ErrorPanelProps) {
 
 	const url = useMemo(() => {
 		let url ='https://github.com/misode/misode.github.io/issues/new'
-		if (error instanceof Error) {
-			url += `?title=${encodeURIComponent(`${error.name}: ${error.message}`)}`
-			if (stack) {
-				url += `&body=${encodeURIComponent(`\`\`\`\n${error.name}: ${error.message}\n${stack}\n\`\`\`\n`)}`
-			}
-		} else {
-			url += `?title=${encodeURIComponent(error.toString())}`
+		url += `?title=${encodeURIComponent(error instanceof Error ? `${error.name}: ${error.message}` : error.toString())}`
+		let body = ''
+		body += `## Crash report\n * Page url: \`${location.href}\`\n`
+		if (gen) {
+			body += ` * Generator ID: \`${gen.id}\`\n`
 		}
+		body += ` * Current version: \`${version}\`\n`
+		body += ` * Latest version: \`${latestVersion}\`\n`
+		if (error instanceof Error && stack) {
+			body += `\n### Stack trace\n\`\`\`\n${error.name}: ${error.message}\n${stack}\n\`\`\`\n`
+		}
+		if (source) {
+			body += `\n### Generator JSON\n<details>\n<pre>\n${JSON.stringify(source, null, 2)}\n</pre>\n</details>\n`
+		}
+		url += `&body=${encodeURIComponent(body)}`
 		return url
-	}, [error, stack])
+	}, [error, version, stack, source, gen?.id])
 
 	return <div class="error">
 		{onDismiss && <div class="error-dismiss" onClick={onDismiss}>{Octicon.x}</div>}

@@ -1,3 +1,4 @@
+import type { ColormapType } from './components/previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 
 type Method = 'menu' | 'hotkey'
@@ -110,6 +111,12 @@ export namespace Analytics {
 		})
 	}
 
+	export function setColormap(colormap: ColormapType) {
+		gtag('set', {
+			colormap,
+		})
+	}
+
 	export function resetGenerator(file_type: string, history: number, method: Method) {
 		event(ID_GENERATOR, 'reset')
 		gtag('event', 'reset_generator', {
@@ -129,7 +136,7 @@ export namespace Analytics {
 	}
 
 	export function redoGenerator(file_type: string, history: number, method: Method) {
-		event(ID_GENERATOR, 'undo', legacyMethod(method))
+		event(ID_GENERATOR, 'redo', legacyMethod(method))
 		gtag('event', 'redo_generator', {
 			file_type,
 			history,

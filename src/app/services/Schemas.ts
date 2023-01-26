@@ -5,10 +5,10 @@ import { initPartners } from '../partners/index.js'
 import { message } from '../Utils.js'
 import { fetchData } from './DataFetcher.js'
 
-export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19'] as const
+export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19', '1.19.3', '1.19.4'] as const
 export type VersionId = typeof VersionIds[number]
 
-export const DEFAULT_VERSION: VersionId = '1.19'
+export const DEFAULT_VERSION: VersionId = '1.19.3'
 
 export type BlockStateRegistry = {
 	[block: string]: {
@@ -46,6 +46,8 @@ const versionGetter: {
 	1.18: () => import('@mcschema/java-1.18'),
 	'1.18.2': () => import('@mcschema/java-1.18.2'),
 	1.19: () => import('@mcschema/java-1.19'),
+	'1.19.3': () => import('@mcschema/java-1.19.3'),
+	'1.19.4': () => import('@mcschema/java-1.19.4'),
 }
 
 export let CachedDecorator: INode<any>

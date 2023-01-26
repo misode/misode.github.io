@@ -1,15 +1,17 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
 import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
+import { Identifier, ItemStack } from 'deepslate/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
 import { Btn, Octicon } from '../components/index.js'
+import { ItemDisplay } from '../components/ItemDisplay.jsx'
+import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
 import config from '../Config.js'
-import { localize, useStore } from '../contexts/index.js'
+import { localize, useLocale, useStore } from '../contexts/index.js'
 import { useFocus } from '../hooks/index.js'
-import { VanillaColors } from '../previews/index.js'
 import type { BlockStateRegistry, VersionId } from '../services/index.js'
-import { CachedCollections, CachedDecorator, CachedFeature, getTextureUrl } from '../services/index.js'
+import { CachedDecorator, CachedFeature } from '../services/index.js'
 import { deepClone, deepEqual, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
 import { ModelWrapper } from './ModelWrapper.js'
 
@@ -21,8 +23,6 @@ const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text
 const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale', 'generator_structure.random_spread.locate_offset']
 const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
 const collapsableFields = ['density_function.argument', 'density_function.argument1', 'density_function.argument2', 'density_function.input', 'density_function.when_in_range', 'density_function.when_out_of_range']
-
-const PACKAGE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8.878.392a1.75 1.75 0 00-1.756 0l-5.25 3.045A1.75 1.75 0 001 4.951v6.098c0 .624.332 1.2.872 1.514l5.25 3.045a1.75 1.75 0 001.756 0l5.25-3.045c.54-.313.872-.89.872-1.514V4.951c0-.624-.332-1.2-.872-1.514L8.878.392zM7.875 1.69a.25.25 0 01.25 0l4.63 2.685L8 7.133 3.245 4.375l4.63-2.685zM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432L2.5 5.677zm6.25 8.271l4.625-2.683a.25.25 0 00.125-.216V5.677L8.75 8.432v5.516z"></path></svg>'
 
 const findGenerator = (id: string) => {
 	return config.generators.find(g => g.id === id.replace(/^\$/, ''))
@@ -140,12 +140,7 @@ const renderHtml: RenderHook = {
 				let label: undefined | string | JSX.Element
 				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
 					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
-						const texturePath = `item/${cValue.name.replace(/^minecraft:/, '')}`
-						if (CachedCollections.get('texture').includes('minecraft:' + texturePath)) {
-							label = <img src={getTextureUrl(version, texturePath)} alt="" onError={e => e.currentTarget.outerHTML = PACKAGE} />
-						} else {
-							label = Octicon.package
-						}
+						label = <ItemDisplay item={new ItemStack(Identifier.parse(cValue.name), 1)} />
 					}
 				}
 
@@ -324,13 +319,20 @@ const renderHtml: RenderHook = {
 }
 
 function Collapsed({ path, value }: { path: ModelPath, value: any, schema: INode<any> }) {
+	const { locale } = useLocale()
 	const context = path.getContext().join('.')
 	switch (context) {
 		case 'loot_table.pools.entry':
-			return <label>{value?.entries?.length ?? 0} entries</label>
+			const count = value?.entries?.length ?? 0
+			return <label>{count} {count == 1 ? 'entry' : 'entries'}</label>
 		case 'function.set_contents.entries.entry':
 		case 'loot_pool.entries.entry':
-			return <label>{value?.name?.replace(/^minecraft:/, '') ?? value?.type?.replace(/^minecraft:/, '')}</label>
+			const name = value?.name?.replace(/^minecraft:/, '') ?? value?.type?.replace(/^minecraft:/, '')
+			const weight = value?.weight || undefined
+			return <>
+				<label>{name}</label>
+				{weight !== undefined && <label class="tooltipped tip-se" aria-label={locale('weight')}>{weight}</label>}
+			</>
 	}
 	for (const child of Object.values(value ?? {})) {
 		if (typeof child === 'string') {

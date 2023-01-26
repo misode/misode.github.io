@@ -28,6 +28,9 @@ const ARTICLE_OVERRIDES = new Map(Object.entries({
 	'1.19-pre5': 'minecraft-1-19-pre-release-4',
 	1.19: 'the-wild-update-out-today-java',
 	'1.19.1-pre4': 'minecraft-1-19-1-pre-release-3',
+	'1.19.1-rc2': 'minecraft-1-19-1-release-candidate-2',
+	'1.19.1-rc3': 'minecraft-1-19-1-release-candidate-3',
+	'1.19.3-pre2': 'minecraft-1-19-3-pre-release-1',
 }))
 
 export function getArticleLink(version: string): string | undefined {

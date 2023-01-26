@@ -83,8 +83,18 @@
     },
     {
       "id": "1.19",
-      "dynamic": true,
+      "ref": "1.19.2",
       "pack_format": 10
+    },
+    {
+      "id": "1.19.3",
+      "ref": "1.19.3",
+      "pack_format": 10
+    },
+    {
+      "id": "1.19.4",
+      "dynamic": true,
+      "pack_format": 11
     }
   ],
   "generators": [
@@ -330,6 +340,14 @@
       "tags": ["assets"],
       "schema": "font",
       "minVersion": "1.16"
+    },
+    {
+      "id": "atlas",
+      "url": "assets/atlas",
+      "path": "atlases",
+      "tags": ["assets"],
+      "schema": "atlas",
+      "minVersion": "1.19.3"
     },
     {
       "id": "block_growth",

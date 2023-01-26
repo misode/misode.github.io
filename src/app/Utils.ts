@@ -1,6 +1,9 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
+import type { Random } from 'deepslate/core'
+import type { mat3 } from 'gl-matrix'
+import { vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
@@ -182,7 +185,7 @@ export function square(a: number) {
 }
 
 export function clamp(a: number, b: number, c: number) {
-	return Math.max(a, Math.min(b, c))
+	return Math.max(b, Math.min(a, c))
 }
 
 export function clampedLerp(a: number, b: number, c: number): number {
@@ -297,12 +300,12 @@ export class BiMap<A, B> {
 	}
 }
 
-export async function readZip(file: File): Promise<[string, string][]> {
-	const buffer = await file.arrayBuffer()
+export async function readZip(file: File | ArrayBuffer, predicate: (name: string) => boolean = () => true): Promise<[string, string][]> {
+	const buffer = file instanceof File ? await file.arrayBuffer() : file
 	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
 	const entries = await reader.getEntries()
 	return await Promise.all(entries
-		.filter(e => !e.directory)
+		.filter(e => !e.directory && predicate(e.filename))
 		.map(async e => {
 			const writer = new zip.TextWriter('utf-8')
 			return [e.filename, await e.getData?.(writer)] as [string, string]
@@ -336,4 +339,41 @@ export async function computeIfAbsentAsync<K, V>(map: Map<K, V>, key: K, getter:
 	const value = await getter(key)
 	map.set(key, value)
 	return value
+}
+
+export function getWeightedRandom<T>(random: Random, entries: T[], getWeight: (entry: T) => number) {
+	let totalWeight = 0
+	for (const entry of entries) {
+		totalWeight += getWeight(entry)
+	}
+	if (totalWeight <= 0) {
+		return undefined
+	}
+	let n = random.nextInt(totalWeight)
+	for (const entry of entries) {
+		n -= getWeight(entry)
+		if (n < 0) {
+			return entry
+		}
+	}
+	return undefined
+}
+
+export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: number, y: number) => D, getColor: (d: D) => [number, number, number]) {
+	const pos = vec2.create()
+	const arr = Array(img.width * img.height)
+	for (let x = 0; x < img.width; x += 1) {
+		for (let y = 0; y < img.height; y += 1) {
+			const i = x + y * img.width
+			vec2.transformMat3(pos, vec2.fromValues(x, y), transform)
+			arr[i] = getData(Math.floor(pos[0]), -Math.floor(pos[1]))
+		}
+	}
+	for (let i = 0; i < img.width * img.height; i += 1) {
+		const color = getColor(arr[i])
+		img.data[4 * i] = color[0]
+		img.data[4 * i + 1] = color[1]
+		img.data[4 * i + 2] = color[2]
+		img.data[4 * i + 3] = 255
+	}
 }
