@@ -359,49 +359,49 @@
       "minVersion": "1.18.2"
     },
     {
-      "id": "item",
+      "id": "obsidian_item",
       "url": "partners/obsidian/item",
       "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:item"
     },
     {
-      "id": "food_item",
+      "id": "obsidian_food_item",
       "url": "partners/obsidian/food_item",
       "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:food_item"
     },
     {
-      "id": "weapon",
+      "id": "obsidian_weapon",
       "url": "partners/obsidian/weapon",
       "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:weapon"
     },
     {
-      "id": "tool",
+      "id": "obsidian_tool",
       "url": "partners/obsidian/tool",
       "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:tool"
     },
     {
-      "id": "block",
+      "id": "obsidian_block",
       "url": "partners/obsidian/block",
       "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:block"
     },
     {
-      "id": "creative_tab",
+      "id": "obsidian_creative_tab",
       "url": "partners/obsidian/creative_tab",
       "category": "partners/obsidian",
       "partner": "obsidian",
       "schema": "obsidian:creative_tab"
     },
     {
-      "id": "tabbed_creative_tab",
+      "id": "obsidian_tabbed_creative_tab",
       "url": "partners/obsidian/tabbed_creative_tab",
       "category": "partners/obsidian",
       "partner": "obsidian",
