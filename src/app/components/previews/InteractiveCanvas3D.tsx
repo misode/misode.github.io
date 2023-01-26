@@ -100,7 +100,6 @@ export function InteractiveCanvas3D({ onSetup, onDraw, onResize, state, startPos
 			redraw.current()
 		}
 
-		console.warn('Uhhh...', canvas.current)
 		onSetup(canvas.current)
 		resizeHandler()
 

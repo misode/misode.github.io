@@ -167,12 +167,13 @@ export async function fetchResources(versionId: VersionId) {
 	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
-		const [models, uvMapping, atlas] = await Promise.all([
+		const [blockDefinitions, models, uvMapping, atlas] = await Promise.all([
+			fetchAllPresets(versionId, 'block_definition'),
 			fetchAllPresets(versionId, 'model'),
 			fetch(`${mcmeta(version, 'atlas')}/all/data.min.json`).then(r => r.json()),
 			loadImage(`${mcmeta(version, 'atlas')}/all/atlas.png`),
 		])
-		return { models, uvMapping, atlas }
+		return { blockDefinitions, models, uvMapping, atlas }
 	} catch (e) {
 		throw new Error(`Error occured while fetching resources: ${message(e)}`)
 	}

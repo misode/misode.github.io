@@ -1,5 +1,5 @@
-import type { BlockModelProvider, ItemStack, TextureAtlasProvider, UV } from 'deepslate/render'
-import { BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
+import type { BlockDefinitionProvider, BlockFlagsProvider, BlockModelProvider, BlockPropertiesProvider, ItemStack, TextureAtlasProvider, UV } from 'deepslate/render'
+import { BlockDefinition, BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
 import { message } from '../Utils.js'
 import { fetchLanguage, fetchResources } from './DataFetcher.js'
 import type { VersionId } from './Schemas.js'
@@ -10,8 +10,8 @@ export async function getResources(version: VersionId) {
 	if (!Resources[version]) {
 		Resources[version] = (async () => {
 			try {
-				const { models, uvMapping, atlas} = await fetchResources(version)
-				Resources[version] = new ResourceManager(models, uvMapping, atlas)
+				const { blockDefinitions, models, uvMapping, atlas} = await fetchResources(version)
+				Resources[version] = new ResourceManager(blockDefinitions, models, uvMapping, atlas)
 				return Resources[version]
 			} catch (e) {
 				console.error('Error: ', e)
@@ -51,15 +51,24 @@ export async function renderItem(version: VersionId, item: ItemStack) {
 	return promise
 }
 
-export class ResourceManager implements BlockModelProvider, TextureAtlasProvider {
-	private blockModels: { [id: string]: BlockModel }
+interface Resources extends BlockDefinitionProvider, BlockModelProvider, TextureAtlasProvider, BlockFlagsProvider, BlockPropertiesProvider {}
+
+export class ResourceManager implements Resources {
+	private readonly blockDefinitions: { [id: string]: BlockDefinition }
+	private readonly blockModels: { [id: string]: BlockModel }
 	private textureAtlas: TextureAtlas
 
-	constructor(models: Map<string, unknown>, uvMapping: any, textureAtlas: HTMLImageElement) {
+	constructor(blockDefinitions: Map<string, unknown>, models: Map<string, unknown>, uvMapping: any, textureAtlas: HTMLImageElement) {
+		this.blockDefinitions = {}
 		this.blockModels = {}
 		this.textureAtlas = TextureAtlas.empty()
+		this.loadBlockDefinitions(blockDefinitions)
 		this.loadBlockModels(models)
 		this.loadBlockAtlas(textureAtlas, uvMapping)
+	}
+
+	public getBlockDefinition(id: Identifier) {
+		return this.blockDefinitions[id.toString()]
 	}
 
 	public getBlockModel(id: Identifier) {
@@ -74,11 +83,29 @@ export class ResourceManager implements BlockModelProvider, TextureAtlasProvider
 		return this.textureAtlas.getTextureAtlas()
 	}
 
+	public getBlockFlags() {
+		return { opaque: false }
+	}
+
+	public getBlockProperties() {
+		return null
+	}
+
+	public getDefaultBlockProperties() {
+		return null
+	}
+
 	private loadBlockModels(models: Map<string, unknown>) {
 		[...models.entries()].forEach(([id, model]) => {
 			this.blockModels[Identifier.create(id).toString()] = BlockModel.fromJson(id, model)
 		})
 		Object.values(this.blockModels).forEach(m => m.flatten(this))
+	}
+
+	private loadBlockDefinitions(definitions: Map<string, unknown>) {
+		[...definitions.entries()].forEach(([id, definition]) => {
+			this.blockDefinitions[Identifier.create(id).toString()] = BlockDefinition.fromJson(id, definition)
+		})
 	}
 
 	private loadBlockAtlas(image: HTMLImageElement, textures: any) {
@@ -98,6 +125,41 @@ export class ResourceManager implements BlockModelProvider, TextureAtlasProvider
 			idMap[Identifier.create(id).toString()] = [u / w, v / h, (u + du) / w, (v + dv2) / h]
 		})
 		this.textureAtlas = new TextureAtlas(imageData, idMap)
+	}
+}
+
+export class ResourceWrapper implements Resources {
+	constructor(
+		private readonly wrapped: Resources,
+		private readonly overrides: Partial<Resources>,
+	) {}
+
+	public getBlockDefinition(id: Identifier) {
+		return this.overrides.getBlockDefinition?.(id) ?? this.wrapped.getBlockDefinition(id)
+	}
+
+	public getBlockModel(id: Identifier) {
+		return this.overrides.getBlockModel?.(id) ?? this.wrapped.getBlockModel(id)
+	}
+
+	public getTextureUV(texture: Identifier) {
+		return this.overrides.getTextureUV?.(texture) ?? this.wrapped.getTextureUV(texture)
+	}
+
+	public getTextureAtlas() {
+		return this.overrides.getTextureAtlas?.() ?? this.wrapped.getTextureAtlas()
+	}
+
+	public getBlockFlags(id: Identifier) {
+		return this.overrides.getBlockFlags?.(id) ?? this.wrapped.getBlockFlags(id)
+	}
+
+	public getBlockProperties(id: Identifier) {
+		return this.overrides.getBlockProperties?.(id) ?? this.wrapped.getBlockProperties(id)
+	}
+
+	public getDefaultBlockProperties(id: Identifier) {
+		return this.overrides.getDefaultBlockProperties?.(id) ?? this.wrapped.getDefaultBlockProperties(id)
 	}
 }
 
