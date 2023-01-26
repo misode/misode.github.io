@@ -29,17 +29,17 @@ export function TextComponent({ component, base = { color: 'white' }, shadow = t
 	const state = JSON.stringify(component)
 	const parts = useMemo(() => {
 		const parts: PartData[] = []
-		visitComponent(component, el => parts.push(el))
+		visitComponent(component, el => parts.push(inherit(el, base)))
 		return parts
-	}, [state])
+	}, [state, base])
 
 	const { value: language } = useAsync(() => getLanguage(version), [version])
 
 	return <div class="text-component">
-		{shadow && <div style={createStyle(base, true)}>
+		{shadow && <div>
 			{parts.map(p => <TextPart part={p} shadow={true} lang={language ?? {}} />)}
 		</div>}
-		<div class="text-foreground" style={createStyle(base, false)}>
+		<div class="text-foreground">
 			{parts.map(p => <TextPart part={p} lang={language ?? {}} />)}
 		</div>
 	</div>
