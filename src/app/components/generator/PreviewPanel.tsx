@@ -24,35 +24,31 @@ export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
 	})
 
 	if (!model) return <></>
+	const data = model.get(new Path([]))
+	if (!data) return <></>
 
 	if (id === 'loot_table') {
-		const data = model.get(new Path([]))
-		if (data) return <LootTablePreview {...{ model, version, shown, data }} />
+		return <LootTablePreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'dimension' && model.get(new Path(['generator', 'type']))?.endsWith('noise')) {
-		const data = model.get(new Path(['generator', 'biome_source']))
-		if (data) return <BiomeSourcePreview {...{ model, version, shown, data }} />
+		return <BiomeSourcePreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/density_function') {
-		const data = model.get(new Path([]))
-		if (data) return <DensityFunctionPreview {...{ model, version, shown, data }} />
+		return <DensityFunctionPreview {...{ model, version, shown, data }} />
 	}
 
 	if (id === 'worldgen/noise') {
-		const data = model.get(new Path([]))
-		if (data) return <NoisePreview {...{ model, version, shown, data }} />
+		return <NoisePreview {...{ model, version, shown, data }} />
 	}
 
-	if (id === 'worldgen/noise_settings') {
-		const data = model.get(new Path([]))
-		if (data) return <NoiseSettingsPreview {...{ model, version, shown, data }} />
+	if (id === 'worldgen/noise_settings' && checkVersion(version, '1.18')) {
+		return <NoiseSettingsPreview {...{ model, version, shown, data }} />
 	}
 
 	if ((id === 'worldgen/placed_feature' ||  (id === 'worldgen/configured_feature' && checkVersion(version, '1.16', '1.17')))) {
-		const data = model.get(new Path([]))
-		if (data) return <DecoratorPreview {...{ model, version, shown, data }} />
+		return <DecoratorPreview {...{ model, version, shown, data }} />
 	}
 
 	return <></>

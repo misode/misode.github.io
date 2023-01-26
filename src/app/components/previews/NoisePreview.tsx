@@ -1,76 +1,73 @@
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { DataModel } from '@mcschema/core'
+import { clampedMap, NoiseParameters, NormalNoise, XoroshiroRandom } from 'deepslate'
+import type { mat3 } from 'gl-matrix'
+import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useCanvas } from '../../hooks/index.js'
-import type { ColormapType } from '../../previews/Colormap.js'
-import { normalNoise, normalNoisePoint } from '../../previews/index.js'
 import { Store } from '../../Store.js'
-import { randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
+import type { ColormapType } from './Colormap.js'
+import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
+import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const NoisePreview = ({ data, shown, version }: PreviewProps) => {
+export const NoisePreview = ({ data, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const [seed, setSeed] = useState(randomSeed())
-	const [scale, setScale] = useState(2)
+	const state = JSON.stringify(data)
+
+	const noise = useMemo(() => {
+		const random = XoroshiroRandom.create(seed)
+		const params = NoiseParameters.fromJson(DataModel.unwrapLists(data))
+		return new NormalNoise(random, params)
+	}, [state, seed])
+
+	const imageData = useRef<ImageData>()
+	const ctx = useRef<CanvasRenderingContext2D>()
 	const [focused, setFocused] = useState<string[]>([])
 	const [colormap, setColormap] = useState<ColormapType>(Store.getColormap() ?? 'viridis')
-	const offset = useRef<[number, number]>([0, 0])
-	const state = JSON.stringify([data])
 
-	const { canvas, redraw } = useCanvas({
-		size() {
-			return [256, 256]
-		},
-		async draw(img) {
-			const options = { offset: offset.current, scale, seed, version, colormap }
-			normalNoise(data, img, options)
-		},
-		async onDrag(dx, dy) {
-			offset.current[0] = offset.current[0] + dx * 256
-			offset.current[1] = offset.current[1] + dy * 256
-			redraw()
-		},
-		onHover(x, y) {
-			const x2 = Math.floor(x * 256)
-			const y2 = Math.floor(y * 256)
-			const options = { offset: offset.current, scale, seed, version, colormap }
-			const value = normalNoisePoint(data, x2, y2, options)
-			
-			const ox = -options.offset[0] - 100
-			const oy = -options.offset[1] - 100
-			const xx = (x2 + ox) * options.scale
-			const yy = (y2 + oy) * options.scale
-			setFocused([value.toPrecision(3), `X=${Math.floor(xx)} Y=${Math.floor(yy)}`])
-		},
-		onLeave() {
+	const onSetup = useCallback((canvas: HTMLCanvasElement) => {
+		const ctx2D = canvas.getContext('2d')
+		if (!ctx2D) return
+		ctx.current = ctx2D
+	}, [])
+	const onResize = useCallback((width: number, height: number) => {
+		if (!ctx.current) return
+		imageData.current = ctx.current.getImageData(0, 0, width, height)
+	}, [])
+	const onDraw = useCallback((transform: mat3) => {
+		if (!ctx.current || !imageData.current || !shown) return
+
+		const colorPicker = getColormap(colormap)
+		iterateWorld2D(imageData.current, transform, (x, y) => {
+			return noise.sample(x, y, 0)
+		}, (value) => {
+			const color = colorPicker(clampedMap(value, -1, 1, 1, 0))
+			return [color[0] * 256, color[1] * 256, color[2] * 256]
+		})
+		ctx.current.putImageData(imageData.current, 0, 0)
+	}, [noise, colormap, shown])
+	const onHover = useCallback((pos: [number, number] | undefined) => {
+		if (!pos) {
 			setFocused([])
-		},
-	}, [version, state, scale, seed, colormap])
-
-	useEffect(() => {
-		if (shown) {
-			redraw()
+		} else {
+			const [x, y] = pos
+			const output = noise.sample(x, -y, 0)
+			setFocused([output.toPrecision(3), `X=${x} Y=${-y}`])
 		}
-	}, [version, state, scale, seed, colormap, shown])
-
-	const changeScale = (newScale: number) => {
-		offset.current[0] = offset.current[0] * scale / newScale
-		offset.current[1] = offset.current[1] * scale / newScale
-		setScale(newScale)
-	}
+	}, [noise])
 
 	return <>
 		<div class="controls preview-controls">
 			{focused.map(s => <Btn label={s} class="no-pointer" /> )}
 			<ColormapSelector value={colormap} onChange={setColormap} />
-			<Btn icon="dash" tooltip={locale('zoom_out')}
-				onClick={() => changeScale(scale * 1.5)} />
-			<Btn icon="plus" tooltip={locale('zoom_in')}
-				onClick={() => changeScale(scale / 1.5)} />
 			<Btn icon="sync" tooltip={locale('generate_new_seed')}
 				onClick={() => setSeed(randomSeed())} />
 		</div>
-		<canvas ref={canvas} width="256" height="256"></canvas>
+		<div class="full-preview">
+			<InteractiveCanvas2D onSetup={onSetup} onResize={onResize} onDraw={onDraw} onHover={onHover} pixelSize={4} />
+		</div>
 	</>
 }

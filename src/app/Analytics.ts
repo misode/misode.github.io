@@ -1,4 +1,4 @@
-import type { ColormapType } from './previews/Colormap.js'
+import type { ColormapType } from './components/previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 
 type Method = 'menu' | 'hotkey'

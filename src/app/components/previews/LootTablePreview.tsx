@@ -1,12 +1,12 @@
 import { DataModel } from '@mcschema/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
-import type { SlottedItem } from '../../previews/LootTable.js'
-import { generateLootTable } from '../../previews/LootTable.js'
 import { clamp, randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
+import type { SlottedItem } from './LootTable.js'
+import { generateLootTable } from './LootTable.js'
 
 export const LootTablePreview = ({ data }: PreviewProps) => {
 	const { locale } = useLocale()

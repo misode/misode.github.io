@@ -3,11 +3,11 @@ import { Identifier } from 'deepslate/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { itemHasGlint } from '../previews/LootTable.js'
 import { renderItem } from '../services/Resources.js'
 import { getCollections } from '../services/Schemas.js'
 import { ItemTooltip } from './ItemTooltip.jsx'
 import { Octicon } from './Octicon.jsx'
+import { itemHasGlint } from './previews/LootTable.js'
 
 interface Props {
 	item: ItemStack,

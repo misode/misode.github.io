@@ -1,14 +1,13 @@
 import { DataModel } from '@mcschema/core'
-import type { Random } from 'deepslate/worldgen'
-import { LegacyRandom, PerlinNoise } from 'deepslate/worldgen'
-import type { VersionId } from '../services/index.js'
-import { checkVersion } from '../services/index.js'
-import { clamp, isObject, stringToColor } from '../Utils.js'
+import type { BlockPos, ChunkPos, PerlinNoise, Random } from 'deepslate/worldgen'
+import type { VersionId } from '../../services/index.js'
+import { checkVersion } from '../../services/index.js'
+import type { Color } from '../../Utils.js'
+import { clamp, isObject, stringToColor } from '../../Utils.js'
 
-type BlockPos = [number, number, number]
-type Placement = [BlockPos, number]
+export type Placement = [BlockPos, number]
 
-type PlacementContext = {
+export type PlacementContext = {
 	placements: Placement[],
 	features: string[],
 	random: Random,
@@ -18,12 +17,17 @@ type PlacementContext = {
 	nextFloat(): number,
 	nextInt(max: number): number,
 	nextGaussian(): number,
-	sampleInt(provider: any): number,
+}
+
+export type PlacedFeature = {
+	pos: BlockPos,
+	feature: string,
+	color: Color,
 }
 
 const terrain = [50, 50, 51, 51, 52, 52, 53, 54, 56, 57, 57, 58, 58, 59, 60, 60, 60, 59, 59, 59, 60, 61, 61, 62, 63, 63, 64, 64, 64, 65, 65, 66, 66, 65, 65, 66, 66, 67, 67, 67, 68, 69, 71, 73, 74, 76, 79, 80, 81, 81, 82, 83, 83, 82, 82, 81, 81, 80, 80, 80, 81, 81, 82, 82] 
 
-const featureColors = [
+const featureColors: Color[] = [
 	[255, 77, 54],  // red
 	[59, 118, 255], // blue
 	[91, 207, 25],  // green
@@ -32,58 +36,22 @@ const featureColors = [
 	[52, 204, 209], // cyan
 ]
 
-export type DecoratorOptions = {
-	size: [number, number, number],
-	seed: bigint,
-	version: VersionId,
-}
-export function decorator(state: any, img: ImageData, options: DecoratorOptions) {
-	const random = new LegacyRandom(options.seed)
-	const ctx: PlacementContext = {
-		placements: [],
-		features: [],
-		random,
-		biomeInfoNoise: new PerlinNoise(random.fork(), 0, [1]),
-		seaLevel: 63,
-		version: options.version,
-		nextFloat: () => random.nextFloat(),
-		nextInt: (max: number) => random.nextInt(max),
-		nextGaussian: () => Math.sqrt(-2 * Math.log(1 - random.nextFloat())) * Math.cos(2 * Math.PI * random.nextFloat()),
-		sampleInt(value) { return sampleInt(value, this) },
+export function decorateChunk(pos: ChunkPos, state: any, ctx: PlacementContext): PlacedFeature[] {
+	if (checkVersion(ctx.version, undefined, '1.17')) {
+		getPlacements([pos[0] * 16, 0, pos[1] * 16], DataModel.unwrapLists(state), ctx)
+	} else {
+		modifyPlacement([pos[0] * 16, 0, pos[1] * 16], DataModel.unwrapLists(state.placement), ctx)
 	}
 
-	for (let x = 0; x < options.size[0] / 16; x += 1) {
-		for (let z = 0; z < options.size[2] / 16; z += 1) {
-			if (checkVersion(options.version, undefined, '1.17')) {
-				getPlacements([x * 16, 0, z * 16], DataModel.unwrapLists(state), ctx)
-			} else {
-				modifyPlacement([x * 16, 0, z * 16], DataModel.unwrapLists(state.placement), ctx)
-			}
+	return ctx.placements.map(([pos, i]) => {
+		const feature = ctx.features[i]
+		let color = i < featureColors.length ? featureColors[i] : stringToColor(feature)
+		color = [clamp(color[0], 50, 205), clamp(color[1], 50, 205), clamp(color[2], 50, 205)]
+		if ((Math.floor(pos[0] / 16) + Math.floor(pos[2] / 16)) % 2 === 0) {
+			color = [0.85 * color[0], 0.85 * color[1], 0.85 * color[2]]
 		}
-	}
-
-	const data = img.data
-	img.data.fill(255)
-
-	for (const [pos, feature] of ctx.placements) {
-		if (pos[0] < 0 || pos[1] < 0 || pos[2] < 0 || pos[0] >= options.size[0] || pos[1] >= options.size[1] || pos[2] >= options.size[2]) continue
-		const i = (pos[2] * (img.width * 4)) + (pos[0] * 4)
-		const color = feature < featureColors.length ? featureColors[feature] : stringToColor(ctx.features[feature])
-		data[i] = clamp(color[0], 50, 205)
-		data[i + 1] = clamp(color[1], 50, 205)
-		data[i + 2] = clamp(color[2], 50, 205)
-		data[i + 3] = 255
-	}
-
-	for (let x = 0; x < options.size[0]; x += 1) {
-		for (let y = 0; y < options.size[2]; y += 1) {
-			if ((Math.floor(x / 16) + Math.floor(y / 16)) % 2 === 0) continue
-			const i = (y * (img.width * 4)) + (x * 4)
-			for (let j = 0; j < 3; j += 1) {
-				data[i + j] = 0.85 * data[i + j] 
-			}
-		}
-	}
+		return { pos, feature, color }
+	})
 }
 
 function normalize(id: string) {
@@ -94,7 +62,7 @@ function decorateY(pos: BlockPos, y: number): BlockPos[] {
 	return [[ pos[0], y, pos[2] ]]
 }
 
-function sampleInt(value: any, ctx: PlacementContext): number {
+export function sampleInt(value: any, ctx: PlacementContext): number {
 	if (typeof value === 'number') {
 		return value
 	} else if (value.base) {
@@ -104,7 +72,7 @@ function sampleInt(value: any, ctx: PlacementContext): number {
 			case 'constant': return value.value
 			case 'uniform': return value.value.min_inclusive + ctx.nextInt(value.value.max_inclusive - value.value.min_inclusive + 1)
 			case 'biased_to_bottom': return value.value.min_inclusive + ctx.nextInt(ctx.nextInt(value.value.max_inclusive - value.value.min_inclusive + 1) + 1)
-			case 'clamped': return clamp(ctx.sampleInt(value.value.source), value.value.min_inclusive, value.value.max_inclusive)
+			case 'clamped': return clamp(sampleInt(value.value.source, ctx), value.value.min_inclusive, value.value.max_inclusive)
 			case 'clamped_normal':
 				const normal = value.value.mean + ctx.nextGaussian() * value.value.deviation
 				return Math.floor(clamp(value.value.min_inclusive, value.value.max_inclusive, normal))
@@ -113,7 +81,7 @@ function sampleInt(value: any, ctx: PlacementContext): number {
 				let i = ctx.nextInt(totalWeight)
 				for (const e of value.distribution) {
 					i -= e.weight
-					if (i < 0) return ctx.sampleInt(e.data)
+					if (i < 0) return sampleInt(e.data, ctx)
 				}
 				return 0
 		}
@@ -122,11 +90,11 @@ function sampleInt(value: any, ctx: PlacementContext): number {
 }
 
 function resolveAnchor(anchor: any, _ctx: PlacementContext): number {
-	if (!isObject(anchor)) throw new Error('Invalid vertical anchor')
-	if (anchor.absolute) return anchor.absolute
-	if (anchor.above_bottom) return anchor.above_bottom
-	if (anchor.below_top) return 256 - anchor.below_top
-	throw new Error('Invalid vertical anchor')
+	if (!isObject(anchor)) return 0
+	if (anchor.absolute !== undefined) return anchor.absolute
+	if (anchor.above_bottom !== undefined) return anchor.above_bottom
+	if (anchor.below_top !== undefined) return 256 - anchor.below_top
+	return 0
 }
 
 function sampleHeight(height: any, ctx: PlacementContext): number {
@@ -234,7 +202,7 @@ const Decorators: {
 		return ctx.nextFloat() < 1 / (config?.chance ?? 1) ? [pos] : []
 	},
 	count: (config, pos, ctx) => {
-		return new Array(ctx.sampleInt(config?.count ?? 1)).fill(pos)
+		return new Array(sampleInt(config?.count ?? 1, ctx)).fill(pos)
 	},
 	count_extra: (config, pos, ctx) => {
 		let count = config?.count ?? 1
@@ -244,7 +212,7 @@ const Decorators: {
 		return new Array(count).fill(pos)
 	},
 	count_multilayer: (config, pos, ctx) => {
-		return new Array(ctx.sampleInt(config?.count ?? 1)).fill(pos)
+		return new Array(sampleInt(config?.count ?? 1, ctx)).fill(pos)
 			.map(p => [
 				p[0] + ctx.nextInt(16),
 				p[1], 
@@ -288,7 +256,7 @@ const Decorators: {
 		])
 	},
 	fire: (config, pos, ctx) => {
-		const count = 1 + ctx.nextInt(ctx.nextInt(ctx.sampleInt(config?.count)))
+		const count = 1 + ctx.nextInt(ctx.nextInt(sampleInt(config?.count, ctx)))
 		return [...new Array(count)].map(() => [
 			pos[0] + ctx.nextInt(16),
 			ctx.nextInt(128),
@@ -296,7 +264,7 @@ const Decorators: {
 		])
 	},
 	glowstone: (config, pos, ctx) => {
-		const count = ctx.nextInt(1 + ctx.nextInt(ctx.sampleInt(config?.count)))
+		const count = ctx.nextInt(1 + ctx.nextInt(sampleInt(config?.count, ctx)))
 		return [...new Array(count)].map(() => [
 			pos[0] + ctx.nextInt(16),
 			ctx.nextInt(128),
@@ -404,10 +372,10 @@ const PlacementModifiers: {
 	[key: string]: (config: any, pos: BlockPos, ctx: PlacementContext) => BlockPos[],
 } = {
 	count: ({ count }, pos, ctx) => {
-		return new Array(ctx.sampleInt(count ?? 1)).fill(pos)
+		return new Array(sampleInt(count ?? 1, ctx)).fill(pos)
 	},
 	count_on_every_layer: ({ count }, pos, ctx) => {
-		return new Array(ctx.sampleInt(count ?? 1)).fill(pos)
+		return new Array(sampleInt(count ?? 1, ctx)).fill(pos)
 			.map(p => [
 				p[0] + ctx.nextInt(16),
 				p[1], 
@@ -444,9 +412,9 @@ const PlacementModifiers: {
 	},
 	random_offset: ({ xz_spread, y_spread }, pos, ctx) => {
 		return [[
-			pos[0] + ctx.sampleInt(xz_spread),
-			pos[1] + ctx.sampleInt(y_spread),
-			pos[2] + ctx.sampleInt(xz_spread),
+			pos[0] + sampleInt(xz_spread, ctx),
+			pos[1] + sampleInt(y_spread, ctx),
+			pos[2] + sampleInt(xz_spread, ctx),
 		]]
 	},
 	rarity_filter: ({ chance }, pos, ctx) => {
