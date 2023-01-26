@@ -16,11 +16,16 @@ import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
+const MODES = ['side', 'top', '3d'] as const
+type Mode = typeof MODES[number]
+
 export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { project } = useProject()
 	const { version } = useVersion()
-	const [voxelMode, setVoxelMode] = useState(false)
+	const [mode, setMode] = useState<Mode>('side')
+	const voxelMode = mode === '3d'
+	const topDown = mode === 'top'
 	const [seed, setSeed] = useState(randomSeed())
 	const [minY] = useState(0)
 	const [height] = useState(256)
@@ -54,7 +59,7 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 		const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
 		let limit = 0.01
 		iterateWorld2D(imageData.current, transform, (x, y) => {
-			const density = df.compute({ x, y, z: 0 })
+			const density = df.compute(topDown ? { x, y: 0, z: y } : { x, y, z: 0 })
 			limit = Math.max(limit, Math.min(1, Math.abs(density)))
 			return density
 		}, (density) => {
@@ -62,16 +67,16 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 			return [color[0] * 256, color[1] * 256, color[2] * 256]
 		})
 		ctx.current.putImageData(imageData.current, 0, 0)
-	}, [voxelMode, df, colormap])
+	}, [mode, df, colormap])
 	const onHover2D = useCallback((pos: [number, number] | undefined) => {
 		if (!pos || !df) {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const output = df.compute({ x: x, y: -y, z: 0 })
-			setFocused([output.toPrecision(3), `X=${x} Y=${-y}`])
+			const output = df.compute(topDown ? { x, y: 0, z: -y } : { x: x, y: -y, z: 0 })
+			setFocused([output.toPrecision(3), `X=${x} ${topDown ? 'Z' : 'Y'}=${-y}`])
 		}
-	}, [voxelMode, df])
+	}, [mode, df])
 
 	// === 3D ===
 	const renderer = useRef<VoxelRenderer | undefined>(undefined)
@@ -120,13 +125,15 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 			</> : <>
 				<ColormapSelector value={colormap} onChange={setColormap} />
 			</>}
-			<Btn label={voxelMode ? locale('3d') : locale('2d')} onClick={() => setVoxelMode(!voxelMode)} />
+			<BtnMenu icon="package">
+				{MODES.map(m => <Btn label={locale(`mode.${m}`)} active={mode == m} onClick={() => setMode(m)} />)}
+			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')}
 				onClick={() => setSeed(randomSeed())} />
 		</div>
 		<div class="full-preview">{voxelMode
 			? <InteractiveCanvas3D onSetup={onSetup3D} onDraw={onDraw3D} onResize={onResize3D} state={state} startDistance={100} startPosition={[8, 120, 8]} />
-			: <InteractiveCanvas2D onSetup={onSetup2D} onDraw={onDraw2D} onHover={onHover2D} onResize={onResize2D} state={state} pixelSize={4} />
+			: <InteractiveCanvas2D onSetup={onSetup2D} onDraw={onDraw2D} onHover={onHover2D} onResize={onResize2D} state={state} pixelSize={4} maxScale={128} />
 		}</div>
 	</>
 }
