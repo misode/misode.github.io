@@ -1,6 +1,6 @@
 import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
-import { initImmersiveWeathering } from './ImmersiveWeathering'
-import { initObsidian } from './Obsidian'
+import { initImmersiveWeathering } from './ImmersiveWeathering.js'
+import { initObsidian } from './Obsidian.js'
 
 export * from './ImmersiveWeathering.js'
 

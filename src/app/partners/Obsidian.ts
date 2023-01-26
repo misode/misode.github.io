@@ -250,10 +250,10 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		function_type: StringNode({ enum: ['NONE', 'REQUIRES_SHIFTING', 'REQUIRES_ITEM', 'REQUIRES_SHIFTING_AND_ITEM'] }),
 		[Switch]: [{ push: 'function_type' }],
 		[Case]: {
-			'NONE': {},
-			'REQUIRES_SHIFTING': {},
-			'REQUIRES_ITEM': { item: StringNode({ validator: 'resource', params: { pool: 'item' } }) },
-			'REQUIRES_SHIFTING_AND_ITEM': { item: StringNode({ validator: 'resource', params: { pool: 'item' } }) },
+			NONE: {},
+			REQUIRES_SHIFTING: {},
+			REQUIRES_ITEM: { item: StringNode({ validator: 'resource', params: { pool: 'item' } }) },
+			REQUIRES_SHIFTING_AND_ITEM: { item: StringNode({ validator: 'resource', params: { pool: 'item' } }) },
 		},
 		function_file: StringNode(),
 	}, { context: `${ID}:function` }))
@@ -263,13 +263,13 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		[Switch]: [{ push: 'predicate_type' }],
 		[Case]: {
 			ALWAYS: {},
-			EQUALS: { left: StringNode(), right: StringNode(), },
-			NOT_EQUALS: { left: StringNode(), right: StringNode(), },
-			CONTAINS: { left: StringNode(), right: StringNode(), },
-			NOT_CONTAINS: { left: StringNode(), right: StringNode(), },
-			BEGINS_WITH: { left: StringNode(), right: StringNode(), },
-			ENDS_WITH: { left: StringNode(), right: StringNode(), },
-			REGEX: { left: StringNode(), right: StringNode(), },
+			EQUALS: { left: StringNode(), right: StringNode() },
+			NOT_EQUALS: { left: StringNode(), right: StringNode() },
+			CONTAINS: { left: StringNode(), right: StringNode() },
+			NOT_CONTAINS: { left: StringNode(), right: StringNode() },
+			BEGINS_WITH: { left: StringNode(), right: StringNode() },
+			ENDS_WITH: { left: StringNode(), right: StringNode() },
+			REGEX: { left: StringNode(), right: StringNode() },
 		},
 	}, { context: `${ID}:predicate` }))
 
@@ -286,7 +286,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		break_sound: Opt(StringNode()),
 		step_sound: Opt(StringNode()),
 		place_sound: Opt(StringNode()),
-		hit_sound: Opt(StringNode())
+		hit_sound: Opt(StringNode()),
 	}, { context: `${ID}:sound_group` }))
 
 	schemas.register(`${ID}:material`, ObjectNode({
@@ -328,7 +328,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 				amplifier: NumberNode({ integer: true }),
 				duration: NumberNode(),
 				effect: StringNode({ validator: 'resource', params: { pool: 'mob_effect' } }),
-				target: StringNode()
+				target: StringNode(),
 			},
 			damage: {
 				amount: NumberNode({ integer: true }),
