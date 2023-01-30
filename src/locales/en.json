@@ -126,6 +126,8 @@
   "title.versions": "Versions Explorer",
   "title.worldgen": "Worldgen Generators and Guides",
   "tools": "Tools",
+  "trim_material": "Trim material",
+  "trim_pattern": "Trim pattern",
   "pack_mcmeta": "Pack.mcmeta",
   "partner.immersive_weathering": "Immersive Weathering",
   "partner.immersive_weathering.block_growth": "Block Growth",
