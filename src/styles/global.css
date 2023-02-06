@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP&display=swap');
 :root {
 	--background-1: #1b1b1b;
 	--background-2: #252525;
@@ -128,7 +129,7 @@ a svg {
 
 body {
 	font-size: 18px;
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: Arial, Helvetica,'IBM Plex Sans JP', sans-serif;
 	min-height: 100vh;
 	overflow-x: hidden;
 	background-color: var(--background-1);
