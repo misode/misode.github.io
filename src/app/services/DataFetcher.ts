@@ -285,7 +285,7 @@ async function cachedFetch<D = unknown>(url: string, { decode = (r => r.json()),
 
 		if (refresh) {
 			try {
-				return await fetchAndCache(cache, url, decode)
+				return await fetchAndCache(cache, url, decode, refresh)
 			} catch (e) {
 				if (cacheResponse && cacheResponse.ok) {
 					console.debug(`[cachedFetch] Cannot refresh, using cache ${url}`)
@@ -312,11 +312,11 @@ async function cachedFetch<D = unknown>(url: string, { decode = (r => r.json()),
 
 const RAWGITHUB_REGEX = /^https:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.*)$/
 
-async function fetchAndCache<D>(cache: Cache, url: string, decode: (r: Response) => Promise<D>) {
+async function fetchAndCache<D>(cache: Cache, url: string, decode: (r: Response) => Promise<D>, noCache?: boolean) {
 	console.debug(`[cachedFetch] Fetching data ${url}`)
 	let fetchResponse
 	try {
-		fetchResponse = await fetch(url)
+		fetchResponse = await fetch(url, noCache ? { cache: 'no-cache' } : undefined)
 	} catch (e) {
 		if (url.startsWith('https://raw.githubusercontent.com/')) {
 			const backupUrl = url.replace(RAWGITHUB_REGEX, 'https://cdn.jsdelivr.net/gh/$1/$2@$3/$4')
