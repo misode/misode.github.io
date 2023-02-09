@@ -571,6 +571,63 @@ main.has-project {
 	position: absolute;
 }
 
+.transformation-editor {
+	display: flex;
+	padding: 8px 16px;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.transformation-input {
+	display: flex;
+	align-items: center;
+	margin-bottom: 2px;
+}
+
+.transformation-input input[type=number] {
+	width: 100px;
+	padding: 3px 6px;
+	border: none;
+	border-radius: 3px;
+	font-size: 14px;
+	margin-right: 8px;
+	background-color: var(--background-2);
+	color: var(--text-2);
+}
+
+.transformation-title {
+	display: flex;
+	margin-bottom: 2px;
+}
+
+.transformation-title span {
+	margin-right: 4px;
+}
+
+.transformation-title button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 2px 3px;
+	background-color: var(--background-4);
+	border: none;
+	border-radius: 3px;
+	margin-left: 4px;
+	cursor: pointer;
+}
+
+.transformation-title button:hover {
+	background-color: var(--background-5);
+}
+
+.transformation-section:not(:first-child) {
+	margin-top: 8px;
+}
+
+.transformation-matrix .transformation-input:nth-child(4n+2):not(:nth-of-type(1)) {
+	margin-top: 8px;
+}
+
 .btn {
 	display: flex;
 	align-items: center;

@@ -92,6 +92,9 @@ function Tools() {
 		<ToolCard title="Minecraft Sounds" icon="sounds"
 			link="/sounds/"
 			desc="Browse through and mix all the vanilla sounds" />
+		<ToolCard title="Transformation preview"
+			link="/transformation/"
+			desc="Visualize transformations for display entities" />
 		<ToolCard title="Data Pack Upgrader"
 			link="https://misode.github.io/upgrader/"
 			desc="Convert your data packs from 1.16 to 1.19" />
