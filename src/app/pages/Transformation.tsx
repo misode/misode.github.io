@@ -1,7 +1,7 @@
 import type { Color } from 'deepslate'
 import { Mesh, Quad, Renderer, ShaderProgram, Vector } from 'deepslate'
 import { mat3, mat4, quat, vec3 } from 'gl-matrix'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
@@ -23,13 +23,6 @@ export function Transformation({}: Props) {
 	const [normalizeLeft, setNormalizeLeft] = useState(true)
 	const [normalizeRight, setNormalizeRight] = useState(true)
 
-	useEffect(() => {
-		if (normalizeLeft) setLeftRotation(q => quat.normalize(quat.clone(q), q))
-	}, [normalizeLeft])
-	useEffect(() => {
-		if (normalizeRight) setRightRotation(q => quat.normalize(quat.clone(q), q))
-	}, [normalizeRight])
-
 	const [useMatrixOverride, setUseMatrixOverride] = useState(false)
 
 	const usedMatrix = useMemo(() => {
@@ -39,10 +32,7 @@ export function Transformation({}: Props) {
 		return composeMatrix(translation, leftRotation, scale, rightRotation)
 	}, [matrix, useMatrixOverride])
 
-	const changeMatrix = useCallback((i: number, value: number) => {
-		const m = mat4.clone(matrix)
-		m[i] = value
-		setMatrix(m)
+	const updateMatrix = useCallback((m: mat4) => {
 		const affine = toAffine(m)
 		const newTranslation = mat4.getTranslation(vec3.create(), affine)
 		const [newLeftRotation, newScale, newRightRotation] = svdDecompose(mat3.fromMat4(mat3.create(), affine))
@@ -50,29 +40,54 @@ export function Transformation({}: Props) {
 		setLeftRotation(newLeftRotation)
 		setScale(newScale)
 		setRightRotation(newRightRotation)
+		setMatrix(m)
+	}, [])
+
+	const changeMatrix = useCallback((i: number, value: number) => {
+		const m = mat4.clone(matrix)
+		m[i] = value
+		updateMatrix(m)
 	}, [matrix])
+
+	const updateTranslation = useCallback((value: vec3) => {
+		setTranslation(value)
+		setMatrix(composeMatrix(value, leftRotation, scale, rightRotation))
+	}, [leftRotation, scale, rightRotation])
 
 	const changeTranslation = useCallback((i: number, value: number) => {
 		const copy = vec3.clone(translation)
 		copy[i] = value
-		setTranslation(copy)
-		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
-	}, [translation, leftRotation, scale, rightRotation])
+		updateTranslation(copy)
+	}, [translation, updateTranslation])
+
+	const updateLeftRotation = useCallback((value: quat) => {
+		setLeftRotation(value)
+		setMatrix(composeMatrix(translation, value, scale, rightRotation))
+	}, [translation, scale, rightRotation])
 
 	const changeLeftRotation = useCallback((i: number, value: number) => {
 		const copy = quat.clone(leftRotation)
 		copy[i] = value
 		if (normalizeLeft) quat.normalize(copy, copy)
-		setLeftRotation(copy)
-		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
-	}, [translation, leftRotation, scale, rightRotation, normalizeLeft])
+		updateLeftRotation(copy)
+	}, [leftRotation, normalizeLeft, updateLeftRotation])
+
+	const updateScale = useCallback((value: vec3) => {
+		setScale(value)
+		setMatrix(composeMatrix(translation, leftRotation, value, rightRotation))
+	}, [translation, leftRotation, rightRotation])
 
 	const changeScale = useCallback((i: number, value: number) => {
 		const copy = vec3.clone(scale)
 		copy[i] = value
 		setScale(copy)
 		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
-	}, [translation, leftRotation, scale, rightRotation])
+	}, [scale, updateScale])
+
+	const updateRightRotation = useCallback((value: quat) => {
+		setRightRotation(value)
+		setMatrix(composeMatrix(translation, leftRotation, scale, value))
+	}, [translation, leftRotation, scale])
 
 	const changeRightRotation = useCallback((i: number, value: number) => {
 		const copy = quat.clone(rightRotation)
@@ -80,7 +95,7 @@ export function Transformation({}: Props) {
 		if (normalizeRight) quat.normalize(copy, copy)
 		setRightRotation(copy)
 		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
-	}, [translation, leftRotation, scale, rightRotation, normalizeRight])
+	}, [rightRotation, normalizeRight, updateRightRotation])
 
 	const renderer = useRef<MeshRenderer>()
 	const onSetup = useCallback((canvas: HTMLCanvasElement) => {
@@ -101,7 +116,7 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.translation')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => setTranslation(vec3.create())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateTranslation(vec3.create())}>{Octicon['history']}</button>
 					</div>
 					{Array(3).fill(0).map((_, i) => <div class="transformation-input">
 						<NumberInput value={translation[i].toFixed(3)} onChange={v => changeTranslation(i, v)} />
@@ -111,7 +126,7 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.left_rotation')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => setLeftRotation(quat.create())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateLeftRotation(quat.create())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('normalize')} onClick={() => setNormalizeLeft(!normalizeLeft)}>{Octicon[normalizeLeft ? 'lock' : 'unlock']}</button>
 					</div>
 					{Array(4).fill(0).map((_, i) => <div class="transformation-input">
@@ -122,7 +137,7 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.scale')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => setScale(vec3.fromValues(1, 1, 1))}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateScale(vec3.fromValues(1, 1, 1))}>{Octicon['history']}</button>
 					</div>
 					{Array(3).fill(0).map((_, i) => <div class="transformation-input">
 						<NumberInput value={scale[i].toFixed(3)} onChange={v => changeScale(i, v)} />
@@ -132,7 +147,7 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.right_rotation')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => setRightRotation(quat.create())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateRightRotation(quat.create())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('normalize')} onClick={() => setNormalizeRight(!normalizeRight)}>{Octicon[normalizeRight ? 'lock' : 'unlock']}</button>
 					</div>
 					{Array(4).fill(0).map((_, i) => <div class="transformation-input">
@@ -145,8 +160,8 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.matrix')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => setMatrix(mat4.create())}>{Octicon['history']}</button>
-						{matrix !== undefined && <button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>}
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(mat4.create())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>
 					</div>
 					{Array(16).fill(0).map((_, i) => <div class="transformation-input">
 						<NumberInput value={matrix[i].toFixed(3)} onChange={v => changeMatrix(i, v)} />
