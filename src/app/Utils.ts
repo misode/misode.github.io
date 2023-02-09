@@ -426,7 +426,6 @@ function stepJacobi(m: mat3): quat {
 		mat3.mul(n, n, m)
 		mat3.copy(m, n)
 	}
-	// console.log('J1', q, m)
 	if (m[2] * m[2] + m[6] * m[6] > 1e-6) {
 		const pair = approxGivensQuat(m[0], 0.5 * (m[2] + m[6]), m[8])
 		const a = -pair[0]
@@ -446,7 +445,6 @@ function stepJacobi(m: mat3): quat {
 		mat3.mul(n, n, m)
 		mat3.copy(m, n)
 	}
-	// console.log('J2', q, m)
 	if (m[5] * m[5] + m[7] * m[7] > 1e-6) {
 		const [a, b] = approxGivensQuat(m[4], 0.5 * (m[5] + m[7]), m[8])
 		const r = quat.fromValues(a, 0, 0, b)
@@ -464,7 +462,6 @@ function stepJacobi(m: mat3): quat {
 		mat3.mul(n, n, m)
 		mat3.copy(m, n)
 	}
-	// console.log('J3', q, m)
 	return q
 }
 
@@ -474,17 +471,14 @@ export function svdDecompose(m: mat3): [quat, vec3, quat] {
 	const n = mat3.create()
 	mat3.transpose(n, m)
 	mat3.mul(n, n, m)
-	// console.log('A', n)
 
 	for (let i = 0; i < 5; i += 1) {
 		quat.mul(r, r, stepJacobi(n))
 	}
 	quat.normalize(r, r)
-	// console.log('B', r)
 	const p0 = mat3.create()
 	mat3.fromQuat(p0, r)
 	mat3.mul(p0, m, p0)
-	// console.log('C', p0)
 	let f = 1
 
 	const [a1, b1] = qrGivensQuat(p0[0], p0[1])
@@ -492,7 +486,6 @@ export function svdDecompose(m: mat3): [quat, vec3, quat] {
 	const d1 = -2 * a1 * b1
 	const e1 = b1 * b1 + a1 * a1
 	const s1 = quat.fromValues(0, 0, a1, b1)
-	// console.log('D', s1)
 	quat.mul(q, q, s1)
 	const p1 = mat3.create()
 	p1[0] = c1
@@ -502,7 +495,6 @@ export function svdDecompose(m: mat3): [quat, vec3, quat] {
 	p1[8] = e1
 	f *= e1
 	mat3.mul(p1, p1, p0)
-	// console.log('E', p1)
 
 	const pair = qrGivensQuat(p1[0], p1[2])
 	const a2 = -pair[0]
@@ -519,7 +511,6 @@ export function svdDecompose(m: mat3): [quat, vec3, quat] {
 	p2[6] = d2
 	p2[4] = e2
 	f *= e2
-	// console.log('H2', f, e2)
 	mat3.mul(p2, p2, p1)
 
 	const [a3, b3] = qrGivensQuat(p2[4], p2[5])
@@ -536,7 +527,6 @@ export function svdDecompose(m: mat3): [quat, vec3, quat] {
 	p3[0] = e3
 	f *= e3
 	mat3.mul(p3, p3, p2)
-	// console.log('G', p1)
 
 	f = 1 / f
 	quat.scale(q, q, Math.sqrt(f))
@@ -550,4 +540,13 @@ export function toAffine(m: mat4): mat4 {
 	const n = mat4.clone(m)
 	mat4.scale(n, n, [a, a, a])
 	return n
+}
+
+export function composeMatrix(translation: vec3, leftRotation: quat, scale: vec3, rightRotation: quat) {
+	const m = mat4.create()
+	mat4.translate(m, m, translation)
+	mat4.mul(m, m, mat4.fromQuat(mat4.create(), leftRotation))
+	mat4.scale(m, m, scale)
+	mat4.mul(m, m, mat4.fromQuat(mat4.create(), rightRotation))
+	return m
 }

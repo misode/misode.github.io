@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
-import { svdDecompose, toAffine } from '../Utils.js'
+import { composeMatrix, svdDecompose, toAffine } from '../Utils.js'
 
 interface Props {
 	path?: string,
@@ -14,6 +14,7 @@ export function Transformation({}: Props) {
 	const { locale } = useLocale()
 	useTitle(locale('title.transformation'))
 
+	const [matrix, setMatrix] = useState<mat4>(mat4.create())
 	const [translation, setTranslation] = useState<vec3>(vec3.create())
 	const [leftRotation, setLeftRotation] = useState<quat>(quat.create())
 	const [scale, setScale] = useState<vec3>(vec3.fromValues(1, 1, 1))
@@ -29,16 +30,19 @@ export function Transformation({}: Props) {
 		if (normalizeRight) setRightRotation(q => quat.normalize(quat.clone(q), q))
 	}, [normalizeRight])
 
-	const matrix = useMemo(() => {
-		const m = mat4.create()
-		mat4.translate(m, m, translation)
-		mat4.mul(m, m, mat4.fromQuat(mat4.create(), leftRotation))
-		mat4.scale(m, m, scale)
-		mat4.mul(m, m, mat4.fromQuat(mat4.create(), rightRotation))
-		return m
-	}, [translation, leftRotation, scale, rightRotation])
+	const [useMatrixOverride, setUseMatrixOverride] = useState(false)
 
-	const setMatrix = useCallback((m: mat4) => {
+	const usedMatrix = useMemo(() => {
+		if (matrix !== undefined && useMatrixOverride) {
+			return matrix
+		}
+		return composeMatrix(translation, leftRotation, scale, rightRotation)
+	}, [matrix, useMatrixOverride])
+
+	const changeMatrix = useCallback((i: number, value: number) => {
+		const m = mat4.clone(matrix)
+		m[i] = value
+		setMatrix(m)
 		const affine = toAffine(m)
 		const newTranslation = mat4.getTranslation(vec3.create(), affine)
 		const [newLeftRotation, newScale, newRightRotation] = svdDecompose(mat3.fromMat4(mat3.create(), affine))
@@ -46,43 +50,37 @@ export function Transformation({}: Props) {
 		setLeftRotation(newLeftRotation)
 		setScale(newScale)
 		setRightRotation(newRightRotation)
-	}, [])
-
-	const changeMatrix = useCallback((i: number, value: number) => {
-		const m = mat4.clone(matrix)
-		m[i] = value
-		setMatrix(m)
 	}, [matrix])
 
 	const changeTranslation = useCallback((i: number, value: number) => {
 		const copy = vec3.clone(translation)
 		copy[i] = value
 		setTranslation(copy)
-	}, [translation])
+		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
+	}, [translation, leftRotation, scale, rightRotation])
 
 	const changeLeftRotation = useCallback((i: number, value: number) => {
 		const copy = quat.clone(leftRotation)
 		copy[i] = value
-		if (normalizeLeft) {
-			quat.normalize(copy, copy)
-		}
+		if (normalizeLeft) quat.normalize(copy, copy)
 		setLeftRotation(copy)
-	}, [leftRotation, normalizeLeft])
+		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
+	}, [translation, leftRotation, scale, rightRotation, normalizeLeft])
 
 	const changeScale = useCallback((i: number, value: number) => {
 		const copy = vec3.clone(scale)
 		copy[i] = value
 		setScale(copy)
-	}, [scale])
+		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
+	}, [translation, leftRotation, scale, rightRotation])
 
 	const changeRightRotation = useCallback((i: number, value: number) => {
 		const copy = quat.clone(rightRotation)
 		copy[i] = value
-		if (normalizeRight) {
-			quat.normalize(copy, copy)
-		}
+		if (normalizeRight) quat.normalize(copy, copy)
 		setRightRotation(copy)
-	}, [rightRotation, normalizeRight])
+		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
+	}, [translation, leftRotation, scale, rightRotation, normalizeRight])
 
 	const renderer = useRef<MeshRenderer>()
 	const onSetup = useCallback((canvas: HTMLCanvasElement) => {
@@ -94,8 +92,8 @@ export function Transformation({}: Props) {
 		renderer.current?.setViewport(0, 0, width, height)
 	}, [])
 	const onDraw = useCallback((view: mat4) => {
-		renderer.current?.draw(view, matrix)
-	}, [matrix])
+		renderer.current?.draw(view, usedMatrix)
+	}, [usedMatrix])
 
 	return <main class="has-preview">
 		<div class="transformation-editor">
@@ -148,10 +146,11 @@ export function Transformation({}: Props) {
 					<div class="transformation-title">
 						<span>{locale('transformation.matrix')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => setMatrix(mat4.create())}>{Octicon['history']}</button>
+						{matrix !== undefined && <button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>}
 					</div>
 					{Array(16).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={matrix[i].toFixed(3)} onChange={v => changeMatrix(i, v)} readonly disabled />
-						<RangeInput min={-1} max={1} step={0.01} value={matrix[i]} onChange={v => changeMatrix(i, v)} readonly disabled />
+						<NumberInput value={matrix[i].toFixed(3)} onChange={v => changeMatrix(i, v)} />
+						<RangeInput min={-1} max={1} step={0.01} value={matrix[i]} onChange={v => changeMatrix(i, v)} />
 					</div>)}
 				</div>
 			</div>
