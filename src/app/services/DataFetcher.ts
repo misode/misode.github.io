@@ -179,7 +179,7 @@ export async function fetchResources(versionId: VersionId) {
 	}
 }
 
-async function loadImage(src: string) {
+export async function loadImage(src: string) {
 	return new Promise<HTMLImageElement>(res => {
 		const image = new Image()
 		image.onload = () => res(image)

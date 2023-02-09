@@ -1,10 +1,11 @@
-import type { Color } from 'deepslate'
-import { Mesh, Quad, Renderer, ShaderProgram, Vector } from 'deepslate'
+import { Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
 import { mat3, mat4, quat, vec3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
+import { useAsync } from '../hooks/useAsync.js'
+import { loadImage } from '../services/DataFetcher.js'
 import { composeMatrix, svdDecompose, toAffine } from '../Utils.js'
 
 interface Props {
@@ -13,6 +14,17 @@ interface Props {
 export function Transformation({}: Props) {
 	const { locale } = useLocale()
 	useTitle(locale('title.transformation'))
+
+	const { value: cubeTexture } = useAsync(async () => {
+		const img = await loadImage('/images/cube.png')
+		const canvas = document.createElement('canvas')
+		canvas.width = 64
+		canvas.height = 64
+		const ctx = canvas.getContext('2d')!
+		ctx.drawImage(img, 0, 0)
+		const data = ctx.getImageData(0, 0, 64, 64)
+		return data
+	})
 
 	const [matrix, setMatrix] = useState<mat4>(mat4.create())
 	const [translation, setTranslation] = useState<vec3>(vec3.create())
@@ -99,13 +111,14 @@ export function Transformation({}: Props) {
 
 	const renderer = useRef<MeshRenderer>()
 	const onSetup = useCallback((canvas: HTMLCanvasElement) => {
+		if (!cubeTexture) return
 		const gl = canvas.getContext('webgl')
 		if (!gl) return
-		renderer.current = new MeshRenderer(gl)
-	}, [])
+		renderer.current = new MeshRenderer(gl, cubeTexture)
+	}, [cubeTexture])
 	const onResize = useCallback((width: number, height: number) => {
 		renderer.current?.setViewport(0, 0, width, height)
-	}, [])
+	}, [cubeTexture])
 	const onDraw = useCallback((view: mat4) => {
 		renderer.current?.draw(view, usedMatrix)
 	}, [usedMatrix])
@@ -181,29 +194,32 @@ export function Transformation({}: Props) {
 
 const vsMesh = `
   attribute vec4 vertPos;
-  attribute vec3 vertColor;
+  attribute vec2 texCoord;
   attribute vec3 normal;
 
   uniform mat4 mView;
   uniform mat4 mProj;
 
-  varying highp vec3 vColor;
+  varying highp vec2 vTexCoord;
   varying highp float vLighting;
 
   void main(void) {
     gl_Position = mProj * mView * vertPos;
-    vColor = vertColor;
+    vTexCoord = texCoord;
     vLighting = normal.y * 0.2 + abs(normal.z) * 0.1 + 0.8;
   }
 `
 
 const fsMesh = `
   precision highp float;
-  varying highp vec3 vColor;
+  varying highp vec2 vTexCoord;
   varying highp float vLighting;
 
+  uniform sampler2D sampler;
+
   void main(void) {
-		gl_FragColor = vec4(vColor.xyz * vLighting, 1.0);
+		vec4 texColor = texture2D(sampler, vTexCoord);
+		gl_FragColor = vec4(texColor.xyz * vLighting, 1.0);
   }
 `
 
@@ -234,52 +250,54 @@ const fsGrid = `
 class MeshRenderer extends Renderer {
 	private readonly meshShaderProgram: WebGLProgram
 	private readonly gridShaderProgram: WebGLProgram
+	private readonly cubeTexture: WebGLTexture
 	private readonly mesh: Mesh
 	private readonly grid: Mesh
 
-	constructor(gl: WebGLRenderingContext) {
+	constructor(gl: WebGLRenderingContext, cubeTexture: ImageData) {
 		super(gl)
 		this.meshShaderProgram = new ShaderProgram(gl, vsMesh, fsMesh).getProgram()
 		this.gridShaderProgram = new ShaderProgram(gl, vsGrid, fsGrid).getProgram()
 
-		const color: Color = [0.8, 0.8, 0.8]
+		this.cubeTexture = this.createAtlasTexture(cubeTexture)
+
 		this.mesh = new Mesh([
-			Quad.fromPoints(
-				new Vector(1, 0, 0),
-				new Vector(1, 1, 0),
-				new Vector(1, 1, 1),
-				new Vector(1, 0, 1)).setColor(color),
-			Quad.fromPoints(
-				new Vector(0, 0, 1),
-				new Vector(0, 1, 1),
-				new Vector(0, 1, 0),
-				new Vector(0, 0, 0)).setColor(color),
-			Quad.fromPoints(
-				new Vector(0, 1, 1),
-				new Vector(1, 1, 1),
-				new Vector(1, 1, 0),
-				new Vector(0, 1, 0)).setColor(color),
-			Quad.fromPoints(
-				new Vector(0, 0, 0),
-				new Vector(1, 0, 0),
-				new Vector(1, 0, 1),
-				new Vector(0, 0, 1)).setColor(color),
-			Quad.fromPoints(
-				new Vector(0, 0, 1),
-				new Vector(1, 0, 1),
-				new Vector(1, 1, 1),
-				new Vector(0, 1, 1)).setColor(color),
-			Quad.fromPoints(
-				new Vector(0, 1, 0),
-				new Vector(1, 1, 0),
-				new Vector(1, 0, 0),
-				new Vector(0, 0, 0)).setColor(color),
+			new Quad(
+				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.25, 0.50], undefined, undefined),
+				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.25, 0.25], undefined, undefined),
+				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.00, 0.25], undefined, undefined),
+				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.00, 0.50], undefined, undefined)),
+			new Quad(
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.25, 0.50], undefined, undefined),
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined),
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.00, 0.25], undefined, undefined),
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.00, 0.50], undefined, undefined)),
+			new Quad(
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined),
+				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined),
+				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.50, 0.00], undefined, undefined),
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.25, 0.00], undefined, undefined)),
+			new Quad(
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined),
+				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined),
+				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.75, 0.00], undefined, undefined),
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.50, 0.00], undefined, undefined)),
+			new Quad(
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.25, 0.50], undefined, undefined),
+				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.50, 0.50], undefined, undefined),
+				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined),
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined)),
+			new Quad(
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.75, 0.50], undefined, undefined),
+				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [1.00, 0.50], undefined, undefined),
+				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [1.00, 0.25], undefined, undefined),
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined)),
 		])
 		for (const q of this.mesh.quads) {
 			const normal = q.normal()
 			q.forEach(v => v.normal = normal)
 		}
-		this.mesh.rebuild(this.gl, { pos: true, color: true, normal: true })
+		this.mesh.rebuild(this.gl, { pos: true, texture: true, normal: true })
 
 		this.grid = new Mesh()
 		this.grid.addLine(0, 0, 0, 1, 0, 0, [1, 0, 0])
@@ -296,7 +314,8 @@ class MeshRenderer extends Renderer {
 		const copy = mat4.clone(view)
 		mat4.multiply(copy, copy, transform)
 		this.setShader(this.meshShaderProgram)
+		this.setTexture(this.cubeTexture)
 		this.prepareDraw(copy)
-		this.drawMesh(this.mesh, { pos: true, color: true, normal: true })
+		this.drawMesh(this.mesh, { pos: true, texture: true, normal: true })
 	}
 }
