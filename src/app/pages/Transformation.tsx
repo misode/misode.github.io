@@ -1,12 +1,15 @@
-import { Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
-import { mat3, mat4, quat, vec3 } from 'gl-matrix'
+import { Matrix3, Matrix4, Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
+import { mat4, quat } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { loadImage } from '../services/DataFetcher.js'
-import { composeMatrix, svdDecompose, toAffine } from '../Utils.js'
+import { composeMatrix, svdDecompose } from '../Utils.js'
+
+const XYZ = ['x', 'y', 'z'] as const
+type XYZ = typeof XYZ[number]
 
 interface Props {
 	path?: string,
@@ -26,11 +29,11 @@ export function Transformation({}: Props) {
 		return data
 	})
 
-	const [matrix, setMatrix] = useState<mat4>(mat4.create())
-	const [translation, setTranslation] = useState<vec3>(vec3.create())
-	const [leftRotation, setLeftRotation] = useState<quat>(quat.create())
-	const [scale, setScale] = useState<vec3>(vec3.fromValues(1, 1, 1))
-	const [rightRotation, setRightRotation] = useState<quat>(quat.create())
+	const [matrix, setMatrix] = useState(new Matrix4())
+	const [translation, setTranslation] = useState(new Vector(0, 0, 0))
+	const [leftRotation, setLeftRotation] = useState(quat.create())
+	const [scale, setScale] = useState(new Vector(1, 1, 1))
+	const [rightRotation, setRightRotation] = useState(quat.create())
 
 	const [normalizeLeft, setNormalizeLeft] = useState(true)
 	const [normalizeRight, setNormalizeRight] = useState(true)
@@ -44,10 +47,10 @@ export function Transformation({}: Props) {
 		return composeMatrix(translation, leftRotation, scale, rightRotation)
 	}, [matrix, useMatrixOverride])
 
-	const updateMatrix = useCallback((m: mat4) => {
-		const affine = toAffine(m)
-		const newTranslation = mat4.getTranslation(vec3.create(), affine)
-		const [newLeftRotation, newScale, newRightRotation] = svdDecompose(mat3.fromMat4(mat3.create(), affine))
+	const updateMatrix = useCallback((m: Matrix4) => {
+		const affine = m.clone().affine()
+		const newTranslation = affine.getTranslation()
+		const [newLeftRotation, newScale, newRightRotation] = svdDecompose(Matrix3.fromMatrix4(affine))
 		setTranslation(newTranslation)
 		setLeftRotation(newLeftRotation)
 		setScale(newScale)
@@ -56,20 +59,18 @@ export function Transformation({}: Props) {
 	}, [])
 
 	const changeMatrix = useCallback((i: number, value: number) => {
-		const m = mat4.clone(matrix)
-		m[i] = value
+		const m = matrix.clone()
+		m.data[i] = value
 		updateMatrix(m)
 	}, [matrix])
 
-	const updateTranslation = useCallback((value: vec3) => {
+	const updateTranslation = useCallback((value: Vector) => {
 		setTranslation(value)
 		setMatrix(composeMatrix(value, leftRotation, scale, rightRotation))
 	}, [leftRotation, scale, rightRotation])
 
-	const changeTranslation = useCallback((i: number, value: number) => {
-		const copy = vec3.clone(translation)
-		copy[i] = value
-		updateTranslation(copy)
+	const changeTranslation = useCallback((c: XYZ, v: number) => {
+		updateTranslation(new Vector(c === 'x' ? v : translation.x, c === 'y' ? v : translation.y, c === 'z' ? v : translation.z))
 	}, [translation, updateTranslation])
 
 	const updateLeftRotation = useCallback((value: quat) => {
@@ -84,16 +85,13 @@ export function Transformation({}: Props) {
 		updateLeftRotation(copy)
 	}, [leftRotation, normalizeLeft, updateLeftRotation])
 
-	const updateScale = useCallback((value: vec3) => {
+	const updateScale = useCallback((value: Vector) => {
 		setScale(value)
 		setMatrix(composeMatrix(translation, leftRotation, value, rightRotation))
 	}, [translation, leftRotation, rightRotation])
 
-	const changeScale = useCallback((i: number, value: number) => {
-		const copy = vec3.clone(scale)
-		copy[i] = value
-		setScale(copy)
-		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
+	const changeScale = useCallback((c: XYZ, v: number) => {
+		updateScale(new Vector(c === 'x' ? v : scale.x, c === 'y' ? v : scale.y, c === 'z' ? v : scale.z))
 	}, [scale, updateScale])
 
 	const updateRightRotation = useCallback((value: quat) => {
@@ -120,7 +118,7 @@ export function Transformation({}: Props) {
 		renderer.current?.setViewport(0, 0, width, height)
 	}, [cubeTexture])
 	const onDraw = useCallback((view: mat4) => {
-		renderer.current?.draw(view, usedMatrix)
+		renderer.current?.draw(view, usedMatrix.data)
 	}, [usedMatrix])
 
 	return <main class="has-preview">
@@ -129,11 +127,11 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.translation')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateTranslation(vec3.create())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateTranslation(new Vector(0, 0, 0))}>{Octicon['history']}</button>
 					</div>
-					{Array(3).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={translation[i].toFixed(3)} onChange={v => changeTranslation(i, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={translation[i]} onChange={v => changeTranslation(i, v)} />
+					{XYZ.map((c) => <div class="transformation-input">
+						<NumberInput value={translation[c].toFixed(3)} onChange={v => changeTranslation(c, v)} />
+						<RangeInput min={-1} max={1} step={0.01} value={translation[c]} onChange={v => changeTranslation(c, v)} />
 					</div>)}
 				</div>
 				<div class="transformation-section">
@@ -150,11 +148,11 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.scale')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateScale(vec3.fromValues(1, 1, 1))}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateScale(new Vector(1, 1, 1))}>{Octicon['history']}</button>
 					</div>
-					{Array(3).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={scale[i].toFixed(3)} onChange={v => changeScale(i, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={scale[i]} onChange={v => changeScale(i, v)} />
+					{XYZ.map((c) => <div class="transformation-input">
+						<NumberInput value={scale[c].toFixed(3)} onChange={v => changeScale(c, v)} />
+						<RangeInput min={-1} max={1} step={0.01} value={scale[c]} onChange={v => changeScale(c, v)} />
 					</div>)}
 				</div>
 				<div class="transformation-section">
@@ -173,12 +171,12 @@ export function Transformation({}: Props) {
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.matrix')}</span>
-						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(mat4.create())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(new Matrix4())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>
 					</div>
 					{Array(16).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={matrix[i].toFixed(3)} onChange={v => changeMatrix(i, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={matrix[i]} onChange={v => changeMatrix(i, v)} />
+						<NumberInput value={matrix.data[i].toFixed(3)} onChange={v => changeMatrix(i, v)} />
+						<RangeInput min={-1} max={1} step={0.01} value={matrix.data[i]} onChange={v => changeMatrix(i, v)} />
 					</div>)}
 				</div>
 			</div>
