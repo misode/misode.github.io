@@ -1405,7 +1405,7 @@ hr {
 	font-family: MinecraftSeven, sans-serif;
 	font-size: 20px;
 	position: relative;
-  white-space: nowrap;
+  white-space: pre;
 	line-height: 1.1	;
 }
 
