@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
+import { useActiveTimeout } from '../hooks/useActiveTimout.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { loadImage } from '../services/DataFetcher.js'
 import { composeMatrix, svdDecompose } from '../Utils.js'
@@ -121,6 +122,18 @@ export function Transformation({}: Props) {
 		renderer.current?.draw(view, usedMatrix.data)
 	}, [usedMatrix])
 
+	const [copiedDecomposed, setCopiedDecomposed] = useActiveTimeout()
+	const onCopyDecomposed = useCallback(() => {
+		navigator.clipboard.writeText(`{translation:[${translation.components().map(formatFloat).join(',')}],left_rotation:[${[...leftRotation].map(formatFloat).join(',')}],scale:[${scale.components().map(formatFloat).join(',')}],right_rotation:[${[...rightRotation].map(formatFloat).join(',')}]}`)
+			.then(() => setCopiedDecomposed())
+	}, [translation, leftRotation, scale, rightRotation, setCopiedDecomposed])
+
+	const [copiedComposed, setCopiedComposed] = useActiveTimeout()
+	const onCopyComposed = useCallback(() => {
+		navigator.clipboard.writeText(`[${[...matrix.data].map(formatFloat).join(',')}]`)
+			.then(() => setCopiedComposed())
+	}, [matrix, setCopiedComposed])
+
 	return <main class="has-preview">
 		<div class="transformation-editor">
 			<div class="transformation-decomposition">
@@ -128,6 +141,7 @@ export function Transformation({}: Props) {
 					<div class="transformation-title">
 						<span>{locale('transformation.translation')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateTranslation(new Vector(0, 0, 0))}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_decomposed')} onClick={onCopyDecomposed}>{Octicon[copiedDecomposed ? 'check' : 'clippy']}</button>
 					</div>
 					{XYZ.map((c) => <div class="transformation-input">
 						<NumberInput value={translation[c].toFixed(3)} onChange={v => changeTranslation(c, v)} />
@@ -172,6 +186,7 @@ export function Transformation({}: Props) {
 					<div class="transformation-title">
 						<span>{locale('transformation.matrix')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(new Matrix4())}>{Octicon['history']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_composed')} onClick={onCopyComposed}>{Octicon[copiedComposed ? 'check' : 'clippy']}</button>
 						<button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>
 					</div>
 					{Array(16).fill(0).map((_, i) => <div class="transformation-input">
@@ -188,6 +203,10 @@ export function Transformation({}: Props) {
 		</div>
 		<Footer />
 	</main>
+}
+
+function formatFloat(x: number) {
+	return x.toFixed(3).replace(/\.?0+$/, '') + 'f'
 }
 
 const vsMesh = `

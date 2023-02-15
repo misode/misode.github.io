@@ -598,6 +598,7 @@ main.has-project {
 .transformation-title {
 	display: flex;
 	margin-bottom: 2px;
+	align-items: flex-end;
 }
 
 .transformation-title span {
@@ -608,7 +609,7 @@ main.has-project {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: 2px 3px;
+	padding: 4px 6px;
 	background-color: var(--background-4);
 	border: none;
 	border-radius: 3px;

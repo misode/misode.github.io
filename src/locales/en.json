@@ -134,6 +134,8 @@
   "transformation.left_rotation": "Left rotation",
   "transformation.scale": "Scale",
   "transformation.right_rotation": "Right rotation",
+  "transformation.copy_decomposed": "Copy decomposed format",
+  "transformation.copy_composed": "Copy matrix format",
   "trim_material": "Trim material",
   "trim_pattern": "Trim pattern",
   "pack_mcmeta": "Pack.mcmeta",
