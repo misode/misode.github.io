@@ -1,5 +1,5 @@
 import { Matrix3, Matrix4, Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
-import { mat4, quat } from 'gl-matrix'
+import { mat4, quat, vec3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
@@ -11,6 +11,11 @@ import { composeMatrix, svdDecompose } from '../Utils.js'
 
 const XYZ = ['x', 'y', 'z'] as const
 type XYZ = typeof XYZ[number]
+
+const XYZW = ['x', 'y', 'z', 'w'] as const
+
+const RotationModes = ['quaternion', 'axis_angle'] as const
+type RotationMode = typeof RotationModes[number]
 
 interface Props {
 	path?: string,
@@ -104,8 +109,41 @@ export function Transformation({}: Props) {
 		const copy = quat.clone(rightRotation)
 		copy[i] = value
 		if (normalizeRight) quat.normalize(copy, copy)
-		setRightRotation(copy)
-		setMatrix(composeMatrix(translation, leftRotation, scale, rightRotation))
+		updateRightRotation(copy)
+	}, [rightRotation, normalizeRight, updateRightRotation])
+
+	const [rotationMode, setRotationMode] = useState<RotationMode>('quaternion')
+
+	const leftRotationAxisAngle = useMemo(() => {
+		const axis = vec3.create()
+		const angle = quat.getAxisAngle(axis, leftRotation)
+		return { axis, angle }
+	}, [leftRotation])
+
+	const changeLeftRotationAxisAngle = useCallback((i: number, value: number) => {
+		const axisCopy = vec3.clone(leftRotationAxisAngle.axis)
+		if (i < 3) axisCopy[i] = value
+		else leftRotationAxisAngle.angle = value
+		if (normalizeLeft) vec3.normalize(axisCopy, axisCopy)
+		const copy = quat.setAxisAngle(quat.create(), axisCopy, leftRotationAxisAngle.angle)
+		if (normalizeLeft) quat.normalize(copy, copy)
+		updateLeftRotation(copy)
+	}, [leftRotation, normalizeLeft, updateLeftRotation])
+
+	const rightRotationAxisAngle = useMemo(() => {
+		const axis = vec3.create()
+		const angle = quat.getAxisAngle(axis, rightRotation)
+		return { axis, angle }
+	}, [rightRotation])
+
+	const changeRightRotationAxisAngle = useCallback((i: number, value: number) => {
+		const axisCopy = vec3.clone(rightRotationAxisAngle.axis)
+		if (i < 3) axisCopy[i] = value
+		else rightRotationAxisAngle.angle = value
+		if (normalizeRight) vec3.normalize(axisCopy, axisCopy)
+		const copy = quat.setAxisAngle(quat.create(), axisCopy, rightRotationAxisAngle.angle)
+		if (normalizeRight) quat.normalize(copy, copy)
+		updateRightRotation(copy)
 	}, [rightRotation, normalizeRight, updateRightRotation])
 
 	const renderer = useRef<MeshRenderer>()
@@ -143,42 +181,50 @@ export function Transformation({}: Props) {
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateTranslation(new Vector(0, 0, 0))}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_decomposed')} onClick={onCopyDecomposed}>{Octicon[copiedDecomposed ? 'check' : 'clippy']}</button>
 					</div>
-					{XYZ.map((c) => <div class="transformation-input">
-						<NumberInput value={translation[c].toFixed(3)} onChange={v => changeTranslation(c, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={translation[c]} onChange={v => changeTranslation(c, v)} />
-					</div>)}
+					{XYZ.map((c) =>
+						<Slider label={c} value={translation[c]} onChange={v => changeTranslation(c, v)} />
+					)}
 				</div>
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.left_rotation')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateLeftRotation(quat.create())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('normalize')} onClick={() => setNormalizeLeft(!normalizeLeft)}>{Octicon[normalizeLeft ? 'lock' : 'unlock']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('transformation.rotation_mode', locale(`transformation.rotation_mode.${rotationMode}`))} onClick={() => setRotationMode(rotationMode === 'quaternion' ? 'axis_angle' : 'quaternion')}>{Octicon['arrow_switch']}</button>
 					</div>
-					{Array(4).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={leftRotation[i].toFixed(3)} onChange={v => changeLeftRotation(i, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={leftRotation[i]} onChange={v => changeLeftRotation(i, v)} />
-					</div>)}
+					{rotationMode === 'quaternion'
+						? XYZW.map((c, i) =>
+							<Slider label={c} value={leftRotation[i]} onChange={v => changeLeftRotation(i, v)} />)
+						: <>
+							{XYZ.map((c, i) =>
+								<Slider label={c} value={leftRotationAxisAngle.axis[i]} onChange={v => changeLeftRotationAxisAngle(i, v)} />)}
+							<Slider label="θ" value={leftRotationAxisAngle.angle} min={0} max={Math.PI*2} onChange={v => changeLeftRotationAxisAngle(3, v)} />
+						</>}
 				</div>
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.scale')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateScale(new Vector(1, 1, 1))}>{Octicon['history']}</button>
 					</div>
-					{XYZ.map((c) => <div class="transformation-input">
-						<NumberInput value={scale[c].toFixed(3)} onChange={v => changeScale(c, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={scale[c]} onChange={v => changeScale(c, v)} />
-					</div>)}
+					{XYZ.map((c) =>
+						<Slider label={c} value={scale[c]} onChange={v => changeScale(c, v)} />
+					)}
 				</div>
 				<div class="transformation-section">
 					<div class="transformation-title">
 						<span>{locale('transformation.right_rotation')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateRightRotation(quat.create())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('normalize')} onClick={() => setNormalizeRight(!normalizeRight)}>{Octicon[normalizeRight ? 'lock' : 'unlock']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('transformation.rotation_mode', locale(`transformation.rotation_mode.${rotationMode}`))} onClick={() => setRotationMode(rotationMode === 'quaternion' ? 'axis_angle' : 'quaternion')}>{Octicon['arrow_switch']}</button>
 					</div>
-					{Array(4).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={rightRotation[i].toFixed(3)} onChange={v => changeRightRotation(i, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={rightRotation[i]} onChange={v => changeRightRotation(i, v)} />
-					</div>)}
+					{rotationMode === 'quaternion'
+						? XYZW.map((c, i) =>
+							<Slider label={c} value={rightRotation[i]} onChange={v => changeRightRotation(i, v)} />)
+						: <>
+							{XYZ.map((c, i) =>
+								<Slider label={c} value={rightRotationAxisAngle.axis[i]} onChange={v => changeRightRotationAxisAngle(i, v)}/>)}
+							<Slider label="θ" value={rightRotationAxisAngle.angle} min={0} max={Math.PI*2} onChange={v => changeRightRotationAxisAngle(3, v)} />
+						</>}
 				</div>
 			</div>
 			<div class="transformation-matrix">
@@ -189,10 +235,9 @@ export function Transformation({}: Props) {
 						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_composed')} onClick={onCopyComposed}>{Octicon[copiedComposed ? 'check' : 'clippy']}</button>
 						<button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>
 					</div>
-					{Array(16).fill(0).map((_, i) => <div class="transformation-input">
-						<NumberInput value={matrix.data[i].toFixed(3)} onChange={v => changeMatrix(i, v)} />
-						<RangeInput min={-1} max={1} step={0.01} value={matrix.data[i]} onChange={v => changeMatrix(i, v)} />
-					</div>)}
+					{Array(16).fill(0).map((_, i) =>
+						<Slider value={matrix.data[i]} onChange={v => changeMatrix(i, v)} />
+					)}
 				</div>
 			</div>
 		</div>
@@ -203,6 +248,21 @@ export function Transformation({}: Props) {
 		</div>
 		<Footer />
 	</main>
+}
+
+interface SliderProps {
+	label?: string
+	value: number
+	onChange?: (value: number) => void
+	min?: number
+	max?: number
+}
+function Slider({ label, value, onChange, min, max }: SliderProps) {
+	return <div class="transformation-input">
+		{label && <label>{label}</label>}
+		<NumberInput value={value.toFixed(3)} onChange={onChange} />
+		<RangeInput min={min ?? -1} max={max ?? 1} step={0.01} value={value} onChange={onChange} />
+	</div>
 }
 
 function formatFloat(x: number) {

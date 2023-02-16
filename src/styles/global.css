@@ -584,13 +584,21 @@ main.has-project {
 	margin-bottom: 2px;
 }
 
+.transformation-input > * + * {
+	margin-left: 8px;
+}
+
+.transformation-input label {
+	color: var(--text-3);
+	font-family: consolas;
+}
+
 .transformation-input input[type=number] {
 	width: 100px;
 	padding: 3px 6px;
 	border: none;
 	border-radius: 3px;
 	font-size: 14px;
-	margin-right: 8px;
 	background-color: var(--background-2);
 	color: var(--text-2);
 }
