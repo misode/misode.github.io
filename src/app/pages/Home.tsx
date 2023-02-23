@@ -132,17 +132,12 @@ function Changelog() {
 
 const KOFI_SUPPORTERS = [
 	{
-		name: 'RoarkCats',
-		avatar: 'https://ko-fi.com/img/anon7.png',
+		name: 'oitsjustjose',
+		avatar: 'https://ko-fi.com/img/anon10.png',
 	},
 	{
-		name: 'MC Silver',
-		avatar: 'https://ko-fi.com/img/anon7.png',
-	},
-	{
-		name: 'Hugman',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
-		url: 'https://ko-fi.com/G2G5DNROO',
+		name: 'Panossa',
+		avatar: 'https://ko-fi.com/img/anon5.png',
 	},
 	{
 		name: 'TelepathicGrunt',
@@ -150,8 +145,17 @@ const KOFI_SUPPORTERS = [
 		url: 'https://github.com/TelepathicGrunt',
 	},
 	{
-		name: 'oitsjustjose',
-		avatar: 'https://ko-fi.com/img/anon10.png',
+		name: 'Hugman',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
+		url: 'https://ko-fi.com/G2G5DNROO',
+	},
+	{
+		name: 'RoarkCats',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/tiny_03381e9f-4a6d-41dc-9f96-1a733c0e114a.png',
+	},
+	{
+		name: 'MC Silver',
+		avatar: 'https://ko-fi.com/img/anon7.png',
 	},
 	{
 		name: 'rx97',
