@@ -288,7 +288,7 @@
     {
     	"id": "worldgen/spline", 
     	"url": "worldgen/spline", 
-    	"schema": "noise_parameters",
+    	"schema": "cubic_spline",
     	"tags": ["worldgen"]
     },
     {

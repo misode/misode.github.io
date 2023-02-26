@@ -1592,10 +1592,6 @@ hr {
 	background-color: transparent;
 }
 
-.spline-canvas{
-	margin-bottom: 5px;
-}
-
 .spline-drag {
 	display: flex;
 	flex-direction: column;
