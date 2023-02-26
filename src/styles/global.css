@@ -1580,6 +1580,34 @@ hr {
 	background-color: var(--background-5);
 }
 
+.spline-card {
+	display: grid;
+	border-radius: 6px;
+	box-shadow: 0 1px 7px -2px #000;
+	background-color: var(--background-4);
+	margin: 10px;
+}
+
+.spline-card canvas {
+	background-color: transparent;
+}
+
+.spline-canvas{
+	margin-bottom: 5px;
+}
+
+.spline-drag {
+	display: flex;
+	flex-direction: column;
+	border-radius: 6px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	background-color: var(--background-5);
+	align-items: center;
+}
+
 [data-ea-publisher] {
 	margin: 0 16px 8px;
 	min-height: 69.38px;

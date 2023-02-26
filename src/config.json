@@ -286,6 +286,12 @@
       "minVersion": "1.19"
     },
     {
+    	"id": "worldgen/spline", 
+    	"url": "worldgen/spline", 
+    	"schema": "noise_parameters",
+    	"tags": ["worldgen"]
+    },
+    {
       "id": "world",
       "url": "world",
       "schema": "world_settings",
