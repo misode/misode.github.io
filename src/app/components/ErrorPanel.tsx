@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact'
 import { getCurrentUrl } from 'preact-router'
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
@@ -8,9 +9,11 @@ import { Octicon } from './index.js'
 
 type ErrorPanelProps = {
 	error: string | Error,
+	reportable?: boolean,
 	onDismiss?: () => unknown,
+	children?: ComponentChildren,
 }
-export function ErrorPanel({ error, onDismiss }: ErrorPanelProps) {
+export function ErrorPanel({ error, reportable, onDismiss, children }: ErrorPanelProps) {
 	const { version } = useVersion()
 	const [stackVisible, setStackVisible] = useState(false)
 	const [stack, setStack] = useState<string | undefined>(undefined)
@@ -64,6 +67,7 @@ export function ErrorPanel({ error, onDismiss }: ErrorPanelProps) {
 			</span>}
 		</h3>
 		{stack && stackVisible && <pre>{stack}</pre>}
-		<p>If you think this is a bug, you can report it <a href={url} target="_blank">on GitHub</a></p>
+		{reportable !== false && <p>If you think this is a bug, you can report it <a href={url} target="_blank">on GitHub</a></p>}
+		{children}
 	</div>
 }

@@ -25,7 +25,8 @@
 	--nav-faded-hover: #6e6e6e;
 	--selection: #445a9599;
 	--errors-background: #62190f;
-	--errors-background-hover: #57140b;
+	--errors-background-2: #471610;
+	--errors-background-3: #3f140f;
 	--errors-text: #ffffffcc;
   --invalid-text: #fd7951;
 	--text-saturation: 60%;
@@ -63,6 +64,8 @@
 	--nav-faded-hover: #bcbfc3;
 	--selection: #6786dd99;
 	--errors-background: #f66653;
+	--errors-background-2: #c13b29;
+	--errors-background-3: #d8503e;
 	--errors-text: #000000cc;
   --invalid-text: #a32600;
 	--text-saturation: 100%;
@@ -101,10 +104,12 @@
 		--nav-faded-hover: #bcbfc3;
 		--selection: #6786dd99;
 		--errors-background: #f66653;
+		--errors-background-2: #c13b29;
+		--errors-background-3: #d8503e;
 		--errors-text: #000000cc;
 		--invalid-text: #a32600;
 		--text-saturation: 100%;
-		--text-lightness: 35%;
+		--text-lightness: 30%;
 		--editor-variable: #0451A5;
 		--editor-string: #A31515;
 		--editor-constant: #0000FF;
@@ -814,7 +819,7 @@ main.has-project {
 }
 
 .btn.danger:not(.btn-input):not(.disabled):hover {
-	background-color: var(--errors-background-hover);
+	background-color: var(--errors-background-2);
 }
 
 .btn-menu .result-list {
@@ -1079,6 +1084,25 @@ main.has-project {
 
 .error a {
 	color: var(--text-1)
+}
+
+.error-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.error-action {
+	display: flex;
+	align-items: center;
+	background-color: var(--errors-background-2);
+	padding: 8px 12px;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.error-action:hover {
+	background-color: var(--errors-background-3);
 }
 
 .modal {
