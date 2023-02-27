@@ -289,7 +289,8 @@
     	"id": "worldgen/spline", 
     	"url": "worldgen/spline", 
     	"schema": "cubic_spline",
-    	"tags": ["worldgen"]
+    	"tags": ["worldgen"],
+	"minVersion": "1.18.2"
     },
     {
       "id": "world",

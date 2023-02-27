@@ -1,32 +1,35 @@
 import {SplineCard} from "../SplineCard.js";
 import {PreviewProps} from "./index.js";
-import {CubicSpline} from "deepslate";
+import {CubicSpline, MinMaxNumberFunction} from "deepslate";
 
-function extractor() {
+function extractor(): MinMaxNumberFunction<number> {
     return {
         compute(c: number): number {
             return c
+        },
+        minValue(): number {
+            return -2
+        },
+        maxValue(): number {
+            return 2
         }
     }
 }
 
 function preProcess(data: any){
     const spline = {
+        coordinate: undefined,
+        points: []
     }
     if('coordinate' in data)
         spline.coordinate = data.coordinate
     if(('points' in data) && Array.isArray(data.points)){
-        spline.points = []
         for(const point of data.points){
-            console.log("point: ", point)
             if('node' in point && 'location' in point.node && 'derivative' in point.node && 'value' in point.node) {
-                console.log("pushed", point.node)
                 spline.points.push(point.node)
             }
         }
     }
-    console.log("preProcess finish")
-    console.log(spline)
     return spline
 }
 
@@ -34,6 +37,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
     console.log("invoke spline preview")
     console.log(data)
 
+    // TODO solve situation where passed in Json is...just a constant
     return <>
         <div class="full-preview">
             <SplineCard spline={CubicSpline.fromJson(preProcess(data), extractor)}/>
