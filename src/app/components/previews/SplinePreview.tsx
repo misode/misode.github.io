@@ -39,8 +39,10 @@ export const SplinePreview = ({data}: PreviewProps) => {
 
     // TODO solve situation where passed in Json is...just a constant
     return <>
-        <div class="full-preview">
-            <SplineCard spline={CubicSpline.fromJson(preProcess(data), extractor)}/>
+        <div class="full-preview" style={{display: 'flex'}}>
+            <div class="spline-preview">
+                <SplineCard spline={CubicSpline.fromJson(preProcess(data), extractor)}/>
+            </div>
         </div>
     </>
 }

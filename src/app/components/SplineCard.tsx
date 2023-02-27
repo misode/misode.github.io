@@ -22,6 +22,9 @@ interface Props {
 
 export function SplineCard({spline}: Props){
 	const canvas = useRef<HTMLCanvasElement>(null)
+	const drag = useRef<HTMLDivElement>(null)
+	const card = useRef<HTMLDivElement>(null)
+	// TODO maybe not good practice
 	const [ctx, setCtx] = useState<CanvasRenderingContext2D>()
 
 	useEffect(() => {
@@ -39,6 +42,37 @@ export function SplineCard({spline}: Props){
 			console.log("translation complete", ctx.getTransform())
 			setCtx(ctx)
 		}
+	}, [])
+
+	useEffect(() => {
+		console.log("invoke drag change handle")
+		if(!drag.current)
+			return
+		function onMouseMove(e: MouseEvent){
+			if(!card.current)
+				return
+			console.log('mouse moved', card.current.style.left)
+			card.current.style.left = `${card.current.offsetLeft+e.movementX}px`
+			card.current.style.top = `${card.current.offsetTop+e.movementY}px`
+			console.log(card.current.style.left)
+		}
+		function onMouseUp(e: MouseEvent){
+			if(!drag.current)
+				return
+			if(e.button != 0)
+				return
+			document.removeEventListener('mousemove', onMouseMove)
+			document.removeEventListener('mouseup', onMouseUp)
+		}
+		function onMouseDown(e: MouseEvent){
+			if(!drag.current)
+				return
+			if(e.button != 0)
+				return
+			document.addEventListener('mousemove', onMouseMove)
+			document.addEventListener('mouseup', onMouseUp)
+		}
+		drag.current.addEventListener('mousedown', onMouseDown)
 	}, [])
 	
 	useEffect( () => {
@@ -84,9 +118,8 @@ export function SplineCard({spline}: Props){
 		ctx.stroke()
 	}, [spline])
 
-	return <div class="spline-card">
-		<div class="spline-drag">{Octicon['code']}
-		</div>
-		<canvas ref={canvas} class="spline-canvas">A canvas. </canvas>
+	return <div class="spline-card" ref={card}>
+		<div class="spline-drag" ref={drag}>{Octicon['code']}</div>
+		<canvas class="spline-canvas" ref={canvas}>A canvas. </canvas>
 	</div>
 }

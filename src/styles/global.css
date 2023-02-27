@@ -1580,12 +1580,20 @@ hr {
 	background-color: var(--background-5);
 }
 
+.spline-preview {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
 .spline-card {
-	display: grid;
+	display: inline-block;
+	position: relative;
 	border-radius: 6px;
 	box-shadow: 0 1px 7px -2px #000;
 	background-color: var(--background-4);
-	margin: 10px;
+	margin: 0px;
+	transform: scale(1);
 }
 
 .spline-card canvas {
@@ -1602,6 +1610,7 @@ hr {
 	padding-bottom: 5px;
 	background-color: var(--background-5);
 	align-items: center;
+	cursor: move;
 }
 
 [data-ea-publisher] {
