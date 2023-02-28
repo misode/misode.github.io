@@ -34,10 +34,12 @@ export function SplineCard({spline}: Props){
 			const ctx = canvas.current.getContext('2d')
 			if (!ctx)
 				return
-			ctx.imageSmoothingEnabled = true
-			ctx.imageSmoothingQuality = 'high'
 			console.log("translating coord sys", ctx.getTransform())
-			ctx.translate(canvas.current.width/2, canvas.current.height/2)
+			const width = canvas.current.clientWidth
+			const height = canvas.current.clientHeight
+			canvas.current.width = width
+			canvas.current.height = height
+			ctx.translate(width/2, height/2)
 			ctx.scale(1, -1)
 			console.log("translation complete", ctx.getTransform())
 			setCtx(ctx)
@@ -45,16 +47,13 @@ export function SplineCard({spline}: Props){
 	}, [])
 
 	useEffect(() => {
-		console.log("invoke drag change handle")
 		if(!drag.current)
 			return
 		function onMouseMove(e: MouseEvent){
 			if(!card.current)
 				return
-			console.log('mouse moved', card.current.style.left)
 			card.current.style.left = `${card.current.offsetLeft+e.movementX}px`
 			card.current.style.top = `${card.current.offsetTop+e.movementY}px`
-			console.log(card.current.style.left)
 		}
 		function onMouseUp(e: MouseEvent){
 			if(!drag.current)
@@ -104,6 +103,8 @@ export function SplineCard({spline}: Props){
 		console.log("drawing curve")
 		const width = canvas.current.width
 		const height = canvas.current.height
+		console.log('canvas size is: ', [width, height])
+		console.log('client size is: ', [canvas.current.clientWidth, canvas.current.clientHeight])
 		ctx.clearRect(-width/2, -height/2, width, height)
 		ctx.beginPath()
 		const maxAbs = Math.max(Math.abs(spline.max()), Math.abs(spline.min()))
@@ -120,6 +121,11 @@ export function SplineCard({spline}: Props){
 
 	return <div class="spline-card" ref={card}>
 		<div class="spline-drag" ref={drag}>{Octicon['code']}</div>
-		<canvas class="spline-canvas" ref={canvas}>A canvas. </canvas>
+		<div class="spline-resize" style={{gridArea: 'resize-left'}} />
+		<canvas class="spline-canvas" ref={canvas} style={{backgroundColor: 'transparent'}} >A canvas. </canvas>
+		<div class="spline-resize" style={{gridArea: 'resize-right'}} />
+		<div class="spline-resize" style={{gridArea: 'resize-corner-left'}} />
+		<div class="spline-resize" style={{gridArea: 'resize-bottom'}} />
+		<div class="spline-resize" style={{gridArea: 'resize-corner-right'}} />
 	</div>
 }
