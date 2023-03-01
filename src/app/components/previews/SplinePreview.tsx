@@ -1,6 +1,7 @@
 import {SplineCard} from "../SplineCard.js";
 import {PreviewProps} from "./index.js";
 import {CubicSpline, MinMaxNumberFunction} from "deepslate";
+import {useRef} from "preact/hooks";
 
 function extractor(): MinMaxNumberFunction<number> {
     return {
@@ -39,9 +40,11 @@ export const SplinePreview = ({data}: PreviewProps) => {
 
     // TODO solve situation where passed in Json is...just a constant
     return <>
+        <div class="controls preview-controls">
+        </div>
         <div class="full-preview">
             <div class="spline-preview">
-                <SplineCard spline={CubicSpline.fromJson(preProcess(data), extractor)}/>
+                <SplineCard spline={CubicSpline.fromJson(preProcess(data), extractor)} splineRef={useRef(null)}/>
             </div>
         </div>
     </>
