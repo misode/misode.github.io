@@ -8,6 +8,7 @@ function extractor(): MinMaxNumberFunction<number> {
         compute(c: number): number {
             return c
         },
+        // TODO this need to be changed later
         minValue(): number {
             return -2
         },

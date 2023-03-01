@@ -21,6 +21,8 @@ interface ResizeDirection {
 
 const INDICATOR_WIDTH = 2
 const RESIZE_WIDTH = 6
+const MIN_WIDTH = 112
+const MIN_HEIGHT = 81
 
 export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}: Props) {
     // TODO useCallback is not required on some functions
@@ -151,10 +153,18 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
         if (!card.current)
             return
         const direction = resizeDirection.current
-        card.current.style.width = `${card.current.clientWidth + e.movementX * direction.width}px`
-        card.current.style.height = `${card.current.clientHeight + e.movementY * direction.height}px`
-        card.current.style.left = `${card.current.offsetLeft + e.movementX * direction.posX}px`
-        card.current.style.top = `${card.current.offsetTop + e.movementY * direction.posY}px`
+
+        let newWidth = card.current.clientWidth + e.movementX * direction.width
+        if(newWidth >= MIN_WIDTH) {
+            card.current.style.width = `${newWidth}px`
+            card.current.style.left = `${card.current.offsetLeft + e.movementX * direction.posX}px`
+        }
+
+        let newHeight = card.current.clientHeight + e.movementY * direction.height
+        if(newHeight >= MIN_HEIGHT) {
+            card.current.style.height = `${newHeight}px`
+            card.current.style.top = `${card.current.offsetTop + e.movementY * direction.posY}px`
+        }
         draw()
     }, [])
 
@@ -170,7 +180,8 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
             return
         let newX = indicator.current.offsetLeft + e.movementX
         if (newX >= RESIZE_WIDTH - INDICATOR_WIDTH / 2 && newX <= card.current.clientWidth - RESIZE_WIDTH - INDICATOR_WIDTH / 2) {
-            indicator.current.style.left = `${newX}px`
+            newX = newX / card.current.clientWidth * 100
+            indicator.current.style.left = `${Math.round(newX)}%`
             if(valChangeHandlerRef && valChangeHandlerRef?.current){
                 valChangeHandlerRef.current(sample())
             }
