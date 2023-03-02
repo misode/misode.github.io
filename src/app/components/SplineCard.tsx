@@ -3,25 +3,23 @@ import {Octicon} from "./Octicon.js";
 import {CubicSpline} from "deepslate";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
-import {RefObject} from "preact";
 import {pos2n} from "../Utils.js";
 import {Offset} from "./previews/SplinePreview.js";
 
 export type ValueChangeHandler = (newVal: number) => any
 
-export type SplineTypeValue = {
-    index: number
-    valChangeHandlerRef: RefObject<ValueChangeHandler>
+export type CardLink = {
+    valIndex: number
+    color: string
+    handleValueChange: ValueChangeHandler | null
 }
-
-export type Sampler = () => number
 
 interface Props {
     id: number
     coordinate: string | number | bigint
     spline: MultiPoint<number> | Constant
-    splineTypeValueList: SplineTypeValue[]
-    vchRef: RefObject<ValueChangeHandler | null>
+    inputLinkList: CardLink[]
+    outputLink: CardLink | null
 }
 
 interface ResizeDirection {
@@ -36,43 +34,47 @@ const RESIZE_WIDTH = 6
 const MIN_WIDTH = 112
 const MIN_HEIGHT = 81
 
-export function SplineCard({coordinate, id, spline, splineTypeValueList, vchRef}: Props) {
+export function SplineCard({coordinate, id, spline, inputLinkList, outputLink}: Props) {
     console.log('invoke SplineCard')
-    
+
     const cardRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const dragRef = useRef<HTMLDivElement>(null)
     const indicatorRef = useRef<HTMLDivElement>(null)
-    
+
     const splineRef = useRef<MultiPoint<number> | Constant>(spline)
-    const splineTypeValueListRef = useRef<SplineTypeValue[]>(splineTypeValueList)
-    
+    const inputLinkListRef = useRef<CardLink[]>(inputLinkList)
+    const outputLinkRef = useRef<CardLink>(outputLink)
+
     const resizeDirectionRef = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
     const offsetRef = useRef<pos2n>(useContext(Offset))
     offsetRef.current = useContext(Offset)
     const posRef = useRef<pos2n>({x: 0, y: 0})
     const ctxRef = useRef<CanvasRenderingContext2D>(null)
 
+    useEffect(() => {
+        outputLinkRef.current = outputLink
+    }, [outputLink])
     // Apply spline type value change handlers
     useEffect(() => {
         console.log('STVList or spline changed')
         splineRef.current = spline
-        splineTypeValueListRef.current = splineTypeValueList
+        inputLinkListRef.current = inputLinkList
         if (spline instanceof MultiPoint) {
-            for (const value of splineTypeValueList) {
-                value.valChangeHandlerRef.current = (newVal: number) => {
+            for (const link of inputLinkList) {
+                link.handleValueChange = (newVal: number) => {
                     console.log('val change received')
-                    spline.values[value.index] = new Constant(newVal)
+                    spline.values[link.valIndex] = new Constant(newVal)
                     draw()
-                    if (vchRef.current) {
+                    if (outputLinkRef.current?.handleValueChange) {
                         console.log('passing val change to parent')
-                        vchRef.current(sample())
+                        outputLinkRef.current.handleValueChange(sample())
                     } else console.log('vch is null, not passing change to parent')
                 }
             }
         }
         draw()
-    }, [splineTypeValueList, spline])
+    }, [inputLinkList, spline])
 
     const [minX, maxX] = useMemo(() => {
         // TODO solve situations where all locations have same val
@@ -88,7 +90,7 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, vchRef}
                 if (location < minX)
                     minX = location
             }
-            if (minX == maxX){
+            if (minX == maxX) {
                 minX = -1
                 maxX = 1
             }
@@ -130,21 +132,50 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, vchRef}
         const height = canvasRef.current.clientHeight
         canvasRef.current.width = width
         canvasRef.current.height = height
-        ctx.resetTransform()
-        ctx.translate(width / 2, height / 2)
-        ctx.scale(1, -1)
-
-        ctx.clearRect(-width / 2, -height / 2, width, height)
-        ctx.beginPath()
         const maxAbs = Math.max(Math.abs(spline.max()), Math.abs(spline.min()))
+        ctx.resetTransform()
+        const scaleX = width / (maxX - minX)
+        const scaleY = -height / 2 / maxAbs
+        ctx.lineWidth = 1 / Math.sqrt(scaleX * scaleX + scaleY * scaleY)
+        ctx.translate(-minX * width / (maxX - minX), height / 2)
+
+        if (spline instanceof Constant) {
+            ctx.beginPath()
+            ctx.moveTo(minX, 0)
+            ctx.lineTo(maxX, 0)
+            ctx.stroke()
+            return
+        }
+        ctx.scale(scaleX, scaleY)
+        ctx.clearRect(minX, -maxAbs, maxX - minX, 2 * maxAbs)
+        ctx.beginPath()
         ctx.strokeStyle = "rgb(154,154,154)"
-        ctx.moveTo(-width / 2, spline.compute(minX) * (height / 2) / maxAbs)
+        ctx.moveTo(minX, spline.compute(minX))
         for (let i = 1; i <= 100; i++) {
-            let x = -width / 2 + width / 100 * i
-            let y = spline.compute(minX + (maxX - minX) / 100 * i) * (height / 2) / maxAbs
+            let x = minX + (maxX - minX) * i / 100
+            let y = spline.compute(minX + (maxX - minX) * i / 100)
             ctx.lineTo(x, y)
         }
         ctx.stroke()
+
+        ctx.lineWidth *= 2
+        let length = Math.min(50, height / 3)
+        length *= maxAbs / height
+        console.log('length: ', length)
+        console.log('maxAbs', maxAbs)
+        for (const link of inputLinkListRef.current) {
+            ctx.strokeStyle = link.color
+            ctx.beginPath()
+            let x = spline.locations[link.valIndex]
+            let midY = spline.compute(x)
+            const y1 = midY - length / 2
+            const y2 = midY + length / 2
+            console.log('x: ', x, ', midY: ', midY)
+            console.log('y1: ', y1, ', y2: ', y2)
+            ctx.moveTo(x, y1)
+            ctx.lineTo(x, y2)
+            ctx.stroke()
+        }
     }
 
     function move(dX: number, dY: number) {
@@ -198,13 +229,16 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, vchRef}
             return
         const direction = resizeDirectionRef.current
 
-        let newWidth = cardRef.current.clientWidth + e.movementX * direction.width
+        const rect = cardRef.current.getBoundingClientRect()
+        const width = rect.width
+        const height = rect.height
+        let newWidth = width + e.movementX * direction.width
         if (newWidth >= MIN_WIDTH) {
             cardRef.current.style.width = `${newWidth}px`
             move(e.movementX * direction.posX, 0)
         }
 
-        let newHeight = cardRef.current.clientHeight + e.movementY * direction.height
+        let newHeight = height + e.movementY * direction.height
         if (newHeight >= MIN_HEIGHT) {
             cardRef.current.style.height = `${newHeight}px`
             move(0, e.movementY * direction.posY)
@@ -228,9 +262,9 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, vchRef}
         if (newX >= RESIZE_WIDTH - INDICATOR_WIDTH / 2 && newX <= cardRef.current.clientWidth - RESIZE_WIDTH - INDICATOR_WIDTH / 2) {
             newX = newX / cardRef.current.clientWidth * 100
             indicatorRef.current.style.left = `${Math.round(newX)}%`
-            if (vchRef.current) {
+            if (outputLinkRef.current?.handleValueChange) {
                 console.log('calling vchRef')
-                vchRef.current(sample())
+                outputLinkRef.current?.handleValueChange(sample())
             } else {
                 console.log('vchRef is null')
             }
@@ -254,7 +288,8 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, vchRef}
 
     return <div class="spline-card" ref={cardRef} style={{
         left: `${useContext(Offset).x + posRef.current.x}px`,
-        top: `${useContext(Offset).y + posRef.current.y}px`
+        top: `${useContext(Offset).y + posRef.current.y}px`,
+        border: `${outputLinkRef.current?.color ? (`2px solid ${outputLinkRef.current.color}`) : 'unset'}`
     }}>
         <div class="spline-coord" style={{
             position: 'absolute', left: '6px', top: '25px',

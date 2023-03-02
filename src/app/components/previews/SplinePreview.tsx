@@ -1,4 +1,4 @@
-import {SplineCard, SplineTypeValue, ValueChangeHandler} from "../SplineCard.js";
+import {SplineCard, CardLink, ValueChangeHandler} from "../SplineCard.js";
 import {PreviewProps} from "./index.js";
 import {CubicSpline, MinMaxNumberFunction} from "deepslate";
 import {createContext, createRef, RefObject} from "preact";
@@ -48,6 +48,13 @@ function checkPoint(point: any): boolean {
 
 export const Offset = createContext<pos2n>({x: 0, y: 0})
 
+function genCardLinkColor() {
+    let hue = Math.floor(Math.random() * 360)
+    let saturation = Math.round(Math.random() * 50) + 50
+    let lightness = Math.round(Math.random() * 30) + 50
+    return `hsl(${hue}, ${saturation}%, ${lightness}%`
+}
+
 // TODO More careful type check, or check if such check is necessary
 
 export const SplinePreview = ({data}: PreviewProps) => {
@@ -55,7 +62,8 @@ export const SplinePreview = ({data}: PreviewProps) => {
 
     const [offset, setOffset] = useState({x: 0, y: 0})
     const offsetRef = useRef<pos2n>(offset)
-    function build(data: any, valChangeHandlerRef: RefObject<ValueChangeHandler>):
+
+    function build(data: any, outputLink: CardLink | null):
         { elements: JSX.Element[], defaultVal: number } {
         console.log('start building', data)
         let result: JSX.Element[] = []
@@ -64,7 +72,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
         let spline = {}
         spline.coordinate = data.coordinate
         spline.points = []
-        let splineTypeValueList: SplineTypeValue[] = []
+        let inputLinkList: CardLink[] = []
         let minX = Infinity, maxX = -Infinity
         for (let i = 0; i < data.points.length; i++) {
             const point = data.points[i]
@@ -74,11 +82,12 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 maxX = point.node.location
             if (point.node.location < minX)
                 minX = point.node.location
+
             if (typeof point.node.value === 'number')
                 spline.points.push(point.node)
             else {
-                const ref = createRef<ValueChangeHandler>()
-                let cards = build(point.node.value, ref)
+                const inputLink: CardLink = {valIndex: i, color: genCardLinkColor(), handleValueChange: null}
+                let cards = build(point.node.value, inputLink)
                 if (cards.elements.length == 0)
                     console.log('cards list is empty!')
                 spline.points.push({
@@ -87,7 +96,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
                     value: cards.elements.length > 0 ? cards.defaultVal : 0
                 })
                 result = [...result, ...cards.elements]
-                splineTypeValueList = [...splineTypeValueList, {index: i, valChangeHandlerRef: ref}]
+                inputLinkList = [...inputLinkList, inputLink]
             }
         }
         const cubicSpline = fromJson(spline, extractor)
@@ -95,16 +104,17 @@ export const SplinePreview = ({data}: PreviewProps) => {
             coordinate={spline.coordinate}
             id={Math.round(Math.random() * 10000)}
             spline={cubicSpline}
-            splineTypeValueList={splineTypeValueList}
-            vchRef={valChangeHandlerRef}
+            inputLinkList={inputLinkList}
+            outputLink={outputLink}
         />]
 
         return {elements: result, defaultVal: cubicSpline.compute(minX + (maxX - minX) / 2)}
     }
-    const buildResult = useMemo(() => build(data, createRef()), [data])
 
-    function onMouseUp(e: MouseEvent){
-        if(e.button != 0)
+    const buildResult = useMemo(() => build(data, null), [data])
+
+    function onMouseUp(e: MouseEvent) {
+        if (e.button != 0)
             return
         document.removeEventListener('mousemove', onMouseMove)
         document.removeEventListener('mouseup', onMouseUp)
@@ -118,7 +128,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
     }
 
     const onMouseDown = useCallback((e: MouseEvent) => {
-        if(e.button != 0)
+        if (e.button != 0)
             return
         document.addEventListener('mousemove', onMouseMove)
         document.addEventListener('mouseup', onMouseUp)
