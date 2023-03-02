@@ -96,7 +96,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
             id={Math.round(Math.random() * 10000)}
             spline={cubicSpline}
             splineTypeValueList={splineTypeValueList}
-            valChangeHandlerRef={valChangeHandlerRef}
+            vchRef={valChangeHandlerRef}
         />]
 
         return {elements: result, defaultVal: cubicSpline.compute(minX + (maxX - minX) / 2)}
