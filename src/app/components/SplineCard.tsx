@@ -1,15 +1,27 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'preact/hooks'
+import {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'preact/hooks'
 import {Octicon} from "./Octicon.js";
 import {CubicSpline} from "deepslate";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
 import {RefObject} from "preact";
+import {pos2n} from "../Utils.js";
+import {Offset} from "./previews/SplinePreview.js";
+
+export type ValueChangeHandler = (newVal: number) => any
+
+export type SplineTypeValue = {
+    index: number
+    valChangeHandlerRef: RefObject<ValueChangeHandler>
+}
+
+export type Sampler = () => number
 
 interface Props {
+    id: number
+    coordinate: string | number | bigint
     spline: MultiPoint<number> | Constant
-    splineRef: RefObject<MultiPoint<number> | Constant>
-    samplerRef: RefObject<() => number> | null
-    valChangeHandlerRef: RefObject<(newVal: number) => any> | null
+    splineTypeValueList: SplineTypeValue[]
+    valChangeHandlerRef: RefObject<ValueChangeHandler> | null
 }
 
 interface ResizeDirection {
@@ -24,20 +36,27 @@ const RESIZE_WIDTH = 6
 const MIN_WIDTH = 112
 const MIN_HEIGHT = 81
 
-export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}: Props) {
+export function SplineCard({coordinate, id, spline, splineTypeValueList, valChangeHandlerRef}: Props) {
     // TODO useCallback is not required on some functions
     console.log('invoke SplineCard')
+    console.log(useContext(Offset))
+    console.log(Offset)
     const canvas = useRef<HTMLCanvasElement>(null)
     const drag = useRef<HTMLDivElement>(null)
     const card = useRef<HTMLDivElement>(null)
     const indicator = useRef<HTMLDivElement>(null)
     const resizeDirection = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
+    const offset = useRef<pos2n>(useContext(Offset))
+    offset.current = useContext(Offset)
+    const pos = useRef<pos2n>({x: 0, y: 0})
     // TODO maybe not good practice
     const [ctx, setCtx] = useState<CanvasRenderingContext2D>()
 
     useEffect(() => {
-        if (!canvas.current)
+        if (!canvas.current) {
+            console.error("canvas not available")
             return
+        }
         if (!ctx) {
             const ctx = canvas.current.getContext('2d')
             if (!ctx)
@@ -45,6 +64,24 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
             setCtx(ctx)
         }
     }, [])
+
+    // Apply spline type value change handlers
+    useEffect(function applyVCHList(){
+        if (spline instanceof MultiPoint) {
+            console.log('applying value change handler list', splineTypeValueList)
+            for (const value of splineTypeValueList) {
+                console.log(value.valChangeHandlerRef.current ? 'ref not null' : 'ref is null')
+                value.valChangeHandlerRef.current = (newVal: number) => {
+                    console.log('invoke val change handler, old val:', spline.values[value.index], 'new:', newVal)
+                    spline.values[value.index] = new Constant(newVal)
+                    draw()
+                    // TODO maybe this one has no effect
+                    if(valChangeHandlerRef && valChangeHandlerRef.current)
+                        valChangeHandlerRef.current(sample())
+                }
+            }
+        }
+    }, [valChangeHandlerRef, spline])
 
     const [minX, maxX] = useMemo(() => {
         // TODO solve situations where all locations have same val
@@ -68,24 +105,22 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
     }, [spline])
 
     function sample() {
-        if (!(indicator.current) || !(card.current))
+        if(!indicator.current || !card.current)
             return 0
-
-        let X = card.current.clientWidth - 2 * RESIZE_WIDTH
-        let x = indicator.current.offsetLeft + INDICATOR_WIDTH / 2 - RESIZE_WIDTH
-        x = minX + x * (maxX - minX) / X
-        return x
+        const X = card.current.clientWidth - 2*RESIZE_WIDTH
+        const x = indicator.current.offsetLeft + INDICATOR_WIDTH/2
+        const val = spline.compute(minX + x/X*(maxX - minX))
+        console.log('sample: ', val)
+        return val
     }
-    if (samplerRef?.current)
-        samplerRef.current = sample
 
     // Draw curve
     function draw() {
         spline.calculateMinMax()
-        if (!canvas.current)
+        if (!canvas.current || !ctx){
+            console.error('canvas or ctx not available, id:', id)
             return
-        if (!ctx)
-            return
+        }
 
         const width = canvas.current.clientWidth
         const height = canvas.current.clientHeight
@@ -109,16 +144,22 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
     }
 
     useEffect(draw, [spline])
-    useEffect(() => {
-        splineRef.current = spline
-    }, [spline])
+
+    function move(dX: number, dY: number){
+        if(!card.current)
+            return
+        pos.current.x += dX
+        pos.current.y += dY
+        card.current.style.left = `${offset.current.x + pos.current.x}px`
+        card.current.style.top = `${offset.current.y + pos.current.y}px`
+    }
 
     // TODO refer to NoisePreview to enhance dragging performance and robust
     const onDragMouseMove = useCallback((e: MouseEvent) => {
         if (!card.current)
             return
-        card.current.style.left = `${card.current.offsetLeft + e.movementX}px`
-        card.current.style.top = `${card.current.offsetTop + e.movementY}px`
+        console.log(card.current)
+        move(e.movementX, e.movementY)
     }, [])
 
     const onDragMouseUp = useCallback((e: MouseEvent) => {
@@ -135,6 +176,7 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
             return
         if (e.button != 0)
             return
+        e.stopPropagation()
         document.addEventListener('mousemove', onDragMouseMove)
         document.addEventListener('mouseup', onDragMouseUp)
     }, [])
@@ -143,6 +185,7 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
         return (e: MouseEvent) => {
             if (e.button != 0)
                 return
+            e.stopPropagation()
             resizeDirection.current = direction
             document.addEventListener('mousemove', onResizeMouseMove)
             document.addEventListener('mouseup', onResizeMouseUp)
@@ -155,15 +198,15 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
         const direction = resizeDirection.current
 
         let newWidth = card.current.clientWidth + e.movementX * direction.width
-        if(newWidth >= MIN_WIDTH) {
+        if (newWidth >= MIN_WIDTH) {
             card.current.style.width = `${newWidth}px`
-            card.current.style.left = `${card.current.offsetLeft + e.movementX * direction.posX}px`
+            move(e.movementX, 0)
         }
 
         let newHeight = card.current.clientHeight + e.movementY * direction.height
-        if(newHeight >= MIN_HEIGHT) {
+        if (newHeight >= MIN_HEIGHT) {
             card.current.style.height = `${newHeight}px`
-            card.current.style.top = `${card.current.offsetTop + e.movementY * direction.posY}px`
+            move(0, e.movementY)
         }
         draw()
     }, [])
@@ -176,14 +219,18 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
     }, [])
 
     function onIndicatorMouseMove(e: MouseEvent) {
-        if (!(indicator.current) || !(card.current))
+        if (!(indicator.current) || !(card.current)) {
+            console.error('indicator or card not available')
             return
+        }
         let newX = indicator.current.offsetLeft + e.movementX
         if (newX >= RESIZE_WIDTH - INDICATOR_WIDTH / 2 && newX <= card.current.clientWidth - RESIZE_WIDTH - INDICATOR_WIDTH / 2) {
             newX = newX / card.current.clientWidth * 100
             indicator.current.style.left = `${Math.round(newX)}%`
-            if(valChangeHandlerRef && valChangeHandlerRef?.current){
+            if (valChangeHandlerRef && valChangeHandlerRef.current) {
                 valChangeHandlerRef.current(sample())
+            } else {
+                console.log('id:', id, 'indicator moved but VCH Ref is', valChangeHandlerRef)
             }
         }
     }
@@ -198,11 +245,21 @@ export function SplineCard({spline, splineRef, samplerRef, valChangeHandlerRef}:
     const onIndicatorMouseDown = useCallback((e: MouseEvent) => {
         if (e.button != 0)
             return
+        e.stopPropagation()
         document.addEventListener('mousemove', onIndicatorMouseMove)
         document.addEventListener('mouseup', onIndicatorMouseUp)
     }, [])
 
-    return <div class="spline-card" ref={card}>
+    return <div class="spline-card" ref={card} style={{
+        left: `${useContext(Offset).x+pos.current.x}px`,
+        top: `${useContext(Offset).y+pos.current.y}px`
+    }}>
+        <div class="spline-coord"style={{
+            position: 'absolute', left: '6px', top: '25px',
+            height: '15px', fontSize: '15px', backgroundColor: 'transparent', pointerEvents: 'none'
+        }}>
+            {`${coordinate} id: ${id}`}
+        </div>
         <div class="spline-drag" ref={drag} onMouseDown={onDragMouseDown}>{Octicon['code']}</div>
         <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
              onMouseDown={buildResizeMouseDownHandler({width: -1, height: 0, posX: 1, posY: 0})}

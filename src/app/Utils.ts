@@ -539,3 +539,8 @@ export function composeMatrix(translation: Vector, leftRotation: quat, scale: Ve
 		.scale(scale)
 		.mul(Matrix4.fromQuat(rightRotation))
 }
+
+export type pos2n = {
+	x: number
+	y: number
+}
