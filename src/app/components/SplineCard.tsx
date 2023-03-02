@@ -39,8 +39,6 @@ const MIN_HEIGHT = 81
 export function SplineCard({coordinate, id, spline, splineTypeValueList, valChangeHandlerRef}: Props) {
     // TODO useCallback is not required on some functions
     console.log('invoke SplineCard')
-    console.log(useContext(Offset))
-    console.log(Offset)
     const canvas = useRef<HTMLCanvasElement>(null)
     const drag = useRef<HTMLDivElement>(null)
     const card = useRef<HTMLDivElement>(null)
@@ -50,23 +48,10 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
     offset.current = useContext(Offset)
     const pos = useRef<pos2n>({x: 0, y: 0})
     // TODO maybe not good practice
-    const [ctx, setCtx] = useState<CanvasRenderingContext2D>()
-
-    useEffect(() => {
-        if (!canvas.current) {
-            console.error("canvas not available")
-            return
-        }
-        if (!ctx) {
-            const ctx = canvas.current.getContext('2d')
-            if (!ctx)
-                return
-            setCtx(ctx)
-        }
-    }, [])
+    const ctxRef = useRef<CanvasRenderingContext2D>(null)
 
     // Apply spline type value change handlers
-    useEffect(function applyVCHList(){
+    useEffect(function applyVCHList() {
         if (spline instanceof MultiPoint) {
             console.log('applying value change handler list', splineTypeValueList)
             for (const value of splineTypeValueList) {
@@ -76,7 +61,7 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
                     spline.values[value.index] = new Constant(newVal)
                     draw()
                     // TODO maybe this one has no effect
-                    if(valChangeHandlerRef && valChangeHandlerRef.current)
+                    if (valChangeHandlerRef && valChangeHandlerRef.current)
                         valChangeHandlerRef.current(sample())
                 }
             }
@@ -105,11 +90,11 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
     }, [spline])
 
     function sample() {
-        if(!indicator.current || !card.current)
+        if (!indicator.current || !card.current)
             return 0
-        const X = card.current.clientWidth - 2*RESIZE_WIDTH
-        const x = indicator.current.offsetLeft + INDICATOR_WIDTH/2
-        const val = spline.compute(minX + x/X*(maxX - minX))
+        const X = card.current.clientWidth - 2 * RESIZE_WIDTH
+        const x = indicator.current.offsetLeft + INDICATOR_WIDTH / 2
+        const val = spline.compute(minX + x / X * (maxX - minX))
         console.log('sample: ', val)
         return val
     }
@@ -117,10 +102,19 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
     // Draw curve
     function draw() {
         spline.calculateMinMax()
-        if (!canvas.current || !ctx){
-            console.error('canvas or ctx not available, id:', id)
+        if (!canvas.current) {
+            console.error('ref to canvas is null, draw failed')
             return
         }
+        if (!ctxRef.current) {
+            const ctx = canvas.current.getContext('2d')
+            if (ctx) {
+                ctxRef.current = ctx
+            } else {
+                console.error('failed to obtain 2D context, draw failed')
+            }
+        }
+        const ctx = ctxRef.current
 
         const width = canvas.current.clientWidth
         const height = canvas.current.clientHeight
@@ -145,8 +139,8 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
 
     useEffect(draw, [spline])
 
-    function move(dX: number, dY: number){
-        if(!card.current)
+    function move(dX: number, dY: number) {
+        if (!card.current)
             return
         pos.current.x += dX
         pos.current.y += dY
@@ -158,7 +152,6 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
     const onDragMouseMove = useCallback((e: MouseEvent) => {
         if (!card.current)
             return
-        console.log(card.current)
         move(e.movementX, e.movementY)
     }, [])
 
@@ -251,10 +244,10 @@ export function SplineCard({coordinate, id, spline, splineTypeValueList, valChan
     }, [])
 
     return <div class="spline-card" ref={card} style={{
-        left: `${useContext(Offset).x+pos.current.x}px`,
-        top: `${useContext(Offset).y+pos.current.y}px`
+        left: `${useContext(Offset).x + pos.current.x}px`,
+        top: `${useContext(Offset).y + pos.current.y}px`
     }}>
-        <div class="spline-coord"style={{
+        <div class="spline-coord" style={{
             position: 'absolute', left: '6px', top: '25px',
             height: '15px', fontSize: '15px', backgroundColor: 'transparent', pointerEvents: 'none'
         }}>

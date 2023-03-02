@@ -52,7 +52,6 @@ export const Offset = createContext<pos2n>({x: 0, y: 0})
 
 export const SplinePreview = ({data}: PreviewProps) => {
     console.log("invoke spline preview")
-    console.log(data)
 
     const [offset, setOffset] = useState({x: 0, y: 0})
     const offsetRef = useRef<pos2n>(offset)
@@ -91,7 +90,6 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 splineTypeValueList = [...splineTypeValueList, {index: i, valChangeHandlerRef: ref}]
             }
         }
-        console.log('spline build result: ', spline)
         const cubicSpline = fromJson(spline, extractor)
         result = [...result, <SplineCard
             coordinate={spline.coordinate}
@@ -126,7 +124,6 @@ export const SplinePreview = ({data}: PreviewProps) => {
         document.addEventListener('mouseup', onMouseUp)
     }, [])
 
-    console.log('providing offset context:', offset)
     // TODO solve situation where passed in Json is...just a constant
     return <>
         <div class="controls preview-controls">
