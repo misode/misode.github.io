@@ -294,7 +294,7 @@ export function SplineCard({
         let newX = indicatorRef.current.offsetLeft + e.movementX
         if (newX >= RESIZE_WIDTH - INDICATOR_WIDTH / 2 && newX <= cardRef.current.clientWidth - RESIZE_WIDTH - INDICATOR_WIDTH / 2) {
             newX = newX / cardRef.current.clientWidth * 100
-            indicatorRef.current.style.left = `${Math.round(newX)}%`
+            indicatorRef.current.style.left = `${newX}%`
             if (outputLinkRef.current?.handleValueChange) {
                 console.log('calling vchRef')
                 outputLinkRef.current?.handleValueChange(sample())
@@ -341,7 +341,7 @@ export function SplineCard({
         const t = new Transformation()
         t.offsetX = minX
         t.scaleX = (maxX - minX) / width
-        const x = t.x(indicatorRef.current.offsetLeft + INDICATOR_WIDTH / 2)
+        const x = t.x(indicatorRef.current.offsetLeft + INDICATOR_WIDTH / 2 - RESIZE_WIDTH)
         const y = spline.compute(x)
         setFocused([`x:${x.toPrecision(3)}`, `y:${y.toPrecision(3)}`])
     }
