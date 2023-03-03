@@ -1,5 +1,5 @@
 import {StateUpdater, useCallback, useContext, useEffect, useMemo, useRef} from 'preact/hooks'
-import {Btn, Octicon} from "./index.js";
+import {Octicon} from "./index.js";
 import {CubicSpline} from "deepslate";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
@@ -61,6 +61,7 @@ class Transformation {
     }
 }
 
+// TODO Determine supported version
 export function SplineCard({
                                coordinate,
                                spline,
@@ -69,8 +70,6 @@ export function SplineCard({
                                placePos = {x: 0, y: 0},
                                setFocused
                            }: Props) {
-    console.log(spline)
-
     const cardRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const dragRef = useRef<HTMLDivElement>(null)
@@ -166,6 +165,7 @@ export function SplineCard({
         t.scaleX = width / (maxX - minX)
         t.scaleY = -height / 2 / maxAbs
 
+        ctx.strokeStyle = "rgb(154,154,154)"
         if (spline instanceof Constant) {
             ctx.beginPath()
             ctx.moveTo(t.x(minX), t.y(0))
@@ -175,7 +175,6 @@ export function SplineCard({
         }
         ctx.clearRect(0, 0, width, height)
         ctx.beginPath()
-        ctx.strokeStyle = "rgb(154,154,154)"
         ctx.moveTo(t.x(minX), t.y(spline.compute(minX)))
         for (let i = 1; i <= 100; i++) {
             let x = t.x(minX + (maxX - minX) * i / 100)

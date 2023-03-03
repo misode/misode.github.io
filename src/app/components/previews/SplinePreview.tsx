@@ -62,6 +62,7 @@ export function genCardLinkColor() {
 // TODO More careful type check, or check if such check is necessary
 
 export const SplinePreview = ({data}: PreviewProps) => {
+    console.log(data)
     const {locale} = useLocale()
 
     const [offset, setOffset] = useState({x: 0, y: 0})
@@ -77,12 +78,26 @@ export const SplinePreview = ({data}: PreviewProps) => {
         let result: JSX.Element[] = []
         if (!checkSpline(data))
             return {elements: result, defaultVal: 0, height: 0}
+        let totHeight = INDENT + DEFAULT_CARD_HEIGHT
+        if (typeof data == 'number') {
+            return {
+                elements: [
+                    <SplineCard
+                        spline={fromJson(data, extractor)}
+                        coordinate={'Constant'}
+                        inputLinkList={[]}
+                        outputLink={outputLink}
+                        placePos={{x: placePos.x + INDENT, y: placePos.y + INDENT}}
+                        setFocused={setFocused}/>],
+                defaultVal: data,
+                height: totHeight
+            }
+        }
         let spline = {}
         spline.coordinate = data.coordinate
         spline.points = []
         let inputLinkList: CardLink[] = []
         let minX = Infinity, maxX = -Infinity
-        let totHeight = INDENT + DEFAULT_CARD_HEIGHT
         for (let i = 0; i < data.points.length; i++) {
             const point = data.points[i]
             if (!checkPoint(point))
@@ -152,7 +167,8 @@ export const SplinePreview = ({data}: PreviewProps) => {
         <div class="controls preview-controls">
             {focused.map(s => <Btn label={s} class="no-pointer"/>)}
             <BtnMenu icon="gear" tooltip={locale('settings')}>
-                <Btn icon={showCoordName ? 'square_fill' : 'square'} label={locale('preview.show_coord_name')} onClick={() => setShowCoordName(!showCoordName)}/>
+                <Btn icon={showCoordName ? 'square_fill' : 'square'} label={locale('preview.show_coord_name')}
+                     onClick={() => setShowCoordName(!showCoordName)}/>
             </BtnMenu>
         </div>
         <div class="full-preview">
