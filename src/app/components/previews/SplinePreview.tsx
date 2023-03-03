@@ -102,7 +102,6 @@ export const SplinePreview = ({data}: PreviewProps) => {
                     {x: placePos.x + INDENT, y: placePos.y + totHeight}
                 )
                 totHeight += buildResult.height
-                if (buildResult.elements.length == 0)
                 spline.points.push({
                     derivative: point.node.derivative,
                     location: point.node.location,

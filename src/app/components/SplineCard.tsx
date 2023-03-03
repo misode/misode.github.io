@@ -69,6 +69,7 @@ export function SplineCard({
                                placePos = {x: 0, y: 0},
                                setFocused
                            }: Props) {
+    console.log(spline)
 
     const cardRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -105,6 +106,7 @@ export function SplineCard({
     const [minX, maxX] = useMemo(() => {
         // TODO solve situations where all locations have same val
         // TODO in this case minX and maxX are equal, should state err or sth
+        console.log('min max spline input: ', spline)
         let minX: number
         let maxX: number
         if ((spline instanceof MultiPoint) && spline.locations.length > 1) {
