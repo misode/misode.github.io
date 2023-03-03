@@ -163,6 +163,7 @@
   "preview.height": "Height",
   "preview.min_y": "Min Y",
   "preview.final_density": "Show final density",
+  "preview.show_coord_name": "Show coordinate name", 
   "project.new": "New project",
   "project.cancel": "Cancel",
   "project.create": "Create a new project",

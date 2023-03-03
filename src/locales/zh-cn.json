@@ -98,6 +98,7 @@
   "preview.peaks": "山峰",
   "preview.scale": "比例",
   "preview.width": "宽度",
+  "preview.show_coord_name": "显示坐标名", 
   "project.cancel": "取消",
   "project.create": "创建新的项目",
   "project.delete": "删除项目",

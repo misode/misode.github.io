@@ -1605,6 +1605,15 @@ hr {
 	box-sizing: border-box;
 }
 
+.spline-refresh {
+	position: absolute;
+	right: 0px;
+	height: 25px;
+	box-shadow: unset;
+	background-color: var(--background-5);
+	padding: 7px;
+}
+
 .spline-coord {
 	position: relative;
 	left: 6px;

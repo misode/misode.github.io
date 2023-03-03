@@ -1,10 +1,10 @@
 import {StateUpdater, useCallback, useContext, useEffect, useMemo, useRef} from 'preact/hooks'
-import {Octicon} from "./Octicon.js";
+import {Btn, Octicon} from "./index.js";
 import {CubicSpline} from "deepslate";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
-import {pos2n} from "../Utils.js";
-import {Focused, Offset} from "./previews/SplinePreview.js";
+import {clamp, pos2n} from "../Utils.js";
+import {genCardLinkColor, Offset, ShowCoordName} from "./previews/SplinePreview.js";
 
 export type ValueChangeHandler = (newVal: number) => any
 
@@ -12,6 +12,7 @@ export type CardLink = {
     valIndex: number
     color: string
     handleValueChange: ValueChangeHandler | null
+    handleColorChange: (() => any) | null
 }
 
 interface Props {
@@ -68,16 +69,11 @@ export function SplineCard({
                                placePos = {x: 0, y: 0},
                                setFocused
                            }: Props) {
-    console.log('invoke SplineCard')
 
     const cardRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const dragRef = useRef<HTMLDivElement>(null)
     const indicatorRef = useRef<HTMLDivElement>(null)
-
-    const splineRef = useRef<MultiPoint<number> | Constant>(spline)
-    const inputLinkListRef = useRef<CardLink[]>(inputLinkList)
-    const outputLinkRef = useRef<CardLink>(outputLink)
 
     const resizeDirectionRef = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
     const offsetRef = useRef<pos2n>(useContext(Offset))
@@ -85,29 +81,23 @@ export function SplineCard({
     const posRef = useRef<pos2n>(placePos)
     const ctxRef = useRef<CanvasRenderingContext2D>(null)
 
-    useEffect(() => {
-        outputLinkRef.current = outputLink
-    }, [outputLink])
     // Apply spline type value change handlers
     useEffect(() => {
-        console.log('STVList or spline changed')
-        splineRef.current = spline
-        inputLinkListRef.current = inputLinkList
         if (spline instanceof MultiPoint) {
             for (const link of inputLinkList) {
                 link.handleValueChange = (newVal: number) => {
-                    console.log('val change received')
                     spline.values[link.valIndex] = new Constant(newVal)
                     draw()
-                    if (outputLinkRef.current?.handleValueChange) {
-                        console.log('passing val change to parent')
-                        outputLinkRef.current.handleValueChange(sample())
-                    } else console.log('vch is null, not passing change to parent')
+                    if (outputLink?.handleValueChange)
+                        outputLink.handleValueChange(sample())
+                }
+                link.handleColorChange = () => {
+                    draw()
                 }
             }
         }
         draw()
-    }, [inputLinkList, spline])
+    }, [inputLinkList, spline, outputLink])
     useEffect(() => {
         posRef.current = placePos
     }, [placePos])
@@ -142,14 +132,13 @@ export function SplineCard({
             return 0
         const X = cardRef.current.clientWidth - 2 * RESIZE_WIDTH
         const x = indicatorRef.current.offsetLeft + INDICATOR_WIDTH / 2
-        const val = splineRef.current.compute(minX + x / X * (maxX - minX))
-        console.log('sample: ', val)
+        const val = spline.compute(minX + x / X * (maxX - minX))
         return val
     }
 
     // Draw curve
     function draw() {
-        splineRef.current.calculateMinMax()
+        spline.calculateMinMax()
         if (!canvasRef.current) {
             console.error('ref to canvas is null, draw failed')
             return
@@ -162,7 +151,6 @@ export function SplineCard({
             }
         }
         const ctx = ctxRef.current
-        const spline = splineRef.current
 
         const width = canvasRef.current.clientWidth
         const height = canvasRef.current.clientHeight
@@ -194,10 +182,8 @@ export function SplineCard({
         }
         ctx.stroke()
 
-        let length = Math.min(50, height / 3)
-        console.log('length: ', length)
-        console.log('maxAbs', maxAbs)
-        for (const link of inputLinkListRef.current) {
+        let length = Math.min(30, height / 4)
+        for (const link of inputLinkList) {
             ctx.strokeStyle = link.color
             ctx.beginPath()
             let x = spline.locations[link.valIndex]
@@ -266,16 +252,12 @@ export function SplineCard({
         const width = rect.width
         const height = rect.height
         let newWidth = width + e.movementX * direction.width
-        if (newWidth >= MIN_WIDTH) {
-            cardRef.current.style.width = `${newWidth}px`
-            move(e.movementX * direction.posX, 0)
-        }
+        cardRef.current.style.width = `${clamp(newWidth, MIN_WIDTH, Infinity)}px`
+        move(e.movementX * direction.posX, 0)
 
         let newHeight = height + e.movementY * direction.height
-        if (newHeight >= MIN_HEIGHT) {
-            cardRef.current.style.height = `${newHeight}px`
-            move(0, e.movementY * direction.posY)
-        }
+        cardRef.current.style.height = `${clamp(newHeight, MIN_HEIGHT, Infinity)}px`
+        move(0, e.movementY * direction.posY)
         draw()
     }, [])
 
@@ -288,19 +270,15 @@ export function SplineCard({
 
     function onIndicatorMouseMove(e: MouseEvent) {
         if (!(indicatorRef.current) || !(cardRef.current)) {
-            console.error('indicator or card not available')
             return
         }
         let newX = indicatorRef.current.offsetLeft + e.movementX
-        if (newX >= RESIZE_WIDTH - INDICATOR_WIDTH / 2 && newX <= cardRef.current.clientWidth - RESIZE_WIDTH - INDICATOR_WIDTH / 2) {
-            newX = newX / cardRef.current.clientWidth * 100
-            indicatorRef.current.style.left = `${newX}%`
-            if (outputLinkRef.current?.handleValueChange) {
-                console.log('calling vchRef')
-                outputLinkRef.current?.handleValueChange(sample())
-            } else {
-                console.log('vchRef is null')
-            }
+        newX = clamp(newX, RESIZE_WIDTH - INDICATOR_WIDTH / 2, cardRef.current.clientWidth - RESIZE_WIDTH - INDICATOR_WIDTH / 2)
+
+        newX = newX / cardRef.current.clientWidth * 100
+        indicatorRef.current.style.left = `${newX}%`
+        if (outputLink?.handleValueChange) {
+            outputLink.handleValueChange(sample())
         }
     }
 
@@ -320,9 +298,8 @@ export function SplineCard({
     }
 
     function onCanvasHover(e: MouseEvent) {
-        if (!canvasRef.current || !splineRef.current)
+        if (!canvasRef.current)
             return
-        const spline = splineRef.current
         const width = canvasRef.current.clientWidth
         const t = new Transformation()
         t.offsetX = minX
@@ -333,10 +310,9 @@ export function SplineCard({
     }
 
     function onIndicatorHover(e: MouseEvent) {
-        if (!canvasRef.current || !splineRef.current || !indicatorRef.current)
+        if (!canvasRef.current || !indicatorRef.current)
             return
         e.stopPropagation()
-        const spline = splineRef.current
         const width = canvasRef.current.clientWidth
         const t = new Transformation()
         t.offsetX = minX
@@ -350,36 +326,72 @@ export function SplineCard({
         setFocused([])
     }
 
-    return <div class="spline-card" ref={cardRef} style={{
-        left: `${useContext(Offset).x + posRef.current.x}px`,
-        top: `${useContext(Offset).y + posRef.current.y}px`,
-        border: `${outputLinkRef.current?.color ? (`2px solid ${outputLinkRef.current.color}`) : 'unset'}`
-    }}>
-        <div class="spline-coord" style={{
-            position: 'absolute', left: '6px', top: '25px',
-            fontSize: '15px', backgroundColor: 'transparent', pointerEvents: 'none'
+    function getBorderString() {
+        return `${outputLink?.color ? (`2px solid ${outputLink.color}`) : 'unset'}`
+    }
+
+    function setBorderColor() {
+        if (!cardRef.current)
+            return
+        cardRef.current.style.border = getBorderString()
+    }
+
+    function onColorRefresh() {
+        if (outputLink?.handleColorChange) {
+            outputLink.color = genCardLinkColor()
+            outputLink.handleColorChange()
+            setBorderColor()
+        }
+    }
+
+    return <>
+        <div class="spline-card" ref={cardRef} style={{
+            left: `${useContext(Offset).x + posRef.current.x}px`,
+            top: `${useContext(Offset).y + posRef.current.y}px`,
+            border: getBorderString()
         }}>
-            {`${coordinate}`}
+            {
+                outputLink ?
+                    <>
+                        <div className="coord-indicator"
+                             ref={indicatorRef}
+                             onMouseDown={onIndicatorMouseDown} onMouseMove={onIndicatorHover}
+                             onMouseLeave={onMouseLeave}
+                        />
+                        <div className="spline-refresh btn" onClick={onColorRefresh}>{Octicon['sync']}</div>
+                    </> :
+                    <></>
+            }
+            {
+                useContext(ShowCoordName) ?
+                    <div class="spline-coord" style={{
+                        position: 'absolute', left: '6px', top: '25px',
+                        fontSize: '13px', pointerEvents: 'none', color: 'rgb(194,194,194)'
+                    }}>
+                        {`${coordinate}`}
+                    </div> :
+                    <></>
+            }
+            <div class="spline-drag" ref={dragRef} onMouseDown={onDragMouseDown}>{Octicon['code']}</div>
+            <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
+                 onMouseDown={buildResizeMouseDownHandler({width: -1, height: 0, posX: 1, posY: 0})}
+            />
+            <canvas class="spline-canvas" ref={canvasRef} style={{backgroundColor: 'transparent'}}
+                    onMouseMove={onCanvasHover} onMouseLeave={onMouseLeave}>
+                Ugh it seems your browser doesn't support HTML Canvas element.
+            </canvas>
+            <div class="spline-resize" style={{gridArea: 'resize-right', cursor: 'ew-resize'}}
+                 onMouseDown={buildResizeMouseDownHandler({width: 1, height: 0, posX: 0, posY: 0})}
+            />
+            <div class="spline-resize" style={{gridArea: 'resize-corner-left', cursor: 'nesw-resize'}}
+                 onMouseDown={buildResizeMouseDownHandler({width: -1, height: 1, posX: 1, posY: 0})}
+            />
+            <div class="spline-resize" style={{gridArea: 'resize-bottom', cursor: 'ns-resize'}}
+                 onMouseDown={buildResizeMouseDownHandler({width: 0, height: 1, posX: 0, posY: 0})}
+            />
+            <div class="spline-resize" style={{gridArea: 'resize-corner-right', cursor: 'nwse-resize'}}
+                 onMouseDown={buildResizeMouseDownHandler({width: 1, height: 1, posX: 0, posY: 0})}
+            />
         </div>
-        <div class="spline-drag" ref={dragRef} onMouseDown={onDragMouseDown}>{Octicon['code']}</div>
-        <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
-             onMouseDown={buildResizeMouseDownHandler({width: -1, height: 0, posX: 1, posY: 0})}
-        />
-        <canvas class="spline-canvas" ref={canvasRef} style={{backgroundColor: 'transparent'}}
-                onMouseMove={onCanvasHover} onMouseLeave={onMouseLeave}/>
-        <div class="spline-resize" style={{gridArea: 'resize-right', cursor: 'ew-resize'}}
-             onMouseDown={buildResizeMouseDownHandler({width: 1, height: 0, posX: 0, posY: 0})}
-        />
-        <div class="spline-resize" style={{gridArea: 'resize-corner-left', cursor: 'nesw-resize'}}
-             onMouseDown={buildResizeMouseDownHandler({width: -1, height: 1, posX: 1, posY: 0})}
-        />
-        <div class="spline-resize" style={{gridArea: 'resize-bottom', cursor: 'ns-resize'}}
-             onMouseDown={buildResizeMouseDownHandler({width: 0, height: 1, posX: 0, posY: 0})}
-        />
-        <div class="spline-resize" style={{gridArea: 'resize-corner-right', cursor: 'nwse-resize'}}
-             onMouseDown={buildResizeMouseDownHandler({width: 1, height: 1, posX: 0, posY: 0})}
-        />
-        <div class="coord-indicator" ref={indicatorRef} onMouseDown={onIndicatorMouseDown}
-             onMouseMove={onIndicatorHover} onMouseLeave={onMouseLeave}/>
-    </div>
+    </>
 }

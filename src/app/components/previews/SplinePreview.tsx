@@ -6,6 +6,8 @@ import fromJson = CubicSpline.fromJson;
 import {StateUpdater, useCallback, useMemo, useRef, useState} from "preact/hooks";
 import {pos2n} from "../../Utils.js";
 import {Btn} from "../Btn.js";
+import {BtnMenu} from "../BtnMenu.js";
+import {useLocale} from "../../contexts/index.js";
 
 function extractor(): MinMaxNumberFunction<number> {
     return {
@@ -48,8 +50,9 @@ function checkPoint(point: any): boolean {
 }
 
 export const Offset = createContext<pos2n>({x: 0, y: 0})
+export const ShowCoordName = createContext<boolean>(true)
 
-function genCardLinkColor() {
+export function genCardLinkColor() {
     let hue = Math.floor(Math.random() * 360)
     let saturation = Math.round(Math.random() * 50) + 50
     let lightness = Math.round(Math.random() * 30) + 50
@@ -59,10 +62,11 @@ function genCardLinkColor() {
 // TODO More careful type check, or check if such check is necessary
 
 export const SplinePreview = ({data}: PreviewProps) => {
-    console.log("invoke spline preview")
+    const {locale} = useLocale()
 
     const [offset, setOffset] = useState({x: 0, y: 0})
     const [focused, setFocused] = useState<string[]>([])
+    const [showCoordName, setShowCoordName] = useState<boolean>(true)
     const offsetRef = useRef<pos2n>(offset)
 
     function build(data: any, outputLink: CardLink | null, placePos: pos2n):
@@ -70,7 +74,6 @@ export const SplinePreview = ({data}: PreviewProps) => {
         const INDENT = 10
         // Keep it matched with CSS height of spline-card in global.css
         const DEFAULT_CARD_HEIGHT = 120
-        console.log('start building', data)
         let result: JSX.Element[] = []
         if (!checkSpline(data))
             return {elements: result, defaultVal: 0, height: 0}
@@ -100,7 +103,6 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 )
                 totHeight += buildResult.height
                 if (buildResult.elements.length == 0)
-                    console.log('cards list is empty!')
                 spline.points.push({
                     derivative: point.node.derivative,
                     location: point.node.location,
@@ -150,11 +152,16 @@ export const SplinePreview = ({data}: PreviewProps) => {
     return <>
         <div class="controls preview-controls">
             {focused.map(s => <Btn label={s} class="no-pointer"/>)}
+            <BtnMenu icon="gear" tooltip={locale('settings')}>
+                <Btn icon={showCoordName ? 'square_fill' : 'square'} label={locale('preview.show_coord_name')} onClick={() => setShowCoordName(!showCoordName)}/>
+            </BtnMenu>
         </div>
         <div class="full-preview">
             <div class="spline-preview" onMouseDown={onMouseDown}>
                 <Offset.Provider value={offset}>
-                    {buildResult.elements}
+                    <ShowCoordName.Provider value={showCoordName}>
+                        {buildResult.elements}
+                    </ShowCoordName.Provider>
                 </Offset.Provider>
             </div>
         </div>
