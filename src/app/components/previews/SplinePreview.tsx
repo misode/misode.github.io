@@ -1,7 +1,7 @@
-import {SplineCard, CardLink, ValueChangeHandler} from "../SplineCard.js";
+import {SplineCard, CardLink} from "../SplineCard.js";
 import {PreviewProps} from "./index.js";
 import {CubicSpline, MinMaxNumberFunction} from "deepslate";
-import {createContext, createRef, RefObject} from "preact";
+import {createContext} from "preact";
 import fromJson = CubicSpline.fromJson;
 import {useCallback, useMemo, useRef, useState} from "preact/hooks";
 import {pos2n} from "../../Utils.js";
@@ -63,17 +63,20 @@ export const SplinePreview = ({data}: PreviewProps) => {
     const [offset, setOffset] = useState({x: 0, y: 0})
     const offsetRef = useRef<pos2n>(offset)
 
-    function build(data: any, outputLink: CardLink | null):
-        { elements: JSX.Element[], defaultVal: number } {
+    function build(data: any, outputLink: CardLink | null, placePos: pos2n):
+        { elements: JSX.Element[], defaultVal: number, height: number } {
+        const MARGIN = 10
+        const DEFAULT_CARD_HEIGHT = 160
         console.log('start building', data)
         let result: JSX.Element[] = []
         if (!checkSpline(data))
-            return {elements: result, defaultVal: 0}
+            return {elements: result, defaultVal: 0, height: 0}
         let spline = {}
         spline.coordinate = data.coordinate
         spline.points = []
         let inputLinkList: CardLink[] = []
         let minX = Infinity, maxX = -Infinity
+        let totHeight = MARGIN + DEFAULT_CARD_HEIGHT
         for (let i = 0; i < data.points.length; i++) {
             const point = data.points[i]
             if (!checkPoint(point))
@@ -87,31 +90,36 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 spline.points.push(point.node)
             else {
                 const inputLink: CardLink = {valIndex: i, color: genCardLinkColor(), handleValueChange: null}
-                let cards = build(point.node.value, inputLink)
-                if (cards.elements.length == 0)
+                let buildResult = build(
+                    point.node.value,
+                    inputLink,
+                    {x: placePos.x + MARGIN, y: placePos.y + totHeight}
+                )
+                totHeight += buildResult.height
+                if (buildResult.elements.length == 0)
                     console.log('cards list is empty!')
                 spline.points.push({
                     derivative: point.node.derivative,
                     location: point.node.location,
-                    value: cards.elements.length > 0 ? cards.defaultVal : 0
+                    value: buildResult.elements.length > 0 ? buildResult.defaultVal : 0
                 })
-                result = [...result, ...cards.elements]
+                result = [...result, ...buildResult.elements]
                 inputLinkList = [...inputLinkList, inputLink]
             }
         }
         const cubicSpline = fromJson(spline, extractor)
         result = [...result, <SplineCard
             coordinate={spline.coordinate}
-            id={Math.round(Math.random() * 10000)}
             spline={cubicSpline}
             inputLinkList={inputLinkList}
             outputLink={outputLink}
+            placePos={{x: placePos.x + MARGIN, y: placePos.y + MARGIN}}
         />]
 
-        return {elements: result, defaultVal: cubicSpline.compute(minX + (maxX - minX) / 2)}
+        return {elements: result, defaultVal: cubicSpline.compute(minX + (maxX - minX) / 2), height: totHeight}
     }
 
-    const buildResult = useMemo(() => build(data, null), [data])
+    const buildResult = useMemo(() => build(data, null, {x: 0, y: 0}), [data])
 
     function onMouseUp(e: MouseEvent) {
         if (e.button != 0)

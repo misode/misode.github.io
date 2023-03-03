@@ -15,11 +15,11 @@ export type CardLink = {
 }
 
 interface Props {
-    id: number
     coordinate: string | number | bigint
     spline: MultiPoint<number> | Constant
     inputLinkList: CardLink[]
     outputLink: CardLink | null
+    placePos: pos2n
 }
 
 interface ResizeDirection {
@@ -34,7 +34,7 @@ const RESIZE_WIDTH = 6
 const MIN_WIDTH = 112
 const MIN_HEIGHT = 81
 
-export function SplineCard({coordinate, id, spline, inputLinkList, outputLink}: Props) {
+export function SplineCard({coordinate, spline, inputLinkList, outputLink, placePos={x: 0, y: 0}}: Props) {
     console.log('invoke SplineCard')
 
     const cardRef = useRef<HTMLDivElement>(null)
@@ -49,7 +49,7 @@ export function SplineCard({coordinate, id, spline, inputLinkList, outputLink}: 
     const resizeDirectionRef = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
     const offsetRef = useRef<pos2n>(useContext(Offset))
     offsetRef.current = useContext(Offset)
-    const posRef = useRef<pos2n>({x: 0, y: 0})
+    const posRef = useRef<pos2n>(placePos)
     const ctxRef = useRef<CanvasRenderingContext2D>(null)
 
     useEffect(() => {
@@ -75,6 +75,9 @@ export function SplineCard({coordinate, id, spline, inputLinkList, outputLink}: 
         }
         draw()
     }, [inputLinkList, spline])
+    useEffect(() => {
+        posRef.current = placePos
+    }, [placePos])
 
     const [minX, maxX] = useMemo(() => {
         // TODO solve situations where all locations have same val
@@ -293,9 +296,9 @@ export function SplineCard({coordinate, id, spline, inputLinkList, outputLink}: 
     }}>
         <div class="spline-coord" style={{
             position: 'absolute', left: '6px', top: '25px',
-            height: '15px', fontSize: '15px', backgroundColor: 'transparent', pointerEvents: 'none'
+            fontSize: '15px', backgroundColor: 'transparent', pointerEvents: 'none'
         }}>
-            {`${coordinate} id: ${id}`}
+            {`${coordinate}`}
         </div>
         <div class="spline-drag" ref={dragRef} onMouseDown={onDragMouseDown}>{Octicon['code']}</div>
         <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
