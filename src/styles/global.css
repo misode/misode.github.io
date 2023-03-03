@@ -1595,8 +1595,8 @@ hr {
 		"resize-corner-left	resize-bottom	resize-corner-right";
 	grid-template-columns: 6px 1fr 6px;
 	grid-template-rows: 25px 1fr 6px;
-	width: 300px;
-	height: 160px;
+	width: 200px;
+	height: 120px;
 	position: absolute;
 	border-radius: 6px;
 	box-shadow: 0 1px 7px -2px #000;

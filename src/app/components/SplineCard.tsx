@@ -1,10 +1,10 @@
-import {useCallback, useContext, useEffect, useMemo, useRef} from 'preact/hooks'
+import {StateUpdater, useCallback, useContext, useEffect, useMemo, useRef} from 'preact/hooks'
 import {Octicon} from "./Octicon.js";
 import {CubicSpline} from "deepslate";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
 import {pos2n} from "../Utils.js";
-import {Offset} from "./previews/SplinePreview.js";
+import {Focused, Offset} from "./previews/SplinePreview.js";
 
 export type ValueChangeHandler = (newVal: number) => any
 
@@ -20,6 +20,7 @@ interface Props {
     inputLinkList: CardLink[]
     outputLink: CardLink | null
     placePos: pos2n
+    setFocused: StateUpdater<string[]>
 }
 
 interface ResizeDirection {
@@ -34,7 +35,39 @@ const RESIZE_WIDTH = 6
 const MIN_WIDTH = 112
 const MIN_HEIGHT = 81
 
-export function SplineCard({coordinate, spline, inputLinkList, outputLink, placePos={x: 0, y: 0}}: Props) {
+// Class for simple transformation, translation and scale only
+class Transformation {
+    offsetX = 0
+    offsetY = 0
+    scaleX = 1
+    scaleY = 1
+
+    constructor() {
+    }
+
+    transform(x: number, y: number): { x: number, y: number } {
+        const xx = this.offsetX + this.scaleX * x
+        const yy = this.offsetY + this.scaleY * y
+        return {x: xx, y: yy}
+    }
+
+    x(x: number): number {
+        return this.offsetX + this.scaleX * x
+    }
+
+    y(y: number): number {
+        return this.offsetY + this.scaleY * y
+    }
+}
+
+export function SplineCard({
+                               coordinate,
+                               spline,
+                               inputLinkList,
+                               outputLink,
+                               placePos = {x: 0, y: 0},
+                               setFocused
+                           }: Props) {
     console.log('invoke SplineCard')
 
     const cardRef = useRef<HTMLDivElement>(null)
@@ -136,45 +169,42 @@ export function SplineCard({coordinate, spline, inputLinkList, outputLink, place
         canvasRef.current.width = width
         canvasRef.current.height = height
         const maxAbs = Math.max(Math.abs(spline.max()), Math.abs(spline.min()))
-        ctx.resetTransform()
-        const scaleX = width / (maxX - minX)
-        const scaleY = -height / 2 / maxAbs
-        ctx.lineWidth = 1 / Math.sqrt(scaleX * scaleX + scaleY * scaleY)
-        ctx.translate(-minX * width / (maxX - minX), height / 2)
+
+        const t = new Transformation()
+        t.offsetX = -minX * width / (maxX - minX)
+        t.offsetY = height / 2
+        t.scaleX = width / (maxX - minX)
+        t.scaleY = -height / 2 / maxAbs
 
         if (spline instanceof Constant) {
             ctx.beginPath()
-            ctx.moveTo(minX, 0)
-            ctx.lineTo(maxX, 0)
+            ctx.moveTo(t.x(minX), t.y(0))
+            ctx.lineTo(t.x(maxX), t.y(0))
             ctx.stroke()
             return
         }
-        ctx.scale(scaleX, scaleY)
-        ctx.clearRect(minX, -maxAbs, maxX - minX, 2 * maxAbs)
+        ctx.clearRect(0, 0, width, height)
         ctx.beginPath()
         ctx.strokeStyle = "rgb(154,154,154)"
-        ctx.moveTo(minX, spline.compute(minX))
+        ctx.moveTo(t.x(minX), t.y(spline.compute(minX)))
         for (let i = 1; i <= 100; i++) {
-            let x = minX + (maxX - minX) * i / 100
-            let y = spline.compute(minX + (maxX - minX) * i / 100)
+            let x = t.x(minX + (maxX - minX) * i / 100)
+            let y = t.y(spline.compute(minX + (maxX - minX) * i / 100))
             ctx.lineTo(x, y)
         }
         ctx.stroke()
 
-        ctx.lineWidth *= 2
         let length = Math.min(50, height / 3)
-        length *= maxAbs / height
         console.log('length: ', length)
         console.log('maxAbs', maxAbs)
         for (const link of inputLinkListRef.current) {
             ctx.strokeStyle = link.color
             ctx.beginPath()
             let x = spline.locations[link.valIndex]
-            let midY = spline.compute(x)
+            let midY = t.y(spline.compute(x))
+            x = t.x(x)
             const y1 = midY - length / 2
             const y2 = midY + length / 2
-            console.log('x: ', x, ', midY: ', midY)
-            console.log('y1: ', y1, ', y2: ', y2)
             ctx.moveTo(x, y1)
             ctx.lineTo(x, y2)
             ctx.stroke()
@@ -281,13 +311,44 @@ export function SplineCard({coordinate, spline, inputLinkList, outputLink, place
         document.removeEventListener('mouseup', onIndicatorMouseUp)
     }
 
-    const onIndicatorMouseDown = useCallback((e: MouseEvent) => {
+    function onIndicatorMouseDown(e: MouseEvent) {
         if (e.button != 0)
             return
         e.stopPropagation()
         document.addEventListener('mousemove', onIndicatorMouseMove)
         document.addEventListener('mouseup', onIndicatorMouseUp)
-    }, [])
+    }
+
+    function onCanvasHover(e: MouseEvent) {
+        if (!canvasRef.current || !splineRef.current)
+            return
+        const spline = splineRef.current
+        const width = canvasRef.current.clientWidth
+        const t = new Transformation()
+        t.offsetX = minX
+        t.scaleX = (maxX - minX) / width
+        const x = t.x(e.offsetX)
+        const y = spline.compute(x)
+        setFocused([`x:${x.toPrecision(3)}`, `y:${y.toPrecision(3)}`])
+    }
+
+    function onIndicatorHover(e: MouseEvent) {
+        if (!canvasRef.current || !splineRef.current || !indicatorRef.current)
+            return
+        e.stopPropagation()
+        const spline = splineRef.current
+        const width = canvasRef.current.clientWidth
+        const t = new Transformation()
+        t.offsetX = minX
+        t.scaleX = (maxX - minX) / width
+        const x = t.x(indicatorRef.current.offsetLeft + INDICATOR_WIDTH / 2)
+        const y = spline.compute(x)
+        setFocused([`x:${x.toPrecision(3)}`, `y:${y.toPrecision(3)}`])
+    }
+
+    function onMouseLeave() {
+        setFocused([])
+    }
 
     return <div class="spline-card" ref={cardRef} style={{
         left: `${useContext(Offset).x + posRef.current.x}px`,
@@ -304,7 +365,8 @@ export function SplineCard({coordinate, spline, inputLinkList, outputLink, place
         <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
              onMouseDown={buildResizeMouseDownHandler({width: -1, height: 0, posX: 1, posY: 0})}
         />
-        <canvas class="spline-canvas" ref={canvasRef} style={{backgroundColor: 'transparent'}}/>
+        <canvas class="spline-canvas" ref={canvasRef} style={{backgroundColor: 'transparent'}}
+                onMouseMove={onCanvasHover} onMouseLeave={onMouseLeave}/>
         <div class="spline-resize" style={{gridArea: 'resize-right', cursor: 'ew-resize'}}
              onMouseDown={buildResizeMouseDownHandler({width: 1, height: 0, posX: 0, posY: 0})}
         />
@@ -317,6 +379,7 @@ export function SplineCard({coordinate, spline, inputLinkList, outputLink, place
         <div class="spline-resize" style={{gridArea: 'resize-corner-right', cursor: 'nwse-resize'}}
              onMouseDown={buildResizeMouseDownHandler({width: 1, height: 1, posX: 0, posY: 0})}
         />
-        <div class="coord-indicator" ref={indicatorRef} onMouseDown={onIndicatorMouseDown}/>
+        <div class="coord-indicator" ref={indicatorRef} onMouseDown={onIndicatorMouseDown}
+             onMouseMove={onIndicatorHover} onMouseLeave={onMouseLeave}/>
     </div>
 }

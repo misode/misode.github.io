@@ -3,8 +3,9 @@ import {PreviewProps} from "./index.js";
 import {CubicSpline, MinMaxNumberFunction} from "deepslate";
 import {createContext} from "preact";
 import fromJson = CubicSpline.fromJson;
-import {useCallback, useMemo, useRef, useState} from "preact/hooks";
+import {StateUpdater, useCallback, useMemo, useRef, useState} from "preact/hooks";
 import {pos2n} from "../../Utils.js";
+import {Btn} from "../Btn.js";
 
 function extractor(): MinMaxNumberFunction<number> {
     return {
@@ -61,12 +62,14 @@ export const SplinePreview = ({data}: PreviewProps) => {
     console.log("invoke spline preview")
 
     const [offset, setOffset] = useState({x: 0, y: 0})
+    const [focused, setFocused] = useState<string[]>([])
     const offsetRef = useRef<pos2n>(offset)
 
     function build(data: any, outputLink: CardLink | null, placePos: pos2n):
         { elements: JSX.Element[], defaultVal: number, height: number } {
-        const MARGIN = 10
-        const DEFAULT_CARD_HEIGHT = 160
+        const INDENT = 10
+        // Keep it matched with CSS height of spline-card in global.css
+        const DEFAULT_CARD_HEIGHT = 120
         console.log('start building', data)
         let result: JSX.Element[] = []
         if (!checkSpline(data))
@@ -76,7 +79,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
         spline.points = []
         let inputLinkList: CardLink[] = []
         let minX = Infinity, maxX = -Infinity
-        let totHeight = MARGIN + DEFAULT_CARD_HEIGHT
+        let totHeight = INDENT + DEFAULT_CARD_HEIGHT
         for (let i = 0; i < data.points.length; i++) {
             const point = data.points[i]
             if (!checkPoint(point))
@@ -93,7 +96,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 let buildResult = build(
                     point.node.value,
                     inputLink,
-                    {x: placePos.x + MARGIN, y: placePos.y + totHeight}
+                    {x: placePos.x + INDENT, y: placePos.y + totHeight}
                 )
                 totHeight += buildResult.height
                 if (buildResult.elements.length == 0)
@@ -113,7 +116,8 @@ export const SplinePreview = ({data}: PreviewProps) => {
             spline={cubicSpline}
             inputLinkList={inputLinkList}
             outputLink={outputLink}
-            placePos={{x: placePos.x + MARGIN, y: placePos.y + MARGIN}}
+            placePos={{x: placePos.x + INDENT, y: placePos.y + INDENT}}
+            setFocused={setFocused}
         />]
 
         return {elements: result, defaultVal: cubicSpline.compute(minX + (maxX - minX) / 2), height: totHeight}
@@ -145,6 +149,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
     // TODO solve situation where passed in Json is...just a constant
     return <>
         <div class="controls preview-controls">
+            {focused.map(s => <Btn label={s} class="no-pointer"/>)}
         </div>
         <div class="full-preview">
             <div class="spline-preview" onMouseDown={onMouseDown}>
