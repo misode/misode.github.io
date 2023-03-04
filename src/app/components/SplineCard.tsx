@@ -16,7 +16,7 @@ export type CardLink = {
 }
 
 interface Props {
-    coordinate: string | number | bigint
+    coordinate: string | number
     spline: MultiPoint<number> | Constant
     inputLinkList: CardLink[]
     outputLink: CardLink | null
@@ -373,7 +373,7 @@ export function SplineCard({
                     </div> :
                     <></>
             }
-            <div class="spline-drag" ref={dragRef} onMouseDown={onDragMouseDown}>{Octicon['code']}</div>
+            <div class="spline-drag" ref={dragRef} onMouseDown={onDragMouseDown}>{Octicon['three_bars']}</div>
             <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
                  onMouseDown={buildResizeMouseDownHandler({width: -1, height: 0, posX: 1, posY: 0})}
             />
