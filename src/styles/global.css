@@ -1602,7 +1602,7 @@ hr {
 	box-shadow: 0 1px 7px -2px #000;
 	background-color: var(--background-4);
 	margin: 0px;
-	box-sizing: border-box;
+	box-sizing: content-box;
 }
 
 .spline-refresh {

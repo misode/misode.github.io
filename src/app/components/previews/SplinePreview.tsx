@@ -4,10 +4,11 @@ import {CubicSpline, MinMaxNumberFunction} from "deepslate";
 import {createContext} from "preact";
 import fromJson = CubicSpline.fromJson;
 import {useCallback, useMemo, useRef, useState} from "preact/hooks";
-import {clamp, pos2n} from "../../Utils.js";
+import {clamp, pos2n, simpleHash} from "../../Utils.js";
 import {Btn} from "../Btn.js";
 import {BtnMenu} from "../BtnMenu.js";
 import {useLocale} from "../../contexts/index.js";
+import {BtnInput} from "../BtnInput.js";
 
 function checkSpline(data: any): boolean {
     if (typeof data === 'number')
@@ -19,9 +20,8 @@ function checkSpline(data: any): boolean {
     let coordType = typeof data.coordinate
     if (coordType != 'string' && coordType != 'number')
         return false
-    if (!(data.points instanceof Array))
-        return false
-    return true
+    return data.points instanceof Array;
+
 }
 
 function checkPoint(point: any): boolean {
@@ -35,55 +35,80 @@ function checkPoint(point: any): boolean {
 }
 
 export class Coordinate {
+    name: string
+    manager: CoordinateManager
     private value: number
-    val() {return this.value}
-    private minValue: number
-    min() {return this.minValue}
-    private maxValue: number
-    max() {return this.maxValue}
 
-    constructor() {
+    val() {
+        return this.value
+    }
+
+    private minValue: number
+
+    min() {
+        return this.minValue
+    }
+
+    private maxValue: number
+
+    max() {
+        return this.maxValue
+    }
+
+    constructor(name: string, manager: CoordinateManager) {
+        this.name = name
+        this.manager = manager
         this.value = 0
         this.minValue = -1
         this.maxValue = 1
     }
 
     setMin(val: number) {
+        if (this.minValue == val)
+            return
         this.minValue = val
         this.value = Math.max(this.value, this.minValue)
         this.maxValue = Math.max(this.maxValue, this.minValue)
+        this.manager.emit(this.name, true)
     }
 
     setMax(val: number) {
+        if (this.maxValue == val)
+            return
         this.maxValue = val
         this.value = Math.min(this.value, this.maxValue)
         this.minValue = Math.min(this.minValue, this.maxValue)
+        this.manager.emit(this.name, true)
     }
 
     setValue(val: number) {
         val = clamp(val, this.minValue, this.maxValue)
         if (val == this.value)
-            return false
+            return
         this.value = val
-        return true
+        this.manager.emit(this.name, false)
     }
 
-    toExtractor(): MinMaxNumberFunction<number> {
-        return {
-            compute(c: number): number {
-                return c
-            },
-            minValue(): number {
-                return this.minValue()
-            },
-            maxValue(): number {
-                return this.maxValue()
+    toExtractor(): () => MinMaxNumberFunction<number> {
+        const min = this.minValue
+        const max = this.maxValue
+        return () => {
+            return {
+                compute: (c: number) => {
+                    return c
+                },
+                minValue: () => {
+                    return min
+                },
+                maxValue: () => {
+                    return max
+                }
             }
         }
     }
 }
 
-export type CoordinateListener = (coordinate: Coordinate, redraw: boolean) => any
+export type CoordinateListener = (redraw: boolean) => any
 
 class CoordinateManager {
     listeners: Map<string, Set<CoordinateListener>>
@@ -96,7 +121,7 @@ class CoordinateManager {
 
     addOrGetCoordinate(name: string): Coordinate {
         if (!this.coordinates.has(name))
-            this.coordinates.set(name, new Coordinate())
+            this.coordinates.set(name, new Coordinate(name, this))
         return this.coordinates.get(name)!
     }
 
@@ -122,13 +147,13 @@ class CoordinateManager {
         this.listeners.get(name)?.add(listener)
     }
 
-    private emit(name: string, redraw: boolean) {
+    emit(name: string, redraw: boolean) {
         const coordinate = this.coordinates.get(name)
         const set = this.listeners.get(name)
         if (!set || !coordinate)
             return
         for (const listener of set)
-            listener(coordinate, redraw)
+            listener(redraw)
     }
 
     setValue(name: string, value: number) {
@@ -155,7 +180,7 @@ class CoordinateManager {
 
 export const Offset = createContext<pos2n>({x: 0, y: 0})
 export const ShowCoordName = createContext<boolean>(true)
-export const Manager = createContext<CoordinateManager | null>(null)
+export const Manager = createContext<CoordinateManager>(new CoordinateManager())
 
 export function genCardLinkColor() {
     let hue = Math.floor(Math.random() * 360)
@@ -164,10 +189,7 @@ export function genCardLinkColor() {
     return `hsl(${hue}, ${saturation}%, ${lightness}%`
 }
 
-// TODO More careful type check, or check if such check is necessary
-
 export const SplinePreview = ({data}: PreviewProps) => {
-    console.log(data)
     const {locale} = useLocale()
 
     const [offset, setOffset] = useState({x: 0, y: 0})
@@ -186,13 +208,13 @@ export const SplinePreview = ({data}: PreviewProps) => {
             return {elements: result, defaultVal: 0, height: 0}
         let totHeight = INDENT + DEFAULT_CARD_HEIGHT
         if (typeof data == 'number') {
-            const coordinate = new Coordinate()
+            const coordinate = new Coordinate(`${data}`, managerRef.current)
             coordinate.setMax(data)
             coordinate.setMin(data)
             return {
                 elements: [
                     <SplineCard
-                        spline={fromJson(data, coordinate.toExtractor)}
+                        spline={fromJson(data, coordinate.toExtractor())}
                         coordinate={data}
                         inputLinkList={[]}
                         outputLink={outputLink}
@@ -238,12 +260,12 @@ export const SplinePreview = ({data}: PreviewProps) => {
             }
         }
         const coordName = typeof spline.coordinate == 'object' ?
-            `Inline${Math.floor(Math.random()*100000000)}` :
+            `Inline${simpleHash(JSON.stringify(spline.coordinate))}` :
             `${spline.coordinate}`
         const coordinate = managerRef.current.addOrGetCoordinate(coordName)
-        const cubicSpline = fromJson(spline, coordinate.toExtractor)
+        const cubicSpline = fromJson(spline, coordinate.toExtractor())
         result = [...result, <SplineCard
-            coordinate={spline.coordinate}
+            coordinate={coordinate}
             spline={cubicSpline}
             inputLinkList={inputLinkList}
             outputLink={outputLink}
@@ -278,16 +300,32 @@ export const SplinePreview = ({data}: PreviewProps) => {
         document.addEventListener('mouseup', onMouseUp)
     }, [])
 
-    // TODO solve situation where passed in Json is...just a constant
+    function mapCoordMinMaxControls() {
+        let result: JSX.Element[] = []
+        for (const coordinate of managerRef.current.coordinates.values()) {
+            result.push(<>
+                    <Btn label={coordinate.name}></Btn>
+                    <BtnInput label="Min: " value={coordinate.min().toString()} onChange={value => {
+                        const n = Number(value)
+                        if (!isNaN(n)) coordinate.setMin(n)
+                    }}/>
+                    <BtnInput label="Max: " value={coordinate.max().toString()} onChange={value => {
+                        const n = Number(value)
+                        if (!isNaN(n)) coordinate.setMax(n)
+                    }}/>
+                </>
+            )
+        }
+        return result
+    }
+
     return <>
         <div class="controls preview-controls">
             {focused.map(s => <Btn label={s} class="no-pointer"/>)}
             <BtnMenu icon="gear" tooltip={locale('settings')}>
                 <Btn icon={showCoordName ? 'square_fill' : 'square'} label={locale('preview.show_coord_name')}
                      onClick={() => setShowCoordName(!showCoordName)}/>
-            </BtnMenu>
-            <BtnMenu icon={'code'}>
-
+                {mapCoordMinMaxControls()}
             </BtnMenu>
         </div>
         <div class="full-preview">
