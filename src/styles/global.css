@@ -1585,6 +1585,7 @@ hr {
 	height: 100%;
 	overflow: hidden;
 	position: relative;
+	user-select: none;
 }
 
 .spline-card {
@@ -1615,11 +1616,13 @@ hr {
 }
 
 .spline-coord {
-	position: relative;
+	position: absolute;
 	left: 6px;
 	top: 25px;
 	width: 90%;
-	font-size: 15px;
+	font-size: 13px;
+	pointer-events: none;
+	color: rgb(194, 194, 194);
 	background-color: transparent;
 	user-select: none;
 	overflow: hidden;

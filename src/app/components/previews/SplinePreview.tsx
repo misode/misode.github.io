@@ -113,24 +113,32 @@ export type CoordinateListener = (redraw: boolean) => any
 class CoordinateManager {
     listeners: Map<string, Set<CoordinateListener>>
     coordinates: Map<string, Coordinate>
+    dirtyCoordinates: Set<string>
 
     constructor() {
         this.listeners = new Map<string, Set<CoordinateListener>>()
         this.coordinates = new Map<string, Coordinate>()
+        this.dirtyCoordinates = new Set<string>()
     }
 
     addOrGetCoordinate(name: string): Coordinate {
         if (!this.coordinates.has(name))
             this.coordinates.set(name, new Coordinate(name, this))
+        else
+            this.dirtyCoordinates.delete(name)
         return this.coordinates.get(name)!
     }
 
-    getCoordinate(name: string): Coordinate | undefined {
-        return this.coordinates.get(name)
+    initiateCleanup() {
+        for (const name of this.coordinates.keys()) {
+            this.dirtyCoordinates.add(name)
+        }
     }
 
-    removeAllListeners() {
-        this.listeners.clear()
+    doCleanup() {
+        for (const name of this.dirtyCoordinates)
+            this.coordinates.delete(name)
+        this.dirtyCoordinates.clear()
     }
 
     removeListener(name: string, listener: CoordinateListener) {
@@ -155,32 +163,12 @@ class CoordinateManager {
         for (const listener of set)
             listener(redraw)
     }
-
-    setValue(name: string, value: number) {
-        if (this.coordinates.get(name)?.setValue(value))
-            this.emit(name, false)
-    }
-
-    setMin(name: string, value: number) {
-        const coordinate = this.coordinates.get(name)
-        if (coordinate) {
-            coordinate.setMin(value)
-            this.emit(name, true)
-        }
-    }
-
-    setMax(name: string, value: number) {
-        const coordinate = this.coordinates.get(name)
-        if (coordinate) {
-            coordinate.setMax(value)
-            this.emit(name, true)
-        }
-    }
 }
 
 export const Offset = createContext<pos2n>({x: 0, y: 0})
 export const ShowCoordName = createContext<boolean>(true)
 export const Manager = createContext<CoordinateManager>(new CoordinateManager())
+export const PosResetCnt = createContext(0)
 
 export function genCardLinkColor() {
     let hue = Math.floor(Math.random() * 360)
@@ -189,12 +177,14 @@ export function genCardLinkColor() {
     return `hsl(${hue}, ${saturation}%, ${lightness}%`
 }
 
-export const SplinePreview = ({data}: PreviewProps) => {
+export const SplinePreview = ({model, data}: PreviewProps) => {
+    console.log('spline preview props: ', model)
     const {locale} = useLocale()
 
     const [offset, setOffset] = useState({x: 0, y: 0})
     const [focused, setFocused] = useState<string[]>([])
     const [showCoordName, setShowCoordName] = useState<boolean>(true)
+    const [posResetCnt, setPosResetCnt] = useState(0)
     const offsetRef = useRef<pos2n>(offset)
     const managerRef = useRef<CoordinateManager>(new CoordinateManager())
 
@@ -277,7 +267,12 @@ export const SplinePreview = ({data}: PreviewProps) => {
         return {elements: result, defaultVal: cubicSpline.compute(coordinate.val()), height: totHeight}
     }
 
-    const {elements: cards} = useMemo(() => build(data, null, {x: 0, y: 0}), [data])
+    const cards = useMemo(() => {
+        managerRef.current.initiateCleanup()
+        const result = build(data, null, {x: 0, y: 0})
+        managerRef.current.doCleanup()
+        return result.elements
+    }, [data])
 
     function onMouseUp(e: MouseEvent) {
         if (e.button != 0)
@@ -327,13 +322,16 @@ export const SplinePreview = ({data}: PreviewProps) => {
                      onClick={() => setShowCoordName(!showCoordName)}/>
                 {mapCoordMinMaxControls()}
             </BtnMenu>
+            <Btn icon="sync" onClick={() => setPosResetCnt(posResetCnt+1)} tooltip={"Reset card position"}/>
         </div>
         <div class="full-preview">
             <div class="spline-preview" onMouseDown={onMouseDown}>
                 <Offset.Provider value={offset}>
                     <ShowCoordName.Provider value={showCoordName}>
                         <Manager.Provider value={managerRef.current}>
-                            {cards}
+                            <PosResetCnt.Provider value={posResetCnt}>
+                                {cards}
+                            </PosResetCnt.Provider>
                         </Manager.Provider>
                     </ShowCoordName.Provider>
                 </Offset.Provider>

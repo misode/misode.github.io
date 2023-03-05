@@ -1,13 +1,13 @@
-import {StateUpdater, useCallback, useContext, useEffect, useRef} from 'preact/hooks'
+import {StateUpdater, useContext, useEffect, useRef} from 'preact/hooks'
 import {Octicon} from "./index.js";
-import {CubicSpline, MinMaxNumberFunction} from "deepslate";
+import {CubicSpline} from "deepslate";
 import {clamp, pos2n} from "../Utils.js";
 import {
     Coordinate,
     CoordinateListener,
     genCardLinkColor,
     Manager,
-    Offset,
+    Offset, PosResetCnt,
     ShowCoordName
 } from "./previews/SplinePreview.js";
 import MultiPoint = CubicSpline.MultiPoint;
@@ -85,9 +85,11 @@ export function SplineCard({
     const resizeDirection = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
     const offset = useRef<pos2n>(useContext(Offset))
     offset.current = useContext(Offset)
-    const pos = useRef<pos2n>(placePos)
+    const pos = useRef<pos2n>({x: placePos.x, y: placePos.y})
     const ctxRef = useRef<CanvasRenderingContext2D>(null)
     const lastCoord = useRef<Coordinate | number | null>(null)
+    const lastCoordListener = useRef<CoordinateListener | null>(null)
+    const manager = useRef(useContext(Manager))
 
     // Apply spline type value change handlers
     useEffect(() => {
@@ -107,43 +109,49 @@ export function SplineCard({
         draw()
     }, [inputLinkList, spline, outputLink])
 
-    const onCoordChange = useCallback<CoordinateListener>((redraw: boolean) => {
+    // TODO solve prob
+    function onCoordChange(redraw: boolean) {
         if (indicator.current && card.current) {
             let newX: number
             const width = card.current.clientWidth
             if (typeof coordinate == 'number' || coordinate.min() == coordinate.max()) {
                 newX = (width / 2 - INDICATOR_WIDTH / 2) / width
             } else {
-                newX = (coordinate.val()-coordinate.min()) / (coordinate.max() - coordinate.min())
+                newX = (coordinate.val() - coordinate.min()) / (coordinate.max() - coordinate.min())
                 newX *= width - 2 * RESIZE_WIDTH
                 newX += RESIZE_WIDTH - INDICATOR_WIDTH / 2
                 newX /= width
             }
-            indicator.current.style.left = `${newX*100}%`
+            indicator.current.style.left = `${newX * 100}%`
         }
-        if(spline instanceof MultiPoint && coordinate instanceof Coordinate) {
+        if (spline instanceof MultiPoint && coordinate instanceof Coordinate) {
             spline.coordinate = coordinate.toExtractor()();
-            console.log((spline.coordinate as MinMaxNumberFunction<number>).minValue())
         }
         if (outputLink?.handleValueChange) {
             outputLink.handleValueChange(sample())
         }
-        if(redraw)
+        if (redraw)
             draw()
-    }, [])
+    }
 
-    if (coordinate != lastCoord.current) {
-        const manager = useContext(Manager)
-        if (lastCoord.current instanceof Coordinate)
-            manager.removeListener(lastCoord.current.name, onCoordChange)
-        if (coordinate instanceof Coordinate)
-            manager.addListener(coordinate.name, onCoordChange)
+    useEffect(() => {
+        if (lastCoord.current instanceof Coordinate && lastCoordListener.current)
+            manager.current.removeListener(lastCoord.current.name, lastCoordListener.current)
+        if (coordinate instanceof Coordinate) {
+            manager.current.addListener(coordinate.name, onCoordChange)
+            lastCoordListener.current = onCoordChange
+        } else
+            lastCoordListener.current = null
         lastCoord.current = coordinate
         onCoordChange(true)
+    }, [spline, coordinate, outputLink])
+
+    const lastPosResetCnt = useRef(useContext(PosResetCnt))
+    if(useContext(PosResetCnt) != lastPosResetCnt.current) {
+        pos.current.x = placePos.x
+        pos.current.y = placePos.y
+        lastPosResetCnt.current = useContext(PosResetCnt)
     }
-    useEffect(() => {
-        pos.current = placePos
-    }, [placePos])
 
     function sample() {
         if (!indicator.current || !card.current)
@@ -158,16 +166,12 @@ export function SplineCard({
     // Draw curve
     function draw() {
         spline.calculateMinMax()
-        if (!canvas.current) {
-            console.error('ref to canvas is null, draw failed')
+        if (!canvas.current)
             return
-        }
         if (!ctxRef.current) {
             ctxRef.current = canvas.current.getContext('2d')
-            if (!ctxRef.current) {
-                console.error('failed to obtain 2D context, draw failed')
+            if (!ctxRef.current)
                 return
-            }
         }
         const ctx = ctxRef.current
 
@@ -227,22 +231,22 @@ export function SplineCard({
     }
 
     // TODO refer to NoisePreview to enhance dragging performance and robust
-    const onDragMouseMove = useCallback((e: MouseEvent) => {
+    function onDragMouseMove(e: MouseEvent) {
         if (!card.current)
             return
         move(e.movementX, e.movementY)
-    }, [])
+    }
 
-    const onDragMouseUp = useCallback((e: MouseEvent) => {
+    function onDragMouseUp(e: MouseEvent) {
         if (!drag.current)
             return
         if (e.button != 0)
             return
         document.removeEventListener('mousemove', onDragMouseMove)
         document.removeEventListener('mouseup', onDragMouseUp)
-    }, [])
+    }
 
-    const onDragMouseDown = useCallback((e: MouseEvent) => {
+    function onDragMouseDown(e: MouseEvent) {
         if (!drag.current)
             return
         if (e.button != 0)
@@ -250,9 +254,9 @@ export function SplineCard({
         e.stopPropagation()
         document.addEventListener('mousemove', onDragMouseMove)
         document.addEventListener('mouseup', onDragMouseUp)
-    }, [])
+    }
 
-    const buildResizeMouseDownHandler = useCallback((direction: ResizeDirection) => {
+    function buildResizeMouseDownHandler(direction: ResizeDirection) {
         return (e: MouseEvent) => {
             if (e.button != 0)
                 return
@@ -261,31 +265,35 @@ export function SplineCard({
             document.addEventListener('mousemove', onResizeMouseMove)
             document.addEventListener('mouseup', onResizeMouseUp)
         }
-    }, [])
+    }
 
-    const onResizeMouseMove = useCallback((e: MouseEvent) => {
+    function onResizeMouseMove(e: MouseEvent) {
         if (!card.current)
             return
         const direction = resizeDirection.current
 
         const width = card.current.clientWidth
         const height = card.current.clientHeight
-        let newWidth = width + e.movementX * direction.width
-        card.current.style.width = `${clamp(newWidth, MIN_WIDTH, Infinity)}px`
-        move(e.movementX * direction.posX, 0)
+        let dW = e.movementX * direction.width
+        dW = clamp(width + dW, MIN_WIDTH, Infinity) - width
+        card.current.style.width = `${width + dW}px`
+        let dX = Math.abs(dW) * Math.sign(e.movementX)
+        move(dX * direction.posX, 0)
 
-        let newHeight = height + e.movementY * direction.height
-        card.current.style.height = `${clamp(newHeight, MIN_HEIGHT, Infinity)}px`
-        move(0, e.movementY * direction.posY)
+        let dH = e.movementY * direction.height
+        dH = clamp(height + dH, MIN_HEIGHT, Infinity) - height
+        card.current.style.height = `${height + dH}px`
+        let dY = Math.abs(dH) * Math.sign(e.movementY)
+        move(0, dY * direction.posY)
         draw()
-    }, [])
+    }
 
-    const onResizeMouseUp = useCallback((e: MouseEvent) => {
+    function onResizeMouseUp(e: MouseEvent) {
         if (e.button != 0)
             return
         document.removeEventListener('mousemove', onResizeMouseMove)
         document.removeEventListener('mousemove', onResizeMouseUp)
-    }, [])
+    }
 
     function onIndicatorMouseMove(e: MouseEvent) {
         e.stopPropagation()
@@ -320,7 +328,7 @@ export function SplineCard({
             return
         let x: number
         let y: number
-        if(coordinate instanceof Coordinate) {
+        if (coordinate instanceof Coordinate) {
             const width = canvas.current.clientWidth
             const t = new Transformation()
             t.offsetX = coordinate.min()
@@ -340,7 +348,7 @@ export function SplineCard({
         e.stopPropagation()
         let x: number
         let y: number
-        if(coordinate instanceof Coordinate) {
+        if (coordinate instanceof Coordinate) {
             const width = canvas.current.clientWidth
             const t = new Transformation()
             t.offsetX = coordinate.min()
@@ -358,21 +366,21 @@ export function SplineCard({
         setFocused([])
     }
 
-    function getBorderString() {
+    function getBorderStyle() {
         return `${outputLink?.color ? (`2px solid ${outputLink.color}`) : 'unset'}`
     }
 
-    function setBorderColor() {
+    function setBorderStyle() {
         if (!card.current)
             return
-        card.current.style.border = getBorderString()
+        card.current.style.border = getBorderStyle()
     }
 
     function onColorRefresh() {
         if (outputLink?.handleColorChange) {
             outputLink.color = genCardLinkColor()
             outputLink.handleColorChange()
-            setBorderColor()
+            setBorderStyle()
         }
     }
 
@@ -380,13 +388,12 @@ export function SplineCard({
         <div class="spline-card" ref={card} style={{
             left: `${useContext(Offset).x + pos.current.x}px`,
             top: `${useContext(Offset).y + pos.current.y}px`,
-            border: getBorderString()
+            border: getBorderStyle()
         }}>
             {
                 outputLink ?
                     <>
-                        <div className="coord-indicator"
-                             ref={indicator}
+                        <div className="coord-indicator" ref={indicator}
                              onMouseDown={onIndicatorMouseDown} onMouseMove={onIndicatorHover}
                              onMouseLeave={onMouseLeave}
                         />
@@ -396,10 +403,7 @@ export function SplineCard({
             }
             {
                 useContext(ShowCoordName) ?
-                    <div class="spline-coord" style={{
-                        position: 'absolute', left: '6px', top: '25px',
-                        fontSize: '13px', pointerEvents: 'none', color: 'rgb(194,194,194)'
-                    }}>
+                    <div class="spline-coord">
                         {`${typeof coordinate == 'number' ? coordinate : coordinate.name}`}
                     </div> :
                     <></>
