@@ -177,8 +177,7 @@ export function genCardLinkColor() {
     return `hsl(${hue}, ${saturation}%, ${lightness}%`
 }
 
-export const SplinePreview = ({model, data}: PreviewProps) => {
-    console.log('spline preview props: ', model)
+export const SplinePreview = ({data}: PreviewProps) => {
     const {locale} = useLocale()
 
     const [offset, setOffset] = useState({x: 0, y: 0})
@@ -322,7 +321,7 @@ export const SplinePreview = ({model, data}: PreviewProps) => {
                      onClick={() => setShowCoordName(!showCoordName)}/>
                 {mapCoordMinMaxControls()}
             </BtnMenu>
-            <Btn icon="sync" onClick={() => setPosResetCnt(posResetCnt+1)} tooltip={"Reset card position"}/>
+            <Btn icon="sync" onClick={() => setPosResetCnt(posResetCnt+1)} tooltip={locale('reset_card_layout')}/>
         </div>
         <div class="full-preview">
             <div class="spline-preview" onMouseDown={onMouseDown}>

@@ -1,4 +1,4 @@
-import {StateUpdater, useContext, useEffect, useRef} from 'preact/hooks'
+import {StateUpdater, useContext, useEffect, useRef, useState} from 'preact/hooks'
 import {Octicon} from "./index.js";
 import {CubicSpline} from "deepslate";
 import {clamp, pos2n} from "../Utils.js";
@@ -83,10 +83,9 @@ export function SplineCard({
     const indicator = useRef<HTMLDivElement>(null)
 
     const resizeDirection = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
-    const offset = useRef<pos2n>(useContext(Offset))
-    offset.current = useContext(Offset)
-    const pos = useRef<pos2n>({x: placePos.x, y: placePos.y})
-    const ctxRef = useRef<CanvasRenderingContext2D>(null)
+    const [posX, setPosX] = useState(placePos.x)
+    const [posY, setPosY] = useState(placePos.y)
+    const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
     const lastCoord = useRef<Coordinate | number | null>(null)
     const lastCoordListener = useRef<CoordinateListener | null>(null)
     const manager = useRef(useContext(Manager))
@@ -146,12 +145,16 @@ export function SplineCard({
         onCoordChange(true)
     }, [spline, coordinate, outputLink])
 
-    const lastPosResetCnt = useRef(useContext(PosResetCnt))
-    if(useContext(PosResetCnt) != lastPosResetCnt.current) {
-        pos.current.x = placePos.x
-        pos.current.y = placePos.y
-        lastPosResetCnt.current = useContext(PosResetCnt)
-    }
+    useRef(useContext(PosResetCnt));
+    useEffect( () => {
+        setPosX(placePos.x)
+        setPosY(placePos.y)
+        if(card.current) {
+            // Default width / height described in CSS, keep them matched with CSS value
+            card.current.style.width = '200px'
+            card.current.style.height = '120px'
+        }
+    }, [useContext(PosResetCnt)])
 
     function sample() {
         if (!indicator.current || !card.current)
@@ -224,10 +227,8 @@ export function SplineCard({
     function move(dX: number, dY: number) {
         if (!card.current)
             return
-        pos.current.x += dX
-        pos.current.y += dY
-        card.current.style.left = `${offset.current.x + pos.current.x}px`
-        card.current.style.top = `${offset.current.y + pos.current.y}px`
+        setPosX((prevX => prevX + dX))
+        setPosY((prevY => prevY + dY))
     }
 
     // TODO refer to NoisePreview to enhance dragging performance and robust
@@ -386,8 +387,8 @@ export function SplineCard({
 
     return <>
         <div class="spline-card" ref={card} style={{
-            left: `${useContext(Offset).x + pos.current.x}px`,
-            top: `${useContext(Offset).y + pos.current.y}px`,
+            left: `${useContext(Offset).x + posX}px`,
+            top: `${useContext(Offset).y + posY}px`,
             border: getBorderStyle()
         }}>
             {

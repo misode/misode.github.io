@@ -255,6 +255,7 @@
   "worldgen/flat_level_generator_preset": "Flat World Preset",
   "y": "Y",
   "worldgen/spline": "Spline",
+  "reset_card_layout": "Reset card layout", 
   "zoom_in": "Zoom in",
   "zoom_in_limit": "Cannot zoom in further\n1 pixel = 4 blocks",
   "zoom_out": "Zoom out"
