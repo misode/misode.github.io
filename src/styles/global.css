@@ -1606,7 +1606,7 @@ hr {
 	box-sizing: content-box;
 }
 
-.spline-refresh {
+.spline-card .refresh.btn {
 	position: absolute;
 	right: 0px;
 	height: 25px;
@@ -1615,7 +1615,7 @@ hr {
 	padding: 7px;
 }
 
-.spline-coord {
+.spline-card .coordinate {
 	position: absolute;
 	left: 6px;
 	top: 25px;
@@ -1628,7 +1628,7 @@ hr {
 	overflow: hidden;
 }
 
-.spline-drag {
+.spline-card .drag {
 	grid-area: drag;
 	display: flex;
 	flex-direction: column;
@@ -1642,18 +1642,43 @@ hr {
 	cursor: move;
 }
 
-.spline-canvas {
+.spline-card canvas {
 	display: flex;
 	width: 100%;
 	height: 100%;
 	grid-area: canvas;
 }
 
-.spline-resize {
+.spline-card .resize {
 	background-color: transparent;
 }
 
-.coord-indicator {
+.spline-card .resize.left{
+	grid-area: resize-left;
+	cursor: ew-resize;
+}
+
+.spline-card .resize.right{
+	grid-area: resize-right;
+	cursor: ew-resize;
+}
+
+.spline-card .resize.corner-left{
+	grid-area: resize-corner-left;
+	cursor: nesw-resize;
+}
+
+.spline-card .resize.bottom{
+	grid-area: resize-bottom;
+	cursor: ns-resize
+}
+
+.spline-card .resize.corner-right{
+	grid-area: resize-corner-right;
+	cursor: nwse-resize
+}
+
+.spline-card .indicator {
 	display: inline;
 	position: absolute;
 	left: 50%;

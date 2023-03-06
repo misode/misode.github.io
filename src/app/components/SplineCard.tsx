@@ -1,10 +1,8 @@
 import {StateUpdater, useContext, useEffect, useRef, useState} from 'preact/hooks'
 import {Octicon} from "./index.js";
 import {CubicSpline} from "deepslate";
-import {clamp, pos2n} from "../Utils.js";
+import {clamp, Coordinate, CoordinateListener, pos2n} from "../Utils.js";
 import {
-    Coordinate,
-    CoordinateListener,
     genCardLinkColor,
     Manager,
     Offset, PosResetCnt,
@@ -12,6 +10,7 @@ import {
 } from "./previews/SplinePreview.js";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
+import {DragHandle} from "./DragHandle.js";
 
 export type ValueChangeHandler = (newVal: number) => any
 
@@ -79,10 +78,8 @@ export function SplineCard({
                            }: Props) {
     const card = useRef<HTMLDivElement>(null)
     const canvas = useRef<HTMLCanvasElement>(null)
-    const drag = useRef<HTMLDivElement>(null)
     const indicator = useRef<HTMLDivElement>(null)
 
-    const resizeDirection = useRef<ResizeDirection>({width: 1, height: 0, posX: 0, posY: 0})
     const [posX, setPosX] = useState(placePos.x)
     const [posY, setPosY] = useState(placePos.y)
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -108,7 +105,6 @@ export function SplineCard({
         draw()
     }, [inputLinkList, spline, outputLink])
 
-    // TODO solve prob
     function onCoordChange(redraw: boolean) {
         if (indicator.current && card.current) {
             let newX: number
@@ -145,15 +141,15 @@ export function SplineCard({
         onCoordChange(true)
     }, [spline, coordinate, outputLink])
 
-    useRef(useContext(PosResetCnt));
-    useEffect( () => {
+    useEffect(() => {
         setPosX(placePos.x)
         setPosY(placePos.y)
-        if(card.current) {
+        if (card.current) {
             // Default width / height described in CSS, keep them matched with CSS value
             card.current.style.width = '200px'
             card.current.style.height = '120px'
         }
+        draw()
     }, [useContext(PosResetCnt)])
 
     function sample() {
@@ -168,7 +164,8 @@ export function SplineCard({
 
     // Draw curve
     function draw() {
-        spline.calculateMinMax()
+        if(spline.min() === -Infinity && spline.max() === Infinity)
+            spline.calculateMinMax()
         if (!canvas.current)
             return
         if (!ctxRef.current) {
@@ -231,72 +228,35 @@ export function SplineCard({
         setPosY((prevY => prevY + dY))
     }
 
-    // TODO refer to NoisePreview to enhance dragging performance and robust
-    function onDragMouseMove(e: MouseEvent) {
+    function onDragMove(e: MouseEvent) {
         if (!card.current)
             return
         move(e.movementX, e.movementY)
     }
 
-    function onDragMouseUp(e: MouseEvent) {
-        if (!drag.current)
-            return
-        if (e.button != 0)
-            return
-        document.removeEventListener('mousemove', onDragMouseMove)
-        document.removeEventListener('mouseup', onDragMouseUp)
-    }
-
-    function onDragMouseDown(e: MouseEvent) {
-        if (!drag.current)
-            return
-        if (e.button != 0)
-            return
-        e.stopPropagation()
-        document.addEventListener('mousemove', onDragMouseMove)
-        document.addEventListener('mouseup', onDragMouseUp)
-    }
-
-    function buildResizeMouseDownHandler(direction: ResizeDirection) {
+    function buildResizeHandler(direction: ResizeDirection) {
         return (e: MouseEvent) => {
-            if (e.button != 0)
+            if (!card.current)
                 return
-            e.stopPropagation()
-            resizeDirection.current = direction
-            document.addEventListener('mousemove', onResizeMouseMove)
-            document.addEventListener('mouseup', onResizeMouseUp)
+
+            const width = card.current.clientWidth
+            const height = card.current.clientHeight
+            let dW = e.movementX * direction.width
+            dW = clamp(width + dW, MIN_WIDTH, Infinity) - width
+            card.current.style.width = `${width + dW}px`
+            let dX = Math.abs(dW) * Math.sign(e.movementX)
+            move(dX * direction.posX, 0)
+
+            let dH = e.movementY * direction.height
+            dH = clamp(height + dH, MIN_HEIGHT, Infinity) - height
+            card.current.style.height = `${height + dH}px`
+            let dY = Math.abs(dH) * Math.sign(e.movementY)
+            move(0, dY * direction.posY)
+            draw()
         }
     }
 
-    function onResizeMouseMove(e: MouseEvent) {
-        if (!card.current)
-            return
-        const direction = resizeDirection.current
-
-        const width = card.current.clientWidth
-        const height = card.current.clientHeight
-        let dW = e.movementX * direction.width
-        dW = clamp(width + dW, MIN_WIDTH, Infinity) - width
-        card.current.style.width = `${width + dW}px`
-        let dX = Math.abs(dW) * Math.sign(e.movementX)
-        move(dX * direction.posX, 0)
-
-        let dH = e.movementY * direction.height
-        dH = clamp(height + dH, MIN_HEIGHT, Infinity) - height
-        card.current.style.height = `${height + dH}px`
-        let dY = Math.abs(dH) * Math.sign(e.movementY)
-        move(0, dY * direction.posY)
-        draw()
-    }
-
-    function onResizeMouseUp(e: MouseEvent) {
-        if (e.button != 0)
-            return
-        document.removeEventListener('mousemove', onResizeMouseMove)
-        document.removeEventListener('mousemove', onResizeMouseUp)
-    }
-
-    function onIndicatorMouseMove(e: MouseEvent) {
+    function onIndicatorMove(e: MouseEvent) {
         e.stopPropagation()
         if (!(indicator.current) || !(card.current) || typeof coordinate == 'number') {
             return
@@ -307,21 +267,6 @@ export function SplineCard({
         newVal += INDICATOR_WIDTH / 2 - RESIZE_WIDTH
         newVal = coordinate.min() + (coordinate.max() - coordinate.min()) * newVal / width
         coordinate.setValue(newVal)
-    }
-
-    function onIndicatorMouseUp(e: MouseEvent) {
-        if (e.button != 0)
-            return
-        document.removeEventListener('mousemove', onIndicatorMouseMove)
-        document.removeEventListener('mouseup', onIndicatorMouseUp)
-    }
-
-    function onIndicatorMouseDown(e: MouseEvent) {
-        if (e.button != 0)
-            return
-        e.stopPropagation()
-        document.addEventListener('mousemove', onIndicatorMouseMove)
-        document.addEventListener('mouseup', onIndicatorMouseUp)
     }
 
     function onCanvasHover(e: MouseEvent) {
@@ -335,26 +280,6 @@ export function SplineCard({
             t.offsetX = coordinate.min()
             t.scaleX = (coordinate.max() - coordinate.min()) / width
             x = t.x(e.offsetX)
-            y = spline.compute(x)
-        } else {
-            x = coordinate
-            y = spline.compute(coordinate)
-        }
-        setFocused([`x:${x.toPrecision(3)}`, `y:${y.toPrecision(3)}`])
-    }
-
-    function onIndicatorHover(e: MouseEvent) {
-        if (!canvas.current || !indicator.current)
-            return
-        e.stopPropagation()
-        let x: number
-        let y: number
-        if (coordinate instanceof Coordinate) {
-            const width = canvas.current.clientWidth
-            const t = new Transformation()
-            t.offsetX = coordinate.min()
-            t.scaleX = (coordinate.max() - coordinate.min()) / width
-            x = t.x(indicator.current.offsetLeft + INDICATOR_WIDTH / 2 - RESIZE_WIDTH)
             y = spline.compute(x)
         } else {
             x = coordinate
@@ -394,40 +319,30 @@ export function SplineCard({
             {
                 outputLink ?
                     <>
-                        <div className="coord-indicator" ref={indicator}
-                             onMouseDown={onIndicatorMouseDown} onMouseMove={onIndicatorHover}
-                             onMouseLeave={onMouseLeave}
-                        />
-                        <div className="spline-refresh btn" onClick={onColorRefresh}>{Octicon['sync']}</div>
+                        <DragHandle class="indicator" reference={indicator} onDrag={onIndicatorMove}/>
+                        <div className="refresh btn" onClick={onColorRefresh}>{Octicon['sync']}</div>
                     </> :
                     <></>
             }
             {
                 useContext(ShowCoordName) ?
-                    <div class="spline-coord">
-                        {`${typeof coordinate == 'number' ? coordinate : coordinate.name}`}
-                    </div> :
+                    <div class="coordinate"> {`${typeof coordinate == 'number' ? coordinate : coordinate.name}`} </div> :
                     <></>
             }
-            <div class="spline-drag" ref={drag} onMouseDown={onDragMouseDown}>{Octicon['three_bars']}</div>
-            <div class="spline-resize" style={{gridArea: 'resize-left', cursor: 'ew-resize'}}
-                 onMouseDown={buildResizeMouseDownHandler({width: -1, height: 0, posX: 1, posY: 0})}
+            <DragHandle class="drag" onDrag={onDragMove} propagate={false}>{Octicon['three_bars']}</DragHandle>
+            <DragHandle class="resize left" onDrag={buildResizeHandler({width: -1, height: 0, posX: 1, posY: 0})}
             />
-            <canvas class="spline-canvas" ref={canvas} style={{backgroundColor: 'transparent'}}
+            <canvas ref={canvas} style={{backgroundColor: 'transparent'}}
                     onMouseMove={onCanvasHover} onMouseLeave={onMouseLeave}>
                 Ugh it seems your browser doesn't support HTML Canvas element.
             </canvas>
-            <div class="spline-resize" style={{gridArea: 'resize-right', cursor: 'ew-resize'}}
-                 onMouseDown={buildResizeMouseDownHandler({width: 1, height: 0, posX: 0, posY: 0})}
+            <DragHandle class="resize right" onDrag={buildResizeHandler({width: 1, height: 0, posX: 0, posY: 0})}
             />
-            <div class="spline-resize" style={{gridArea: 'resize-corner-left', cursor: 'nesw-resize'}}
-                 onMouseDown={buildResizeMouseDownHandler({width: -1, height: 1, posX: 1, posY: 0})}
+            <DragHandle class="resize corner-left" onDrag={buildResizeHandler({width: -1, height: 1, posX: 1, posY: 0})}
             />
-            <div class="spline-resize" style={{gridArea: 'resize-bottom', cursor: 'ns-resize'}}
-                 onMouseDown={buildResizeMouseDownHandler({width: 0, height: 1, posX: 0, posY: 0})}
+            <DragHandle class="resize bottom" onDrag={buildResizeHandler({width: 0, height: 1, posX: 0, posY: 0})}
             />
-            <div class="spline-resize" style={{gridArea: 'resize-corner-right', cursor: 'nwse-resize'}}
-                 onMouseDown={buildResizeMouseDownHandler({width: 1, height: 1, posX: 0, posY: 0})}
+            <DragHandle class="resize corner-right" onDrag={buildResizeHandler({width: 1, height: 1, posX: 0, posY: 0})}
             />
         </div>
     </>

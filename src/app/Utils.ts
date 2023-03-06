@@ -2,7 +2,7 @@ import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
 import type { Random } from 'deepslate'
-import { Matrix3, Matrix4, Vector } from 'deepslate'
+import {Matrix3, Matrix4, MinMaxNumberFunction, Vector} from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { quat, vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
@@ -552,3 +552,134 @@ export function simpleHash(str: string) {
 	}
 	return hash
 }
+export class Coordinate {
+	name: string
+	manager: CoordinateManager
+	private value: number
+
+	val() {
+		return this.value
+	}
+
+	private minValue: number
+
+	min() {
+		return this.minValue
+	}
+
+	private maxValue: number
+
+	max() {
+		return this.maxValue
+	}
+
+	constructor(name: string, manager: CoordinateManager) {
+		this.name = name
+		this.manager = manager
+		this.value = 0
+		this.minValue = -1
+		this.maxValue = 1
+	}
+
+	setMin(val: number) {
+		if (this.minValue == val)
+			return
+		this.minValue = val
+		this.value = Math.max(this.value, this.minValue)
+		this.maxValue = Math.max(this.maxValue, this.minValue)
+		this.manager.emit(this.name, true)
+	}
+
+	setMax(val: number) {
+		if (this.maxValue == val)
+			return
+		this.maxValue = val
+		this.value = Math.min(this.value, this.maxValue)
+		this.minValue = Math.min(this.minValue, this.maxValue)
+		this.manager.emit(this.name, true)
+	}
+
+	setValue(val: number) {
+		val = clamp(val, this.minValue, this.maxValue)
+		if (val == this.value)
+			return
+		this.value = val
+		this.manager.emit(this.name, false)
+	}
+
+	toExtractor(): () => MinMaxNumberFunction<number> {
+		const min = this.minValue
+		const max = this.maxValue
+		return () => {
+			return {
+				compute: (c: number) => {
+					return c
+				},
+				minValue: () => {
+					return min
+				},
+				maxValue: () => {
+					return max
+				}
+			}
+		}
+	}
+}
+
+export type CoordinateListener = (redraw: boolean) => any
+
+export class CoordinateManager {
+	listeners: Map<string, Set<CoordinateListener>>
+	coordinates: Map<string, Coordinate>
+	dirtyCoordinates: Set<string>
+
+	constructor() {
+		this.listeners = new Map<string, Set<CoordinateListener>>()
+		this.coordinates = new Map<string, Coordinate>()
+		this.dirtyCoordinates = new Set<string>()
+	}
+
+	addOrGetCoordinate(name: string): Coordinate {
+		if (!this.coordinates.has(name))
+			this.coordinates.set(name, new Coordinate(name, this))
+		else
+			this.dirtyCoordinates.delete(name)
+		return this.coordinates.get(name)!
+	}
+
+	initiateCleanup() {
+		for (const name of this.coordinates.keys()) {
+			this.dirtyCoordinates.add(name)
+		}
+	}
+
+	doCleanup() {
+		for (const name of this.dirtyCoordinates)
+			this.coordinates.delete(name)
+		this.dirtyCoordinates.clear()
+	}
+
+	removeListener(name: string, listener: CoordinateListener) {
+		const set = this.listeners.get(name)
+		if (!set)
+			return
+		set.delete(listener)
+	}
+
+	addListener(name: string, listener: CoordinateListener) {
+		if (!this.listeners.has(name))
+			this.listeners.set(name, new Set<CoordinateListener>())
+		// I know ?. isn't required here, but my IDE keeps mumbling
+		this.listeners.get(name)?.add(listener)
+	}
+
+	emit(name: string, redraw: boolean) {
+		const coordinate = this.coordinates.get(name)
+		const set = this.listeners.get(name)
+		if (!set || !coordinate)
+			return
+		for (const listener of set)
+			listener(redraw)
+	}
+}
+
