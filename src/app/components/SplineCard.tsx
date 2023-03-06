@@ -4,7 +4,7 @@ import {CubicSpline} from "deepslate";
 import {clamp, Coordinate, CoordinateListener, pos2n} from "../Utils.js";
 import {genCardLinkColor, Manager, Offset, PosResetCnt, ShowCoordName} from "./previews/SplinePreview.js";
 import {DragHandle} from "./DragHandle.js";
-import {vec2} from "gl-matrix";
+import {mat3, vec2} from "gl-matrix";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
 
@@ -39,29 +39,6 @@ const MIN_WIDTH = 112
 const MIN_HEIGHT = 81
 
 // Class for simple transformation, translation and scale only
-class Transformation {
-    offsetX = 0
-    offsetY = 0
-    scaleX = 1
-    scaleY = 1
-
-    constructor() {
-    }
-
-    transform(x: number, y: number): { x: number, y: number } {
-        const xx = this.offsetX + this.scaleX * x
-        const yy = this.offsetY + this.scaleY * y
-        return {x: xx, y: yy}
-    }
-
-    x(x: number): number {
-        return this.offsetX + this.scaleX * x
-    }
-
-    y(y: number): number {
-        return this.offsetY + this.scaleY * y
-    }
-}
 
 export const DEFAULT_CARD_WIDTH = 200
 export const DEFAULT_CARD_HEIGHT = 120
@@ -97,34 +74,49 @@ export function SplineCard({
                     if (outputLink?.handleValueChange)
                         outputLink.handleValueChange(sample())
                 }
-                link.handleColorChange = () => {
-                    draw()
-                }
+                link.handleColorChange = () => draw()
             }
         }
         draw()
     }, [inputLinkList, spline, outputLink])
 
-    function onCoordChange(redraw: boolean) {
-        if (indicator.current) {
+    function updateIndicatorPos(){
+        if (canvas.current && indicator.current) {
             let newX: number
-            const width = size[0]
+            const width = canvas.current.clientWidth
             if (typeof coordinate == 'number' || coordinate.min() == coordinate.max()) {
                 newX = (width / 2 - INDICATOR_WIDTH / 2) / width
             } else {
-                newX = (coordinate.val() - coordinate.min()) / (coordinate.max() - coordinate.min())
-                newX *= width - 2 * RESIZE_WIDTH
+                newX = (coordinate.val() - coordinate.min()) / (coordinate.max() - coordinate.min()) * width
                 newX += RESIZE_WIDTH - INDICATOR_WIDTH / 2
-                newX /= width
             }
-            indicator.current.style.left = `${newX * 100}%`
+            indicator.current.style.left = `${newX}px`
         }
+    }
+
+    function onIndicatorMove(e: MouseEvent) {
+        e.stopPropagation()
+        if (!(indicator.current) || !(canvas.current) || typeof coordinate == 'number' || coordinate.min() == coordinate.max())
+            return
+
+        const width = canvas.current.clientWidth
+        let newVal = indicator.current.offsetLeft + e.movementX - RESIZE_WIDTH + INDICATOR_WIDTH / 2
+        newVal = clamp(newVal, 0, width)
+        newVal = newVal / width * (coordinate.max() - coordinate.min()) + coordinate.min()
+        coordinate.setValue(newVal)
+    }
+
+    useEffect(() => updateIndicatorPos(), [size])
+
+    function onCoordChange(redraw: boolean) {
+        updateIndicatorPos()
         if (spline instanceof MultiPoint && coordinate instanceof Coordinate) {
             spline.coordinate = coordinate.toExtractor()();
         }
         if (outputLink?.handleValueChange) {
             outputLink.handleValueChange(sample())
         }
+        spline.calculateMinMax()
         if (redraw)
             draw()
     }
@@ -187,19 +179,24 @@ export function SplineCard({
             return
         }
 
-        const t = new Transformation()
-        t.offsetX = -coordinate.min() * width / (coordinate.max() - coordinate.min())
-        t.offsetY = height / 2
-        t.scaleX = width / (coordinate.max() - coordinate.min())
-        t.scaleY = -height / 2 / maxAbs
+        const mat = mat3.create()
+        const offsetX = -coordinate.min() * width / (coordinate.max() - coordinate.min())
+        const offsetY = height / 2
+        const scaleX = width / (coordinate.max() - coordinate.min())
+        const scaleY = -height / 2 / maxAbs
+        mat3.translate(mat, mat, [offsetX, offsetY])
+        mat3.scale(mat, mat, [scaleX, scaleY])
 
         ctx.clearRect(0, 0, width, height)
         ctx.beginPath()
-        ctx.moveTo(t.x(coordinate.min()), t.y(spline.compute(coordinate.min())))
+        let point: vec2 = [coordinate.min(), spline.compute(coordinate.min())]
+        vec2.transformMat3(point, point, mat)
+        ctx.moveTo(point[0], point[1])
         for (let i = 1; i <= 100; i++) {
-            let x = t.x(coordinate.min() + (coordinate.max() - coordinate.min()) * i / 100)
-            let y = t.y(spline.compute(coordinate.min() + (coordinate.max() - coordinate.min()) * i / 100))
-            ctx.lineTo(x, y)
+            point[0] = coordinate.min() + (coordinate.max() - coordinate.min()) * i / 100
+            point[1] = spline.compute(coordinate.min() + (coordinate.max() - coordinate.min()) * i / 100)
+            vec2.transformMat3(point, point, mat)
+            ctx.lineTo(point[0], point[1])
         }
         ctx.stroke()
 
@@ -207,13 +204,13 @@ export function SplineCard({
         for (const link of inputLinkList) {
             ctx.strokeStyle = link.color
             ctx.beginPath()
-            let x = spline.locations[link.valIndex]
-            let midY = t.y(spline.compute(x))
-            x = t.x(x)
-            const y1 = midY - length / 2
-            const y2 = midY + length / 2
-            ctx.moveTo(x, y1)
-            ctx.lineTo(x, y2)
+            point[0] = spline.locations[link.valIndex]
+            point[1] = spline.compute(point[0])
+            vec2.transformMat3(point, point, mat)
+            const y1 = point[1] - length / 2
+            const y2 = point[1] + length / 2
+            ctx.moveTo(point[0], y1)
+            ctx.lineTo(point[0], y2)
             ctx.stroke()
         }
     }
@@ -240,24 +237,11 @@ export function SplineCard({
             let dY = Math.abs(dH) * Math.sign(e.movementY)
 
             move(dX * direction.posX, dY * direction.posY)
-            setSize([width + dW, height + dH])
+            setSize((prevSize) => [prevSize[0] + dW, prevSize[1] + dH])
         }
     }
 
     useEffect(() => draw(), [size])
-
-    function onIndicatorMove(e: MouseEvent) {
-        e.stopPropagation()
-        if (!(indicator.current) || typeof coordinate == 'number') {
-            return
-        }
-        const width = size[0] - 2 * RESIZE_WIDTH
-        let newVal = indicator.current.offsetLeft + e.movementX
-        newVal = clamp(newVal, RESIZE_WIDTH - INDICATOR_WIDTH / 2, width + RESIZE_WIDTH - INDICATOR_WIDTH / 2)
-        newVal += INDICATOR_WIDTH / 2 - RESIZE_WIDTH
-        newVal = coordinate.min() + (coordinate.max() - coordinate.min()) * newVal / width
-        coordinate.setValue(newVal)
-    }
 
     function onCanvasHover(e: MouseEvent) {
         if (!canvas.current)
@@ -266,10 +250,14 @@ export function SplineCard({
         let y: number
         if (coordinate instanceof Coordinate) {
             const width = canvas.current.clientWidth
-            const t = new Transformation()
-            t.offsetX = coordinate.min()
-            t.scaleX = (coordinate.max() - coordinate.min()) / width
-            x = t.x(e.offsetX)
+            const mat = mat3.create()
+            const offsetX = coordinate.min()
+            const scaleX = (coordinate.max() - coordinate.min()) / width
+            mat3.translate(mat, mat, [offsetX, 0])
+            mat3.scale(mat, mat, [scaleX, 1])
+            const point: vec2 = [e.offsetX, 0]
+            vec2.transformMat3(point, point, mat)
+            x = point[0]
             y = spline.compute(x)
         } else {
             x = coordinate
@@ -282,7 +270,7 @@ export function SplineCard({
         setFocused([])
     }
 
-    function updateBorderStyle(){
+    function updateBorderStyle() {
         setBorderStyle(`${outputLink?.color ? (`2px solid ${outputLink.color}`) : 'unset'}`)
     }
 
@@ -304,8 +292,7 @@ export function SplineCard({
             height: `${size[1]}px`,
             border: borderStyle
         }}>
-            <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} reference={indicator}
-                        onDrag={onIndicatorMove}/>
+            <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} onDrag={onIndicatorMove} reference={indicator}/>
             <div className={`refresh btn${outputLink ? '' : ' hidden'}`}
                  onClick={onColorRefresh}>{Octicon['sync']}</div>
             <div class={`coordinate${useContext(ShowCoordName) ? '' : ' hidden'}`}>
