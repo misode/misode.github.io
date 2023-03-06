@@ -1,4 +1,4 @@
-import {SplineCard, CardLink} from "../SplineCard.js";
+import {SplineCard, CardLink, DEFAULT_CARD_HEIGHT} from "../SplineCard.js";
 import {PreviewProps} from "./index.js";
 import {CubicSpline} from "deepslate";
 import {createContext} from "preact";
@@ -57,8 +57,6 @@ export const SplinePreview = ({data}: PreviewProps) => {
         }
 
         const INDENT = 10
-        // Keep it matched with CSS height of spline-card in global.css
-        const DEFAULT_CARD_HEIGHT = 120
         let result: JSX.Element[] = []
         if (!checkSpline(data))
             return {elements: result, defaultVal: 0, height: 0}

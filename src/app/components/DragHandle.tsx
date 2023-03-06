@@ -1,4 +1,5 @@
 import {ComponentChildren, Ref} from "preact";
+import {useEffect, useRef} from "preact/hooks";
 
 interface Props {
     class: string
@@ -10,6 +11,8 @@ interface Props {
 }
 
 export function DragHandle({class: clazz, reference, onDrag, buttons, propagate, children}: Props) {
+    const onDragRef = useRef(onDrag)
+    useEffect(() => {onDragRef.current = onDrag}, [onDrag])
 
     function match(btn: number): boolean {
         if (!buttons)
@@ -31,7 +34,7 @@ export function DragHandle({class: clazz, reference, onDrag, buttons, propagate,
     }
 
     function onMouseMove(e: MouseEvent) {
-        onDrag(e)
+        onDragRef.current(e)
         if (!propagate)
             e.stopPropagation()
     }

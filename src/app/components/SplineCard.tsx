@@ -2,15 +2,11 @@ import {StateUpdater, useContext, useEffect, useRef, useState} from 'preact/hook
 import {Octicon} from "./index.js";
 import {CubicSpline} from "deepslate";
 import {clamp, Coordinate, CoordinateListener, pos2n} from "../Utils.js";
-import {
-    genCardLinkColor,
-    Manager,
-    Offset, PosResetCnt,
-    ShowCoordName
-} from "./previews/SplinePreview.js";
+import {genCardLinkColor, Manager, Offset, PosResetCnt, ShowCoordName} from "./previews/SplinePreview.js";
+import {DragHandle} from "./DragHandle.js";
+import {vec2} from "gl-matrix";
 import MultiPoint = CubicSpline.MultiPoint;
 import Constant = CubicSpline.Constant;
-import {DragHandle} from "./DragHandle.js";
 
 export type ValueChangeHandler = (newVal: number) => any
 
@@ -67,6 +63,9 @@ class Transformation {
     }
 }
 
+export const DEFAULT_CARD_WIDTH = 200
+export const DEFAULT_CARD_HEIGHT = 120
+
 // TODO Determine supported version
 export function SplineCard({
                                coordinate,
@@ -76,12 +75,12 @@ export function SplineCard({
                                placePos = {x: 0, y: 0},
                                setFocused
                            }: Props) {
-    const card = useRef<HTMLDivElement>(null)
     const canvas = useRef<HTMLCanvasElement>(null)
     const indicator = useRef<HTMLDivElement>(null)
 
-    const [posX, setPosX] = useState(placePos.x)
-    const [posY, setPosY] = useState(placePos.y)
+    const [pos, setPos] = useState<vec2>([placePos.x, placePos.y])
+    const [size, setSize] = useState<vec2>([DEFAULT_CARD_WIDTH, DEFAULT_CARD_HEIGHT])
+    const [borderStyle, setBorderStyle] = useState<string>(outputLink ? `2px solid ${outputLink.color}` : 'unset')
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
     const lastCoord = useRef<Coordinate | number | null>(null)
     const lastCoordListener = useRef<CoordinateListener | null>(null)
@@ -93,6 +92,7 @@ export function SplineCard({
             for (const link of inputLinkList) {
                 link.handleValueChange = (newVal: number) => {
                     spline.values[link.valIndex] = new Constant(newVal)
+                    spline.calculateMinMax()
                     draw()
                     if (outputLink?.handleValueChange)
                         outputLink.handleValueChange(sample())
@@ -106,9 +106,9 @@ export function SplineCard({
     }, [inputLinkList, spline, outputLink])
 
     function onCoordChange(redraw: boolean) {
-        if (indicator.current && card.current) {
+        if (indicator.current) {
             let newX: number
-            const width = card.current.clientWidth
+            const width = size[0]
             if (typeof coordinate == 'number' || coordinate.min() == coordinate.max()) {
                 newX = (width / 2 - INDICATOR_WIDTH / 2) / width
             } else {
@@ -142,22 +142,18 @@ export function SplineCard({
     }, [spline, coordinate, outputLink])
 
     useEffect(() => {
-        setPosX(placePos.x)
-        setPosY(placePos.y)
-        if (card.current) {
-            // Default width / height described in CSS, keep them matched with CSS value
-            card.current.style.width = '200px'
-            card.current.style.height = '120px'
-        }
+        setPos([placePos.x, placePos.y])
+        // Default width / height described in CSS, keep them matched with CSS value
+        setSize([DEFAULT_CARD_WIDTH, DEFAULT_CARD_HEIGHT])
         draw()
     }, [useContext(PosResetCnt)])
 
     function sample() {
-        if (!indicator.current || !card.current)
+        if (!indicator.current)
             return 0
         if (typeof coordinate == 'number')
             return spline.compute(coordinate)
-        const X = card.current.clientWidth - 2 * RESIZE_WIDTH
+        const X = size[0] - 2 * RESIZE_WIDTH
         const x = indicator.current.offsetLeft + INDICATOR_WIDTH / 2
         return spline.compute(coordinate.min() + x / X * (coordinate.max() - coordinate.min()))
     }
@@ -179,7 +175,8 @@ export function SplineCard({
         const height = canvas.current.clientHeight
         canvas.current.width = width
         canvas.current.height = height
-        ctx.strokeStyle = "rgb(154,154,154)"
+        const root = document.documentElement
+        ctx.strokeStyle = getComputedStyle(root).getPropertyValue('--text-2')
         const maxAbs = Math.max(Math.abs(spline.max()), Math.abs(spline.min()))
 
         if (spline instanceof Constant || typeof coordinate == 'number') {
@@ -222,46 +219,39 @@ export function SplineCard({
     }
 
     function move(dX: number, dY: number) {
-        if (!card.current)
-            return
-        setPosX((prevX => prevX + dX))
-        setPosY((prevY => prevY + dY))
+        setPos(prevPos => [prevPos[0] + dX, prevPos[1] + dY])
     }
 
     function onDragMove(e: MouseEvent) {
-        if (!card.current)
-            return
         move(e.movementX, e.movementY)
     }
 
     function buildResizeHandler(direction: ResizeDirection) {
         return (e: MouseEvent) => {
-            if (!card.current)
-                return
 
-            const width = card.current.clientWidth
-            const height = card.current.clientHeight
+            const width = size[0]
+            const height = size[1]
             let dW = e.movementX * direction.width
             dW = clamp(width + dW, MIN_WIDTH, Infinity) - width
-            card.current.style.width = `${width + dW}px`
             let dX = Math.abs(dW) * Math.sign(e.movementX)
-            move(dX * direction.posX, 0)
 
             let dH = e.movementY * direction.height
             dH = clamp(height + dH, MIN_HEIGHT, Infinity) - height
-            card.current.style.height = `${height + dH}px`
             let dY = Math.abs(dH) * Math.sign(e.movementY)
-            move(0, dY * direction.posY)
-            draw()
+
+            move(dX * direction.posX, dY * direction.posY)
+            setSize([width + dW, height + dH])
         }
     }
 
+    useEffect(() => draw(), [size])
+
     function onIndicatorMove(e: MouseEvent) {
         e.stopPropagation()
-        if (!(indicator.current) || !(card.current) || typeof coordinate == 'number') {
+        if (!(indicator.current) || typeof coordinate == 'number') {
             return
         }
-        const width = card.current.clientWidth - 2 * RESIZE_WIDTH
+        const width = size[0] - 2 * RESIZE_WIDTH
         let newVal = indicator.current.offsetLeft + e.movementX
         newVal = clamp(newVal, RESIZE_WIDTH - INDICATOR_WIDTH / 2, width + RESIZE_WIDTH - INDICATOR_WIDTH / 2)
         newVal += INDICATOR_WIDTH / 2 - RESIZE_WIDTH
@@ -292,29 +282,27 @@ export function SplineCard({
         setFocused([])
     }
 
-    function getBorderStyle() {
-        return `${outputLink?.color ? (`2px solid ${outputLink.color}`) : 'unset'}`
-    }
-
-    function setBorderStyle() {
-        if (!card.current)
-            return
-        card.current.style.border = getBorderStyle()
+    function updateBorderStyle(){
+        setBorderStyle(`${outputLink?.color ? (`2px solid ${outputLink.color}`) : 'unset'}`)
     }
 
     function onColorRefresh() {
         if (outputLink?.handleColorChange) {
             outputLink.color = genCardLinkColor()
             outputLink.handleColorChange()
-            setBorderStyle()
+            updateBorderStyle()
         }
     }
 
+    useEffect(() => updateBorderStyle(), [outputLink])
+
     return <>
-        <div class="spline-card" ref={card} style={{
-            left: `${useContext(Offset).x + posX}px`,
-            top: `${useContext(Offset).y + posY}px`,
-            border: getBorderStyle()
+        <div class="spline-card" style={{
+            left: `${useContext(Offset).x + pos[0]}px`,
+            top: `${useContext(Offset).y + pos[1]}px`,
+            width: `${size[0]}px`,
+            height: `${size[1]}px`,
+            border: borderStyle
         }}>
             <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} reference={indicator}
                         onDrag={onIndicatorMove}/>
