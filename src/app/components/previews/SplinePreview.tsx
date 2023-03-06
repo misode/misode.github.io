@@ -1,6 +1,6 @@
 import {SplineCard, CardLink, DEFAULT_CARD_HEIGHT} from "../SplineCard.js";
 import {PreviewProps} from "./index.js";
-import {CubicSpline} from "deepslate";
+import {CubicSpline, MinMaxNumberFunction} from "deepslate";
 import {createContext} from "preact";
 import fromJson = CubicSpline.fromJson;
 import {useMemo, useRef, useState} from "preact/hooks";
@@ -40,7 +40,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
             if (!('coordinate' in data) || !('points' in data))
                 return false
             let coordType = typeof data.coordinate
-            if (coordType != 'string' && coordType != 'number')
+            if (coordType != 'string' && coordType != 'number' && coordType != 'object')
                 return false
             return data.points instanceof Array;
 
@@ -113,11 +113,22 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 inputLinkList = [...inputLinkList, inputLink]
             }
         }
-        const coordName = typeof spline.coordinate == 'object' ?
-            `Inline${simpleHash(JSON.stringify(spline.coordinate))}` :
-            `${spline.coordinate}`
-        const coordinate = managerRef.current.addOrGetCoordinate(coordName)
-        const cubicSpline = fromJson(spline, coordinate.toExtractor())
+
+        let coordinate: number | Coordinate
+        switch(typeof spline.coordinate) {
+            case 'number': coordinate = spline.coordinate; break
+            case 'string': coordinate = managerRef.current.addOrGetCoordinate(spline.coordinate); break
+            case 'object': coordinate = managerRef.current.addOrGetCoordinate(`Inline${simpleHash(JSON.stringify(spline.coordinate))}`); break
+            default: throw 'The given coordinate is neither number, string or object. Contact dev. '
+        }
+        const extractor: () => MinMaxNumberFunction<number> = coordinate instanceof Coordinate ?
+            coordinate.toExtractor() :
+            (): MinMaxNumberFunction<number> => { return {
+                    compute: (c: number) => {return c},
+                    minValue: () => {return spline.coordinate},
+                    maxValue: () => {return spline.coordinate}
+            }}
+        const cubicSpline = fromJson(spline, extractor)
         result = [...result, <SplineCard
             coordinate={coordinate}
             spline={cubicSpline}
@@ -126,9 +137,8 @@ export const SplinePreview = ({data}: PreviewProps) => {
             placePos={{x: placePos.x + INDENT, y: placePos.y + INDENT}}
             setFocused={setFocused}
         />]
-
-
-        return {elements: result, defaultVal: cubicSpline.compute(coordinate.val()), height: totHeight}
+        const x = coordinate instanceof Coordinate ? coordinate.val() : coordinate
+        return {elements: result, defaultVal: cubicSpline.compute(x), height: totHeight}
     }
 
     const cards = useMemo(() => {

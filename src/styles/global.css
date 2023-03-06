@@ -1678,12 +1678,20 @@ hr {
 	cursor: nwse-resize
 }
 
+.spline-card .indicator-zone {
+	position: absolute;
+	top: 25px;
+	left: 6px;
+	right: 6px;
+	bottom: 6px;
+	cursor: crosshair;
+}
+
 .spline-card .indicator {
-	display: inline;
 	position: absolute;
 	left: 50%;
-	top: 25px;
-	bottom: 6px;
+	top: 0px;
+	bottom: 0px;
 	width: 2px;
 	background-color: #a89b30;
 	cursor: ew-resize;

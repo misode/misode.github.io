@@ -88,9 +88,9 @@ export function SplineCard({
                 newX = (width / 2 - INDICATOR_WIDTH / 2) / width
             } else {
                 newX = (coordinate.val() - coordinate.min()) / (coordinate.max() - coordinate.min()) * width
-                newX += RESIZE_WIDTH - INDICATOR_WIDTH / 2
+                newX = (newX - INDICATOR_WIDTH / 2) / width
             }
-            indicator.current.style.left = `${newX}px`
+            indicator.current.style.left = `${newX*100}%`
         }
     }
 
@@ -100,7 +100,7 @@ export function SplineCard({
             return
 
         const width = canvas.current.clientWidth
-        let newVal = indicator.current.offsetLeft + e.movementX - RESIZE_WIDTH + INDICATOR_WIDTH / 2
+        let newVal = indicator.current.offsetLeft + e.movementX + INDICATOR_WIDTH / 2
         newVal = clamp(newVal, 0, width)
         newVal = newVal / width * (coordinate.max() - coordinate.min()) + coordinate.min()
         coordinate.setValue(newVal)
@@ -180,6 +180,7 @@ export function SplineCard({
         }
 
         const mat = mat3.create()
+        console.log(coordinate)
         const offsetX = -coordinate.min() * width / (coordinate.max() - coordinate.min())
         const offsetY = height / 2
         const scaleX = width / (coordinate.max() - coordinate.min())
@@ -243,7 +244,7 @@ export function SplineCard({
 
     useEffect(() => draw(), [size])
 
-    function onCanvasHover(e: MouseEvent) {
+    function onHover(e: MouseEvent) {
         if (!canvas.current)
             return
         let x: number
@@ -259,11 +260,11 @@ export function SplineCard({
             vec2.transformMat3(point, point, mat)
             x = point[0]
             y = spline.compute(x)
+            setFocused([`x:${x.toPrecision(3)}`, `y:${y.toPrecision(3)}`])
         } else {
-            x = coordinate
             y = spline.compute(coordinate)
+            setFocused([`y:${y.toPrecision(3)}`])
         }
-        setFocused([`x:${x.toPrecision(3)}`, `y:${y.toPrecision(3)}`])
     }
 
     function onMouseLeave() {
@@ -292,7 +293,9 @@ export function SplineCard({
             height: `${size[1]}px`,
             border: borderStyle
         }}>
-            <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} onDrag={onIndicatorMove} reference={indicator}/>
+            <div class={'indicator-zone'} onMouseMove={onHover} onMouseLeave={onMouseLeave}>
+                <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} onDrag={onIndicatorMove} reference={indicator}/>
+            </div>
             <div className={`refresh btn${outputLink ? '' : ' hidden'}`}
                  onClick={onColorRefresh}>{Octicon['sync']}</div>
             <div class={`coordinate${useContext(ShowCoordName) ? '' : ' hidden'}`}>
@@ -301,8 +304,7 @@ export function SplineCard({
             <DragHandle class="drag" onDrag={onDragMove}>{Octicon['three_bars']}</DragHandle>
             <DragHandle class="resize left" onDrag={buildResizeHandler({width: -1, height: 0, posX: 1, posY: 0})}
             />
-            <canvas ref={canvas} style={{backgroundColor: 'transparent'}}
-                    onMouseMove={onCanvasHover} onMouseLeave={onMouseLeave}>
+            <canvas ref={canvas} style={{backgroundColor: 'transparent'}}>
                 Ugh it seems your browser doesn't support HTML Canvas element.
             </canvas>
             <DragHandle class="resize right" onDrag={buildResizeHandler({width: 1, height: 0, posX: 0, posY: 0})}
