@@ -164,7 +164,7 @@ export function SplineCard({
 
     // Draw curve
     function draw() {
-        if(spline.min() === -Infinity && spline.max() === Infinity)
+        if (spline.min() === -Infinity && spline.max() === Infinity)
             spline.calculateMinMax()
         if (!canvas.current)
             return
@@ -316,20 +316,14 @@ export function SplineCard({
             top: `${useContext(Offset).y + posY}px`,
             border: getBorderStyle()
         }}>
-            {
-                outputLink ?
-                    <>
-                        <DragHandle class="indicator" reference={indicator} onDrag={onIndicatorMove}/>
-                        <div className="refresh btn" onClick={onColorRefresh}>{Octicon['sync']}</div>
-                    </> :
-                    <></>
-            }
-            {
-                useContext(ShowCoordName) ?
-                    <div class="coordinate"> {`${typeof coordinate == 'number' ? coordinate : coordinate.name}`} </div> :
-                    <></>
-            }
-            <DragHandle class="drag" onDrag={onDragMove} propagate={false}>{Octicon['three_bars']}</DragHandle>
+            <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} reference={indicator}
+                        onDrag={onIndicatorMove}/>
+            <div className={`refresh btn${outputLink ? '' : ' hidden'}`}
+                 onClick={onColorRefresh}>{Octicon['sync']}</div>
+            <div class={`coordinate${useContext(ShowCoordName) ? '' : ' hidden'}`}>
+                {`${typeof coordinate == 'number' ? coordinate : coordinate.name}`}
+            </div>
+            <DragHandle class="drag" onDrag={onDragMove}>{Octicon['three_bars']}</DragHandle>
             <DragHandle class="resize left" onDrag={buildResizeHandler({width: -1, height: 0, posX: 1, posY: 0})}
             />
             <canvas ref={canvas} style={{backgroundColor: 'transparent'}}

@@ -1689,6 +1689,10 @@ hr {
 	cursor: ew-resize;
 }
 
+.spline-card .hidden {
+	display: none;
+}
+
 [data-ea-publisher] {
 	margin: 0 16px 8px;
 	min-height: 69.38px;
