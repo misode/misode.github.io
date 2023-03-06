@@ -80,7 +80,7 @@ export function SplineCard({
         draw()
     }, [inputLinkList, spline, outputLink])
 
-    function updateIndicatorPos(){
+    function updateIndicatorPos() {
         if (canvas.current && indicator.current) {
             let newX: number
             const width = canvas.current.clientWidth
@@ -90,7 +90,7 @@ export function SplineCard({
                 newX = (coordinate.val() - coordinate.min()) / (coordinate.max() - coordinate.min()) * width
                 newX = (newX - INDICATOR_WIDTH / 2) / width
             }
-            indicator.current.style.left = `${newX*100}%`
+            indicator.current.style.left = `${newX * 100}%`
         }
     }
 
@@ -171,7 +171,7 @@ export function SplineCard({
         ctx.strokeStyle = getComputedStyle(root).getPropertyValue('--text-2')
         const maxAbs = Math.max(Math.abs(spline.max()), Math.abs(spline.min()))
 
-        if (spline instanceof Constant || typeof coordinate == 'number') {
+        if (spline instanceof Constant || typeof coordinate == 'number' || coordinate.min() == coordinate.max() || spline.min() == spline.max()) {
             ctx.beginPath()
             ctx.moveTo(0, height / 2)
             ctx.lineTo(width, height / 2)
@@ -294,7 +294,8 @@ export function SplineCard({
             border: borderStyle
         }}>
             <div class={'indicator-zone'} onMouseMove={onHover} onMouseLeave={onMouseLeave}>
-                <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} onDrag={onIndicatorMove} reference={indicator}/>
+                <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} onDrag={onIndicatorMove}
+                            reference={indicator}/>
             </div>
             <div className={`refresh btn${outputLink ? '' : ' hidden'}`}
                  onClick={onColorRefresh}>{Octicon['sync']}</div>
