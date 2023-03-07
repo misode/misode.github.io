@@ -4,7 +4,7 @@ import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics.js'
 import { Header } from './components/index.js'
-import { Changelog, Generator, Generators, Guide, Guides, Home, Partners, Sounds, Versions, Worldgen } from './pages/index.js'
+import { Changelog, Generator, Generators, Guide, Guides, Home, Partners, Sounds, Transformation, Versions, Worldgen } from './pages/index.js'
 import { cleanUrl } from './Utils.js'
 
 export function App() {
@@ -24,6 +24,7 @@ export function App() {
 			<Sounds path="/sounds" />
 			<Changelog path="/changelog" />
 			<Versions path="/versions" />
+			<Transformation path="/transformation" />
 			<Guides path="/guides" />
 			<Guide path="/guides/:id" />
 			<Generator default />

@@ -25,7 +25,8 @@
 	--nav-faded-hover: #6e6e6e;
 	--selection: #445a9599;
 	--errors-background: #62190f;
-	--errors-background-hover: #57140b;
+	--errors-background-2: #471610;
+	--errors-background-3: #3f140f;
 	--errors-text: #ffffffcc;
   --invalid-text: #fd7951;
 	--text-saturation: 60%;
@@ -63,6 +64,8 @@
 	--nav-faded-hover: #bcbfc3;
 	--selection: #6786dd99;
 	--errors-background: #f66653;
+	--errors-background-2: #c13b29;
+	--errors-background-3: #d8503e;
 	--errors-text: #000000cc;
   --invalid-text: #a32600;
 	--text-saturation: 100%;
@@ -101,10 +104,12 @@
 		--nav-faded-hover: #bcbfc3;
 		--selection: #6786dd99;
 		--errors-background: #f66653;
+		--errors-background-2: #c13b29;
+		--errors-background-3: #d8503e;
 		--errors-text: #000000cc;
 		--invalid-text: #a32600;
 		--text-saturation: 100%;
-		--text-lightness: 35%;
+		--text-lightness: 30%;
 		--editor-variable: #0451A5;
 		--editor-string: #A31515;
 		--editor-constant: #0000FF;
@@ -571,6 +576,72 @@ main.has-project {
 	position: absolute;
 }
 
+.transformation-editor {
+	display: flex;
+	padding: 8px 16px;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.transformation-input {
+	display: flex;
+	align-items: center;
+	margin-bottom: 2px;
+}
+
+.transformation-input > * + * {
+	margin-left: 8px;
+}
+
+.transformation-input label {
+	color: var(--text-3);
+	font-family: consolas;
+}
+
+.transformation-input input[type=number] {
+	width: 100px;
+	padding: 3px 6px;
+	border: none;
+	border-radius: 3px;
+	font-size: 14px;
+	background-color: var(--background-2);
+	color: var(--text-2);
+}
+
+.transformation-title {
+	display: flex;
+	margin-bottom: 2px;
+	align-items: flex-end;
+}
+
+.transformation-title span {
+	margin-right: 4px;
+}
+
+.transformation-title button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 4px 6px;
+	background-color: var(--background-4);
+	border: none;
+	border-radius: 3px;
+	margin-left: 4px;
+	cursor: pointer;
+}
+
+.transformation-title button:hover {
+	background-color: var(--background-5);
+}
+
+.transformation-section:not(:first-child) {
+	margin-top: 8px;
+}
+
+.transformation-matrix .transformation-input:nth-child(4n+2):not(:nth-of-type(1)) {
+	margin-top: 8px;
+}
+
 .btn {
 	display: flex;
 	align-items: center;
@@ -748,7 +819,7 @@ main.has-project {
 }
 
 .btn.danger:not(.btn-input):not(.disabled):hover {
-	background-color: var(--errors-background-hover);
+	background-color: var(--errors-background-2);
 }
 
 .btn-menu .result-list {
@@ -1013,6 +1084,25 @@ main.has-project {
 
 .error a {
 	color: var(--text-1)
+}
+
+.error-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.error-action {
+	display: flex;
+	align-items: center;
+	background-color: var(--errors-background-2);
+	padding: 8px 12px;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.error-action:hover {
+	background-color: var(--errors-background-3);
 }
 
 .modal {
@@ -1348,7 +1438,7 @@ hr {
 	font-family: MinecraftSeven, sans-serif;
 	font-size: 20px;
 	position: relative;
-  white-space: nowrap;
+  white-space: pre;
 	line-height: 1.1	;
 }
 

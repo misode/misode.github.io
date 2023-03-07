@@ -136,10 +136,28 @@
       "noPath": true
     },
     {
+      "id": "damage_type",
+      "url": "damage-type",
+      "schema": "damage_type",
+      "minVersion": "1.19.4"
+    },
+    {
       "id": "chat_type",
       "url": "chat-type",
       "schema": "chat_type",
       "minVersion": "1.19"
+    },
+    {
+      "id": "trim_material",
+      "url": "trim-material",
+      "schema": "trim_material",
+      "minVersion": "1.19.4"
+    },
+    {
+      "id": "trim_pattern",
+      "url": "trim-pattern",
+      "schema": "trim_pattern",
+      "minVersion": "1.19.4"
     },
     {
       "id": "pack_mcmeta",

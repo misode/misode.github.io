@@ -1,4 +1,4 @@
-import { useRef, useState } from 'preact/hooks'
+import { useCallback, useRef, useState } from 'preact/hooks'
 
 interface ActiveTimeoutOptions {
 	cooldown?: number,
@@ -9,13 +9,13 @@ export function useActiveTimeout({ cooldown, invert, initial }: ActiveTimeoutOpt
 	const [active, setActive] = useState(initial)
 	const timeout = useRef<number | undefined>(undefined)
 
-	const trigger = () => {
+	const trigger = useCallback(() => {
 		setActive(invert ? false : true)
 		if (timeout.current !== undefined) clearTimeout(timeout.current)
 		timeout.current = setTimeout(() => {
 			setActive(invert ? true : false)
 		}, cooldown ?? 2000) as any
-	}
+	}, [])
 
 	return [active, trigger]
 }

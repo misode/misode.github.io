@@ -92,6 +92,9 @@ function Tools() {
 		<ToolCard title="Minecraft Sounds" icon="sounds"
 			link="/sounds/"
 			desc="Browse through and mix all the vanilla sounds" />
+		<ToolCard title="Transformation preview"
+			link="/transformation/"
+			desc="Visualize transformations for display entities" />
 		<ToolCard title="Data Pack Upgrader"
 			link="https://misode.github.io/upgrader/"
 			desc="Convert your data packs from 1.16 to 1.19" />
@@ -129,17 +132,12 @@ function Changelog() {
 
 const KOFI_SUPPORTERS = [
 	{
-		name: 'RoarkCats',
-		avatar: 'https://ko-fi.com/img/anon7.png',
+		name: 'oitsjustjose',
+		avatar: 'https://ko-fi.com/img/anon10.png',
 	},
 	{
-		name: 'MC Silver',
-		avatar: 'https://ko-fi.com/img/anon7.png',
-	},
-	{
-		name: 'Hugman',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
-		url: 'https://ko-fi.com/G2G5DNROO',
+		name: 'Panossa',
+		avatar: 'https://ko-fi.com/img/anon5.png',
 	},
 	{
 		name: 'TelepathicGrunt',
@@ -147,8 +145,17 @@ const KOFI_SUPPORTERS = [
 		url: 'https://github.com/TelepathicGrunt',
 	},
 	{
-		name: 'oitsjustjose',
-		avatar: 'https://ko-fi.com/img/anon10.png',
+		name: 'Hugman',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
+		url: 'https://ko-fi.com/G2G5DNROO',
+	},
+	{
+		name: 'RoarkCats',
+		avatar: 'https://storage.ko-fi.com/cdn/useruploads/tiny_03381e9f-4a6d-41dc-9f96-1a733c0e114a.png',
+	},
+	{
+		name: 'MC Silver',
+		avatar: 'https://ko-fi.com/img/anon7.png',
 	},
 	{
 		name: 'rx97',

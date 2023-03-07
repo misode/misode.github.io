@@ -1,9 +1,10 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
-import type { Random } from 'deepslate/core'
+import type { Random } from 'deepslate'
+import { Matrix3, Matrix4, Vector } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
-import { vec2 } from 'gl-matrix'
+import { quat, vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
@@ -376,4 +377,165 @@ export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: 
 		img.data[4 * i + 2] = color[2]
 		img.data[4 * i + 3] = 255
 	}
+}
+
+function makeFloat(a: number) {
+	return a > 3.4028235E38 ? Infinity : a < -3.4028235E38 ? -Infinity : a
+}
+
+const G = 3 + 2 * Math.sqrt(2)
+const CS = Math.cos(Math.PI / 8)
+const SS = Math.sin(Math.PI / 8)
+function approxGivensQuat(a: number, b: number, c: number): [number, number] {
+	const d = 2 * (a - c)
+	if (makeFloat(G * b * b) < makeFloat(d * d)) {
+		const e = 1 / Math.sqrt(b * b + d * d)
+		return [e * b, e * d]
+	} else {
+		return [SS, CS]
+	}
+}
+
+function qrGivensQuat(a: number, b: number) {
+	const c = Math.hypot(a, b)
+	let d = c > 1e-6 ? b : 0
+	let e = Math.abs(a) + Math.max(c, 1e-6)
+	if (a < 0) {
+		[d, e] = [e, d]
+	}
+	const f = 1 / Math.sqrt(e * e + d * d)
+	return [d * f, e * f]
+}
+
+// modifies the passed mat3
+function stepJacobi(m: Matrix3): quat {
+	const n = new Matrix3()
+	const q = quat.create()
+	if (m.m01 * m.m01 + m.m10 * m.m10 > 1e-6) {
+		const [a, b] = approxGivensQuat(m.m00, 0.5 * (m.m01 + m.m10), m.m11)
+		const r = quat.fromValues(0, 0, a, b)
+		const c = b * b - a * a
+		const d = -2 * a * b
+		const e = b * b + a * a
+		quat.mul(q, q, r)
+		n.m00 = c
+		n.m11 = c
+		n.m01 = -d
+		n.m10 = d
+		n.m22 = e
+		m.mul(n)
+		n.transpose().mul(m)
+		m.copy(n)
+	}
+	if (m.m02 * m.m02 + m.m20 * m.m20 > 1e-6) {
+		const pair = approxGivensQuat(m.m00, 0.5 * (m.m02 + m.m20), m.m22)
+		const a = -pair[0]
+		const b = pair[1]
+		const r = quat.fromValues(0, a, 0, b)
+		const c = b * b - a * a
+		const d = -2 * a * b
+		const e = b * b + a * a
+		quat.mul(q, q, r)
+		n.m00 = c
+		n.m22 = c
+		n.m02 = d
+		n.m20 = -d
+		n.m11 = e
+		m.mul(n)
+		n.transpose().mul(m)
+		m.copy(n)
+	}
+	if (m.m12 * m.m12 + m.m21 * m.m21 > 1e-6) {
+		const [a, b] = approxGivensQuat(m.m11, 0.5 * (m.m12 + m.m21), m.m22)
+		const r = quat.fromValues(a, 0, 0, b)
+		const c = b * b - a * a
+		const d = -2 * a * b
+		const e = b * b + a * a
+		quat.mul(q, q, r)
+		n.m11 = c
+		n.m22 = c
+		n.m12 = -d
+		n.m21 = d
+		n.m00 = e
+		m.mul(n)
+		n.transpose().mul(m)
+		m.copy(n)
+	}
+	return q
+}
+
+export function svdDecompose(m: Matrix3): [quat, Vector, quat] {
+	const q = quat.create()
+	const r = quat.create()
+	const n = m.clone()
+		.transpose()
+		.mul(m)
+
+	for (let i = 0; i < 5; i += 1) {
+		quat.mul(r, r, stepJacobi(n))
+	}
+	quat.normalize(r, r)
+	const p0 = m.clone()
+		.mul(Matrix3.fromQuat(r))
+	let f = 1
+
+	const [a1, b1] = qrGivensQuat(p0.m00, p0.m01)
+	const c1 = b1 * b1 - a1 * a1
+	const d1 = -2 * a1 * b1
+	const e1 = b1 * b1 + a1 * a1
+	const s1 = quat.fromValues(0, 0, a1, b1)
+	quat.mul(q, q, s1)
+	const p1 = new Matrix3()
+	p1.m00 = c1
+	p1.m11 = c1
+	p1.m01 = d1
+	p1.m10 = -d1
+	p1.m22 = e1
+	f *= e1
+	p1.mul(p0)
+
+	const pair = qrGivensQuat(p1.m00, p1.m02)
+	const a2 = -pair[0]
+	const b2 = pair[1]
+	const c2 = b2 * b2 - a2 * a2
+	const d2 = -2 * a2 * b2
+	const e2 = b2 * b2 + a2 * a2
+	const s2 = quat.fromValues(0, a2, 0, b2)
+	quat.mul(q, q, s2)
+	const p2 = new Matrix3()
+	p2.m00 = c2
+	p2.m22 = c2
+	p2.m02 = -d2
+	p2.m20 = d2
+	p2.m11 = e2
+	f *= e2
+	p2.mul(p1)
+
+	const [a3, b3] = qrGivensQuat(p2.m11, p2.m12)
+	const c3 = b3 * b3 - a3 * a3
+	const d3 = -2 * a3 * b3
+	const e3 = b3 * b3 + a3 * a3
+	const s3 = quat.fromValues(a3, 0, 0, b3)
+	quat.mul(q, q, s3)
+	const p3 = new Matrix3()
+	p3.m11 = c3
+	p3.m22 = c3
+	p3.m12 = d3
+	p3.m21 = -d3
+	p3.m00 = e3
+	f *= e3
+	p3.mul(p2)
+
+	f = 1 / f
+	quat.scale(q, q, Math.sqrt(f))
+	const scale = new Vector(p3.m00 * f, p3.m11 * f, p3.m22 * f)
+	return [q, scale, r]
+}
+
+export function composeMatrix(translation: Vector, leftRotation: quat, scale: Vector, rightRotation: quat) {
+	return new Matrix4()
+		.translate(translation)
+		.mul(Matrix4.fromQuat(leftRotation))
+		.scale(scale)
+		.mul(Matrix4.fromQuat(rightRotation))
 }

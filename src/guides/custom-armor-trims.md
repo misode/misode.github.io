@@ -146,7 +146,7 @@ Now to finish off with the resource pack. Let's quickly add a language file used
 **`assets/example/lang/en_us.json`**
 ```json
 {
-  "trim_material.example.ender_pearl": "Ender Pearl Material"
+  "trim_material.example.ender": "Ender Material"
 }
 ```
 

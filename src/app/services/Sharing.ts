@@ -9,7 +9,6 @@ export async function shareSnippet(type: string, version: VersionId, jsonData: a
 	try {
 		const raw = JSON.stringify(jsonData)
 		const data = lz.compressToBase64(raw)
-		console.debug('Compression rate', raw.length / raw.length)
 		const body = JSON.stringify({ data, type, version, show_preview })
 		let id = ShareCache.get(body)
 		if (!id) {

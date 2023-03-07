@@ -36,39 +36,41 @@ export function ItemTooltip({ item, advanced }: Props) {
 
 	return <>
 		<TextComponent component={name} base={{ color: 'white', italic: displayName.length > 0 }} />
-		{(!advanced && displayName.length === 0 && item.is('filled_map') && item.tag.hasNumber('map')) && <>
-			<TextComponent component={{ text: `#${item.tag.getNumber('map')}`, color: 'gray' }} />
+		{shouldShow(item, 'additional') && <>
+			{(!advanced && displayName.length === 0 && item.is('filled_map') && item.tag.hasNumber('map')) && <>
+				<TextComponent component={{ text: `#${item.tag.getNumber('map')}`, color: 'gray' }} />
+			</>}
+			{(item.is('filled_map') && advanced) && <>
+				<TextComponent component={{ translate: 'filled_map.unknown', color: 'gray' }} />
+			</>}
+			{isPotion && effects.length === 0
+				? <TextComponent component={{ translate: 'effect.none', color: 'gray' }} />
+				: effects.map(e => {
+					const color = e.effect.category === 'harmful' ? 'red' : 'blue'
+					let component: any = { translate: `effect.${e.effect.id.namespace}.${e.effect.id.path}` }
+					if (e.amplifier > 0) {
+						component = { translate: 'potion.withAmplifier', with: [component, { translate: `potion.potency.${e.amplifier}` }] }
+					}
+					if (e.duration > 20) {
+						component = { translate: 'potion.withDuration', with: [component, MobEffectInstance.formatDuration(e)] }
+					}
+					return <TextComponent component={{ ...component, color }} />
+				})}
+			{attributeModifiers.length > 0 && <>
+				<TextComponent component='' />
+				<TextComponent component={{ translate: 'potion.whenDrank', color: 'dark_purple' }} />
+				{attributeModifiers.map(([attr, { amount, operation }]) => {
+					const a = operation === AttributeModifierOperation.addition ? amount * 100 : amount
+					if (amount > 0) {
+						return <TextComponent component={{ translate: `attribute.modifier.plus.${operation}`, with: [Math.floor(a * 100) / 100, { translate: `attribute.name.${attr.id.path}` }], color: 'blue' }} />
+					} else if (amount < 0) {
+						return <TextComponent component={{ translate: `attribute.modifier.take.${operation}`, with: [Math.floor(a * -100) / 100, { translate: `attribute.name.${attr.id.path}` }], color: 'red' }} />
+					}
+					return null
+				})}
+			</>}
 		</>}
-		{(item.is('filled_map') && advanced) && <>
-			<TextComponent component={{ translate: 'filled_map.unknown', color: 'gray' }} />
-		</>}
-		{isPotion && effects.length === 0
-			? <TextComponent component={{ translate: 'effect.none', color: 'gray' }} />
-			: effects.map(e => {
-				const color = e.effect.category === 'harmful' ? 'red' : 'blue'
-				let component: any = { translate: `effect.${e.effect.id.namespace}.${e.effect.id.path}` }
-				if (e.amplifier > 0) {
-					component = { translate: 'potion.withAmplifier', with: [component, { translate: `potion.potency.${e.amplifier}` }] }
-				}
-				if (e.duration > 20) {
-					component = { translate: 'potion.withDuration', with: [component, MobEffectInstance.formatDuration(e)] }
-				}
-				return <TextComponent component={{ ...component, color }} />
-			})}
-		{attributeModifiers.length > 0 && <>
-			<TextComponent component='' />
-			<TextComponent component={{ translate: 'potion.whenDrank', color: 'dark_purple' }} />
-			{attributeModifiers.map(([attr, { amount, operation }]) => {
-				const a = operation === AttributeModifierOperation.addition ? amount * 100 : amount
-				if (amount > 0) {
-					return <TextComponent component={{ translate: `attribute.modifier.plus.${operation}`, with: [Math.floor(a * 100) / 100, { translate: `attribute.name.${attr.id.path}` }], color: 'blue' }} />
-				} else if (amount < 0) {
-					return <TextComponent component={{ translate: `attribute.modifier.take.${operation}`, with: [Math.floor(a * -100) / 100, { translate: `attribute.name.${attr.id.path}` }], color: 'red' }} />
-				}
-				return null
-			})}
-		</>}
-		{enchantments.map(enchantment => {
+		{shouldShow(item, 'enchantments') && enchantments.map(enchantment => {
 			const id = enchantment.getString('id')
 			const lvl = enchantment.getNumber('lvl')
 			const ench = Enchantment.REGISTRY.get(Identifier.parse(id))
@@ -79,12 +81,12 @@ export function ItemTooltip({ item, advanced }: Props) {
 			return <TextComponent component={component} />
 		})}
 		{item.tag.hasCompound('display') && <>
-			{item.tag.getCompound('display').hasNumber('color') && (advanced
+			{shouldShow(item, 'dye') && item.tag.getCompound('display').hasNumber('color') && (advanced
 				? <TextComponent component={{ translate: 'item.color', with: [`#${item.tag.getCompound('display').getNumber('color').toString(16).padStart(6, '0')}`], color: 'gray' }} />
 				: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />)}
 			{(item.tag.getCompound('display').getList('Lore', NbtType.String)).map((line) => <TextComponent component={JSON.parse(line.getAsString())} base={{ color: 'dark_purple', italic: true }} />)}
 		</>}
-		{item.tag.getBoolean('Unbreakable') && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
+		{shouldShow(item, 'unbreakable') && item.tag.getBoolean('Unbreakable') && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
 		{(advanced && item.tag.getNumber('Damage') > 0 && durability) && <TextComponent component={{ translate: 'item.durability', with: [`${durability - item.tag.getNumber('Damage')}`, `${durability}`] }} />}
 		{advanced && <>
 			<TextComponent component={{ text: item.id.toString(), color: 'dark_gray'}} />
@@ -99,4 +101,20 @@ function fakeTranslation(str: string) {
 		.split(' ')
 		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 		.join(' ')
+}
+
+const TooltipMasks = {
+	enchantments: 1,
+	modifiers: 2,
+	unbreakable: 4,
+	can_destroy: 8,
+	can_place: 16,
+	additional: 32,
+	dye: 64,
+	upgrades: 128,
+}
+
+function shouldShow(item: ItemStack, mask: keyof typeof TooltipMasks) {
+	const flags = item.tag.getNumber('HideFlags')
+	return (flags & TooltipMasks[mask]) === 0
 }
