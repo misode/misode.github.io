@@ -29,6 +29,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
     const [focused, setFocused] = useState<string[]>([])
     const [showCoordName, setShowCoordName] = useState<boolean>(true)
     const [posResetCnt, setPosResetCnt] = useState(0)
+    const [, setManualUpdate] = useState<number>(0)
     const managerRef = useRef<CoordinateManager>(new CoordinateManager())
 
     function build(data: any, outputLink: CardLink | null, placePos: vec2):
@@ -163,10 +164,12 @@ export const SplinePreview = ({data}: PreviewProps) => {
                     <BtnInput label="Min: " value={coordinate.min().toString()} onChange={value => {
                         const n = Number(value)
                         if (!isNaN(n)) coordinate.setMin(n)
+                        setManualUpdate(prev => prev+1)
                     }}/>
                     <BtnInput label="Max: " value={coordinate.max().toString()} onChange={value => {
                         const n = Number(value)
                         if (!isNaN(n)) coordinate.setMax(n)
+                        setManualUpdate(prev => prev+1)
                     }}/>
                 </>
             )
