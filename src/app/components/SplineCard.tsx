@@ -1,7 +1,7 @@
 import {StateUpdater, useContext, useEffect, useRef, useState} from 'preact/hooks'
 import {Octicon} from "./index.js";
 import {CubicSpline} from "deepslate";
-import {clamp, Coordinate, CoordinateListener, pos2n} from "../Utils.js";
+import {clamp, Coordinate, CoordinateListener} from "../Utils.js";
 import {genCardLinkColor, Manager, Offset, PosResetCnt, ShowCoordName} from "./previews/SplinePreview.js";
 import {DragHandle} from "./DragHandle.js";
 import {mat3, vec2} from "gl-matrix";
@@ -22,7 +22,7 @@ interface Props {
     spline: MultiPoint<number> | Constant
     inputLinkList: CardLink[]
     outputLink: CardLink | null
-    placePos: pos2n
+    placePos: vec2
     setFocused: StateUpdater<string[]>
 }
 
@@ -49,13 +49,13 @@ export function SplineCard({
                                spline,
                                inputLinkList,
                                outputLink,
-                               placePos = {x: 0, y: 0},
+                               placePos = [0, 0],
                                setFocused
                            }: Props) {
     const canvas = useRef<HTMLCanvasElement>(null)
     const indicator = useRef<HTMLDivElement>(null)
 
-    const [pos, setPos] = useState<vec2>([placePos.x, placePos.y])
+    const [pos, setPos] = useState<vec2>([placePos[0], placePos[1]])
     const [size, setSize] = useState<vec2>([DEFAULT_CARD_WIDTH, DEFAULT_CARD_HEIGHT])
     const [borderStyle, setBorderStyle] = useState<string>(outputLink ? `2px solid ${outputLink.color}` : 'unset')
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
@@ -134,7 +134,7 @@ export function SplineCard({
     }, [spline, coordinate, outputLink])
 
     useEffect(() => {
-        setPos([placePos.x, placePos.y])
+        setPos([placePos[0], placePos[1]])
         // Default width / height described in CSS, keep them matched with CSS value
         setSize([DEFAULT_CARD_WIDTH, DEFAULT_CARD_HEIGHT])
         draw()
@@ -287,8 +287,8 @@ export function SplineCard({
 
     return <>
         <div class="spline-card" style={{
-            left: `${useContext(Offset).x + pos[0]}px`,
-            top: `${useContext(Offset).y + pos[1]}px`,
+            left: `${useContext(Offset)[0] + pos[0]}px`,
+            top: `${useContext(Offset)[1] + pos[1]}px`,
             width: `${size[0]}px`,
             height: `${size[1]}px`,
             border: borderStyle
@@ -297,8 +297,7 @@ export function SplineCard({
                 <DragHandle class={`indicator${outputLink ? '' : ' hidden'}`} onDrag={onIndicatorMove}
                             reference={indicator}/>
             </div>
-            <div className={`refresh btn${outputLink ? '' : ' hidden'}`}
-                 onClick={onColorRefresh}>{Octicon['sync']}</div>
+            <div class={`refresh btn${outputLink ? '' : ' hidden'}`} onClick={onColorRefresh}>{Octicon['sync']}</div>
             <div class={`coordinate${useContext(ShowCoordName) ? '' : ' hidden'}`}>
                 {`${typeof coordinate == 'number' ? coordinate : coordinate.name}`}
             </div>

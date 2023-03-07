@@ -4,12 +4,13 @@ import {CubicSpline, MinMaxNumberFunction} from "deepslate";
 import {createContext} from "preact";
 import fromJson = CubicSpline.fromJson;
 import {useMemo, useRef, useState} from "preact/hooks";
-import {Coordinate, CoordinateManager, pos2n, simpleHash} from "../../Utils.js";
+import {Coordinate, CoordinateManager, hashString} from "../../Utils.js";
 import {Btn, BtnMenu, BtnInput} from "../index.js";
 import {useLocale} from "../../contexts/index.js";
 import {DragHandle} from "../DragHandle.js";
+import {vec2} from "gl-matrix";
 
-export const Offset = createContext<pos2n>({x: 0, y: 0})
+export const Offset = createContext<vec2>([0, 0])
 export const ShowCoordName = createContext<boolean>(true)
 export const Manager = createContext<CoordinateManager>(new CoordinateManager())
 export const PosResetCnt = createContext(0)
@@ -24,13 +25,13 @@ export function genCardLinkColor() {
 export const SplinePreview = ({data}: PreviewProps) => {
     const {locale} = useLocale()
 
-    const [offset, setOffset] = useState({x: 0, y: 0})
+    const [offset, setOffset] = useState<vec2>([0, 0])
     const [focused, setFocused] = useState<string[]>([])
     const [showCoordName, setShowCoordName] = useState<boolean>(true)
     const [posResetCnt, setPosResetCnt] = useState(0)
     const managerRef = useRef<CoordinateManager>(new CoordinateManager())
 
-    function build(data: any, outputLink: CardLink | null, placePos: pos2n):
+    function build(data: any, outputLink: CardLink | null, placePos: vec2):
         { elements: JSX.Element[], defaultVal: number, height: number } {
         function checkSpline(data: any): boolean {
             if (typeof data === 'number')
@@ -72,7 +73,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
                         coordinate={data}
                         inputLinkList={[]}
                         outputLink={outputLink}
-                        placePos={{x: placePos.x + INDENT, y: placePos.y + INDENT}}
+                        placePos={[placePos[0] + INDENT, placePos[1] + INDENT]}
                         setFocused={setFocused}/>
                 ],
                 defaultVal: data,
@@ -101,7 +102,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
                 let buildResult = build(
                     point.node.value,
                     inputLink,
-                    {x: placePos.x + INDENT, y: placePos.y + totHeight}
+                    [placePos[0] + INDENT, placePos[1] + totHeight]
                 )
                 totHeight += buildResult.height
                 spline.points.push({
@@ -118,7 +119,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
         switch(typeof spline.coordinate) {
             case 'number': coordinate = spline.coordinate; break
             case 'string': coordinate = managerRef.current.addOrGetCoordinate(spline.coordinate); break
-            case 'object': coordinate = managerRef.current.addOrGetCoordinate(`Inline${simpleHash(JSON.stringify(spline.coordinate))}`); break
+            case 'object': coordinate = managerRef.current.addOrGetCoordinate(`Inline${hashString(JSON.stringify(spline.coordinate))}`); break
             default: throw 'The given coordinate is neither number, string or object. Contact dev. '
         }
         const extractor: () => MinMaxNumberFunction<number> = coordinate instanceof Coordinate ?
@@ -134,7 +135,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
             spline={cubicSpline}
             inputLinkList={inputLinkList}
             outputLink={outputLink}
-            placePos={{x: placePos.x + INDENT, y: placePos.y + INDENT}}
+            placePos={[placePos[0] + INDENT, placePos[1] + INDENT]}
             setFocused={setFocused}
         />]
         const x = coordinate instanceof Coordinate ? coordinate.val() : coordinate
@@ -143,17 +144,14 @@ export const SplinePreview = ({data}: PreviewProps) => {
 
     const cards = useMemo(() => {
         managerRef.current.initiateCleanup()
-        const result = build(data, null, {x: 0, y: 0})
+        const result = build(data, null, [0, 0])
         managerRef.current.doCleanup()
         return result.elements
     }, [data])
 
     function onMouseMove(e: MouseEvent) {
         setOffset((prevOffset) => {
-            return {
-                x: prevOffset.x + e.movementX,
-                y: prevOffset.y + e.movementY
-            }
+            return [prevOffset[0] + e.movementX, prevOffset[1] + e.movementY]
         })
     }
 
@@ -186,7 +184,7 @@ export const SplinePreview = ({data}: PreviewProps) => {
             </BtnMenu>
             <Btn icon="sync" onClick={() => {
                 setPosResetCnt(posResetCnt + 1)
-                setOffset({x: 0, y: 0})
+                setOffset([0, 0])
             }} tooltip={locale('reset_card_layout')}/>
         </div>
         <div class="full-preview">
