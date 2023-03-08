@@ -44,14 +44,9 @@ export function Transformation({}: Props) {
 	const [normalizeLeft, setNormalizeLeft] = useState(true)
 	const [normalizeRight, setNormalizeRight] = useState(true)
 
-	const [useMatrixOverride, setUseMatrixOverride] = useState(false)
-
 	const usedMatrix = useMemo(() => {
-		if (matrix !== undefined && useMatrixOverride) {
-			return matrix
-		}
 		return composeMatrix(translation, leftRotation, scale, rightRotation)
-	}, [matrix, useMatrixOverride])
+	}, [translation, leftRotation, scale, rightRotation])
 
 	const updateMatrix = useCallback((m: Matrix4) => {
 		const affine = m.clone().affine()
@@ -233,10 +228,9 @@ export function Transformation({}: Props) {
 						<span>{locale('transformation.matrix')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(new Matrix4())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_composed')} onClick={onCopyComposed}>{Octicon[copiedComposed ? 'check' : 'clippy']}</button>
-						<button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>
 					</div>
 					{Array(16).fill(0).map((_, i) =>
-						<Slider value={matrix.data[i]} onChange={v => changeMatrix(i, v)} />
+						<Slider value={matrix.data[i]} onChange={v => changeMatrix(i, v)} disabled={i % 4 === 3} />
 					)}
 				</div>
 			</div>
@@ -256,12 +250,13 @@ interface SliderProps {
 	onChange?: (value: number) => void
 	min?: number
 	max?: number
+	disabled?: boolean
 }
-function Slider({ label, value, onChange, min, max }: SliderProps) {
+function Slider({ label, value, onChange, min, max, disabled }: SliderProps) {
 	return <div class="transformation-input">
 		{label && <label>{label}</label>}
-		<NumberInput value={value.toFixed(3)} onChange={onChange} />
-		<RangeInput min={min ?? -1} max={max ?? 1} step={0.01} value={value} onChange={onChange} />
+		<NumberInput value={value.toFixed(3)} onChange={onChange} disabled={disabled} readonly={disabled} />
+		<RangeInput min={min ?? -1} max={max ?? 1} step={0.01} value={value} onChange={onChange} disabled={disabled} readonly={disabled} />
 	</div>
 }
 
