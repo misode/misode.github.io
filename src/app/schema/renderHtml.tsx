@@ -197,7 +197,9 @@ const renderHtml: RenderHook = {
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
 		const onAdd = () => {
 			const key = keyPath.get()
-			path.model.set(path.push(key), DataModel.wrapLists(children.default()))
+			if (path.model.get(path.push(key)) === undefined) {
+				path.model.set(path.push(key), DataModel.wrapLists(children.default()))
+			}
 		}
 		const blockState = config.validation?.validator === 'block_state_map' ? states?.[relativePath(path, config.validation.params.id).get()] : null
 		const keysSchema = blockState?.properties
