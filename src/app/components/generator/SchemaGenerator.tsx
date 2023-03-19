@@ -191,6 +191,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	}
 
 	const [shareUrl, setShareUrl] = useState<string | undefined>(undefined)
+	const [shareLoading, setShareLoading] = useState(false)
 	const [shareShown, setShareShown] = useState(false)
 	const [shareCopyActive, shareCopySuccess] = useActiveTimeout({ cooldown: 3000 })
 	const share = () => {
@@ -208,6 +209,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				setShareUrl(`${location.origin}/${gen.url}/?version=${version}`)
 				setShareShown(true)
 			} else {
+				setShareLoading(true)
 				shareSnippet(gen.id, version, output, previewShown)
 					.then(({ id, length, compressed, rate }) => {
 						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
@@ -220,6 +222,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 							setError(e)
 						}
 					})
+					.finally(() => setShareLoading(false))
 			}
 		}
 	}
@@ -326,8 +329,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
 				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
-			<div class={'popup-action action-share shown tooltipped tip-nw'} aria-label={locale('share')} onClick={share}>
-				{Octicon.link}
+			<div class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`} aria-label={locale(shareLoading ? 'share.loading' : 'share')} onClick={share}>
+				{shareLoading ? Octicon.sync : Octicon.link}
 			</div>
 			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
 				{Octicon.download}

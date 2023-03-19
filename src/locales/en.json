@@ -109,6 +109,7 @@
   "settings.fields.path": "Context",
   "settings.fields.name": "Name",
   "share": "Share",
+  "share.loading": "Getting share link...",
   "theme": "Theme",
   "tag/block": "Block Tag",
   "tag/entity_type": "Entity Type Tag",
