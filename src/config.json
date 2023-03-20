@@ -93,8 +93,8 @@
     },
     {
       "id": "1.19.4",
-      "dynamic": true,
-      "pack_format": 11
+      "ref": "1.19.4",
+      "pack_format": 12
     }
   ],
   "generators": [
