@@ -1,10 +1,12 @@
 import { useMemo } from 'preact/hooks'
+import contributors from '../../contributors.json'
 import { ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import { fetchChangelogs, fetchVersions } from '../services/DataFetcher.js'
 import { Store } from '../Store.js'
+import { shuffle } from '../Utils.js'
 
 const MIN_FAVORITES = 2
 const MAX_FAVORITES = 5
@@ -35,7 +37,7 @@ export function Home({}: Props) {
 					<Tools />
 				</div>}
 			</div>
-			<Sponsors />
+			<Contributors />
 			<Giscus />
 			<Footer />
 		</div>
@@ -130,62 +132,37 @@ function Changelog() {
 	</ToolGroup>
 }
 
-const KOFI_SUPPORTERS = [
-	{
-		name: 'oitsjustjose',
-		avatar: 'https://ko-fi.com/img/anon10.png',
-	},
-	{
-		name: 'Panossa',
-		avatar: 'https://ko-fi.com/img/anon5.png',
-	},
-	{
-		name: 'TelepathicGrunt',
-		avatar: 'https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80',
-		url: 'https://github.com/TelepathicGrunt',
-	},
-	{
-		name: 'Hugman',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
-		url: 'https://ko-fi.com/G2G5DNROO',
-	},
-	{
-		name: 'RoarkCats',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/tiny_03381e9f-4a6d-41dc-9f96-1a733c0e114a.png',
-	},
-	{
-		name: 'MC Silver',
-		avatar: 'https://ko-fi.com/img/anon7.png',
-	},
-	{
-		name: 'rx97',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/78f6cf72-52e1-4953-99f5-dd38f55a9c6e.png',
-		url: 'https://github.com/RitikShah',
-	},
-] 
 
-function Sponsors() {
-	const { value } = useAsync(() => {
-		return fetch('https://ghs.vercel.app/sponsors/misode').then(r => r.json())
+
+function Contributors() {
+	const supporters = useMemo(() => {
+		return contributors.filter(c => c.types.includes('support'))
 	}, [])
 
-	const supporters = useMemo(() => {
-		const githubSponsors = value?.sponsors?.map((sponsor: any) => ({
-			name: sponsor.handle,
-			avatar: sponsor.avatar,
-			url: sponsor.profile,
-		})) ?? []
-		return [...githubSponsors, ...KOFI_SUPPORTERS]
-	}, [value])
+	const otherContributors = useMemo(() => {
+		return shuffle(contributors.filter(c => c.types.filter(t => t !== 'support').length > 0))
+	}, [])
 
-	return <div class="sponsors">
+	return <div class="contributors">
 		<h3>Supporters</h3>
-		<div class="sponsors-list">
-			{supporters?.map((s: any) =>
-				<a class="tooltipped tip-se" href={s.url} target="_blank" aria-label={s.name}>
-					<img width={48} height={48} src={s.avatar} alt={s.name} />
-				</a>
-			)}
-		</div>
+		<ContributorsList list={supporters} large />
+		<h3>Contributors</h3>
+		<ContributorsList list={otherContributors} />
+	</div>
+}
+
+interface ContributorsListProps {
+	list: typeof contributors
+	large?: boolean
+}
+function ContributorsList({ list, large }: ContributorsListProps) {
+	const { locale } = useLocale()
+
+	return <div class={`contributors-list ${large ? 'contributors-large' : ''}`}>
+		{list.map((c) =>
+			<a class="tooltipped tip-se" href={c.url} target="_blank" aria-label={`${c.name}\n${c.types.map(t => `• ${locale('contributor.' + t)}`).join('\n')}`}>
+				<img width={large ? 48 : 32} height={large ? 48 : 32} src={c.avatar} alt={c.name} loading="lazy" />
+			</a>
+		)}
 	</div>
 }

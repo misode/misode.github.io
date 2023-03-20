@@ -322,6 +322,16 @@ export async function writeZip(entries: [string, string][]): Promise<string> {
 	return await writer.close()
 }
 
+export function shuffle<T>(array: T[]) {
+	let i = array.length
+	while (i != 0) {
+		const j = Math.floor(Math.random() * i)
+		i -= 1;
+		[array[i], array[j]] = [array[j], array[i]]
+	}
+	return array
+}
+
 export function computeIfAbsent<K, V>(map: Map<K, V>, key: K, getter: (key: K) => V): V {
 	const existing = map.get(key)
 	if (existing) {
