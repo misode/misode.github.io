@@ -553,8 +553,10 @@ export class Coordinate implements MinMaxNumberFunction<coordQuery> {
 	private userInputVal: number
 	private changeID: number
 
-	compute({x, }: coordQuery) {
-		return x
+	compute({x, drawCoord}: coordQuery) {
+		if (drawCoord == this)
+			return x
+		return this.value()
 	}
 
 	value() {
@@ -675,8 +677,11 @@ export class CoordinateManager {
 				case 'object':
 					coordinate = (mngRef.current as CoordinateManager).addOrGetCoordinate(`Inline${hashString(JSON.stringify(obj))}`);
 					break
+				case 'undefined':
+					coordinate = (mngRef.current as CoordinateManager).addOrGetCoordinate(typeof obj);
+					break
 				default:
-					throw 'The given coordinate in the JSON is neither number, string or object. Contact dev. '
+					throw `The given coordinate in the JSON is neither number, string or object, and it is ${typeof obj}. Contact dev. `
 			}
 			return coordinate
 		}
@@ -719,7 +724,7 @@ export class ColoredCachedMP extends MultiPoint<coordQuery> {
 	}
 
 	compute(query: coordQuery): number {
-		if (query.drawCoord == this.coordinate)
+		if (this.lastChangeIDs.has(query.drawCoord))
 			return super.compute(query)
 		this.updateCache()
 		return this.cachedResult
