@@ -1,10 +1,9 @@
 import type { ItemStack } from 'deepslate/core'
 import { AttributeModifierOperation, Enchantment, Identifier, MobEffectInstance, Potion } from 'deepslate/core'
 import { NbtList, NbtType } from 'deepslate/nbt'
-import { useMemo } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { getTranslation } from '../services/Resources.js'
+import { getLanguage, getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
@@ -14,19 +13,33 @@ interface Props {
 export function ItemTooltip({ item, advanced }: Props) {
 	const { version } = useVersion()
 
+	const { value: language } = useAsync(() => getLanguage(version), [version])
+
 	const isPotion = item.is('potion') || item.is('splash_potion') || item.is('lingering_potion')
-	const descriptionId = useMemo(() => {
-		const d = `${item.id.namespace}.${item.id.path}`
-		if (isPotion) {
-			return `${d}.effect.${Potion.fromNbt(item).name}`
+	let displayName = item.tag.getCompound('display').getString('Name')
+	let name: string | undefined
+	if (displayName) {
+		try {
+			name = JSON.parse(displayName)
+		} catch (e) {
+			displayName = ''
 		}
-		return d
-	}, [item])
-	const { value: translatedName } = useAsync(() => {
-		return getTranslation(version, `item.${descriptionId}`) ?? getTranslation(version, `block.${descriptionId}`)
-	}, [version, descriptionId])
-	const displayName = item.tag.getCompound('display').getString('Name')
-	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(item.id.path))
+	}
+	if (name === undefined) {
+		if (language) {
+			let descriptionId = `${item.id.namespace}.${item.id.path}`
+			if (isPotion) {
+				descriptionId = `${descriptionId}.effect.${Potion.fromNbt(item).name}`
+			}
+			name = getTranslation(language, `item.${descriptionId}`)
+			name ??= getTranslation(language, `block.${descriptionId}`)
+		}
+		name ??= item.id.path
+			.replace(/[_\/]/g, ' ')
+			.split(' ')
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ')
+	}
 
 	const durability = item.getItem().durability
 	const enchantments = (item.is('enchanted_book') ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
@@ -93,14 +106,6 @@ export function ItemTooltip({ item, advanced }: Props) {
 			{item.tag.size > 0 && <TextComponent component={{ translate: 'item.nbt_tags', with: [item.tag.size], color: 'dark_gray' }} />}
 		</>}
 	</>
-}
-
-function fakeTranslation(str: string) {
-	return str
-		.replace(/[_\/]/g, ' ')
-		.split(' ')
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ')
 }
 
 const TooltipMasks = {

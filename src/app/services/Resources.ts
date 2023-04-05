@@ -163,7 +163,9 @@ export class ResourceWrapper implements Resources {
 	}
 }
 
-const Languages: Record<string, Record<string, string> | Promise<Record<string, string>>> = {}
+export type Language = Record<string, string>
+
+const Languages: Record<string, Language | Promise<Language>> = {}
 
 export async function getLanguage(version: VersionId) {
 	if (!Languages[version]) {
@@ -181,10 +183,9 @@ export async function getLanguage(version: VersionId) {
 	return Languages[version]
 }
 
-export async function getTranslation(version: VersionId, key: string, params?: string[]) {
-	const lang = await getLanguage(version)
+export function getTranslation(lang: Language, key: string, params?: string[]) {
 	const str = lang[key]
-	if (!str) return null
+	if (!str) return undefined
 	return replaceTranslation(str, params)
 }
 
