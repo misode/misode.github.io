@@ -94,7 +94,7 @@
     {
       "id": "1.19.4",
       "dynamic": true,
-      "pack_format": 11
+      "pack_format": 13
     }
   ],
   "generators": [
