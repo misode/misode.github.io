@@ -56,7 +56,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 			const pos = vec2.create()
 			const minX = vec2.transformMat3(pos, vec2.fromValues(0, 0), transform)[0]
 			const maxX = vec2.transformMat3(pos, vec2.fromValues(imageData.current.width-1, 0), transform)[0]
-			DEEPSLATE.generateChunks(minX, maxX - minX + 1)
+			DEEPSLATE.generateChunks(minX, maxX - minX + 1, biome)
 			iterateWorld2D(imageData.current, transform, (x, y) => {
 				return DEEPSLATE.getBlockState(x, y)?.getName().toString()
 			}, (block) => {
@@ -73,7 +73,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 			})
 		}
 		ctx.current.putImageData(imageData.current, 0, 0)
-	}, [noiseSettings, finalDensity, layer, colormap, shown])
+	}, [noiseSettings, finalDensity, layer, colormap, biome, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
 		if (!pos || !noiseSettings || !finalDensity) {
 			setFocused([])
