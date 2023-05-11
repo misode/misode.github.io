@@ -1,6 +1,7 @@
 import type { ItemStack } from 'deepslate/core'
 import { AttributeModifierOperation, Enchantment, Identifier, MobEffectInstance, Potion } from 'deepslate/core'
 import { NbtList, NbtType } from 'deepslate/nbt'
+import { message } from '../Utils.js'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getLanguage, getTranslation } from '../services/Resources.js'
@@ -22,6 +23,7 @@ export function ItemTooltip({ item, advanced }: Props) {
 		try {
 			name = JSON.parse(displayName)
 		} catch (e) {
+			console.warn(`Error parsing display name '${displayName}': ${message(e)}`)
 			displayName = ''
 		}
 	}
@@ -40,6 +42,14 @@ export function ItemTooltip({ item, advanced }: Props) {
 			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 			.join(' ')
 	}
+	const lore: any[] = []
+	item.tag.getCompound('display').getList('Lore', NbtType.String).forEach((line) => {
+		try {
+			lore.push(JSON.parse(line['value']))
+		} catch (e) {
+			console.warn(`Error parsing lore line '${line}': ${message(e)}`)
+		}
+	})
 
 	const durability = item.getItem().durability
 	const enchantments = (item.is('enchanted_book') ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
@@ -97,7 +107,7 @@ export function ItemTooltip({ item, advanced }: Props) {
 			{shouldShow(item, 'dye') && item.tag.getCompound('display').hasNumber('color') && (advanced
 				? <TextComponent component={{ translate: 'item.color', with: [`#${item.tag.getCompound('display').getNumber('color').toString(16).padStart(6, '0')}`], color: 'gray' }} />
 				: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />)}
-			{(item.tag.getCompound('display').getList('Lore', NbtType.String)).map((line) => <TextComponent component={JSON.parse(line.getAsString())} base={{ color: 'dark_purple', italic: true }} />)}
+			{lore.map((component) => <TextComponent component={component} base={{ color: 'dark_purple', italic: true }} />)}
 		</>}
 		{shouldShow(item, 'unbreakable') && item.tag.getBoolean('Unbreakable') && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
 		{(advanced && item.tag.getNumber('Damage') > 0 && durability) && <TextComponent component={{ translate: 'item.durability', with: [`${durability - item.tag.getNumber('Damage')}`, `${durability}`] }} />}
