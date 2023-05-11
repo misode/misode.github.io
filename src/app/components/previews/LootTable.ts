@@ -1,8 +1,8 @@
 import type { Random } from 'deepslate/core'
 import { Enchantment, Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate/nbt'
-import type { VersionId } from '../../services/Schemas.js'
 import { clamp, getWeightedRandom, isObject } from '../../Utils.js'
+import type { VersionId } from '../../services/Schemas.js'
 
 export interface SlottedItem {
 	slot: number,
@@ -460,7 +460,7 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 }
 
 function computeInt(provider: any, ctx: LootContext): number {
-	if (typeof provider === 'number') return provider
+	if (typeof provider === 'number') return Math.round(provider)
 	if (!isObject(provider)) return 0
 
 	const type = provider.type?.replace(/^minecraft:/, '') ?? 'uniform'
