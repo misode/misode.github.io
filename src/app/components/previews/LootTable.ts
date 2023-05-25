@@ -229,11 +229,15 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	}
 	switch (type) {
 		case 'item':
-			entryConsumer(new ItemStack(Identifier.parse(entry.name), 1))
+			try {
+				entryConsumer(new ItemStack(Identifier.parse(entry.name), 1))
+			} catch (e) {}
 			break
 		case 'tag':
 			ctx.getItemTag(entry.name).forEach(tagEntry => {
-				entryConsumer(new ItemStack(Identifier.parse(tagEntry), 1))
+				try {
+					entryConsumer(new ItemStack(Identifier.parse(tagEntry), 1))
+				} catch (e) {}
 			})
 			break
 		case 'loot_table':
@@ -280,7 +284,10 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 		if (enchantments.length > 0) {
 			const id = enchantments[ctx.random.nextInt(enchantments.length)]
-			const ench = Enchantment.REGISTRY.get(Identifier.parse(id))
+			let ench: Enchantment | undefined
+			try {
+				ench = Enchantment.REGISTRY.get(Identifier.parse(id))
+			} catch (e) {}
 			if (ench === undefined) return
 			const lvl = ctx.random.nextInt(ench.maxLevel - ench.minLevel + 1) + ench.minLevel
 			if (isBook) {
@@ -337,7 +344,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
 		Object.entries(enchantments).forEach(([id, level]) => {
 			const lvl = computeInt(level, ctx)
-			enchantItem(item, { id: Identifier.parse(id), lvl }, add)
+			try {
+				enchantItem(item, { id: Identifier.parse(id), lvl }, add)
+			} catch (e) {}
 		})
 	},
 	set_lore: ({ lore, replace }) => (item) => {
@@ -361,7 +370,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	},
 	set_potion: ({ id }) => (item) => {
 		if (typeof id === 'string') {
-			item.tag.set('Potion', new NbtString(Identifier.parse(id).toString()))
+			try {
+				item.tag.set('Potion', new NbtString(Identifier.parse(id).toString()))
+			} catch (e) {}
 		}
 	},
 }

@@ -1,18 +1,18 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
-import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
+import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, StringNode, relativePath } from '@mcschema/core'
 import { Identifier, ItemStack } from 'deepslate/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
-import { Btn, Octicon } from '../components/index.js'
-import { ItemDisplay } from '../components/ItemDisplay.jsx'
-import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
 import config from '../Config.js'
+import { deepClone, deepEqual, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
+import { ItemDisplay } from '../components/ItemDisplay.jsx'
+import { Btn, Octicon } from '../components/index.js'
+import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
 import { localize, useLocale, useStore } from '../contexts/index.js'
 import { useFocus } from '../hooks/index.js'
 import type { BlockStateRegistry, VersionId } from '../services/index.js'
 import { CachedDecorator, CachedFeature } from '../services/index.js'
-import { deepClone, deepEqual, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
 import { ModelWrapper } from './ModelWrapper.js'
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.cat.variant', 'entity.type_specific.frog.variant', 'rule_block_entity_modifier.type']
@@ -140,7 +140,13 @@ const renderHtml: RenderHook = {
 				let label: undefined | string | JSX.Element
 				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
 					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
-						label = <ItemDisplay item={new ItemStack(Identifier.parse(cValue.name), 1)} />
+						let itemStack: ItemStack | undefined
+						try {
+							itemStack = new ItemStack(Identifier.parse(cValue.name), 1)
+						} catch (e) {}
+						if (itemStack !== undefined) {
+							label = <ItemDisplay item={itemStack} />
+						}
 					}
 				}
 
