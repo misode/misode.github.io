@@ -6,6 +6,12 @@
     "url": "https://github.com/tryashtar"
   },
   {
+    "name": "catter1",
+    "types": ["support", "translation"],
+    "avatar": "https://avatars.githubusercontent.com/u/63272345?v=4",
+    "url": "https://github.com/catter1"
+  },
+  {
     "name": "EpyonProjects",
     "types": ["support", "report"],
     "avatar": "https://avatars.githubusercontent.com/u/66185010?s=60&v=4",
@@ -48,6 +54,11 @@
     "types": ["support"],
     "avatar": "https://storage.ko-fi.com/cdn/useruploads/78f6cf72-52e1-4953-99f5-dd38f55a9c6e.png",
     "url": "https://github.com/RitikShah"
+  },
+  {
+    "name": "Xanbelor",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon3.png"
   },
   {
     "name": "SPGoding",
@@ -476,6 +487,18 @@
     "url": "https://github.com/vdvman1"
   },
   {
+    "name": "Insane96",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/7185104?v=4",
+    "url": "https://github.com/Insane96"
+  },
+  {
+    "name": "Shadowclaimer",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/2214143?v=4",
+    "url": "https://github.com/Shadowclaimer"
+  },
+  {
     "name": "Manasukiyami-Github2",
     "types": ["report"],
     "avatar": "https://avatars.githubusercontent.com/u/107654390?v=4",
@@ -486,12 +509,6 @@
     "types": ["translation"],
     "avatar": "https://avatars.githubusercontent.com/u/36039861?v=4",
     "url": "https://github.com/lakejason0"
-  },
-  {
-    "name": "catter1",
-    "types": ["translation"],
-    "avatar": "https://avatars.githubusercontent.com/u/63272345?v=4",
-    "url": "https://github.com/catter1"
   },
   {
     "name": "Jerozgen",
@@ -800,9 +817,21 @@
     "url": "https://github.com/GustavoLank"
   },
   {
+    "name": "CavaleiroDev",
+    "types": ["translation"],
+    "avatar": "https://avatars.githubusercontent.com/u/48626778?v=4",
+    "url": "https://github.com/CavaleiroDev"
+  },
+  {
     "name": "TuTurDuDur",
     "types": ["translation"],
     "avatar": "https://avatars.githubusercontent.com/u/90134169?v=4",
     "url": "https://github.com/TuTurDuDur"
+  },
+  {
+    "name": "Neylz",
+    "types": ["translation"],
+    "avatar": "https://avatars.githubusercontent.com/u/56648332?v=4",
+    "url": "https://github.com/Neylz"
   }
 ]

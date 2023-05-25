@@ -136,11 +136,11 @@ function Changelog() {
 
 function Contributors() {
 	const supporters = useMemo(() => {
-		return contributors.filter(c => c.types.includes('support'))
+		return contributors.filter(c => c.types.includes('support') || c.types.includes('infrastructure'))
 	}, [])
 
 	const otherContributors = useMemo(() => {
-		return shuffle(contributors.filter(c => c.types.filter(t => t !== 'support').length > 0))
+		return shuffle(contributors.filter(c => !supporters.includes(c)))
 	}, [])
 
 	return <div class="contributors">
