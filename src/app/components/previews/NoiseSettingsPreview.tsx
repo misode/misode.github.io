@@ -60,7 +60,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 			iterateWorld2D(imageData.current, transform, (x, y) => {
 				return DEEPSLATE.getBlockState(x, y)?.getName().toString()
 			}, (block) => {
-				return BlockColors[block ?? 'minecraft:air']
+				return BlockColors[block ?? 'minecraft:air'] ?? [0, 0, 0]
 			})
 		} else if (layer === 'final_density') {
 			const colormapFn = getColormap(colormap)
