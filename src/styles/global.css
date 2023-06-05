@@ -1827,10 +1827,6 @@ hr {
 	padding: 16px;
 }
 
-.changelog > .badges-list {
-	margin-top: 12px;
-}
-
 .badge {
 	--color: hsl(var(--tint, 0), var(--text-saturation), var(--text-lightness));
 	display: flex;
@@ -1980,7 +1976,9 @@ hr {
 	flex-basis: 100%;
 }
 
-.navigation + .card-column {
+.navigation + .card-column,
+.badges-list + .card-column,
+.navigation + .badges-list {
 	margin-top: 8px;
 }
 
@@ -2207,10 +2205,6 @@ hr {
 .card-subtitle {
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
-
-.guides > .badges-list {
-	margin-top: 8px;
 }
 
 .guide {
@@ -2532,8 +2526,14 @@ hr {
 		display: none;
 	}
 
+	.card {
+		display: flex;
+		flex-direction: column;
+	}
+
 	.card-overlay {
-		display: none;
+		order: 1;
+		align-self: flex-end;
 	}
 }
 
