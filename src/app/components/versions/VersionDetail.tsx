@@ -21,7 +21,7 @@ export function VersionDetail({ id, version }: Props) {
 	const [tab, setTab] = useSearchParam('tab')
 	useEffect(() => {
 		if (tab === undefined || !Tabs.includes(tab)) {
-			setTab(Tabs[0])
+			setTab(Tabs[0], true)
 		}
 	}, [tab])
 
