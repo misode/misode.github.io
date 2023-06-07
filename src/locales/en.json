@@ -10,6 +10,7 @@
   "atlas": "Atlas",
   "back": "Back",
   "block_definition": "Blockstate",
+  "change.obsolete": "This change has been replaced by a later change in this release cycle",
   "changelog": "Technical changelog",
   "changelog.search": "Search changes",
   "changelog.no_results": "No documented changes",

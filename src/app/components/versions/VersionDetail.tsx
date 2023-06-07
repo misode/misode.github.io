@@ -28,7 +28,7 @@ export function VersionDetail({ id, version }: Props) {
 	const { value: changes } = useAsync(fetchChangelogs, [])
 
 	const filteredChangelogs = useMemo(() =>
-		changes?.filter(c => c.version === id || c.group === id),
+		changes?.filter(c => c.version === id || (c.group === id && !c.tags.includes('obsolete'))),
 	[id, changes])
 
 	const articleLink = version && getArticleLink(version.id)
