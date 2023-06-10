@@ -1608,6 +1608,127 @@ hr {
 	background-color: var(--background-5);
 }
 
+.spline-preview {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	user-select: none;
+}
+
+.spline-card {
+	display: inline grid;
+	grid-template-areas:
+		"drag			drag		drag"
+		"resize-left		canvas		resize-right"
+		"resize-corner-left	resize-bottom	resize-corner-right";
+	grid-template-columns: 6px 1fr 6px;
+	grid-template-rows: 25px 1fr 6px;
+	position: absolute;
+	border-radius: 6px;
+	box-shadow: 0 1px 7px -2px #000;
+	background-color: var(--background-4);
+	margin: 0px;
+	box-sizing: content-box;
+}
+
+.spline-card .refresh.btn {
+	position: absolute;
+	right: 0px;
+	height: 25px;
+	box-shadow: unset;
+	background-color: var(--background-5);
+	padding: 7px;
+}
+
+.spline-card .coordinate {
+	position: absolute;
+	left: 6px;
+	top: 25px;
+	width: 90%;
+	font-size: 13px;
+	pointer-events: none;
+	color: var(--text-2);
+	background-color: transparent;
+	user-select: none;
+	overflow: hidden;
+}
+
+.spline-card .drag {
+	grid-area: drag;
+	display: flex;
+	flex-direction: column;
+	border-radius: 6px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	color: var(--text-2);
+	fill: var(--text-2);
+	background-color: var(--background-5);
+	align-items: center;
+	cursor: move;
+}
+
+.spline-card canvas {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	grid-area: canvas;
+}
+
+.spline-card .resize {
+	background-color: transparent;
+}
+
+.spline-card .resize.left{
+	grid-area: resize-left;
+	cursor: ew-resize;
+}
+
+.spline-card .resize.right{
+	grid-area: resize-right;
+	cursor: ew-resize;
+}
+
+.spline-card .resize.corner-left{
+	grid-area: resize-corner-left;
+	cursor: nesw-resize;
+}
+
+.spline-card .resize.bottom{
+	grid-area: resize-bottom;
+	cursor: ns-resize
+}
+
+.spline-card .resize.corner-right{
+	grid-area: resize-corner-right;
+	cursor: nwse-resize
+}
+
+.spline-card .indicator-zone {
+	position: absolute;
+	top: 25px;
+	left: 6px;
+	right: 6px;
+	bottom: 6px;
+	cursor: crosshair;
+}
+
+.spline-card .indicator {
+	position: absolute;
+	left: 50%;
+	top: 0px;
+	bottom: 0px;
+	width: 2px;
+	background-color: #a89b30;
+	cursor: ew-resize;
+}
+
+.spline-card .hidden {
+	display: none;
+}
+
 [data-ea-publisher] {
 	margin: 0 16px 8px;
 	min-height: 69.38px;

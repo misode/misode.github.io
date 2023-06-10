@@ -2,13 +2,15 @@ import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
 import type { Random } from 'deepslate'
-import { Matrix3, Matrix4, Vector } from 'deepslate'
+import {CubicSpline, Matrix3, Matrix4, MinMaxNumberFunction, Vector} from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { quat, vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
 import config from './Config.js'
+import {createRef} from "preact";
+import MultiPoint = CubicSpline.MultiPoint;
 
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
@@ -540,4 +542,234 @@ export function composeMatrix(translation: Vector, leftRotation: quat, scale: Ve
 		.mul(Matrix4.fromQuat(leftRotation))
 		.scale(scale)
 		.mul(Matrix4.fromQuat(rightRotation))
+}
+
+export interface coordQuery {
+	x: number,
+	drawCoord: Coordinate
+}
+
+export class Coordinate implements MinMaxNumberFunction<coordQuery> {
+	name: string
+	manager: CoordinateManager
+	private userInputVal: number
+	private changeID: number
+
+	compute({x, drawCoord}: coordQuery) {
+		if (drawCoord == this)
+			return x
+		return this.value()
+	}
+
+	value() {
+		return this.userInputVal
+	}
+
+	private min: number
+
+	minValue() {
+		return this.min
+	}
+
+	private max: number
+
+	maxValue() {
+		return this.max
+	}
+
+	isConstant() {
+		return this.min == this.max
+	}
+
+	constructor(name: string, manager: CoordinateManager) {
+		this.name = name
+		this.manager = manager
+		this.userInputVal = 0
+		this.min = -1
+		this.max = 1
+		this.changeID = 1
+	}
+
+	setMin(min: number) {
+		if (this.min == min)
+			return
+		this.min= min
+		const newVal = Math.max(this.userInputVal, this.min)
+		if (newVal != this.userInputVal) {
+			this.userInputVal = newVal
+			this.changeID++
+		}
+		this.max= Math.max(this.max, this.min)
+	}
+
+	setMax(max: number) {
+		if (this.max == max)
+			return
+		this.max = max
+		const newVal = Math.min(this.userInputVal, this.max)
+		if (newVal != this.userInputVal) {
+			this.userInputVal = newVal
+			this.changeID++
+		}
+		this.min = Math.min(this.min, this.max)
+	}
+
+	setValue(val: number) {
+		val = clamp(val, this.min, this.max)
+		if (val == this.userInputVal)
+			return
+		this.userInputVal = val
+		this.changeID++
+	}
+
+	getChangeID() {
+		return this.changeID
+	}
+}
+
+export type CoordinateListener = (redraw: boolean) => any
+
+export class CoordinateManager {
+	listeners: Map<string, Set<CoordinateListener>>
+	coordinates: Map<string, Coordinate>
+	dirtyCoordinates: Set<string>
+
+	constructor() {
+		this.listeners = new Map<string, Set<CoordinateListener>>()
+		this.coordinates = new Map<string, Coordinate>()
+		this.dirtyCoordinates = new Set<string>()
+	}
+
+	addOrGetCoordinate(name: string): Coordinate {
+		if (!this.coordinates.has(name))
+			this.coordinates.set(name, new Coordinate(name, this))
+		else
+			this.dirtyCoordinates.delete(name)
+		return this.coordinates.get(name)!
+	}
+
+	initiateCleanup() {
+		for (const name of this.coordinates.keys()) {
+			this.dirtyCoordinates.add(name)
+		}
+	}
+
+	doCleanup() {
+		for (const name of this.dirtyCoordinates)
+			this.coordinates.delete(name)
+		this.dirtyCoordinates.clear()
+	}
+
+	getExtractor(): (obj: unknown) => MinMaxNumberFunction<coordQuery> {
+		const mngRef = createRef<CoordinateManager>()
+		mngRef.current = this
+		return (obj: unknown): MinMaxNumberFunction<coordQuery> => {
+			if (typeof obj == 'number')
+				return {
+					compute(): number { return obj },
+					minValue(): number { return obj },
+					maxValue(): number { return obj }
+				}
+
+			let coordinate: Coordinate
+			switch (typeof obj) {
+				case 'string':
+					coordinate = (mngRef.current as CoordinateManager).addOrGetCoordinate(obj);
+					break
+				case 'object':
+					coordinate = (mngRef.current as CoordinateManager).addOrGetCoordinate(`Inline${hashString(JSON.stringify(obj))}`);
+					break
+				case 'undefined':
+					coordinate = (mngRef.current as CoordinateManager).addOrGetCoordinate(typeof obj);
+					break
+				default:
+					throw `The given coordinate in the JSON is neither number, string or object, and it is ${typeof obj}. Contact dev. `
+			}
+			return coordinate
+		}
+	}
+}
+
+export class ColoredCachedMP extends MultiPoint<coordQuery> {
+	color: string = 'unset'
+	lastChangeIDs: Map<Coordinate, number>
+	cachedResult: number = 0
+	cachedCurve: vec2[] = []
+	genColor() {
+		let hue = Math.floor(Math.random() * 360)
+		let saturation = Math.round(Math.random() * 50) + 50
+		let lightness = Math.round(Math.random() * 30) + 50
+		this.color = `hsl(${hue}, ${saturation}%, ${lightness}%`
+	}
+
+	constructor(mp: MultiPoint<coordQuery>, recursionDepth: number) {
+		super(mp.coordinate, mp.locations, mp.values, mp.derivatives)
+		if (recursionDepth > 1)
+			this.genColor()
+		this.lastChangeIDs = new Map<Coordinate, number>()
+
+		for (const i in this.values) {
+			if (!(this.values[i] instanceof MultiPoint))
+				continue
+			this.values[i] = new ColoredCachedMP(this.values[i], recursionDepth + 1)
+			const value = this.values[i] as ColoredCachedMP
+			for (const [coord, id] of value.lastChangeIDs) {
+				this.lastChangeIDs.set(coord, id)
+			}
+		}
+
+		const coord = this.coordinate as Coordinate
+		if (!this.lastChangeIDs.has(coord))
+			this.lastChangeIDs.set(coord, coord.getChangeID())
+		this.doUpdateCurve()
+		this.doUpdateResult()
+	}
+
+	compute(query: coordQuery): number {
+		if (this.lastChangeIDs.has(query.drawCoord))
+			return super.compute(query)
+		this.updateCache()
+		return this.cachedResult
+	}
+
+	updateCache(): void {
+		let needUpdateCurve = false
+		let needUpdateResult = false
+		const coordinate = this.coordinate as Coordinate
+
+		for (const [coord, id] of this.lastChangeIDs) {
+			if (coord == this.coordinate)
+				continue
+			const currentID = coord.getChangeID()
+			if (currentID != id) {
+				needUpdateCurve = true
+				needUpdateResult = true
+				this.lastChangeIDs.set(coord, currentID)
+			}
+		}
+		if (!needUpdateResult)
+			if (this.lastChangeIDs.get(coordinate) != coordinate.getChangeID())
+				needUpdateResult = true
+
+		if (needUpdateCurve)
+			this.doUpdateCurve()
+		if (needUpdateResult)
+			this.doUpdateResult()
+	}
+
+	doUpdateCurve() {
+		const coordinate = this.coordinate as Coordinate
+		this.cachedCurve = [[coordinate.minValue(), super.compute({x: coordinate.minValue(), drawCoord: coordinate})]]
+		for (let i = 1; i <= 100; i++) {
+			const x = coordinate.minValue() + (coordinate.maxValue() - coordinate.minValue()) * i / 100
+			const y = super.compute({x: coordinate.minValue() + (coordinate.maxValue() - coordinate.minValue()) * i / 100, drawCoord: coordinate})
+			this.cachedCurve.push([x, y])
+		}
+		this.calculateMinMax()
+	}
+
+	doUpdateResult() {
+		const coordinate = this.coordinate as Coordinate
+		this.cachedResult = super.compute({x: coordinate.value(), drawCoord: coordinate})
+	}
 }

@@ -98,6 +98,7 @@
   "preview.peaks": "山峰",
   "preview.scale": "比例",
   "preview.width": "宽度",
+  "preview.show_coord_name": "显示坐标名", 
   "project.cancel": "取消",
   "project.create": "创建新的项目",
   "project.delete": "删除项目",
@@ -218,6 +219,9 @@
   "worldgen/structure_set": "结构集",
   "worldgen/template_pool": "模板池",
   "worldgen/world_preset": "世界预设",
+  "worldgen/spline": "样条曲线",
+  "reset_card_layout": "重置卡片布局", 
   "zoom_in": "放大",
+  "zoom_in_limit": "无法继续放大\n1像素=4方块",
   "zoom_out": "缩小"
 }
