@@ -41,6 +41,7 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 	const imageData = useRef<ImageData>()
 	const ctx = useRef<CanvasRenderingContext2D>()
 	const [focused, setFocused] = useState<string[]>([])
+	const [offset, setOffset] = useState<number>(0)
 	const [colormap, setColormap] = useState<ColormapType>(Store.getColormap() ?? 'viridis')
 
 	const onSetup2D = useCallback((canvas: HTMLCanvasElement) => {
@@ -59,7 +60,7 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 		const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
 		let limit = 0.01
 		iterateWorld2D(imageData.current, transform, (x, y) => {
-			const density = df.compute(topDown ? { x, y: 0, z: y } : { x, y, z: 0 })
+			const density = df.compute(topDown ? { x, y: offset, z: y } : { x, y, z: offset })
 			limit = Math.max(limit, Math.min(1, Math.abs(density)))
 			return density
 		}, (density) => {
@@ -67,16 +68,16 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 			return [color[0] * 256, color[1] * 256, color[2] * 256]
 		})
 		ctx.current.putImageData(imageData.current, 0, 0)
-	}, [mode, df, colormap])
+	}, [mode, df, offset, colormap])
 	const onHover2D = useCallback((pos: [number, number] | undefined) => {
 		if (!pos || !df) {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const output = df.compute(topDown ? { x, y: 0, z: -y } : { x: x, y: -y, z: 0 })
+			const output = df.compute(topDown ? { x, y: offset, z: -y } : { x: x, y: -y, z: offset })
 			setFocused([output.toPrecision(3), `X=${x} ${topDown ? 'Z' : 'Y'}=${-y}`])
 		}
-	}, [mode, df])
+	}, [mode, df, offset])
 
 	// === 3D ===
 	const renderer = useRef<VoxelRenderer | undefined>(undefined)
@@ -125,6 +126,10 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 			</> : <>
 				<ColormapSelector value={colormap} onChange={setColormap} />
 			</>}
+			{!voxelMode && <div class="btn btn-input" onClick={e => e.stopPropagation()}>
+				<span>{locale(topDown ? 'y' : 'z')}</span>
+				<NumberInput value={offset} onChange={setOffset} />
+			</div>}
 			<BtnMenu icon="package">
 				{MODES.map(m => <Btn label={locale(`mode.${m}`)} active={mode == m} onClick={() => setMode(m)} />)}
 			</BtnMenu>
