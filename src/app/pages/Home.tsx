@@ -88,6 +88,9 @@ function Tools() {
 	const { locale } = useLocale()
 
 	return <ToolGroup title={locale('tools')}>
+		<ToolCard title="Customized Worlds"
+			link="/customized/"
+			desc="Create complete data packs to customize your world" />
 		<ToolCard title="Report Inspector" icon="report"
 			link="https://misode.github.io/report/"
 			desc="Analyse your performance reports" />
