@@ -261,7 +261,7 @@ function generateOreFeatures(ctx: Context) {
 		} else {
 			const placed = deepClone(ctx.vanilla['worldgen/placed_feature'].get(name))
 			if (value.tries !== initial.tries) {
-				const modifier = placed.placement.find((m: any) => m.type === 'minecraft:count' || m.type === 'rarity_filter')
+				const modifier = placed.placement.find((m: any) => m.type === 'minecraft:count' || m.type === 'minecraft:rarity_filter')
 				if (Number.isInteger(value.tries)) {
 					modifier.type = 'minecraft:count',
 					modifier.count = value.tries

@@ -1,19 +1,20 @@
 import type { ComponentChildren } from 'preact'
 import { getCurrentUrl } from 'preact-router'
 import { useEffect, useMemo, useState } from 'preact/hooks'
-import { useVersion } from '../contexts/Version.jsx'
-import { latestVersion } from '../services/DataFetcher.js'
 import { Store } from '../Store.js'
 import { getGenerator } from '../Utils.js'
+import { useVersion } from '../contexts/Version.jsx'
+import { latestVersion } from '../services/DataFetcher.js'
 import { Octicon } from './index.js'
 
 type ErrorPanelProps = {
 	error: string | Error,
 	reportable?: boolean,
 	onDismiss?: () => unknown,
+	body?: string,
 	children?: ComponentChildren,
 }
-export function ErrorPanel({ error, reportable, onDismiss, children }: ErrorPanelProps) {
+export function ErrorPanel({ error, reportable, onDismiss, body: body_, children }: ErrorPanelProps) {
 	const { version } = useVersion()
 	const [stackVisible, setStackVisible] = useState(false)
 	const [stack, setStack] = useState<string | undefined>(undefined)
@@ -54,9 +55,12 @@ export function ErrorPanel({ error, reportable, onDismiss, children }: ErrorPane
 		if (source) {
 			body += `\n### Generator JSON\n<details>\n<pre>\n${JSON.stringify(source, null, 2)}\n</pre>\n</details>\n`
 		}
+		if (body_) {
+			body += body_
+		}
 		url += `&body=${encodeURIComponent(body)}`
 		return url
-	}, [error, version, stack, source, gen?.id])
+	}, [error, body_, version, stack, source, gen?.id])
 
 	return <div class="error">
 		{onDismiss && <div class="error-dismiss" onClick={onDismiss}>{Octicon.x}</div>}

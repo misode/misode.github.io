@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../Config.js'
-import { writeZip } from '../Utils.js'
+import { deepClone, deepEqual, writeZip } from '../Utils.js'
 import { BasicSettings } from '../components/customized/BasicSettings.jsx'
 import { generateCustomized } from '../components/customized/CustomizedGenerator.js'
 import { CustomizedModel } from '../components/customized/CustomizedModel.js'
@@ -89,8 +89,21 @@ export function Customized({}: Props) {
 				<Btn icon="download" label="Create" class="customized-create" onClick={generate} />
 				<a ref={download} style="display: none;"></a>
 			</div>
-			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
+			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} body={`\n### Customized settings\n<details>\n<pre>\n${JSON.stringify(getDiffModel(model, initialModel), null, 2)}\n</pre>\n</details>\n`} />}
 		</div>
 		<Footer />
 	</main>
+}
+
+function getDiffModel(model: any, initial: any) {
+	const result = deepClone(model)
+	if (typeof result !== 'object' || result === null) return
+	Object.keys(result).forEach(key => {
+		if (deepEqual(result[key], initial[key])) {
+			delete result[key]
+		} else if (typeof result[key] === 'object' && result[key] !== null) {
+			result[key] = getDiffModel(result[key], initial[key])
+		}
+	})
+	return result
 }
