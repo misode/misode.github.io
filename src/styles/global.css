@@ -68,7 +68,8 @@
 	--errors-background-2: #c13b29;
 	--errors-background-3: #d8503e;
 	--errors-text: #000000cc;
-  --invalid-text: #a32600;
+	--invalid-text: #a32600;
+	--success-background-3: #6cd83e;
 	--text-saturation: 100%;
 	--text-lightness: 30%;
 	--editor-variable: #0451A5;
@@ -643,6 +644,15 @@ main.has-project {
 	margin-top: 8px;
 }
 
+.customized .ad {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.customized .version-switcher {
+	padding: 6px 0;	
+}
+
 .customized-tab {
 	padding-bottom: 30px;
 }
@@ -655,11 +665,18 @@ main.has-project {
 .btn.customized-create {
 	display: inline-flex;
 	background-color: var(--accent-site-1);
-	font-size: bold;
+	font-weight: bold;
+	padding: 20px 18px;
 }
 
 .btn.customized-create:not(.disabled):hover {
 	background-color: var(--accent-site-2) !important;
+}
+
+.btn.customized-create > svg {
+	width: 20px;
+	height: 20px;
+	margin-right: 10px;
 }
 
 .customized-tab > *:not(:first-child) {
@@ -2264,7 +2281,7 @@ hr {
 	box-shadow: inset 0 -1px 0 var(--background-4);
 }
 
-.tabs > * {
+.tabs > span {
 	border-bottom: 2px solid transparent;
 	padding: 8px 16px;
 	cursor: pointer;
@@ -2282,6 +2299,17 @@ hr {
 .tabs > .selected {
 	border-color: var(--text-3);
 	color: var(--text-1);
+}
+
+.tabs > .version-switcher {
+	margin-left: auto;
+}
+
+.tabs.tabs-sticky {
+	position: sticky;
+	top: 55px;
+	background-color: var(--background-1);
+	z-index: 4;
 }
 
 .ace_editor,
