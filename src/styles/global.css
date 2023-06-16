@@ -30,6 +30,8 @@
 	--errors-text: #ffffffcc;
 	--invalid-text: #fd7951;
 	--success-background-3: #143f0f;
+	--water-background-3: #0d3266;
+	--lava-background-3: #662e0d;
 	--text-saturation: 60%;
 	--text-lightness: 45%;
 	--editor-variable: #9CDCFE;
@@ -70,6 +72,8 @@
 	--errors-text: #000000cc;
 	--invalid-text: #a32600;
 	--success-background-3: #6cd83e;
+	--water-background-3: #3e79d8;
+	--lava-background-3: #d86f3e;
 	--text-saturation: 100%;
 	--text-lightness: 30%;
 	--editor-variable: #0451A5;
@@ -110,6 +114,9 @@
 		--errors-background-3: #d8503e;
 		--errors-text: #000000cc;
 		--invalid-text: #a32600;
+		--success-background-3: #6cd83e;
+		--water-background-3: #3e79d8;
+		--lava-background-3: #d86f3e;
 		--text-saturation: 100%;
 		--text-lightness: 30%;
 		--editor-variable: #0451A5;
@@ -679,6 +686,12 @@ main.has-project {
 	margin-right: 10px;
 }
 
+.customized > .error {
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: 0;
+}
+
 .customized-tab > *:not(:first-child) {
 	margin-top: 10px;
 }
@@ -861,11 +874,11 @@ main.has-project {
 }
 
 .customized-input button.customized-water {
-	background-color: #0d3266;
+	background-color: var(--water-background-3);
 }
 
 .customized-input button.customized-lava {
-	background-color: #662e0d;
+	background-color: var(--lava-background-3);
 }
 
 .customized-input button.customized-icon {
