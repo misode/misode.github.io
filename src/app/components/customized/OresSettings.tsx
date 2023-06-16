@@ -19,6 +19,7 @@ export function OresSettings(props: Props) {
 		<CustomizedOreGroup label="Gold" item="gold_ore" ores={['goldLower', 'gold']} {...props} />
 		<CustomizedOreGroup label="Redstone" item="redstone_ore" ores={['redstoneLower', 'redstone']} {...props} />
 		<CustomizedOreGroup label="Lapis Lazuli" item="lapis_ore" ores={['lapis', 'lapisBuried']} {...props} />
+		<CustomizedOreGroup label="Emerald" item="emerald_ore" ores={['emerald']} {...props} />
 		<CustomizedOreGroup label="Diamond" item="diamond_ore" ores={['diamond', 'diamondBuried', 'diamondLarge']} {...props} />
 	</>
 }

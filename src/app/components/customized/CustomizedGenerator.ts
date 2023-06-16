@@ -246,6 +246,7 @@ const Ores: Partial<Record<keyof CustomizedModel, string>> = {
 	redstone: 'ore_redstone',
 	lapis: 'ore_lapis',
 	lapisBuried: 'ore_lapis_buried',
+	emerald: 'ore_emerald',
 	diamond: 'ore_diamond',
 	diamondBuried: 'ore_diamond_buried',
 	diamondLarge: 'ore_diamond_large',
