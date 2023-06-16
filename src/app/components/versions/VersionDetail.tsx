@@ -50,7 +50,7 @@ export function VersionDetail({ id, version }: Props) {
 					This version does not exist. Only versions since 1.14 are tracked, or it may be too recent.
 				</p>}
 			</div>
-			<div class="version-tabs">
+			<div class="tabs">
 				<span class={tab === 'changelog' ? 'selected' : ''} onClick={() => setTab('changelog')}>{locale('versions.technical_changes')}</span>
 				<span class={tab === 'discussion' ? 'selected' : ''} onClick={() => setTab('discussion')}>{locale('versions.discussion')}</span>
 				<span class={tab === 'fixes' ? 'selected' : ''} onClick={() => setTab('fixes')}>{locale('versions.fixes')}</span>

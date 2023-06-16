@@ -28,7 +28,10 @@
 	--errors-background-2: #471610;
 	--errors-background-3: #3f140f;
 	--errors-text: #ffffffcc;
-  --invalid-text: #fd7951;
+	--invalid-text: #fd7951;
+	--success-background-3: #143f0f;
+	--water-background-3: #0d3266;
+	--lava-background-3: #662e0d;
 	--text-saturation: 60%;
 	--text-lightness: 45%;
 	--editor-variable: #9CDCFE;
@@ -67,7 +70,10 @@
 	--errors-background-2: #c13b29;
 	--errors-background-3: #d8503e;
 	--errors-text: #000000cc;
-  --invalid-text: #a32600;
+	--invalid-text: #a32600;
+	--success-background-3: #6cd83e;
+	--water-background-3: #3e79d8;
+	--lava-background-3: #d86f3e;
 	--text-saturation: 100%;
 	--text-lightness: 30%;
 	--editor-variable: #0451A5;
@@ -108,6 +114,9 @@
 		--errors-background-3: #d8503e;
 		--errors-text: #000000cc;
 		--invalid-text: #a32600;
+		--success-background-3: #6cd83e;
+		--water-background-3: #3e79d8;
+		--lava-background-3: #d86f3e;
 		--text-saturation: 100%;
 		--text-lightness: 30%;
 		--editor-variable: #0451A5;
@@ -640,6 +649,256 @@ main.has-project {
 
 .transformation-matrix .transformation-input:nth-child(4n+2):not(:nth-of-type(1)) {
 	margin-top: 8px;
+}
+
+.customized .ad {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+.customized .version-switcher {
+	padding: 6px 0;	
+}
+
+.customized-tab {
+	padding-bottom: 30px;
+}
+
+.customized-actions > span {
+	color: var(--text-3);
+	margin-left: 10px;
+}
+
+.btn.customized-create {
+	display: inline-flex;
+	background-color: var(--accent-site-1);
+	font-weight: bold;
+	padding: 20px 18px;
+}
+
+.btn.customized-create:not(.disabled):hover {
+	background-color: var(--accent-site-2) !important;
+}
+
+.btn.customized-create > svg {
+	width: 20px;
+	height: 20px;
+	margin-right: 10px;
+}
+
+.customized > .error {
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: 0;
+}
+
+.customized-tab > *:not(:first-child) {
+	margin-top: 10px;
+}
+
+.customized-childs {
+	margin-top: 10px;
+	margin-bottom: 20px;
+	margin-left: 10px;
+	border-left: 2px solid var(--background-4);
+}
+
+.customized-childs > * {
+	margin-left: 10px;
+}
+
+.customized-childs > *:not(:first-child) {
+	margin-top: 10px;
+}
+
+.customized-input {
+	display: flex;
+	align-items: center;
+}
+
+.customized-input .customized-label {
+	height: 28px;
+	min-width: 140px;
+	padding-right: 10px;
+	display: inline-flex;
+	align-items: center;
+}
+
+.customized-childs .customized-label {
+	min-width: 118px;
+	color: var(--text-2);
+}
+
+.customized-input .customized-label label {
+	position: relative;
+}
+
+.customized-input.customized-modified > .customized-label label::after {
+	content: '*';
+	color: var(--accent-primary);
+	position: absolute;
+	left: 100%;
+	margin-left: 3px;
+}
+
+.customized-input .customized-label .item-display {
+	width: 32px;
+	height: 32px;
+	margin-right: 3px;
+}
+
+.customized-input input[type="range"] {
+	margin-left: 5px;
+	width: 200px;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	border: 2px solid var(--background-4);
+}
+
+.customized-input input[type="range"]:focus {
+	outline: none;
+	border-color: var(--text-2);
+}
+
+.customized-input.customized-errored input[type="range"] {
+	border-color: var(--errors-background);
+}
+
+.customized-input.customized-errored input[type="range"]:focus {
+	border-color: var(--accent-danger);
+}
+
+/* Track */
+.customized-input input[type="range"]::-webkit-slider-runnable-track {
+	background-color: var(--background-4);
+	height: 24px;
+}
+
+.customized-input input[type="range"]::-moz-range-track {
+	background-color: var(--background-4);
+	height: 24px;
+}
+
+/* Thumb */
+.customized-input input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--text-2);
+	margin-top: -2px;
+	width: 10px;
+	height: 28px;
+}
+
+.customized-input input[type="range"]::-moz-range-thumb {
+	border: none;
+	border-radius: 0;
+	background-color: var(--text-2);
+	margin-top: -2px;
+	width: 10px;
+	height: 28px;
+}
+
+.customized-input input[type="number"],
+.customized-input input[type="text"] {
+	margin-left: 5px;
+	width: 200px;
+	height: 28px;
+	padding: 3px 6px;
+	background-color: var(--background-1);
+	border: 2px solid var(--background-4);
+	color: var(--text-2);
+	font-size: 18px;
+}
+
+.customized-input input[type="number"] {
+	width: 100px;
+}
+
+.customized-input input[type="number"]:focus,
+.customized-input input[type="text"]:focus {
+	outline: none;
+	border-color: var(--text-2);
+}
+
+.customized-input.customized-errored input[type="number"],
+.customized-input.customized-errored input[type="text"] {
+	border-color: var(--errors-background);
+}
+
+.customized-input.customized-errored input[type="number"]:focus,
+.customized-input.customized-errored input[type="text"]:focus {
+	border-color: var(--accent-danger);
+}
+
+.customized-input > .item-display {
+	margin-left: 5px;
+	width: 28px;
+	height: 28px;
+}
+
+.customized-input button {
+	margin-left: 5px;
+	height: 28px;
+	padding: 2px 6px;
+	border: 2px solid transparent;
+	background-color: var(--background-4);
+	color: var(--text-2);
+	fill: var(--text-2);
+	font-size: 18px;
+}
+
+.customized-input button:focus {
+	outline: none;
+	border-color: var(--text-2);
+}
+
+.customized-input button.customized-toggle + span {
+	margin-left: 3px;
+}
+
+.customized-input span + button.customized-toggle {
+	margin-left: 3px;
+}
+
+.customized-input button.customized-active {
+	background-color: var(--success-background-3);
+}
+
+.customized-input button.customized-false {
+	background-color: var(--errors-background-3);
+}
+
+.customized-input button.customized-true {
+	background-color: var(--success-background-3);
+}
+
+.customized-input button.customized-water {
+	background-color: var(--water-background-3);
+}
+
+.customized-input button.customized-lava {
+	background-color: var(--lava-background-3);
+}
+
+.customized-input button.customized-icon {
+	width: 28px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.customized-input button.customized-error {
+	fill: var(--accent-danger);
+}
+
+.customized-input > .customized-input {
+	margin-left: 10px;
+}
+
+.customized-input > .customized-input .customized-label {
+	min-width: unset;;
 }
 
 .btn {
@@ -2025,13 +2284,17 @@ hr {
 	fill: var(--accent-primary);
 }
 
-.version-tabs {
+.version-detail .tabs {
+	margin-top: 20px;
+}
+
+.tabs {
 	display: flex;
-	margin: 20px 0 10px;
+	margin-bottom: 10px;
 	box-shadow: inset 0 -1px 0 var(--background-4);
 }
 
-.version-tabs > * {
+.tabs > span {
 	border-bottom: 2px solid transparent;
 	padding: 8px 16px;
 	cursor: pointer;
@@ -2042,13 +2305,24 @@ hr {
 	align-items: center;
 }
 
-.version-tabs > * > svg {
+.tabs > * > svg {
 	margin-left: 8px;
 }
 
-.version-tabs > .selected {
+.tabs > .selected {
 	border-color: var(--text-3);
 	color: var(--text-1);
+}
+
+.tabs > .version-switcher {
+	margin-left: auto;
+}
+
+.tabs.tabs-sticky {
+	position: sticky;
+	top: 55px;
+	background-color: var(--background-1);
+	z-index: 4;
 }
 
 .ace_editor,

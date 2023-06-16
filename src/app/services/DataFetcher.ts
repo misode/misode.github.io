@@ -84,6 +84,24 @@ async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) 
 	}
 }
 
+export async function fetchBlockStates(versionId: VersionId) {
+	console.debug(`[fetchBlockStates] ${versionId}`)
+	const version = config.versions.find(v => v.id === versionId)!
+	const result = new Map<string, {properties: Record<string, string[]>, default: Record<string, string>}>()
+	try {
+		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
+		for (const id in data) {
+			result.set('minecraft:' + id, {
+				properties: data[id][0],
+				default: data[id][1],
+			})
+		}
+	} catch (e) {
+		console.warn('Error occurred while fetching block states:', message(e))
+	}
+	return result
+}
+
 export async function fetchPreset(versionId: VersionId, registry: string, id: string) {
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
 	const version = config.versions.find(v => v.id === versionId)!
