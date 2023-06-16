@@ -5,7 +5,7 @@ import type { VersionId } from '../../services/Schemas.js'
 import type { CustomizedOreModel } from './CustomizedModel.js'
 import { CustomizedModel } from './CustomizedModel.js'
 
-const PackTypes = ['dimension_type', 'worldgen/noise_settings', 'worldgen/noise', 'worldgen/structure_set', 'worldgen/placed_feature', 'worldgen/configured_feature'] as const
+const PackTypes = ['dimension_type', 'worldgen/noise_settings', 'worldgen/noise', 'worldgen/structure_set', 'worldgen/placed_feature', 'worldgen/configured_feature', 'worldgen/configured_carver'] as const
 export type CustomizedPackType = typeof PackTypes[number]
 
 export type CustomizedPack = Record<CustomizedPackType, Map<string, any>>
@@ -38,6 +38,7 @@ export async function generateCustomized(model: CustomizedModel, version: Versio
 	}
 	generateDimensionType(ctx)
 	generateNoiseSettings(ctx)
+	generateCarvers(ctx)
 	generateClimateNoises(ctx)
 	generateStructures(ctx)
 	generateDungeonFeatures(ctx)
@@ -77,6 +78,38 @@ function generateNoiseSettings(ctx: Context) {
 			final_density: finalDensity,
 		},
 	})
+}
+
+function generateCarvers(ctx: Context) {
+	if (isUnchanged(ctx, 'caves', 'carverCaves', 'ravines')) return
+	if (!ctx.model.caves || !ctx.model.carverCaves) {
+		const vanilla = ctx.vanilla['worldgen/configured_carver'].get('cave')
+		ctx.out['worldgen/configured_carver'].set('cave', {
+			...vanilla,
+			config: {
+				...vanilla.config,
+				probability: 0,
+			},
+		})
+		const extraVanilla = ctx.vanilla['worldgen/configured_carver'].get('cave')
+		ctx.out['worldgen/configured_carver'].set('cave_extra_underground', {
+			...extraVanilla,
+			config: {
+				...extraVanilla.config,
+				probability: 0,
+			},
+		})
+	}
+	if (!ctx.model.caves || !ctx.model.ravines) {
+		const vanilla = ctx.vanilla['worldgen/configured_carver'].get('canyon')
+		ctx.out['worldgen/configured_carver'].set('canyon', {
+			...vanilla,
+			config: {
+				...vanilla.config,
+				probability: 0,
+			},
+		})
+	}
 }
 
 function generateClimateNoises(ctx: Context) {

@@ -45,7 +45,7 @@ export function BasicSettings({ model, initialModel, changeModel }: Props) {
 				<CustomizedToggle label="Noise caves"
 					value={model.noiseCaves} onChange={v => changeModel({ noiseCaves: v })}
 					initial={initialModel.noiseCaves} />
-				<CustomizedToggle label="Carver caves"
+				<CustomizedToggle label="Old caves"
 					value={model.carverCaves} onChange={v => changeModel({ carverCaves: v })}
 					initial={initialModel.carverCaves} />
 				<CustomizedToggle label="Ravines"
