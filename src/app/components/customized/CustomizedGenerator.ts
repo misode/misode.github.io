@@ -152,19 +152,22 @@ function generateStructures(ctx: Context) {
 	}
 }
 
-const DisabledFeature = {
-	feature: {
+function getDisabledFeature(ctx: Context) {
+	ctx.out['worldgen/configured_feature'].set('no_op', {
 		type: 'minecraft:no_op',
 		config: {},
-	},
-	placement: [],
+	})
+	return {
+		feature: 'minecraft:no_op',
+		placement: [],
+	}
 }
 
 function generateDungeonFeatures(ctx: Context) {
 	if (isUnchanged(ctx, 'dungeons', 'dungeonTries')) return
 	if (!ctx.model.dungeons) {
-		ctx.out['worldgen/placed_feature'].set('monster_room_deep', DisabledFeature)
-		ctx.out['worldgen/placed_feature'].set('monster_room', DisabledFeature)
+		ctx.out['worldgen/placed_feature'].set('monster_room_deep', getDisabledFeature(ctx))
+		ctx.out['worldgen/placed_feature'].set('monster_room', getDisabledFeature(ctx))
 	} else {
 		const deepTries = Math.round(ctx.model.dungeonTries * 4 / 14)
 		const deepVanilla = ctx.vanilla['worldgen/placed_feature'].get('monster_room_deep')
@@ -195,8 +198,8 @@ function generateDungeonFeatures(ctx: Context) {
 function generateLakeFeatures(ctx: Context) {
 	if (!isUnchanged(ctx, 'lavaLakes', 'lavaLakeRarity', 'lavaLakeRarityUnderground')) {
 		if (!ctx.model.lavaLakes) {
-			ctx.out['worldgen/placed_feature'].set('lake_lava_surface', DisabledFeature)
-			ctx.out['worldgen/placed_feature'].set('lake_lava_underground', DisabledFeature)
+			ctx.out['worldgen/placed_feature'].set('lake_lava_surface', getDisabledFeature(ctx))
+			ctx.out['worldgen/placed_feature'].set('lake_lava_underground', getDisabledFeature(ctx))
 		} else {
 			const undergroundVanilla = ctx.vanilla['worldgen/placed_feature'].get('lake_lava_underground')
 			ctx.out['worldgen/placed_feature'].set('lake_lava_underground', {
@@ -258,7 +261,7 @@ function generateOreFeatures(ctx: Context) {
 		const value = ctx.model[key] as CustomizedOreModel | undefined
 		const initial = ctx.initial[key] as CustomizedOreModel
 		if (value === undefined) {
-			ctx.out['worldgen/placed_feature'].set(name, DisabledFeature)
+			ctx.out['worldgen/placed_feature'].set(name, getDisabledFeature(ctx))
 		} else {
 			const placed = deepClone(ctx.vanilla['worldgen/placed_feature'].get(name))
 			if (value.tries !== initial.tries) {
