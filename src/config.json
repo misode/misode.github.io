@@ -98,8 +98,8 @@
     },
     {
       "id": "1.20",
-      "dynamic": true,
-      "pack_format": 13
+      "ref": "1.20.1",
+      "pack_format": 15
     }
   ],
   "generators": [
