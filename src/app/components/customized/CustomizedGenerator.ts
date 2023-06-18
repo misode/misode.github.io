@@ -125,7 +125,7 @@ function generateClimateNoises(ctx: Context) {
 
 const Structures: Partial<Record<keyof CustomizedModel, string>> = {
 	ancientCities: 'ancient_cities',
-	buriedTreasure: 'buried_treasure',
+	buriedTreasures: 'buried_treasures',
 	desertPyramids: 'desert_pyramids',
 	igloos: 'igloos',
 	jungleTemples: 'jungle_temples',

@@ -12,9 +12,9 @@ export function StructuresSettings({ model, initialModel, changeModel }: Props) 
 		<CustomizedToggle label="Ancient cities"
 			value={model.ancientCities} onChange={v => changeModel({ ancientCities: v })}
 			initial={initialModel.ancientCities} />
-		<CustomizedToggle label="Buried treasure"
-			value={model.buriedTreasure} onChange={v => changeModel({ buriedTreasure: v })}
-			initial={initialModel.buriedTreasure} />
+		<CustomizedToggle label="Buried treasures"
+			value={model.buriedTreasures} onChange={v => changeModel({ buriedTreasures: v })}
+			initial={initialModel.buriedTreasures} />
 		<CustomizedToggle label="Desert pyramids"
 			value={model.desertPyramids} onChange={v => changeModel({ desertPyramids: v })}
 			initial={initialModel.desertPyramids} />

@@ -25,7 +25,7 @@ export interface CustomizedModel {
 	biomeSize: number,
 	// Structures
 	ancientCities: boolean,
-	buriedTreasure: boolean,
+	buriedTreasures: boolean,
 	desertPyramids: boolean,
 	igloos: boolean,
 	jungleTemples: boolean,
@@ -88,7 +88,7 @@ export namespace CustomizedModel {
 			biomeSize: 4,
 
 			ancientCities: true,
-			buriedTreasure: true,
+			buriedTreasures: true,
 			desertPyramids: true,
 			igloos: true,
 			jungleTemples: true,
