@@ -408,31 +408,56 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 }
 
 function StringSuffix({ path, getValues, config, node, value, lang, version, states }: NodeProps<StringHookParams>) {
+	const context = path.getContext().join('.')
 	const onChange = (evt: Event) => {
 		evt.stopPropagation()
 		const newValue = (evt.target as HTMLSelectElement).value
 		if (newValue === value) return
+		// Hackfix to support switching between checkerboard and multi_noise biome sources
+		if (context === 'dimension.generator.biome_source.type') {
+			const biomeSourceType = newValue.replace(/^minecraft:/, '')
+			const biomePath = path.pop().push('biomes')
+			const biomes = biomePath.get()
+			if (biomeSourceType === 'multi_noise') {
+				const newBiomes = Array.isArray(biomes)
+					? biomes.flatMap((b: any) => {
+						if (typeof b.node !== 'string') return []
+						return [{ node: { biome: b.node }}]
+					})
+					: [{ node: { biome: 'minecraft:plains' } }]
+				path.model.set(biomePath, newBiomes, true)
+			} else if (biomeSourceType === 'checkerboard') {
+				const newBiomes = typeof biomes === 'string'
+					? biomes
+					: Array.isArray(biomes)
+						? biomes.flatMap((b: any) => {
+							if (typeof b.node !== 'object' || b.node === null || typeof b.node.biome !== 'string') return []
+							return [{ node: b.node.biome }]
+						})
+						: [{ node: 'minecraft:plains' }]
+				path.model.set(biomePath, newBiomes, true)
+			}
+		}
 		path.model.set(path, newValue.length === 0 ? undefined : newValue)
 	}
 	const values = getValues()
-	const context = path.getContext().join('.')
 	const id = !isEnum(config) && config?.validator === 'resource' && typeof config.params.pool === 'string' ? config.params.pool : undefined
 
 	if (nbtFields.includes(context)) {
 		return <textarea value={value ?? ''} onBlur={onChange}></textarea>
 	} else if ((isEnum(config) && !config.additional) || selectRegistries.includes(context)) {
-		let context = new Path([])
+		let childPath = new Path([])
 		if (isEnum(config) && typeof config.enum === 'string') {
-			context = context.contextPush(config.enum)
+			childPath = childPath.contextPush(config.enum)
 		} else if (id) {
-			context = context.contextPush(id)
+			childPath = childPath.contextPush(id)
 		} else if (isEnum(config)) {
-			context = path
+			childPath = path
 		}
 		return <select value={value ?? ''} onChange={onChange}>
 			{node.optional() && <option value="">{localize(lang, 'unset')}</option>}
 			{values.map(v => <option value={v}>
-				{pathLocale(lang, context.contextPush(v.replace(/^minecraft:/, '')))}
+				{pathLocale(lang, childPath.contextPush(v.replace(/^minecraft:/, '')))}
 			</option>)}
 		</select>
 	} else if (!isEnum(config) && config?.validator === 'block_state_key') {
