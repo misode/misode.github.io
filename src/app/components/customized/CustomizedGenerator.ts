@@ -58,7 +58,7 @@ function generateDimensionType(ctx: Context) {
 }
 
 function generateNoiseSettings(ctx: Context) {
-	if (isUnchanged(ctx, 'seaLevel', 'oceans', 'caves', 'noiseCaves')) return
+	if (isUnchanged(ctx, 'minHeight', 'maxHeight', 'seaLevel', 'oceans', 'caves', 'noiseCaves')) return
 	const defaultFluid = formatIdentifier(ctx.model.oceans)
 	const vanilla = ctx.vanilla['worldgen/noise_settings'].get('overworld')
 	const finalDensity = deepClone(vanilla.noise_router.final_density)
@@ -72,6 +72,11 @@ function generateNoiseSettings(ctx: Context) {
 		default_fluid: {
 			Name: defaultFluid,
 			Properties: ctx.blockStates.get(defaultFluid)?.default,
+		},
+		noise: {
+			...vanilla.noise,
+			min_y: ctx.model.minHeight,
+			height: ctx.model.maxHeight - ctx.model.minHeight,
 		},
 		noise_router: {
 			...vanilla.noise_router,
