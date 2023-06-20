@@ -6,7 +6,7 @@ import { generateCustomized } from '../components/customized/CustomizedGenerator
 import { CustomizedModel } from '../components/customized/CustomizedModel.js'
 import { OresSettings } from '../components/customized/OresSettings.jsx'
 import { StructuresSettings } from '../components/customized/StructuresSettings.jsx'
-import { Btn, ErrorPanel, Footer, VersionSwitcher } from '../components/index.js'
+import { Btn, ErrorPanel, Footer, Octicon, VersionSwitcher } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useSearchParam } from '../hooks/index.js'
 import { stringifySource } from '../services/Source.js'
@@ -43,9 +43,17 @@ export function Customized({}: Props) {
 	const initialModel = useMemo(() => {
 		return CustomizedModel.getDefault(version)
 	}, [version])
+	const isModified = useMemo(() => {
+		return !deepEqual(model, initialModel)
+	}, [model, initialModel])
+
+	const reset = useCallback(() => {
+		setModel(deepClone(initialModel))
+	}, [initialModel])
 
 	const download = useRef<HTMLAnchorElement>(null)
 	const [error, setError] = useState<Error | string | null>(null)
+	const [hasDownloaded, setHasDownloaded] = useState(false)
 	const generate = useCallback(async () => {
 		if (!download.current) return
 		try {
@@ -63,6 +71,7 @@ export function Customized({}: Props) {
 			download.current.setAttribute('href', url)
 			download.current.setAttribute('download', 'customized.zip')
 			download.current.click()
+			setHasDownloaded(true)
 			setError(null)
 		} catch (e) {
 			if (e instanceof Error) {
@@ -86,10 +95,24 @@ export function Customized({}: Props) {
 				{tab === 'ores' && <OresSettings {...{model, initialModel, changeModel}} />}
 			</div>
 			<div class="customized-actions">
-				<Btn icon="download" label="Create" class="customized-create" onClick={generate} />
+				<Btn icon="download" label="Create" class="customized-create" tooltip="Create and download data pack" tooltipLoc="se" onClick={generate} />
 				<a ref={download} style="display: none;"></a>
+				{isModified && <Btn icon="undo" label="Reset" tooltip="Reset to default" tooltipLoc="se" onClick={reset} />}
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} body={`\n### Customized settings\n<details>\n<pre>\n${JSON.stringify(getDiffModel(model, initialModel), null, 2)}\n</pre>\n</details>\n`} />}
+			{hasDownloaded && <div class="customized-instructions">
+				<h4>
+					{Octicon.mortar_board}
+					What now?
+				</h4>
+				<ol>
+					<li>After launching Minecraft, create a new singleplayer world.</li>
+					<li>Select the "More" tab at the top.</li>
+					<li>Click on "Data Packs" and drag the downloaded zip file onto the game window. </li>
+					<li>Move the imported data pack to the right panel and click on "Done".</li>
+					<li>A message will warn about the use of experimental world settings. Click on "Proceed".</li>
+				</ol>
+			</div>}
 		</div>
 		<Footer />
 	</main>

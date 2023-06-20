@@ -664,8 +664,12 @@ main.has-project {
 	padding-bottom: 30px;
 }
 
-.customized-actions > span {
-	color: var(--text-3);
+.customized-actions {
+	display: flex;
+	align-items: center;
+}
+
+.customized-actions > *:not(:first-child) {
 	margin-left: 10px;
 }
 
@@ -684,6 +688,35 @@ main.has-project {
 	width: 20px;
 	height: 20px;
 	margin-right: 10px;
+}
+
+.customized-instructions {
+	margin-top: 5px;
+	padding: 5px;
+	color: var(--text-2);
+}
+
+
+.customized-instructions h4 {
+	display: flex;
+	align-items: center;
+	margin: 10px 0;
+}
+
+.customized-instructions svg {
+	fill: var(--accent-primary);
+	width: 24px;
+	height: 24px;
+	margin-right: 10px;
+}
+
+.customized-instructions ol {
+	margin-left: 25px;
+}
+
+.customized-instructions li {
+	margin: 6px 0;
+	color: var(--text-3);
 }
 
 .customized > .error {
@@ -1240,6 +1273,7 @@ main.has-project {
 	color: var(--text-1);
 	border-radius: 6px;
 	font-size: 14px;
+	font-weight: normal;
 	line-height: 1.5;
 	text-align: left;
 	opacity: 0;
