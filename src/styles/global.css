@@ -718,14 +718,14 @@ main.has-project {
 
 .customized-input .customized-label {
 	height: 28px;
-	min-width: 140px;
-	padding-right: 10px;
+	min-width: 160px;
+	padding-right: 3px;
 	display: inline-flex;
 	align-items: center;
 }
 
 .customized-childs .customized-label {
-	min-width: 118px;
+	min-width: 138px;
 	color: var(--text-2);
 }
 
@@ -733,12 +733,22 @@ main.has-project {
 	position: relative;
 }
 
-.customized-input.customized-modified > .customized-label label::after {
-	content: '*';
+.customized-input .customized-label .customized-modified {
 	color: var(--accent-primary);
-	position: absolute;
-	left: 100%;
 	margin-left: 3px;
+}
+
+.customized-input .customized-label .customized-help {
+	padding: 6px 0;
+	width: 16px;
+	height: 28px;
+	fill: var(--text-3);
+	margin-left: 6px;
+}
+
+.customized-input .customized-label .customized-help > svg {
+	width: 16px;
+	height: 16px;
 }
 
 .customized-input .customized-label .item-display {

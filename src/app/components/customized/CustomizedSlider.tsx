@@ -4,6 +4,7 @@ import { CustomizedInput } from './CustomizedInput.jsx'
 
 interface Props {
 	label: string,
+	help?: string,
 	value: number,
 	min: number,
 	max: number,

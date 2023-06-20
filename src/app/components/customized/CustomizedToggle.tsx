@@ -3,6 +3,7 @@ import { CustomizedInput } from './CustomizedInput.jsx'
 
 interface Props {
 	label: string,
+	help?: string,
 	value: boolean,
 	initial?: boolean,
 	onChange: (value: boolean) => void,

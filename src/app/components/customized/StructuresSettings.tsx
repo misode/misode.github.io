@@ -57,10 +57,10 @@ export function StructuresSettings({ model, initialModel, changeModel }: Props) 
 		<CustomizedToggle label="Woodland mansions"
 			value={model.woodlandMansions} onChange={v => changeModel({ woodlandMansions: v })}
 			initial={initialModel.woodlandMansions} />
-		<CustomizedToggle label="Dungeons"
+		<CustomizedToggle label="Dungeons" help="The smaller monster rooms with a spawner and chest"
 			value={model.dungeons} onChange={v => changeModel({ dungeons: v })}
 			initial={initialModel.dungeons}>
-			{model.dungeons && <CustomizedSlider label="Tries"
+			{model.dungeons && <CustomizedSlider label="Tries" help="The number of attempts to generate per chunk"
 				value={model.dungeonTries} onChange={v => changeModel({ dungeonTries: v })}
 				min={1} max={256} initial={initialModel.dungeonTries} />}
 		</CustomizedToggle>
@@ -69,10 +69,10 @@ export function StructuresSettings({ model, initialModel, changeModel }: Props) 
 				value={model.lavaLakes} onChange={v => changeModel({ lavaLakes: v })}
 				initial={initialModel.lavaLakes} />
 			{model.lavaLakes && <div class="customized-childs">
-				<CustomizedSlider label="Surface rarity"
+				<CustomizedSlider label="Surface rarity" help="The chance that a lava lake attempts to generate on the surface, larger numbers make them rarer"
 					value={model.lavaLakeRarity} onChange={v => changeModel({ lavaLakeRarity: v })}
 					min={1} max={400} initial={initialModel.lavaLakeRarity} />
-				<CustomizedSlider label="Underground rarity"
+				<CustomizedSlider label="Underground rarity" help="The chance that a lava lake attempts to generate underground, larger numbers make them rarer"
 					value={model.lavaLakeRarityUnderground} onChange={v => changeModel({ lavaLakeRarityUnderground: v })}
 					min={1} max={400} initial={initialModel.lavaLakeRarityUnderground} />
 			</div>}
