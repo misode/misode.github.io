@@ -67,6 +67,17 @@
     "avatar": "https://ko-fi.com/img/anon3.png"
   },
   {
+    "name": "MichaelMiner",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/be5f3072-8f59-4b05-a72e-bc3ebd946e72_tiny.png"
+  },
+  {
+    "name": "hoponopono",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/9755521b-a224-4cda-930a-e49409b5b20d.png",
+    "url": "https://ko-fi.com/hoponopono"
+  },
+  {
     "name": "SPGoding",
     "types": ["code", "infrastructure", "report", "translation"],
     "avatar": "https://avatars.githubusercontent.com/u/15277496?v=4",
@@ -521,6 +532,24 @@
     "types": ["report"],
     "avatar": "https://avatars.githubusercontent.com/u/10309699?v=4",
     "url": "https://github.com/Darkosto"
+  },
+  {
+    "name": "Sniper1-1",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/130007671?v=4",
+    "url": "https://github.com/Sniper1-1"
+  },
+  {
+    "name": "kruthers",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/10118799?v=4",
+    "url": "https://github.com/kruthers"
+  },
+  {
+    "name": "Rhythmic",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/45906780?v=4",
+    "url": "https://github.com/RhythmicSys"
   },
   {
     "name": "lakejason0",
