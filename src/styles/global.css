@@ -2369,6 +2369,69 @@ hr {
 	z-index: 4;
 }
 
+.whats-new > p {
+	color: var(--text-2);
+	padding-bottom: 30px;
+}
+
+.whats-new-entry {
+	padding-bottom: 50px;
+	position: relative;
+	padding-left: 46px;
+}
+
+.whats-new-entry:last-child {
+	padding-bottom: 10px;
+}
+
+.whats-new-entry::before {
+	content: '';
+	background-color: var(--background-6);
+	position: absolute;
+	top: 17px;
+	bottom: -2px;
+	left: 20px;
+	width: 2px;
+}
+
+.whats-new-entry::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 13px;
+	background-color: var(--background-1);
+	border: 3px solid var(--text-1);
+	border-radius: 10px;
+	width: 10px;
+	height: 10px;
+}
+
+.whats-new-entry > a {
+	display: block;
+	text-decoration: none;
+}
+
+.whats-new-entry time {
+	color: var(--text-3);
+	font-size: 15px;
+}
+
+.whats-new-entry h2 {
+	color: var(--text-1);
+	padding: 10px 0 15px;
+}
+
+.whats-new-entry .guide-content {
+	margin-top: 0;
+}
+
+.whats-new-entry .guide-content img {
+	max-width: min(calc(100vw - 78px), 600px);
+	background: linear-gradient(150deg, var(--background-6) 0%, var(--background-5) 100%);
+	padding: 20px;
+	display: block;
+}
+
 .ace_editor,
 .ace_gutter,
 .ace_gutter .ace_layer,

@@ -1,12 +1,12 @@
 import { useMemo } from 'preact/hooks'
 import contributors from '../../contributors.json'
-import { ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
+import { Store } from '../Store.js'
+import { shuffle } from '../Utils.js'
+import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
-import { fetchChangelogs, fetchVersions } from '../services/DataFetcher.js'
-import { Store } from '../Store.js'
-import { shuffle } from '../Utils.js'
+import { fetchChangelogs, fetchVersions, fetchWhatsNew } from '../services/DataFetcher.js'
 
 const MIN_FAVORITES = 2
 const MAX_FAVORITES = 5
@@ -30,6 +30,7 @@ export function Home({}: Props) {
 					{smallScreen && <Guides />}
 					<Versions />
 					{smallScreen && <Tools />}
+					<WhatsNew />
 				</div>
 				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
@@ -135,7 +136,15 @@ function Changelog() {
 	</ToolGroup>
 }
 
+function WhatsNew() {
+	const { locale } = useLocale()
 
+	const { value: items } = useAsync(fetchWhatsNew)
+
+	return <ToolGroup title={locale('whats_new')} link="/whats-new/" titleIcon="megaphone">
+		{items?.slice(0, 3).map(item => <Card overlay={Intl.DateTimeFormat(undefined, { day: 'numeric',month: 'long', year: 'numeric' }).format(new Date(item.createdAt))}>{item.title}</Card>)}
+	</ToolGroup>
+}
 
 function Contributors() {
 	const supporters = useMemo(() => {

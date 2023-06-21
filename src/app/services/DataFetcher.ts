@@ -19,6 +19,7 @@ const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
 const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 const fixesUrl = 'https://raw.githubusercontent.com/misode/mcfixes'
+const whatsNewUrl = 'https://whats-new.misode.workers.dev/'
 
 type McmetaTypes = 'summary' | 'data' | 'data-json' | 'assets' | 'assets-json' | 'registries' | 'atlas'
 
@@ -277,6 +278,23 @@ export async function fetchBugfixes(version: VersionId): Promise<Bugfix[]> {
 		return fixes
 	} catch (e) {
 		throw new Error(`Error occured while fetching bugfixes: ${message(e)}`)
+	}
+}
+
+export interface WhatsNewItem {
+	id: string,
+	title: string,
+	body: string,
+	url: string,
+	createdAt: string,
+}
+
+export async function fetchWhatsNew(): Promise<WhatsNewItem[]> {
+	try {
+		const whatsNew = await cachedFetch<WhatsNewItem[]>(whatsNewUrl, { refresh: true })
+		return whatsNew
+	} catch (e) {
+		throw new Error(`Error occured while fetching what's new: ${message(e)}`)
 	}
 }
 
