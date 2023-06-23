@@ -3,6 +3,7 @@ import contributors from '../../contributors.json'
 import { Store } from '../Store.js'
 import { shuffle } from '../Utils.js'
 import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
+import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
@@ -26,14 +27,15 @@ export function Home({}: Props) {
 				<div class="card-column">
 					<PopularGenerators />
 					{smallScreen && <FavoriteGenerators />}
+					{smallScreen && <WhatsNew />}
 					<Changelog />
 					{smallScreen && <Guides />}
 					<Versions />
 					{smallScreen && <Tools />}
-					<WhatsNew />
 				</div>
 				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
+					<WhatsNew />
 					<Guides />
 					<Tools />
 				</div>}
@@ -142,7 +144,7 @@ function WhatsNew() {
 	const { value: items } = useAsync(fetchWhatsNew)
 
 	return <ToolGroup title={locale('whats_new')} link="/whats-new/" titleIcon="megaphone">
-		{items?.slice(0, 3).map(item => <Card overlay={Intl.DateTimeFormat(undefined, { day: 'numeric',month: 'long', year: 'numeric' }).format(new Date(item.createdAt))}>{item.title}</Card>)}
+		{items?.slice(0, 3).map(item => <Card link="/whats-new/" overlay={<WhatsNewTime item={item} short={true} />}>{item.title}</Card>)}
 	</ToolGroup>
 }
 

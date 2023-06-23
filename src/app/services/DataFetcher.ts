@@ -1,5 +1,6 @@
 import type { CollectionRegistry } from '@mcschema/core'
 import config from '../Config.js'
+import { Store } from '../Store.js'
 import { message } from '../Utils.js'
 import type { BlockStateRegistry, VersionId } from './Schemas.js'
 
@@ -287,11 +288,19 @@ export interface WhatsNewItem {
 	body: string,
 	url: string,
 	createdAt: string,
+	seenAt?: string,
 }
 
 export async function fetchWhatsNew(): Promise<WhatsNewItem[]> {
 	try {
 		const whatsNew = await cachedFetch<WhatsNewItem[]>(whatsNewUrl, { refresh: true })
+		const seenState = Store.getWhatsNewSeen()
+		for (const { id, time } of seenState) {
+			const item = whatsNew.find(i => i.id === id)
+			if (item) {
+				item.seenAt = time
+			}
+		}
 		return whatsNew
 	} catch (e) {
 		throw new Error(`Error occured while fetching what's new: ${message(e)}`)
