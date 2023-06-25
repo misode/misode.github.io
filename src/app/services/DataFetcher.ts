@@ -336,7 +336,7 @@ async function cachedFetch<D = unknown>(url: string, { decode = (r => r.json()),
 					console.debug(`[cachedFetch] Cannot refresh, using cache ${url}`)
 					return await decode(cacheResponse)
 				}
-				throw new Error('Failed to fetch')
+				throw new Error(`Failed to fetch: ${message(e)}`)
 			}
 		} else {
 			if (cacheResponse && cacheResponse.ok) {
@@ -366,7 +366,11 @@ async function fetchAndCache<D>(cache: Cache, url: string, decode: (r: Response)
 		if (url.startsWith('https://raw.githubusercontent.com/')) {
 			const backupUrl = url.replace(RAWGITHUB_REGEX, 'https://cdn.jsdelivr.net/gh/$1/$2@$3/$4')
 			console.debug(`[cachedFetch] Retrying using ${backupUrl}`)
-			fetchResponse = await fetch(backupUrl)
+			try {
+				fetchResponse = await fetch(backupUrl)
+			} catch (e) {
+				throw new Error(`Backup "${backupUrl}" failed: ${message(e)}`)
+			}
 		} else {
 			throw e
 		}
