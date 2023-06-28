@@ -729,6 +729,18 @@ main.has-project {
 	margin-top: 10px;
 }
 
+.customized-info {
+	display: flex;
+	align-items: center;
+	padding-top: 20px;
+	color: var(--text-3);
+	fill: var(--text-3);
+}
+
+.customized-info > svg {
+	margin-right: 10px;
+}
+
 .customized-childs {
 	margin-top: 10px;
 	margin-bottom: 20px;

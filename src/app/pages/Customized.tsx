@@ -2,31 +2,44 @@ import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } f
 import config from '../Config.js'
 import { deepClone, deepEqual, writeZip } from '../Utils.js'
 import { BasicSettings } from '../components/customized/BasicSettings.jsx'
+import { BiomesSettings } from '../components/customized/BiomesSettings.jsx'
 import { generateCustomized } from '../components/customized/CustomizedGenerator.js'
 import { CustomizedModel } from '../components/customized/CustomizedModel.js'
 import { OresSettings } from '../components/customized/OresSettings.jsx'
 import { StructuresSettings } from '../components/customized/StructuresSettings.jsx'
 import { Btn, ErrorPanel, Footer, Octicon, VersionSwitcher } from '../components/index.js'
-import { useLocale, useTitle } from '../contexts/index.js'
+import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import { useSearchParam } from '../hooks/index.js'
+import { checkVersion } from '../services/Schemas.js'
 import { stringifySource } from '../services/Source.js'
 
-const Tabs = ['basic', 'structures', 'ores']
+const MIN_VERSION = '1.20'
+const Tabs = ['basic', 'biomes', 'structures', 'ores']
 
 interface Props {
 	path?: string,
 }
 export function Customized({}: Props) {
 	const { locale } = useLocale()
-	// const { version, changeVersion } = useVersion()
-	const version = '1.20'
-	const changeVersion = () => {}
+	const { version, changeVersion } = useVersion()
 	useTitle(locale('title.customized'))
 
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
 		errorBoundary.message = `Something went wrong with the customized world tool: ${errorBoundary.message}`
 		return <main><ErrorPanel error={errorBoundary} onDismiss={errorRetry} /></main>
+	}
+
+	if (!checkVersion(version, '1.20')) {
+		return <main>
+			<ErrorPanel error={locale('customized.error_min_version', MIN_VERSION)} reportable={false}>
+				<div class="error-actions">
+					<div class="error-action" onClick={() => changeVersion(MIN_VERSION)}>
+						{locale('generator.switch_version', MIN_VERSION)} {Octicon.arrow_right}
+					</div>
+				</div>
+			</ErrorPanel>
+		</main>
 	}
 
 	const [tab, setTab] = useSearchParam('tab')
@@ -44,6 +57,7 @@ export function Customized({}: Props) {
 		return CustomizedModel.getDefault(version)
 	}, [version])
 	const isModified = useMemo(() => {
+		console.log(model, initialModel)
 		return !deepEqual(model, initialModel)
 	}, [model, initialModel])
 
@@ -85,12 +99,14 @@ export function Customized({}: Props) {
 		<div class="container customized">
 			<div class="tabs tabs-sticky">
 				<span class={tab === 'basic' ? 'selected' : ''} onClick={() => setTab('basic')}>{locale('customized.basic')}</span>
+				<span class={tab === 'biomes' ? 'selected' : ''} onClick={() => setTab('biomes')}>{locale('customized.biomes')}</span>
 				<span class={tab === 'structures' ? 'selected' : ''} onClick={() => setTab('structures')}>{locale('customized.structures')}</span>
 				<span class={tab === 'ores' ? 'selected' : ''} onClick={() => setTab('ores')}>{locale('customized.ores')}</span>
 				<VersionSwitcher value={version} onChange={changeVersion} allowed={['1.20']} />
 			</div>
 			<div class="customized-tab">
 				{tab === 'basic' && <BasicSettings {...{model, initialModel, changeModel}} />}
+				{tab === 'biomes' && <BiomesSettings {...{model, initialModel, changeModel}} />}
 				{tab === 'structures' && <StructuresSettings {...{model, initialModel, changeModel}} />}
 				{tab === 'ores' && <OresSettings {...{model, initialModel, changeModel}} />}
 			</div>
