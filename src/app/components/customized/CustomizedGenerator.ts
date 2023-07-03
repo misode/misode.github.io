@@ -5,6 +5,9 @@ import type { VersionId } from '../../services/Schemas.js'
 import type { CustomizedOreModel } from './CustomizedModel.js'
 import { CustomizedModel } from './CustomizedModel.js'
 
+// Random prefix to avoid collisions with other packs that add no-op placed features
+const FeatureCollisionPrefix = 468794
+
 const PackTypes = ['dimension_type', 'worldgen/noise_settings', 'worldgen/noise', 'worldgen/structure_set', 'worldgen/placed_feature', 'worldgen/configured_feature', 'worldgen/configured_carver'] as const
 export type CustomizedPackType = typeof PackTypes[number]
 
@@ -17,6 +20,7 @@ interface Context {
 	blockStates: Map<string, {properties: Record<string, string[]>, default: Record<string, string>}>,
 	vanilla: CustomizedPack,
 	out: CustomizedPack,
+	featureCollisionIndex: number,
 }
 
 export async function generateCustomized(model: CustomizedModel, version: VersionId): Promise<CustomizedPack> {
@@ -35,6 +39,7 @@ export async function generateCustomized(model: CustomizedModel, version: Versio
 		out: PackTypes.reduce((acc, k) => {
 			return { ...acc, [k]: new Map()}
 		}, Object.create(null)) as CustomizedPack,
+		featureCollisionIndex: FeatureCollisionPrefix,
 	}
 	generateDimensionType(ctx)
 	generateNoiseSettings(ctx)
@@ -158,13 +163,18 @@ function generateStructures(ctx: Context) {
 }
 
 function getDisabledFeature(ctx: Context) {
-	ctx.out['worldgen/configured_feature'].set('no_op', {
-		type: 'minecraft:no_op',
-		config: {},
-	})
+	ctx.featureCollisionIndex += 1
 	return {
-		feature: 'minecraft:no_op',
-		placement: [],
+		feature: {
+			type: 'minecraft:no_op',
+			config: {},
+		},
+		placement: [
+			{
+				type: 'minecraft:rarity_filter',
+				chance: ctx.featureCollisionIndex,
+			},
+		],
 	}
 }
 
