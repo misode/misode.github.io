@@ -40,6 +40,10 @@ export function generateUUID() {
 	})
 }
 
+export function generateColor() {
+	return Math.floor(Math.random() * 16777215)
+}
+
 export function newSeed(model: DataModel) {
 	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
 	const dimensions = model.get(new Path(['dimensions']))

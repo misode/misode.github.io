@@ -58,6 +58,7 @@
   "fields": "Fields",
   "generate_new_seed": "Generate new seed",
   "generate_new_uuid": "Generate new UUID",
+  "generate_new_color": "Generate new color",
   "generator.not_found": "Cannot find generator \"%0%\"",
   "generator.error_min_version": "The minimum version for this generator is %0%",
   "generator.error_max_version": "This generator is not available in versions above %0%",
