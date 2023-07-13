@@ -42,6 +42,7 @@
     "format.yaml": "YAML",
     "generate_new_seed": "Générer une nouvelle graine",
     "generate_new_uuid": "Générer un nouvel UUID",
+    "generate_new_color": "Générer une nouvelle couleur",
     "generators.all": "Tout les générateurs",
     "generators.no_results": "Aucun générateur trouvé pour cette recherche",
     "generators.popular": "Générateur Populaires",

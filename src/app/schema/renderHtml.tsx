@@ -5,7 +5,7 @@ import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
 import config from '../Config.js'
-import { deepClone, deepEqual, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
+import { deepClone, deepEqual, generateColor, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
 import { ItemDisplay } from '../components/ItemDisplay.jsx'
 import { Btn, Octicon } from '../components/index.js'
 import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
@@ -403,6 +403,7 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 	return <>
 		<input type="text" value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
+		{config?.color && <button onClick={() => path.set(generateColor())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_color')}>{Octicon.sync}</button>}
 		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed', 'structure_placement.salt'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
 	</>
 }
