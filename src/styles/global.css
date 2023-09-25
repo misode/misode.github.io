@@ -1520,6 +1520,24 @@ a.tool-head:hover {
 	margin-bottom: 0;
 }
 
+.minecraft-wiki {
+	margin-bottom: 8px;
+	align-items: center;
+	padding: 5px 10px;
+}
+
+.minecraft-wiki img {
+	width: 64px;
+	height: 64px;
+	margin-right: 8px;
+}
+
+.minecraft-wiki em {
+	font-weight: bold;
+	font-style: normal;
+	color: var(--accent-primary);
+}
+
 hr {
 	margin: 12px 0;
 	border: none;
