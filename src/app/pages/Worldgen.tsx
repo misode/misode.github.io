@@ -9,7 +9,7 @@ export function Worldgen({}: Props) {
 	useTitle(locale('title.worldgen'))
 
 	return <main>
-		<div class="container worldgen">
+		<div class="legacy-container worldgen">
 			<div class="card-group">
 				<ToolGroup title={locale('generators.popular')}>
 					<GeneratorCard minimal id="dimension" />

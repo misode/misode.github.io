@@ -165,7 +165,7 @@
   background-color: var(--node-background-input);
 }
 
-.object-node > .node-header > .collapse {
+.object-node > .node-header > .node-collapse {
   cursor: pointer;
 }
 
@@ -215,40 +215,37 @@ button:not([disabled]).selected:hover {
   background-color: var(--node-selected-hover);
 }
 
-.collapse svg {
+.node-collapse svg {
   fill: var(--node-text);
 }
 
-.collapse.closed,
+.node-collapse.closed,
 button.add {
   background-color: var(--node-add);
   border-color: var(--node-add-border);
 }
 
-.collapse:not([disabled]).closed:hover,
+.node-collapse:not([disabled]).closed:hover,
 button:not([disabled]).add:hover {
   background-color: var(--node-add-hover);
 }
 
-.collapse.open,
+.node-collapse.open,
 button.remove {
   background-color: var(--node-remove);
   border-color: var(--node-remove-border);
 }
 
-.collapse:not([disabled]).open:hover,
+.node-collapse:not([disabled]).open:hover,
 button:not([disabled]).remove:hover {
   background-color: var(--node-remove-hover);
 }
 
 .node-header > button svg {
-  display: inline-block;
-  position: relative;
-  top: 2px;
   fill: var(--node-text);
 }
 
-.node-header > button.collapse:last-child,
+.node-header > button.node-collapse:last-child,
 .node-header > button.add:last-child {
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;

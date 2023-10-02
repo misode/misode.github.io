@@ -27,7 +27,7 @@ export function Versions({}: Props) {
 
 	return <main>
 		{error && <ErrorPanel error={error} />}
-		<div class="container">
+		<div class="legacy-container">
 			{selectedId ? <>
 				<div class="navigation">
 					<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
