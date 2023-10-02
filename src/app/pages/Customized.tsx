@@ -19,7 +19,7 @@ interface Props {
 export function Customized({}: Props) {
 	const { locale } = useLocale()
 	// const { version, changeVersion } = useVersion()
-	const version = '1.20'
+	const version = '1.20.2'
 	const changeVersion = () => {}
 	useTitle(locale('title.customized'))
 
@@ -87,7 +87,7 @@ export function Customized({}: Props) {
 				<span class={tab === 'basic' ? 'selected' : ''} onClick={() => setTab('basic')}>{locale('customized.basic')}</span>
 				<span class={tab === 'structures' ? 'selected' : ''} onClick={() => setTab('structures')}>{locale('customized.structures')}</span>
 				<span class={tab === 'ores' ? 'selected' : ''} onClick={() => setTab('ores')}>{locale('customized.ores')}</span>
-				<VersionSwitcher value={version} onChange={changeVersion} allowed={['1.20']} />
+				<VersionSwitcher value={version} onChange={changeVersion} allowed={['1.20.2']} />
 			</div>
 			<div class="customized-tab">
 				{tab === 'basic' && <BasicSettings {...{model, initialModel, changeModel}} />}
