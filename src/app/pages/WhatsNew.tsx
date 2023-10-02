@@ -29,7 +29,7 @@ export function WhatsNew({}: Props) {
 	}, [items, storeTime])
 
 	return <main>
-		<div class="container whats-new">
+		<div class="legacy-container whats-new">
 			<p>{locale('whats_new.description')}</p>
 			{error && <ErrorPanel error={error} />}
 			{items?.map(item => <WhatsNewEntry item={item} />)}

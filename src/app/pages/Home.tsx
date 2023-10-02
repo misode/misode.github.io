@@ -22,7 +22,7 @@ export function Home({}: Props) {
 	const smallScreen = useMediaQuery('(max-width: 580px)')
 
 	return <main>
-		<div class="container">
+		<div class="legacy-container">
 			<MinecraftWikiBanner />
 			<div class="card-group">
 				<div class="card-column">

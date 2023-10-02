@@ -126,12 +126,6 @@
 	}
 }
 
-* {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-}
-
 ::selection {
 	background-color: var(--selection);
 }
@@ -1444,7 +1438,7 @@ main.has-project {
 	box-shadow: none;
 }
 
-.container {
+.legacy-container {
 	padding: 16px;
 	max-width: 960px;
 	margin: 0 auto;
@@ -2421,8 +2415,8 @@ hr {
 	background-color: var(--background-1);
 	border: 3px solid var(--text-1);
 	border-radius: 10px;
-	width: 10px;
-	height: 10px;
+	width: 16px;
+	height: 16px;
 }
 
 .whats-new-entry > a {
@@ -2650,6 +2644,7 @@ hr {
 	padding: 8px 16px;
 	line-height: 1.2;
 	font-size: 90%;
+	list-style-type: decimal;
 }
 
 .guide-content {

@@ -82,7 +82,7 @@ export function Customized({}: Props) {
 	}, [model, version])
 
 	return <main>
-		<div class="container customized">
+		<div class="legacy-container customized">
 			<div class="tabs tabs-sticky">
 				<span class={tab === 'basic' ? 'selected' : ''} onClick={() => setTab('basic')}>{locale('customized.basic')}</span>
 				<span class={tab === 'structures' ? 'selected' : ''} onClick={() => setTab('structures')}>{locale('customized.structures')}</span>

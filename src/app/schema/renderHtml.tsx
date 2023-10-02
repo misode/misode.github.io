@@ -278,10 +278,10 @@ const renderHtml: RenderHook = {
 		if (node.optional()) {
 			if (value === undefined) {
 				const onExpand = () => path.set(DataModel.wrapLists(node.default()))
-				suffix = <button class="collapse closed tooltipped tip-se" aria-label={localize(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
+				suffix = <button class="node-collapse closed tooltipped tip-se" aria-label={localize(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
 			} else {
 				const onCollapse = () => path.set(undefined)
-				suffix = <button class="collapse open tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
+				suffix = <button class="node-collapse open tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
 			}
 		}
 		const context = path.getContext().join('.')

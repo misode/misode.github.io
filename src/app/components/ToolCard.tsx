@@ -25,7 +25,7 @@ export function ToolCard({ title, desc, link, icon, titleIcon }: Props) {
 }
 
 function ToolHead({ title, titleIcon }: Pick<Props, 'title' | 'titleIcon'>) {
-	return <h3>
+	return <h3 class="text-[1.17em]">
 		{title}
 		{titleIcon && (titleIcon in Octicon ? (Octicon as any)[titleIcon] : (Icons as any)[titleIcon])}
 	</h3>
