@@ -55,7 +55,6 @@
     "@types/seedrandom": "^2.4.28",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
-    "cypress": "^9.2.0",
     "eslint": "^8.17.0",
     "fast-glob": "^3.2.11",
     "preact": "^10.8.0",
