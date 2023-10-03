@@ -397,6 +397,7 @@ function testCondition(condition: any, ctx: LootContext): boolean {
 
 const LootConditions: Record<string, (params: any) => LootCondition> = {
 	alternative: ({ terms }) => (ctx) => {
+		if (!Array.isArray(terms) || terms.length === 0) return true
 		for (const term of terms) {
 			if (testCondition(term, ctx)) {
 				return true
