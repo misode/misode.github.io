@@ -1366,6 +1366,11 @@ main.has-project {
 	margin: 10px 0;
 }
 
+.error svg {
+	display: inline;
+	fill: currentColor;
+}
+
 .error h3 span {
 	margin-left: 8px;
 	cursor: pointer;
