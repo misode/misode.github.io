@@ -1,13 +1,13 @@
 import { Matrix3, Matrix4, Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
 import { mat4, quat, vec3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
+import { composeMatrix, svdDecompose } from '../Utils.js'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useActiveTimeout } from '../hooks/useActiveTimout.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { loadImage } from '../services/DataFetcher.js'
-import { composeMatrix, svdDecompose } from '../Utils.js'
 
 const XYZ = ['x', 'y', 'z'] as const
 type XYZ = typeof XYZ[number]
@@ -163,7 +163,8 @@ export function Transformation({}: Props) {
 
 	const [copiedComposed, setCopiedComposed] = useActiveTimeout()
 	const onCopyComposed = useCallback(() => {
-		navigator.clipboard.writeText(`[${[...matrix.data].map(formatFloat).join(',')}]`)
+		const matrixData = matrix.clone().transpose().data
+		navigator.clipboard.writeText(`[${[...matrixData].map(formatFloat).join(',')}]`)
 			.then(() => setCopiedComposed())
 	}, [matrix, setCopiedComposed])
 
