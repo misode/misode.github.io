@@ -348,6 +348,14 @@
       "minVersion": "1.18.2"
     },
     {
+      "id": "tag/worldgen/structure",
+      "url": "tags/structure",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/structure",
+      "schema": "structure_tag",
+      "minVersion": "1.19"
+    },
+    {
       "id": "block_definition",
       "url": "assets/blockstate",
       "path": "blockstates",
