@@ -2339,6 +2339,7 @@ hr {
 	fill: var(--text-2);
 	vertical-align: middle;
 	margin-left: 8px;
+	display: inline-block;
 }
 
 .version-metadata-link:hover {
