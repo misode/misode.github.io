@@ -39,7 +39,7 @@ export function Versions({}: Props) {
 				<VersionDetail id={selectedId} version={selected} />
 			</> : <>
 				<VersionList versions={versions} link={id => `/versions/?id=${id}`} navigation={(
-					<BtnLink link="/changelog" icon="git_commit" label={locale('versions.technical_changes')} />
+					<BtnLink link="/changelog" icon="git_commit" label={locale('versions.changelog')} />
 				)} />
 			</>}
 		</div>

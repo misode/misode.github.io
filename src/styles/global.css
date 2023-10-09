@@ -38,6 +38,16 @@
 	--editor-string: #CE9178;
 	--editor-constant: #569CD6;
 	--editor-number: #B5CEA8;
+	--diff-added: #3fb950;
+	--diff-modified: #d29922;
+	--diff-removed: #f85149;
+	--diff-renamed: #7d8590;
+	--diff-line-added: rgba(46, 160, 67, 0.15);
+	--diff-line-removed: rgba(248, 81, 73, 0.1);
+	--diff-line-separation: rgba(56, 139, 253, 0.1);
+	--diff-numbers-added: rgba(63, 185, 80, 0.3);
+	--diff-numbers-removed: rgba(248, 81, 73, 0.3);
+	--diff-numbers-separation: rgba(56, 139, 253, 0.4);
 }
 
 :root[data-theme=light] {
@@ -80,6 +90,16 @@
 	--editor-string: #A31515;
 	--editor-constant: #0000FF;
 	--editor-number: #098658;
+	--diff-added: #1a7f37;
+	--diff-modified: #9a6700;
+	--diff-removed: #d1242f;
+	--diff-renamed: #656d76;
+	--diff-line-added: rgb(230, 255, 236);
+	--diff-line-removed: rgb(255, 235, 233);
+	--diff-line-separation: rgb(221, 244, 255);
+	--diff-numbers-added: rgb(204, 255, 216);
+	--diff-numbers-removed: rgb(255, 215, 213);
+	--diff-numbers-separation: rgba(84, 174, 255, 0.4);
 }
 
 @media (prefers-color-scheme: light) {
@@ -123,6 +143,16 @@
 		--editor-string: #A31515;
 		--editor-constant: #0000FF;
 		--editor-number: #098658;
+		--diff-added: #1a7f37;
+		--diff-modified: #9a6700;
+		--diff-removed: #d1242f;
+		--diff-renamed: #656d76;
+		--diff-line-added: rgb(230, 255, 236);
+		--diff-line-removed: rgb(255, 235, 233);
+		--diff-line-separation: rgb(221, 244, 255);
+		--diff-numbers-added: rgb(204, 255, 216);
+		--diff-numbers-removed: rgb(255, 215, 213);
+		--diff-numbers-separation: rgba(84, 174, 255, 0.4);
 	}
 }
 
@@ -2348,6 +2378,96 @@ hr {
 
 .version-detail .tabs {
 	margin-top: 20px;
+}
+
+.diff-tree {
+	max-height: calc(100vh - 56px);
+	min-height: calc(100vh - 56px);
+}
+
+.diff-view-panel {
+	margin-top: calc(-100vh + 56px);
+	min-height: calc(100vh - 56px);
+}
+
+.diff-entry {
+	position: relative;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 4px 8px 4px 6px;
+	padding-left: calc(var(--indent, 0) * 8px);
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	color: var(--text-2);
+	border-left: 2px solid transparent;
+}
+
+.diff-entry:hover {
+	background-color: var(--background-2);
+}
+
+.diff-entry.active {
+	background-color: var(--background-4);
+	border-color: var(--accent-primary);
+}
+
+.diff-added {
+	fill: var(--diff-added);
+}
+
+.diff-modified {
+	fill: var(--diff-modified);
+}
+
+.diff-removed {
+	fill: var(--diff-removed);
+}
+
+.diff-renamed {
+	fill: var(--diff-renamed);
+}
+
+.diff-view {
+	background-color: var(--background-1);
+	border: 1px solid var(--background-4);
+	border-left: none;
+	border-right: none;
+}
+
+.diff-line-added {
+	background-color: var(--diff-line-added);
+	color: var(--text-1);
+}
+
+.diff-line-removed {
+	background-color: var(--diff-line-removed);
+	color: var(--text-1);
+}
+
+.diff-line-separation {
+	background-color: var(--diff-line-separation);
+}
+
+.diff-number {
+	text-align: right;
+}
+
+.diff-line-added .diff-number {
+	background-color: var(--diff-numbers-added);
+	color: var(--text-1);
+}
+
+.diff-line-removed .diff-number {
+	background-color: var(--diff-numbers-removed);
+	color: var(--text-2);
+}
+
+.diff-line-separation .diff-number {
+	background-color: var(--diff-numbers-separation);
+	text-align: center;
 }
 
 .tabs {
