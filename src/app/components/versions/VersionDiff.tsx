@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "preact/hooks"
 import { parseGitPatch } from "../../Utils.js"
 import { useLocale } from "../../contexts/Locale.jsx"
 import { useAsync } from "../../hooks/useAsync.js"
+import { useLocalStorage } from "../../hooks/useLocalStorage.js"
 import { useSearchParam } from "../../hooks/useSearchParam.js"
 import { GitHubCommitFile, fetchVersionDiff } from "../../services/DataFetcher.js"
 import { ErrorPanel } from "../ErrorPanel.jsx"
@@ -70,25 +71,33 @@ export function VersionDiff({ version }: Props) {
 		return () => window.removeEventListener('keydown', onKeyDown)
 	}, [commit, filename, selectFile])
 
+	const [wrap, setWrap] = useLocalStorage('misode_diff_word_wrap', true, (s) => s === 'true', (b) => b ? 'true' : 'false')
+
 	return <>
-		<p class="note">Showing <b>{commit?.files.length} changed files</b> with <b>{commit?.stats.additions} additions</b> and <b>{commit?.stats.deletions} deletions</b></p>
+		<div class="flex justify-between items-center">
+			<p class="note">Showing <b>{commit?.files.length} changed files</b> with <b>{commit?.stats.additions} additions</b> and <b>{commit?.stats.deletions} deletions</b></p>
+			<label>
+				<input type="checkbox" checked={wrap} onClick={() => setWrap(!wrap)} />
+				<span class="ml-2">Word wrap</span>
+			</label>
+		</div>
 		<div ref={diffView} class="mt-3 w-full">
 			<div class="diff-tree w-64 overflow-y-scroll overscroll-contain sticky top-[56px]">
 				<TreeView entries={commit?.files ?? []} group={DiffFolder} leaf={DiffEntry} split={file => file.filename.split('/')} />
 			</div>
 			{filename && <div class="diff-view-panel flex-1 min-w-0 ml-64 pl-2">
-				<div class="font-bold text-xl text-center p-2 overflow-hidden text-ellipsis">{filename}</div>
+				<div class="font-bold text-xl text-center p-2 overflow-hidden text-ellipsis" title={filename}>{filename}</div>
 				{diff === undefined ? (
 					<span class="note">{locale('loading')}</span>
 				)	: diff instanceof Error ? (
 					<ErrorPanel error={diff} />
-				) : <div class="diff-view flex text-sm">
-					<table class="w-full">
-						{diff.map(line => <tr class={`w-full font-mono whitespace-pre-wrap ${line.before ? (line.after ? '' : 'diff-line-removed') : (line.after ? 'diff-line-added' : 'diff-line-separation')}`}>
-							<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} w-16 select-none px-2`}>{line.before ?? (line.after ? '' : '...')}</td>
-							<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} w-16 select-none px-2`}>{line.after ?? (line.before ? '' : '...')}</td>
+				) : <div class={`diff-view text-sm ${wrap ? '' : 'overflow-x-auto'}`}>
+					<table class="max-w-full w-full">
+						{diff.map(line => <tr class={`w-full font-mono ${wrap ? 'whitespace-pre-wrap' : 'whitespace-pre'} ${line.before ? (line.after ? '' : 'diff-line-removed') : (line.after ? 'diff-line-added' : 'diff-line-separation')}`}>
+							<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} select-none px-2`}>{line.before ?? (line.after ? '' : '...')}</td>
+							<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} select-none px-2`}>{line.after ?? (line.before ? '' : '...')}</td>
 							<td class="px-2 align-top w-4 select-none">{line.line.startsWith('@') ? '' : line.line.charAt(0)}</td>
-							<td class={`break-all ${line.before || line.after ? '' : 'py-2'}`}>{line.line.startsWith('@') ? line.line : line.line.slice(1)}</td>
+							<td class={`break-all w-full ${line.before || line.after ? '' : 'py-2'}`}>{line.line.startsWith('@') ? line.line : line.line.slice(1)}</td>
 						</tr>)}
 					</table>
 				</div>}
