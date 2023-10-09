@@ -2380,14 +2380,28 @@ hr {
 	margin-top: 20px;
 }
 
-.diff-tree {
-	max-height: calc(100vh - 56px);
-	min-height: calc(100vh - 56px);
+.diff-header {
+	background-color: var(--background-1);
 }
 
-.diff-view-panel {
-	margin-top: calc(-100vh + 56px);
-	min-height: calc(100vh - 56px);
+.diff-toggle {
+	fill: var(--text-3);
+}
+
+.diff-toggle:hover {
+	fill: var(--text-1);
+}
+
+@media (min-width: 768px) {
+	.diff-tree {
+		max-height: calc(100vh - 56px);
+		min-height: calc(100vh - 56px);
+	}
+
+	.diff-view-panel {
+		margin-top: calc(-100vh + 56px);
+		min-height: calc(100vh - 56px);
+	}
 }
 
 .diff-entry {

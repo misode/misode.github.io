@@ -560,11 +560,11 @@ export function parseGitPatch(patch: string) {
 	for (let i = 0; i < source.length; i += 1) {
 		const line = source[i]
 		if (line.startsWith('@')) {
-			const match = line.match(/^@@ -(\d+),(\d+) \+(\d+),(\d+) @@/)
+			const match = line.match(/^@@ -(\d+)(?:,(?:\d+))? \+(\d+)(?:,(?:\d+))? @@/)
 			if (!match) throw new Error(`Invalid patch pattern at line ${i+1}: ${line}`)
 			result.push({ line })
 			before = Number(match[1])
-			after = Number(match[3])
+			after = Number(match[2])
 		} else if (line.startsWith(' ')) {
 			result.push({ line, before, after })
 			before += 1

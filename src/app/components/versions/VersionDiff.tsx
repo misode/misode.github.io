@@ -74,18 +74,20 @@ export function VersionDiff({ version }: Props) {
 	const [wrap, setWrap] = useLocalStorage('misode_diff_word_wrap', true, (s) => s === 'true', (b) => b ? 'true' : 'false')
 
 	return <>
-		<div class="flex justify-between items-center">
+		<div class="diff-header flex items-center z-10 py-2 sticky top-[56px] md:static">
+			<button class={`diff-toggle mr-2 ${filename ? 'block md:hidden' : 'hidden'}`} onClick={() => setFilename(undefined)}>{Octicon.arrow_left}</button>
 			<p class="note">Showing <b>{commit?.files.length} changed files</b> with <b>{commit?.stats.additions} additions</b> and <b>{commit?.stats.deletions} deletions</b></p>
-			<label>
+			<div class="flex-1"></div>
+			<label class={`ml-2 whitespace-nowrap ${filename ? 'block' : 'hidden md:block'}`}>
 				<input type="checkbox" checked={wrap} onClick={() => setWrap(!wrap)} />
 				<span class="ml-2">Word wrap</span>
 			</label>
 		</div>
-		<div ref={diffView} class="mt-3 w-full">
-			<div class="diff-tree w-64 overflow-y-scroll overscroll-contain sticky top-[56px]">
+		<div ref={diffView} class="w-full">
+			<div class={`diff-tree w-full md:w-64 md:overflow-y-scroll md:overscroll-contain md:sticky md:top-[56px] ${filename ? 'hidden md:block' : 'block'}`}>
 				<TreeView entries={commit?.files ?? []} group={DiffFolder} leaf={DiffEntry} split={file => file.filename.split('/')} />
 			</div>
-			{filename && <div class="diff-view-panel flex-1 min-w-0 ml-64 pl-2">
+			{filename && <div class={`diff-view-panel flex-1 min-w-0 md:pl-2 md:ml-64`}>
 				<div class="font-bold text-xl text-center p-2 overflow-hidden text-ellipsis" title={filename}>{filename}</div>
 				{diff === undefined ? (
 					<span class="note">{locale('loading')}</span>
