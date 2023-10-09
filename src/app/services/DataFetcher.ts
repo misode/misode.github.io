@@ -297,6 +297,9 @@ export interface GitHubCommitFile {
 export interface GitHubCommit {
 	sha: string,
 	html_url: string,
+	parents: {
+		sha: string,
+	}[],
 	stats: {
 		total: number,
 		additions: number,

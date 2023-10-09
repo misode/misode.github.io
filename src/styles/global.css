@@ -2484,6 +2484,19 @@ hr {
 	text-align: center;
 }
 
+.diff-media {
+	image-rendering: pixelated;
+	background-color: var(--background-2);
+}
+
+.diff-media-added {
+	background-color: var(--diff-line-added);
+}
+
+.diff-media-removed {
+	background-color: var(--diff-line-removed);
+}
+
 .tabs {
 	display: flex;
 	margin-bottom: 10px;

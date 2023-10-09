@@ -9,6 +9,9 @@ import { ErrorPanel } from "../ErrorPanel.jsx"
 import { Octicon } from "../Octicon.jsx"
 import { TreeView, TreeViewGroupRenderer, TreeViewLeafRenderer } from "../TreeView.jsx"
 
+const mcmetaRawUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
+const mcmetaBlobUrl = 'https://github.com/misode/mcmeta/blob'
+
 interface Props {
 	version: string,
 }
@@ -27,17 +30,33 @@ export function VersionDiff({ version }: Props) {
 		}
 	}, [diffView, setFilename])
 
-	const diff = useMemo(() => {
-		if (filename === undefined) return undefined
+	const { file, diff } = useMemo(() => {
+		if (filename === undefined) return { file: undefined, diff: undefined }
 		const file = commit?.files.find(f => f.filename === filename)
-		if (file === undefined) return undefined
-		if (file.patch === undefined) return []
+		if (file === undefined) return { file, diff: undefined }
+		if (file.patch === undefined) {
+			const match = filename.match(/\.(png|ogg)$/)
+			if (match) {
+				return {
+					file,
+					diff: {
+						type: match[1],
+						before: file.status === 'added' ? undefined : `${mcmetaRawUrl}/${commit?.parents[0].sha}/${filename}`,
+						after: file.status === 'removed' ? undefined : `${mcmetaRawUrl}/${version}-diff/${filename}`,
+					},
+				}
+			} else if (file.status === 'renamed') {
+				return { file, diff: [] }
+			} else {
+				return { file, diff: new Error('Cannot display diff for this file') }
+			}
+		}
 		try {
-			return parseGitPatch(file.patch)
+			return { file, diff: parseGitPatch(file.patch) }
 		} catch (e) {
 			const error = e as Error
 			error.message = `Failed to show diff: ${error.message}`
-			return error
+			return { file, diff: error }
 		}
 	}, [filename, commit])
 
@@ -78,31 +97,58 @@ export function VersionDiff({ version }: Props) {
 			<button class={`diff-toggle mr-2 ${filename ? 'block md:hidden' : 'hidden'}`} onClick={() => setFilename(undefined)}>{Octicon.arrow_left}</button>
 			<p class="note">Showing <b>{commit?.files.length} changed files</b> with <b>{commit?.stats.additions} additions</b> and <b>{commit?.stats.deletions} deletions</b></p>
 			<div class="flex-1"></div>
-			<label class={`ml-2 whitespace-nowrap ${filename ? 'block' : 'hidden md:block'}`}>
+			{Array.isArray(diff) && <label class={`ml-2 whitespace-nowrap ${filename ? 'block' : 'hidden md:block'}`}>
 				<input type="checkbox" checked={wrap} onClick={() => setWrap(!wrap)} />
 				<span class="ml-2">Word wrap</span>
-			</label>
+			</label>}
 		</div>
 		<div ref={diffView} class="w-full">
 			<div class={`diff-tree w-full md:w-64 md:overflow-y-scroll md:overscroll-contain md:sticky md:top-[56px] ${filename ? 'hidden md:block' : 'block'}`}>
 				<TreeView entries={commit?.files ?? []} group={DiffFolder} leaf={DiffEntry} split={file => file.filename.split('/')} />
 			</div>
-			{filename && <div class={`diff-view-panel flex-1 min-w-0 md:pl-2 md:ml-64`}>
-				<div class="font-bold text-xl text-center p-2 overflow-hidden text-ellipsis" title={filename}>{filename}</div>
+			{filename && <div key={filename} class={`diff-view-panel flex-1 min-w-0 md:pl-2 md:ml-64`}>
+				<div class="flex justify-center items-center min-w-0 text-center py-2" title={filename}>
+					<span class="mr-2 min-w-0 overflow-hidden text-ellipsis font-bold text-xl">{filename}</span>
+					<a class="diff-toggle p-1" href={`${mcmetaBlobUrl}/${version}-diff/${filename}`} target="_blank">{Octicon.link_external}</a>
+				</div>
 				{diff === undefined ? (
 					<span class="note">{locale('loading')}</span>
 				)	: diff instanceof Error ? (
 					<ErrorPanel error={diff} />
-				) : <div class={`diff-view text-sm ${wrap ? '' : 'overflow-x-auto'}`}>
-					<table class="max-w-full w-full">
-						{diff.map(line => <tr class={`w-full font-mono ${wrap ? 'whitespace-pre-wrap' : 'whitespace-pre'} ${line.before ? (line.after ? '' : 'diff-line-removed') : (line.after ? 'diff-line-added' : 'diff-line-separation')}`}>
-							<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} select-none px-2`}>{line.before ?? (line.after ? '' : '...')}</td>
-							<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} select-none px-2`}>{line.after ?? (line.before ? '' : '...')}</td>
-							<td class="px-2 align-top w-4 select-none">{line.line.startsWith('@') ? '' : line.line.charAt(0)}</td>
-							<td class={`break-all w-full ${line.before || line.after ? '' : 'py-2'}`}>{line.line.startsWith('@') ? line.line : line.line.slice(1)}</td>
-						</tr>)}
-					</table>
-				</div>}
+				) : !Array.isArray(diff) ? (
+					<div class="flex justify-center items-start px-8">
+						{diff.before ? (
+							diff.type === 'png'
+								? <img class="diff-media diff-media-removed w-full min-w-0" src={diff.before} alt="Before image" />
+								: <audio class="w-full" controls src={diff.before} />
+						) : (
+							<div class="diff-media-removed w-full self-stretch flex justify-center items-center">{Octicon.circle_slash}</div>
+						)}
+						<div class="p-2"></div>
+						{diff.after ? (
+							diff.type === 'png'
+								? <img class="diff-media diff-media-added w-full min-w-0" src={diff.after} alt="After image" />
+								: <audio class="w-full" controls src={diff.after} />
+						) : (
+							<div class="diff-media-added w-full self-stretch flex justify-center items-center">{Octicon.circle_slash}</div>
+						)}
+					</div>
+				) : <>
+					{file.previous_filename !== undefined && <div class="flex justify-center font-mono flex-wrap">
+						<span class="overflow-hidden text-ellipsis mr-2">{file.previous_filename}</span>
+						<span class="overflow-hidden text-ellipsis whitespace-nowrap"><span class="select-none">→ </span>{file.filename}</span>
+					</div>}
+					<div class={`diff-view text-sm ${wrap ? '' : 'overflow-x-auto'}`}>
+						<table class="max-w-full w-full">
+							{diff.map(line => <tr class={`w-full font-mono ${wrap ? 'whitespace-pre-wrap' : 'whitespace-pre'} ${line.before ? (line.after ? '' : 'diff-line-removed') : (line.after ? 'diff-line-added' : 'diff-line-separation')}`}>
+								<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} select-none px-2`}>{line.before ?? (line.after ? '' : '...')}</td>
+								<td class={`diff-number ${line.before || line.after ? 'align-top' : ''} select-none px-2`}>{line.after ?? (line.before ? '' : '...')}</td>
+								<td class="px-2 align-top w-4 select-none">{line.line.startsWith('@') ? '' : line.line.charAt(0)}</td>
+								<td class={`break-all w-full ${line.before || line.after ? '' : 'py-2'}`}>{line.line.startsWith('@') ? line.line : line.line.slice(1)}</td>
+							</tr>)}
+						</table>
+					</div>
+				</>}
 			</div>}
 		</div>
 	</>
