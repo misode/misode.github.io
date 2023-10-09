@@ -200,7 +200,7 @@
     "versions.released": "リリース済み",
     "versions.resource_pack_format": "リソースパック形式",
     "versions.search": "バージョンを検索",
-    "versions.technical_changes": "技術的な変更点",
+    "versions.changelog": "技術的な変更点",
     "world": "ワールド設定 (World Settings)",
     "worldgen": "ワールドジェネレーター (World Generator)",
     "worldgen/biome": "バイオーム (Biome)",

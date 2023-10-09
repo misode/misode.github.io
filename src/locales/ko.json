@@ -186,7 +186,7 @@
   "versions.released": "릴리즈됨",
   "versions.resource_pack_format": "리소스 팩 형식",
   "versions.search": "버전 검색",
-  "versions.technical_changes": "기술적 변경",
+  "versions.changelog": "기술적 변경",
   "world": "월드 설정",
   "worldgen": "월드젠",
   "worldgen/biome": "바이옴",

@@ -214,7 +214,7 @@
     "versions.pack_format": "Формат набора",
     "versions.data_pack_format": "Формат набора данных",
     "versions.resource_pack_format": "Формат набора ресурсов",
-    "versions.technical_changes": "Технические изменения",
+    "versions.changelog": "Технические изменения",
     "versions.discussion": "Обсуждение",
     "versions.fixes": "Исправленные ошибки",
     "versions.fixes.no_results": "Нет исправлений",
