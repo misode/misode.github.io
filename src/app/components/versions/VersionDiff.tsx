@@ -99,7 +99,7 @@ export function VersionDiff({ version }: Props) {
 			<div class="flex-1"></div>
 			{Array.isArray(diff) && <label class={`ml-2 whitespace-nowrap ${filename ? 'block' : 'hidden md:block'}`}>
 				<input type="checkbox" checked={wrap} onClick={() => setWrap(!wrap)} />
-				<span class="ml-2">Word wrap</span>
+				<span class="ml-2">{locale('version_diff.word_wrap')}</span>
 			</label>}
 		</div>
 		<div ref={diffView} class="w-full">
@@ -134,9 +134,9 @@ export function VersionDiff({ version }: Props) {
 						)}
 					</div>
 				) : <>
-					{file.previous_filename !== undefined && <div class="flex justify-center font-mono flex-wrap">
+					{file.previous_filename !== undefined && <div class="flex justify-center font-mono flex-wrap" title={`${file.previous_filename} → ${filename}`}>
 						<span class="overflow-hidden text-ellipsis mr-2">{file.previous_filename}</span>
-						<span class="overflow-hidden text-ellipsis whitespace-nowrap"><span class="select-none">→ </span>{file.filename}</span>
+						<span class="overflow-hidden text-ellipsis whitespace-nowrap"><span class="select-none">→ </span>{filename}</span>
 					</div>}
 					<div class={`diff-view text-sm ${wrap ? '' : 'overflow-x-auto'}`}>
 						<table class="max-w-full w-full">

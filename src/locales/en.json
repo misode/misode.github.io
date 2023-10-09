@@ -254,6 +254,7 @@
   "versions.minecraft_versions": "Minecraft Versions",
   "versions.latest_snapshot": "Latest snapshot",
   "versions.latest_release": "Latest release",
+  "version_diff.word_wrap": "Word wrap",
   "weight": "Weight",
   "whats_new": "What's new?",
   "whats_new.description": "Stay informed about all the latest development on misode.github.io. Read below to find out which features have recently been added.",
