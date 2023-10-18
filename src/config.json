@@ -393,6 +393,24 @@
       "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
+    },
+    {
+      "id": "worldgen_modifier",
+      "url": "partners/lithostitched/worldgen-modifier",
+      "path": "lithostitched/worldgen_modifier",
+      "tags": ["partners"],
+      "partner": "lithostitched",
+      "schema": "lithostitched:worldgen_modifier",
+      "minVersion": "1.20.2"
+    },
+    {
+      "id": "modded_biome_slice",
+      "url": "partners/lithostitched/modded-biome-slice",
+      "path": "lithostitched/modded_biome_slice",
+      "tags": ["partners"],
+      "partner": "lithostitched",
+      "schema": "lithostitched:modded_biome_slice",
+      "minVersion": "1.20.2"
     }
   ]
 }
