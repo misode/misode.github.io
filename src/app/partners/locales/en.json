@@ -73,9 +73,5 @@
   "lithostitched:modifier_predicate_type.lithostitched:any_of": "Any of",
   "lithostitched:modifier_predicate_type.lithostitched:mod_loaded": "Mod loaded",
   "lithostitched:modifier_predicate_type.lithostitched:not": "Not",
-  "lithostitched:modifier_predicate_type.lithostitched:true": "True",
-  "lithostitched:modded_biome_layout_type.lithostitched:biome_source": "Biome source",
-  "lithostitched:modded_biome_layout_type.lithostitched:multi_noise": "Multi noise",
-  "lithostitched:modded_biome_layout_type.lithostitched:original": "Original",
-  "lithostitched:modded_biome_layout_type.lithostitched:overlay": "Overlay"
+  "lithostitched:modifier_predicate_type.lithostitched:true": "True"
 }

@@ -1,5 +1,5 @@
 import type { CollectionRegistry, ResourceType, SchemaRegistry } from '@mcschema/core'
-import { BooleanNode, Case, ChoiceNode, ListNode, MapNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
+import { BooleanNode, Case, ChoiceNode, ListNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
 
 
 const ID = "lithostitched"
@@ -225,83 +225,5 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 		}
 	}, {
 		context: `${ID}.modifier_predicate`, disableSwitchContext: true
-	}))
-
-	// Modded Biome Slice
-	collections.register(`${ID}:modded_biome_layout_type`, [
-		"lithostitched:biome_source",
-		"lithostitched:multi_noise",
-		"lithostitched:original",
-		"lithostitched:overlay"
-	])
-
-	schemas.register(`${ID}:biome_source`, ObjectNode({
-		type: StringNode({ validator: 'resource', params: { pool: 'worldgen/biome_source' } }),
-		[Switch]: [{ push: 'type' }],
-		[Case]: {
-			'minecraft:fixed': {
-				biome: StringNode({ validator: 'resource', params: { pool: '$worldgen/biome' } })
-			},
-			'minecraft:multi_noise': {
-				preset: Opt(StringNode({ validator: 'resource', params: { pool: ['minecraft:overworld', 'minecraft:nether'] } })),
-				biomes: Mod(ListNode(
-					Reference('generator_biome')
-				), {
-					enabled: path => path.push('preset').get() === undefined,
-					default: () => [{
-						biome: 'minecraft:plains'
-					}]
-				})
-			},
-			'minecraft:checkerboard': {
-				scale: Opt(NumberNode({ integer: true, min: 0, max: 62 })),
-				biomes: Tag('$worldgen/biome')
-			},
-		}
-	}, { category: 'predicate', disableSwitchContext: true }))
-
-	schemas.register(`${ID}:modded_biome_slice`, Mod(ObjectNode({
-		levels: ListNode(StringNode({ validator: 'resource', params: { pool: `$dimension` } })),
-		layout: Opt(Reference(`${ID}:modded_biome_layout`)),
-		weight: NumberNode({ integer: true })
-	}, { context: `${ID}.modded_biome_slice`, disableSwitchContext: true }), {
-		default: () => ({
-			levels: ['minecraft:overworld'],
-			weight: 100
-		})
-	}))
-
-	schemas.register(`${ID}:modded_biome_layout`, ObjectNode({
-		type: StringNode({ validator: 'resource', params: { pool: `${ID}:modded_biome_layout_type` as any } }),
-		[Switch]: [{ push: 'type' }],
-		[Case]: {
-			'lithostitched:biome_source': {
-				biome_source: Reference(`${ID}:biome_source`)
-			},
-			'lithostitched:multi_noise': {
-				biomes: Mod(ListNode(
-					Reference('generator_biome')
-				), {
-					default: () => [{
-						biome: 'minecraft:plains'
-					}]
-				}),
-				areas: Opt(MapNode(
-					StringNode({ validator: 'resource', params: { pool: '$worldgen/biome' } }),
-					StringNode({ validator: 'resource', params: { pool: '$worldgen/biome' } })
-				)),
-				only_map_from_areas: Opt(BooleanNode())
-			},
-			'lithostitched:overlay': {
-				overlays: ListNode(
-					ObjectNode({
-						matches_biomes: Tag('$worldgen/biome'),
-						biome_source: Reference(`${ID}:biome_source`)
-					})
-				)
-			}
-		}
-	}, {
-		context: `${ID}.modded_biome_layout`, disableSwitchContext: true
 	}))
 }
