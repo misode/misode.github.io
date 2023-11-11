@@ -2,14 +2,16 @@ import type { DataModel } from '@mcschema/core'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import config from '../../Config.js'
-import { disectFilePath, DRAFT_PROJECT, getFilePath, useLocale, useProject, useVersion } from '../../contexts/index.js'
-import type { VersionId } from '../../services/index.js'
-import { stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { writeZip } from '../../Utils.js'
+import { DRAFT_PROJECT, disectFilePath, getFilePath, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { useFocus } from '../../hooks/useFocus.js'
+import type { VersionId } from '../../services/index.js'
+import { stringifySource } from '../../services/index.js'
 import { Btn } from '../Btn.js'
 import { BtnMenu } from '../BtnMenu.js'
-import type { EntryAction } from '../TreeView.js'
+import { Octicon } from '../Octicon.jsx'
+import type { TreeViewGroupRenderer, TreeViewLeafRenderer } from '../TreeView.js'
 import { TreeView } from '../TreeView.js'
 
 interface Props {
@@ -85,12 +87,12 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 		download.current.click()
 	}
 
-	const actions = useMemo<EntryAction[]>(() => [
+	const actions = useMemo(() => [
 		{
 			icon: 'pencil',
 			label: locale('project.rename_file'),
-			onAction: (e) => {
-				const file = disectEntry(e)
+			onAction: (entry: string) => {
+				const file = disectEntry(entry)
 				if (file) {
 					onRename(file)
 				}
@@ -99,8 +101,8 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 		{
 			icon: 'trashcan',
 			label: locale('project.delete_file'),
-			onAction: (e) => {
-				const file = disectEntry(e)
+			onAction: (entry: string) => {
+				const file = disectEntry(entry)
 				if (file) {
 					Analytics.deleteProjectFile(file.type, projects.length, project.files.length, 'menu')
 					updateFile(file.type, file.id, {})
@@ -108,6 +110,32 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 			},
 		},
 	], [disectEntry, updateFile, onRename])
+
+	const FolderEntry: TreeViewGroupRenderer = useCallback(({ name, open, onClick }) => {
+		return <div class="entry" onClick={onClick} >
+			{Octicon[!open ? 'chevron_right' : 'chevron_down']}
+			<span class="overflow-hidden text-ellipsis whitespace-nowrap">{name}</span>
+		</div>
+	}, [])
+
+	const FileEntry: TreeViewLeafRenderer<string> = useCallback(({ entry }) => {
+		const [focused, setFocus] = useFocus()
+		const onContextMenu = (evt: MouseEvent) => {
+			evt.preventDefault()
+			setFocus()
+		}
+	
+		return <div class={`entry ${entry === selected ? 'active' : ''} ${focused ? 'focused' : ''}`} onClick={() => selectFile(entry)} onContextMenu={onContextMenu} >
+			{Octicon.file}
+			<span>{entry.split('/').at(-1)}</span>
+			{focused && <div class="entry-menu">
+				{actions?.map(a => <div class="action [&>svg]:inline" onClick={e => { a.onAction(entry); e.stopPropagation(); setFocus(false) }}>
+					{(Octicon as any)[a.icon]}
+					<span>{a.label}</span>
+				</div>)}
+			</div>}
+		</div>
+	}, [actions])
 
 	return <>
 		<div class="project-controls">
@@ -124,7 +152,7 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 		<div class="file-view">
 			{entries.length === 0
 				? <span>{locale('project.no_files')}</span>
-				: <TreeView entries={entries} selected={selected} onSelect={selectFile} actions={actions} />}
+				: <TreeView entries={entries} split={path => path.split('/')} group={FolderEntry} leaf={FileEntry} />}
 		</div>
 		<a ref={download} style="display: none;"></a>
 	</>

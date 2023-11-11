@@ -201,7 +201,7 @@
     "versions.released": "Sortie",
     "versions.resource_pack_format": "Format du pack de ressources",
     "versions.search": "Rechercher des versions",
-    "versions.technical_changes": "Modifications techniques",
+    "versions.changelog": "Modifications techniques",
     "world": "Paramètres du monde",
     "worldgen": "Générateur de monde",
     "worldgen/biome": "Biome",

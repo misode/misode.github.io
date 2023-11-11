@@ -1,46 +1,4 @@
 :root {
-	--background-1: #1b1b1b;
-	--background-2: #252525;
-	--background-3: #222222;
-	--background-4: #3d3d3d;
-	--background-5: #383838;
-	--background-6: #575757;
-	--text-1: #ffffff;
-	--text-2: #dcdcdc;
-	--text-3: #c3c3c3;
-	--accent-primary: #50baf9;
-	--accent-success: #3eb84f;
-	--accent-warning: #b8893e;
-	--accent-danger: #cf4945;
-	--accent-donate: #db61a2;
-	--accent-site-1: #307328;
-	--accent-site-2: #296422;
-	--accent-sounds-1: #451475;
-	--accent-sounds-2: #39155e;
-	--accent-sounds-3: #6a08a3;
-	--accent-sounds-4: #d1a5e6;
-	--nav: #91908f;
-	--nav-hover: #b4b3b0;
-	--nav-faded: #4d4c4c;
-	--nav-faded-hover: #6e6e6e;
-	--selection: #445a9599;
-	--errors-background: #62190f;
-	--errors-background-2: #471610;
-	--errors-background-3: #3f140f;
-	--errors-text: #ffffffcc;
-	--invalid-text: #fd7951;
-	--success-background-3: #143f0f;
-	--water-background-3: #0d3266;
-	--lava-background-3: #662e0d;
-	--text-saturation: 60%;
-	--text-lightness: 45%;
-	--editor-variable: #9CDCFE;
-	--editor-string: #CE9178;
-	--editor-constant: #569CD6;
-	--editor-number: #B5CEA8;
-}
-
-:root[data-theme=light] {
 	--background-1: #fafafa;
 	--background-2: #e2e2e2;
 	--background-3: #d4d3d3;
@@ -80,50 +38,68 @@
 	--editor-string: #A31515;
 	--editor-constant: #0000FF;
 	--editor-number: #098658;
+	--diff-added: #1a7f37;
+	--diff-modified: #9a6700;
+	--diff-removed: #d1242f;
+	--diff-renamed: #656d76;
+	--diff-line-added: rgb(230, 255, 236);
+	--diff-line-removed: rgb(255, 235, 233);
+	--diff-line-separation: rgb(221, 244, 255);
+	--diff-numbers-added: rgb(204, 255, 216);
+	--diff-numbers-removed: rgb(255, 215, 213);
+	--diff-numbers-separation: rgba(84, 174, 255, 0.4);
 }
 
-@media (prefers-color-scheme: light) {
-	:root[data-theme=system] {
-		--background-1: #fafafa;
-		--background-2: #e2e2e2;
-		--background-3: #d4d3d3;
-		--background-4: #b8b8b8;
-		--background-5: #bdbdbd;
-		--background-6: #cecece;
-		--text-1: #000000;
-		--text-2: #2f2f2f;
-		--text-3: #494949;
-		--accent-primary: #088cdb;
-		--accent-success: #1a7f37;
-		--accent-warning: #a36f1c;
-		--accent-danger: #bd2f2a;
-		--accent-donate: #bf3989;
-		--accent-site-1: #2da44e;
-		--accent-site-2: #2c974b;
-		--accent-sounds-1: #b481e7;
-		--accent-sounds-2: #c18df5;
-		--accent-sounds-3: #af72d3;
-		--accent-sounds-4: #efd3fd;
-		--nav: #343a40;
-		--nav-hover: #565d64;
-		--nav-faded: #9fa2a7;
-		--nav-faded-hover: #bcbfc3;
-		--selection: #6786dd99;
-		--errors-background: #f66653;
-		--errors-background-2: #c13b29;
-		--errors-background-3: #d8503e;
-		--errors-text: #000000cc;
-		--invalid-text: #a32600;
-		--success-background-3: #6cd83e;
-		--water-background-3: #3e79d8;
-		--lava-background-3: #d86f3e;
-		--text-saturation: 100%;
-		--text-lightness: 30%;
-		--editor-variable: #0451A5;
-		--editor-string: #A31515;
-		--editor-constant: #0000FF;
-		--editor-number: #098658;
-	}
+:root.dark {
+	--background-1: #1b1b1b;
+	--background-2: #252525;
+	--background-3: #222222;
+	--background-4: #3d3d3d;
+	--background-5: #383838;
+	--background-6: #575757;
+	--text-1: #ffffff;
+	--text-2: #dcdcdc;
+	--text-3: #c3c3c3;
+	--accent-primary: #50baf9;
+	--accent-success: #3eb84f;
+	--accent-warning: #b8893e;
+	--accent-danger: #cf4945;
+	--accent-donate: #db61a2;
+	--accent-site-1: #307328;
+	--accent-site-2: #296422;
+	--accent-sounds-1: #451475;
+	--accent-sounds-2: #39155e;
+	--accent-sounds-3: #6a08a3;
+	--accent-sounds-4: #d1a5e6;
+	--nav: #91908f;
+	--nav-hover: #b4b3b0;
+	--nav-faded: #4d4c4c;
+	--nav-faded-hover: #6e6e6e;
+	--selection: #445a9599;
+	--errors-background: #62190f;
+	--errors-background-2: #471610;
+	--errors-background-3: #3f140f;
+	--errors-text: #ffffffcc;
+	--invalid-text: #fd7951;
+	--success-background-3: #143f0f;
+	--water-background-3: #0d3266;
+	--lava-background-3: #662e0d;
+	--text-saturation: 60%;
+	--text-lightness: 45%;
+	--editor-variable: #9CDCFE;
+	--editor-string: #CE9178;
+	--editor-constant: #569CD6;
+	--editor-number: #B5CEA8;
+	--diff-added: #3fb950;
+	--diff-modified: #d29922;
+	--diff-removed: #f85149;
+	--diff-renamed: #7d8590;
+	--diff-line-added: rgba(46, 160, 67, 0.15);
+	--diff-line-removed: rgba(248, 81, 73, 0.1);
+	--diff-line-separation: rgba(56, 139, 253, 0.1);
+	--diff-numbers-added: rgba(63, 185, 80, 0.3);
+	--diff-numbers-removed: rgba(248, 81, 73, 0.3);
+	--diff-numbers-separation: rgba(56, 139, 253, 0.4);
 }
 
 ::selection {
@@ -2348,6 +2324,123 @@ hr {
 
 .version-detail .tabs {
 	margin-top: 20px;
+}
+
+.diff-header {
+	background-color: var(--background-1);
+}
+
+.diff-toggle {
+	fill: var(--text-3);
+}
+
+.diff-toggle:hover {
+	fill: var(--text-1);
+}
+
+@media (min-width: 768px) {
+	.diff-tree {
+		max-height: calc(100vh - 56px);
+		min-height: calc(100vh - 56px);
+	}
+
+	.diff-view-panel {
+		margin-top: calc(-100vh + 56px);
+		min-height: calc(100vh - 56px);
+	}
+}
+
+.diff-entry {
+	position: relative;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 4px 8px 4px 6px;
+	padding-left: calc(var(--indent, 0) * 8px);
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	color: var(--text-2);
+	border-left: 2px solid transparent;
+}
+
+.diff-entry:hover {
+	background-color: var(--background-2);
+}
+
+.diff-entry.active {
+	background-color: var(--background-4);
+	border-color: var(--accent-primary);
+}
+
+.diff-added {
+	fill: var(--diff-added);
+}
+
+.diff-modified {
+	fill: var(--diff-modified);
+}
+
+.diff-removed {
+	fill: var(--diff-removed);
+}
+
+.diff-renamed {
+	fill: var(--diff-renamed);
+}
+
+.diff-view {
+	background-color: var(--background-1);
+	border: 1px solid var(--background-4);
+	border-left: none;
+	border-right: none;
+}
+
+.diff-line-added {
+	background-color: var(--diff-line-added);
+	color: var(--text-1);
+}
+
+.diff-line-removed {
+	background-color: var(--diff-line-removed);
+	color: var(--text-1);
+}
+
+.diff-line-separation {
+	background-color: var(--diff-line-separation);
+}
+
+.diff-number {
+	text-align: right;
+}
+
+.diff-line-added .diff-number {
+	background-color: var(--diff-numbers-added);
+	color: var(--text-1);
+}
+
+.diff-line-removed .diff-number {
+	background-color: var(--diff-numbers-removed);
+	color: var(--text-2);
+}
+
+.diff-line-separation .diff-number {
+	background-color: var(--diff-numbers-separation);
+	text-align: center;
+}
+
+.diff-media {
+	image-rendering: pixelated;
+	background-color: var(--background-2);
+}
+
+.diff-media-added {
+	background-color: var(--diff-line-added);
+}
+
+.diff-media-removed {
+	background-color: var(--diff-line-removed);
 }
 
 .tabs {

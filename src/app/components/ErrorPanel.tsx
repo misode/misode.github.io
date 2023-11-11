@@ -67,7 +67,7 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 
 	return <div class="error">
 		{onDismiss && <div class="error-dismiss" onClick={onDismiss}>{Octicon.x}</div>}
-		<h3>
+		<h3 class="font-bold text-xl !my-[10px]">
 			{(prefix ?? '') + (error instanceof Error ? error.message : error)}
 			{stack && <span onClick={() => setStackVisible(!stackVisible)}>
 				{Octicon.info}

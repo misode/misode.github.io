@@ -200,7 +200,7 @@
   "versions.released": "发布于",
   "versions.resource_pack_format": "资源包格式",
   "versions.search": "搜索版本",
-  "versions.technical_changes": "技术变更",
+  "versions.changelog": "技术变更",
   "world": "世界设置",
   "worldgen": "世界生成",
   "worldgen/biome": "生物群系",

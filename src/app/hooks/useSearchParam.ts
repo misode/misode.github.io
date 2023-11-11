@@ -32,7 +32,7 @@ export function useSearchParam(param: string): [string | undefined, (value: stri
 			} else {
 				params.set(param, newValue)
 			}
-			changeUrl({ search: params.toString().replaceAll('%7C', '|'), replace })
+			changeUrl({ search: params.toString().replaceAll('%7C', '|').replaceAll('%2F', '/'), replace })
 		}
 	}, [value])
 
