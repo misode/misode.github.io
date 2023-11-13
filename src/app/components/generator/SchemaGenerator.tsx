@@ -315,12 +315,12 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				</BtnMenu>
 				<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
 				<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
+					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={() => setCreateFile('menu')} />
 					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
 					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
 					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
 					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
-					<Btn icon="file" label={locale('project.create.file')} onClick={() => setCreateFile('menu')} />
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
