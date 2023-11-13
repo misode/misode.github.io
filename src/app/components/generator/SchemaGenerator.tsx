@@ -4,13 +4,13 @@ import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } f
 import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
+import { Store } from '../../Store.js'
+import { cleanUrl, deepEqual } from '../../Utils.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../../hooks/index.js'
 import { getOutput } from '../../schema/transformOutput.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
-import { Store } from '../../Store.js'
-import { cleanUrl, deepEqual } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 
 export const SHARE_KEY = 'share'
@@ -301,6 +301,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const [projectCreating, setProjectCreating] = useState(false)
 	const [projectDeleting, setprojectDeleting] = useState(false)
+	const [createFile, setCreateFile] = useState<string | undefined>(undefined)
 	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
 	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
 
@@ -319,6 +320,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
 					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
+					<Btn icon="file" label={locale('project.create.file')} onClick={() => setCreateFile('menu')} />
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
@@ -363,6 +365,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
 		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
 		{model && fileSaving && <FileCreation id={gen.id} model={model} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
+		{createFile && <FileCreation id={gen.id} model={DataModel.wrapLists({})} method={createFile} onClose={() => setCreateFile(undefined)} />}
 		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
 	</>
 }
