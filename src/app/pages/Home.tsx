@@ -2,7 +2,7 @@ import { useMemo } from 'preact/hooks'
 import contributors from '../../contributors.json'
 import { Store } from '../Store.js'
 import { shuffle } from '../Utils.js'
-import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
+import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, ToolCard, ToolGroup } from '../components/index.js'
 import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -50,7 +50,7 @@ export function Home({}: Props) {
 
 function MinecraftWikiBanner() {
 	return <a class="tool-card minecraft-wiki" href="https://minecraft.wiki/w/Minecraft_Wiki:Moving_from_Fandom" target="_blank">
-		<img src="/images/minecraft_wiki.png" alt="Minecraft Wiki Logo" />
+		<img src="https://minecraft.wiki/images/Wiki@2x.png" alt="Minecraft Wiki Logo" />
 		<div>
 			The Minecraft Wiki has moved from Fandom to <em>minecraft.wiki</em>!
 		</div>
@@ -91,10 +91,7 @@ function FavoriteGenerators() {
 function Guides() {
 	const { locale } = useLocale()
 
-	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right">
-		<GuideCard minimal id="adding-custom-structures" />
-		<GuideCard minimal id="noise-router" />
-	</ToolGroup>
+	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right" />
 }
 
 function Tools() {

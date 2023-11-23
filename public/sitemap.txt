@@ -31,10 +31,3 @@ https://misode.github.io/report/
 https://misode.github.io/upgrader/
 https://misode.github.io/changelog/
 https://misode.github.io/versions/
-https://misode.github.io/guides/
-https://misode.github.io/guides/adding-custom-structures/
-https://misode.github.io/guides/density-functions/
-https://misode.github.io/guides/feature-order-cycle/
-https://misode.github.io/guides/heightmap-types/
-https://misode.github.io/guides/noise-router/
-https://misode.github.io/guides/placed-features/

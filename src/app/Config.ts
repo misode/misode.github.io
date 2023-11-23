@@ -25,10 +25,17 @@ export interface ConfigGenerator {
 	maxVersion?: string,
 }
 
+export interface ConfigLegacyGuide {
+	id: string,
+	title: string,
+	link: string,
+}
+
 export interface Config {
 	languages: ConfigLanguage[],
 	versions: ConfigVersion[],
 	generators: ConfigGenerator[],
+	legacyGuides: ConfigLegacyGuide[],
 }
 
 export default config as Config
