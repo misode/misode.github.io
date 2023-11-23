@@ -23,7 +23,6 @@ export function Home({}: Props) {
 
 	return <main>
 		<div class="legacy-container">
-			<MinecraftWikiBanner />
 			<div class="card-group">
 				<div class="card-column">
 					<PopularGenerators />
@@ -46,15 +45,6 @@ export function Home({}: Props) {
 			<Footer />
 		</div>
 	</main>
-}
-
-function MinecraftWikiBanner() {
-	return <a class="tool-card minecraft-wiki" href="https://minecraft.wiki/w/Minecraft_Wiki:Moving_from_Fandom" target="_blank">
-		<img src="https://minecraft.wiki/images/Wiki@2x.png" alt="Minecraft Wiki Logo" />
-		<div>
-			The Minecraft Wiki has moved from Fandom to <em>minecraft.wiki</em>!
-		</div>
-	</a>
 }
 
 function PopularGenerators() {
