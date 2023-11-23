@@ -16,7 +16,7 @@ export function Guide({ id }: Props) {
 			<a class="tool-card minecraft-wiki" href={`https://minecraft.wiki/w/${guide?.link}`} target="_blank">
 				<img src="https://minecraft.wiki/images/Wiki@2x.png" alt="Minecraft Wiki Logo" />
 				<div>
-					<h3>This guide has moved to the <em>Minecraft Wiki</em> {Octicon.link_external}</h3>
+					<h3><span>This guide has moved to the <em>Minecraft Wiki</em></span> {Octicon.link_external}</h3>
 				</div>
 			</a>
 		</div>

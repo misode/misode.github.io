@@ -1,10 +1,15 @@
 import { Footer, Octicon } from '../components/index.js'
 import config from '../Config.js'
+import { useLocale } from '../contexts/Locale.jsx'
+import { useTitle } from '../contexts/Title.jsx'
 
 interface Props {
 	path?: string
 }
 export function Guides({}: Props) {
+	const { locale } = useLocale()
+	useTitle(locale('title.guides'))
+
 	const guides = config.legacyGuides
 	return <main>
 		<div class="legacy-container guides">
