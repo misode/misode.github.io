@@ -29,14 +29,13 @@ export function Home({}: Props) {
 					{smallScreen && <FavoriteGenerators />}
 					{smallScreen && <WhatsNew />}
 					<Changelog />
-					{smallScreen && <Guides />}
 					<Versions />
 					{smallScreen && <Tools />}
+					<Guides />
 				</div>
 				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
 					<WhatsNew />
-					<Guides />
 					<Tools />
 				</div>}
 			</div>
@@ -103,6 +102,9 @@ function Tools() {
 		<ToolCard title="Data Pack Upgrader"
 			link="https://misode.github.io/upgrader/"
 			desc="Convert your data packs from 1.16 to 1.20" />
+		<ToolCard title="Template Placer"
+			link="https://misode.github.io/template-placer/"
+			desc="Automatically place all the structure pieces in your world" />
 	</ToolGroup>
 }
 
