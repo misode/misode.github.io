@@ -23,6 +23,7 @@ export interface ConfigGenerator {
 	partner?: string,
 	minVersion?: string,
 	maxVersion?: string,
+	wiki?: string,
 }
 
 export interface ConfigLegacyGuide {

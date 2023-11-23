@@ -4,13 +4,13 @@ import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } f
 import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
+import { Store } from '../../Store.js'
+import { cleanUrl, deepEqual } from '../../Utils.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../../hooks/index.js'
 import { getOutput } from '../../schema/transformOutput.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
-import { Store } from '../../Store.js'
-import { cleanUrl, deepEqual } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 
 export const SHARE_KEY = 'share'
@@ -250,11 +250,6 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		Analytics.downloadOutput(gen.id, 'menu')
 		setDownload(doDownload + 1)
 	}
-	const importSource = () => {
-		Analytics.generatorEvent('import')
-		setSourceShown(true)
-		setImport(doImport + 1)
-	}
 	const toggleSource = () => {
 		if (sourceShown) {
 			Analytics.hideOutput(gen.id, 'menu')
@@ -308,7 +303,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
 			{!gen.partner && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls generator-controls">
-				<Btn icon="upload" label={locale('import')} onClick={importSource} />
+				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={`https://minecraft.wiki/w/${gen.wiki}`} target="_blank">
+					{Octicon.mortar_board}
+					<span>{locale('wiki')}</span>
+				</a>}
 				<BtnMenu icon="archive" label={locale('presets')} relative={false}>
 					<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
 				</BtnMenu>
