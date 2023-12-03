@@ -22,7 +22,7 @@ interface Props {
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { projects, project, file, updateProject, updateFile } = useProject()
+	const { projects, project, file, updateProject, updateFile, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -298,6 +298,20 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [projectDeleting, setprojectDeleting] = useState(false)
 	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
 	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
+	const [newFileQueued, setNewFileQueued] = useState(false)
+
+	const onNewFile = useCallback(() => {
+		closeFile()
+		// Need to queue reset because otherwise the useModel hook will update the old file
+		setNewFileQueued(true)
+	}, [closeFile])
+
+	useEffect(() => {
+		if (file === undefined && newFileQueued) {
+			model?.reset(DataModel.wrapLists(model.schema.default()), true)
+			setNewFileQueued(false)
+		}
+	}, [model, newFileQueued, file])
 
 	return <>
 		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
@@ -316,6 +330,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
 					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
+					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={onNewFile} />
 					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
 				</BtnMenu>
 			</div>
