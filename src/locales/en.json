@@ -192,7 +192,7 @@
   "project.delete_file": "Delete file",
   "project.download": "Download data pack",
   "project.go_to": "Go to project",
-  "project.new_file": "New file",
+  "project.new_file": "New empty file",
   "project.no_files": "No files",
   "project.rename": "Rename",
   "project.rename_file": "Rename file",
