@@ -124,8 +124,9 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 			evt.preventDefault()
 			setFocus()
 		}
-	
-		return <div class={`entry ${entry === selected ? 'active' : ''} ${focused ? 'focused' : ''}`} onClick={() => selectFile(entry)} onContextMenu={onContextMenu} >
+		const file = disectEntry(entry)
+
+		return <div class={`entry ${file && getFilePath(file) === selected ? 'active' : ''} ${focused ? 'focused' : ''}`} onClick={() => selectFile(entry)} onContextMenu={onContextMenu} >
 			{Octicon.file}
 			<span>{entry.split('/').at(-1)}</span>
 			{focused && <div class="entry-menu">
@@ -135,7 +136,7 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 				</div>)}
 			</div>}
 		</div>
-	}, [actions])
+	}, [actions, disectEntry])
 
 	return <>
 		<div class="project-controls">
