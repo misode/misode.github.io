@@ -9,7 +9,7 @@
 		gtag('js', new Date());
 		gtag('config', 'G-S982VZS08T', {
 			theme: localStorage.getItem('theme') || 'default',
-			version: localStorage.getItem('schema_version') || '1.20.2',
+			version: localStorage.getItem('schema_version') || '1.20.3',
 			locale: localStorage.getItem('language') || 'en',
 			prefers_color_scheme: matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none',
 			tree_view_mode: localStorage.getItem('misode_tree_view_mode') || 'default',
@@ -25,7 +25,7 @@
 		ga('set', 'page', location.pathname);
 		ga('set', 'dimension1', localStorage.getItem('theme') || 'default');
 		ga('set', 'dimension2', 'v2');
-		ga('set', 'dimension3', localStorage.getItem('schema_version') || '1.20.2');
+		ga('set', 'dimension3', localStorage.getItem('schema_version') || '1.20.3');
 		ga('set', 'dimension4', localStorage.getItem('language') || 'en');
 		ga('set', 'dimension5', 'none');
 		ga('set', 'dimension7', matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none');

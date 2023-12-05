@@ -19,7 +19,7 @@ interface Props {
 export function Customized({}: Props) {
 	const { locale } = useLocale()
 	// const { version, changeVersion } = useVersion()
-	const version = '1.20.2'
+	const version = '1.20.3' // TODO: support multiple versions
 	const changeVersion = () => {}
 	useTitle(locale('title.customized'))
 
