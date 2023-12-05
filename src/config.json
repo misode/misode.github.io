@@ -59,57 +59,74 @@
     {
       "id": "1.15",
       "ref": "1.15.2",
+      "name": "1.15 — 1.15.2",
       "pack_format": 5
     },
     {
       "id": "1.16",
       "ref": "1.16.5",
+      "name": "1.16 — 1.16.5",
       "pack_format": 6
     },
     {
       "id": "1.17",
       "ref": "1.17.1",
+      "name": "1.17 — 1.17.1",
       "pack_format": 7
     },
     {
       "id": "1.18",
       "ref": "1.18.1",
+      "name": "1.18 — 1.18.1",
       "pack_format": 8
     },
     {
       "id": "1.18.2",
       "ref": "1.18.2",
-      "pack_format": 9
+      "name": "1.18.2",
+      "pack_format": 9,
+      "show": true
     },
     {
       "id": "1.19",
       "ref": "1.19.2",
-      "pack_format": 10
+      "name": "1.19 — 1.19.2",
+      "pack_format": 10,
+      "show": true
     },
     {
       "id": "1.19.3",
       "ref": "1.19.3",
+      "name": "1.19.3",
       "pack_format": 10
     },
     {
       "id": "1.19.4",
       "ref": "1.19.4",
-      "pack_format": 12
+      "name": "1.19.4",
+      "pack_format": 12,
+      "show": true
     },
     {
       "id": "1.20",
       "ref": "1.20.1",
-      "pack_format": 15
+      "name": "1.20 — 1.20.1",
+      "pack_format": 15,
+      "show": true
     },
     {
       "id": "1.20.2",
       "ref": "1.20.2",
-      "pack_format": 18
+      "name": "1.20.2",
+      "pack_format": 18,
+      "show": true
     },
     {
       "id": "1.20.3",
       "ref": "1.20.3",
-      "pack_format": 26
+      "name": "1.20.3",
+      "pack_format": 26,
+      "show": true
     }
   ],
   "generators": [

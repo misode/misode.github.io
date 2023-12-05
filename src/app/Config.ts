@@ -1,4 +1,5 @@
 import config from '../config.json'
+import type { VersionId } from './services/Schemas.js'
 
 export interface ConfigLanguage {
 	code: string,
@@ -7,9 +8,11 @@ export interface ConfigLanguage {
 }
 
 export interface ConfigVersion {
-	id: string,
+	id: VersionId,
 	pack_format: number,
+	name: string,
 	ref?: string,
+	show?: boolean,
 	dynamic?: boolean,
 }
 
