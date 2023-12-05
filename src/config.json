@@ -369,6 +369,15 @@
       "wiki": "Tag#Java_Edition"
     },
     {
+      "id": "tag/damage_type",
+      "url": "tags/damage-type",
+      "tags": ["tags"],
+      "path": "tags/damage_type",
+      "schema": "damage_type_tag",
+      "minVersion": "1.19.4",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
       "id": "tag/worldgen/biome",
       "url": "tags/biome",
       "tags": ["tags", "worldgen"],
@@ -383,6 +392,78 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/structure",
       "schema": "structure_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/worldgen/structure_set",
+      "url": "tags/structure-set",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/structure_set",
+      "schema": "structure_set_tag",
+      "minVersion": "1.18.2",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/worldgen/flat_level_generator_preset",
+      "url": "tags/flat-world-preset",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/flat_level_generator_preset",
+      "schema": "flat_level_generator_preset_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/worldgen/world_preset",
+      "url": "tags/world-preset",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/world_preset",
+      "schema": "world_preset_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/banner_pattern",
+      "url": "tags/banner-pattern",
+      "tags": ["tags"],
+      "path": "tags/banner_pattern",
+      "schema": "banner_pattern_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/cat_variant",
+      "url": "tags/cat-variant",
+      "tags": ["tags"],
+      "path": "tags/cat_variant",
+      "schema": "cat_variant_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/instrument",
+      "url": "tags/instrument",
+      "tags": ["tags"],
+      "path": "tags/instrument",
+      "schema": "instrument_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/painting_variant",
+      "url": "tags/painting-variant",
+      "tags": ["tags"],
+      "path": "tags/painting_variant",
+      "schema": "painting_variant_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/point_of_interest_type",
+      "url": "tags/painting-variant",
+      "tags": ["tags"],
+      "path": "tags/point_of_interest_type",
+      "schema": "point_of_interest_type_tag",
       "minVersion": "1.19",
       "wiki": "Tag#Java_Edition"
     },
