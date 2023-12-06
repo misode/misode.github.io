@@ -55,12 +55,12 @@ export async function fetchData(versionId: string, collectionTarget: CollectionR
 	await validateCache(version)
 
 	await Promise.all([
-		fetchRegistries(version, collectionTarget),
-		fetchBlockStateMap(version, blockStateTarget),
+		_fetchRegistries(version, collectionTarget),
+		_fetchBlockStateMap(version, blockStateTarget),
 	])
 }
 
-async function fetchRegistries(version: Version, target: CollectionRegistry) {
+async function _fetchRegistries(version: Version, target: CollectionRegistry) {
 	console.debug(`[fetchRegistries] ${version.id}`)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
@@ -72,7 +72,7 @@ async function fetchRegistries(version: Version, target: CollectionRegistry) {
 	}
 }
 
-async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) {
+async function _fetchBlockStateMap(version: Version, target: BlockStateRegistry) {
 	console.debug(`[fetchBlockStateMap] ${version.id}`)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
@@ -84,6 +84,21 @@ async function fetchBlockStateMap(version: Version, target: BlockStateRegistry) 
 		}
 	} catch (e) {
 		console.warn('Error occurred while fetching block state map:', message(e))
+	}
+}
+
+export async function fetchRegistries(versionId: VersionId) {
+	console.debug(`[fetchRegistries] ${versionId}`)
+	const version = config.versions.find(v => v.id === versionId)!
+	try {
+		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
+		const result = new Map<string, string[]>()
+		for (const id in data) {
+			result.set(id, data[id].map((e: string) => 'minecraft:' + e))
+		}
+		return result
+	} catch (e) {
+		throw new Error(`Error occurred while fetching registries (2): ${message(e)}`)
 	}
 }
 
