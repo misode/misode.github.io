@@ -2194,6 +2194,7 @@ hr {
 
 .changelog-content ul {
 	padding-left: 24px;
+	list-style: unset;
 }
 
 .changelog-content code {
