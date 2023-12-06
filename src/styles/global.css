@@ -650,6 +650,10 @@ main.has-project {
 	padding: 20px 18px;
 }
 
+.btn.customized-create.btn.disabled {
+	background-color: var(--accent-site-1);
+}
+
 .btn.customized-create:not(.disabled):hover {
 	background-color: var(--accent-site-2) !important;
 }

@@ -71,7 +71,7 @@ export function CustomizedPanel({ tab }: Props) {
 			{tab === 'ores' && <OresSettings {...{model, initialModel, changeModel}} />}
 		</div>
 		<div class="customized-actions">
-			<Btn icon="download" label="Create" class="customized-create" tooltip="Create and download data pack" tooltipLoc="se" onClick={generate} />
+			<Btn icon="download" label="Create" class="customized-create" tooltip="Create and download data pack" tooltipLoc="se" onClick={isModified ? generate : undefined} disabled={!isModified} />
 			<a ref={download} style="display: none;"></a>
 			{isModified && <Btn icon="undo" label="Reset" tooltip="Reset to default" tooltipLoc="se" onClick={reset} />}
 		</div>
