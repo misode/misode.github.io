@@ -266,7 +266,9 @@ function decorateFunctions(functions: any[], consumer: ItemConsumer, ctx: LootCo
 function composeFunctions(functions: any[]): LootFunction {
 	return (item, ctx) => {
 		for (const fn of functions) {
-			if (composeConditions(fn.conditions ?? [])(ctx)) {
+			if (Array.isArray(fn)) {
+				composeFunctions(fn)
+			} else if (composeConditions(fn.conditions ?? [])(ctx)) {
 				const type = fn.function?.replace(/^minecraft:/, '');
 				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
@@ -327,6 +329,10 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	limit_count: ({ limit }) => (item, ctx) => {
 		const { min, max } = prepareIntRange(limit, ctx)
 		item.count = clamp(item.count, min, max )
+	},
+	sequence: ({ functions }) => (item, ctx) => {
+		if (!Array.isArray(functions)) return
+		composeFunctions(functions)(item, ctx)
 	},
 	set_count: ({ count, add }) => (item, ctx) => {
 		const oldCount = add ? (item.count) : 0
@@ -391,12 +397,26 @@ function composeConditions(conditions: any[]): LootCondition {
 }
 
 function testCondition(condition: any, ctx: LootContext): boolean {
+	if (Array.isArray(condition)) {
+		return composeConditions(condition)(ctx)
+	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
 }
 
 const LootConditions: Record<string, (params: any) => LootCondition> = {
-	alternative: ({ terms }) => (ctx) => {
+	alternative: params => LootConditions['any_of'](params),
+	all_of: ({ terms }) => (ctx) => {
+		if (!Array.isArray(terms) || terms.length === 0) return true
+		for (const term of terms) {
+			if (!testCondition(term, ctx)) {
+				return false
+			}
+		}
+		return true
+	},
+	any_of: ({ terms }) => (ctx) => {
+		if (!Array.isArray(terms) || terms.length === 0) return true
 		for (const term of terms) {
 			if (testCondition(term, ctx)) {
 				return true

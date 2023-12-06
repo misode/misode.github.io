@@ -3,18 +3,18 @@ import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { vec2 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
+import { Store } from '../../Store.js'
+import { iterateWorld2D, randomSeed } from '../../Utils.js'
 import { getProjectData, useLocale, useProject } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
 import { CachedCollections } from '../../services/index.js'
-import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed } from '../../Utils.js'
-import { Btn, BtnInput, BtnMenu } from '../index.js'
+import { Btn, BtnInput, BtnMenu, ErrorPanel } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
 import { DEEPSLATE } from './Deepslate.js'
-import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
+import type { PreviewProps } from './index.js'
 
 export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => {
 	const { locale } = useLocale()
@@ -24,7 +24,7 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 	const [layer, setLayer] = useState('terrain')
 	const state = JSON.stringify(data)
 
-	const { value } = useAsync(async () => {
+	const { value, error } = useAsync(async () => {
 		const unwrapped = DataModel.unwrapLists(data)
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
 		const biomeSource = { type: 'fixed', biome }
@@ -87,6 +87,10 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 	}, [noiseSettings, finalDensity])
 
 	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
+
+	if (error) {
+		return <ErrorPanel error={error} prefix="Failed to initialize preview: " />
+	}
 
 	return <>
 		<div class="controls preview-controls">

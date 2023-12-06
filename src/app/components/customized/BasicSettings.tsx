@@ -17,7 +17,7 @@ export function BasicSettings({ model, initialModel, changeModel }: Props) {
 			value={model.minHeight} onChange={v => changeModel({ minHeight: v })}
 			min={-128} max={384} step={16} initial={initialModel.minHeight}
 			error={model.minHeight % 16 !== 0 ? 'Min height needs to be a multiple of 16' : undefined} />
-		<CustomizedSlider label="Max height" help="The heighest Y level of the world"
+		<CustomizedSlider label="Max height" help="The highest Y level of the world"
 			value={model.maxHeight} onChange={v => changeModel({ maxHeight: v })}
 			min={-128} max={384} step={16} initial={initialModel.maxHeight}
 			error={model.maxHeight <= model.minHeight ? 'Max height needs to be larger than Min height' : model.maxHeight % 16 !== 0 ? 'Max height needs to be a multiple of 16' : undefined} />

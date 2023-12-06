@@ -8,7 +8,7 @@ import { CustomizedModel } from '../components/customized/CustomizedModel.js'
 import { OresSettings } from '../components/customized/OresSettings.jsx'
 import { StructuresSettings } from '../components/customized/StructuresSettings.jsx'
 import { Btn, ErrorPanel, Footer, Octicon, VersionSwitcher } from '../components/index.js'
-import { useLocale, useTitle, useVersion } from '../contexts/index.js'
+import { useLocale, useTitle } from '../contexts/index.js'
 import { useSearchParam } from '../hooks/index.js'
 import { checkVersion } from '../services/Schemas.js'
 import { stringifySource } from '../services/Source.js'
@@ -21,7 +21,9 @@ interface Props {
 }
 export function Customized({}: Props) {
 	const { locale } = useLocale()
-	const { version, changeVersion } = useVersion()
+	// const { version, changeVersion } = useVersion()
+	const version = '1.20.3' // TODO: support multiple versions
+	const changeVersion = () => {}
 	useTitle(locale('title.customized'))
 
 	const [errorBoundary, errorRetry] = useErrorBoundary()
@@ -96,13 +98,13 @@ export function Customized({}: Props) {
 	}, [model, version])
 
 	return <main>
-		<div class="container customized">
+		<div class="legacy-container customized">
 			<div class="tabs tabs-sticky">
 				<span class={tab === 'basic' ? 'selected' : ''} onClick={() => setTab('basic')}>{locale('customized.basic')}</span>
 				<span class={tab === 'biomes' ? 'selected' : ''} onClick={() => setTab('biomes')}>{locale('customized.biomes')}</span>
 				<span class={tab === 'structures' ? 'selected' : ''} onClick={() => setTab('structures')}>{locale('customized.structures')}</span>
 				<span class={tab === 'ores' ? 'selected' : ''} onClick={() => setTab('ores')}>{locale('customized.ores')}</span>
-				<VersionSwitcher value={version} onChange={changeVersion} allowed={['1.20']} />
+				<VersionSwitcher value={version} onChange={changeVersion} allowed={['1.20.2']} />
 			</div>
 			<div class="customized-tab">
 				{tab === 'basic' && <BasicSettings {...{model, initialModel, changeModel}} />}

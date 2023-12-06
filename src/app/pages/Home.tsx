@@ -2,7 +2,7 @@ import { useMemo } from 'preact/hooks'
 import contributors from '../../contributors.json'
 import { Store } from '../Store.js'
 import { shuffle } from '../Utils.js'
-import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
+import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, ToolCard, ToolGroup } from '../components/index.js'
 import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -22,21 +22,20 @@ export function Home({}: Props) {
 	const smallScreen = useMediaQuery('(max-width: 580px)')
 
 	return <main>
-		<div class="container">
+		<div class="legacy-container">
 			<div class="card-group">
 				<div class="card-column">
 					<PopularGenerators />
 					{smallScreen && <FavoriteGenerators />}
 					{smallScreen && <WhatsNew />}
 					<Changelog />
-					{smallScreen && <Guides />}
 					<Versions />
 					{smallScreen && <Tools />}
+					<Guides />
 				</div>
 				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
 					<WhatsNew />
-					<Guides />
 					<Tools />
 				</div>}
 			</div>
@@ -81,10 +80,7 @@ function FavoriteGenerators() {
 function Guides() {
 	const { locale } = useLocale()
 
-	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right">
-		<GuideCard minimal id="adding-custom-structures" />
-		<GuideCard minimal id="noise-router" />
-	</ToolGroup>
+	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right" />
 }
 
 function Tools() {
@@ -106,6 +102,9 @@ function Tools() {
 		<ToolCard title="Data Pack Upgrader"
 			link="https://misode.github.io/upgrader/"
 			desc="Convert your data packs from 1.16 to 1.20" />
+		<ToolCard title="Template Placer"
+			link="https://misode.github.io/template-placer/"
+			desc="Automatically place all the structure pieces in your world" />
 	</ToolGroup>
 }
 

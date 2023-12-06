@@ -14,7 +14,7 @@ export function Changelog({}: Props) {
 
 	return <main>
 		{error && <ErrorPanel error={error} />}
-		<div class="container changelog">
+		<div class="legacy-container changelog">
 			<ChangelogList changes={changes} defaultOrder="desc" limit={100} navigation={(
 				<BtnLink link="/versions/" icon="three_bars" label={locale('versions.all')} />
 			)} />

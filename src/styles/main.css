@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+	line-height: normal;
+}
+
+a {
+	text-decoration: underline;
+}
+
+input::placeholder {
+	color: rgb(117, 117, 117);
+}

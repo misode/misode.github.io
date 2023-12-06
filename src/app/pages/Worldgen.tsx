@@ -1,4 +1,4 @@
-import { Footer, GeneratorCard, GeneratorList, GuideCard, ToolGroup } from '../components/index.js'
+import { Footer, GeneratorCard, GeneratorList, ToolGroup } from '../components/index.js'
 import { useLocale, useTitle } from '../contexts/index.js'
 
 interface Props {
@@ -9,7 +9,7 @@ export function Worldgen({}: Props) {
 	useTitle(locale('title.worldgen'))
 
 	return <main>
-		<div class="container worldgen">
+		<div class="legacy-container worldgen">
 			<div class="card-group">
 				<ToolGroup title={locale('generators.popular')}>
 					<GeneratorCard minimal id="dimension" />
@@ -18,9 +18,13 @@ export function Worldgen({}: Props) {
 					<GeneratorCard minimal id="worldgen/configured_feature" />
 					<GeneratorCard minimal id="worldgen/placed_feature" />
 				</ToolGroup>
-				<ToolGroup title={locale('guides')} link="/guides/?tags=worldgen" titleIcon="arrow_right">
-					<GuideCard id="adding-custom-structures" />
-					<GuideCard id="placed-features" />
+				<ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right">
+					<a class="tool-card minecraft-wiki" href="/guides/">
+						<img src="https://minecraft.wiki/images/Wiki@2x.png" alt="Minecraft Wiki Logo" />
+						<div>
+							The guides have moved to the <em>Minecraft Wiki</em>!
+						</div>
+					</a>
 				</ToolGroup>
 			</div>
 			<GeneratorList predicate={gen => gen.tags?.includes('worldgen')} />

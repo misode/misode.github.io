@@ -13,18 +13,6 @@ npm run dev
 ```
 4. Open the browser in `localhost:3000`.
 
-## Guides
-Do you want to contribute a [guide](https://misode.github.io/guides/)?
-1. Add a markdown file in `src/guides/`. It's name will be used in the url.
-2. The beginning of the file contains the metadata of the guide, check the other guides for the format.
-3. Start the dev server with `npm run dev`.
-4. If everything is setup, saving the markdown file will update the guide in the browser.
-5. To support multiple versions, wrap parts of the guide like this:
-```
-{#[1.18] this text will only show when 1.18 is selected #}
-The selected version is {#version#}, and the pack format is {#pack_format#}
-```
-
 ## Translating
 misode.github.io supports multiple languages. If you'd like to help us translate this project to your language, it would be really appreciated! If your language is not on this list, please create an issue for it.
 

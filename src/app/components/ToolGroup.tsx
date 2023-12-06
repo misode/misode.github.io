@@ -12,7 +12,7 @@ interface Props {
 export function ToolGroup({ title, titleIcon, link, children }: Props) {
 	return <div class="tool-group">
 		{link === undefined
-			? <div class="tool-card"><h3>{title}</h3></div>
+			? <div class="tool-card"><h3 class="text-[1.17em]">{title}</h3></div>
 			: <ToolCard {...{ title, titleIcon, link}} />
 		}
 		{children && <div class="tool-body">

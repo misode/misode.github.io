@@ -1,7 +1,7 @@
 import * as deepslate19 from 'deepslate/worldgen'
+import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../../Utils.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchAllPresets, fetchPreset } from '../../services/index.js'
-import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
 
@@ -99,6 +99,9 @@ export class Deepslate {
 		const newCacheState = [settings, `${seed}`, biomeState]
 		if (!deepEqual(this.cacheState, newCacheState)) {
 			const noiseSettings = this.createNoiseSettings(settings)
+			if (noiseSettings.noise.xzSize === 0 || noiseSettings.noise.ySize === 0) {
+				throw new Error('size_horizontal or size_vertical cannot be zero')
+			}
 			const biomeSource = await this.createBiomeSource(noiseSettings, biomeState, seed)
 			const chunkGenerator = this.isVersion('1.19')
 				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
