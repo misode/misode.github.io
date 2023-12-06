@@ -39,8 +39,6 @@ export function GeneratorCard({ id, minimal }: Props) {
 			.map(v => v.id as VersionId)
 	}, [gen])
 
-	console.log(config.versions)
-
 	const versionText = useMemo(() => {
 		if (versions.length <= 5) {
 			return versions.join(VERSION_SEP)

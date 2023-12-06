@@ -27,7 +27,6 @@ export function CustomizedPanel({ tab }: Props) {
 		return CustomizedModel.getDefault(version)
 	}, [version])
 	const isModified = useMemo(() => {
-		console.log(model, initialModel)
 		return !deepEqual(model, initialModel)
 	}, [model, initialModel])
 
@@ -42,7 +41,6 @@ export function CustomizedPanel({ tab }: Props) {
 		if (!download.current) return
 		try {
 			const pack = await generateCustomized(model, version)
-			console.log('Generated customized', pack)
 			const entries = Object.entries(pack).flatMap(([type, files]) => {
 				const prefix = `data/minecraft/${type}/`
 				return [...files.entries()].map(([name, data]) => {
