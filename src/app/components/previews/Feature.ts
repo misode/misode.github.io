@@ -1,5 +1,5 @@
-import type { BlockState, Random } from 'deepslate'
-import { BlockPos } from 'deepslate'
+import type { Random } from 'deepslate'
+import { BlockPos, BlockState } from 'deepslate'
 import type { VersionId } from '../../services/index.js'
 import { sampleBlockState, sampleInt } from './WorldgenUtils.jsx'
 
@@ -20,6 +20,25 @@ export function placeFeature(data: any, ctx: FeatureContext) {
 const Features: {
 	[key: string]: (config: any, ctx: FeatureContext) => void,
 } = {
+	bamboo: (config, ctx) => {
+		const n = ctx.nextInt(12) + 5
+		if (ctx.nextFloat() < config?.probability ?? 0) {
+			const s = ctx.nextInt(4) + 1
+			for (let x = -s; x <= s; x += 1) {
+				for (let z = -s; z <= s; z += 1) {
+					if (x * x + z * z <= s * s) {
+						ctx.place([x, -1, z], new BlockState('podzol', { snowy: 'false' }))
+					}
+				}
+			}
+		}
+		for (let i = 0; i < n; i += 1) {
+			ctx.place([0, i, 0], new BlockState('bamboo', { age: '1', leaves: 'none', stage: '0' }))
+		}
+		ctx.place([0, n, 0], new BlockState('bamboo', { age: '1', leaves: 'large', stage: '1'}))
+		ctx.place([0, n-1, 0], new BlockState('bamboo', { age: '1', leaves: 'large', stage: '0'}))
+		ctx.place([0, n-2, 0], new BlockState('bamboo', { age: '1', leaves: 'small', stage: '0'}))
+	},
 	tree: (config, ctx) => {
 		const trunk = config.trunk_placer
 		const trunkPlacerType = trunk.type.replace(/^minecraft:/, '')

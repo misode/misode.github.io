@@ -15,7 +15,7 @@ import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 import { nextGaussian } from './WorldgenUtils.jsx'
 import type { PreviewProps } from './index.js'
 
-const MAX_SIZE = 25
+const MAX_SIZE = 45
 
 export const FeaturePreview = ({ data, version, shown }: PreviewProps) => {
 	const { locale } = useLocale()
@@ -35,8 +35,8 @@ export const FeaturePreview = ({ data, version, shown }: PreviewProps) => {
 			version: version,
 			random,
 			place: (pos, block) => {
-				const structurePos = BlockPos.offset(pos, placeOffset, 0, placeOffset)
-				if (structurePos.some(v => v < 0 || v >= MAX_SIZE)) return
+				const structurePos = BlockPos.offset(pos, placeOffset, placeOffset, placeOffset)
+				if (structurePos.some((v, i) => v < 0 || v >= structure.getSize()[i])) return
 				const name = typeof block === 'string' ? block : block.getName()
 				const properties = typeof block === 'string' ? undefined : block.getProperties()
 				structure.addBlock(structurePos, name, properties)
@@ -52,10 +52,14 @@ export const FeaturePreview = ({ data, version, shown }: PreviewProps) => {
 	const renderer = useRef<StructureRenderer | undefined>(undefined)
 
 	const onSetup = useCallback((canvas: HTMLCanvasElement) => {
+		if (renderer.current) {
+			renderer.current.setStructure(structure)
+			return
+		}
 		if (!resources || !shown) return
 		const gl = canvas.getContext('webgl')
 		if (!gl) return
-		renderer.current = new StructureRenderer(gl, structure, resources)
+		renderer.current = new StructureRenderer(gl, structure, resources, { useInvisibleBlockBuffer: false })
 	}, [resources, shown, structure])
 	const onResize = useCallback((width: number, height: number) => {
 		renderer.current?.setViewport(0, 0, width, height)
@@ -69,7 +73,7 @@ export const FeaturePreview = ({ data, version, shown }: PreviewProps) => {
 			<Btn icon="sync" tooltip={locale('generate_new_seed')} onClick={() => setSeed(randomSeed())} />
 		</div>
 		<div class="full-preview">
-			<InteractiveCanvas3D onSetup={onSetup} onDraw={onDraw} onResize={onResize} startDistance={10} startPosition={[MAX_SIZE/2, 0, MAX_SIZE/2]} startYRotation={2.6} />
+			<InteractiveCanvas3D onSetup={onSetup} onDraw={onDraw} onResize={onResize} startDistance={10} startPosition={[MAX_SIZE/2, MAX_SIZE/2, MAX_SIZE/2]} startYRotation={2.6} />
 		</div>
 	</>
 }
