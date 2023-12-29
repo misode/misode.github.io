@@ -78,6 +78,21 @@
     "url": "https://ko-fi.com/hoponopono"
   },
   {
+    "name": "Flab",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon2.png"
+  },
+  {
+    "name": "EnderCraft",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon8.png"
+  },
+  {
+    "name": "alumina6767",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/5ebdb30d-9fb6-4a80-b471-e606f1832344_78f4cbda-5ed9-4d76-8a59-3c6d10100357.png"
+  },
+  {
     "name": "SPGoding",
     "types": ["code", "infrastructure", "report", "translation"],
     "avatar": "https://avatars.githubusercontent.com/u/15277496?v=4",
