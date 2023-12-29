@@ -225,7 +225,8 @@
       "url": "worldgen/biome",
       "tags": ["worldgen"],
       "schema": "biome",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Custom_biome"
     },
     {
       "id": "worldgen/configured_carver",
@@ -233,7 +234,7 @@
       "tags": ["worldgen"],
       "schema": "configured_carver",
       "minVersion": "1.16",
-      "wiki": "Custom_biome"
+      "wiki": "Custom_carver"
     },
     {
       "id": "worldgen/configured_feature",
@@ -313,7 +314,8 @@
       "url": "worldgen/processor-list",
       "tags": ["worldgen"],
       "schema": "processor_list",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Processor_list"
     },
     {
       "id": "worldgen/template_pool",
@@ -321,7 +323,7 @@
       "tags": ["worldgen"],
       "schema": "template_pool",
       "minVersion": "1.16",
-      "wiki": "Processor_list"
+      "wiki": "Template_pool"
     },
     {
       "id": "worldgen/world_preset",
