@@ -47,6 +47,11 @@
       "schemas": false
     },
     {
+      "code": "tr",
+      "name": "Türkçe",
+      "schemas": false
+    },
+    {
       "code": "zh-cn",
       "name": "简体中文"
     },
