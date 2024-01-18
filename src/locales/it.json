@@ -1,13 +1,13 @@
 {
-  "advancement": "Avanzamento",
+  "generator.advancement": "Avanzamento",
   "copy": "Copia",
-  "dimension": "Dimensione",
-  "dimension_type": "Tipo di Dimensione",
+  "generator.dimension": "Dimensione",
+  "generator.dimension_type": "Tipo di Dimensione",
   "download": "Scarica",
   "fields": "Campi",
-  "item_modifier": "Modificatore d'Oggetti",
+  "generator.item_modifier": "Modificatore d'Oggetti",
   "language": "Lingua",
-  "loot_table": "Tavola del Bottino",
-  "predicate": "Predica",
+  "generator.loot_table": "Tavola del Bottino",
+  "generator.predicate": "Predica",
   "redo": "Rifai"
 }

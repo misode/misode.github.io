@@ -1,62 +1,30 @@
-import { useMemo, useState } from 'preact/hooks'
-import { Badge, Footer, GuideCard, TextInput, VersionSwitcher } from '../components/index.js'
-import { useLocale, useTitle, useVersion } from '../contexts/index.js'
-import { useTags } from '../hooks/index.js'
-import { getGuides } from '../services/Guides.js'
+import { Footer, Octicon } from '../components/index.js'
+import config from '../Config.js'
+import { useLocale } from '../contexts/Locale.jsx'
+import { useTitle } from '../contexts/Title.jsx'
 
 interface Props {
 	path?: string
 }
 export function Guides({}: Props) {
 	const { locale } = useLocale()
-	const { version, changeVersion } = useVersion()
 	useTitle(locale('title.guides'))
 
-	const [search, setSearch] = useState('')
-	const [activeTags, toggleTag] = useTags()
-
-	const [versionFilter, setVersionFiler] = useState(false)
-
-	const versionedGuides = useMemo(() => {
-		if (versionFilter === false) return getGuides()
-		return getGuides().filter(guide => {
-			return guide.versions?.includes(version)
-		})
-	}, [version, versionFilter])
-
-	const filteredGuides = useMemo(() => {
-		const query = search.split(' ').map(q => q.trim().toLowerCase()).filter(q => q.length > 0)
-		return versionedGuides.filter(guide => {
-			if (!activeTags.every(tag => guide.tags?.includes(tag))) {
-				return false
-			}
-			const content = guide.tags?.join(' ') + ' ' + guide.title.toLowerCase()
-			return query.every(q => {
-				if (q.startsWith('!')) {
-					return q.length === 1 || !content.includes(q.slice(1))
-				}
-				return content.includes(q)
-			})
-		})
-	}, [versionedGuides, search, activeTags])
-
+	const guides = config.legacyGuides
 	return <main>
 		<div class="legacy-container guides">
-			<div class="navigation">
-				<TextInput class="btn btn-input query-search" placeholder={locale('guides.search')} value={search} onChange={setSearch} />
-				<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
+			<div class="tool-card minecraft-wiki">
+				<img src="https://minecraft.wiki/images/Wiki@2x.png" alt="Minecraft Wiki Logo" />
+				<div>
+					The guides have moved to the <em>Minecraft Wiki</em>!
+				</div>
 			</div>
-			{activeTags.length > 0 && <div class="badges-list">
-				{activeTags.map(tag => <Badge label={tag} onClick={() => toggleTag(tag)} />)}
-			</div>}
-			<div class="card-column">
-				{versionedGuides.length === 0 ? <>
-					<span class="note">{locale('guides.no_results.version')}</span>
-				</> : filteredGuides.length === 0 ? <>
-					<span class="note">{locale('guides.no_results.query')}</span>
-				</> : filteredGuides.map(g =>
-					<GuideCard id={g.id} activeTags={activeTags} toggleTag={toggleTag} />
-				)}
+			<div class="card-column pt-4">
+				{guides.map(g => <a class="tool-card" href={`https://minecraft.wiki/w/${g?.link}`} target="_blank">
+					<div>
+						<h3>{g.title} {Octicon.link_external}</h3>
+					</div>
+				</a>)}
 			</div>
 		</div>
 		<Footer />

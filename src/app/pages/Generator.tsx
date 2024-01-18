@@ -1,12 +1,12 @@
 import { getCurrentUrl, route } from 'preact-router'
 import { useMemo } from 'preact/hooks'
+import config from '../Config.js'
+import { getGenerator } from '../Utils.js'
 import { SchemaGenerator } from '../components/generator/SchemaGenerator.jsx'
 import { ErrorPanel, Octicon } from '../components/index.js'
-import config from '../Config.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import type { VersionId } from '../services/index.js'
 import { checkVersion } from '../services/index.js'
-import { getGenerator } from '../Utils.js'
 
 export const SHARE_KEY = 'share'
 
@@ -29,7 +29,7 @@ export function Generator({}: Props) {
 			.reverse()
 	}, [gen.minVersion, gen.maxVersion])
 
-	useTitle(locale('title.generator', locale(gen.partner ? `partner.${gen.partner}.${gen.id}` : gen.id)), allowedVersions)
+	useTitle(locale('title.generator', locale(`generator.${gen.id}`)), allowedVersions)
 
 	if (!checkVersion(version, gen.minVersion, gen.maxVersion)) {
 		const lower = !checkVersion(version, gen.minVersion)

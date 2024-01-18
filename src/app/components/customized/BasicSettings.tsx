@@ -53,8 +53,5 @@ export function BasicSettings({ model, initialModel, changeModel }: Props) {
 					initial={initialModel.ravines} />
 			</div>}
 		</div>
-		<CustomizedSlider label="Biome size" help="The scale of the biome layout, 6 corresponds to the large biomes preset"
-			value={model.biomeSize} onChange={v => changeModel({ biomeSize: v })}
-			min={1} max={8} initial={initialModel.biomeSize} />
 	</>
 }

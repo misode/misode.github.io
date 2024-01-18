@@ -8,7 +8,7 @@ import { CustomizedModel } from './CustomizedModel.js'
 // Random prefix to avoid collisions with other packs that add no-op placed features
 const FeatureCollisionPrefix = 468794
 
-const PackTypes = ['dimension_type', 'worldgen/noise_settings', 'worldgen/noise', 'worldgen/structure_set', 'worldgen/placed_feature', 'worldgen/configured_feature', 'worldgen/configured_carver'] as const
+const PackTypes = ['dimension', 'dimension_type', 'worldgen/noise_settings', 'worldgen/noise', 'worldgen/structure_set', 'worldgen/placed_feature', 'worldgen/configured_feature', 'worldgen/configured_carver'] as const
 export type CustomizedPackType = typeof PackTypes[number]
 
 export type CustomizedPack = Record<CustomizedPackType, Map<string, any>>
@@ -41,6 +41,7 @@ export async function generateCustomized(model: CustomizedModel, version: Versio
 		}, Object.create(null)) as CustomizedPack,
 		featureCollisionIndex: FeatureCollisionPrefix,
 	}
+	generateBiomeReplacements(ctx)
 	generateDimensionType(ctx)
 	generateNoiseSettings(ctx)
 	generateCarvers(ctx)
@@ -131,6 +132,27 @@ function generateClimateNoises(ctx: Context) {
 			firstOctave: vanilla.firstOctave - ctx.model.biomeSize + 4,
 		})
 	}
+}
+
+function generateBiomeReplacements(ctx: Context) {
+	if (isUnchanged(ctx, 'biomeReplacements')) return
+	const vanilla = ctx.vanilla['dimension'].get('overworld')
+	const biomes = vanilla.generator.biome_source.biomes.slice()
+	const replacements = new Map(Object.entries(ctx.model.biomeReplacements))
+	ctx.out['dimension'].set('overworld', {
+		type: 'minecraft:overworld',
+		generator: {
+			type: 'minecraft:noise',
+			settings: 'minecraft:overworld',
+			biome_source: {
+				type: 'minecraft:multi_noise',
+				biomes: biomes.map((b: any) => ({
+					biome: replacements.get(b.biome.slice(10)) ?? b.biome,
+					parameters: b.parameters,
+				})),
+			},
+		},
+	})
 }
 
 const Structures: Partial<Record<keyof CustomizedModel, string>> = {

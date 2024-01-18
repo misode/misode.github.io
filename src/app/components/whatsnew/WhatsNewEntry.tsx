@@ -11,6 +11,6 @@ export function WhatsNewEntry({ item }: EntryProps) {
 			<WhatsNewTime item={item} />
 			<h2 class="font-bold text-[27px]">{item.title}</h2>
 		</a>
-		<div class="guide-content" dangerouslySetInnerHTML={{ __html: marked(item.body) }} />
+		<div class="markdown-content" dangerouslySetInnerHTML={{ __html: marked(item.body) }} />
 	</article>
 }

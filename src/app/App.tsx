@@ -5,7 +5,7 @@ import '../styles/nodes.css'
 import { Analytics } from './Analytics.js'
 import { cleanUrl } from './Utils.js'
 import { Header } from './components/index.js'
-import { Changelog, Customized, Generator, Generators, Guide, Guides, Home, Partners, Sounds, Transformation, Versions, WhatsNew, Worldgen } from './pages/index.js'
+import { Changelog, Customized, Generator, Generators, Guide, Guides, Home, LegacyPartners, Partners, Sounds, Transformation, Versions, WhatsNew, Worldgen } from './pages/index.js'
 
 export function App() {
 	const changeRoute = (e: RouterOnChangeArgs) => {
@@ -21,6 +21,7 @@ export function App() {
 			<Generators path="/generators" />
 			<Worldgen path="/worldgen" />
 			<Partners path="/partners" />
+			<LegacyPartners path="/partners/:id" />
 			<Sounds path="/sounds" />
 			<Changelog path="/changelog" />
 			<Versions path="/versions" />

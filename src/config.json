@@ -47,6 +47,11 @@
       "schemas": false
     },
     {
+      "code": "tr",
+      "name": "Türkçe",
+      "schemas": false
+    },
+    {
       "code": "zh-cn",
       "name": "简体中文"
     },
@@ -59,52 +64,74 @@
     {
       "id": "1.15",
       "ref": "1.15.2",
+      "name": "1.15 — 1.15.2",
       "pack_format": 5
     },
     {
       "id": "1.16",
       "ref": "1.16.5",
+      "name": "1.16 — 1.16.5",
       "pack_format": 6
     },
     {
       "id": "1.17",
       "ref": "1.17.1",
+      "name": "1.17 — 1.17.1",
       "pack_format": 7
     },
     {
       "id": "1.18",
       "ref": "1.18.1",
+      "name": "1.18 — 1.18.1",
       "pack_format": 8
     },
     {
       "id": "1.18.2",
       "ref": "1.18.2",
-      "pack_format": 9
+      "name": "1.18.2",
+      "pack_format": 9,
+      "show": true
     },
     {
       "id": "1.19",
       "ref": "1.19.2",
-      "pack_format": 10
+      "name": "1.19 — 1.19.2",
+      "pack_format": 10,
+      "show": true
     },
     {
       "id": "1.19.3",
       "ref": "1.19.3",
+      "name": "1.19.3",
       "pack_format": 10
     },
     {
       "id": "1.19.4",
       "ref": "1.19.4",
-      "pack_format": 12
+      "name": "1.19.4",
+      "pack_format": 12,
+      "show": true
     },
     {
       "id": "1.20",
       "ref": "1.20.1",
-      "pack_format": 15
+      "name": "1.20 — 1.20.1",
+      "pack_format": 15,
+      "show": true
     },
     {
       "id": "1.20.2",
       "ref": "1.20.2",
-      "pack_format": 18
+      "name": "1.20.2",
+      "pack_format": 18,
+      "show": true
+    },
+    {
+      "id": "1.20.3",
+      "ref": "1.20.3",
+      "name": "1.20.3 — 1.20.4",
+      "pack_format": 26,
+      "show": true
     }
   ],
   "generators": [
@@ -112,44 +139,51 @@
       "id": "loot_table",
       "url": "loot-table",
       "path": "loot_tables",
-      "schema": "loot_table"
+      "schema": "loot_table",
+      "wiki": "Loot_table"
     },
     {
       "id": "predicate",
       "url": "predicate",
       "path": "predicates",
-      "schema": "predicate"
+      "schema": "predicate",
+      "wiki": "Predicate"
     },
     {
       "id": "item_modifier",
       "url": "item-modifier",
       "path": "item_modifiers",
       "schema": "item_modifier",
-      "minVersion": "1.17"
+      "minVersion": "1.17",
+      "wiki": "Item modifier"
     },
     {
       "id": "advancement",
       "url": "advancement",
       "path": "advancements",
-      "schema": "advancement"
+      "schema": "advancement",
+      "wiki": "Advancement/JSON_format"
     },
     {
       "id": "recipe",
       "url": "recipe",
       "path": "recipes",
-      "schema": "recipe"
+      "schema": "recipe",
+      "wiki": "Recipe#JSON_format"
     },
     {
       "id": "text_component",
       "url": "text-component",
       "schema": "text_component",
-      "noPath": true
+      "noPath": true,
+      "wiki": "Raw_JSON_text_format#Java_Edition"
     },
     {
       "id": "damage_type",
       "url": "damage-type",
       "schema": "damage_type",
-      "minVersion": "1.19.4"
+      "minVersion": "1.19.4",
+      "wiki": "Damage_type"
     },
     {
       "id": "chat_type",
@@ -172,70 +206,80 @@
     {
       "id": "pack_mcmeta",
       "url": "pack-mcmeta",
-      "schema": "pack_mcmeta"
+      "schema": "pack_mcmeta",
+      "wiki": "Data_pack#pack.mcmeta"
     },
     {
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",
       "tags": ["worldgen"],
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Custom_dimension"
     },
     {
       "id": "dimension_type",
       "url": "dimension-type",
       "schema": "dimension_type",
       "tags": ["worldgen"],
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Dimension_type"
     },
     {
       "id": "worldgen/biome",
       "url": "worldgen/biome",
       "tags": ["worldgen"],
       "schema": "biome",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Custom_biome"
     },
     {
       "id": "worldgen/configured_carver",
       "url": "worldgen/carver",
       "tags": ["worldgen"],
       "schema": "configured_carver",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Custom_carver"
     },
     {
       "id": "worldgen/configured_feature",
       "url": "worldgen/feature",
       "tags": ["worldgen"],
       "schema": "configured_feature",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Configured_feature"
     },
     {
       "id": "worldgen/placed_feature",
       "url": "worldgen/placed-feature",
       "tags": ["worldgen"],
       "schema": "placed_feature",
-      "minVersion": "1.18"
+      "minVersion": "1.18",
+      "wiki": "Placed_feature"
     },
     {
       "id": "worldgen/density_function",
       "url": "worldgen/density-function",
       "tags": ["worldgen"],
       "schema": "density_function",
-      "minVersion": "1.18.2"
+      "minVersion": "1.18.2",
+      "wiki": "Density_function"
     },
     {
       "id": "worldgen/noise",
       "url": "worldgen/noise",
       "tags": ["worldgen"],
       "schema": "noise_parameters",
-      "minVersion": "1.18"
+      "minVersion": "1.18",
+      "wiki": "Noise"
     },
     {
       "id": "worldgen/noise_settings",
       "url": "worldgen/noise-settings",
       "tags": ["worldgen"],
       "schema": "noise_settings",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Custom_noise_settings"
     },
     {
       "id": "worldgen/configured_structure_feature",
@@ -250,14 +294,16 @@
       "url": "worldgen/structure",
       "tags": ["worldgen"],
       "schema": "structure",
-      "minVersion": "1.19"
+      "minVersion": "1.19",
+      "wiki": "Structure/JSON_format"
     },
     {
       "id": "worldgen/structure_set",
       "url": "worldgen/structure-set",
       "tags": ["worldgen"],
       "schema": "structure_set",
-      "minVersion": "1.18.2"
+      "minVersion": "1.18.2",
+      "wiki": "Structure_set"
     },
     {
       "id": "worldgen/configured_surface_builder",
@@ -265,35 +311,40 @@
       "tags": ["worldgen"],
       "schema": "configured_surface_builder",
       "minVersion": "1.16",
-      "maxVersion": "1.17"
+      "maxVersion": "1.17",
+      "wiki": "Configured_surface_builder"
     },
     {
       "id": "worldgen/processor_list",
       "url": "worldgen/processor-list",
       "tags": ["worldgen"],
       "schema": "processor_list",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Processor_list"
     },
     {
       "id": "worldgen/template_pool",
       "url": "worldgen/template-pool",
       "tags": ["worldgen"],
       "schema": "template_pool",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Template_pool"
     },
     {
       "id": "worldgen/world_preset",
       "url": "worldgen/world-preset",
       "tags": ["worldgen"],
       "schema": "world_preset",
-      "minVersion": "1.19"
+      "minVersion": "1.19",
+      "wiki": "Custom_world_preset"
     },
     {
       "id": "worldgen/flat_level_generator_preset",
       "url": "worldgen/flat-world-preset",
       "tags": ["worldgen"],
       "schema": "flat_level_generator_preset",
-      "minVersion": "1.19"
+      "minVersion": "1.19",
+      "wiki": "Custom_world_preset#Superflat_Level_Generation_Preset"
     },
     {
       "id": "world",
@@ -301,28 +352,33 @@
       "schema": "world_settings",
       "noPath": true,
       "tags": ["worldgen"],
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "maxVersion": "1.19.3",
+      "wiki": "Custom"
     },
     {
       "id": "tag/block",
       "url": "tags/block",
       "tags": ["tags"],
       "path": "tags/blocks",
-      "schema": "block_tag"
+      "schema": "block_tag",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "tag/entity_type",
       "url": "tags/entity-type",
       "tags": ["tags"],
       "path": "tags/entity_types",
-      "schema": "entity_type_tag"
+      "schema": "entity_type_tag",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "tag/fluid",
       "url": "tags/fluid",
       "tags": ["tags"],
       "path": "tags/fluids",
-      "schema": "fluid_tag"
+      "schema": "fluid_tag",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "tag/game_event",
@@ -330,14 +386,25 @@
       "tags": ["tags"],
       "path": "tags/game_events",
       "schema": "game_event_tag",
-      "minVersion": "1.17"
+      "minVersion": "1.17",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "tag/item",
       "url": "tags/item",
       "tags": ["tags"],
       "path": "tags/items",
-      "schema": "item_tag"
+      "schema": "item_tag",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/damage_type",
+      "url": "tags/damage-type",
+      "tags": ["tags"],
+      "path": "tags/damage_type",
+      "schema": "damage_type_tag",
+      "minVersion": "1.19.4",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/biome",
@@ -345,7 +412,8 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/biome",
       "schema": "biome_tag",
-      "minVersion": "1.18.2"
+      "minVersion": "1.18.2",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/structure",
@@ -353,21 +421,96 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/structure",
       "schema": "structure_tag",
-      "minVersion": "1.19"
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/worldgen/structure_set",
+      "url": "tags/structure-set",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/structure_set",
+      "schema": "structure_set_tag",
+      "minVersion": "1.18.2",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/worldgen/flat_level_generator_preset",
+      "url": "tags/flat-world-preset",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/flat_level_generator_preset",
+      "schema": "flat_level_generator_preset_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/worldgen/world_preset",
+      "url": "tags/world-preset",
+      "tags": ["tags", "worldgen"],
+      "path": "tags/worldgen/world_preset",
+      "schema": "world_preset_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/banner_pattern",
+      "url": "tags/banner-pattern",
+      "tags": ["tags"],
+      "path": "tags/banner_pattern",
+      "schema": "banner_pattern_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/cat_variant",
+      "url": "tags/cat-variant",
+      "tags": ["tags"],
+      "path": "tags/cat_variant",
+      "schema": "cat_variant_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/instrument",
+      "url": "tags/instrument",
+      "tags": ["tags"],
+      "path": "tags/instrument",
+      "schema": "instrument_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/painting_variant",
+      "url": "tags/painting-variant",
+      "tags": ["tags"],
+      "path": "tags/painting_variant",
+      "schema": "painting_variant_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
+    },
+    {
+      "id": "tag/point_of_interest_type",
+      "url": "tags/painting-variant",
+      "tags": ["tags"],
+      "path": "tags/point_of_interest_type",
+      "schema": "point_of_interest_type_tag",
+      "minVersion": "1.19",
+      "wiki": "Tag#Java_Edition"
     },
     {
       "id": "block_definition",
       "url": "assets/blockstate",
       "path": "blockstates",
       "tags": ["assets"],
-      "schema": "block_definition"
+      "schema": "block_definition",
+      "wiki": "Tutorials/Models#Block_states"
     },
     {
       "id": "model",
       "url": "assets/model",
       "path": "models",
       "tags": ["assets"],
-      "schema": "model"
+      "schema": "model",
+      "wiki": "Tutorials/Models"
     },
     {
       "id": "font",
@@ -375,7 +518,8 @@
       "path": "font",
       "tags": ["assets"],
       "schema": "font",
-      "minVersion": "1.16"
+      "minVersion": "1.16",
+      "wiki": "Resource_pack#Fonts"
     },
     {
       "id": "atlas",
@@ -383,25 +527,75 @@
       "path": "atlases",
       "tags": ["assets"],
       "schema": "atlas",
-      "minVersion": "1.19.3"
+      "minVersion": "1.19.3",
+      "wiki": "Resource_pack#Atlases"
     },
     {
-      "id": "block_growth",
-      "url": "partners/immersive-weathering/block-growth",
+      "id": "immersive_weathering.block_growth",
+      "url": "immersive-weathering/block-growth",
       "path": "block_growths",
       "tags": ["partners"],
-      "partner": "immersive_weathering",
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
     },
     {
-      "id": "worldgen_modifier",
-      "url": "partners/lithostitched/worldgen-modifier",
+      "id": "lithostitched.worldgen_modifier",
+      "url": "lithostitched/worldgen-modifier",
       "path": "lithostitched/worldgen_modifier",
       "tags": ["partners"],
-      "partner": "lithostitched",
       "schema": "lithostitched:worldgen_modifier",
       "minVersion": "1.20.2"
+    },
+    {
+      "id": "obsidian.item",
+      "url": "obsidian/item",
+      "path": "obsidian_item",
+      "tags": ["partners"],
+      "schema": "obsidian:item"
+    },
+    {
+      "id": "obsidian.block",
+      "url": "obsidian/block",
+      "path": "obsidian_block",
+      "tags": ["partners"],
+      "schema": "obsidian:block"
+    }
+  ],
+  "legacyGuides": [
+    {
+      "id": "adding-custom-structures",
+      "title": "Adding custom structures",
+      "link": "Tutorials/Custom_structures"
+    },
+    {
+      "id": "custom-armor-trims",
+      "title": "Trim patterns and materials",
+      "link": "Tutorials/Adding_custom_trims"
+    },
+    {
+      "id": "density-functions",
+      "title": "Density function types and their configuration",
+      "link": "Density_function"
+    },
+    {
+      "id": "feature-order-cycle",
+      "title": "How to fix feature order cycles",
+      "link": "Custom_biome"
+    },
+    {
+      "id": "heightmap-types",
+      "title": "The different heightmap types explained",
+      "link": "Heightmap"
+    },
+    {
+      "id": "noise-router",
+      "title": "How terrain is generated using the noise router",
+      "link": "Noise_router#Final_density"
+    },
+    {
+      "id": "placed-features",
+      "title": "Placed features and their configuration",
+      "link": "Placed_feature"
     }
   ]
 }

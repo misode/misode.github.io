@@ -2,7 +2,7 @@ import { useMemo } from 'preact/hooks'
 import contributors from '../../contributors.json'
 import { Store } from '../Store.js'
 import { shuffle } from '../Utils.js'
-import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
+import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, ToolCard, ToolGroup } from '../components/index.js'
 import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -23,38 +23,34 @@ export function Home({}: Props) {
 
 	return <main>
 		<div class="legacy-container">
-			<MinecraftWikiBanner />
 			<div class="card-group">
-				<div class="card-column">
+				{smallScreen ? /* mobile */ <>
 					<PopularGenerators />
-					{smallScreen && <FavoriteGenerators />}
-					{smallScreen && <WhatsNew />}
-					<Changelog />
-					{smallScreen && <Guides />}
-					<Versions />
-					{smallScreen && <Tools />}
-				</div>
-				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
 					<WhatsNew />
-					<Guides />
+					<Changelog />
+					<Versions />
 					<Tools />
-				</div>}
+					<Guides />
+				</> : /* desktop */ <>
+					<div class="card-column">
+						<PopularGenerators />
+						<Changelog />
+						<Versions />
+						<Guides />
+					</div>
+					{!smallScreen && <div class="card-column">
+						<FavoriteGenerators />
+						<WhatsNew />
+						<Tools />
+					</div>}
+				</>}
 			</div>
 			<Contributors />
 			<Giscus />
 			<Footer />
 		</div>
 	</main>
-}
-
-function MinecraftWikiBanner() {
-	return <a class="tool-card minecraft-wiki" href="https://minecraft.wiki/w/Minecraft_Wiki:Moving_from_Fandom" target="_blank">
-		<img src="/images/minecraft_wiki.png" alt="Minecraft Wiki Logo" />
-		<div>
-			The Minecraft Wiki has moved from Fandom to <em>minecraft.wiki</em>!
-		</div>
-	</a>
 }
 
 function PopularGenerators() {
@@ -65,6 +61,7 @@ function PopularGenerators() {
 		<GeneratorCard minimal id="predicate" />
 		<ToolCard title={locale('worldgen')} link="/worldgen/" titleIcon="worldgen" />
 		<ToolCard title={locale('generators.all')} link="/generators/" titleIcon="arrow_right" />
+		<ToolCard title={locale('generators.partners')} link="/partners/" titleIcon="arrow_right" />
 	</ToolGroup>
 }
 
@@ -91,10 +88,7 @@ function FavoriteGenerators() {
 function Guides() {
 	const { locale } = useLocale()
 
-	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right">
-		<GuideCard minimal id="adding-custom-structures" />
-		<GuideCard minimal id="noise-router" />
-	</ToolGroup>
+	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right" />
 }
 
 function Tools() {
@@ -116,6 +110,9 @@ function Tools() {
 		<ToolCard title="Data Pack Upgrader"
 			link="https://misode.github.io/upgrader/"
 			desc="Convert your data packs from 1.16 to 1.20" />
+		<ToolCard title="Template Placer"
+			link="https://misode.github.io/template-placer/"
+			desc="Automatically place all the structure pieces in your world" />
 	</ToolGroup>
 }
 
