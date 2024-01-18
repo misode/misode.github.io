@@ -537,6 +537,20 @@
       "tags": ["partners"],
       "schema": "immersive_weathering:block_growth",
       "minVersion": "1.18.2"
+    },
+    {
+      "id": "obsidian.item",
+      "url": "obsidian/item",
+      "path": "obsidian_item",
+      "tags": ["partners"],
+      "schema": "obsidian:item"
+    },
+    {
+      "id": "obsidian.block",
+      "url": "obsidian/block",
+      "path": "obsidian_block",
+      "tags": ["partners"],
+      "schema": "obsidian:block"
     }
   ],
   "legacyGuides": [
