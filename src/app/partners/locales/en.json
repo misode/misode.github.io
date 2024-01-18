@@ -55,8 +55,24 @@
   "immersive_weathering:rule_test.immersive_weathering:block_set_match": "Block set match",
   "immersive_weathering:rule_test.immersive_weathering:fluid_match": "Fluid match",
   "immersive_weathering:rule_test.immersive_weathering:tree_log": "Tree log",
-  "rule_test.blocks": "Blocks",
-  "rule_test.fluid": "Fluid",
+
+  "lithostitched:modifier_type.lithostitched:add_biome_spawns": "Add biome spawns",
+  "lithostitched:modifier_type.lithostitched:add_features": "Add features",
+  "lithostitched:modifier_type.lithostitched:add_structure_set_entries": "Add structure set entries",
+  "lithostitched:modifier_type.lithostitched:add_surface_rule": "Add surface rule",
+  "lithostitched:modifier_type.lithostitched:add_template_pool_elements": "Add template pool elements",
+  "lithostitched:modifier_type.lithostitched:no_op": "Nothing",
+  "lithostitched:modifier_type.lithostitched:redirect_feature": "Redirect feature",
+  "lithostitched:modifier_type.lithostitched:remove_biome_spawns": "Remove biome spawns",
+  "lithostitched:modifier_type.lithostitched:remove_features": "Remove features",
+  "lithostitched:modifier_type.lithostitched:remove_structures_from_structure_set": "Remove structures from set",
+  "lithostitched:modifier_type.lithostitched:replace_climate": "Replace climate",
+  "lithostitched:modifier_type.lithostitched:replace_effects": "Replace effects",
+  "lithostitched:modifier_predicate_type.lithostitched:all_of": "All of",
+  "lithostitched:modifier_predicate_type.lithostitched:any_of": "Any of",
+  "lithostitched:modifier_predicate_type.lithostitched:mod_loaded": "Mod loaded",
+  "lithostitched:modifier_predicate_type.lithostitched:not": "Not",
+  "lithostitched:modifier_predicate_type.lithostitched:true": "True",
 
   "obsidian:item.information": "Item Information",
   "obsidian:item_information.rarity": "Rarity",
@@ -115,5 +131,8 @@
   "obsidian:block.display.model": "Model",
   "obsidian:block.display.item_model": "Item Model",
   "obsidian:block.display.block_model": "Block Model",
-  "obsidian:block.display.lore": "Lore"
+  "obsidian:block.display.lore": "Lore",
+
+  "rule_test.blocks": "Blocks",
+  "rule_test.fluid": "Fluid"
 }

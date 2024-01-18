@@ -175,6 +175,8 @@
   "partner.obsidian": "Obsidian",
   "generator.obsidian.item": "Obsidian Item",
   "generator.obsidian.block": "Obsidian Block",
+  "partner.lithostitched": "Lithostitched",
+  "generator.lithostitched.worldgen_modifier": "Worldgen Modifier",
   "presets": "Presets",
   "preview": "Visualize",
   "preview.auto_scroll": "Auto scroll",
