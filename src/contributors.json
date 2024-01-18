@@ -154,7 +154,7 @@
   },
   {
     "name": "ApolloDatapacks",
-    "types": ["report", "content"],
+    "types": ["report"],
     "avatar": "https://avatars.githubusercontent.com/u/102649729?v=4",
     "url": "https://github.com/ApolloDatapacks"
   },

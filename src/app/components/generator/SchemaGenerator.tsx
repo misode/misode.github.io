@@ -315,7 +315,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	return <>
 		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
-			{!gen.partner && <Ad id="data-pack-generator" type="text" />}
+			{!gen.tags?.includes('partners') && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls generator-controls">
 				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={`https://minecraft.wiki/w/${gen.wiki}`} target="_blank">
 					{Octicon.mortar_board}
@@ -336,7 +336,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
 			<Tree {...{model, version, blockStates}} onError={setError} />
-			<Footer donate={!gen.partner} />
+			<Footer donate={!gen.tags?.includes('partners')} />
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>

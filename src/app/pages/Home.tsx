@@ -24,20 +24,27 @@ export function Home({}: Props) {
 	return <main>
 		<div class="legacy-container">
 			<div class="card-group">
-				<div class="card-column">
+				{smallScreen ? /* mobile */ <>
 					<PopularGenerators />
-					{smallScreen && <FavoriteGenerators />}
-					{smallScreen && <WhatsNew />}
-					<Changelog />
-					<Versions />
-					{smallScreen && <Tools />}
-					<Guides />
-				</div>
-				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
 					<WhatsNew />
+					<Changelog />
+					<Versions />
 					<Tools />
-				</div>}
+					<Guides />
+				</> : /* desktop */ <>
+					<div class="card-column">
+						<PopularGenerators />
+						<Changelog />
+						<Versions />
+						<Guides />
+					</div>
+					{!smallScreen && <div class="card-column">
+						<FavoriteGenerators />
+						<WhatsNew />
+						<Tools />
+					</div>}
+				</>}
 			</div>
 			<Contributors />
 			<Giscus />
@@ -54,6 +61,7 @@ function PopularGenerators() {
 		<GeneratorCard minimal id="predicate" />
 		<ToolCard title={locale('worldgen')} link="/worldgen/" titleIcon="worldgen" />
 		<ToolCard title={locale('generators.all')} link="/generators/" titleIcon="arrow_right" />
+		<ToolCard title={locale('generators.partners')} link="/partners/" titleIcon="arrow_right" />
 	</ToolGroup>
 }
 

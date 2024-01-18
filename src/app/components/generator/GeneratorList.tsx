@@ -28,7 +28,7 @@ export function GeneratorList({ predicate }: Props) {
 	const filteredGenerators = useMemo(() => {
 		const query = search.split(' ').map(q => q.trim().toLowerCase()).filter(q => q.length > 0)
 		return versionedGenerators.filter(gen => {
-			const content = `${gen.id} ${gen.tags?.join(' ') ?? ''} ${gen.path ?? ''} ${gen.partner ?? ''} ${locale(gen.id).toLowerCase()}`
+			const content = `${gen.id} ${gen.tags?.join(' ') ?? ''} ${gen.path ?? ''} ${locale(`generator.${gen.id}`).toLowerCase()}`
 			return query.every(q => {
 				if (q.startsWith('!')) {
 					return q.length === 1 || !content.includes(q.slice(1))
