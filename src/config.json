@@ -140,14 +140,14 @@
       "url": "loot-table",
       "path": "loot_tables",
       "schema": "loot_table",
-      "wiki": "Loot_table"
+      "wiki": "https://minecraft.wiki/w/Loot_table"
     },
     {
       "id": "predicate",
       "url": "predicate",
       "path": "predicates",
       "schema": "predicate",
-      "wiki": "Predicate"
+      "wiki": "https://minecraft.wiki/w/Predicate"
     },
     {
       "id": "item_modifier",
@@ -155,35 +155,35 @@
       "path": "item_modifiers",
       "schema": "item_modifier",
       "minVersion": "1.17",
-      "wiki": "Item modifier"
+      "wiki": "https://minecraft.wiki/w/Item modifier"
     },
     {
       "id": "advancement",
       "url": "advancement",
       "path": "advancements",
       "schema": "advancement",
-      "wiki": "Advancement/JSON_format"
+      "wiki": "https://minecraft.wiki/w/Advancement/JSON_format"
     },
     {
       "id": "recipe",
       "url": "recipe",
       "path": "recipes",
       "schema": "recipe",
-      "wiki": "Recipe#JSON_format"
+      "wiki": "https://minecraft.wiki/w/Recipe#JSON_format"
     },
     {
       "id": "text_component",
       "url": "text-component",
       "schema": "text_component",
       "noPath": true,
-      "wiki": "Raw_JSON_text_format#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Raw_JSON_text_format#Java_Edition"
     },
     {
       "id": "damage_type",
       "url": "damage-type",
       "schema": "damage_type",
       "minVersion": "1.19.4",
-      "wiki": "Damage_type"
+      "wiki": "https://minecraft.wiki/w/Damage_type"
     },
     {
       "id": "chat_type",
@@ -207,7 +207,7 @@
       "id": "pack_mcmeta",
       "url": "pack-mcmeta",
       "schema": "pack_mcmeta",
-      "wiki": "Data_pack#pack.mcmeta"
+      "wiki": "https://minecraft.wiki/w/Data_pack#pack.mcmeta"
     },
     {
       "id": "dimension",
@@ -215,7 +215,7 @@
       "schema": "dimension",
       "tags": ["worldgen"],
       "minVersion": "1.16",
-      "wiki": "Custom_dimension"
+      "wiki": "https://minecraft.wiki/w/Custom_dimension"
     },
     {
       "id": "dimension_type",
@@ -223,7 +223,7 @@
       "schema": "dimension_type",
       "tags": ["worldgen"],
       "minVersion": "1.16",
-      "wiki": "Dimension_type"
+      "wiki": "https://minecraft.wiki/w/Dimension_type"
     },
     {
       "id": "worldgen/biome",
@@ -231,7 +231,7 @@
       "tags": ["worldgen"],
       "schema": "biome",
       "minVersion": "1.16",
-      "wiki": "Custom_biome"
+      "wiki": "https://minecraft.wiki/w/Custom_biome"
     },
     {
       "id": "worldgen/configured_carver",
@@ -239,7 +239,7 @@
       "tags": ["worldgen"],
       "schema": "configured_carver",
       "minVersion": "1.16",
-      "wiki": "Custom_carver"
+      "wiki": "https://minecraft.wiki/w/Custom_carver"
     },
     {
       "id": "worldgen/configured_feature",
@@ -247,7 +247,7 @@
       "tags": ["worldgen"],
       "schema": "configured_feature",
       "minVersion": "1.16",
-      "wiki": "Configured_feature"
+      "wiki": "https://minecraft.wiki/w/Configured_feature"
     },
     {
       "id": "worldgen/placed_feature",
@@ -255,7 +255,7 @@
       "tags": ["worldgen"],
       "schema": "placed_feature",
       "minVersion": "1.18",
-      "wiki": "Placed_feature"
+      "wiki": "https://minecraft.wiki/w/Placed_feature"
     },
     {
       "id": "worldgen/density_function",
@@ -263,7 +263,7 @@
       "tags": ["worldgen"],
       "schema": "density_function",
       "minVersion": "1.18.2",
-      "wiki": "Density_function"
+      "wiki": "https://minecraft.wiki/w/Density_function"
     },
     {
       "id": "worldgen/noise",
@@ -271,7 +271,7 @@
       "tags": ["worldgen"],
       "schema": "noise_parameters",
       "minVersion": "1.18",
-      "wiki": "Noise"
+      "wiki": "https://minecraft.wiki/w/Noise"
     },
     {
       "id": "worldgen/noise_settings",
@@ -279,7 +279,7 @@
       "tags": ["worldgen"],
       "schema": "noise_settings",
       "minVersion": "1.16",
-      "wiki": "Custom_noise_settings"
+      "wiki": "https://minecraft.wiki/w/Custom_noise_settings"
     },
     {
       "id": "worldgen/configured_structure_feature",
@@ -295,7 +295,7 @@
       "tags": ["worldgen"],
       "schema": "structure",
       "minVersion": "1.19",
-      "wiki": "Structure/JSON_format"
+      "wiki": "https://minecraft.wiki/w/Structure/JSON_format"
     },
     {
       "id": "worldgen/structure_set",
@@ -303,7 +303,7 @@
       "tags": ["worldgen"],
       "schema": "structure_set",
       "minVersion": "1.18.2",
-      "wiki": "Structure_set"
+      "wiki": "https://minecraft.wiki/w/Structure_set"
     },
     {
       "id": "worldgen/configured_surface_builder",
@@ -312,7 +312,7 @@
       "schema": "configured_surface_builder",
       "minVersion": "1.16",
       "maxVersion": "1.17",
-      "wiki": "Configured_surface_builder"
+      "wiki": "https://minecraft.wiki/w/Configured_surface_builder"
     },
     {
       "id": "worldgen/processor_list",
@@ -320,7 +320,7 @@
       "tags": ["worldgen"],
       "schema": "processor_list",
       "minVersion": "1.16",
-      "wiki": "Processor_list"
+      "wiki": "https://minecraft.wiki/w/Processor_list"
     },
     {
       "id": "worldgen/template_pool",
@@ -328,7 +328,7 @@
       "tags": ["worldgen"],
       "schema": "template_pool",
       "minVersion": "1.16",
-      "wiki": "Template_pool"
+      "wiki": "https://minecraft.wiki/w/Template_pool"
     },
     {
       "id": "worldgen/world_preset",
@@ -336,7 +336,7 @@
       "tags": ["worldgen"],
       "schema": "world_preset",
       "minVersion": "1.19",
-      "wiki": "Custom_world_preset"
+      "wiki": "https://minecraft.wiki/w/Custom_world_preset"
     },
     {
       "id": "worldgen/flat_level_generator_preset",
@@ -344,7 +344,7 @@
       "tags": ["worldgen"],
       "schema": "flat_level_generator_preset",
       "minVersion": "1.19",
-      "wiki": "Custom_world_preset#Superflat_Level_Generation_Preset"
+      "wiki": "https://minecraft.wiki/w/Custom_world_preset#Superflat_Level_Generation_Preset"
     },
     {
       "id": "world",
@@ -354,7 +354,7 @@
       "tags": ["worldgen"],
       "minVersion": "1.16",
       "maxVersion": "1.19.3",
-      "wiki": "Custom"
+      "wiki": "https://minecraft.wiki/w/Custom"
     },
     {
       "id": "tag/block",
@@ -362,7 +362,7 @@
       "tags": ["tags"],
       "path": "tags/blocks",
       "schema": "block_tag",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/entity_type",
@@ -370,7 +370,7 @@
       "tags": ["tags"],
       "path": "tags/entity_types",
       "schema": "entity_type_tag",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/fluid",
@@ -378,7 +378,7 @@
       "tags": ["tags"],
       "path": "tags/fluids",
       "schema": "fluid_tag",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/game_event",
@@ -387,7 +387,7 @@
       "path": "tags/game_events",
       "schema": "game_event_tag",
       "minVersion": "1.17",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/item",
@@ -395,7 +395,7 @@
       "tags": ["tags"],
       "path": "tags/items",
       "schema": "item_tag",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/damage_type",
@@ -404,7 +404,7 @@
       "path": "tags/damage_type",
       "schema": "damage_type_tag",
       "minVersion": "1.19.4",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/biome",
@@ -413,7 +413,7 @@
       "path": "tags/worldgen/biome",
       "schema": "biome_tag",
       "minVersion": "1.18.2",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/structure",
@@ -422,7 +422,7 @@
       "path": "tags/worldgen/structure",
       "schema": "structure_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/structure_set",
@@ -431,7 +431,7 @@
       "path": "tags/worldgen/structure_set",
       "schema": "structure_set_tag",
       "minVersion": "1.18.2",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/flat_level_generator_preset",
@@ -440,7 +440,7 @@
       "path": "tags/worldgen/flat_level_generator_preset",
       "schema": "flat_level_generator_preset_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/worldgen/world_preset",
@@ -449,7 +449,7 @@
       "path": "tags/worldgen/world_preset",
       "schema": "world_preset_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/banner_pattern",
@@ -458,7 +458,7 @@
       "path": "tags/banner_pattern",
       "schema": "banner_pattern_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/cat_variant",
@@ -467,7 +467,7 @@
       "path": "tags/cat_variant",
       "schema": "cat_variant_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/instrument",
@@ -476,7 +476,7 @@
       "path": "tags/instrument",
       "schema": "instrument_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/painting_variant",
@@ -485,7 +485,7 @@
       "path": "tags/painting_variant",
       "schema": "painting_variant_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "tag/point_of_interest_type",
@@ -494,7 +494,7 @@
       "path": "tags/point_of_interest_type",
       "schema": "point_of_interest_type_tag",
       "minVersion": "1.19",
-      "wiki": "Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
       "id": "block_definition",
@@ -502,7 +502,7 @@
       "path": "blockstates",
       "tags": ["assets"],
       "schema": "block_definition",
-      "wiki": "Tutorials/Models#Block_states"
+      "wiki": "https://minecraft.wiki/w/Tutorials/Models#Block_states"
     },
     {
       "id": "model",
@@ -510,7 +510,7 @@
       "path": "models",
       "tags": ["assets"],
       "schema": "model",
-      "wiki": "Tutorials/Models"
+      "wiki": "https://minecraft.wiki/w/Tutorials/Models"
     },
     {
       "id": "font",
@@ -519,7 +519,7 @@
       "tags": ["assets"],
       "schema": "font",
       "minVersion": "1.16",
-      "wiki": "Resource_pack#Fonts"
+      "wiki": "https://minecraft.wiki/w/Resource_pack#Fonts"
     },
     {
       "id": "atlas",
@@ -528,7 +528,7 @@
       "tags": ["assets"],
       "schema": "atlas",
       "minVersion": "1.19.3",
-      "wiki": "Resource_pack#Atlases"
+      "wiki": "https://minecraft.wiki/w/Resource_pack#Atlases"
     },
     {
       "id": "immersive_weathering.block_growth",
@@ -544,7 +544,8 @@
       "path": "lithostitched/worldgen_modifier",
       "tags": ["partners"],
       "schema": "lithostitched:worldgen_modifier",
-      "minVersion": "1.20.2"
+      "minVersion": "1.20.2",
+      "wiki": "https://github.com/Apollounknowndev/lithostitched/wiki/Worldgen-Modifiers"
     },
     {
       "id": "obsidian.item",
@@ -559,6 +560,15 @@
       "path": "obsidian_block",
       "tags": ["partners"],
       "schema": "obsidian:block"
+    },
+    {
+      "id": "ohthetreesyoullgrow.configured_feature",
+      "url": "ohthetreesyoullgrow/feature",
+      "path": "configured_feature",
+      "tags": ["partners"],
+      "schema": "ohthetreesyoullgrow:configured_feature",
+      "minVersion": "1.20.3",
+      "wiki": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow/wiki/Generating-Your-Tree-With-Data-Packs!"
     }
   ],
   "legacyGuides": [

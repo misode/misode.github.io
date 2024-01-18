@@ -177,6 +177,8 @@
   "generator.obsidian.block": "Obsidian Block",
   "partner.lithostitched": "Lithostitched",
   "generator.lithostitched.worldgen_modifier": "Worldgen Modifier",
+  "partner.ohthetreesyoullgrow": "Oh The Trees You'll Grow",
+  "generator.ohthetreesyoullgrow.configured_feature": "OTTYG Feature",
   "presets": "Presets",
   "preview": "Visualize",
   "preview.auto_scroll": "Auto scroll",

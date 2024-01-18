@@ -317,7 +317,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
 			{!gen.tags?.includes('partners') && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls generator-controls">
-				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={`https://minecraft.wiki/w/${gen.wiki}`} target="_blank">
+				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={gen.wiki} target="_blank">
 					{Octicon.mortar_board}
 					<span>{locale('wiki')}</span>
 				</a>}
