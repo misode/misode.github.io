@@ -1,10 +1,10 @@
 import type { ItemStack } from 'deepslate/core'
 import { AttributeModifierOperation, Enchantment, Identifier, MobEffectInstance, Potion } from 'deepslate/core'
 import { NbtList, NbtType } from 'deepslate/nbt'
-import { useMemo } from 'preact/hooks'
+import { message } from '../Utils.js'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { getTranslation } from '../services/Resources.js'
+import { getLanguage, getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
@@ -14,19 +14,42 @@ interface Props {
 export function ItemTooltip({ item, advanced }: Props) {
 	const { version } = useVersion()
 
+	const { value: language } = useAsync(() => getLanguage(version), [version])
+
 	const isPotion = item.is('potion') || item.is('splash_potion') || item.is('lingering_potion')
-	const descriptionId = useMemo(() => {
-		const d = `${item.id.namespace}.${item.id.path}`
-		if (isPotion) {
-			return `${d}.effect.${Potion.fromNbt(item).name}`
+	let displayName = item.tag.getCompound('display').getString('Name')
+	let name: string | undefined
+	if (displayName) {
+		try {
+			name = JSON.parse(displayName)
+		} catch (e) {
+			console.warn(`Error parsing display name '${displayName}': ${message(e)}`)
+			displayName = ''
 		}
-		return d
-	}, [item])
-	const { value: translatedName } = useAsync(() => {
-		return getTranslation(version, `item.${descriptionId}`) ?? getTranslation(version, `block.${descriptionId}`)
-	}, [version, descriptionId])
-	const displayName = item.tag.getCompound('display').getString('Name')
-	const name = displayName ? JSON.parse(displayName) : (translatedName ?? fakeTranslation(item.id.path))
+	}
+	if (name === undefined) {
+		if (language) {
+			let descriptionId = `${item.id.namespace}.${item.id.path}`
+			if (isPotion) {
+				descriptionId = `${descriptionId}.effect.${Potion.fromNbt(item).name}`
+			}
+			name = getTranslation(language, `item.${descriptionId}`)
+			name ??= getTranslation(language, `block.${descriptionId}`)
+		}
+		name ??= item.id.path
+			.replace(/[_\/]/g, ' ')
+			.split(' ')
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ')
+	}
+	const lore: any[] = []
+	item.tag.getCompound('display').getList('Lore', NbtType.String).forEach((line) => {
+		try {
+			lore.push(JSON.parse(line['value']))
+		} catch (e) {
+			console.warn(`Error parsing lore line '${line}': ${message(e)}`)
+		}
+	})
 
 	const durability = item.getItem().durability
 	const enchantments = (item.is('enchanted_book') ? item.tag.getList('StoredEnchantments', NbtType.Compound) : item.tag.getList('Enchantments', NbtType.Compound)) ?? NbtList.create()
@@ -84,7 +107,7 @@ export function ItemTooltip({ item, advanced }: Props) {
 			{shouldShow(item, 'dye') && item.tag.getCompound('display').hasNumber('color') && (advanced
 				? <TextComponent component={{ translate: 'item.color', with: [`#${item.tag.getCompound('display').getNumber('color').toString(16).padStart(6, '0')}`], color: 'gray' }} />
 				: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />)}
-			{(item.tag.getCompound('display').getList('Lore', NbtType.String)).map((line) => <TextComponent component={JSON.parse(line.getAsString())} base={{ color: 'dark_purple', italic: true }} />)}
+			{lore.map((component) => <TextComponent component={component} base={{ color: 'dark_purple', italic: true }} />)}
 		</>}
 		{shouldShow(item, 'unbreakable') && item.tag.getBoolean('Unbreakable') && <TextComponent component={{ translate: 'item.unbreakable', color: 'blue' }} />}
 		{(advanced && item.tag.getNumber('Damage') > 0 && durability) && <TextComponent component={{ translate: 'item.durability', with: [`${durability - item.tag.getNumber('Damage')}`, `${durability}`] }} />}
@@ -93,14 +116,6 @@ export function ItemTooltip({ item, advanced }: Props) {
 			{item.tag.size > 0 && <TextComponent component={{ translate: 'item.nbt_tags', with: [item.tag.size], color: 'dark_gray' }} />}
 		</>}
 	</>
-}
-
-function fakeTranslation(str: string) {
-	return str
-		.replace(/[_\/]/g, ' ')
-		.split(' ')
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ')
 }
 
 const TooltipMasks = {

@@ -1,13 +1,13 @@
 import { Matrix3, Matrix4, Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
 import { mat4, quat, vec3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
+import { composeMatrix, svdDecompose } from '../Utils.js'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useActiveTimeout } from '../hooks/useActiveTimout.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { loadImage } from '../services/DataFetcher.js'
-import { composeMatrix, svdDecompose } from '../Utils.js'
 
 const XYZ = ['x', 'y', 'z'] as const
 type XYZ = typeof XYZ[number]
@@ -44,14 +44,9 @@ export function Transformation({}: Props) {
 	const [normalizeLeft, setNormalizeLeft] = useState(true)
 	const [normalizeRight, setNormalizeRight] = useState(true)
 
-	const [useMatrixOverride, setUseMatrixOverride] = useState(false)
-
 	const usedMatrix = useMemo(() => {
-		if (matrix !== undefined && useMatrixOverride) {
-			return matrix
-		}
 		return composeMatrix(translation, leftRotation, scale, rightRotation)
-	}, [matrix, useMatrixOverride])
+	}, [translation, leftRotation, scale, rightRotation])
 
 	const updateMatrix = useCallback((m: Matrix4) => {
 		const affine = m.clone().affine()
@@ -168,7 +163,8 @@ export function Transformation({}: Props) {
 
 	const [copiedComposed, setCopiedComposed] = useActiveTimeout()
 	const onCopyComposed = useCallback(() => {
-		navigator.clipboard.writeText(`[${[...matrix.data].map(formatFloat).join(',')}]`)
+		const matrixData = matrix.clone().transpose().data
+		navigator.clipboard.writeText(`[${[...matrixData].map(formatFloat).join(',')}]`)
 			.then(() => setCopiedComposed())
 	}, [matrix, setCopiedComposed])
 
@@ -233,10 +229,9 @@ export function Transformation({}: Props) {
 						<span>{locale('transformation.matrix')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(new Matrix4())}>{Octicon['history']}</button>
 						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_composed')} onClick={onCopyComposed}>{Octicon[copiedComposed ? 'check' : 'clippy']}</button>
-						<button class="tooltipped tip-se" aria-label={`${useMatrixOverride ? 'Expected' : 'Current'} behavior (see MC-259853)`} onClick={() => setUseMatrixOverride(!useMatrixOverride)}>{Octicon['info']}</button>
 					</div>
 					{Array(16).fill(0).map((_, i) =>
-						<Slider value={matrix.data[i]} onChange={v => changeMatrix(i, v)} />
+						<Slider value={matrix.data[i]} onChange={v => changeMatrix(i, v)} disabled={i % 4 === 3} />
 					)}
 				</div>
 			</div>
@@ -256,12 +251,13 @@ interface SliderProps {
 	onChange?: (value: number) => void
 	min?: number
 	max?: number
+	disabled?: boolean
 }
-function Slider({ label, value, onChange, min, max }: SliderProps) {
+function Slider({ label, value, onChange, min, max, disabled }: SliderProps) {
 	return <div class="transformation-input">
 		{label && <label>{label}</label>}
-		<NumberInput value={value.toFixed(3)} onChange={onChange} />
-		<RangeInput min={min ?? -1} max={max ?? 1} step={0.01} value={value} onChange={onChange} />
+		<NumberInput value={value.toFixed(3)} onChange={onChange} disabled={disabled} readonly={disabled} />
+		<RangeInput min={min ?? -1} max={max ?? 1} step={0.01} value={value} onChange={onChange} disabled={disabled} readonly={disabled} />
 	</div>
 }
 
@@ -339,32 +335,32 @@ class MeshRenderer extends Renderer {
 		this.cubeTexture = this.createAtlasTexture(cubeTexture)
 
 		this.mesh = new Mesh([
-			new Quad(
+			new Quad( // E
 				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.25, 0.50], undefined, undefined),
 				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.25, 0.25], undefined, undefined),
 				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.00, 0.25], undefined, undefined),
 				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.00, 0.50], undefined, undefined)),
-			new Quad(
-				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.25, 0.50], undefined, undefined),
-				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined),
-				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.00, 0.25], undefined, undefined),
-				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.00, 0.50], undefined, undefined)),
-			new Quad(
+			new Quad( // W
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.75, 0.50], undefined, undefined),
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.75, 0.25], undefined, undefined),
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined),
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.50], undefined, undefined)),
+			new Quad( // U
 				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined),
 				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined),
 				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.50, 0.00], undefined, undefined),
 				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.25, 0.00], undefined, undefined)),
-			new Quad(
+			new Quad( // D
 				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined),
 				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined),
 				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.75, 0.00], undefined, undefined),
 				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.50, 0.00], undefined, undefined)),
-			new Quad(
+			new Quad( // S
 				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.25, 0.50], undefined, undefined),
 				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.50, 0.50], undefined, undefined),
 				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined),
 				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined)),
-			new Quad(
+			new Quad( // N
 				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.75, 0.50], undefined, undefined),
 				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [1.00, 0.50], undefined, undefined),
 				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [1.00, 0.25], undefined, undefined),

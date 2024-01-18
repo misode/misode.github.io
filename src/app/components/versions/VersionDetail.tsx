@@ -1,15 +1,14 @@
+import { Link } from 'preact-router'
 import { useEffect, useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useSearchParam } from '../../hooks/useSearchParam.js'
 import type { VersionMeta } from '../../services/index.js'
 import { fetchChangelogs, getArticleLink } from '../../services/index.js'
-import { Giscus } from '../Giscus.js'
 import { Octicon } from '../Octicon.js'
-import { ChangelogList } from './ChangelogList.js'
-import { IssueList, VersionMetaData } from './index.js'
+import { ChangelogList, IssueList, VersionDiff, VersionMetaData } from './index.js'
 
-const Tabs = ['changelog', 'discussion', 'fixes']
+const Tabs = ['changelog', 'diff', 'fixes']
 
 interface Props {
 	id: string,
@@ -21,14 +20,14 @@ export function VersionDetail({ id, version }: Props) {
 	const [tab, setTab] = useSearchParam('tab')
 	useEffect(() => {
 		if (tab === undefined || !Tabs.includes(tab)) {
-			setTab(Tabs[0])
+			setTab(Tabs[0], true)
 		}
 	}, [tab])
 
 	const { value: changes } = useAsync(fetchChangelogs, [])
 
 	const filteredChangelogs = useMemo(() =>
-		changes?.filter(c => c.version === id || c.group === id),
+		changes?.filter(c => c.version === id || (c.group === id && !c.tags.includes('obsolete'))),
 	[id, changes])
 
 	const articleLink = version && getArticleLink(version.id)
@@ -50,10 +49,10 @@ export function VersionDetail({ id, version }: Props) {
 					This version does not exist. Only versions since 1.14 are tracked, or it may be too recent.
 				</p>}
 			</div>
-			<div class="version-tabs">
-				<span class={tab === 'changelog' ? 'selected' : ''} onClick={() => setTab('changelog')}>{locale('versions.technical_changes')}</span>
-				<span class={tab === 'discussion' ? 'selected' : ''} onClick={() => setTab('discussion')}>{locale('versions.discussion')}</span>
-				<span class={tab === 'fixes' ? 'selected' : ''} onClick={() => setTab('fixes')}>{locale('versions.fixes')}</span>
+			<div class="tabs">
+				{Tabs.map(t => <Link key={t} class={tab === t ? 'selected' : ''} href={`/versions/?id=${id}&tab=${t}`}>
+					{locale(`versions.${t}`)}
+				</Link>)}
 				{articleLink && <a href={articleLink} target="_blank">
 					{locale('versions.article')}
 					{Octicon.link_external}
@@ -61,7 +60,7 @@ export function VersionDetail({ id, version }: Props) {
 			</div>
 			<div class="version-tab">
 				{tab === 'changelog' && <ChangelogList changes={filteredChangelogs} defaultOrder="asc" />}
-				{tab === 'discussion' && <Giscus term={`version/${id}/`} />}
+				{tab === 'diff' && <VersionDiff version={id} />}
 				{tab === 'fixes' && <IssueList version={id} />}
 			</div>
 		</div>

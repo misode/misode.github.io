@@ -1,26 +1,26 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
-import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
+import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, StringNode, relativePath } from '@mcschema/core'
 import { Identifier, ItemStack } from 'deepslate/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
-import { Btn, Octicon } from '../components/index.js'
-import { ItemDisplay } from '../components/ItemDisplay.jsx'
-import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
 import config from '../Config.js'
+import { deepClone, deepEqual, generateColor, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
+import { ItemDisplay } from '../components/ItemDisplay.jsx'
+import { Btn, Octicon } from '../components/index.js'
+import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
 import { localize, useLocale, useStore } from '../contexts/index.js'
 import { useFocus } from '../hooks/index.js'
 import type { BlockStateRegistry, VersionId } from '../services/index.js'
 import { CachedDecorator, CachedFeature } from '../services/index.js'
-import { deepClone, deepEqual, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
 import { ModelWrapper } from './ModelWrapper.js'
 
-const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.cat.variant', 'entity.type_specific.frog.variant']
+const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.cat.variant', 'entity.type_specific.frog.variant', 'rule_block_entity_modifier.type', 'pool_alias_binding.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element', 'decorator.block_survives_filter.state', 'material_rule.block.result_state']
-const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.type', 'glyph_provider.type', 'sprite_source.type', 'immersive_weathering.area_condition.type', 'immersive_weathering.block_growth.growth_for_face.entry.direction', 'immersive_weathering.position_test.predicate_type']
+const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.type', 'glyph_provider.type', 'sprite_source.type', 'rule_block_entity_modifier.type', 'immersive_weathering.area_condition.type', 'immersive_weathering.block_growth.growth_for_face.entry.direction', 'immersive_weathering.position_test.predicate_type', 'pool_alias_binding.type']
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
-const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale', 'generator_structure.random_spread.locate_offset']
+const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.has_sturdy_face.offset', 'block_predicate.inside_world_bounds.offset', 'block_predicate.matching_block_tag.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'block_predicate.would_survive.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale', 'generator_structure.random_spread.locate_offset', 'pack_overlay.formats']
 const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
 const collapsableFields = ['density_function.argument', 'density_function.argument1', 'density_function.argument2', 'density_function.input', 'density_function.when_in_range', 'density_function.when_out_of_range']
 
@@ -140,7 +140,13 @@ const renderHtml: RenderHook = {
 				let label: undefined | string | JSX.Element
 				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
 					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
-						label = <ItemDisplay item={new ItemStack(Identifier.parse(cValue.name), 1)} />
+						let itemStack: ItemStack | undefined
+						try {
+							itemStack = new ItemStack(Identifier.parse(cValue.name), 1)
+						} catch (e) {}
+						if (itemStack !== undefined) {
+							label = <ItemDisplay item={itemStack} />
+						}
 					}
 				}
 
@@ -197,7 +203,9 @@ const renderHtml: RenderHook = {
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())]))
 		const onAdd = () => {
 			const key = keyPath.get()
-			path.model.set(path.push(key), DataModel.wrapLists(children.default()))
+			if (path.model.get(path.push(key)) === undefined) {
+				path.model.set(path.push(key), DataModel.wrapLists(children.default()))
+			}
 		}
 		const blockState = config.validation?.validator === 'block_state_map' ? states?.[relativePath(path, config.validation.params.id).get()] : null
 		const keysSchema = blockState?.properties
@@ -270,10 +278,10 @@ const renderHtml: RenderHook = {
 		if (node.optional()) {
 			if (value === undefined) {
 				const onExpand = () => path.set(DataModel.wrapLists(node.default()))
-				suffix = <button class="collapse closed tooltipped tip-se" aria-label={localize(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
+				suffix = <button class="node-collapse closed tooltipped tip-se" aria-label={localize(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
 			} else {
 				const onCollapse = () => path.set(undefined)
-				suffix = <button class="collapse open tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
+				suffix = <button class="node-collapse open tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
 			}
 		}
 		const context = path.getContext().join('.')
@@ -395,36 +403,62 @@ function NumberSuffix({ path, config, integer, value, lang }: NodeProps<NumberHo
 	return <>
 		<input type="text" value={value ?? ''} onBlur={onChange} onKeyDown={evt => {if (evt.key === 'Enter') onChange(evt)}} />
 		{config?.color && <input type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={onColor} />}
+		{config?.color && <button onClick={() => path.set(generateColor())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_color')}>{Octicon.sync}</button>}
 		{['dimension.generator.seed', 'dimension.generator.biome_source.seed', 'world_settings.seed', 'structure_placement.salt'].includes(path.getContext().join('.')) && <button onClick={() => newSeed(path.model)} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_seed')}>{Octicon.sync}</button>}
 	</>
 }
 
 function StringSuffix({ path, getValues, config, node, value, lang, version, states }: NodeProps<StringHookParams>) {
+	const context = path.getContext().join('.')
 	const onChange = (evt: Event) => {
 		evt.stopPropagation()
 		const newValue = (evt.target as HTMLSelectElement).value
 		if (newValue === value) return
+		// Hackfix to support switching between checkerboard and multi_noise biome sources
+		if (context === 'dimension.generator.biome_source.type') {
+			const biomeSourceType = newValue.replace(/^minecraft:/, '')
+			const biomePath = path.pop().push('biomes')
+			const biomes = biomePath.get()
+			if (biomeSourceType === 'multi_noise') {
+				const newBiomes = Array.isArray(biomes)
+					? biomes.flatMap((b: any) => {
+						if (typeof b.node !== 'string') return []
+						return [{ node: { biome: b.node }}]
+					})
+					: [{ node: { biome: 'minecraft:plains' } }]
+				path.model.set(biomePath, newBiomes, true)
+			} else if (biomeSourceType === 'checkerboard') {
+				const newBiomes = typeof biomes === 'string'
+					? biomes
+					: Array.isArray(biomes)
+						? biomes.flatMap((b: any) => {
+							if (typeof b.node !== 'object' || b.node === null || typeof b.node.biome !== 'string') return []
+							return [{ node: b.node.biome }]
+						})
+						: [{ node: 'minecraft:plains' }]
+				path.model.set(biomePath, newBiomes, true)
+			}
+		}
 		path.model.set(path, newValue.length === 0 ? undefined : newValue)
 	}
 	const values = getValues()
-	const context = path.getContext().join('.')
 	const id = !isEnum(config) && config?.validator === 'resource' && typeof config.params.pool === 'string' ? config.params.pool : undefined
 
 	if (nbtFields.includes(context)) {
 		return <textarea value={value ?? ''} onBlur={onChange}></textarea>
 	} else if ((isEnum(config) && !config.additional) || selectRegistries.includes(context)) {
-		let context = new Path([])
+		let childPath = new Path([])
 		if (isEnum(config) && typeof config.enum === 'string') {
-			context = context.contextPush(config.enum)
+			childPath = childPath.contextPush(config.enum)
 		} else if (id) {
-			context = context.contextPush(id)
+			childPath = childPath.contextPush(id)
 		} else if (isEnum(config)) {
-			context = path
+			childPath = path
 		}
 		return <select value={value ?? ''} onChange={onChange}>
 			{node.optional() && <option value="">{localize(lang, 'unset')}</option>}
 			{values.map(v => <option value={v}>
-				{pathLocale(lang, context.contextPush(v.replace(/^minecraft:/, '')))}
+				{pathLocale(lang, childPath.contextPush(v.replace(/^minecraft:/, '')))}
 			</option>)}
 		</select>
 	} else if (!isEnum(config) && config?.validator === 'block_state_key') {

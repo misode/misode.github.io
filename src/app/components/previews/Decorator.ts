@@ -1,9 +1,9 @@
 import { DataModel } from '@mcschema/core'
 import type { BlockPos, ChunkPos, PerlinNoise, Random } from 'deepslate/worldgen'
-import type { VersionId } from '../../services/index.js'
-import { checkVersion } from '../../services/index.js'
 import type { Color } from '../../Utils.js'
 import { clamp, isObject, stringToColor } from '../../Utils.js'
+import type { VersionId } from '../../services/index.js'
+import { checkVersion } from '../../services/index.js'
 
 export type Placement = [BlockPos, number]
 
@@ -27,7 +27,7 @@ export type PlacedFeature = {
 
 const terrain = [50, 50, 51, 51, 52, 52, 53, 54, 56, 57, 57, 58, 58, 59, 60, 60, 60, 59, 59, 59, 60, 61, 61, 62, 63, 63, 64, 64, 64, 65, 65, 66, 66, 65, 65, 66, 66, 67, 67, 67, 68, 69, 71, 73, 74, 76, 79, 80, 81, 81, 82, 83, 83, 82, 82, 81, 81, 80, 80, 80, 81, 81, 82, 82] 
 
-const featureColors: Color[] = [
+export const featureColors: Color[] = [
 	[255, 77, 54],  // red
 	[59, 118, 255], // blue
 	[91, 207, 25],  // green

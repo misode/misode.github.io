@@ -1,10 +1,13 @@
 import { useMemo } from 'preact/hooks'
-import { ChangelogEntry, Footer, GeneratorCard, Giscus, GuideCard, ToolCard, ToolGroup } from '../components/index.js'
+import contributors from '../../contributors.json'
+import { Store } from '../Store.js'
+import { shuffle } from '../Utils.js'
+import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, ToolCard, ToolGroup } from '../components/index.js'
+import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
-import { fetchChangelogs, fetchVersions } from '../services/DataFetcher.js'
-import { Store } from '../Store.js'
+import { fetchChangelogs, fetchVersions, fetchWhatsNew } from '../services/DataFetcher.js'
 
 const MIN_FAVORITES = 2
 const MAX_FAVORITES = 5
@@ -19,23 +22,31 @@ export function Home({}: Props) {
 	const smallScreen = useMediaQuery('(max-width: 580px)')
 
 	return <main>
-		<div class="container">
+		<div class="legacy-container">
 			<div class="card-group">
-				<div class="card-column">
+				{smallScreen ? /* mobile */ <>
 					<PopularGenerators />
-					{smallScreen && <FavoriteGenerators />}
-					<Changelog />
-					{smallScreen && <Guides />}
-					<Versions />
-					{smallScreen && <Tools />}
-				</div>
-				{!smallScreen && <div class="card-column">
 					<FavoriteGenerators />
-					<Guides />
+					<WhatsNew />
+					<Changelog />
+					<Versions />
 					<Tools />
-				</div>}
+					<Guides />
+				</> : /* desktop */ <>
+					<div class="card-column">
+						<PopularGenerators />
+						<Changelog />
+						<Versions />
+						<Guides />
+					</div>
+					{!smallScreen && <div class="card-column">
+						<FavoriteGenerators />
+						<WhatsNew />
+						<Tools />
+					</div>}
+				</>}
 			</div>
-			<Sponsors />
+			<Contributors />
 			<Giscus />
 			<Footer />
 		</div>
@@ -50,6 +61,7 @@ function PopularGenerators() {
 		<GeneratorCard minimal id="predicate" />
 		<ToolCard title={locale('worldgen')} link="/worldgen/" titleIcon="worldgen" />
 		<ToolCard title={locale('generators.all')} link="/generators/" titleIcon="arrow_right" />
+		<ToolCard title={locale('generators.partners')} link="/partners/" titleIcon="arrow_right" />
 	</ToolGroup>
 }
 
@@ -76,16 +88,16 @@ function FavoriteGenerators() {
 function Guides() {
 	const { locale } = useLocale()
 
-	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right">
-		<GuideCard minimal id="adding-custom-structures" />
-		<GuideCard minimal id="noise-router" />
-	</ToolGroup>
+	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right" />
 }
 
 function Tools() {
 	const { locale } = useLocale()
 
 	return <ToolGroup title={locale('tools')}>
+		<ToolCard title="Customized Worlds" icon="customized"
+			link="/customized/"
+			desc="Create data packs to customize your world" />
 		<ToolCard title="Report Inspector" icon="report"
 			link="https://misode.github.io/report/"
 			desc="Analyse your performance reports" />
@@ -97,7 +109,10 @@ function Tools() {
 			desc="Visualize transformations for display entities" />
 		<ToolCard title="Data Pack Upgrader"
 			link="https://misode.github.io/upgrader/"
-			desc="Convert your data packs from 1.16 to 1.19" />
+			desc="Convert your data packs from 1.16 to 1.20" />
+		<ToolCard title="Template Placer"
+			link="https://misode.github.io/template-placer/"
+			desc="Automatically place all the structure pieces in your world" />
 	</ToolGroup>
 }
 
@@ -130,62 +145,45 @@ function Changelog() {
 	</ToolGroup>
 }
 
-const KOFI_SUPPORTERS = [
-	{
-		name: 'oitsjustjose',
-		avatar: 'https://ko-fi.com/img/anon10.png',
-	},
-	{
-		name: 'Panossa',
-		avatar: 'https://ko-fi.com/img/anon5.png',
-	},
-	{
-		name: 'TelepathicGrunt',
-		avatar: 'https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80',
-		url: 'https://github.com/TelepathicGrunt',
-	},
-	{
-		name: 'Hugman',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/daf75a1c-9900-4da0-b9a8-e394b2c87e8c_tiny.png',
-		url: 'https://ko-fi.com/G2G5DNROO',
-	},
-	{
-		name: 'RoarkCats',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/tiny_03381e9f-4a6d-41dc-9f96-1a733c0e114a.png',
-	},
-	{
-		name: 'MC Silver',
-		avatar: 'https://ko-fi.com/img/anon7.png',
-	},
-	{
-		name: 'rx97',
-		avatar: 'https://storage.ko-fi.com/cdn/useruploads/78f6cf72-52e1-4953-99f5-dd38f55a9c6e.png',
-		url: 'https://github.com/RitikShah',
-	},
-] 
+function WhatsNew() {
+	const { locale } = useLocale()
 
-function Sponsors() {
-	const { value } = useAsync(() => {
-		return fetch('https://ghs.vercel.app/sponsors/misode').then(r => r.json())
+	const { value: items } = useAsync(fetchWhatsNew)
+
+	return <ToolGroup title={locale('whats_new')} link="/whats-new/" titleIcon="megaphone">
+		{items?.slice(0, 3).map(item => <Card link="/whats-new/" overlay={<WhatsNewTime item={item} short={true} />}>{item.title}</Card>)}
+	</ToolGroup>
+}
+
+function Contributors() {
+	const supporters = useMemo(() => {
+		return contributors.filter(c => c.types.includes('support') || c.types.includes('infrastructure'))
 	}, [])
 
-	const supporters = useMemo(() => {
-		const githubSponsors = value?.sponsors?.map((sponsor: any) => ({
-			name: sponsor.handle,
-			avatar: sponsor.avatar,
-			url: sponsor.profile,
-		})) ?? []
-		return [...githubSponsors, ...KOFI_SUPPORTERS]
-	}, [value])
+	const otherContributors = useMemo(() => {
+		return shuffle(contributors.filter(c => !supporters.includes(c)))
+	}, [])
 
-	return <div class="sponsors">
+	return <div class="contributors">
 		<h3>Supporters</h3>
-		<div class="sponsors-list">
-			{supporters?.map((s: any) =>
-				<a class="tooltipped tip-se" href={s.url} target="_blank" aria-label={s.name}>
-					<img width={48} height={48} src={s.avatar} alt={s.name} />
-				</a>
-			)}
-		</div>
+		<ContributorsList list={supporters} large />
+		<h3>Contributors</h3>
+		<ContributorsList list={otherContributors} />
+	</div>
+}
+
+interface ContributorsListProps {
+	list: typeof contributors
+	large?: boolean
+}
+function ContributorsList({ list, large }: ContributorsListProps) {
+	const { locale } = useLocale()
+
+	return <div class={`contributors-list ${large ? 'contributors-large' : ''}`}>
+		{list.map((c) =>
+			<a class="tooltipped tip-se" href={c.url} target="_blank" aria-label={`${c.name}\n${c.types.map(t => `• ${locale('contributor.' + t)}`).join('\n')}`}>
+				<img width={large ? 48 : 32} height={large ? 48 : 32} src={c.avatar} alt={c.name} loading="lazy" />
+			</a>
+		)}
 	</div>
 }

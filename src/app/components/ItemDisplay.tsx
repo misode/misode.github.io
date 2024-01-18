@@ -12,9 +12,10 @@ import { itemHasGlint } from './previews/LootTable.js'
 interface Props {
 	item: ItemStack,
 	slotDecoration?: boolean,
+	tooltip?: boolean,
 	advancedTooltip?: boolean,
 }
-export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
+export function ItemDisplay({ item, slotDecoration, tooltip, advancedTooltip }: Props) {
 	const el = useRef<HTMLDivElement>(null)
 	const [tooltipOffset, setTooltipOffset] = useState<[number, number]>([0, 0])
 	const [tooltipSwap, setTooltipSwap] = useState(false)
@@ -49,13 +50,13 @@ export function ItemDisplay({ item, slotDecoration, advancedTooltip }: Props) {
 			</svg>}
 			<div class="item-slot-overlay"></div>
 		</>}
-		<div class="item-tooltip" style={tooltipOffset && {
+		{tooltip !== false && <div class="item-tooltip" style={tooltipOffset && {
 			left: (tooltipSwap ? undefined : `${tooltipOffset[0]}px`),
 			right: (tooltipSwap ? `${tooltipOffset[0]}px` : undefined),
 			top: `${tooltipOffset[1]}px`,
 		}}>
 			<ItemTooltip item={item} advanced={advancedTooltip} />
-		</div>
+		</div>}
 	</div>
 }
 

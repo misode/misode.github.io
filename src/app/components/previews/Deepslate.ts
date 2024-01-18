@@ -1,7 +1,7 @@
 import * as deepslate19 from 'deepslate/worldgen'
+import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../../Utils.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchAllPresets, fetchPreset } from '../../services/index.js'
-import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
 
@@ -25,6 +25,7 @@ export class Deepslate {
 	private generatorCache: ChunkGenerator | undefined
 	private biomeSourceCache: BiomeSource | undefined
 	private randomStateCache: deepslate19.RandomState | undefined
+	private structureContextCache: deepslate19.WorldgenStructure.GenerationContext | undefined
 	private chunksCache: Chunk[] = []
 	private biomeCache: Map<string, string> = new Map()
 	private readonly presetCache: Map<string, unknown> = new Map()
@@ -98,6 +99,9 @@ export class Deepslate {
 		const newCacheState = [settings, `${seed}`, biomeState]
 		if (!deepEqual(this.cacheState, newCacheState)) {
 			const noiseSettings = this.createNoiseSettings(settings)
+			if (noiseSettings.noise.xzSize === 0 || noiseSettings.noise.ySize === 0) {
+				throw new Error('size_horizontal or size_vertical cannot be zero')
+			}
 			const biomeSource = await this.createBiomeSource(noiseSettings, biomeState, seed)
 			const chunkGenerator = this.isVersion('1.19')
 				?	new this.d.NoiseChunkGenerator(biomeSource, noiseSettings)
@@ -296,16 +300,72 @@ export class Deepslate {
 		}
 	}
 
+	public loadStructureSet(state: unknown, seed: bigint) {
+		if (!this.isVersion('1.19')) {
+			throw new Error('Cannot load structure set prior to 1.19')
+		}
+		const settings = this.d.NoiseGeneratorSettings.create({
+			noise: {
+				minY: 0,
+				height: 256,
+				xzSize: 1,
+				ySize: 2,
+			},
+			noiseRouter: this.d.NoiseRouter.create({
+				finalDensity: this.d.DensityFunction.fromJson(state),
+			}),
+		})
+		const unknownBiome = this.d.Identifier.create('unknown')
+		const randomState = new this.d.RandomState(settings, seed)
+		const biomeSource = new this.d.FixedBiomeSource(unknownBiome)
+		const chunkGenerator = new this.d.NoiseChunkGenerator(biomeSource, settings)
+		this.structureContextCache = { seed, settings, randomState, biomeSource, chunkGenerator }
+
+		class SimpleStructure extends this.d.WorldgenStructure {
+			constructor(settings: deepslate19.WorldgenStructure.StructureSettings) {
+				super(settings)
+			}
+			findGenerationPoint(chunkX: number, chunkZ: number, _random: deepslate19.Random, _context: deepslate19.WorldgenStructure.GenerationContext): deepslate19.BlockPos {
+				return [(chunkX << 4) + 8, 0, (chunkZ << 4) + 8]
+			}
+		}
+		const structureSet = this.d.StructureSet.fromJson(state)
+		for (const e of structureSet.structures) {
+			const id = e.structure.key()
+			if (id === undefined) {
+				continue
+			}
+			const structure = new SimpleStructure({ validBiomes: new this.d.HolderSet([this.d.Holder.reference(this.d.WorldgenRegistries.BIOME, unknownBiome)])})
+			this.d.WorldgenStructure.REGISTRY.register(id, structure)
+			this.d.WorldgenRegistries.BIOME.register(unknownBiome, {})
+		}
+		if (structureSet.placement instanceof this.d.StructurePlacement.ConcentricRingsStructurePlacement) {
+			const biomeTag = structureSet.placement['preferredBiomes'].key()
+			if (biomeTag instanceof this.d.Identifier) {
+				this.d.WorldgenRegistries.BIOME.getTagRegistry().register(biomeTag, new this.d.HolderSet([this.d.Holder.reference(this.d.WorldgenRegistries.BIOME, unknownBiome)]))
+			}
+		}
+		
+		return structureSet
+	}
+
+	public getWorldgenStructureContext(): deepslate19.WorldgenStructure.GenerationContext {
+		if (!this.structureContextCache) {
+			throw new Error('Tried to access structure context when it isn\'t loaded')
+		}
+		return this.structureContextCache
+	}
+
 	public getNoiseSettings(): NoiseSettings {
 		if (!this.settingsCache) {
-			throw new Error('Tried to access noise settings when they are not loaded')
+			throw new Error('Tried to access noise settings when it isn\'t loaded')
 		}
 		return this.settingsCache
 	}
 
 	public getNoiseRouter(): NoiseRouter {
 		if (!this.routerCache) {
-			throw new Error('Tried to access noise router when they are not loaded')
+			throw new Error('Tried to access noise router when it isn\'t loaded')
 		}
 		return this.routerCache
 	}

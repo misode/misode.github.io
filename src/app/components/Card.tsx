@@ -10,7 +10,7 @@ export function Card({ title, overlay, link, children }: Props) {
 	const content = <>
 		{overlay && <span class="card-overlay">{overlay}</span>}
 		<div class="card-content">
-			{title && <h3 class="card-title">{title}</h3>}
+			{title && <h3 class="card-title font-bold text-[1.17em]">{title}</h3>}
 			{children}
 		</div>
 	</>

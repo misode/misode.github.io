@@ -1,8 +1,8 @@
 import type { Random } from 'deepslate/core'
 import { Enchantment, Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate/nbt'
-import type { VersionId } from '../../services/Schemas.js'
 import { clamp, getWeightedRandom, isObject } from '../../Utils.js'
+import type { VersionId } from '../../services/Schemas.js'
 
 export interface SlottedItem {
 	slot: number,
@@ -229,11 +229,15 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	}
 	switch (type) {
 		case 'item':
-			entryConsumer(new ItemStack(Identifier.parse(entry.name), 1))
+			try {
+				entryConsumer(new ItemStack(Identifier.parse(entry.name), 1))
+			} catch (e) {}
 			break
 		case 'tag':
 			ctx.getItemTag(entry.name).forEach(tagEntry => {
-				entryConsumer(new ItemStack(Identifier.parse(tagEntry), 1))
+				try {
+					entryConsumer(new ItemStack(Identifier.parse(tagEntry), 1))
+				} catch (e) {}
 			})
 			break
 		case 'loot_table':
@@ -262,7 +266,9 @@ function decorateFunctions(functions: any[], consumer: ItemConsumer, ctx: LootCo
 function composeFunctions(functions: any[]): LootFunction {
 	return (item, ctx) => {
 		for (const fn of functions) {
-			if (composeConditions(fn.conditions ?? [])(ctx)) {
+			if (Array.isArray(fn)) {
+				composeFunctions(fn)
+			} else if (composeConditions(fn.conditions ?? [])(ctx)) {
 				const type = fn.function?.replace(/^minecraft:/, '');
 				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
@@ -280,7 +286,10 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 		if (enchantments.length > 0) {
 			const id = enchantments[ctx.random.nextInt(enchantments.length)]
-			const ench = Enchantment.REGISTRY.get(Identifier.parse(id))
+			let ench: Enchantment | undefined
+			try {
+				ench = Enchantment.REGISTRY.get(Identifier.parse(id))
+			} catch (e) {}
 			if (ench === undefined) return
 			const lvl = ctx.random.nextInt(ench.maxLevel - ench.minLevel + 1) + ench.minLevel
 			if (isBook) {
@@ -321,6 +330,10 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		const { min, max } = prepareIntRange(limit, ctx)
 		item.count = clamp(item.count, min, max )
 	},
+	sequence: ({ functions }) => (item, ctx) => {
+		if (!Array.isArray(functions)) return
+		composeFunctions(functions)(item, ctx)
+	},
 	set_count: ({ count, add }) => (item, ctx) => {
 		const oldCount = add ? (item.count) : 0
 		item.count = clamp(oldCount + computeInt(count, ctx), 0, 64)
@@ -337,7 +350,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
 		Object.entries(enchantments).forEach(([id, level]) => {
 			const lvl = computeInt(level, ctx)
-			enchantItem(item, { id: Identifier.parse(id), lvl }, add)
+			try {
+				enchantItem(item, { id: Identifier.parse(id), lvl }, add)
+			} catch (e) {}
 		})
 	},
 	set_lore: ({ lore, replace }) => (item) => {
@@ -361,7 +376,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	},
 	set_potion: ({ id }) => (item) => {
 		if (typeof id === 'string') {
-			item.tag.set('Potion', new NbtString(Identifier.parse(id).toString()))
+			try {
+				item.tag.set('Potion', new NbtString(Identifier.parse(id).toString()))
+			} catch (e) {}
 		}
 	},
 }
@@ -380,12 +397,26 @@ function composeConditions(conditions: any[]): LootCondition {
 }
 
 function testCondition(condition: any, ctx: LootContext): boolean {
+	if (Array.isArray(condition)) {
+		return composeConditions(condition)(ctx)
+	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
 }
 
 const LootConditions: Record<string, (params: any) => LootCondition> = {
-	alternative: ({ terms }) => (ctx) => {
+	alternative: params => LootConditions['any_of'](params),
+	all_of: ({ terms }) => (ctx) => {
+		if (!Array.isArray(terms) || terms.length === 0) return true
+		for (const term of terms) {
+			if (!testCondition(term, ctx)) {
+				return false
+			}
+		}
+		return true
+	},
+	any_of: ({ terms }) => (ctx) => {
+		if (!Array.isArray(terms) || terms.length === 0) return true
 		for (const term of terms) {
 			if (testCondition(term, ctx)) {
 				return true
@@ -460,7 +491,7 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 }
 
 function computeInt(provider: any, ctx: LootContext): number {
-	if (typeof provider === 'number') return provider
+	if (typeof provider === 'number') return Math.round(provider)
 	if (!isObject(provider)) return 0
 
 	const type = provider.type?.replace(/^minecraft:/, '') ?? 'uniform'

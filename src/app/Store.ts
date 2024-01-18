@@ -21,6 +21,7 @@ export namespace Store {
 	export const ID_TREE_VIEW_MODE = 'misode_tree_view_mode'
 	export const ID_COLORMAP = 'misode_colormap'
 	export const ID_GENERATOR_HISTORY = 'misode_generator_history'
+	export const ID_WHATS_NEW_SEEN = 'misode_whats_new_seen'
 
 	export function getLanguage() {
 		return localStorage.getItem(ID_LANGUAGE) ?? 'en'
@@ -185,5 +186,23 @@ export namespace Store {
 		const history = getGeneratorHistory()
 		history.push(id)
 		localStorage.setItem(ID_GENERATOR_HISTORY, JSON.stringify(history.slice(-50)))
+	}
+
+	export function getWhatsNewSeen(): { id: string, time: string }[] {
+		return JSON.parse(localStorage.getItem(ID_WHATS_NEW_SEEN) ?? '[]')
+	}
+
+	export function seeWhatsNew(ids: string[]) {
+		const now = new Date().toISOString()
+		const items = getWhatsNewSeen()
+		for (const id of ids) {
+			const old = items.find(i => i.id === id)
+			if (old) {
+				old.time = now
+			} else {
+				items.push({ id, time: now })
+			}
+		}
+		localStorage.setItem(ID_WHATS_NEW_SEEN, JSON.stringify(items))
 	}
 }

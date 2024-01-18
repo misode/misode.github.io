@@ -9,8 +9,8 @@ export function Generators({}: Props) {
 	useTitle(locale('title.generators'))
 
 	return <main>
-		<div class="container">
-			<GeneratorList predicate={gen => !gen.partner} />
+		<div class="legacy-container">
+			<GeneratorList predicate={gen => !gen.tags?.includes('partners')} />
 		</div>
 		<Footer />
 	</main>
