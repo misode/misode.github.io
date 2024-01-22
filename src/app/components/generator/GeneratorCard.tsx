@@ -24,7 +24,7 @@ export function GeneratorCard({ id, minimal }: Props) {
 		return gen
 	}, [id])
 
-	const title = locale(gen.partner ? `partner.${gen.partner}.${gen.id}` : gen.id)
+	const title = locale(`generator.${gen.id}`)
 
 	const icon = Object.keys(Icons).includes(id) ? id as keyof typeof Icons : undefined
 
@@ -53,7 +53,7 @@ export function GeneratorCard({ id, minimal }: Props) {
 		return []
 	}, [gen])
 
-	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.partner ? locale(`partner.${gen.partner}`) : versionText} link={cleanUrl(gen.url)}>
+	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.tags?.includes('partners') ? locale(`partner.${gen.id.substring(0, gen.id.indexOf('.'))}`) : versionText} link={cleanUrl(gen.url)}>
 		{!gen.noPath && <p class="card-subtitle">/{gen.path ?? gen.id}</p>}
 		{tags.length > 0 && <div class="badges-list">
 			{tags.sort().map(tag => <Badge label={tag} />)}

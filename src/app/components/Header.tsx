@@ -28,7 +28,7 @@ export function Header() {
 				{config.generators
 					.filter(g => g.tags?.[0] === gen?.tags?.[0] && checkVersion(version, g.minVersion))
 					.map(g =>
-						<Btn label={locale(g.partner ? `partner.${g.partner}.${g.id}` : g.id)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
+						<Btn label={locale(`generator.${g.id}`)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
 					)}
 			</BtnMenu>}
 			{!gen && url.match(/\/?project\/?$/) && <BtnMenu icon="chevron_down" tooltip={locale('switch_project')}>
