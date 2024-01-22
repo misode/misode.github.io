@@ -1,5 +1,5 @@
 import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
-import { BooleanNode, Case, ListNode, MapNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
+import { BooleanNode, Case, ChoiceNode, ListNode, MapNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
 
 const ID = 'obsidian'
 
@@ -10,49 +10,64 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	// ITEMS
 	schemas.register(`${ID}:item`, Mod(ObjectNode({
 		information: Opt(Reference(`${ID}:item_information`)),
-		display: Opt(ObjectNode({
+		rendering: Opt(ObjectNode({
 			model: Opt(Reference(`${ID}:model`)),
-			item_model: Opt(Reference(`${ID}:model`)),
-			lore: Opt(ListNode(
-				ObjectNode({
-					text: Reference(`${ID}:name_information`),
-				}),
-			)),
+			item_model: Opt(Reference(`${ID}:model`))
 		})),
+		lore: Opt(Reference(`${ID}:tooltip_information`)),
 		use_action: Opt(ObjectNode({
 			action: Opt(StringNode({ enum: ['none', 'eat', 'drink', 'block', 'bow', 'spear', 'crossbow', 'spyglass'] })),
 			right_click_action: Opt(StringNode({ enum: ['open_gui', 'run_command', 'open_url']})) ,
 			command: Opt(StringNode()),
 			url: Opt(StringNode()),
 			gui_size: Opt(NumberNode({ integer: true, min: 1, max: 6 })),
-			gui_title: Opt(Reference(`${ID}:name_information`)),
+			gui_title: Opt(Reference(`${ID}:name`)),
 		})),
 	}, { context: `${ID}:item` }), {
 		default: () => ({}),
 	}))
 
-	schemas.register(`${ID}:item_information`, ObjectNode({
-		rarity: Opt(StringNode({ enum: ['common', 'uncommon', 'rare', 'epic']})),
+	schemas.register(`${ID}:item_settings`, ObjectNode({
+		base_item_settings: Opt(Reference(`${ID}:item_settings`)),
 		creative_tab: Opt(StringNode()),
 		max_stack_size: Opt(NumberNode({ integer: true, min: 1 })),
-		name: Opt(Reference(`${ID}:name_information`)),
+		durability: Opt(NumberNode({ integer: true })),
+		rarity: Opt(StringNode({ enum: ['common', 'uncommon', 'rare', 'epic']})),
+		fireproof: Opt(BooleanNode()),
+		is_fuel: Opt(BooleanNode()),
+		fuel_duration: Opt(NumberNode({ integer: true, min: 1 })),
 		has_enchantment_glint: Opt(BooleanNode()),
 		is_enchantable: Opt(BooleanNode()),
 		enchantability: Opt(NumberNode({ integer: true })),
-		use_duration: Opt(NumberNode({ integer: true })),
 		can_place_block: Opt(BooleanNode()),
 		placable_block: Opt(StringNode({ validator: 'resource', params: { pool: 'block' } })),
 		wearable: Opt(BooleanNode()),
-		default_color: Opt(NumberNode({ color: true })),
 		wearable_slot: Opt(StringNode()),
+		dyeable: Opt(BooleanNode()),
+		default_color: Opt(NumberNode({ color: true })),
 		custom_render_mode: Opt(BooleanNode()),
 		render_mode_models: Opt(ListNode(
 			ObjectNode({
-				model: Reference('model_identifier'),
+				model: Reference('model'),
 				modes: ListNode(StringNode()),
 			})
 		)),
+		conversion: Opt(Reference(`${ID}:conversion`))
+	}, { context: `${ID}:item_settings` }))
+
+	schemas.register(`${ID}:conversion`, ObjectNode({
+		from: ListNode(StringNode()),
+		to: StringNode()
+	}))
+
+	schemas.register(`${ID}:item_information`, ObjectNode({
+		name: Reference(`${ID}:name`),
+		item_properties: Reference(`${ID}:item_settings`)
 	}, { context: `${ID}:item_information` }))
+
+	schemas.register(`${ID}:tooltip_information`, ObjectNode({
+		text: Reference(`${ID}:name`)
+	}, { context: `${ID}:tooltip_information` }))
 
 	schemas.register(`${ID}:item_model`, ObjectNode({
 		textures: Opt(MapNode(
@@ -63,18 +78,9 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	}, { context: `${ID}:item_model` }))
 
 	schemas.register(`${ID}:block`, Mod(ObjectNode({
+		description: Opt(Reference(`${ID}:description`)),
 		block_type: Opt(StringNode({ enum: `${ID}:block_type`})),
 		information: Opt(Reference(`${ID}:block_information`)),
-		display: Opt(ObjectNode({
-			model: Opt(Reference(`${ID}:model`)),
-			item_model: Opt(Reference(`${ID}:model`)),
-			block_model: Opt(Reference(`${ID}:model`)),
-			lore: ListNode(
-				ObjectNode({
-					text: Reference(`${ID}:item_name_information`),
-				}),
-			),
-		})),
 		additional_information: Opt(ObjectNode({
 			extraBlocksName: Opt(StringNode()),
 			slab: Opt(BooleanNode()),
@@ -115,6 +121,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 				})),
 			})),
 		})),
+		lore: Opt(Reference(`${ID}:tooltip_information`)),
 		functions: Opt(ObjectNode({
 			random_tick: Opt(Reference(`${ID}:function`)),
 			scheduled_tick: Opt(Reference(`${ID}:function`)),
@@ -160,7 +167,6 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 				})
 			),
 		})),
-		cake_slices: Opt(NumberNode({integer: true, min: 1})),
 		campfire_properties: Opt(ObjectNode({
 			emits_particles: Opt(BooleanNode()),
 			fire_damage: Opt(NumberNode({ integer: true })),
@@ -182,7 +188,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 					slab: Opt(BooleanNode()),
 					blocks: Opt(ListNode(
 						ObjectNode({
-							name: Opt(Reference(`${ID}:name_information`)),
+							name: Opt(Reference(`${ID}:name`)),
 							display: Opt(Reference(`${ID}:model`)),
 						})
 					)),
@@ -206,43 +212,75 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 			height: Opt(NumberNode({ integer: true })),
 		})),
 		placable_feature: Opt(StringNode({ validator: 'resource', params: { pool: '$worldgen/configured_feature' } })),
+		rendering: Opt(ObjectNode({
+			model: Opt(Reference(`${ID}:model`)),
+			item_model: Opt(Reference(`${ID}:model`)),
+			block_model: Opt(Reference(`${ID}:model`)),
+		}))
 	}, { context: `${ID}:block` }), {
 		default: () => ({}),
 	}))
 
 	schemas.register(`${ID}:block_information`, ObjectNode({
-		rarity: Opt(StringNode({ enum: ['common', 'uncommon', 'rare', 'epic']})),
-		creative_tab: Opt(StringNode()),
+		name: Opt(Reference(`${ID}:name`)),
+		block_set_type: Opt(StringNode()),
+		wood_type: Opt(StringNode()),
+		parent_block: Opt(StringNode()),
+		cake_slices: Opt(NumberNode({integer: true, min: 1})),
+		has_item: Opt(BooleanNode()),
+		wooden_button: Opt(BooleanNode()),
+		block_properties: Opt(ChoiceNode([
+			{
+				type: 'string',
+				node: StringNode(),
+				change: () => undefined,
+			},
+			{
+				type: 'object',
+				node: Reference(`${ID}:block_settings`),
+				change: () => ({ blah: 1 }),
+			}
+		], { choiceContext: 'tag.list' })),
+		item_properties: Opt(ChoiceNode([
+			{
+				type: 'string',
+				node: StringNode(),
+				change: () => undefined,
+			},
+			{
+				type: 'object',
+				node: Reference(`${ID}:item_settings`),
+				change: () => ({ blah: 1 }),
+			}
+		], { choiceContext: 'tag.list' })),
+	}, { context: `${ID}:block_information` }))
+
+	schemas.register(`${ID}:block_settings`, ObjectNode({
+		sound_group: Opt(Reference(`${ID}:sound_group`)),
 		collidable: Opt(BooleanNode()),
-		max_stack_size: Opt(NumberNode({ integer: true, min: 1 })),
-		name: Opt(Reference(`${ID}:name_information`)),
-		vanilla_sound_group: Opt(StringNode()),
-		custom_sound_group: Opt(Reference(`${ID}:sound_group`)),
-		vanilla_material: Opt(StringNode()),
-		custom_material: Opt(Reference(`${ID}:material`)),
-		has_glint: Opt(BooleanNode()),
-		is_enchantable: Opt(BooleanNode()),
-		enchantability: Opt(NumberNode({ integer: true })),
-		fireproof: Opt(BooleanNode()),
+		hardness: Opt(NumberNode({ min: 1 })),
+		resistance: Opt(NumberNode({ min: 1 })),
+		randomTicks: Opt(BooleanNode()),
+		instant_break: Opt(BooleanNode()),
+		slipperiness: Opt(NumberNode({ min: 1 })),
+		velocity_modifier: Opt(NumberNode({ min: 1 })),
+		jump_velocity_modifier: Opt(NumberNode({ min: 1 })),
+		luminance: Opt(NumberNode({ integer: true, min: 1 })),
+		is_emissive: Opt(BooleanNode()),
 		translucent: Opt(BooleanNode()),
 		dynamic_boundaries: Opt(BooleanNode()),
-		has_item: Opt(BooleanNode()),
-		dyeable: Opt(BooleanNode()),
-		defaultColor: Opt(NumberNode({ color: true })),
-		wearable: Opt(BooleanNode()),
-		wearble_slot: Opt(StringNode()),
-		custom_render_mode: Opt(BooleanNode()),
-		render_mode_models: Opt(ListNode(
-			ObjectNode({
-				model: Reference('model_identifier'),
-				modes: ListNode(StringNode()),
-			})
-		)),
-	}, { context: `${ID}:block_information` }))
+		push_reaction: Opt(StringNode()),
+		map_color: Opt(StringNode()),
+	}, { context: `${ID}:block_settings` }))
 
 	schemas.register(`${ID}:block_y_offset`, ObjectNode({
 		type: Opt(StringNode({enum: ['fixed', 'above_bottom', 'below_top', 'bottom', 'top']})),
 		offset: Opt(NumberNode({ integer: true })),
+	}))
+
+	schemas.register(`${ID}:description`, ObjectNode({
+		identifier: StringNode(),
+		register_to_creative_menu: Opt(BooleanNode()),
 	}))
 
 	schemas.register(`${ID}:function`, ObjectNode({
@@ -302,10 +340,10 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	}, { context: `${ID}:material` }))
 
 	// COMMON
-	schemas.register(`${ID}:name_information`, ObjectNode({
+	schemas.register(`${ID}:name`, ObjectNode({
 		id: StringNode(),
 		text: Opt(StringNode()),
-		type: Opt(StringNode({ enum: ['literal', 'translatable'] })),
+		textType: Opt(StringNode({ enum: ['literal', 'translatable'] })),
 		translated: Opt(MapNode(
 			StringNode(),
 			StringNode(),
@@ -314,7 +352,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		formatting: Opt(ListNode(StringNode())),
 	}))
 
-	schemas.register(`${ID}:display_information`, ObjectNode({
+	schemas.register(`${ID}:rendering`, ObjectNode({
 		// TODO
 	}))
 
@@ -386,8 +424,8 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 	// COLLECTIONS
 	collections.register(`${ID}:block_type`, [
 		'BLOCK',
-		'HORIZONTAL_FACING_BLOCK',
-		'ROTATABLE_BLOCK',
+		'HORIZONTAL_DIRECTIONAL',
+		'DIRECTIONAL',
 		'CAMPFIRE',
 		'STAIRS',
 		'SLAB',
@@ -397,8 +435,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		'CAKE',
 		'BED',
 		'TRAPDOOR',
-		'METAL_DOOR',
-		'WOODEN_DOOR',
+		'DOOR',
 		'LOG',
 		'STEM',
 		'WOOD',
@@ -412,8 +449,7 @@ export function initObsidian(schemas: SchemaRegistry, collections: CollectionReg
 		'LEAVES',
 		'LADDER',
 		'PATH',
-		'WOODEN_BUTTON',
-		'STONE_BUTTON',
+		'BUTTON',
 		'DOUBLE_PLANT',
 		'HORIZONTAL_FACING_DOUBLE_PLANT',
 		'HANGING_DOUBLE_LEAVES',
