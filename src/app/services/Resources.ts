@@ -167,15 +167,15 @@ export type Language = Record<string, string>
 
 const Languages: Record<string, Language | Promise<Language>> = {}
 
-export async function getLanguage(version: VersionId) {
+export async function getLanguage(version: VersionId,language: string = 'en_us') {
 	if (!Languages[version]) {
 		Languages[version] = (async () => {
 			try {
-				Languages[version] = await fetchLanguage(version)
+				Languages[version] = await fetchLanguage(version,language)
 				return Languages[version]
 			} catch (e) {
 				console.error('Error: ', e)
-				throw new Error(`Cannot get language for version ${version}: ${message(e)}`)
+				throw new Error(`Cannot get language '${language}' for version ${version}: ${message(e)}`)
 			}
 		})()
 		return Languages[version]

@@ -58,7 +58,7 @@ export function ItemTooltip({ item, advanced }: Props) {
 	const attributeModifiers = isPotion ? Potion.getAllAttributeModifiers(item) : []
 
 	return <>
-		<TextComponent component={name} base={{ color: 'white', italic: displayName.length > 0 }} />
+		<TextComponent lang='en_us' component={{translate:'block.minecraft.stone'}} base={{ color: 'white', italic: displayName.length > 0 }} />
 		{shouldShow(item, 'additional') && <>
 			{(!advanced && displayName.length === 0 && item.is('filled_map') && item.tag.hasNumber('map')) && <>
 				<TextComponent component={{ text: `#${item.tag.getNumber('map')}`, color: 'gray' }} />

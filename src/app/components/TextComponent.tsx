@@ -22,8 +22,9 @@ interface Props {
 	component: unknown,
 	base?: StyleData,
 	shadow?: boolean,
+	lang?:string
 }
-export function TextComponent({ component, base = { color: 'white' }, shadow = true }: Props) {
+export function TextComponent({ component, base = { color: 'white' }, shadow = true ,lang = 'en_us'}: Props) {
 	const { version } = useVersion()
 
 	const state = JSON.stringify(component)
@@ -33,7 +34,7 @@ export function TextComponent({ component, base = { color: 'white' }, shadow = t
 		return parts
 	}, [state, base])
 
-	const { value: language } = useAsync(() => getLanguage(version), [version])
+	const { value: language } = useAsync(() => getLanguage(version,lang), [version])
 
 	return <div class="text-component">
 		{shadow && <div>
