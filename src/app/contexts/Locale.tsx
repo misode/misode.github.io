@@ -9,7 +9,6 @@ import { Store } from '../Store.js'
 // const English = require('../../locales/en.json')
 import English from '../../locales/en.json'
 import { clearLanguages } from '../services/Resources.js'
-import { fetchLanguage } from '../services/index.js'
 
 interface Locale {
 	lang: string,
@@ -73,7 +72,6 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 		Analytics.changeLocale(lang, newLang)
 		Store.setLanguage(newLang)
 		clearLanguages()
-		fetchLanguage(Store.getVersion()??'1.20',locale('mclang'))
 		setLanguage(newLang)
 	}, [lang])
 
