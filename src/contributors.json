@@ -898,7 +898,7 @@
   },
   {
     "name":"efekos",
-    "types":["translation"],
+    "types":["translation","code"],
     "avatar":"https://avatars.githubusercontent.com/u/56752400?v=4",
     "url":"https://github.com/efekos"
   }
