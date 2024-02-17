@@ -8,6 +8,7 @@ import { Store } from '../Store.js'
 // const require = createRequire(import.meta.url)
 // const English = require('../../locales/en.json')
 import English from '../../locales/en.json'
+import { clearLanguages } from '../services/Resources.js'
 
 interface Locale {
 	lang: string,
@@ -70,6 +71,7 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 		await loadLocale(newLang)
 		Analytics.changeLocale(lang, newLang)
 		Store.setLanguage(newLang)
+		clearLanguages()
 		setLanguage(newLang)
 	}, [lang])
 

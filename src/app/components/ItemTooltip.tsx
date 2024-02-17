@@ -6,6 +6,7 @@ import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getLanguage, getTranslation } from '../services/Resources.js'
 import { TextComponent } from './TextComponent.jsx'
+import { useLocale } from '../contexts/Locale.jsx'
 
 interface Props {
 	item: ItemStack,
@@ -57,8 +58,10 @@ export function ItemTooltip({ item, advanced }: Props) {
 	const effects = isPotion ? Potion.getAllEffects(item) : []
 	const attributeModifiers = isPotion ? Potion.getAllAttributeModifiers(item) : []
 
+	const { locale } = useLocale()
+
 	return <>
-		<TextComponent lang='en_us' component={{translate:'block.minecraft.stone'}} base={{ color: 'white', italic: displayName.length > 0 }} />
+		<TextComponent lang={locale('mclang')} component={{translate:'block.minecraft.stone'}} base={{ color: 'white', italic: displayName.length > 0 }} />
 		{shouldShow(item, 'additional') && <>
 			{(!advanced && displayName.length === 0 && item.is('filled_map') && item.tag.hasNumber('map')) && <>
 				<TextComponent component={{ text: `#${item.tag.getNumber('map')}`, color: 'gray' }} />

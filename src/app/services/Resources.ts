@@ -165,7 +165,11 @@ export class ResourceWrapper implements Resources {
 
 export type Language = Record<string, string>
 
-const Languages: Record<string, Language | Promise<Language>> = {}
+let Languages: Record<string, Language | Promise<Language>> = {}
+
+export function clearLanguages(){
+	Languages = {}
+}
 
 export async function getLanguage(version: VersionId,language: string = 'en_us') {
 	if (!Languages[version]) {
