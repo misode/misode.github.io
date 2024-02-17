@@ -53,7 +53,7 @@ async function loadLocale(language: string) {
 	if (language === 'en') {
 		partners = await import('../partners/locales/en.json')
 	}
-	Locales[language] = { ...data.default, ...schema.default, ...partners.default }
+	Locales[language] = { ...data.default, ...schema.default, ...partners.default,mclang:langConfig.mc }
 }
 
 export function useLocale() {

@@ -2,61 +2,75 @@
   "languages": [
     {
       "code": "de",
-      "name": "Deutsch"
+      "name": "Deutsch",
+      "mc": "de_de"
     },
     {
       "code": "en",
-      "name": "English"
+      "name": "English",
+      "mc": "en_us"
     },
     {
       "code": "es",
-      "name": "Español"
+      "name": "Español",
+      "mc": "es_es"
     },
     {
       "code": "fr",
-      "name": "Français"
+      "name": "Français",
+      "mc": "fr_fr"
     },
     {
       "code": "it",
-      "name": "Italiano"
+      "name": "Italiano",
+      "mc": "it_it"
     },
     {
       "code": "ja",
-      "name": "日本語"
+      "name": "日本語",
+      "mc": "ja_jp"
     },
     {
       "code": "ko",
       "name": "한국어",
+      "mc": "ko_kr",
       "schemas": false
     },
     {
       "code": "pl",
-      "name": "Polski"
+      "name": "Polski",
+      "mc": "pl_pl"
     },
     {
       "code": "pt",
-      "name": "Português"
+      "name": "Português",
+      "mc": "pt_pt"
     },
     {
       "code": "ru",
-      "name": "Русский"
+      "name": "Русский",
+      "mc": "ru_ru"
     },
     {
       "code": "sk",
       "name": "Slovenčina",
+      "mc": "sk_sk",
       "schemas": false
     },
     {
       "code": "tr",
-      "name": "Türkçe"
+      "name": "Türkçe",
+      "mc": "tr_tr"
     },
     {
       "code": "zh-cn",
-      "name": "简体中文"
+      "name": "简体中文",
+      "mc": "zh_cn"
     },
     {
       "code": "zh-tw",
-      "name": "正體中文"
+      "name": "正體中文",
+      "mc": "zh_hk"
     }
   ],
   "versions": [
