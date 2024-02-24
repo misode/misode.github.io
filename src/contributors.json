@@ -153,6 +153,12 @@
     "url": "https://github.com/Flemmli97"
   },
   {
+    "name": "efekos",
+    "types": ["code", "translation"],
+    "avatar": "https://avatars.githubusercontent.com/u/56752400?v=4",
+    "url": "https://github.com/efekos"
+  },
+  {
     "name": "HalbFettKaese",
     "types": ["report", "translation"],
     "avatar": "https://avatars.githubusercontent.com/u/43047038?v=4",
@@ -955,11 +961,5 @@
     "types": ["translation"],
     "avatar": "https://avatars.githubusercontent.com/u/121224522?v=4",
     "url": "https://github.com/notlin4"
-  },
-  {
-    "name":"efekos",
-    "types":["translation"],
-    "avatar":"https://avatars.githubusercontent.com/u/56752400?v=4",
-    "url":"https://github.com/efekos"
   }
 ]
