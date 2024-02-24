@@ -1,18 +1,12 @@
 {
   "add": "Dodaj",
-  "generator.advancement": "Postęp",
   "copy": "Kopiuj",
+  "download": "Pobierz",
+  "generator.advancement": "Postęp",
   "generator.dimension": "Wymiar",
   "generator.dimension_type": "Typ Wymiaru",
-  "download": "Pobierz",
-  "language": "Język",
   "generator.loot_table": "Tabela Łupów",
   "generator.predicate": "Predicate",
-  "preview": "Wizualizuj",
-  "reset": "Reset",
-  "share": "Podziel się",
-  "title.generator": "Generator %0%",
-  "title.home": "Generatory Data Packów",
   "generator.world": "Ustawienia Świata",
   "generator.worldgen/biome": "Biom",
   "generator.worldgen/configured_carver": "Rzeźbiarz",
@@ -21,5 +15,11 @@
   "generator.worldgen/configured_surface_builder": "Konstruktor Powierzchni",
   "generator.worldgen/noise_settings": "Ustawienia Szumu",
   "generator.worldgen/processor_list": "Lista Procesorów",
-  "generator.worldgen/template_pool": "Pula Szablonów"
+  "generator.worldgen/template_pool": "Pula Szablonów",
+  "language": "Język",
+  "preview": "Wizualizuj",
+  "reset": "Reset",
+  "share": "Podziel się",
+  "title.generator": "Generator %0%",
+  "title.home": "Generatory Data Packów"
 }
