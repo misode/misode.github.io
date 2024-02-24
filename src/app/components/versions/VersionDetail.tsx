@@ -9,6 +9,7 @@ import { Octicon } from '../Octicon.js'
 import { ChangelogList, IssueList, VersionDiff, VersionMetaData } from './index.js'
 
 const Tabs = ['changelog', 'diff', 'fixes']
+const WIKI_PAGE_PREFIX = 'https://minecraft.wiki/w/Java_Edition_'
 
 interface Props {
 	id: string,
@@ -31,6 +32,7 @@ export function VersionDetail({ id, version }: Props) {
 	[id, changes])
 
 	const articleLink = version && getArticleLink(version.id)
+	const wikiPageLink = version && WIKI_PAGE_PREFIX + version.name
 
 	return <>
 		<div class="version-detail">
@@ -55,6 +57,10 @@ export function VersionDetail({ id, version }: Props) {
 				</Link>)}
 				{articleLink && <a href={articleLink} target="_blank">
 					{locale('versions.article')}
+					{Octicon.link_external}
+				</a>}
+				{wikiPageLink && <a href={wikiPageLink} target="_blank">
+					{locale('versions.wiki')}
 					{Octicon.link_external}
 				</a>}
 			</div>

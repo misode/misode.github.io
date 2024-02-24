@@ -1,15 +1,15 @@
 [
   {
-    "name": "tryashtar",
-    "types": ["support"],
-    "avatar": "https://avatars.githubusercontent.com/u/26075577?s=60&v=4",
-    "url": "https://github.com/tryashtar"
-  },
-  {
     "name": "catter1",
     "types": ["support", "translation"],
     "avatar": "https://avatars.githubusercontent.com/u/63272345?v=4",
     "url": "https://github.com/catter1"
+  },
+  {
+    "name": "tryashtar",
+    "types": ["support"],
+    "avatar": "https://avatars.githubusercontent.com/u/26075577?s=60&v=4",
+    "url": "https://github.com/tryashtar"
   },
   {
     "name": "EpyonProjects",
@@ -29,15 +29,21 @@
     "avatar": "https://ko-fi.com/img/anon10.png"
   },
   {
-    "name": "Panossa",
-    "types": ["support"],
-    "avatar": "https://ko-fi.com/img/anon5.png"
+    "name": "Shadowclaimer",
+    "types": ["support", "report"],
+    "avatar": "https://avatars.githubusercontent.com/u/2214143?v=4",
+    "url": "https://github.com/Shadowclaimer"
   },
   {
     "name": "TelepathicGrunt",
-    "types": ["support"],
+    "types": ["support", "report"],
     "avatar": "https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80",
     "url": "https://github.com/TelepathicGrunt"
+  },
+  {
+    "name": "Panossa",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon5.png"
   },
   {
     "name": "Hugman",
@@ -100,7 +106,7 @@
   },
   {
     "name": "jacobsjo",
-    "types": ["code"],
+    "types": ["code", "report"],
     "avatar": "https://avatars.githubusercontent.com/u/10163794?v=4",
     "url": "https://github.com/jacobsjo"
   },
@@ -133,6 +139,18 @@
     "types": ["code"],
     "avatar": "https://avatars.githubusercontent.com/u/39634838?v=4",
     "url": "https://github.com/jan00bl"
+  },
+  {
+    "name": "YanisBft",
+    "types": ["code"],
+    "avatar": "https://avatars.githubusercontent.com/u/16228338?v=4",
+    "url": "https://github.com/YanisBft"
+  },
+  {
+    "name": "Flemmli97",
+    "types": ["code"],
+    "avatar": "https://avatars.githubusercontent.com/u/34157027?v=4",
+    "url": "https://github.com/Flemmli97"
   },
   {
     "name": "HalbFettKaese",
@@ -525,12 +543,6 @@
     "url": "https://github.com/Insane96"
   },
   {
-    "name": "Shadowclaimer",
-    "types": ["report"],
-    "avatar": "https://avatars.githubusercontent.com/u/2214143?v=4",
-    "url": "https://github.com/Shadowclaimer"
-  },
-  {
     "name": "Manasukiyami-Github2",
     "types": ["report"],
     "avatar": "https://avatars.githubusercontent.com/u/107654390?v=4",
@@ -565,6 +577,48 @@
     "types": ["report"],
     "avatar": "https://avatars.githubusercontent.com/u/45906780?v=4",
     "url": "https://github.com/RhythmicSys"
+  },
+  {
+    "name": "OshidaBCF",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/61458287?v=4",
+    "url": "https://github.com/OshidaBCF"
+  },
+  {
+    "name": "gaspoweredpick",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/138521830?v=4",
+    "url": "https://github.com/gaspoweredpick"
+  },
+  {
+    "name": "Hokage3211",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/54164358?v=4",
+    "url": "https://github.com/Hokage3211"
+  },
+  {
+    "name": "FrootsieLoopsie",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/69542034?v=4",
+    "url": "https://github.com/FrootsieLoopsie"
+  },
+  {
+    "name": "woodiertexas",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/17211100?v=4",
+    "url": "https://github.com/woodiertexas"
+  },
+  {
+    "name": "Kimani8370",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/114260594?v=4",
+    "url": "https://github.com/Kimani8370"
+  },
+  {
+    "name": "neeeekolaz",
+    "types": ["report"],
+    "avatar": "https://avatars.githubusercontent.com/u/23646976?v=4",
+    "url": "https://github.com/neeeekolaz"
   },
   {
     "name": "lakejason0",
@@ -895,6 +949,12 @@
     "types": ["translation"],
     "avatar": "https://avatars.githubusercontent.com/u/56648332?v=4",
     "url": "https://github.com/Neylz"
+  },
+  {
+    "name": "notlin4",
+    "types": ["translation"],
+    "avatar": "https://avatars.githubusercontent.com/u/121224522?v=4",
+    "url": "https://github.com/notlin4"
   },
   {
     "name":"efekos",
