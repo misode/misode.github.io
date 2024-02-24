@@ -198,6 +198,7 @@
     "versions.resource_pack_format": "Format du pack de ressources",
     "versions.search": "Rechercher des versions",
     "versions.changelog": "Modifications techniques",
+    "versions.wiki": "Wiki",
     "world": "Paramètres du monde",
     "worldgen": "Générateur de monde",
     "worldgen/biome": "Biome",
