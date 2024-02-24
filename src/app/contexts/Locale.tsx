@@ -8,7 +8,6 @@ import { Store } from '../Store.js'
 // const require = createRequire(import.meta.url)
 // const English = require('../../locales/en.json')
 import English from '../../locales/en.json'
-import { clearLanguages } from '../services/Resources.js'
 
 interface Locale {
 	lang: string,
@@ -53,7 +52,7 @@ async function loadLocale(language: string) {
 	if (language === 'en') {
 		partners = await import('../partners/locales/en.json')
 	}
-	Locales[language] = { ...data.default, ...schema.default, ...partners.default,mclang:langConfig.mc }
+	Locales[language] = { ...data.default, ...schema.default, ...partners.default }
 }
 
 export function useLocale() {
@@ -71,7 +70,6 @@ export function LocaleProvider({ children }: { children: ComponentChildren }) {
 		await loadLocale(newLang)
 		Analytics.changeLocale(lang, newLang)
 		Store.setLanguage(newLang)
-		clearLanguages()
 		setLanguage(newLang)
 	}, [lang])
 

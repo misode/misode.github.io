@@ -1,5 +1,6 @@
 import type { BlockDefinitionProvider, BlockFlagsProvider, BlockModelProvider, BlockPropertiesProvider, ItemStack, TextureAtlasProvider, UV } from 'deepslate/render'
 import { BlockDefinition, BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
+import config from '../Config.js'
 import { message } from '../Utils.js'
 import { fetchLanguage, fetchResources } from './DataFetcher.js'
 import type { VersionId } from './Schemas.js'
@@ -165,26 +166,24 @@ export class ResourceWrapper implements Resources {
 
 export type Language = Record<string, string>
 
-let Languages: Record<string, Language | Promise<Language>> = {}
+const Languages: Record<string, Language | Promise<Language>> = {}
 
-export function clearLanguages(){
-	Languages = {}
-}
-
-export async function getLanguage(version: VersionId,language: string = 'en_us') {
-	if (!Languages[version]) {
-		Languages[version] = (async () => {
+export async function getLanguage(version: VersionId, lang: string = 'en') {
+	const mcLang = config.languages.find(l => l.code === lang)?.mc ?? 'en_us'
+	const cacheKey = `${version}_${mcLang}`
+	if (!Languages[cacheKey]) {
+		Languages[cacheKey] = (async () => {
 			try {
-				Languages[version] = await fetchLanguage(version,language)
-				return Languages[version]
+				Languages[cacheKey] = await fetchLanguage(version, mcLang)
+				return Languages[cacheKey]
 			} catch (e) {
 				console.error('Error: ', e)
-				throw new Error(`Cannot get language '${language}' for version ${version}: ${message(e)}`)
+				throw new Error(`Cannot get language '${mcLang}' for version ${version}: ${message(e)}`)
 			}
 		})()
-		return Languages[version]
+		return Languages[cacheKey]
 	}
-	return Languages[version]
+	return Languages[cacheKey]
 }
 
 export function getTranslation(lang: Language, key: string, params?: string[]) {
