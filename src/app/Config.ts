@@ -4,6 +4,7 @@ import type { VersionId } from './services/Schemas.js'
 export interface ConfigLanguage {
 	code: string,
 	name: string,
+	mc: string,
 	schemas?: boolean,
 }
 
