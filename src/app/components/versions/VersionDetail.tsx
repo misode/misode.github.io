@@ -60,7 +60,7 @@ export function VersionDetail({ id, version }: Props) {
 					{Octicon.link_external}
 				</a>}
 				{wikiPageLink && <a href={wikiPageLink} target="_blank">
-					{locale('versions.wiki_page')}
+					{locale('versions.wiki')}
 					{Octicon.link_external}
 				</a>}
 			</div>
