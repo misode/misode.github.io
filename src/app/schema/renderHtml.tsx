@@ -1,28 +1,29 @@
 import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
-import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, StringNode, relativePath } from '@mcschema/core'
+import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import { Identifier, ItemStack } from 'deepslate/core'
 import type { ComponentChildren, JSX } from 'preact'
 import { memo } from 'preact/compat'
 import { useState } from 'preact/hooks'
-import config from '../Config.js'
-import { deepClone, deepEqual, generateColor, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
-import { ItemDisplay } from '../components/ItemDisplay.jsx'
 import { Btn, Octicon } from '../components/index.js'
+import { ItemDisplay } from '../components/ItemDisplay.jsx'
 import { VanillaColors } from '../components/previews/BiomeSourcePreview.jsx'
+import config from '../Config.js'
 import { localize, useLocale, useStore } from '../contexts/index.js'
 import { useFocus } from '../hooks/index.js'
 import type { BlockStateRegistry, VersionId } from '../services/index.js'
 import { CachedDecorator, CachedFeature } from '../services/index.js'
+import { deepClone, deepEqual, generateColor, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
 import { ModelWrapper } from './ModelWrapper.js'
 
 const selectRegistries = ['loot_table.type', 'loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'recipe.type', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'dimension.generator.biome_source.preset', 'carver.type', 'feature.type', 'decorator.type', 'feature.tree.minimum_size.type', 'block_state_provider.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'int_provider.type', 'float_provider.type', 'height_provider.type', 'structure_feature.type', 'surface_builder.type', 'processor.processor_type', 'rule_test.predicate_type', 'pos_rule_test.predicate_type', 'template_element.element_type', 'block_placer.type', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'structure_placement.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.cat.variant', 'entity.type_specific.frog.variant', 'rule_block_entity_modifier.type', 'pool_alias_binding.type', 'lithostitched.worldgen_modifier.type', 'lithostitched.modifier_predicate.type', 'ohthetreesyoullgrow.configured_feature.type']
 const hiddenFields = ['number_provider.type', 'score_provider.type', 'nbt_provider.type', 'int_provider.type', 'float_provider.type', 'height_provider.type']
 const flattenedFields = ['feature.config', 'decorator.config', 'int_provider.value', 'float_provider.value', 'block_state_provider.simple_state_provider.state', 'block_state_provider.rotated_block_provider.state', 'block_state_provider.weighted_state_provider.entries.entry.data', 'rule_test.block_state', 'structure_feature.config', 'surface_builder.config', 'template_pool.elements.entry.element', 'decorator.block_survives_filter.state', 'material_rule.block.result_state']
-const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.type', 'glyph_provider.type', 'sprite_source.type', 'rule_block_entity_modifier.type', 'immersive_weathering.area_condition.type', 'immersive_weathering.block_growth.growth_for_face.entry.direction', 'immersive_weathering.position_test.predicate_type', 'pool_alias_binding.type']
+const inlineFields = ['loot_entry.type', 'function.function', 'condition.condition', 'criterion.trigger', 'dimension.generator.type', 'dimension.generator.biome_source.type', 'feature.type', 'decorator.type', 'block_state_provider.type', 'feature.tree.minimum_size.type', 'trunk_placer.type', 'foliage_placer.type', 'tree_decorator.type', 'block_placer.type', 'rule_test.predicate_type', 'processor.processor_type', 'template_element.element_type', 'nbt_operation.op', 'number_provider.value', 'score_provider.name', 'score_provider.target', 'nbt_provider.source', 'nbt_provider.target', 'generator_biome.biome', 'block_predicate.type', 'material_rule.type', 'material_condition.type', 'density_function.type', 'root_placer.type', 'entity.type_specific.type', 'glyph_provider.type', 'sprite_source.type', 'rule_block_entity_modifier.type', 'immersive_weathering.area_condition.type', 'immersive_weathering.block_growth.growth_for_face.entry.direction', 'immersive_weathering.position_test.predicate_type', 'pool_alias_binding.type', 'item_stack.id', 'data_component.banner_patterns.entry.pattern', 'data_component.container.entry.slot', 'map_decoration.type', 'suspicious_stew_effect_instance.id']
 const nbtFields = ['function.set_nbt.tag', 'advancement.display.icon.nbt', 'text_component_object.nbt', 'entity.nbt', 'block.nbt', 'item.nbt']
-const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.has_sturdy_face.offset', 'block_predicate.inside_world_bounds.offset', 'block_predicate.matching_block_tag.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'block_predicate.would_survive.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale', 'generator_structure.random_spread.locate_offset', 'pack_overlay.formats']
+const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.parameters.humidity', 'generator_biome.parameters.continentalness', 'generator_biome.parameters.erosion', 'generator_biome.parameters.depth', 'generator_biome.parameters.weirdness', 'feature.end_spike.crystal_beam_target', 'feature.end_gateway.exit', 'decorator.block_filter.offset', 'block_predicate.has_sturdy_face.offset', 'block_predicate.inside_world_bounds.offset', 'block_predicate.matching_block_tag.offset', 'block_predicate.matching_blocks.offset', 'block_predicate.matching_fluids.offset', 'block_predicate.would_survive.offset', 'model_element.from', 'model_element.to', 'model_element.rotation.origin', 'model_element.faces.uv', 'item_transform.rotation', 'item_transform.translation', 'item_transform.scale', 'generator_structure.random_spread.locate_offset', 'pack_overlay.formats', 'data_component.profile.id']
 const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
 const collapsableFields = ['density_function.argument', 'density_function.argument1', 'density_function.argument2', 'density_function.input', 'density_function.when_in_range', 'density_function.when_out_of_range']
+const itemPreviewFields = ['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry']
 
 const findGenerator = (id: string) => {
 	return config.generators.find(g => g.id === id.replace(/^\$/, ''))
@@ -132,13 +133,13 @@ const renderHtml: RenderHook = {
 				if (index > maxShown) {
 					return null
 				}
-
-				const cPath = path.push(index).contextPush('entry')
+				const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
+				const cPath = pathWithContext.push(index).contextPush('entry')
 				const canToggle = children.type(cPath) === 'object'
 				const toggle = isToggled(cId)
 
 				let label: undefined | string | JSX.Element
-				if (['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry'].includes(cPath.getContext().join('.'))) {
+				if (itemPreviewFields.includes(cPath.getContext().join('.'))) {
 					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
 						let itemStack: ItemStack | undefined
 						try {
@@ -230,8 +231,8 @@ const renderHtml: RenderHook = {
 		</>
 		const body = <>
 			{typeof value === 'object' && Object.entries(value).map(([key, cValue]) => {
-
-				const cPath = path.modelPush(key)
+				const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
+				const cPath = pathWithContext.modelPush(key)
 				const canToggle = children.type(cPath) === 'object'
 				const toggle = isToggled(key)
 				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
