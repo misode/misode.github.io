@@ -199,6 +199,12 @@
       "wiki": "https://minecraft.wiki/w/Raw_JSON_text_format#Java_Edition"
     },
     {
+      "id": "banner_pattern",
+      "url": "banner-pattern",
+      "schema": "banner_pattern",
+      "minVersion": "1.20.5"
+    },
+    {
       "id": "damage_type",
       "url": "damage-type",
       "schema": "damage_type",
@@ -222,6 +228,12 @@
       "url": "trim-pattern",
       "schema": "trim_pattern",
       "minVersion": "1.19.4"
+    },
+    {
+      "id": "wolf_variant",
+      "url": "wolf-variant",
+      "schema": "wolf_variant",
+      "minVersion": "1.20.5"
     },
     {
       "id": "pack_mcmeta",
