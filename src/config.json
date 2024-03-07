@@ -209,7 +209,8 @@
       "id": "chat_type",
       "url": "chat-type",
       "schema": "chat_type",
-      "minVersion": "1.19"
+      "minVersion": "1.19",
+      "wiki": "https://minecraft.wiki/w/Chat_type"
     },
     {
       "id": "trim_material",
@@ -222,6 +223,18 @@
       "url": "trim-pattern",
       "schema": "trim_pattern",
       "minVersion": "1.19.4"
+    },
+    {
+      "id": "banner_pattern",
+      "url": "banner-pattern",
+      "schema": "banner_pattern",
+      "minVersion": "1.20.5"
+    },
+    {
+      "id": "wolf_variant",
+      "url": "wolf-variant",
+      "schema": "wolf_variant",
+      "minVersion": "1.20.5"
     },
     {
       "id": "pack_mcmeta",
