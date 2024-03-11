@@ -199,8 +199,11 @@ const renderHtml: RenderHook = {
 		return [null, suffix, body]
 	},
 
-	map({ children, keys, config }, path, value, lang, version, states, ctx) {
+	map({ children, keys, config, node }, path, value, lang, version, states, ctx) {
 		const { expand, collapse, isToggled } = useToggles()
+
+		let suffix: JSX.Element | null = null
+		let body: JSX.Element | null = null
 
 		const keyPath = new ModelPath(keysModel, new Path([hashString(path.toString())], path.contextArr))
 		const onAdd = () => {
@@ -227,12 +230,14 @@ const renderHtml: RenderHook = {
 			})
 			return ObjectNode(Object.fromEntries(properties)).hook(this, path, value, lang, version, states, ctx)
 		}
-		const suffix = <>
-			{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, version, states, ctx)[1]}
-			<button class="add tooltipped tip-se" aria-label={localize(lang, 'add')} onClick={onAdd}>{Octicon.plus_circle}</button>
-		</>
-		const body = <>
-			{typeof value === 'object' && Object.entries(value).map(([key, cValue]) => {
+
+		if (typeof value === 'object' && value !== null) {
+			suffix = <>
+				{suffix}
+				{keysSchema.hook(this, keyPath, keyPath.get() ?? '', lang, version, states, ctx)[1]}
+				<button class="add tooltipped tip-se" aria-label={localize(lang, 'add')} onClick={onAdd}>{Octicon.plus_circle}</button>
+			</>
+			body = <>{Object.entries(value).map(([key, cValue]) => {
 				const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
 				const cPath = pathWithContext.modelPush(key)
 				const canToggle = children.type(cPath) === 'object'
@@ -257,8 +262,11 @@ const renderHtml: RenderHook = {
 					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'collapse')}\n${localize(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>}
 					<button class="remove tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
 				</MemoedTreeNode>
-			})}
-		</>
+			})}</>
+		} else {
+			const onReset = () => path.set(DataModel.wrapLists(node.default()))
+			suffix = <>{suffix}<button class="add tooltipped tip-se" aria-label={localize(lang, 'reset')} onClick={onReset}>{Octicon.history}</button></>
+		}
 		return [null, suffix, body]
 	},
 
@@ -278,11 +286,12 @@ const renderHtml: RenderHook = {
 
 		let prefix: JSX.Element | null = null
 		let suffix: JSX.Element | null = null
+		let body: JSX.Element | null = null
 		if (node.optional()) {
 			if (value === undefined) {
 				const onExpand = () => path.set(DataModel.wrapLists(node.default()))
 				suffix = <button class="node-collapse closed tooltipped tip-se" aria-label={localize(lang, 'expand')} onClick={onExpand}>{Octicon.plus_circle}</button>
-			} else {
+			} else if (typeof value === 'object' && value !== null){
 				const onCollapse = () => path.set(undefined)
 				suffix = <button class="node-collapse open tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onCollapse}>{Octicon.trashcan}</button>
 			}
@@ -298,12 +307,11 @@ const renderHtml: RenderHook = {
 				return [prefix, suffix, null]
 			}
 		}
-
-		const newCtx = (typeof value === 'object' && value !== null && node.default()?.pools)
-			? { ...ctx, loot: value?.type } : ctx
-		const body = <>
-			{(typeof value === 'object' && value !== null && !(node.optional() && value === undefined)) &&
-				Object.entries(getActiveFields(path))
+		if (!(node.optional() && value === undefined)) {
+			if (typeof value === 'object' && value !== null) {
+				const newCtx = (typeof value === 'object' && value !== null && node.default()?.pools)
+					? { ...ctx, loot: value?.type } : ctx
+				body = <>{Object.entries(getActiveFields(path))
 					.filter(([_, child]) => child.enabled(path))
 					.map(([key, child]) => {
 						const cPath = getChildModelPath(path, key)
@@ -318,9 +326,12 @@ const renderHtml: RenderHook = {
 							return isFlattened ? cBody : null
 						}
 						return <MemoedTreeNode key={key} schema={child} path={cPath} value={value[key]} {...{lang, version, states, ctx: newCtx}} />
-					})
+					})}</>
+			} else {
+				const onReset = () => path.set(DataModel.wrapLists(node.default()))
+				suffix = <>{suffix}<button class="add tooltipped tip-se" aria-label={localize(lang, 'reset')} onClick={onReset}>{Octicon.history}</button></>
 			}
-		</>
+		}
 		return [prefix, suffix, body]
 	},
 
