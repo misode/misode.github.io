@@ -10,7 +10,7 @@ import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../../hooks/index.js'
 import { getOutput } from '../../schema/transformOutput.js'
 import type { VersionId } from '../../services/index.js'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
+import { fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 
 export const SHARE_KEY = 'share'
@@ -265,7 +265,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [copyActive, copySuccess] = useActiveTimeout()
 
 	const [previewShown, setPreviewShown] = useState(Store.getPreviewPanelOpen() ?? window.innerWidth > 800)
-	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
+	const hasPreview = HasPreview.includes(gen.id)
 	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 2
 	if (hasPreview) actionsShown += 1

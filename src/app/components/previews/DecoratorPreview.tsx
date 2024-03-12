@@ -1,13 +1,14 @@
 import { BlockPos, ChunkPos, LegacyRandom, PerlinNoise } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
 import { computeIfAbsent, iterateWorld2D, randomSeed } from '../../Utils.js'
+import { useLocale } from '../../contexts/index.js'
 import { Btn } from '../index.js'
 import type { PlacedFeature, PlacementContext } from './Decorator.js'
 import { decorateChunk } from './Decorator.js'
-import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
+import { nextGaussian } from './WorldgenUtils.jsx'
+import type { PreviewProps } from './index.js'
 
 export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 	const { locale } = useLocale()
@@ -25,7 +26,7 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 			version: version,
 			nextFloat: () => random.nextFloat(),
 			nextInt: (max: number) => random.nextInt(max),
-			nextGaussian: () => Math.sqrt(-2 * Math.log(1 - random.nextFloat())) * Math.cos(2 * Math.PI * random.nextFloat()),
+			nextGaussian: nextGaussian(random),
 		}
 		return {
 			context,
