@@ -522,7 +522,7 @@
     },
     {
       "id": "tag/point_of_interest_type",
-      "url": "tags/painting-variant",
+      "url": "tags/point-of-interest-type",
       "tags": ["tags"],
       "path": "tags/point_of_interest_type",
       "schema": "point_of_interest_type_tag",
