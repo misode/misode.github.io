@@ -101,6 +101,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 					fontSize: 14,
 					showFoldWidgets: false,
 					highlightSelectedWord: false,
+					scrollPastEnd: 0.5,
 				})
 				braceEditor.$blockScrolling = Infinity
 				braceEditor.on('blur', () => onImport.current())
