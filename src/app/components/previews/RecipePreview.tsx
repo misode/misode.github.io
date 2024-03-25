@@ -103,7 +103,7 @@ function slotStyle(slot: Slot) {
 function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) {
 	const items = new Map<Slot, ItemStack>()
 	const type: string = recipe.type?.replace(/^minecraft:/, '')
-	if (type.startsWith('crafting_special') || type === 'crafting_decorated_pot') {
+	if (!type || type.startsWith('crafting_special') || type === 'crafting_decorated_pot') {
 		return items
 	}
 
@@ -120,7 +120,6 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 		const keys = new Map<string, ItemStack>()
 		for (const [key, ingredient] of Object.entries(recipe.key ?? {})) {
 			const choices = allIngredientChoices(ingredient, itemTags)
-			console.log(choices)
 			if (choices.length > 0) {
 				const choice = choices[animation % choices.length]
 				keys.set(key, choice)
@@ -175,7 +174,9 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 	} else if (typeof result === 'string') {
 		items.set(resultSlot, new ItemStack(Identifier.parse(result), 1))
 	} else if (typeof result === 'object' && result !== null) {
-		const id = typeof result.id === 'string' ? result.id : 'minecraft:air'
+		const id = typeof result.id === 'string' ? result.id
+			: typeof result.item === 'string' ? result.item
+				: 'minecraft:air'
 		const count = typeof result.count === 'number' ? result.count : 1
 		// TODO: add components
 		items.set(resultSlot, new ItemStack(Identifier.parse(id), count))
