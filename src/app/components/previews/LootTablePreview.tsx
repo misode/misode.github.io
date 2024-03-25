@@ -1,11 +1,10 @@
 import { DataModel } from '@mcschema/core'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { clamp, randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
-import type { SlottedItem } from './LootTable.js'
 import { generateLootTable } from './LootTable.js'
 
 export const LootTablePreview = ({ data }: PreviewProps) => {
@@ -19,14 +18,10 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const overlay = useRef<HTMLDivElement>(null)
 
-	const [items, setItems] = useState<SlottedItem[]>([])
-
 	const table = DataModel.unwrapLists(data)
 	const state = JSON.stringify(table)
-	useEffect(() => {
-		const items = generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
-		console.log('Generated loot', items)
-		setItems(items)
+	const items = useMemo(() => {
+		return generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
 	}, [version, seed, luck, daytime, weather, mixItems, state])
 
 	return <>

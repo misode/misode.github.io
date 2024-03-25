@@ -9,6 +9,7 @@ export * from './LootTablePreview.jsx'
 export * from './ModelPreview.jsx'
 export * from './NoisePreview.js'
 export * from './NoiseSettingsPreview.js'
+export * from './RecipePreview.jsx'
 export * from './StructureSetPreview.jsx'
 
 export type PreviewProps = {
