@@ -194,7 +194,7 @@ function allIngredientChoices(ingredient: any, itemTags: Map<string, any>): Item
 			try {
 				return [new ItemStack(Identifier.parse(ingredient.item), 1)]
 			} catch (e) {}
-		} else if (typeof (ingredient.tag === 'string')) {
+		} else if (typeof ingredient.tag === 'string') {
 			const tag: any = itemTags.get(ingredient.tag.replace(/^minecraft:/, ''))
 			if (typeof tag === 'object' && tag !== null && Array.isArray(tag.values)) {
 				return tag.values.flatMap((value: any) => {
