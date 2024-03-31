@@ -25,6 +25,7 @@ const fixedLists = ['generator_biome.parameters.temperature', 'generator_biome.p
 const collapsedFields = ['noise_settings.surface_rule', 'noise_settings.noise.terrain_shaper']
 const collapsableFields = ['density_function.argument', 'density_function.argument1', 'density_function.argument2', 'density_function.input', 'density_function.when_in_range', 'density_function.when_out_of_range']
 const itemPreviewFields = ['loot_pool.entries.entry', 'loot_entry.alternatives.children.entry', 'loot_entry.group.children.entry', 'loot_entry.sequence.children.entry', 'function.set_contents.entries.entry']
+const forceEnumContexts: Record<string, string> = { 'loot_table.type': 'loot_table.type', 'condition.condition': 'loot_condition_type', 'function.function': 'loot_function_type' }
 
 const findGenerator = (id: string) => {
 	return config.generators.find(g => g.id === id.replace(/^\$/, ''))
@@ -460,6 +461,8 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 			childPath = childPath.contextPush(id)
 		} else if (isEnum(config)) {
 			childPath = path
+		} else if (Object.hasOwn(forceEnumContexts, context)) {
+			childPath = childPath.contextPush(forceEnumContexts[context])
 		}
 		return <select value={value ?? ''} onChange={onChange}>
 			{node.optional() && <option value="">{localize(lang, 'unset')}</option>}
