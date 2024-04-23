@@ -125,7 +125,7 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 				keys.set(key, choice)
 			}
 		}
-		const pattern = recipe.pattern
+		const pattern = Array.isArray(recipe.pattern) ? recipe.pattern : []
 		for (let row = 0; row < Math.min(3, pattern.length); row += 1) {
 			for (let col = 0; col < Math.min(3, pattern[row].length); col += 1) {
 				const key = pattern[row].split('')[col]
