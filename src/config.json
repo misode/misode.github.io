@@ -148,9 +148,9 @@
     },
     {
       "id": "1.20.5",
-      "dynamic": true,
-      "name": "1.20.5",
-      "pack_format": 33,
+      "ref": "1.20.6",
+      "name": "1.20.5 — 1.20.6",
+      "pack_format": 41,
       "show": true
     }
   ],
