@@ -488,7 +488,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 				{values.map(v => <option value={v} />)}
 			</datalist>}
 			{['generator_biome.biome'].includes(context) && <input type="color" value={rgbToHex(biomeColors[fullId] ?? VanillaColors[fullId] ?? stringToColor(fullId))} onChange={v => setBiomeColor(fullId, hexToRgb(v.currentTarget.value))}></input>}
-			{['attribute_modifier.id', 'text_component_object.hoverEvent.show_entity.contents.id'].includes(context) && <button onClick={() => path.set(generateUUID())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_uuid')}>{Octicon.sync}</button>}
+			{['attribute_modifier.id', 'text_component_object.hoverEvent.show_entity.contents.id', 'enchantment.effects.entry.uuid'].includes(context) && <button onClick={() => path.set(generateUUID())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_uuid')}>{Octicon.sync}</button>}
 			{gen && values.includes(value) && value.startsWith('minecraft:') &&
 				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={localize(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>
