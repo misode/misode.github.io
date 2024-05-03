@@ -152,6 +152,13 @@
       "name": "1.20.5 — 1.20.6",
       "pack_format": 41,
       "show": true
+    },
+    {
+      "id": "1.21",
+      "dynamic": true,
+      "name": "1.21",
+      "pack_format": 42,
+      "show": true
     }
   ],
   "generators": [
@@ -190,6 +197,18 @@
       "path": "recipes",
       "schema": "recipe",
       "wiki": "https://minecraft.wiki/w/Recipe#JSON_format"
+    },
+    {
+      "id": "enchantment",
+      "url": "enchantment",
+      "schema": "enchantment",
+      "minVersion": "1.21"
+    },
+    {
+      "id": "enchantment_provider",
+      "url": "enchantment-provider",
+      "schema": "enchantment_provider",
+      "minVersion": "1.21"
     },
     {
       "id": "text_component",
