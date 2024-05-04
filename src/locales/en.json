@@ -83,6 +83,7 @@
   "generator.tag/block": "Block Tag",
   "generator.tag/cat_variant": "Cat Variant Tag",
   "generator.tag/damage_type": "Damage Type Tag",
+  "generator.tag/enchantment": "Enchantment Tag",
   "generator.tag/entity_type": "Entity Type Tag",
   "generator.tag/fluid": "Fluid Tag",
   "generator.tag/game_event": "Game Event Tag",
