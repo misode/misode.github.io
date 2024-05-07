@@ -182,14 +182,14 @@
       "path": "item_modifiers",
       "schema": "item_modifier",
       "minVersion": "1.17",
-      "wiki": "https://minecraft.wiki/w/Item modifier"
+      "wiki": "https://minecraft.wiki/w/Item_modifier"
     },
     {
       "id": "advancement",
       "url": "advancement",
       "path": "advancements",
       "schema": "advancement",
-      "wiki": "https://minecraft.wiki/w/Advancement/JSON_format"
+      "wiki": "https://minecraft.wiki/w/Custom_advancement"
     },
     {
       "id": "recipe",
@@ -202,13 +202,15 @@
       "id": "enchantment",
       "url": "enchantment",
       "schema": "enchantment",
-      "minVersion": "1.21"
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Custom_enchantment"
     },
     {
       "id": "enchantment_provider",
       "url": "enchantment-provider",
       "schema": "enchantment_provider",
-      "minVersion": "1.21"
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Enchantment_provider"
     },
     {
       "id": "text_component",
@@ -254,6 +256,13 @@
       "url": "wolf-variant",
       "schema": "wolf_variant",
       "minVersion": "1.20.5"
+    },
+    {
+      "id": "painting_variant",
+      "url": "painting-variant",
+      "schema": "painting_variant",
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Painting_variant"
     },
     {
       "id": "pack_mcmeta",
@@ -347,7 +356,7 @@
       "tags": ["worldgen"],
       "schema": "structure",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Structure/JSON_format"
+      "wiki": "https://minecraft.wiki/w/Custom_structure"
     },
     {
       "id": "worldgen/structure_set",
@@ -518,6 +527,15 @@
       "tags": ["tags"],
       "path": "tags/cat_variant",
       "schema": "cat_variant_tag",
+      "minVersion": "1.19",
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+    },
+    {
+      "id": "tag/enchantment",
+      "url": "tags/enchantment",
+      "tags": ["tags"],
+      "path": "tags/enchantment",
+      "schema": "enchantment_tag",
       "minVersion": "1.19",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
