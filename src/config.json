@@ -157,7 +157,7 @@
       "id": "1.21",
       "dynamic": true,
       "name": "1.21",
-      "pack_format": 42,
+      "pack_format": 43,
       "show": true
     }
   ],
@@ -421,7 +421,7 @@
       "id": "tag/block",
       "url": "tags/block",
       "tags": ["tags"],
-      "path": "tags/blocks",
+      "path": "tags/block",
       "schema": "block_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -429,7 +429,7 @@
       "id": "tag/entity_type",
       "url": "tags/entity-type",
       "tags": ["tags"],
-      "path": "tags/entity_types",
+      "path": "tags/entity_type",
       "schema": "entity_type_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -437,7 +437,7 @@
       "id": "tag/fluid",
       "url": "tags/fluid",
       "tags": ["tags"],
-      "path": "tags/fluids",
+      "path": "tags/fluid",
       "schema": "fluid_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -445,7 +445,7 @@
       "id": "tag/game_event",
       "url": "tags/game-event",
       "tags": ["tags"],
-      "path": "tags/game_events",
+      "path": "tags/game_event",
       "schema": "game_event_tag",
       "minVersion": "1.17",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
@@ -454,7 +454,7 @@
       "id": "tag/item",
       "url": "tags/item",
       "tags": ["tags"],
-      "path": "tags/items",
+      "path": "tags/item",
       "schema": "item_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
