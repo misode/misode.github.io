@@ -264,6 +264,13 @@
       "wiki": "https://minecraft.wiki/w/Painting_variant"
     },
     {
+      "id": "jukebox_song",
+      "url": "jukebox-song",
+      "schema": "jukebox_song",
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Jukebox_song_definition"
+    },
+    {
       "id": "pack_mcmeta",
       "url": "pack-mcmeta",
       "schema": "pack_mcmeta",

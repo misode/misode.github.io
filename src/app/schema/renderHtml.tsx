@@ -11,7 +11,7 @@ import config from '../Config.js'
 import { localize, useLocale, useStore } from '../contexts/index.js'
 import { useFocus } from '../hooks/index.js'
 import type { BlockStateRegistry, VersionId } from '../services/index.js'
-import { CachedDecorator, CachedFeature } from '../services/index.js'
+import { CachedDecorator, CachedFeature, checkVersion } from '../services/index.js'
 import { deepClone, deepEqual, generateColor, generateUUID, hexId, hexToRgb, isObject, newSeed, rgbToHex, stringToColor } from '../Utils.js'
 import { ModelWrapper } from './ModelWrapper.js'
 
@@ -488,7 +488,7 @@ function StringSuffix({ path, getValues, config, node, value, lang, version, sta
 				{values.map(v => <option value={v} />)}
 			</datalist>}
 			{['generator_biome.biome'].includes(context) && <input type="color" value={rgbToHex(biomeColors[fullId] ?? VanillaColors[fullId] ?? stringToColor(fullId))} onChange={v => setBiomeColor(fullId, hexToRgb(v.currentTarget.value))}></input>}
-			{['attribute_modifier.id', 'text_component_object.hoverEvent.show_entity.contents.id', 'enchantment.effects.entry.uuid'].includes(context) && <button onClick={() => path.set(generateUUID())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_uuid')}>{Octicon.sync}</button>}
+			{(['text_component_object.hoverEvent.show_entity.contents.id', 'enchantment.effects.entry.uuid'].includes(context) || ('attribute_modifier.id' === context && !checkVersion(version, '1.21'))) && <button onClick={() => path.set(generateUUID())} class="tooltipped tip-se" aria-label={localize(lang, 'generate_new_uuid')}>{Octicon.sync}</button>}
 			{gen && values.includes(value) && value.startsWith('minecraft:') &&
 				<a href={`/${gen.url}/?version=${version}&preset=${value.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={localize(lang, 'follow_reference')}>{Octicon.link_external}</a>}
 		</>
