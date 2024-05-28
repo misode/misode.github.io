@@ -585,10 +585,10 @@ export function parseGitPatch(patch: string) {
 	return result
 }
 
-const legacyTags = new Set(['tag/item', 'tag/block', 'tag/fluid', 'tag/entity_type', 'tag/game_event'])
+const legacyFolders = new Set(['loot_table', 'predicate', 'item_modifier', 'advancement', 'recipe', 'tag/function', 'tag/item', 'tag/block', 'tag/fluid', 'tag/entity_type', 'tag/game_event'])
 export function genPath(gen: ConfigGenerator, version: VersionId) {
 	const path = gen.path ?? gen.id
-	if (!checkVersion(version, '1.21') && legacyTags.has(gen.id)) {
+	if (!checkVersion(version, '1.21') && legacyFolders.has(gen.id)) {
 		return path + 's'
 	}
 	return path

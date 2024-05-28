@@ -164,21 +164,18 @@
     {
       "id": "loot_table",
       "url": "loot-table",
-      "path": "loot_tables",
       "schema": "loot_table",
       "wiki": "https://minecraft.wiki/w/Loot_table"
     },
     {
       "id": "predicate",
       "url": "predicate",
-      "path": "predicates",
       "schema": "predicate",
       "wiki": "https://minecraft.wiki/w/Predicate"
     },
     {
       "id": "item_modifier",
       "url": "item-modifier",
-      "path": "item_modifiers",
       "schema": "item_modifier",
       "minVersion": "1.17",
       "wiki": "https://minecraft.wiki/w/Item_modifier"
@@ -186,14 +183,12 @@
     {
       "id": "advancement",
       "url": "advancement",
-      "path": "advancements",
       "schema": "advancement",
       "wiki": "https://minecraft.wiki/w/Custom_advancement"
     },
     {
       "id": "recipe",
       "url": "recipe",
-      "path": "recipes",
       "schema": "recipe",
       "wiki": "https://minecraft.wiki/w/Recipe#JSON_format"
     },
