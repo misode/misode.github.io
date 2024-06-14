@@ -4,13 +4,13 @@ import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } f
 import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
-import { Store } from '../../Store.js'
-import { cleanUrl, deepEqual } from '../../Utils.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../../hooks/index.js'
 import { getOutput } from '../../schema/transformOutput.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
+import { Store } from '../../Store.js'
+import { cleanUrl, deepEqual, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 
 export const SHARE_KEY = 'share'
@@ -167,7 +167,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const loadPreset = async (id: string) => {
 		try {
-			const preset = await fetchPreset(version, gen.path ?? gen.id, id)
+			const preset = await fetchPreset(version, genPath(gen, version), id)
 			const seed = model?.get(new Path(['generator', 'seed']))
 			if (preset?.generator?.seed !== undefined && seed !== undefined) {
 				preset.generator.seed = seed

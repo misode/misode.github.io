@@ -136,8 +136,7 @@
       "id": "1.20.2",
       "ref": "1.20.2",
       "name": "1.20.2",
-      "pack_format": 18,
-      "show": true
+      "pack_format": 18
     },
     {
       "id": "1.20.3",
@@ -157,7 +156,7 @@
       "id": "1.21",
       "dynamic": true,
       "name": "1.21",
-      "pack_format": 42,
+      "pack_format": 43,
       "show": true
     }
   ],
@@ -165,36 +164,31 @@
     {
       "id": "loot_table",
       "url": "loot-table",
-      "path": "loot_tables",
       "schema": "loot_table",
       "wiki": "https://minecraft.wiki/w/Loot_table"
     },
     {
       "id": "predicate",
       "url": "predicate",
-      "path": "predicates",
       "schema": "predicate",
       "wiki": "https://minecraft.wiki/w/Predicate"
     },
     {
       "id": "item_modifier",
       "url": "item-modifier",
-      "path": "item_modifiers",
       "schema": "item_modifier",
       "minVersion": "1.17",
-      "wiki": "https://minecraft.wiki/w/Item modifier"
+      "wiki": "https://minecraft.wiki/w/Item_modifier"
     },
     {
       "id": "advancement",
       "url": "advancement",
-      "path": "advancements",
       "schema": "advancement",
-      "wiki": "https://minecraft.wiki/w/Advancement/JSON_format"
+      "wiki": "https://minecraft.wiki/w/Custom_advancement"
     },
     {
       "id": "recipe",
       "url": "recipe",
-      "path": "recipes",
       "schema": "recipe",
       "wiki": "https://minecraft.wiki/w/Recipe#JSON_format"
     },
@@ -202,13 +196,15 @@
       "id": "enchantment",
       "url": "enchantment",
       "schema": "enchantment",
-      "minVersion": "1.21"
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Custom_enchantment"
     },
     {
       "id": "enchantment_provider",
       "url": "enchantment-provider",
       "schema": "enchantment_provider",
-      "minVersion": "1.21"
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Enchantment_provider"
     },
     {
       "id": "text_component",
@@ -254,6 +250,20 @@
       "url": "wolf-variant",
       "schema": "wolf_variant",
       "minVersion": "1.20.5"
+    },
+    {
+      "id": "painting_variant",
+      "url": "painting-variant",
+      "schema": "painting_variant",
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Painting_variant"
+    },
+    {
+      "id": "jukebox_song",
+      "url": "jukebox-song",
+      "schema": "jukebox_song",
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Jukebox_song_definition"
     },
     {
       "id": "pack_mcmeta",
@@ -347,7 +357,7 @@
       "tags": ["worldgen"],
       "schema": "structure",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Structure/JSON_format"
+      "wiki": "https://minecraft.wiki/w/Custom_structure"
     },
     {
       "id": "worldgen/structure_set",
@@ -412,7 +422,7 @@
       "id": "tag/block",
       "url": "tags/block",
       "tags": ["tags"],
-      "path": "tags/blocks",
+      "path": "tags/block",
       "schema": "block_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -429,7 +439,7 @@
       "id": "tag/entity_type",
       "url": "tags/entity-type",
       "tags": ["tags"],
-      "path": "tags/entity_types",
+      "path": "tags/entity_type",
       "schema": "entity_type_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -437,7 +447,7 @@
       "id": "tag/fluid",
       "url": "tags/fluid",
       "tags": ["tags"],
-      "path": "tags/fluids",
+      "path": "tags/fluid",
       "schema": "fluid_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -445,7 +455,7 @@
       "id": "tag/game_event",
       "url": "tags/game-event",
       "tags": ["tags"],
-      "path": "tags/game_events",
+      "path": "tags/game_event",
       "schema": "game_event_tag",
       "minVersion": "1.17",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
@@ -454,7 +464,7 @@
       "id": "tag/item",
       "url": "tags/item",
       "tags": ["tags"],
-      "path": "tags/items",
+      "path": "tags/item",
       "schema": "item_tag",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
@@ -527,6 +537,15 @@
       "tags": ["tags"],
       "path": "tags/cat_variant",
       "schema": "cat_variant_tag",
+      "minVersion": "1.19",
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+    },
+    {
+      "id": "tag/enchantment",
+      "url": "tags/enchantment",
+      "tags": ["tags"],
+      "path": "tags/enchantment",
+      "schema": "enchantment_tag",
       "minVersion": "1.19",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },

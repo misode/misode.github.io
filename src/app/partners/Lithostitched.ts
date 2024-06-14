@@ -1,11 +1,11 @@
 import type { CollectionRegistry, ResourceType, SchemaRegistry } from '@mcschema/core'
 import { BooleanNode, Case, ChoiceNode, ListNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
-import { VersionId } from '../services/Schemas.js'
+import type { VersionId } from '../services/Schemas.js'
 
 
 const ID = 'lithostitched'
 
-export function initLithostitched(schemas: SchemaRegistry, collections: CollectionRegistry, id: VersionId) {
+export function initLithostitched(schemas: SchemaRegistry, collections: CollectionRegistry, version: VersionId) {
 	const Reference = RawReference.bind(undefined, schemas)
 	const StringNode = RawStringNode.bind(undefined, collections)
 
@@ -67,10 +67,12 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 		}
 	)
 
-	// Is this good code? Debatable!
-	let modifier_types = [
+	collections.register(`${ID}:modifier_type`, [
 		'lithostitched:add_biome_spawns',
 		'lithostitched:add_features',
+		...(version === '1.20.5' || version === '1.21')
+			? ['lithostitched:add_pool_aliases']
+			: [],
 		'lithostitched:add_structure_set_entries',
 		'lithostitched:add_surface_rule',
 		'lithostitched:add_template_pool_elements',
@@ -81,14 +83,7 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 		'lithostitched:remove_structures_from_structure_set',
 		'lithostitched:replace_climate',
 		'lithostitched:replace_effects',
-	]
-
-	if (id == "1.20.5" || id == "1.21") {
-		modifier_types.push('lithostitched:add_pool_aliases')
-		modifier_types.sort()
-	}
-
-	collections.register(`${ID}:modifier_type`, modifier_types)
+	])
 
 	collections.register(`${ID}:modifier_predicate_type`, [
 		'lithostitched:all_of',
@@ -101,7 +96,7 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 	schemas.register(`${ID}:worldgen_modifier`, Mod(ObjectNode({
 		type: StringNode({ validator: 'resource', params: { pool: `${ID}:modifier_type` as any } }),
 		predicate: Mod(Opt(Reference(`${ID}:modifier_predicate`)), {
-			enabled: () => id !== "1.21"
+			enabled: () => version !== '1.21',
 		}),
 		[Switch]: [{ push: 'type' }],
 		[Case]: {
@@ -127,7 +122,7 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 			},
 			'lithostitched:add_pool_aliases': {
 				structure: StringNode({ validator: 'resource', params: { pool: '$worldgen/structure' } }),
-				pool_aliases: Reference('pool_alias_binding')
+				pool_aliases: Reference('pool_alias_binding'),
 			},
 			'lithostitched:add_structure_set_entries': {
 				structure_set: StringNode({ validator: 'resource', params: { pool: '$worldgen/structure_set' } }),
