@@ -427,15 +427,6 @@
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
-      "id": "tag/enchantment",
-      "url": "tags/enchantment",
-      "tags": ["tags"],
-      "path": "tags/enchantment",
-      "schema": "enchantment_tag",
-      "minVersion": "1.20.5",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
-    },
-    {
       "id": "tag/entity_type",
       "url": "tags/entity-type",
       "tags": ["tags"],
