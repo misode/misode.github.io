@@ -58,6 +58,7 @@
 
   "lithostitched:modifier_type.lithostitched:add_biome_spawns": "Add biome spawns",
   "lithostitched:modifier_type.lithostitched:add_features": "Add features",
+  "lithostitched:modifier_type.lithostitched:add_pool_aliases": "Add pool aliases",
   "lithostitched:modifier_type.lithostitched:add_structure_set_entries": "Add structure set entries",
   "lithostitched:modifier_type.lithostitched:add_surface_rule": "Add surface rule",
   "lithostitched:modifier_type.lithostitched:add_template_pool_elements": "Add template pool elements",
