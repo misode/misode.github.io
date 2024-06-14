@@ -1,10 +1,11 @@
 import type { CollectionRegistry, ResourceType, SchemaRegistry } from '@mcschema/core'
 import { BooleanNode, Case, ChoiceNode, ListNode, Mod, NumberNode, ObjectNode, Opt, Reference as RawReference, StringNode as RawStringNode, Switch } from '@mcschema/core'
+import type { VersionId } from '../services/Schemas.js'
 
 
 const ID = 'lithostitched'
 
-export function initLithostitched(schemas: SchemaRegistry, collections: CollectionRegistry) {
+export function initLithostitched(schemas: SchemaRegistry, collections: CollectionRegistry, version: VersionId) {
 	const Reference = RawReference.bind(undefined, schemas)
 	const StringNode = RawStringNode.bind(undefined, collections)
 
@@ -69,6 +70,9 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 	collections.register(`${ID}:modifier_type`, [
 		'lithostitched:add_biome_spawns',
 		'lithostitched:add_features',
+		...(version === '1.20.5' || version === '1.21')
+			? ['lithostitched:add_pool_aliases']
+			: [],
 		'lithostitched:add_structure_set_entries',
 		'lithostitched:add_surface_rule',
 		'lithostitched:add_template_pool_elements',
@@ -91,7 +95,9 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 
 	schemas.register(`${ID}:worldgen_modifier`, Mod(ObjectNode({
 		type: StringNode({ validator: 'resource', params: { pool: `${ID}:modifier_type` as any } }),
-		predicate: Opt(Reference(`${ID}:modifier_predicate`)),
+		predicate: Mod(Opt(Reference(`${ID}:modifier_predicate`)), {
+			enabled: () => version !== '1.21',
+		}),
 		[Switch]: [{ push: 'type' }],
 		[Case]: {
 			'lithostitched:add_biome_spawns': {
@@ -113,6 +119,10 @@ export function initLithostitched(schemas: SchemaRegistry, collections: Collecti
 				biomes: Tag('$worldgen/biome'),
 				features: Tag('$worldgen/configured_feature'),
 				step: StringNode({ enum: 'decoration_step' }),
+			},
+			'lithostitched:add_pool_aliases': {
+				structure: StringNode({ validator: 'resource', params: { pool: '$worldgen/structure' } }),
+				pool_aliases: Reference('pool_alias_binding'),
 			},
 			'lithostitched:add_structure_set_entries': {
 				structure_set: StringNode({ validator: 'resource', params: { pool: '$worldgen/structure_set' } }),
