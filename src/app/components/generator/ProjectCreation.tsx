@@ -45,7 +45,7 @@ export function ProjectCreation({ onClose }: Props) {
 			readZip(file).then(async (entries) => {
 				const project: Partial<Project> = { files: [] }
 				await Promise.all(entries.map(async (entry) => {
-					const file = disectFilePath(entry[0])
+					const file = disectFilePath(entry[0], version)
 					if (file) {
 						try {
 							const data = await parseSource(entry[1], 'json')

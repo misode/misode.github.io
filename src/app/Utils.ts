@@ -8,7 +8,10 @@ import { quat, vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
+import type { ConfigGenerator } from './Config.js'
 import config from './Config.js'
+import type { VersionId } from './services/index.js'
+import { checkVersion } from './services/index.js'
 
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
@@ -580,4 +583,13 @@ export function parseGitPatch(patch: string) {
 		}
 	}
 	return result
+}
+
+const legacyFolders = new Set(['loot_table', 'predicate', 'item_modifier', 'advancement', 'recipe', 'tag/function', 'tag/item', 'tag/block', 'tag/fluid', 'tag/entity_type', 'tag/game_event'])
+export function genPath(gen: ConfigGenerator, version: VersionId) {
+	const path = gen.path ?? gen.id
+	if (!checkVersion(version, '1.21') && legacyFolders.has(gen.id)) {
+		return path + 's'
+	}
+	return path
 }
