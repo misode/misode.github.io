@@ -48,6 +48,7 @@
   "fields": "Fields",
   "follow_reference": "Follow reference",
   "format.json": "JSON",
+  "format.snbt": "SNBT",
   "format.yaml": "YAML",
   "generate_new_color": "Generate new color",
   "generate_new_seed": "Generate new seed",

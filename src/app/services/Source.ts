@@ -1,3 +1,4 @@
+import { NbtByte, NbtCompound, NbtDouble, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate'
 import yaml from 'js-yaml'
 import { Store } from '../Store.js'
 
@@ -26,6 +27,10 @@ const FORMATS: Record<string, {
 		},
 		stringify: (v, i) => (commentJson ?? JSON).stringify(v, null, i) + '\n',
 	},
+	snbt: {
+		parse: async (v) => NbtTag.fromString(v).toSimplifiedJson(),
+		stringify: (v, _i) => jsonToNbt(v).toPrettyString(),
+	},
 	yaml: {
 		parse: async (v) => yaml.load(v),
 		stringify: (v, i) => yaml.dump(v, {
@@ -33,6 +38,28 @@ const FORMATS: Record<string, {
 			indent: typeof i === 'string' ? 4 : i,
 		}),
 	},
+}
+
+function jsonToNbt(value: unknown): NbtTag {
+	if (typeof value === 'string') {
+		return new NbtString(value)
+	}
+	if (typeof value === 'number') {
+		return Number.isInteger(value) ? new NbtInt(value) : new NbtDouble(value)
+	}
+	if (typeof value === 'boolean') {
+		return new NbtByte(value)
+	}
+	if (Array.isArray(value)) {
+		return new NbtList(value.map(jsonToNbt))
+	}
+	if (typeof value === 'object' && value !== null) {
+		return new NbtCompound(
+			new Map(Object.entries(value ?? {})
+				.map(([k, v]) => [k, jsonToNbt(v)]))
+		)
+	}
+	throw new Error(`Could not convert ${value} to NBT`)
 }
 
 export function stringifySource(data: unknown, format?: string, indent?: string) {

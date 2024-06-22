@@ -153,7 +153,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	useEffect(() => {
 		if (!editor.current || !retransform.current) return
 		if (!highlighting || braceLoaded) {
-			editor.current.configure(indent, format)
+			editor.current.configure(indent, format === 'snbt' ? 'yaml' : format)
 			retransform.current()
 		}
 	}, [indent, format, highlighting, braceLoaded])
