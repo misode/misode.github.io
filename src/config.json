@@ -154,9 +154,9 @@
     },
     {
       "id": "1.21",
-      "dynamic": true,
+      "ref": "1.21",
       "name": "1.21",
-      "pack_format": 43,
+      "pack_format": 48,
       "show": true
     }
   ],
