@@ -154,9 +154,16 @@
     },
     {
       "id": "1.21",
-      "ref": "1.21",
-      "name": "1.21",
+      "ref": "1.21.1",
+      "name": "1.21 — 1.21.1",
       "pack_format": 48,
+      "show": true
+    },
+    {
+      "id": "1.21.2",
+      "dynamic": true,
+      "name": "1.21.2",
+      "pack_format": 49,
       "show": true
     }
   ],
@@ -264,6 +271,12 @@
       "schema": "jukebox_song",
       "minVersion": "1.21",
       "wiki": "https://minecraft.wiki/w/Jukebox_song_definition"
+    },
+    {
+      "id": "instrument",
+      "url": "instrument",
+      "schema": "instrument",
+      "minVersion": "1.21.2"
     },
     {
       "id": "pack_mcmeta",

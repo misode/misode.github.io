@@ -68,6 +68,7 @@
   "generator.error_min_version": "The minimum version for this generator is %0%",
   "generator.font": "Font",
   "generator.immersive_weathering.block_growth": "Block Growth",
+  "generator.instrument": "Instrument",
   "generator.item_modifier": "Item Modifier",
   "generator.jukebox_song": "Jukebox Song",
   "generator.lithostitched.worldgen_modifier": "Worldgen Modifier",
