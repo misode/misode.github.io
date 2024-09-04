@@ -163,7 +163,7 @@
       "id": "1.21.2",
       "dynamic": true,
       "name": "1.21.2",
-      "pack_format": 49,
+      "pack_format": 52,
       "show": true
     }
   ],
@@ -276,6 +276,12 @@
       "id": "instrument",
       "url": "instrument",
       "schema": "instrument",
+      "minVersion": "1.21.2"
+    },
+    {
+      "id": "trial_spawner",
+      "url": "trial-spawner",
+      "schema": "trial_spawner",
       "minVersion": "1.21.2"
     },
     {
