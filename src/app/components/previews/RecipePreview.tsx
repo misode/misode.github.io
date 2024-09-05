@@ -172,14 +172,18 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 			items.set(resultSlot, base)
 		}
 	} else if (typeof result === 'string') {
-		items.set(resultSlot, new ItemStack(Identifier.parse(result), 1))
+		try {
+			items.set(resultSlot, new ItemStack(Identifier.parse(result), 1))
+		} catch (e) {}
 	} else if (typeof result === 'object' && result !== null) {
 		const id = typeof result.id === 'string' ? result.id
 			: typeof result.item === 'string' ? result.item
 				: 'minecraft:air'
 		const count = typeof result.count === 'number' ? result.count : 1
 		// TODO: add components
-		items.set(resultSlot, new ItemStack(Identifier.parse(id), count))
+		try {
+			items.set(resultSlot, new ItemStack(Identifier.parse(id), count))
+		} catch (e) {}
 	}
 
 	return items
