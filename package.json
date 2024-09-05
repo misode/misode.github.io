@@ -30,7 +30,7 @@
     "@mcschema/java-1.20.3": "^0.0.14",
     "@mcschema/java-1.20.5": "^0.0.39",
     "@mcschema/java-1.21": "^0.0.24",
-    "@mcschema/java-1.21.2": "^0.0.6",
+    "@mcschema/java-1.21.2": "^0.0.8",
     "@mcschema/locales": "^0.1.104",
     "@zip.js/zip.js": "^2.4.5",
     "brace": "^0.11.1",
