@@ -1,18 +1,17 @@
 import { DataModel } from '@mcschema/core'
 import { Identifier, ItemStack } from 'deepslate'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { useLocale, useVersion } from '../../contexts/index.js'
+import { useLocale } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { fetchAllPresets } from '../../services/index.js'
+import { checkVersion, fetchAllPresets, VersionId } from '../../services/index.js'
 import { Btn, BtnMenu } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
 
 const ANIMATION_TIME = 1000
 
-export const RecipePreview = ({ data }: PreviewProps) => {
+export const RecipePreview = ({ data, version }: PreviewProps) => {
 	const { locale } = useLocale()
-	const { version } = useVersion()
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const [animation, setAnimation] = useState(0)
 	const overlay = useRef<HTMLDivElement>(null)
@@ -31,7 +30,7 @@ export const RecipePreview = ({ data }: PreviewProps) => {
 	const recipe = DataModel.unwrapLists(data)
 	const state = JSON.stringify(recipe)
 	const items = useMemo<Map<Slot, ItemStack>>(() => {
-		return placeItems(recipe, animation, itemTags ?? new Map())
+		return placeItems(version, recipe, animation, itemTags ?? new Map())
 	}, [state, animation, itemTags])
 
 	const gui = useMemo(() => {
@@ -100,7 +99,7 @@ function slotStyle(slot: Slot) {
 	}
 }
 
-function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) {
+function placeItems(version: VersionId, recipe: any, animation: number, itemTags: Map<string, any>) {
 	const items = new Map<Slot, ItemStack>()
 	const type: string = recipe.type?.replace(/^minecraft:/, '')
 	if (!type || type.startsWith('crafting_special') || type === 'crafting_decorated_pot') {
@@ -110,7 +109,7 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 	if (type === 'crafting_shapeless') {
 		const ingredients: any[] = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
 		ingredients.forEach((ingredient, i) => {
-			const choices = allIngredientChoices(ingredient, itemTags)
+			const choices = allIngredientChoices(version, ingredient, itemTags)
 			if (i >= 0 && i < 9 && choices.length > 0) {
 				const choice = choices[(3 * i + animation) % choices.length]
 				items.set(`crafting.${i}` as Slot, choice)
@@ -119,7 +118,7 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 	} else if (type === 'crafting_shaped') {
 		const keys = new Map<string, ItemStack>()
 		for (const [key, ingredient] of Object.entries(recipe.key ?? {})) {
-			const choices = allIngredientChoices(ingredient, itemTags)
+			const choices = allIngredientChoices(version, ingredient, itemTags)
 			if (choices.length > 0) {
 				const choice = choices[animation % choices.length]
 				keys.set(key, choice)
@@ -136,20 +135,20 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 			}
 		}
 	} else if (type === 'smelting' || type === 'smoking' || type === 'blasting' || type === 'campfire_cooking') {
-		const choices = allIngredientChoices(recipe.ingredient, itemTags)
+		const choices = allIngredientChoices(version, recipe.ingredient, itemTags)
 		if (choices.length > 0) {
 			const choice = choices[animation % choices.length]
 			items.set('smelting.ingredient' as Slot, choice)
 		}
 	} else if (type === 'stonecutting') {
-		const choices = allIngredientChoices(recipe.ingredient, itemTags)
+		const choices = allIngredientChoices(version, recipe.ingredient, itemTags)
 		if (choices.length > 0) {
 			const choice = choices[animation % choices.length]
 			items.set('stonecutting.ingredient' as Slot, choice)
 		}
 	} else if (type === 'smithing_transform' || type === 'smithing_trim') {
 		for (const ingredient of ['template', 'base', 'addition'] as const) {
-			const choices = allIngredientChoices(recipe[ingredient], itemTags)
+			const choices = allIngredientChoices(version, recipe[ingredient], itemTags)
 			if (choices.length > 0) {
 				const choice = choices[animation % choices.length]
 				items.set(`smithing.${ingredient}`, choice)
@@ -189,28 +188,48 @@ function placeItems(recipe: any, animation: number, itemTags: Map<string, any>) 
 	return items
 }
 
-function allIngredientChoices(ingredient: any, itemTags: Map<string, any>): ItemStack[] {
+function allIngredientChoices(version: VersionId, ingredient: any, itemTags: Map<string, any>): ItemStack[] {
 	if (Array.isArray(ingredient)) {
-		return ingredient.flatMap(i => allIngredientChoices(i, itemTags))
+		return ingredient.flatMap(i => allIngredientChoices(version, i, itemTags))
 	}
-	if (typeof ingredient === 'object' && ingredient !== null) {
-		if (typeof ingredient.item === 'string') {
-			try {
-				return [new ItemStack(Identifier.parse(ingredient.item), 1)]
-			} catch (e) {}
-		} else if (typeof ingredient.tag === 'string') {
-			const tag: any = itemTags.get(ingredient.tag.replace(/^minecraft:/, ''))
-			if (typeof tag === 'object' && tag !== null && Array.isArray(tag.values)) {
-				return tag.values.flatMap((value: any) => {
-					if (typeof value !== 'string') return []
-					if (value.startsWith('#')) return allIngredientChoices({ tag: value.slice(1) }, itemTags)
-					try {
-						return [new ItemStack(Identifier.parse(value), 1)]
-					} catch (e) {}
-					return []
-				})
+
+	if (checkVersion(version, '1.21.2')) {
+		if (ingredient !== null) {
+			if (typeof ingredient === 'string') {
+				if (ingredient.startsWith('#')) {
+					return parseTag(version, ingredient.slice(1), itemTags)
+				}
+				return [new ItemStack(Identifier.parse(ingredient), 1)]
 			}
 		}
+
+		return [new ItemStack(Identifier.create('stone'), 1)]
+	} else {
+		if (typeof ingredient === 'object' && ingredient !== null) {
+			if (typeof ingredient.item === 'string') {
+				try {
+					return [new ItemStack(Identifier.parse(ingredient.item), 1)]
+				} catch (e) {}
+			} else if (typeof ingredient.tag === 'string') {
+				return parseTag(version, ingredient.tag, itemTags)
+			}
+		}
+	}
+
+	return []
+}
+
+function parseTag(version: VersionId, ingredient: any, itemTags: Map<string, any>): ItemStack[] {
+	const tag: any = itemTags.get(ingredient.replace(/^minecraft:/, ''))
+	if (typeof tag === 'object' && tag !== null && Array.isArray(tag.values)) {
+		return tag.values.flatMap((value: any) => {
+			if (typeof value !== 'string') return []
+			if (value.startsWith('#')) return allIngredientChoices(version, { tag: value.slice(1) }, itemTags)
+			try {
+				return [new ItemStack(Identifier.parse(value), 1)]
+			} catch (e) {}
+			return []
+		})
 	}
 	return []
 }
