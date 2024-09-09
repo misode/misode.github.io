@@ -1,13 +1,13 @@
 import { useMemo } from 'preact/hooks'
 import contributors from '../../contributors.json'
-import { Store } from '../Store.js'
-import { shuffle } from '../Utils.js'
-import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, ToolCard, ToolGroup } from '../components/index.js'
+import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, Octicon, ToolCard, ToolGroup } from '../components/index.js'
 import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import { fetchChangelogs, fetchVersions, fetchWhatsNew } from '../services/DataFetcher.js'
+import { Store } from '../Store.js'
+import { shuffle } from '../Utils.js'
 
 const MIN_FAVORITES = 2
 const MAX_FAVORITES = 5
@@ -27,20 +27,20 @@ export function Home({}: Props) {
 				{smallScreen ? /* mobile */ <>
 					<PopularGenerators />
 					<FavoriteGenerators />
+					<Spyglass />
 					<WhatsNew />
 					<Changelog />
 					<Versions />
 					<Tools />
-					<Guides />
 				</> : /* desktop */ <>
 					<div class="card-column">
 						<PopularGenerators />
 						<Changelog />
 						<Versions />
-						<Guides />
 					</div>
 					{!smallScreen && <div class="card-column">
 						<FavoriteGenerators />
+						<Spyglass />
 						<WhatsNew />
 						<Tools />
 					</div>}
@@ -85,10 +85,17 @@ function FavoriteGenerators() {
 	</ToolGroup>
 }
 
-function Guides() {
-	const { locale } = useLocale()
-
-	return <ToolGroup title={locale('guides')} link="/guides/" titleIcon="arrow_right" />
+function Spyglass() {
+	return <a class="tool-group tool-card p-[10px] no-underline" href="https://marketplace.visualstudio.com/items?itemName=SPGoding.datapack-language-server" target="_blank">
+		<div class="flex items-center">
+			<img src="/images/spyglass.png" alt="Spyglass Logo" width="42" height="42" />
+			<h3 class="ml-2 text-[1.17em]">
+				Datapack Helper Plus
+				{Octicon.arrow_right}
+			</h3>
+		</div>
+		<p class="mt-2">VSCode extension with heavy language features, updated to Minecraft 1.21</p>
+	</a>
 }
 
 function Tools() {
