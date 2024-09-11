@@ -20,6 +20,7 @@ export const Icons = {
 	recipe: <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M20 2H12V10L20 10V2ZM10 2V10H2V4C2 2.89543 2.89543 2 4 2H10ZM2 20L2 12H10V20H2ZM2 22L2 28C2 29.1046 2.89543 30 4 30H10V22H2ZM12 22V30H20V22L12 22ZM22 22V30H28C29.1046 30 30 29.1046 30 28V22H22ZM30 20V12H22V20H30ZM20 20L12 20V12L20 12V20ZM30 4V10H22V2H28C29.1046 2 30 2.89543 30 4ZM4 0C1.79086 0 0 1.79086 0 4V28C0 30.2091 1.79086 32 4 32H28C30.2091 32 32 30.2091 32 28V4C32 1.79086 30.2091 0 28 0H4Z"/></svg>,
 	'tag/block': TAG,
 	'tag/damage_type': TAG,
+	'tag/enchantment': TAG,
 	'tag/entity_type': TAG,
 	'tag/fluid': TAG,
 	'tag/game_event': TAG,
