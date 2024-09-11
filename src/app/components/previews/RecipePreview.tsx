@@ -3,7 +3,9 @@ import { Identifier, ItemStack } from 'deepslate'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { checkVersion, fetchAllPresets, VersionId } from '../../services/index.js'
+import type { VersionId } from '../../services/index.js'
+import { checkVersion, fetchAllPresets } from '../../services/index.js'
+import { jsonToNbt } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
@@ -171,18 +173,17 @@ function placeItems(version: VersionId, recipe: any, animation: number, itemTags
 			items.set(resultSlot, base)
 		}
 	} else if (typeof result === 'string') {
-		try {
-			items.set(resultSlot, new ItemStack(Identifier.parse(result), 1))
-		} catch (e) {}
+		items.set(resultSlot, new ItemStack(Identifier.parse(result), 1))
 	} else if (typeof result === 'object' && result !== null) {
 		const id = typeof result.id === 'string' ? result.id
 			: typeof result.item === 'string' ? result.item
 				: 'minecraft:air'
-		const count = typeof result.count === 'number' ? result.count : 1
-		// TODO: add components
-		try {
-			items.set(resultSlot, new ItemStack(Identifier.parse(id), count))
-		} catch (e) {}
+		if (id !== 'minecraft:air') {
+			const count = typeof result.count === 'number' ? result.count : 1
+			const components = new Map(Object.entries(result.components ?? {})
+				.map(([k, v]) => [k, jsonToNbt(v)]))
+			items.set(resultSlot, new ItemStack(Identifier.parse(id), count, components))
+		}
 	}
 
 	return items
@@ -207,9 +208,7 @@ function allIngredientChoices(version: VersionId, ingredient: any, itemTags: Map
 	} else {
 		if (typeof ingredient === 'object' && ingredient !== null) {
 			if (typeof ingredient.item === 'string') {
-				try {
-					return [new ItemStack(Identifier.parse(ingredient.item), 1)]
-				} catch (e) {}
+				return [new ItemStack(Identifier.parse(ingredient.item), 1)]
 			} else if (typeof ingredient.tag === 'string') {
 				return parseTag(version, ingredient.tag, itemTags)
 			}
@@ -225,10 +224,7 @@ function parseTag(version: VersionId, ingredient: any, itemTags: Map<string, any
 		return tag.values.flatMap((value: any) => {
 			if (typeof value !== 'string') return []
 			if (value.startsWith('#')) return allIngredientChoices(version, { tag: value.slice(1) }, itemTags)
-			try {
-				return [new ItemStack(Identifier.parse(value), 1)]
-			} catch (e) {}
-			return []
+			return [new ItemStack(Identifier.parse(value), 1)]
 		})
 	}
 	return []

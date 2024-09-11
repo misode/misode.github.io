@@ -1,8 +1,8 @@
 import type { DataModel } from '@mcschema/core'
 import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
-import type { Random } from 'deepslate'
-import { Matrix3, Matrix4, Vector } from 'deepslate'
+import type { Identifier, NbtTag, Random } from 'deepslate'
+import { Matrix3, Matrix4, NbtByte, NbtCompound, NbtDouble, NbtInt, NbtList, NbtString, Vector } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { quat, vec2 } from 'gl-matrix'
 import yaml from 'js-yaml'
@@ -592,4 +592,46 @@ export function genPath(gen: ConfigGenerator, version: VersionId) {
 		return path + 's'
 	}
 	return path
+}
+
+export function jsonToNbt(value: unknown): NbtTag {
+	if (typeof value === 'string') {
+		return new NbtString(value)
+	}
+	if (typeof value === 'number') {
+		return Number.isInteger(value) ? new NbtInt(value) : new NbtDouble(value)
+	}
+	if (typeof value === 'boolean') {
+		return new NbtByte(value)
+	}
+	if (Array.isArray(value)) {
+		return new NbtList(value.map(jsonToNbt))
+	}
+	if (typeof value === 'object' && value !== null) {
+		return new NbtCompound(
+			new Map(Object.entries(value ?? {})
+				.map(([k, v]) => [k, jsonToNbt(v)]))
+		)
+	}
+	return new NbtByte(0)
+}
+
+export function mergeTextComponentStyles(text: unknown, style: Record<string, unknown>) {
+	if (typeof text === 'string') {
+		return { ...style, text }
+	}
+	if (Array.isArray(text)) {
+		return { ...style, ...text[0], extra: text.slice(1) }
+	}
+	if (typeof text === 'object' && text !== null) {
+		return { ...style, ...text }
+	}
+	return { ...style, text: '' }
+}
+
+export function makeDescriptionId(prefix: string, id: Identifier | undefined) {
+	if (id === undefined) {
+		return `${prefix}.unregistered_sadface`
+	}
+	return `${prefix}.${id.namespace}.${id.path.replaceAll('/', '.')}`
 }

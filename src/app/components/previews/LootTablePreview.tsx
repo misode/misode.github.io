@@ -1,15 +1,21 @@
 import { DataModel } from '@mcschema/core'
 import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
-import { clamp, randomSeed } from '../../Utils.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import { checkVersion, fetchItemComponents } from '../../services/index.js'
+import { clamp, jsonToNbt, randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
+import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
 import type { PreviewProps } from './index.js'
 import { generateLootTable } from './LootTable.js'
+import { generateLootTable as generateLootTable1204 } from './LootTable1204.js'
 
 export const LootTablePreview = ({ data }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
+	const use1204 = checkVersion(version, undefined, '1.20.4')
+
 	const [seed, setSeed] = useState(randomSeed())
 	const [luck, setLuck] = useState(0)
 	const [daytime, setDaytime] = useState(0)
@@ -18,18 +24,31 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const overlay = useRef<HTMLDivElement>(null)
 
+	const { value: itemComponents } = useAsync(() => {
+		return use1204 ? Promise.resolve(undefined) : fetchItemComponents(version)
+	}, [use1204, version])
+
 	const table = DataModel.unwrapLists(data)
 	const state = JSON.stringify(table)
 	const items = useMemo(() => {
-		return generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
-	}, [version, seed, luck, daytime, weather, mixItems, state])
+		if (use1204) {
+			return generateLootTable1204(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
+		} else {
+			if (itemComponents === undefined) {
+				return []
+			}
+			return generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default', getBaseComponents: (id) => new Map([...(itemComponents.get(id) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])) })
+		}
+	}, [version, seed, luck, daytime, weather, mixItems, state, itemComponents])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">
 			<img src="/images/container.png" alt="Container background" class="pixelated" draggable={false} />
 			{items.map(({ slot, item }) =>
 				<div key={slot} style={slotStyle(slot)}>
-					<ItemDisplay item={item} slotDecoration={true} advancedTooltip={advancedTooltips} />
+					{use1204 ?
+						<ItemDisplay1204 item={item as any} slotDecoration={true} advancedTooltip={advancedTooltips} /> :
+						<ItemDisplay item={item as any} slotDecoration={true} advancedTooltip={advancedTooltips} />}
 				</div>
 			)}
 		</div>
