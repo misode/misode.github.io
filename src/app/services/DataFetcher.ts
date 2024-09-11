@@ -120,6 +120,31 @@ export async function fetchBlockStates(versionId: VersionId) {
 	return result
 }
 
+export async function fetchItemComponents(versionId: VersionId) {
+	console.debug(`[fetchItemComponents] ${versionId}`)
+	const version = config.versions.find(v => v.id === versionId)!
+	const result = new Map<string, Map<string, unknown>>()
+	try {
+		const data = await cachedFetch<Record<string, Record<string, unknown>>>(`${mcmeta(version, 'summary')}/item_components/data.min.json`)
+		for (const [id, components] of Object.entries(data)) {
+			const base = new Map<string, unknown>()
+			if (Array.isArray(components)) { // syntax before 1.21
+				for (const entry of components) {
+					base.set(entry.type, entry.value)
+				}
+			} else {
+				for (const [key, value] of Object.entries(components)) {
+					base.set(key, value)
+				}
+			}
+			result.set('minecraft:' + id, base)
+		}
+	} catch (e) {
+		console.warn('Error occurred while fetching item components:', message(e))
+	}
+	return result
+}
+
 export async function fetchPreset(versionId: VersionId, registry: string, id: string) {
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
 	const version = config.versions.find(v => v.id === versionId)!
