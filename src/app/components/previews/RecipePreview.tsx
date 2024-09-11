@@ -218,12 +218,12 @@ function allIngredientChoices(version: VersionId, ingredient: any, itemTags: Map
 	return []
 }
 
-function parseTag(version: VersionId, ingredient: any, itemTags: Map<string, any>): ItemStack[] {
-	const tag: any = itemTags.get(ingredient.replace(/^minecraft:/, ''))
+function parseTag(version: VersionId, tagId: any, itemTags: Map<string, any>): ItemStack[] {
+	const tag: any = itemTags.get(tagId.replace(/^minecraft:/, ''))
 	if (typeof tag === 'object' && tag !== null && Array.isArray(tag.values)) {
 		return tag.values.flatMap((value: any) => {
 			if (typeof value !== 'string') return []
-			if (value.startsWith('#')) return allIngredientChoices(version, { tag: value.slice(1) }, itemTags)
+			if (value.startsWith('#')) return parseTag(version, value.slice(1), itemTags)
 			return [new ItemStack(Identifier.parse(value), 1)]
 		})
 	}
