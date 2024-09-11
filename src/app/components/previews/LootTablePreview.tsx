@@ -2,7 +2,7 @@ import { DataModel } from '@mcschema/core'
 import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
-import { checkVersion, fetchItemComponents } from '../../services/index.js'
+import { checkVersion, fetchAllPresets, fetchItemComponents } from '../../services/index.js'
 import { clamp, jsonToNbt, randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
@@ -14,7 +14,7 @@ import { generateLootTable as generateLootTable1204 } from './LootTable1204.js'
 export const LootTablePreview = ({ data }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
-	const use1204 = checkVersion(version, undefined, '1.20.4')
+	const use1204 = !checkVersion(version, '1.20.5')
 
 	const [seed, setSeed] = useState(randomSeed())
 	const [luck, setLuck] = useState(0)
@@ -24,22 +24,39 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const overlay = useRef<HTMLDivElement>(null)
 
-	const { value: itemComponents } = useAsync(() => {
-		return use1204 ? Promise.resolve(undefined) : fetchItemComponents(version)
-	}, [use1204, version])
+	const { value: dependencies, loading } = useAsync(() => {
+		return Promise.all([
+			fetchAllPresets(version, 'tag/item'),
+			fetchAllPresets(version, 'loot_table'),
+			use1204 ? Promise.resolve(undefined) : fetchItemComponents(version),
+		])
+	}, [version])
 
 	const table = DataModel.unwrapLists(data)
 	const state = JSON.stringify(table)
 	const items = useMemo(() => {
-		if (use1204) {
-			return generateLootTable1204(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default' })
-		} else {
-			if (itemComponents === undefined) {
-				return []
-			}
-			return generateLootTable(table, { version, seed, luck, daytime, weather, stackMixer: mixItems ? 'container' : 'default', getBaseComponents: (id) => new Map([...(itemComponents.get(id) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])) })
+		if (dependencies === undefined || loading) {
+			return []
 		}
-	}, [version, seed, luck, daytime, weather, mixItems, state, itemComponents])
+		const [itemTags, lootTables, itemComponents] = dependencies
+		if (use1204) {
+			return generateLootTable1204(table, {
+				version, seed, luck, daytime, weather,
+				stackMixer: mixItems ? 'container' : 'default',
+				getItemTag: (id) => (itemTags.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
+				getLootTable: (id) => lootTables.get(id.replace(/^minecraft:/, '')),
+				getPredicate: () => undefined,
+			})
+		}
+		return generateLootTable(table, {
+			version, seed, luck, daytime, weather,
+			stackMixer: mixItems ? 'container' : 'default',
+			getItemTag: (id) => (itemTags.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
+			getLootTable: (id) => lootTables.get(id.replace(/^minecraft:/, '')),
+			getPredicate: () => undefined,
+			getBaseComponents: (id) => new Map([...(itemComponents?.get(id) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
+		})
+	}, [version, seed, luck, daytime, weather, mixItems, state, dependencies, loading])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">

@@ -27,6 +27,9 @@ interface LootOptions {
 	daytime: number,
 	weather: string,
 	stackMixer: StackMixer,
+	getItemTag(id: string): string[],
+	getLootTable(id: string): any,
+	getPredicate(id: string): any,
 	getBaseComponents(id: string): Map<string, NbtTag>,
 }
 
@@ -35,9 +38,6 @@ interface LootContext extends LootOptions {
 	luck: number
 	weather: string,
 	dayTime: number,
-	getItemTag(id: string): string[],
-	getLootTable(id: string): any,
-	getPredicate(id: string): any,
 }
 
 export function generateLootTable(lootTable: any, options: LootOptions) {
@@ -133,10 +133,6 @@ function createLootContext(options: LootOptions): LootContext {
 		luck: options.luck,
 		weather: options.weather,
 		dayTime: options.daytime,
-		// TODO
-		getItemTag: () => [],
-		getLootTable: () => ({ pools: [] }),
-		getPredicate: () => [],
 	}
 }
 
@@ -207,7 +203,7 @@ function expandEntry(entry: any, ctx: LootContext, consumer: (entry: any) => voi
 			return true
 		case 'tag':
 			if (entry.expand) {
-				ctx.getItemTag(entry.tag ?? '').forEach(tagEntry => {
+				ctx.getItemTag(entry.name ?? '').forEach(tagEntry => {
 					consumer({ type: 'item', name: tagEntry })
 				})
 			} else {
@@ -243,7 +239,10 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 			})
 			break
 		case 'loot_table':
-			generateTable(ctx.getLootTable(entry.name), entryConsumer, ctx)
+			const lootTable = typeof entry.value === 'string' ? ctx.getLootTable(entry.value) : entry.value
+			if (lootTable !== undefined) {
+				generateTable(lootTable, entryConsumer, ctx)
+			}
 			break
 		case 'dynamic':
 			// not relevant for this simulation
@@ -365,7 +364,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	},
 	set_count: ({ count, add }) => (item, ctx) => {
 		const oldCount = add ? (item.count) : 0
-		item.count = clamp(oldCount + computeInt(count, ctx), 0, 64)
+		item.count = oldCount + computeInt(count, ctx)
 	},
 	set_custom_data: ({ tag }) => (item) => {
 		try {
@@ -638,7 +637,6 @@ function testItemPredicate(predicate: any, item: ResolvedItem, ctx: LootContext)
 	}
 	if (predicate.count !== undefined) {
 		const { min, max } = prepareIntRange(predicate.count, ctx)
-		console.log(min, max, item.count)
 		if (min > item.count || item.count > max) {
 			return false
 		}

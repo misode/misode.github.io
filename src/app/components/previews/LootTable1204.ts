@@ -25,6 +25,9 @@ interface LootOptions {
 	daytime: number,
 	weather: string,
 	stackMixer: StackMixer,
+	getItemTag(id: string): string[],
+	getLootTable(id: string): any,
+	getPredicate(id: string): any,
 }
 
 interface LootContext extends LootOptions {
@@ -32,9 +35,6 @@ interface LootContext extends LootOptions {
 	luck: number
 	weather: string,
 	dayTime: number,
-	getItemTag(id: string): string[],
-	getLootTable(id: string): any,
-	getPredicate(id: string): any,
 }
 
 export function generateLootTable(lootTable: any, options: LootOptions) {
@@ -130,9 +130,6 @@ function createLootContext(options: LootOptions): LootContext {
 		luck: options.luck,
 		weather: options.weather,
 		dayTime: options.daytime,
-		getItemTag: () => [],
-		getLootTable: () => ({ pools: [] }),
-		getPredicate: () => [],
 	}
 }
 
@@ -203,7 +200,7 @@ function expandEntry(entry: any, ctx: LootContext, consumer: (entry: any) => voi
 			return true
 		case 'tag':
 			if (entry.expand) {
-				ctx.getItemTag(entry.tag ?? '').forEach(tagEntry => {
+				ctx.getItemTag(entry.name ?? '').forEach(tagEntry => {
 					consumer({ type: 'item', name: tagEntry })
 				})
 			} else {
@@ -241,7 +238,10 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 			})
 			break
 		case 'loot_table':
-			generateTable(ctx.getLootTable(entry.name), entryConsumer, ctx)
+			const lootTable = ctx.getLootTable(entry.name)
+			if (lootTable !== undefined) {
+				generateTable(lootTable, entryConsumer, ctx)
+			}
 			break
 		case 'dynamic':
 			// not relevant for this simulation
@@ -659,7 +659,6 @@ const AlwaysHasGlint = new Set([
 ])
 
 export function itemHasGlint(item: ItemStack) {
-	console.log(item)
 	if (AlwaysHasGlint.has(item.id.toString())) {
 		return true
 	}
