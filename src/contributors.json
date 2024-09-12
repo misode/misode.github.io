@@ -18,6 +18,12 @@
     "url": "https://github.com/EpyonProjects"
   },
   {
+    "name": "TelepathicGrunt",
+    "types": ["support", "report"],
+    "avatar": "https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80",
+    "url": "https://github.com/TelepathicGrunt"
+  },
+  {
     "name": "Lambsy",
     "types": ["support"],
     "avatar": "https://avatars.githubusercontent.com/u/22985759?v=4",
@@ -35,10 +41,59 @@
     "url": "https://github.com/Shadowclaimer"
   },
   {
-    "name": "TelepathicGrunt",
-    "types": ["support", "report"],
-    "avatar": "https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80",
-    "url": "https://github.com/TelepathicGrunt"
+    "name": "alumina6767",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/5ebdb30d-9fb6-4a80-b471-e606f1832344_78f4cbda-5ed9-4d76-8a59-3c6d10100357.png"
+  },
+  {
+    "name": "tholleman",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/post/615c6561-04c3-4ab6-91b6-72a447cf7c75_a524398f-ff67-4f8f-93d0-ac9d4a37624d.png",
+    "url": "https://ko-fi.com/V7V5XQM0L"
+  },
+  {
+    "name": "contessa",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon3.png"
+  },
+  {
+    "name": "Zenith",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/tiny_34059247-700e-4f6c-beef-67f1ac223d61.png",
+    "url": "https://ko-fi.com/zenithknight"
+  },
+  {
+    "name": "MyNameIsBhex",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/post/e632119c-639e-4855-ad9a-1652cc7e1815_dd629262-2491-4327-9ea5-5d19ab7836c3.png",
+    "url": "https://ko-fi.com/mynameisbhex"
+  },
+  {
+    "name": "kohara",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/ead82adb-6108-45a7-81f7-fcf323966d3c_tiny.png",
+    "url": "https://ko-fi.com/kohara"
+  },
+  {
+    "name": "ThijquintNL",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon6.png"
+  },
+  {
+    "name": "Nyxiality",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon6.png"
+  },
+  {
+    "name": "Gamer Gourmon",
+    "types": ["support"],
+    "avatar": "https://ko-fi.com/img/anon3.png"
+  },
+  {
+    "name": "FrozenHydrant",
+    "types": ["support"],
+    "avatar": "https://storage.ko-fi.com/cdn/useruploads/post/b0ff9622-a2c6-4110-afb9-6b3ade45fa3f_a007d2f5-2cc4-4059-ba6a-1e6cddae3764.png",
+    "url": "https://ko-fi.com/K3K8MOKXG"
   },
   {
     "name": "Panossa",
@@ -84,7 +139,7 @@
     "url": "https://ko-fi.com/hoponopono"
   },
   {
-    "name": "Flab",
+    "name": "flabbypants",
     "types": ["support"],
     "avatar": "https://ko-fi.com/img/anon2.png"
   },
@@ -92,11 +147,6 @@
     "name": "EnderCraft",
     "types": ["support"],
     "avatar": "https://ko-fi.com/img/anon8.png"
-  },
-  {
-    "name": "alumina6767",
-    "types": ["support"],
-    "avatar": "https://storage.ko-fi.com/cdn/useruploads/5ebdb30d-9fb6-4a80-b471-e606f1832344_78f4cbda-5ed9-4d76-8a59-3c6d10100357.png"
   },
   {
     "name": "SPGoding",
