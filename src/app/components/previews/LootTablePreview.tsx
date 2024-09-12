@@ -1,4 +1,5 @@
 import { DataModel } from '@mcschema/core'
+import { Identifier } from 'deepslate'
 import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -29,6 +30,8 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 			fetchAllPresets(version, 'tag/item'),
 			fetchAllPresets(version, 'loot_table'),
 			use1204 ? Promise.resolve(undefined) : fetchItemComponents(version),
+			checkVersion(version, '1.21') ? fetchAllPresets(version, 'enchantment') : Promise.resolve(undefined),
+			checkVersion(version, '1.21') ? fetchAllPresets(version, 'tag/enchantment') : Promise.resolve(undefined),
 		])
 	}, [version])
 
@@ -38,7 +41,7 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 		if (dependencies === undefined || loading) {
 			return []
 		}
-		const [itemTags, lootTables, itemComponents] = dependencies
+		const [itemTags, lootTables, itemComponents, enchantments, enchantmentTags] = dependencies
 		if (use1204) {
 			return generateLootTable1204(table, {
 				version, seed, luck, daytime, weather,
@@ -54,7 +57,9 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 			getItemTag: (id) => (itemTags.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
 			getLootTable: (id) => lootTables.get(id.replace(/^minecraft:/, '')),
 			getPredicate: () => undefined,
-			getBaseComponents: (id) => new Map([...(itemComponents?.get(id) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
+			getEnchantments: () => enchantments ?? new Map(),
+			getEnchantmentTag: (id) => (enchantmentTags?.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
+			getBaseComponents: (id) => new Map([...(itemComponents?.get(Identifier.parse(id).toString()) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
 		})
 	}, [version, seed, luck, daytime, weather, mixItems, state, dependencies, loading])
 

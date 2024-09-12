@@ -4,7 +4,7 @@ import { Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate/nbt'
 import { ResolvedItem } from '../../services/ResolvedItem.js'
 import type { VersionId } from '../../services/Schemas.js'
-import { clamp, isObject, jsonToNbt } from '../../Utils.js'
+import { clamp, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
 
 export interface SlottedItem {
 	slot: number,
@@ -30,6 +30,8 @@ interface LootOptions {
 	getItemTag(id: string): string[],
 	getLootTable(id: string): any,
 	getPredicate(id: string): any,
+	getEnchantments(): Map<string, any>,
+	getEnchantmentTag(id: string): string[],
 	getBaseComponents(id: string): Map<string, NbtTag>,
 }
 
@@ -278,11 +280,45 @@ function composeFunctions(functions: any[]): LootFunction {
 }
 
 const LootFunctions: Record<string, (params: any) => LootFunction> = {
-	enchant_randomly: () => () => {
-		// TODO
+	enchant_randomly: ({ options, only_compatible }) => (item, ctx) => {
+		let enchantments = options
+			? getHomogeneousList(options, ctx.getEnchantmentTag)
+			: [...ctx.getEnchantments().keys()]
+		if (!item.is('book') && (only_compatible ?? true)) {
+			enchantments = enchantments.filter(e => {
+				const ench = ctx.getEnchantments().get(e.replace(/^minecraft:/, ''))
+				if (!ench) return true
+				const supportedItems = getHomogeneousList(ench.supported_items, ctx.getItemTag)
+				return supportedItems.some(i => item.is(i))
+			})
+		}
+		if (enchantments.length === 0) {
+			return
+		}
+		const pick = enchantments[ctx.random.nextInt(enchantments.length)]
+		const maxLevel = ctx.getEnchantments().get(pick.replace(/^minecraft:/, ''))?.max_level ?? 1
+		const level = ctx.random.nextInt(maxLevel - 1) + 1
+		if (item.is('book')) {
+			item.id = Identifier.create('enchanted_book')
+			item.base = ctx.getBaseComponents(item.id.toString())
+		}
+		updateEnchantments(item, levels => {
+			return levels.set(Identifier.parse(pick).toString(), level)
+		})
 	},
-	enchant_with_levels: () => () => {
-		// TODO
+	enchant_with_levels: ({ options, levels }) => (item, ctx) => {
+		const allowed = getHomogeneousList(options, ctx.getEnchantmentTag)
+		const selected = selectEnchantments(item, computeInt(levels, ctx), allowed, ctx)
+		if (item.is('book')) {
+			item.id = Identifier.create('enchanted_book')
+			item.base = ctx.getBaseComponents(item.id.toString())
+		}
+		updateEnchantments(item, levelsMap => {
+			for (const { id, lvl } of selected) {
+				levelsMap.set(id.toString(), lvl)
+			}
+			return levelsMap
+		})
 	},
 	exploration_map: ({ decoration }) => (item) => {
 		if (!item.is('map')) {
@@ -622,16 +658,25 @@ function prepareIntRange(range: any, ctx: LootContext) {
 	return { min, max }
 }
 
+function getHomogeneousList(value: unknown, tagGetter: (id: string) => string[]): string[] {
+	if (typeof value === 'string') {
+		if (value.startsWith('#')) {
+			return [...new Set(tagGetter(value.slice(1)).flatMap(e => getHomogeneousList(e, tagGetter)))]
+		} else {
+			return [value]
+		}
+	}
+	if (Array.isArray(value)) {
+		return value
+	}
+	return []
+}
+
 function testItemPredicate(predicate: any, item: ResolvedItem, ctx: LootContext) {
 	if (!isObject(predicate)) return false
-	if (typeof predicate.items === 'string') {
-		if (predicate.items.startsWith('#')) {
-			return false // TODO: depends on item tag
-		} else if (!item.id.is(predicate.items)) {
-			return false
-		}
-	} else if (Array.isArray(predicate.items)) {
-		if (!predicate.items.some(i => typeof i === 'string' && item.id.is(i))) {
+	if (predicate.items !== undefined) {
+		const allowedItems = getHomogeneousList(predicate.items, ctx.getItemTag)
+		if (!allowedItems.some(i => item.id.is(i))) {
 			return false
 		}
 	}
@@ -724,4 +769,80 @@ function updateAttributes(item: ResolvedItem, fn: (modifiers: AttributeModifier[
 		.set('modifiers', newModifiersTag)
 		.set('show_in_tooltip', showInTooltip)
 	item.set('attribute_modifiers', newTag)
+}
+
+interface Enchant {
+	id: Identifier
+	lvl: number
+}
+
+function selectEnchantments(item: ResolvedItem, levels: number, options: string[], ctx: LootContext): Enchant[] {
+	const enchantable = item.get('enchantable', tag => tag.isCompound() ? tag.getNumber('value') : undefined)
+	if (enchantable === undefined) {
+		return []
+	}
+	let cost = levels + 1 + ctx.random.nextInt(Math.floor(enchantable / 4 + 1)) + ctx.random.nextInt(Math.floor(enchantable / 4 + 1))
+	const f = (ctx.random.nextFloat() + ctx.random.nextFloat() - 1) * 0.15
+	cost = clamp(Math.round(cost + cost * f), 1, Number.MAX_SAFE_INTEGER)
+	let available = getAvailableEnchantments(item, cost, options, ctx)
+	if (available.length === 0) {
+		return []
+	}
+	function getEnchantWeight(ench: Enchant): number {
+		return ctx.getEnchantments().get(ench.id.toString().replace(/^minecraft:/, ''))?.weight ?? 0
+	}
+	const result: Enchant[] = []
+	const first = getWeightedRandom(ctx.random, available, getEnchantWeight)
+	if (first) result.push(first)
+
+	while (ctx.random.nextInt(50) <= cost) {
+		if (result.length > 0) {
+			const lastAdded = result[result.length - 1]
+			available = available.filter(a => areCompatibleEnchantments(a, lastAdded, ctx))
+		}
+		if (available.length === 0) break
+		const ench = getWeightedRandom(ctx.random, available, getEnchantWeight)
+		if (ench) result.push(ench)
+		cost = Math.floor(cost / 2)
+	}
+
+	return result
+}
+
+function getAvailableEnchantments(item: ResolvedItem, cost: number, options: string[], ctx: LootContext): Enchant[] {
+	const result: Enchant[] = []
+	for (const id of options) {
+		const ench = ctx.getEnchantments().get(id.replace(/^minecraft:/, ''))
+		if (ench === undefined) continue
+		const primaryItems = getHomogeneousList(ench.primary_items ?? ench.supported_items, ctx.getItemTag)
+		if (item.is('book') || primaryItems.some((i: string) => item.id.is(i))) {
+			for (let lvl = ench.max_level; lvl > 0; lvl -= 1) {
+				if (cost >= enchantmentCost(ench.min_cost, lvl) && cost <= enchantmentCost(ench.max_cost, lvl)) {
+					result.push({ id: Identifier.parse(id), lvl })
+				}
+			}
+		}
+	}
+	return result
+}
+
+function enchantmentCost(value: any, level: number): number {
+	return value.base + value.per_level_above_first * (level - 1)
+}
+
+function areCompatibleEnchantments(a: Enchant, b: Enchant, ctx: LootContext) {
+	if (a.id.equals(b.id)) {
+		return false
+	}
+	const enchA = ctx.getEnchantments().get(a.id.toString().replace(/^minecraft:/, ''))
+	const exclusiveA = getHomogeneousList(enchA?.exclusive_set ?? [], ctx.getEnchantmentTag)
+	if (exclusiveA.some(id => b.id.is(id))) {
+		return false
+	}
+	const enchB = ctx.getEnchantments().get(b.id.toString().replace(/^minecraft:/, ''))
+	const exclusiveB = getHomogeneousList(enchB?.exclusive_set ?? [], ctx.getEnchantmentTag)
+	if (exclusiveB.some(id => a.id.is(id))) {
+		return false
+	}
+	return true
 }
