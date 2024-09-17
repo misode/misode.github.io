@@ -388,7 +388,10 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	set_contents: ({ component, entries }) => (item, ctx) => {
-		const result = generateLootTable({ pools: [{ rolls: 1, entries }] }, ctx)
+		if (typeof component !== 'string' || !Array.isArray(entries)) {
+			return
+		}
+		const result = generateLootTable({ pools: [{ rolls: 1, entries: entries }] }, ctx)
 		if (Identifier.parse(component).is('container')) {
 			item.set(component, new NbtList(result.map(s => new NbtCompound()
 				.set('slot', new NbtInt(s.slot))
