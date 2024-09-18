@@ -200,25 +200,11 @@
       "wiki": "https://minecraft.wiki/w/Recipe#JSON_format"
     },
     {
-      "id": "enchantment",
-      "url": "enchantment",
-      "schema": "enchantment",
-      "minVersion": "1.21",
-      "wiki": "https://minecraft.wiki/w/Custom_enchantment"
-    },
-    {
-      "id": "enchantment_provider",
-      "url": "enchantment-provider",
-      "schema": "enchantment_provider",
-      "minVersion": "1.21",
-      "wiki": "https://minecraft.wiki/w/Enchantment_provider"
-    },
-    {
-      "id": "text_component",
-      "url": "text-component",
-      "schema": "text_component",
-      "noPath": true,
-      "wiki": "https://minecraft.wiki/w/Raw_JSON_text_format#Java_Edition"
+      "id": "chat_type",
+      "url": "chat-type",
+      "schema": "chat_type",
+      "minVersion": "1.19",
+      "wiki": "https://minecraft.wiki/w/Chat_type"
     },
     {
       "id": "damage_type",
@@ -226,13 +212,6 @@
       "schema": "damage_type",
       "minVersion": "1.19.4",
       "wiki": "https://minecraft.wiki/w/Damage_type"
-    },
-    {
-      "id": "chat_type",
-      "url": "chat-type",
-      "schema": "chat_type",
-      "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Chat_type"
     },
     {
       "id": "trim_material",
@@ -259,6 +238,20 @@
       "minVersion": "1.20.5"
     },
     {
+      "id": "enchantment",
+      "url": "enchantment",
+      "schema": "enchantment",
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Custom_enchantment"
+    },
+    {
+      "id": "enchantment_provider",
+      "url": "enchantment-provider",
+      "schema": "enchantment_provider",
+      "minVersion": "1.21",
+      "wiki": "https://minecraft.wiki/w/Enchantment_provider"
+    },
+    {
       "id": "painting_variant",
       "url": "painting-variant",
       "schema": "painting_variant",
@@ -283,6 +276,13 @@
       "url": "trial-spawner",
       "schema": "trial_spawner",
       "minVersion": "1.21.2"
+    },
+    {
+      "id": "text_component",
+      "url": "text-component",
+      "schema": "text_component",
+      "noPath": true,
+      "wiki": "https://minecraft.wiki/w/Raw_JSON_text_format#Java_Edition"
     },
     {
       "id": "pack_mcmeta",
