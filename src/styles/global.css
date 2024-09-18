@@ -2291,6 +2291,7 @@ hr {
 
 .navigation + .card-column,
 .badges-list + .card-column,
+.navigation + .card-grid,
 .navigation + .badges-list {
 	margin-top: 8px;
 }
@@ -2681,6 +2682,18 @@ hr {
 	margin-bottom: 8px;
 }
 
+.card-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+
+@media screen and (max-width: 980px) {
+	.card-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 .card {
 	display: block;
 	text-decoration: none;
@@ -2714,11 +2727,12 @@ hr {
 	color: var(--text-2);
 	fill: currentColor;
 	margin-left: 8px;
-	transition: margin 0.2s;
+	margin-right: 8px;
+	transition: transform 0.2s;
 }
 
 .card:hover .card-title svg {
-	margin-left: 14px;
+	transform: translateX(6px);
 }
 
 .card-overlay {

@@ -45,7 +45,7 @@ export function GeneratorList({ predicate }: Props) {
 		</div>
 		{filteredGenerators.length === 0 ? <>
 			<span class="note">{locale('generators.no_results')}</span>
-		</> : <div class="card-column">
+		</> : <div class="card-grid">
 			{filteredGenerators.map(gen =>
 				<GeneratorCard id={gen.id} />
 			)}

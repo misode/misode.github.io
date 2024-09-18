@@ -1,10 +1,10 @@
 import { useMemo } from 'preact/hooks'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
-import { cleanUrl } from '../../Utils.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import type { VersionId } from '../../services/Schemas.js'
 import { checkVersion } from '../../services/Schemas.js'
+import { cleanUrl } from '../../Utils.js'
 import { Badge, Card, Icons, ToolCard } from '../index.js'
 
 const VERSION_SEP = ' • '
@@ -40,12 +40,12 @@ export function GeneratorCard({ id, minimal }: Props) {
 	}, [gen])
 
 	const versionText = useMemo(() => {
-		if (versions.length <= 5) {
+		if (versions.length <= 3) {
 			return versions.join(VERSION_SEP)
 		}
 		return versions[0] + VERSION_SEP
 			+ '...' + VERSION_SEP
-			+ versions.slice(-3).join(VERSION_SEP)
+			+ versions.slice(-2).join(VERSION_SEP)
 	}, [versions])
 
 	const tags = useMemo(() => {
