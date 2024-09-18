@@ -115,7 +115,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 			: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />
 		)}
 		{item.getLore().map((component) =>
-			<TextComponent component={JSON.parse(component)} base={{ color: 'dark_purple', italic: true }} />
+			<TextComponent component={component} base={{ color: 'dark_purple', italic: true }} />
 		)}
 		{item.showInTooltip('attribute_modifiers') && (
 			<AttributeModifiersTooltip data={item.get('attribute_modifiers', tag => tag)} />

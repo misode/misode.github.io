@@ -107,7 +107,13 @@ export class ResolvedItem extends ItemStack {
 
 	public getLore() {
 		return this.get('lore', tag => {
-			return tag.isList() ? tag.map(e => e.getAsString()) : []
+			return tag.isList() ? tag.map(e => {
+				try {
+					return JSON.parse(e.getAsString())
+				} catch (e) {
+					return { text: '(invalid lore line)' }
+				}
+			}) : []
 		}) ?? []
 	}
 
@@ -160,11 +166,13 @@ export class ResolvedItem extends ItemStack {
 		}
 
 		const itemName = this.get('item_name', tag => tag.isString() ? tag.getAsString() : undefined)
-		try {
-			if (itemName) {
+		if (itemName) {
+			try {
 				return JSON.parse(itemName)
+			} catch (e) {
+				return { text: '(invalid item name)' }
 			}
-		} catch (e) {}
+		}
 
 		const guess = this.id.path
 			.replace(/[_\/]/g, ' ')
