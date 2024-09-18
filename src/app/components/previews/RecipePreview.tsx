@@ -136,6 +136,17 @@ function placeItems(version: VersionId, recipe: any, animation: number, itemTags
 				}
 			}
 		}
+	} else if (type === 'crafting_transmute') {
+		const inputs = allIngredientChoices(version, recipe.input, itemTags)
+		if (inputs.length > 0) {
+			const choice = inputs[animation % inputs.length]
+			items.set('crafting.0', choice)
+		}
+		const materials = allIngredientChoices(version, recipe.material, itemTags)
+		if (materials.length > 0) {
+			const choice = materials[animation % materials.length]
+			items.set('crafting.1', choice)
+		}
 	} else if (type === 'smelting' || type === 'smoking' || type === 'blasting' || type === 'campfire_cooking') {
 		const choices = allIngredientChoices(version, recipe.ingredient, itemTags)
 		if (choices.length > 0) {
