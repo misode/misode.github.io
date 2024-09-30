@@ -5,6 +5,7 @@ import type { mat3, mat4 } from 'gl-matrix'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { getProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import { useLocalStorage } from '../../hooks/useLocalStorage.js'
 import { Store } from '../../Store.js'
 import { iterateWorld2D, randomSeed } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
@@ -17,13 +18,12 @@ import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 const MODES = ['side', 'top', '3d'] as const
-type Mode = typeof MODES[number]
 
 export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { project } = useProject()
 	const { version } = useVersion()
-	const [mode, setMode] = useState<Mode>('side')
+	const [mode, setMode] = useLocalStorage('misode_density_function_mode', 'side')
 	const voxelMode = mode === '3d'
 	const topDown = mode === 'top'
 	const [seed, setSeed] = useState(randomSeed())
@@ -130,7 +130,7 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 				<span>{locale(topDown ? 'y' : 'z')}</span>
 				<NumberInput value={offset} onChange={setOffset} />
 			</div>}
-			<BtnMenu icon="package">
+			<BtnMenu label={locale(`mode.${mode}`)}>
 				{MODES.map(m => <Btn label={locale(`mode.${m}`)} active={mode == m} onClick={() => setMode(m)} />)}
 			</BtnMenu>
 			<Btn icon="sync" tooltip={locale('generate_new_seed')}
