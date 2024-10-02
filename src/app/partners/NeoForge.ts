@@ -4,7 +4,7 @@ import type { VersionId } from '../services/Schemas.js'
 
 const ID = 'neoforge'
 
-export function initNeoForge(schemas: SchemaRegistry, collections: CollectionRegistry, version: VersionId) {
+export function initNeoForge(schemas: SchemaRegistry, collections: CollectionRegistry, _version: VersionId) {
 	const StringNode = RawStringNode.bind(undefined, collections)
 
 	// Homogenous list (ref, list of refs, tag)
@@ -170,7 +170,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				biomes: '#minecraft:is_overworld',
 				features: 'minecraft:ore_iron_small',
 				step: 'underground_ores',
-			})
+			}),
 		}
 	))
 
@@ -233,7 +233,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 					type: 'minecraft:bat',
 					weight: 1,
 				},
-			})
+			}),
 		}
 	))
 
@@ -243,7 +243,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			type: 'number',
 			node: NumberNode({
 				min: 0,
-				max: 1
+				max: 1,
 			}),
 			change: (v: any) => v['chance'],
 		},
@@ -252,7 +252,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			node: ObjectNode({
 				chance: NumberNode({
 					min: 0,
-					max: 1
+					max: 1,
 				}),
 				can_villager_compost: Opt(BooleanNode()),
 			}),
@@ -262,9 +262,9 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:apple'] = {
-			chance: 1,
-			can_villager_compost: true,
-		}
+		chance: 1,
+		can_villager_compost: true,
+	}
 	)
 	createDataMap(schemas, collections, 'furnace_fuels', 'item', ChoiceNode([
 		{
@@ -288,8 +288,8 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:chest'] = {
-			burn_time: 300
-		}
+		burn_time: 300,
+	}
 	)
 	createDataMap(schemas, collections, 'monster_room_mobs', 'entity_type', ChoiceNode([
 		{
@@ -313,7 +313,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:bat'] = {
-		weight: 5
+		weight: 5,
 	})
 	createDataMap(schemas, collections, 'oxidizables', 'block', ChoiceNode([
 		{
@@ -337,7 +337,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:grass_block'] = {
-		next_oxidation_stage: 'minecraft:dirt'
+		next_oxidation_stage: 'minecraft:dirt',
 	})
 	createDataMap(schemas, collections, 'parrot_imitations', 'entity_type', ChoiceNode([
 		{
@@ -361,7 +361,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:allay'] = {
-		sound: 'minecraft:entity.allay.ambient_without_item'
+		sound: 'minecraft:entity.allay.ambient_without_item',
 	})
 	createDataMap(schemas, collections, 'raid_hero_gifts', 'villager_profession', ChoiceNode([
 		{
@@ -385,7 +385,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:cleric'] = {
-		loot_table: 'minecraft:empty'
+		loot_table: 'minecraft:empty',
 	})
 	createDataMap(schemas, collections, 'vibration_frequencies', 'game_event', ChoiceNode([
 		{
@@ -411,7 +411,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:block_change'] = {
-		frequency: 5
+		frequency: 5,
 	})
 	createDataMap(schemas, collections, 'waxables', 'block', ChoiceNode([
 		{
@@ -435,7 +435,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 			}),
 		},
 	]), (values) => values['minecraft:dirt'] = {
-		waxed: 'minecraft:coarse_dirt'
+		waxed: 'minecraft:coarse_dirt',
 	})
 }
 
@@ -445,7 +445,7 @@ function createDataMap(schemas: SchemaRegistry, collections: CollectionRegistry,
 	// Ref or tag
 	const Tag = StringNode({
 		validator: 'resource',
-		params: { pool: registry, allowTag: true }
+		params: { pool: registry, allowTag: true },
 	})
 	
 	// Create data map
@@ -456,12 +456,12 @@ function createDataMap(schemas: SchemaRegistry, collections: CollectionRegistry,
 				Tag,
 				valueNode,
 			),
-			remove: Opt(ListNode(Tag))
+			remove: Opt(ListNode(Tag)),
 		}, {context: `${ID}.data_map_${dataMap}`, disableSwitchContext: true}),
 		{
 			default: () => {
-				let result = {
-					values: {}
+				const result = {
+					values: {},
 				}
 				def(result['values'])
 
