@@ -454,7 +454,27 @@ function createDataMap(schemas: SchemaRegistry, collections: CollectionRegistry,
 			replace: Opt(BooleanNode()),
 			values: MapNode(
 				Tag,
-				valueNode,
+				ChoiceNode([
+					{
+						type: 'replaceable',
+						node: ObjectNode({
+							replace: Opt(BooleanNode()),
+							value: valueNode
+						}),
+						priority: 1,
+						match: (v: any) => v.value !== undefined,
+						change: (v: any) => ({
+							replace: true,
+							value: v,
+						})
+					},
+					{
+						type: 'object',
+						node: valueNode,
+						match: (v: any) => v.value === undefined,
+						change: (v: any) => v['value']
+					},
+				]),
 			),
 			remove: Opt(ListNode(Tag)),
 		}, {context: `${ID}.data_map_${dataMap}`, disableSwitchContext: true}),
