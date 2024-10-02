@@ -98,14 +98,14 @@ export class ResourceManager implements Resources {
 
 	private loadBlockModels(models: Map<string, unknown>) {
 		[...models.entries()].forEach(([id, model]) => {
-			this.blockModels[Identifier.create(id).toString()] = BlockModel.fromJson(id, model)
+			this.blockModels[Identifier.create(id).toString()] = BlockModel.fromJson(model)
 		})
 		Object.values(this.blockModels).forEach(m => m.flatten(this))
 	}
 
 	private loadBlockDefinitions(definitions: Map<string, unknown>) {
 		[...definitions.entries()].forEach(([id, definition]) => {
-			this.blockDefinitions[Identifier.create(id).toString()] = BlockDefinition.fromJson(id, definition)
+			this.blockDefinitions[Identifier.create(id).toString()] = BlockDefinition.fromJson(definition)
 		})
 	}
 

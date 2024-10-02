@@ -10,7 +10,7 @@ import type { PreviewProps } from './index.js'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 const PREVIEW_ID = Identifier.parse('misode:preview')
-const PREVIEW_DEFINITION = new BlockDefinition(PREVIEW_ID, { '': { model: PREVIEW_ID.toString() }}, undefined)
+const PREVIEW_DEFINITION = new BlockDefinition({ '': { model: PREVIEW_ID.toString() }}, undefined)
 
 export const ModelPreview = ({ data, shown }: PreviewProps) => {
 	const { version } = useVersion()
@@ -19,7 +19,7 @@ export const ModelPreview = ({ data, shown }: PreviewProps) => {
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
 		const resources = await getResources(version)
-		const model = BlockModel.fromJson(PREVIEW_ID.toString(), DataModel.unwrapLists(data))
+		const model = BlockModel.fromJson(DataModel.unwrapLists(data))
 		model.flatten(resources)
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {

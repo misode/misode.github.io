@@ -18,7 +18,7 @@ export const BlockStatePreview = ({ data, shown }: PreviewProps) => {
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
 		const resources = await getResources(version)
-		const definition = BlockDefinition.fromJson(PREVIEW_ID.toString(), DataModel.unwrapLists(data))
+		const definition = BlockDefinition.fromJson(DataModel.unwrapLists(data))
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {
 				if (id.equals(PREVIEW_ID)) return definition
