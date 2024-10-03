@@ -245,7 +245,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				min: 0,
 				max: 1,
 			}),
-			change: (v: any) => v['chance'],
+			change: (v: any) => v?.chance,
 		},
 		{
 			type: 'object',
@@ -273,7 +273,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				min: 1,
 				integer: true,
 			}),
-			change: (v: any) => v['burn_time'],
+			change: (v: any) => v?.burn_time,
 		},
 		{
 			type: 'object',
@@ -298,7 +298,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				min: 0,
 				integer: true,
 			}),
-			change: (v: any) => v['weight'],
+			change: (v: any) => v?.weight,
 		},
 		{
 			type: 'object',
@@ -322,7 +322,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				validator: 'resource',
 				params: { pool: 'block' },
 			}),
-			change: (v: any) => v['next_oxidation_stage'],
+			change: (v: any) => v?.next_oxidation_stage,
 		},
 		{
 			type: 'object',
@@ -346,7 +346,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				validator: 'resource',
 				params: { pool: 'sound_event' as any },
 			}),
-			change: (v: any) => v['sound'],
+			change: (v: any) => v?.sound,
 		},
 		{
 			type: 'object',
@@ -370,7 +370,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				validator: 'resource',
 				params: { pool: '$loot_table' },
 			}),
-			change: (v: any) => v['loot_table'],
+			change: (v: any) => v?.loot_table,
 		},
 		{
 			type: 'object',
@@ -389,13 +389,13 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 	})
 	createDataMap(schemas, collections, 'vibration_frequencies', 'game_event', ChoiceNode([
 		{
-			type: 'string',
+			type: 'number',
 			node: NumberNode({
 				min: 1,
 				max: 15,
 				integer: true,
 			}),
-			change: (v: any) => v['frequency'],
+			change: (v: any) => v?.frequency,
 		},
 		{
 			type: 'object',
@@ -420,7 +420,7 @@ export function initNeoForge(schemas: SchemaRegistry, collections: CollectionReg
 				validator: 'resource',
 				params: { pool: 'block' },
 			}),
-			change: (v: any) => v['waxed'],
+			change: (v: any) => v?.waxed,
 		},
 		{
 			type: 'object',
@@ -456,23 +456,23 @@ function createDataMap(schemas: SchemaRegistry, collections: CollectionRegistry,
 				Tag,
 				ChoiceNode([
 					{
+						type: 'direct',
+						match: () => true,
+						node: valueNode,
+						change: (v: any) => v?.value,
+					},
+					{
 						type: 'replaceable',
+						match: (v: any) => typeof v === 'object' && v?.value !== undefined,
+						priority: 1,
 						node: ObjectNode({
 							replace: Opt(BooleanNode()),
-							value: valueNode
+							value: valueNode,
 						}),
-						priority: 1,
-						match: (v: any) => v.value !== undefined,
 						change: (v: any) => ({
 							replace: true,
 							value: v,
-						})
-					},
-					{
-						type: 'object',
-						node: valueNode,
-						match: (v: any) => v.value === undefined,
-						change: (v: any) => v['value']
+						}),
 					},
 				]),
 			),
@@ -483,7 +483,7 @@ function createDataMap(schemas: SchemaRegistry, collections: CollectionRegistry,
 				const result = {
 					values: {},
 				}
-				def(result['values'])
+				def(result.values)
 
 				return result
 			},
