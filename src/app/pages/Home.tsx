@@ -56,7 +56,7 @@ function PopularGenerators() {
 	return <ToolGroup title={locale('generators.popular')} link="/generators/">
 		<GeneratorCard minimal id="loot_table" />
 		<GeneratorCard minimal id="advancement" />
-		<GeneratorCard minimal id="predicate" />
+		<GeneratorCard minimal id="recipe" />
 		<ToolCard title={locale('worldgen')} link="/worldgen/" titleIcon="worldgen" />
 		<ToolCard title={locale('generators.all')} link="/generators/" titleIcon="arrow_right" />
 		<ToolCard title={locale('generators.partners')} link="/partners/" titleIcon="arrow_right" />
