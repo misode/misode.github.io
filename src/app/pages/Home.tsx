@@ -130,7 +130,12 @@ function Changelog() {
 	const hugeScreen = useMediaQuery('(min-width: 960px)')
 
 	const { value: changes } = useAsync(fetchChangelogs, [])
-	const latestChanges = useMemo(() => changes?.sort((a, b) => b.order - a.order).slice(0, 2), [changes])
+	const latestChanges = useMemo(() => {
+		return changes
+			?.sort((a, b) => b.order - a.order)
+			.filter(c => !(c.tags.includes('pack') && c.tags.includes('breaking')))
+			.slice(0, 2)
+	}, [changes])
 
 	return <ToolGroup title={locale('changelog')} link="/changelog/" titleIcon="git_commit">
 		{latestChanges?.map(change => <ChangelogEntry minimal={!hugeScreen} short={true} change={change} />)}
