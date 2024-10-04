@@ -647,6 +647,96 @@
       "wiki": "https://github.com/Apollounknowndev/lithostitched/wiki/Worldgen-Modifiers"
     },
     {
+      "id": "neoforge.biome_modifier",
+      "url": "neoforge/biome-modifier",
+      "path": "neoforge/biome_modifier",
+      "tags": ["partners"],
+      "schema": "neoforge:biome_modifier",
+      "minVersion": "1.20.2",
+      "wiki": "https://docs.neoforged.net/docs/worldgen/biomemodifier"
+    },
+    {
+      "id": "neoforge.data_map_compostables",
+      "url": "neoforge/data-map-compostables",
+      "path": "neoforge/data_map_compostables",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_compostables",
+      "minVersion": "1.20.4",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgecompostables"
+    },
+    {
+      "id": "neoforge.data_map_furnace_fuels",
+      "url": "neoforge/data-map-furnace-fuels",
+      "path": "neoforge/data_map_furnace_fuels",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_furnace_fuels",
+      "minVersion": "1.20.4",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgefurnace_fuels"
+    },
+    {
+      "id": "neoforge.data_map_monster_room_mobs",
+      "url": "neoforge/data-map-monster-room-mobs",
+      "path": "neoforge/data_map_monster_room_mobs",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_monster_room_mobs",
+      "minVersion": "1.20.6",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgemonster_room_mobs"
+    },
+    {
+      "id": "neoforge.data_map_oxidizables",
+      "url": "neoforge/data-map-oxidizables",
+      "path": "neoforge/data_map_oxidizables",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_oxidizables",
+      "minVersion": "1.21",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgeoxidizables"
+    },
+    {
+      "id": "neoforge.data_map_parrot_imitations",
+      "url": "neoforge/data-map-parrot-imitations",
+      "path": "neoforge/data_map_parrot_imitations",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_parrot_imitations",
+      "minVersion": "1.20.4",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgeparrot_imitations"
+    },
+    {
+      "id": "neoforge.data_map_raid_hero_gifts",
+      "url": "neoforge/data-map-raid-hero-gifts",
+      "path": "neoforge/data_map_raid_hero_gifts",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_raid_hero_gifts",
+      "minVersion": "1.20.4",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgeraid_hero_gifts"
+    },
+    {
+      "id": "neoforge.data_map_vibration_frequencies",
+      "url": "neoforge/data-map-vibration-frequencies",
+      "path": "neoforge/data_map_vibration_frequencies",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_vibration_frequencies",
+      "minVersion": "1.20.4",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgevibration_frequencies"
+    },
+    {
+      "id": "neoforge.data_map_waxables",
+      "url": "neoforge/data-map-waxables",
+      "path": "neoforge/data_map_waxables",
+      "tags": ["partners"],
+      "schema": "neoforge:data_map_waxables",
+      "minVersion": "1.21",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgewaxables"
+    },
+    {
+      "id": "neoforge.structure_modifier",
+      "url": "neoforge/structure-modifier",
+      "path": "neoforge/structure_modifier",
+      "tags": ["partners"],
+      "schema": "neoforge:structure_modifier",
+      "minVersion": "1.20.2",
+      "wiki": "https://github.com/neoforged/NeoForge/blob/1.21.x/src/main/java/net/neoforged/neoforge/common/world/StructureModifiers.java"
+    },
+    {
       "id": "obsidian.item",
       "url": "obsidian/item",
       "path": "obsidian_item",
