@@ -349,7 +349,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				{Octicon.download}
 			</div>
 			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={locale(copyActive ? 'copied' : 'copy')} onClick={copySource}>
-				{copyActive ? Octicon.check : Octicon.clippy}
+				{copyActive ? Octicon.check : Octicon.copy}
 			</div>
 			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={locale(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
 				{sourceShown ? Octicon.chevron_right : Octicon.code}
@@ -363,7 +363,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		</div>
 		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
 			<TextInput value={shareUrl} readonly />
-			<Btn icon={shareCopyActive ? 'check' : 'clippy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
+			<Btn icon={shareCopyActive ? 'check' : 'copy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
 		</div>
 		<div class="popup-actions left-actions" style="--offset: 50px;">
 			<div class={'popup-action action-project shown tooltipped tip-ne'} aria-label={locale(projectShown ? 'hide_project' : 'show_project')} onClick={toggleProjectShown}>

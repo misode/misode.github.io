@@ -1,13 +1,13 @@
 import { Matrix3, Matrix4, Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
 import { mat4, quat, vec3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { composeMatrix, svdDecompose } from '../Utils.js'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useActiveTimeout } from '../hooks/useActiveTimout.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { loadImage } from '../services/DataFetcher.js'
+import { composeMatrix, svdDecompose } from '../Utils.js'
 
 const XYZ = ['x', 'y', 'z'] as const
 type XYZ = typeof XYZ[number]
@@ -175,7 +175,7 @@ export function Transformation({}: Props) {
 					<div class="transformation-title">
 						<span>{locale('transformation.translation')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateTranslation(new Vector(0, 0, 0))}>{Octicon['history']}</button>
-						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_decomposed')} onClick={onCopyDecomposed}>{Octicon[copiedDecomposed ? 'check' : 'clippy']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_decomposed')} onClick={onCopyDecomposed}>{Octicon[copiedDecomposed ? 'check' : 'copy']}</button>
 					</div>
 					{XYZ.map((c) =>
 						<Slider label={c} value={translation[c]} onChange={v => changeTranslation(c, v)} />
@@ -228,7 +228,7 @@ export function Transformation({}: Props) {
 					<div class="transformation-title">
 						<span>{locale('transformation.matrix')}</span>
 						<button class="tooltipped tip-se" aria-label={locale('reset')} onClick={() => updateMatrix(new Matrix4())}>{Octicon['history']}</button>
-						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_composed')} onClick={onCopyComposed}>{Octicon[copiedComposed ? 'check' : 'clippy']}</button>
+						<button class="tooltipped tip-se" aria-label={locale('transformation.copy_composed')} onClick={onCopyComposed}>{Octicon[copiedComposed ? 'check' : 'copy']}</button>
 					</div>
 					{Array(16).fill(0).map((_, i) =>
 						<Slider value={matrix.data[i]} onChange={v => changeMatrix(i, v)} disabled={i % 4 === 3} />
