@@ -1,4 +1,4 @@
-import type { BooleanHookParams, EnumOption, Hook, INode, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
+import type { BooleanHookParams, EnumOption, Hook, INode, ListHookParams, NodeChildren, NumberHookParams, StringHookParams, ValidationOption } from '@mcschema/core'
 import { DataModel, ListNode, MapNode, ModelPath, ObjectNode, Path, relativePath, StringNode } from '@mcschema/core'
 import { Identifier, ItemStack } from 'deepslate/core'
 import type { ComponentChildren, JSX } from 'preact'
@@ -94,10 +94,7 @@ const renderHtml: RenderHook = {
 		return [prefix, <>{inject}{suffix}</>, body]
 	},
 
-	list({ children, config }, path, value, lang, version, states, ctx) {
-		const { expand, collapse, isToggled } = useToggles()
-		const [maxShown, setMaxShown] = useState(50)
-
+	list({ children, config, node }, path, value, lang, version, states, ctx) {
 		const context = path.getContext().join('.')
 		if (fixedLists.includes(context)) {
 			const prefix = <>
@@ -117,87 +114,8 @@ const renderHtml: RenderHook = {
 			const node = DataModel.wrapLists(children.default())
 			path.model.set(path, [{ node, id: hexId() }, ...value])
 		}
-		const onAddBottom = () => {
-			if (!Array.isArray(value)) value = []
-			const node = DataModel.wrapLists(children.default())
-			path.model.set(path, [...value, { node, id: hexId() }])
-		}
 		const suffix = <button class="add tooltipped tip-se" aria-label={localize(lang, 'add_top')} onClick={onAdd}>{Octicon.plus_circle}</button>
-		const body = <>
-			{(value && Array.isArray(value)) && value.map(({ node: cValue, id: cId }, index) => {
-				if (index === maxShown) {
-					return <div class="node node-header">
-						<label>{localize(lang, 'entries_hidden', `${value.length - maxShown}`)}</label>
-						<button onClick={() => setMaxShown(Math.min(maxShown + 50, value.length))}>{localize(lang, 'entries_hidden.more', '50')}</button>
-						<button onClick={() => setMaxShown(value.length)}>{localize(lang, 'entries_hidden.all')}</button>
-					</div>
-				}
-				if (index > maxShown) {
-					return null
-				}
-				const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
-				const cPath = pathWithContext.push(index).contextPush('entry')
-				const canToggle = children.type(cPath) === 'object'
-				const toggle = isToggled(cId)
-
-				let label: undefined | string | JSX.Element
-				if (itemPreviewFields.includes(cPath.getContext().join('.'))) {
-					if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
-						let itemStack: ItemStack | undefined
-						try {
-							itemStack = new ItemStack(Identifier.parse(cValue.name), 1)
-						} catch (e) {}
-						if (itemStack !== undefined) {
-							label = <ItemDisplay item={itemStack} />
-						}
-					}
-				}
-
-				if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
-					return <div class="node node-header" data-category={children.category(cPath)}>
-						<ErrorPopup lang={lang} path={cPath} nested />
-						<button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'expand')}\n${localize(lang, 'expand_all', 'Ctrl')}`} onClick={expand(cId)}>{Octicon.chevron_right}</button>
-						<label>{label ?? pathLocale(lang, cPath, `${index}`)}</label>
-						<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
-					</div>
-				}
-
-				const onRemove = () => cPath.set(undefined)
-				const onMoveUp = () => {
-					const v = [...path.get()];
-					[v[index - 1], v[index]] = [v[index], v[index - 1]]
-					path.model.set(path, v)
-				}
-				const onMoveDown = () => {
-					const v = [...path.get()];
-					[v[index + 1], v[index]] = [v[index], v[index + 1]]
-					path.model.set(path, v)
-				}
-				const actions: MenuAction[] = [
-					{
-						icon: 'duplicate',
-						label: 'duplicate',
-						onSelect: () => {
-							const v = [...path.get()]
-							v.splice(index, 0, { id: hexId(), node: deepClone(cValue) })
-							path.model.set(path, v)
-						},
-					},
-				]
-				return <MemoedTreeNode key={cId} label={label} path={cPath} schema={children} value={cValue} {...{lang, version, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
-					{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'collapse')}\n${localize(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
-					<button class="remove tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
-					{value.length > 1 && <div class="node-move">
-						<button class="move tooltipped tip-se" aria-label={localize(lang, 'move_up')} onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
-						<button class="move tooltipped tip-se" aria-label={localize(lang, 'move_down')} onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
-					</div>}
-				</MemoedTreeNode>
-			})}
-			{(value && value.length > 0 && value.length <= maxShown) && <div class="node node-header">
-				<button class="add tooltipped tip-se" aria-label={localize(lang, 'add_bottom')} onClick={onAddBottom}>{Octicon.plus_circle}</button>
-			</div>}
-		</>
-		return [null, suffix, body]
+		return [null, suffix, <ListBody {...{children, config, node, path, value, lang, version, states, ctx}}/>]
 	},
 
 	map({ children, keys, config }, path, value, lang, version, states, ctx) {
@@ -384,6 +302,90 @@ function useToggles() {
 	}
 
 	return { expand, collapse, isToggled }
+}
+
+function ListBody({ path, value, lang, config, children, version, states, ctx }: NodeProps<ListHookParams>) {
+	const { expand, collapse, isToggled } = useToggles()
+	const [maxShown, setMaxShown] = useState(50)
+	const onAddBottom = () => {
+		if (!Array.isArray(value)) value = []
+		const node = DataModel.wrapLists(children.default())
+		path.model.set(path, [...value, { node, id: hexId() }])
+	}
+	return <>
+		{(value && Array.isArray(value)) && value.map(({ node: cValue, id: cId }, index) => {
+			if (index === maxShown) {
+				return <div class="node node-header">
+					<label>{localize(lang, 'entries_hidden', `${value.length - maxShown}`)}</label>
+					<button onClick={() => setMaxShown(Math.min(maxShown + 50, value.length))}>{localize(lang, 'entries_hidden.more', '50')}</button>
+					<button onClick={() => setMaxShown(value.length)}>{localize(lang, 'entries_hidden.all')}</button>
+				</div>
+			}
+			if (index > maxShown) {
+				return null
+			}
+			const pathWithContext = (config?.context) ? new ModelPath(path.getModel(), new Path(path.getArray(), [config.context])) : path
+			const cPath = pathWithContext.push(index).contextPush('entry')
+			const canToggle = children.type(cPath) === 'object'
+			const toggle = isToggled(cId)
+
+			let label: undefined | string | JSX.Element
+			if (itemPreviewFields.includes(cPath.getContext().join('.'))) {
+				if (isObject(cValue) && typeof cValue.type === 'string' && cValue.type.replace(/^minecraft:/, '') === 'item' && typeof cValue.name === 'string') {
+					let itemStack: ItemStack | undefined
+					try {
+						itemStack = new ItemStack(Identifier.parse(cValue.name), 1)
+					} catch (e) {}
+					if (itemStack !== undefined) {
+						label = <ItemDisplay item={itemStack} />
+					}
+				}
+			}
+
+			if (canToggle && (toggle === false || (toggle === undefined && value.length > 20))) {
+				return <div class="node node-header" data-category={children.category(cPath)}>
+					<ErrorPopup lang={lang} path={cPath} nested />
+					<button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'expand')}\n${localize(lang, 'expand_all', 'Ctrl')}`} onClick={expand(cId)}>{Octicon.chevron_right}</button>
+					<label>{label ?? pathLocale(lang, cPath, `${index}`)}</label>
+					<Collapsed key={cId} path={cPath} value={cValue} schema={children} />
+				</div>
+			}
+
+			const onRemove = () => cPath.set(undefined)
+			const onMoveUp = () => {
+				const v = [...path.get()];
+				[v[index - 1], v[index]] = [v[index], v[index - 1]]
+				path.model.set(path, v)
+			}
+			const onMoveDown = () => {
+				const v = [...path.get()];
+				[v[index + 1], v[index]] = [v[index], v[index + 1]]
+				path.model.set(path, v)
+			}
+			const actions: MenuAction[] = [
+				{
+					icon: 'duplicate',
+					label: 'duplicate',
+					onSelect: () => {
+						const v = [...path.get()]
+						v.splice(index, 0, { id: hexId(), node: deepClone(cValue) })
+						path.model.set(path, v)
+					},
+				},
+			]
+			return <MemoedTreeNode key={cId} label={label} path={cPath} schema={children} value={cValue} {...{lang, version, states, actions}} ctx={{...ctx, index: (index === 0 ? 1 : 0) + (index === value.length - 1 ? 2 : 0)}}>
+				{canToggle && <button class="toggle tooltipped tip-se" aria-label={`${localize(lang, 'collapse')}\n${localize(lang, 'collapse_all', 'Ctrl')}`} onClick={collapse(cId)}>{Octicon.chevron_down}</button>}
+				<button class="remove tooltipped tip-se" aria-label={localize(lang, 'remove')} onClick={onRemove}>{Octicon.trashcan}</button>
+				{value.length > 1 && <div class="node-move">
+					<button class="move tooltipped tip-se" aria-label={localize(lang, 'move_up')} onClick={onMoveUp} disabled={index === 0}>{Octicon.chevron_up}</button>
+					<button class="move tooltipped tip-se" aria-label={localize(lang, 'move_down')} onClick={onMoveDown} disabled={index === value.length - 1}>{Octicon.chevron_down}</button>
+				</div>}
+			</MemoedTreeNode>
+		})}
+		{(value && value.length > 0 && value.length <= maxShown) && <div class="node node-header">
+			<button class="add tooltipped tip-se" aria-label={localize(lang, 'add_bottom')} onClick={onAddBottom}>{Octicon.plus_circle}</button>
+		</div>}
+	</>
 }
 
 function BooleanSuffix({ path, node, value, lang }: NodeProps<BooleanHookParams>) {
