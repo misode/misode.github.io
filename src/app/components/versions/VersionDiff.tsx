@@ -54,8 +54,8 @@ export function VersionDiff({ version }: Props) {
 				return { file, diff: [] }
 			} else if (isText) {
 				const [beforeStr, afterStr] = await Promise.all([
-					fetch(`${mcmetaRawUrl}/${commit?.parents[0].sha}/${filename}`).then(r => r.text()),
-					fetch(`${mcmetaRawUrl}/${version}-diff/${filename}`).then(r => r.text()),
+					fetch(`${mcmetaRawUrl}/${commit?.parents[0].sha}/${filename}`).then(r => r.ok ? r.text() : ''),
+					fetch(`${mcmetaRawUrl}/${version}-diff/${filename}`).then(r => r.ok ? r.text() : ''),
 				])
 				patch = createPatch(filename, beforeStr, afterStr)
 			}
