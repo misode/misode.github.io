@@ -60,3 +60,27 @@ export function getSourceIndents() {
 export function getSourceFormats() {
 	return Object.keys(FORMATS)
 }
+
+export function sortData(data: any): any {
+	if (typeof data !== 'object' || data === null) {
+		return data
+	}
+	if (Array.isArray(data)) {
+		return data.map(sortData)
+	}
+	const ordered = Object.create(null)
+	for (const symbol of Object.getOwnPropertySymbols(data)) {
+		ordered[symbol] = data[symbol]
+	}
+	const orderedKeys = Object.keys(data).sort(customOrder)
+	for (const key of orderedKeys) {
+		ordered[key] = sortData(data[key])
+	}
+	return ordered
+}
+
+const priority = ['type', 'parent']
+function customOrder(a: string, b: string) {
+	return (priority.indexOf(a) + 1 || Infinity) - (priority.indexOf(b) + 1 || Infinity)
+		|| a.localeCompare(b)
+}

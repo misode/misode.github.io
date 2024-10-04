@@ -1,10 +1,10 @@
 import { DataModel } from '@mcschema/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useModel } from '../../hooks/index.js'
+import { useLocalStorage, useModel } from '../../hooks/index.js'
 import { getOutput } from '../../schema/transformOutput.js'
 import type { BlockStateRegistry } from '../../services/index.js'
-import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, stringifySource } from '../../services/index.js'
+import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { message } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
@@ -30,6 +30,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
+	const [sort, setSort] = useLocalStorage('misode_output_sort', 'schema')
 	const [highlighting, setHighlighting] = useState(Store.getHighlighting())
 	const [braceLoaded, setBraceLoaded] = useState(false)
 	const download = useRef<HTMLAnchorElement>(null)
@@ -40,9 +41,12 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const editor = useRef<Editor>()
 
 	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
-		const data = getOutput(model, blockStates)
+		let data = getOutput(model, blockStates)
+		if (sort === 'alphabetically') {
+			data = sortData(data)
+		}
 		return stringifySource(data, format, indent)
-	}, [indent, format])
+	}, [indent, format, sort])
 
 	useEffect(() => {
 		retransform.current = () => {
@@ -80,7 +84,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				console.error(e)
 			}
 		}
-	}, [model, blockStates, indent, format, highlighting])
+	}, [model, blockStates, indent, format, sort, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
@@ -156,7 +160,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			editor.current.configure(indent, format === 'snbt' ? 'yaml' : format)
 			retransform.current()
 		}
-	}, [indent, format, highlighting, braceLoaded])
+	}, [indent, format, sort, highlighting, braceLoaded])
 
 	useEffect(() => {
 		if (doCopy && model && blockStates) {
@@ -210,6 +214,8 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 					<Btn label={locale(`format.${key}`)} active={format === key}
 						onClick={() => changeFormat(key)} />)}
 				<hr />
+				<Btn icon={sort === 'alphabetically' ? 'square_fill' : 'square'} label={locale('sort_alphabetically')}
+					onClick={() => setSort(sort === 'alphabetically' ? 'schema' : 'alphabetically')} />
 				<Btn icon={highlighting ? 'square_fill' : 'square'} label={locale('highlighting')}
 					onClick={() => changeHighlighting(!highlighting)} />
 			</BtnMenu>
