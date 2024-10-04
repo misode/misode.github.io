@@ -77,6 +77,9 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 			if (path === 'pack.mcmeta') hasPack = true
 			return [[path, stringifySource(file.data)]] as [string, string][]
 		})
+		project.unknownFiles?.forEach(({ path, data }) => {
+			entries.push([path, data])
+		})
 		if (!hasPack) {
 			const pack_format = config.versions.find(v => v.id === version)!.pack_format
 			entries.push(['pack.mcmeta', stringifySource({ pack: { pack_format, description: '' } })])

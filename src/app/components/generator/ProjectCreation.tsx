@@ -50,10 +50,15 @@ export function ProjectCreation({ onClose }: Props) {
 						try {
 							const data = await parseSource(entry[1], 'json')
 							project.files!.push({ ...file, data })
+							return
 						} catch (e) {
-							console.error(`Failed parsing ${file.type} ${file.id}: ${message(e)}`)
+							console.warn(`Failed parsing ${file.type} ${file.id}: ${message(e)}`)
 						}
 					}
+					if (project.unknownFiles === undefined) {
+						project.unknownFiles = []
+					}
+					project.unknownFiles.push({ path: entry[0], data: entry[1] })
 				}))
 				projectUpdater.current(project)
 				onClose()

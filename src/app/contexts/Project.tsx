@@ -13,6 +13,7 @@ export type Project = {
 	namespace?: string,
 	version?: VersionId,
 	files: ProjectFile[],
+	unknownFiles?: UnknownFile[],
 }
 export const DRAFT_PROJECT: Project = {
 	name: 'Drafts',
@@ -24,6 +25,11 @@ export type ProjectFile = {
 	type: string,
 	id: string,
 	data: any,
+}
+
+export type UnknownFile = {
+	path: string,
+	data: string,
 }
 
 export const FilePatterns = [
