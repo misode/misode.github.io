@@ -1417,6 +1417,11 @@ main.has-project {
 	pointer-events: all;
 }
 
+.modal span.invalid {
+	color: var(--invalid-text);
+	font-size: 16px;
+}
+
 [data-modals] .tree {
 	pointer-events: none;
 }
