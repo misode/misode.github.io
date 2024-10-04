@@ -206,8 +206,9 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		if (editor.current) {
 			const text = await navigator.clipboard.readText()
 			editor.current.setValue(text)
+			onImport.current()
 		}
-	}, [])
+	}, [editor, onImport])
 
 	return <> 
 		<div class="controls source-controls">
