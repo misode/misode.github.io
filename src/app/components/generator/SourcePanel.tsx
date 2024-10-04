@@ -110,6 +110,9 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				braceEditor.$blockScrolling = Infinity
 				braceEditor.on('blur', () => onImport.current())
 				braceEditor.on('touchstart', e => e.stopPropagation())
+				braceEditor.container.addEventListener('contextmenu', function(e) {
+					e.preventDefault()
+				}, false)
 				braceEditor.getSession().setMode('ace/mode/json')
 
 				editor.current = {
