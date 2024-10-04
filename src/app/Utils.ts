@@ -562,6 +562,11 @@ export function parseGitPatch(patch: string) {
 	let after = 1
 	for (let i = 0; i < source.length; i += 1) {
 		const line = source[i]
+		if (line.startsWith('Index: ') || line.startsWith('===')
+			|| line.startsWith('---') || line.startsWith('+++')
+			|| line.startsWith('\\') || line.length === 0) {
+			continue
+		}
 		if (line.startsWith('@')) {
 			const match = line.match(/^@@ -(\d+)(?:,(?:\d+))? \+(\d+)(?:,(?:\d+))? @@/)
 			if (!match) throw new Error(`Invalid patch pattern at line ${i+1}: ${line}`)
@@ -578,8 +583,8 @@ export function parseGitPatch(patch: string) {
 		} else if (line.startsWith('-')) {
 			result.push({ line, before })
 			before += 1
-		} else if (!line.startsWith('\\')) {
-			throw new Error(`Invalid patch, got ${line.charAt(0)} at line ${i+1}`)
+		} else {
+			throw new Error(`Invalid patch, got '${line.charAt(0)}' at line ${i+1}`)
 		}
 	}
 	return result

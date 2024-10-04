@@ -1,13 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef } from "preact/hooks"
-import { parseGitPatch } from "../../Utils.js"
-import { useLocale } from "../../contexts/Locale.jsx"
-import { useAsync } from "../../hooks/useAsync.js"
-import { useLocalStorage } from "../../hooks/useLocalStorage.js"
-import { useSearchParam } from "../../hooks/useSearchParam.js"
-import { GitHubCommitFile, fetchVersionDiff } from "../../services/DataFetcher.js"
-import { ErrorPanel } from "../ErrorPanel.jsx"
-import { Octicon } from "../Octicon.jsx"
-import { TreeView, TreeViewGroupRenderer, TreeViewLeafRenderer } from "../TreeView.jsx"
+import { createPatch } from 'diff'
+import { useCallback, useEffect, useRef } from 'preact/hooks'
+import { useLocale } from '../../contexts/Locale.jsx'
+import { useAsync } from '../../hooks/useAsync.js'
+import { useLocalStorage } from '../../hooks/useLocalStorage.js'
+import { useSearchParam } from '../../hooks/useSearchParam.js'
+import type { GitHubCommitFile } from '../../services/DataFetcher.js'
+import { fetchVersionDiff } from '../../services/DataFetcher.js'
+import { parseGitPatch } from '../../Utils.js'
+import { ErrorPanel } from '../ErrorPanel.jsx'
+import { Octicon } from '../Octicon.jsx'
+import type { TreeViewGroupRenderer, TreeViewLeafRenderer } from '../TreeView.jsx'
+import { TreeView } from '../TreeView.jsx'
 
 const mcmetaRawUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 const mcmetaBlobUrl = 'https://github.com/misode/mcmeta/blob'
@@ -30,35 +33,45 @@ export function VersionDiff({ version }: Props) {
 		}
 	}, [diffView, setFilename])
 
-	const { file, diff } = useMemo(() => {
+	const { value, loading } = useAsync(async () => {
 		if (filename === undefined) return { file: undefined, diff: undefined }
 		const file = commit?.files.find(f => f.filename === filename)
 		if (file === undefined) return { file, diff: undefined }
-		if (file.patch === undefined) {
-			const match = filename.match(/\.(png|ogg)$/)
-			if (match) {
+		let patch = file.patch
+		if (patch === undefined) {
+			const isMedia = filename.match(/\.(png|ogg)$/)
+			const isText = filename.match(/\.(txt|json|mcmeta)$/)
+			if (isMedia) {
 				return {
 					file,
 					diff: {
-						type: match[1],
+						type: isMedia[1],
 						before: file.status === 'added' ? undefined : `${mcmetaRawUrl}/${commit?.parents[0].sha}/${filename}`,
 						after: file.status === 'removed' ? undefined : `${mcmetaRawUrl}/${version}-diff/${filename}`,
 					},
 				}
 			} else if (file.status === 'renamed') {
 				return { file, diff: [] }
-			} else {
-				return { file, diff: new Error('Cannot display diff for this file') }
+			} else if (isText) {
+				const [beforeStr, afterStr] = await Promise.all([
+					fetch(`${mcmetaRawUrl}/${commit?.parents[0].sha}/${filename}`).then(r => r.text()),
+					fetch(`${mcmetaRawUrl}/${version}-diff/${filename}`).then(r => r.text()),
+				])
+				patch = createPatch(filename, beforeStr, afterStr)
 			}
 		}
+		if (patch === undefined) {
+			return { file, diff: new Error('Cannot display diff for this file') }
+		}
 		try {
-			return { file, diff: parseGitPatch(file.patch) }
+			return { file, diff: parseGitPatch(patch) }
 		} catch (e) {
 			const error = e as Error
 			error.message = `Failed to show diff: ${error.message}`
 			return { file, diff: error }
 		}
 	}, [filename, commit])
+	const { file, diff } = value ?? {}
 
 	const DiffFolder: TreeViewGroupRenderer = useCallback(({ name, open, onClick }) => {
 		return <div class="diff-entry select-none" onClick={onClick} >
@@ -71,7 +84,7 @@ export function VersionDiff({ version }: Props) {
 		return <div class={`diff-entry py-0.5 flex items-center [&>svg]:shrink-0 select-none ${entry.filename === filename ? 'active' : ''}`} onClick={() => selectFile(entry.filename)} title={entry.filename}>
 			<span class="ml-[15px] mx-2 overflow-hidden text-ellipsis whitespace-nowrap">{entry.filename.split('/').at(-1)}</span>
 			<span class={`ml-auto diff-${entry.status}`}>{Octicon[`diff_${entry.status}`]}</span>
-	</div>
+		</div>
 	}, [filename])
 
 	useEffect(() => {
@@ -106,12 +119,12 @@ export function VersionDiff({ version }: Props) {
 			<div class={`diff-tree w-full md:w-64 md:overflow-y-scroll md:overscroll-contain md:sticky md:top-[56px] ${filename ? 'hidden md:block' : 'block'}`}>
 				<TreeView entries={commit?.files ?? []} group={DiffFolder} leaf={DiffEntry} split={file => file.filename.split('/')} />
 			</div>
-			{filename && <div key={filename} class={`diff-view-panel flex-1 min-w-0 md:pl-2 md:ml-64`}>
+			{filename && <div key={filename} class={'diff-view-panel flex-1 min-w-0 md:pl-2 md:ml-64'}>
 				<div class="flex justify-center items-center min-w-0 text-center py-2" title={filename}>
 					<span class="mr-2 min-w-0 overflow-hidden text-ellipsis font-bold text-xl">{filename}</span>
 					<a class="diff-toggle p-1" href={`${mcmetaBlobUrl}/${version}-diff/${filename}`} target="_blank">{Octicon.link_external}</a>
 				</div>
-				{diff === undefined ? (
+				{(diff === undefined || loading) ? (
 					<span class="note">{locale('loading')}</span>
 				)	: diff instanceof Error ? (
 					<ErrorPanel error={diff} />
@@ -134,7 +147,7 @@ export function VersionDiff({ version }: Props) {
 						)}
 					</div>
 				) : <>
-					{file.previous_filename !== undefined && <div class="flex justify-center font-mono flex-wrap" title={`${file.previous_filename} → ${filename}`}>
+					{file?.previous_filename !== undefined && <div class="flex justify-center font-mono flex-wrap" title={`${file.previous_filename} → ${filename}`}>
 						<span class="overflow-hidden text-ellipsis mr-2">{file.previous_filename}</span>
 						<span class="overflow-hidden text-ellipsis whitespace-nowrap"><span class="select-none">→ </span>{filename}</span>
 					</div>}

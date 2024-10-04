@@ -40,6 +40,7 @@
     "deepslate-1.18.2": "npm:deepslate@0.9.0",
     "deepslate-1.20.4": "npm:deepslate@0.20.1",
     "deepslate": "^0.22.3",
+    "diff": "^7.0.0",
     "highlight.js": "^11.5.1",
     "howler": "^2.2.3",
     "js-yaml": "^3.14.1",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.4.0",
     "@rollup/plugin-html": "^1.0.1",
+    "@types/diff": "^5.2.2",
     "@types/google.analytics": "0.0.40",
     "@types/gtag.js": "^0.0.10",
     "@types/howler": "^2.2.4",
