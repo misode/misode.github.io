@@ -40,7 +40,7 @@ export function VersionDiff({ version }: Props) {
 		let patch = file.patch
 		if (patch === undefined) {
 			const isMedia = filename.match(/\.(png|ogg)$/)
-			const isText = filename.match(/\.(txt|json|mcmeta)$/)
+			const isText = filename.match(/\.(txt|json|mcmeta|snbt|vsh|fsh)$/)
 			if (isMedia) {
 				return {
 					file,
