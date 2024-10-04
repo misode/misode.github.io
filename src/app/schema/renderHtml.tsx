@@ -545,7 +545,7 @@ function TreeNode({ label, schema, path, value, lang, version, states, ctx, acti
 						<span>{a.description ?? localize(lang, a.label)}</span>
 					</div>)}
 					<div class="menu-item">
-						<Btn icon="clippy" tooltip={localize(lang, 'copy_context')} tooltipLoc="se" onClick={() => navigator.clipboard.writeText(context)} />
+						<Btn icon="copy" tooltip={localize(lang, 'copy_context')} tooltipLoc="se" onClick={() => navigator.clipboard.writeText(context)} />
 						<span>{context}</span>
 					</div>
 				</div>}

@@ -306,6 +306,7 @@ main > .controls {
 .sounds-controls > *:not(:last-child),
 .preview-controls > *:not(:last-child),
 .generator-controls > *:not(:last-child),
+.source-controls > *:not(:last-child),
 .project-controls > *:not(:last-child) {
 	margin-right: 8px;
 }

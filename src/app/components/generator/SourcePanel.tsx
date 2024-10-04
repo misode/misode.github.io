@@ -109,10 +109,6 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				})
 				braceEditor.$blockScrolling = Infinity
 				braceEditor.on('blur', () => onImport.current())
-				braceEditor.on('touchstart', e => e.stopPropagation())
-				braceEditor.container.addEventListener('contextmenu', function(e) {
-					e.preventDefault()
-				}, false)
 				braceEditor.getSession().setMode('ace/mode/json')
 
 				editor.current = {
@@ -206,8 +202,18 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		setHighlighting(value)
 	}
 
+	const importFromClipboard = useCallback(async () => {
+		if (editor.current) {
+			const text = await navigator.clipboard.readText()
+			editor.current.setValue(text)
+		}
+	}, [])
+
 	return <> 
 		<div class="controls source-controls">
+			{window.matchMedia('(pointer: coarse)').matches && <>
+				<Btn icon="paste" onClick={importFromClipboard} />
+			</>}
 			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
 				{getSourceIndents().map(key =>
 					<Btn label={locale(`indentation.${key}`)} active={indent === key}
