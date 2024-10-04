@@ -30,7 +30,13 @@ const FORMATS: Record<string, {
 	},
 	snbt: {
 		parse: async (v) => NbtTag.fromString(v).toSimplifiedJson(),
-		stringify: (v, _i) => jsonToNbt(v).toPrettyString(),
+		stringify: (v, i) => {
+			const tag = jsonToNbt(v)
+			if (i === undefined) {
+				return tag.toString()
+			}
+			return tag.toPrettyString(typeof i === 'number' ? ' '.repeat(i) : i)
+		},
 	},
 	yaml: {
 		parse: async (v) => yaml.load(v),
