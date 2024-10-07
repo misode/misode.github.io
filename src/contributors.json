@@ -20,7 +20,7 @@
   {
     "name": "TelepathicGrunt",
     "types": ["support", "report"],
-    "avatar": "https://cdn.discordapp.com/avatars/369282168624644106/47af47d7d5d88c703c1cd9555877e76a.webp?size=80",
+    "avatar": "https://avatars.githubusercontent.com/u/40846040?v=4",
     "url": "https://github.com/TelepathicGrunt"
   },
   {
@@ -28,6 +28,12 @@
     "types": ["support"],
     "avatar": "https://avatars.githubusercontent.com/u/22985759?v=4",
     "url": "https://github.com/Lambsy"
+  },
+  {
+    "name": "Kesuaheli",
+    "types": ["support"],
+    "avatar": "https://avatars.githubusercontent.com/u/40177436?v=4",
+    "url": "https://github.com/Kesuaheli"
   },
   {
     "name": "oitsjustjose",
