@@ -68,6 +68,7 @@ module.exports = {
 		'quote-props': [
 			'warn',
 			'as-needed',
+			{ numbers: true },
 		],
 	},
 }
