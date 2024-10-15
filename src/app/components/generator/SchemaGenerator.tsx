@@ -1,14 +1,12 @@
-import { DataModel, Path } from '@mcschema/core'
 import { route } from 'preact-router'
-import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
+import { useCallback, useEffect, useErrorBoundary, useMemo, useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
-import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../../hooks/index.js'
-import { getOutput } from '../../schema/transformOutput.js'
-import type { VersionId } from '../../services/index.js'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
+import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
+import type { FileModel, VersionId } from '../../services/index.js'
+import { checkVersion, createMockFileModel, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, deepEqual, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
@@ -22,7 +20,7 @@ interface Props {
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { projects, project, file, updateProject, updateFile, closeFile } = useProject()
+	const { projects, project, file, updateProject, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -34,16 +32,15 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
-	const ignoreChange = useRef(false)
 	const backup = useMemo(() => Store.getBackup(gen.id), [gen.id])
 
 	const loadBackup = () => {
 		if (backup !== undefined) {
-			model?.reset(DataModel.wrapLists(backup), false)
+			// TODO: implement
 		}
 	}
 
-	const { value } = useAsync(async () => {
+	const {} = useAsync(async () => {
 		let data: unknown = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
@@ -81,81 +78,65 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			}
 			data = file.data
 		}
-		const [model, blockStates] = await Promise.all([
-			getModel(version, gen.id),
-			getBlockStates(version),
-		])
 		if (data) {
-			ignoreChange.current = true
-			model.reset(DataModel.wrapLists(data), false)
+			// TODO: set file contents to data
 		}
 		Analytics.setGenerator(gen.id)
-		return { model, blockStates }
+		return {}
 	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id])
 
-	const model = value?.model
-	const blockStates = value?.blockStates
+	const model: FileModel = createMockFileModel()
 
-	useModel(model, model => {
-		if (!ignoreChange.current) {
-			setCurrentPreset(undefined, true)
-			setSharedSnippetId(undefined, true)
-		}
-		if (file && model && blockStates) {
-			const data = getOutput(model, blockStates)
-			updateFile(gen.id, file.id, { id: file.id, data })
-		}
-		ignoreChange.current = false
-		Store.setBackup(gen.id, DataModel.unwrapLists(model.data))
-		setError(null)
-	}, [gen.id, setCurrentPreset, setSharedSnippetId, blockStates, file?.id])
+	// TODO: when contents of file change:
+	// - remove preset and share id from url
+	// - update project
+	// - store backup
 
 	const reset = () => {
-		Analytics.resetGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
-		model?.reset(DataModel.wrapLists(model.schema.default()), true)
+		Analytics.resetGenerator(gen.id, 1, 'menu')
+		// TODO
 	}
 	const undo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.undoGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
-		model?.undo()
+		Analytics.undoGenerator(gen.id, 1, 'menu')
+		// TODO
 	}
 	const redo = (e: MouseEvent) => {
 		e.stopPropagation()
-		Analytics.redoGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
-		model?.redo()
+		Analytics.redoGenerator(gen.id, 1, 'menu')
+		// TODO
 	}
 
-	const onKeyUp = (e: KeyboardEvent) => {
-		if (e.ctrlKey && e.key === 'z') {
-			Analytics.undoGenerator(gen.id, model?.historyIndex ?? 1, 'hotkey')
-			model?.undo()
-		} else if (e.ctrlKey && e.key === 'y') {
-			Analytics.redoGenerator(gen.id, model?.historyIndex ?? 1, 'hotkey')
-			model?.redo()
-		}
-	}
-	const onKeyDown = (e: KeyboardEvent) => {
-		if (e.ctrlKey && e.key === 's') {
-			setFileSaving('hotkey')
-			e.preventDefault()
-			e.stopPropagation()
-		}
-	}
 	useEffect(() => {
+		const onKeyUp = (e: KeyboardEvent) => {
+			if (e.ctrlKey && e.key === 'z') {
+				Analytics.undoGenerator(gen.id, 1, 'hotkey')
+				// TODO
+			} else if (e.ctrlKey && e.key === 'y') {
+				Analytics.redoGenerator(gen.id, 1, 'hotkey')
+				// TODO
+			}
+		}
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey && e.key === 's') {
+				setFileSaving('hotkey')
+				e.preventDefault()
+				e.stopPropagation()
+			}
+		}
+
 		document.addEventListener('keyup', onKeyUp)
 		document.addEventListener('keydown', onKeyDown)
 		return () => {
 			document.removeEventListener('keyup', onKeyUp)
 			document.removeEventListener('keydown', onKeyDown)
 		}
-	}, [model, blockStates, file])
+	}, [gen.id])
 
-	const [presets, setPresets] = useState<string[]>([])
-	useEffect(() => {
-		getCollections(version).then(collections => {
-			setPresets(collections.get(gen.id).map(p => p.startsWith('minecraft:') ? p.slice(10) : p))
-		})
-			.catch(e => { console.error(e); setError(e) })
+	const { value: presets } = useAsync(async () => {
+		const registries = await fetchRegistries(version)
+		const entries = registries.get(gen.id) ?? []
+		return entries.map(e => e.startsWith('minecraft:') ? e.slice(10) : e)
 	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
@@ -168,13 +149,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const loadPreset = async (id: string) => {
 		try {
 			const preset = await fetchPreset(version, genPath(gen, version), id)
-			const seed = model?.get(new Path(['generator', 'seed']))
-			if (preset?.generator?.seed !== undefined && seed !== undefined) {
-				preset.generator.seed = seed
-				if (preset.generator.biome_source?.seed !== undefined) {
-					preset.generator.biome_source.seed = seed
-				}
-			}
+			// TODO: sync random seed
 			return preset
 		} catch (e) {
 			setError(`Cannot load preset ${id} in ${version}`)
@@ -203,14 +178,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			setShareUrl(`${location.origin}/${gen.url}/?version=${version}&preset=${currentPreset}`)
 			setShareShown(true)
 			copySharedId()
-		} else if (model && blockStates) {
-			const output = getOutput(model, blockStates)
-			if (deepEqual(output, model.schema.default())) {
+		} else {
+			// TODO: get contents from file, and compare to default of type
+			if (deepEqual(model.data, {})) {
 				setShareUrl(`${location.origin}/${gen.url}/?version=${version}`)
 				setShareShown(true)
 			} else {
 				setShareLoading(true)
-				shareSnippet(gen.id, version, output, previewShown)
+				shareSnippet(gen.id, version, model.data, previewShown)
 					.then(({ id, length, compressed, rate }) => {
 						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
 						const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`
@@ -298,20 +273,11 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [projectDeleting, setprojectDeleting] = useState(false)
 	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
 	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
-	const [newFileQueued, setNewFileQueued] = useState(false)
 
 	const onNewFile = useCallback(() => {
 		closeFile()
-		// Need to queue reset because otherwise the useModel hook will update the old file
-		setNewFileQueued(true)
+		// TODO: create new file with default contents
 	}, [closeFile])
-
-	useEffect(() => {
-		if (file === undefined && newFileQueued) {
-			model?.reset(DataModel.wrapLists(model.schema.default()), true)
-			setNewFileQueued(false)
-		}
-	}, [model, newFileQueued, file])
 
 	return <>
 		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
@@ -335,7 +301,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			<Tree {...{model, version, blockStates}} onError={setError} />
+			<Tree model={model} onError={setError} />
 			<Footer donate={!gen.tags?.includes('partners')} />
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
@@ -356,10 +322,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{model, version, id: gen.id}} shown={previewShown} onError={setError} />
+			<PreviewPanel model={model} id={gen.id} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
+			<SourcePanel {...{model, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
 		</div>
 		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
 			<TextInput value={shareUrl} readonly />
@@ -371,7 +337,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			</div>
 		</div>
 		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
-			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onDeleteProject={() => setprojectDeleting(true)} onRename={setFileRenaming} onCreate={() => setProjectCreating(true)} />
+			<ProjectPanel onError={setError} onDeleteProject={() => setprojectDeleting(true)} onRename={setFileRenaming} onCreate={() => setProjectCreating(true)} />
 		</div>
 		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
 		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}

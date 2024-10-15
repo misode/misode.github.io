@@ -1,4 +1,3 @@
-import { DataModel } from '@mcschema/core'
 import { Identifier } from 'deepslate'
 import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
@@ -12,7 +11,7 @@ import type { PreviewProps } from './index.js'
 import { generateLootTable } from './LootTable.js'
 import { generateLootTable as generateLootTable1204 } from './LootTable1204.js'
 
-export const LootTablePreview = ({ data }: PreviewProps) => {
+export const LootTablePreview = ({ model }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const use1204 = !checkVersion(version, '1.20.5')
@@ -35,7 +34,7 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 		])
 	}, [version])
 
-	const table = DataModel.unwrapLists(data)
+	const table = model.data
 	const state = JSON.stringify(table)
 	const items = useMemo(() => {
 		if (dependencies === undefined || loading) {

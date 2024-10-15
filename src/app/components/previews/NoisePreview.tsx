@@ -1,4 +1,3 @@
-import { DataModel } from '@mcschema/core'
 import { clampedMap, NoiseParameters, NormalNoise, XoroshiroRandom } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
@@ -12,14 +11,14 @@ import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const NoisePreview = ({ data, shown }: PreviewProps) => {
+export const NoisePreview = ({ model, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(data)
+	const state = JSON.stringify(model.data)
 
 	const noise = useMemo(() => {
 		const random = XoroshiroRandom.create(seed)
-		const params = NoiseParameters.fromJson(DataModel.unwrapLists(data))
+		const params = NoiseParameters.fromJson(model.data)
 		return new NormalNoise(random, params)
 	}, [state, seed])
 

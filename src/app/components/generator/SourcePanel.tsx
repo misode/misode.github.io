@@ -1,9 +1,7 @@
-import { DataModel } from '@mcschema/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useLocalStorage, useModel } from '../../hooks/index.js'
-import { getOutput } from '../../schema/transformOutput.js'
-import type { BlockStateRegistry } from '../../services/index.js'
+import { useLocalStorage } from '../../hooks/index.js'
+import type { FileModel } from '../../services/index.js'
 import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { message } from '../../Utils.js'
@@ -18,15 +16,14 @@ interface Editor {
 
 type SourcePanelProps = {
 	name: string,
-	model: DataModel | undefined,
-	blockStates: BlockStateRegistry | undefined,
+	model: FileModel | undefined,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
 	copySuccess: () => unknown,
 	onError: (message: string | Error) => unknown,
 }
-export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
+export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
@@ -40,8 +37,8 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
-	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
-		let data = getOutput(model, blockStates)
+	const getSerializedOutput = useCallback((model: FileModel) => {
+		let data = model.data
 		if (sort === 'alphabetically') {
 			data = sortData(data)
 		}
@@ -51,9 +48,9 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	useEffect(() => {
 		retransform.current = () => {
 			if (!editor.current) return
-			if (!model || !blockStates) return
+			if (!model) return
 			try {
-				const output = getSerializedOutput(model, blockStates)
+				const output = getSerializedOutput(model)
 				editor.current.setValue(output)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -72,8 +69,8 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			const value = editor.current.getValue()
 			if (value.length === 0) return
 			try {
-				const data = await parseSource(value, format)
-				model?.reset(DataModel.wrapLists(data), false)
+				await parseSource(value, format)
+				// TODO: import
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`
@@ -84,7 +81,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				console.error(e)
 			}
 		}
-	}, [model, blockStates, indent, format, sort, highlighting])
+	}, [model, indent, format, sort, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
@@ -145,10 +142,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		}
 	}, [highlighting])
 
-	useModel(model, () => {
-		if (!retransform.current) return
-		retransform.current()
-	})
+	// TODO: when file contents change, retransform
 	useEffect(() => {
 		if (!retransform.current) return
 		if (model) retransform.current()
@@ -163,16 +157,16 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [indent, format, sort, highlighting, braceLoaded])
 
 	useEffect(() => {
-		if (doCopy && model && blockStates) {
-			navigator.clipboard.writeText(getSerializedOutput(model, blockStates)).then(() => {
+		if (doCopy && model) {
+			navigator.clipboard.writeText(getSerializedOutput(model)).then(() => {
 				copySuccess()
 			})
 		}
 	}, [doCopy])
 
 	useEffect(() => {
-		if (doDownload && model && blockStates && download.current) {
-			const content = encodeURIComponent(getSerializedOutput(model, blockStates))
+		if (doDownload && model && download.current) {
+			const content = encodeURIComponent(getSerializedOutput(model))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
 			const fileName = name === 'pack_mcmeta' ? 'pack.mcmeta' : `${name}.${format}`
 			download.current.setAttribute('download', fileName)

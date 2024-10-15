@@ -1,19 +1,12 @@
-import type { CollectionRegistry } from '@mcschema/core'
 import config from '../Config.js'
 import { Store } from '../Store.js'
 import { message } from '../Utils.js'
-import type { BlockStateRegistry, VersionId } from './Schemas.js'
+import type { VersionId } from './Schemas.js'
 import { checkVersion } from './Schemas.js'
 
 const CACHE_NAME = 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'
 const CACHE_PATCH = 'misode_cache_patch'
-
-type Version = {
-	id: string,
-	ref?: string,
-	dynamic?: boolean,
-}
 
 declare var __LATEST_VERSION__: string
 export const latestVersion = __LATEST_VERSION__ ?? ''
@@ -46,51 +39,10 @@ async function validateCache(version: RefInfo) {
 	}
 }
 
-export async function fetchData(versionId: string, collectionTarget: CollectionRegistry, blockStateTarget: BlockStateRegistry) {
-	const version = config.versions.find(v => v.id === versionId) as Version | undefined
-	if (!version) {
-		console.error(`[fetchData] Unknown version ${version} in ${JSON.stringify(config.versions)}`)
-		return
-	}
-
-	await validateCache(version)
-
-	await Promise.all([
-		_fetchRegistries(version, collectionTarget),
-		_fetchBlockStateMap(version, blockStateTarget),
-	])
-}
-
-async function _fetchRegistries(version: Version, target: CollectionRegistry) {
-	console.debug(`[fetchRegistries] ${version.id}`)
-	try {
-		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
-		for (const id in data) {
-			target.register(id, data[id].map((e: string) => 'minecraft:' + e))
-		}
-	} catch (e) {
-		console.warn('Error occurred while fetching registries:', message(e))
-	}
-}
-
-async function _fetchBlockStateMap(version: Version, target: BlockStateRegistry) {
-	console.debug(`[fetchBlockStateMap] ${version.id}`)
-	try {
-		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
-		for (const id in data) {
-			target['minecraft:' + id] = {
-				properties: data[id][0],
-				default: data[id][1],
-			}
-		}
-	} catch (e) {
-		console.warn('Error occurred while fetching block state map:', message(e))
-	}
-}
-
 export async function fetchRegistries(versionId: VersionId) {
 	console.debug(`[fetchRegistries] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
 		const result = new Map<string, string[]>()
@@ -103,10 +55,16 @@ export async function fetchRegistries(versionId: VersionId) {
 	}
 }
 
+export interface BlockStateData {
+	properties: Record<string, string[]>
+	default: Record<string, string>
+}
+
 export async function fetchBlockStates(versionId: VersionId) {
 	console.debug(`[fetchBlockStates] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!
-	const result = new Map<string, {properties: Record<string, string[]>, default: Record<string, string>}>()
+	const result = new Map<string, BlockStateData>()
+	await validateCache(version)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
 		for (const id in data) {
@@ -128,6 +86,7 @@ export async function fetchItemComponents(versionId: VersionId) {
 	if (!checkVersion(versionId, '1.20.5')) {
 		return result
 	}
+	await validateCache(version)
 	try {
 		const data = await cachedFetch<Record<string, Record<string, unknown>>>(`${mcmeta(version, 'summary')}/item_components/data.min.json`)
 		for (const [id, components] of Object.entries(data)) {
@@ -152,6 +111,7 @@ export async function fetchItemComponents(versionId: VersionId) {
 export async function fetchPreset(versionId: VersionId, registry: string, id: string) {
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
 	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
 	try {
 		let url
 		if (id.startsWith('immersive_weathering:')) {

@@ -1,13 +1,13 @@
-import { DataModel } from '@mcschema/core'
 import { useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import { useLocale, useProject } from '../../contexts/index.js'
+import type { FileModel } from '../../services/index.js'
 import { Btn } from '../Btn.js'
 import { TextInput } from '../forms/index.js'
 import { Modal } from '../Modal.js'
 
 interface Props {
-	model: DataModel,
+	model: FileModel,
 	id: string,
 	method: string,
 	onClose: () => void,
@@ -29,7 +29,7 @@ export function FileCreation({ model, id, method, onClose }: Props) {
 			return
 		}
 		Analytics.saveProjectFile(id, projects.length, project.files.length, method as any)
-		updateFile(id, undefined, { type: id, id: fileId, data: DataModel.unwrapLists(model.data) })
+		updateFile(id, undefined, { type: id, id: fileId, data: model.data })
 		onClose()
 	}
 

@@ -1,4 +1,3 @@
-import { DataModel } from '@mcschema/core'
 import type { Voxel } from 'deepslate/render'
 import { clampedMap, VoxelRenderer } from 'deepslate/render'
 import type { mat3, mat4 } from 'gl-matrix'
@@ -19,7 +18,7 @@ import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 const MODES = ['side', 'top', '3d'] as const
 
-export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
+export const DensityFunctionPreview = ({ model, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { project } = useProject()
 	const { version } = useVersion()
@@ -29,11 +28,11 @@ export const DensityFunctionPreview = ({ data, shown }: PreviewProps) => {
 	const [seed, setSeed] = useState(randomSeed())
 	const [minY] = useState(0)
 	const [height] = useState(256)
-	const serializedData = JSON.stringify(data)
+	const serializedData = JSON.stringify(model.data)
 
 	const { value: df } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
-		const df = DEEPSLATE.loadDensityFunction(DataModel.unwrapLists(data), minY, height, seed)
+		const df = DEEPSLATE.loadDensityFunction(model.data, minY, height, seed)
 		return df
 	}, [version, project, minY, height, seed, serializedData])
 

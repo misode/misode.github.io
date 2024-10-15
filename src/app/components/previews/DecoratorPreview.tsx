@@ -1,7 +1,7 @@
 import { BlockPos, ChunkPos, LegacyRandom, PerlinNoise } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
+import { useLocale, useVersion } from '../../contexts/index.js'
 import { computeIfAbsent, iterateWorld2D, randomSeed } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { PlacedFeature, PlacementContext } from './Decorator.js'
@@ -9,10 +9,11 @@ import { decorateChunk } from './Decorator.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
+export const DecoratorPreview = ({ model, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(data)
+	const state = JSON.stringify(model.data)
 
 	const { context, chunkFeatures } = useMemo(() => {
 		const random = new LegacyRandom(seed)
@@ -51,7 +52,7 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(Math.floor(x / 16), Math.floor(-y / 16))
-			const features = computeIfAbsent(chunkFeatures, `${pos[0]} ${pos[1]}`, () => decorateChunk(pos, data, context))
+			const features = computeIfAbsent(chunkFeatures, `${pos[0]} ${pos[1]}`, () => decorateChunk(pos, model.data, context))
 			return features.find(f => f.pos[0] === x && f.pos[2] == -y) ?? { pos: BlockPos.create(x, 0, -y) }
 		}, (feature) => {
 			if ('color' in feature) {

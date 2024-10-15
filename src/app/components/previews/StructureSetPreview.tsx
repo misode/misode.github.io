@@ -1,26 +1,26 @@
-import { DataModel } from '@mcschema/core'
 import type { Identifier } from 'deepslate'
 import { ChunkPos } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
+import { useLocale, useVersion } from '../../contexts/index.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import type { Color } from '../../Utils.js'
 import { computeIfAbsent, iterateWorld2D, randomSeed, stringToColor } from '../../Utils.js'
-import { useLocale } from '../../contexts/index.js'
-import { useAsync } from '../../hooks/useAsync.js'
 import { Btn } from '../index.js'
 import { featureColors } from './Decorator.js'
 import { DEEPSLATE } from './Deepslate.js'
-import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 import type { PreviewProps } from './index.js'
+import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const StructureSetPreview = ({ data, version, shown }: PreviewProps) => {
+export const StructureSetPreview = ({ model, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(data)
+	const state = JSON.stringify(model.data)
 
 	const { value: structureSet } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version)
-		const structureSet = DEEPSLATE.loadStructureSet(DataModel.unwrapLists(data), seed)
+		const structureSet = DEEPSLATE.loadStructureSet(model.data, seed)
 		return structureSet
 	}, [state, version, seed])
 

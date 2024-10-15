@@ -1,8 +1,7 @@
-import { DataModel } from '@mcschema/core'
 import { clampedMap } from 'deepslate'
 import { mat3 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
-import { getProjectData, useLocale, useProject, useStore } from '../../contexts/index.js'
+import { getProjectData, useLocale, useProject, useStore, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
 import { checkVersion } from '../../services/Schemas.js'
 import { Store } from '../../Store.js'
@@ -21,8 +20,9 @@ type Layer = typeof LAYERS[number]
 const DETAIL_DELAY = 300
 const DETAIL_SCALE = 2
 
-export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
+export const BiomeSourcePreview = ({ model, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const { project } = useProject()
 	const { biomeColors } = useStore()
 	const [seed, setSeed] = useState(randomSeed())
@@ -31,13 +31,13 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const [focused, setFocused] = useState<string[]>([])
 	const [focused2, setFocused2] = useState<string[]>([])
 
-	const state = JSON.stringify(data)
-	const type: string = data?.generator?.biome_source?.type?.replace(/^minecraft:/, '') ?? ''
+	const state = JSON.stringify(model.data)
+	const type: string = model.data?.generator?.biome_source?.type?.replace(/^minecraft:/, '') ?? ''
 	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 
 	const { value } = useAsync(async function loadBiomeSource() {
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
-		await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(data?.generator?.settings), DataModel.unwrapLists(data?.generator?.biome_source), seed)
+		await DEEPSLATE.loadChunkGenerator(model.data?.generator?.settings, model.data?.generator?.biome_source, seed)
 		return {
 			biomeSource: { loaded: true },
 			noiseRouter: checkVersion(version, '1.19') ? DEEPSLATE.getNoiseRouter() : undefined,

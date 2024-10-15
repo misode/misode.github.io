@@ -1,5 +1,3 @@
-import type { DataModel } from '@mcschema/core'
-import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
 import type { Identifier, NbtTag, Random } from 'deepslate'
 import { Matrix3, Matrix4, NbtByte, NbtCompound, NbtDouble, NbtInt, NbtList, NbtString, Vector } from 'deepslate'
@@ -45,21 +43,6 @@ export function generateUUID() {
 
 export function generateColor() {
 	return Math.floor(Math.random() * 16777215)
-}
-
-export function newSeed(model: DataModel) {
-	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
-	const dimensions = model.get(new Path(['dimensions']))
-	model.set(new Path(['seed']), seed, true)
-	if (isObject(dimensions)) {
-		Object.keys(dimensions).forEach(id => {
-			model.set(new Path(['dimensions', id, 'generator', 'seed']), seed, true)
-			model.set(new Path(['dimensions', id, 'generator', 'biome_source', 'seed']), seed, true)
-		})
-	}
-	model.set(new Path(['placement', 'salt']), Math.abs(seed), true)
-	model.set(new Path(['generator', 'seed']), seed, true)
-	model.set(new Path(['generator', 'biome_source', 'seed']), seed)
 }
 
 export function htmlEncode(str: string) {

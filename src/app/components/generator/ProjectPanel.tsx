@@ -1,10 +1,8 @@
-import type { DataModel } from '@mcschema/core'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import config from '../../Config.js'
 import { disectFilePath, DRAFT_PROJECT, getFilePath, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useFocus } from '../../hooks/useFocus.js'
-import type { VersionId } from '../../services/index.js'
 import { stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { writeZip } from '../../Utils.js'
@@ -15,9 +13,6 @@ import type { TreeViewGroupRenderer, TreeViewLeafRenderer } from '../TreeView.js
 import { TreeView } from '../TreeView.js'
 
 interface Props {
-	model: DataModel | undefined,
-	version: VersionId,
-	id: string,
 	onError: (message: string) => unknown,
 	onRename: (file: { type: string, id: string }) => unknown,
 	onCreate: () => unknown,
