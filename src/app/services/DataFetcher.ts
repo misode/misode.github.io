@@ -40,6 +40,14 @@ async function validateCache(version: RefInfo) {
 	}
 }
 
+export function getVersionChecksum(versionId: VersionId) {
+	const version = config.versions.find(v => v.id === versionId)!
+	if (version.dynamic) {
+		return (localStorage.getItem(CACHE_LATEST_VERSION) ?? '').toString()
+	}
+	return version.ref
+}
+
 export async function fetchVanillaMcdoc() {
 	try {
 		// TODO: enable refresh

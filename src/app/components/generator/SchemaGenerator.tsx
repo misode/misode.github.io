@@ -32,8 +32,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
 
 	useEffect(() => {
-		setupSpyglass()
-	}, [])
+		setupSpyglass(version)
+	}, [version])
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
