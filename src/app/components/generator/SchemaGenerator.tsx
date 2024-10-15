@@ -8,16 +8,42 @@ import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts
 import { AsyncCancel, useActiveTimeout, useAsync, useModel, useSearchParam } from '../../hooks/index.js'
 import { getOutput } from '../../schema/transformOutput.js'
 import type { VersionId } from '../../services/index.js'
-import { checkVersion, fetchPreset, getBlockStates, getCollections, getModel, getSnippet, shareSnippet } from '../../services/index.js'
+import {
+	checkVersion,
+	fetchPreset,
+	getBlockStates,
+	getCollections,
+	getModel,
+	getSnippet,
+	shareSnippet,
+} from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, deepEqual, genPath } from '../../Utils.js'
-import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
+import {
+	Btn,
+	BtnMenu,
+	ErrorPanel,
+	FileCreation,
+	FileRenaming,
+	Footer,
+	HasPreview,
+	Octicon,
+	PreviewPanel,
+	ProjectCreation,
+	ProjectDeletion,
+	ProjectPanel,
+	SearchList,
+	SourcePanel,
+	TextInput,
+	Tree,
+	VersionSwitcher,
+} from '../index.js'
 
 export const SHARE_KEY = 'share'
 
 interface Props {
 	gen: ConfigGenerator
-	allowedVersions: VersionId[],
+	allowedVersions: VersionId[]
 }
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
@@ -27,7 +53,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
 		errorBoundary.message = `Something went wrong rendering the generator: ${errorBoundary.message}`
-		return <main><ErrorPanel error={errorBoundary} onDismiss={errorRetry} /></main>
+		return (
+			<main>
+				<ErrorPanel
+					error={errorBoundary}
+					onDismiss={errorRetry}
+				/>
+			</main>
+		)
 	}
 
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
@@ -59,7 +92,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				cancel = true
 			}
 			if (snippet.type && snippet.type !== gen.id) {
-				const snippetGen = config.generators.find(g => g.id === snippet.type)
+				const snippetGen = config.generators.find((g) => g.id === snippet.type)
 				if (snippetGen) {
 					route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
 					cancel = true
@@ -81,10 +114,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			}
 			data = file.data
 		}
-		const [model, blockStates] = await Promise.all([
-			getModel(version, gen.id),
-			getBlockStates(version),
-		])
+		const [model, blockStates] = await Promise.all([getModel(version, gen.id), getBlockStates(version)])
 		if (data) {
 			ignoreChange.current = true
 			model.reset(DataModel.wrapLists(data), false)
@@ -96,19 +126,23 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const model = value?.model
 	const blockStates = value?.blockStates
 
-	useModel(model, model => {
-		if (!ignoreChange.current) {
-			setCurrentPreset(undefined, true)
-			setSharedSnippetId(undefined, true)
-		}
-		if (file && model && blockStates) {
-			const data = getOutput(model, blockStates)
-			updateFile(gen.id, file.id, { id: file.id, data })
-		}
-		ignoreChange.current = false
-		Store.setBackup(gen.id, DataModel.unwrapLists(model.data))
-		setError(null)
-	}, [gen.id, setCurrentPreset, setSharedSnippetId, blockStates, file?.id])
+	useModel(
+		model,
+		(model) => {
+			if (!ignoreChange.current) {
+				setCurrentPreset(undefined, true)
+				setSharedSnippetId(undefined, true)
+			}
+			if (file && model && blockStates) {
+				const data = getOutput(model, blockStates)
+				updateFile(gen.id, file.id, { id: file.id, data })
+			}
+			ignoreChange.current = false
+			Store.setBackup(gen.id, DataModel.unwrapLists(model.data))
+			setError(null)
+		},
+		[gen.id, setCurrentPreset, setSharedSnippetId, blockStates, file?.id]
+	)
 
 	const reset = () => {
 		Analytics.resetGenerator(gen.id, model?.historyIndex ?? 1, 'menu')
@@ -152,10 +186,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const [presets, setPresets] = useState<string[]>([])
 	useEffect(() => {
-		getCollections(version).then(collections => {
-			setPresets(collections.get(gen.id).map(p => p.startsWith('minecraft:') ? p.slice(10) : p))
-		})
-			.catch(e => { console.error(e); setError(e) })
+		getCollections(version)
+			.then((collections) => {
+				setPresets(collections.get(gen.id).map((p) => (p.startsWith('minecraft:') ? p.slice(10) : p)))
+			})
+			.catch((e) => {
+				console.error(e)
+				setError(e)
+			})
 	}, [version, gen.id])
 
 	const selectPreset = (id: string) => {
@@ -217,7 +255,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 						setShareUrl(url)
 						setShareShown(true)
 					})
-					.catch(e => {
+					.catch((e) => {
 						if (e instanceof Error) {
 							setError(e)
 						}
@@ -265,7 +303,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [copyActive, copySuccess] = useActiveTimeout()
 
 	const [previewShown, setPreviewShown] = useState(Store.getPreviewPanelOpen() ?? window.innerWidth > 800)
-	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
+	const hasPreview =
+		HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
 	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 2
 	if (hasPreview) actionsShown += 1
@@ -297,7 +336,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [projectCreating, setProjectCreating] = useState(false)
 	const [projectDeleting, setprojectDeleting] = useState(false)
 	const [fileSaving, setFileSaving] = useState<string | undefined>(undefined)
-	const [fileRenaming, setFileRenaming] = useState<{ type: string, id: string } | undefined>(undefined)
+	const [fileRenaming, setFileRenaming] = useState<{ type: string; id: string } | undefined>(undefined)
 	const [newFileQueued, setNewFileQueued] = useState(false)
 
 	const onNewFile = useCallback(() => {
@@ -313,69 +352,196 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 	}, [model, newFileQueued, file])
 
-	return <>
-		<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
-			{!gen.tags?.includes('partners') && <Ad id="data-pack-generator" type="text" />}
-			<div class="controls generator-controls">
-				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={gen.wiki} target="_blank">
-					{Octicon.mortar_board}
-					<span>{locale('wiki')}</span>
-				</a>}
-				<BtnMenu icon="archive" label={locale('presets')} relative={false}>
-					<SearchList searchPlaceholder={locale('search')} noResults={locale('no_presets')} values={presets} onSelect={selectPreset}/>
-				</BtnMenu>
-				<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
-				<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
-					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
-					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
-					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
-					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
-					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={onNewFile} />
-					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
-				</BtnMenu>
+	return (
+		<>
+			<main class={`generator${previewShown ? ' has-preview' : ''}${projectShown ? ' has-project' : ''}`}>
+				<div class='controls generator-controls'>
+					{gen.wiki && (
+						<a
+							class='btn btn-link tooltipped tip-se'
+							aria-label={locale('learn_on_the_wiki')}
+							href={gen.wiki}
+							target='_blank'
+						>
+							{Octicon.mortar_board}
+							<span>{locale('wiki')}</span>
+						</a>
+					)}
+					<BtnMenu
+						icon='archive'
+						label={locale('presets')}
+						relative={false}
+					>
+						<SearchList
+							searchPlaceholder={locale('search')}
+							noResults={locale('no_presets')}
+							values={presets}
+							onSelect={selectPreset}
+						/>
+					</BtnMenu>
+					<VersionSwitcher
+						value={version}
+						onChange={selectVersion}
+						allowed={allowedVersions}
+					/>
+					<BtnMenu
+						icon='kebab_horizontal'
+						tooltip={locale('more')}
+					>
+						<Btn
+							icon='history'
+							label={locale('reset_default')}
+							onClick={reset}
+						/>
+						{backup !== undefined && (
+							<Btn
+								icon='history'
+								label={locale('restore_backup')}
+								onClick={loadBackup}
+							/>
+						)}
+						<Btn
+							icon='arrow_left'
+							label={locale('undo')}
+							onClick={undo}
+						/>
+						<Btn
+							icon='arrow_right'
+							label={locale('redo')}
+							onClick={redo}
+						/>
+						<Btn
+							icon='plus_circle'
+							label={locale('project.new_file')}
+							onClick={onNewFile}
+						/>
+						<Btn
+							icon='file'
+							label={locale('project.save')}
+							onClick={() => setFileSaving('menu')}
+						/>
+					</BtnMenu>
+				</div>
+				{error && (
+					<ErrorPanel
+						error={error}
+						onDismiss={() => setError(null)}
+					/>
+				)}
+				<Tree
+					{...{ model, version, blockStates }}
+					onError={setError}
+				/>
+				<Footer donate={!gen.tags?.includes('partners')} />
+			</main>
+			<div
+				class='popup-actions right-actions'
+				style={`--offset: -${8 + actionsShown * 50}px;`}
+			>
+				<div
+					class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`}
+					aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')}
+					onClick={togglePreview}
+				>
+					{previewShown ? Octicon.x_circle : Octicon.play}
+				</div>
+				<div
+					class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`}
+					aria-label={locale(shareLoading ? 'share.loading' : 'share')}
+					onClick={share}
+				>
+					{shareLoading ? Octicon.sync : Octicon.link}
+				</div>
+				<div
+					class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`}
+					aria-label={locale('download')}
+					onClick={downloadSource}
+				>
+					{Octicon.download}
+				</div>
+				<div
+					class={`popup-action action-copy${sourceShown ? ' shown' : ''}${
+						copyActive ? ' active' : ''
+					} tooltipped tip-nw`}
+					aria-label={locale(copyActive ? 'copied' : 'copy')}
+					onClick={copySource}
+				>
+					{copyActive ? Octicon.check : Octicon.copy}
+				</div>
+				<div
+					class={'popup-action action-code shown tooltipped tip-nw'}
+					aria-label={locale(sourceShown ? 'hide_output' : 'show_output')}
+					onClick={toggleSource}
+				>
+					{sourceShown ? Octicon.chevron_right : Octicon.code}
+				</div>
 			</div>
-			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			<Tree {...{model, version, blockStates}} onError={setError} />
-			<Footer donate={!gen.tags?.includes('partners')} />
-		</main>
-		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
-			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
-				{previewShown ? Octicon.x_circle : Octicon.play}
+			<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
+				<PreviewPanel
+					{...{ model, version, id: gen.id }}
+					shown={previewShown}
+					onError={setError}
+				/>
 			</div>
-			<div class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`} aria-label={locale(shareLoading ? 'share.loading' : 'share')} onClick={share}>
-				{shareLoading ? Octicon.sync : Octicon.link}
+			<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
+				<SourcePanel
+					{...{ model, blockStates, doCopy, doDownload, doImport }}
+					name={gen.schema ?? 'data'}
+					copySuccess={copySuccess}
+					onError={setError}
+				/>
 			</div>
-			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
-				{Octicon.download}
+			<div class={`popup-share${shareShown ? ' shown' : ''}`}>
+				<TextInput
+					value={shareUrl}
+					readonly
+				/>
+				<Btn
+					icon={shareCopyActive ? 'check' : 'copy'}
+					onClick={copySharedId}
+					tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')}
+					tooltipLoc='nw'
+					active={shareCopyActive}
+				/>
 			</div>
-			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={locale(copyActive ? 'copied' : 'copy')} onClick={copySource}>
-				{copyActive ? Octicon.check : Octicon.copy}
+			<div
+				class='popup-actions left-actions'
+				style='--offset: 50px;'
+			>
+				<div
+					class={'popup-action action-project shown tooltipped tip-ne'}
+					aria-label={locale(projectShown ? 'hide_project' : 'show_project')}
+					onClick={toggleProjectShown}
+				>
+					{projectShown ? Octicon.chevron_left : Octicon.repo}
+				</div>
 			</div>
-			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={locale(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
-				{sourceShown ? Octicon.chevron_right : Octicon.code}
+			<div class={`popup-project${projectShown ? ' shown' : ''}`}>
+				<ProjectPanel
+					{...{ model, version, id: gen.id }}
+					onError={setError}
+					onDeleteProject={() => setprojectDeleting(true)}
+					onRename={setFileRenaming}
+					onCreate={() => setProjectCreating(true)}
+				/>
 			</div>
-		</div>
-		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel {...{model, version, id: gen.id}} shown={previewShown} onError={setError} />
-		</div>
-		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{model, blockStates, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
-		</div>
-		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
-			<TextInput value={shareUrl} readonly />
-			<Btn icon={shareCopyActive ? 'check' : 'copy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
-		</div>
-		<div class="popup-actions left-actions" style="--offset: 50px;">
-			<div class={'popup-action action-project shown tooltipped tip-ne'} aria-label={locale(projectShown ? 'hide_project' : 'show_project')} onClick={toggleProjectShown}>
-				{projectShown ? Octicon.chevron_left : Octicon.repo}
-			</div>
-		</div>
-		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
-			<ProjectPanel {...{model, version, id: gen.id}} onError={setError} onDeleteProject={() => setprojectDeleting(true)} onRename={setFileRenaming} onCreate={() => setProjectCreating(true)} />
-		</div>
-		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
-		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
-		{model && fileSaving && <FileCreation id={gen.id} model={model} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
-		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
-	</>
+			{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
+			{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
+			{model && fileSaving && (
+				<FileCreation
+					id={gen.id}
+					model={model}
+					method={fileSaving}
+					onClose={() => setFileSaving(undefined)}
+				/>
+			)}
+			{fileRenaming && (
+				<FileRenaming
+					id={fileRenaming.type}
+					name={fileRenaming.id}
+					onClose={() => setFileRenaming(undefined)}
+				/>
+			)}
+		</>
+	)
 }

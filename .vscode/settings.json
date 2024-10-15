@@ -25,5 +25,12 @@
 	"editor.insertSpaces": false,
 	"files.insertFinalNewline": true,
 	"files.trimFinalNewlines": true,
-	"typescript.tsdk": "node_modules\\typescript\\lib"
+	"typescript.tsdk": "node_modules\\typescript\\lib",
+	"prettier.tabWidth": 4,
+	"prettier.useTabs": true,
+	"prettier.semi": false,
+	"prettier.arrowParens": "always",
+	"prettier.jsxSingleQuote": true,
+	"prettier.singleQuote": true,
+	"prettier.printWidth": 120
 }

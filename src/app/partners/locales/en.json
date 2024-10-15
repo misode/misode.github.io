@@ -55,7 +55,6 @@
   "immersive_weathering:rule_test.immersive_weathering:block_set_match": "Block set match",
   "immersive_weathering:rule_test.immersive_weathering:fluid_match": "Fluid match",
   "immersive_weathering:rule_test.immersive_weathering:tree_log": "Tree log",
-
   "lithostitched:modifier_type.lithostitched:add_biome_spawns": "Add biome spawns",
   "lithostitched:modifier_type.lithostitched:add_features": "Add features",
   "lithostitched:modifier_type.lithostitched:add_pool_aliases": "Add pool aliases",
@@ -74,7 +73,6 @@
   "lithostitched:modifier_predicate_type.lithostitched:mod_loaded": "Mod loaded",
   "lithostitched:modifier_predicate_type.lithostitched:not": "Not",
   "lithostitched:modifier_predicate_type.lithostitched:true": "True",
-
   "neoforge:biome_modifier_type.neoforge:none": "Disable Biome Modifier",
   "neoforge:biome_modifier_type.neoforge:add_features": "Add Features",
   "neoforge:biome_modifier_type.neoforge:remove_features": "Remove Features",
@@ -88,7 +86,6 @@
   "neoforge:structure_modifier_type.neoforge:add_spawns": "Add Mob Spawns",
   "neoforge:structure_modifier_type.neoforge:remove_spawns": "Remove Mob Spawns",
   "neoforge:structure_modifier_type.neoforge:clear_spawns": "Clear Mob Spawns",
-
   "obsidian:item.information": "Item Information",
   "obsidian:item_information.rarity": "Rarity",
   "obsidian:item_information.creative_tab": "Creative Tab",
@@ -116,7 +113,6 @@
   "obsidian:item.use_action.url": "URL",
   "obsidian:item.use_action.gui_size": "GUI Size",
   "obsidian:item.use_action.gui_title": "GUI Title",
-
   "obsidian:block.block_type": "Block Type",
   "obsidian:block.information": "Block Information",
   "obsidian:block_information.rarity": "Rarity",
@@ -147,7 +143,6 @@
   "obsidian:block.display.item_model": "Item Model",
   "obsidian:block.display.block_model": "Block Model",
   "obsidian:block.display.lore": "Lore",
-
   "ohthetreesyoullgrow:feature.ohthetreesyoullgrow:tree_from_nbt_v1": "Tree from NBT v1",
   "ohthetreesyoullgrow.configured_feature.type": "Type",
   "ohthetreesyoullgrow.configured_feature.config": "Config",
@@ -172,5 +167,9 @@
   "ohthetreesyoullgrow.configured_feature.config.max_log_depth": "Max log depth",
   "ohthetreesyoullgrow.configured_feature.config.place_from_nbt": "Place from NBT",
   "ohthetreesyoullgrow.configured_feature.config.place_from_nbt.help": "Additional blocks from the structure pieces that should be placed in the world.",
-  "ohthetreesyoullgrow.configured_feature.config.place_from_nbt.entry": "Block"
+  "ohthetreesyoullgrow.configured_feature.config.place_from_nbt.entry": "Block",
+  "shardborne.custom_npc.id": "Questline ID",
+  "shardborne.custom_npc.id.help": "A unique ID for the questline",
+  "shardborne.custom_npc.random_dialogue.help": "A string array of dialogue the NPC will say when a questline is complete",
+  "shardborne.custom_npc.prerequisites.help": "An array of prerequisites that need to be completed before the quest line can start"
 }
