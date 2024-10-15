@@ -19,8 +19,14 @@ export default defineConfig({
 			{ find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' },
 		],
 	},
+	optimizeDeps: {
+		esbuildOptions: {
+			target: 'es2021',
+		},
+	},
 	build: {
 		sourcemap: true,
+		target: 'es2021',
 		rollupOptions: {
 			plugins: [
 				html({

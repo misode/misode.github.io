@@ -16,6 +16,7 @@ const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 const fixesUrl = 'https://raw.githubusercontent.com/misode/mcfixes'
 const versionDiffUrl = 'https://mcmeta-diff.misode.workers.dev'
 const whatsNewUrl = 'https://whats-new.misode.workers.dev'
+const vanillaMcdocUrl = 'https://proxy.misode.workers.dev/mcdoc'
 
 type McmetaTypes = 'summary' | 'data' | 'data-json' | 'assets' | 'assets-json' | 'registries' | 'atlas'
 
@@ -39,6 +40,15 @@ async function validateCache(version: RefInfo) {
 	}
 }
 
+export async function fetchVanillaMcdoc() {
+	try {
+		// TODO: enable refresh
+		return cachedFetch(vanillaMcdocUrl, { decode: res => res.arrayBuffer(), refresh: false })
+	} catch (e) {
+		throw new Error(`Error occured while fetching vanilla-mcdoc: ${message(e)}`)
+	}
+}
+
 export async function fetchRegistries(versionId: VersionId) {
 	console.debug(`[fetchRegistries] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!
@@ -51,7 +61,7 @@ export async function fetchRegistries(versionId: VersionId) {
 		}
 		return result
 	} catch (e) {
-		throw new Error(`Error occurred while fetching registries (2): ${message(e)}`)
+		throw new Error(`Error occurred while fetching registries: ${message(e)}`)
 	}
 }
 

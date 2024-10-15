@@ -7,6 +7,7 @@ import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts
 import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
 import type { FileModel, VersionId } from '../../services/index.js'
 import { checkVersion, createMockFileModel, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
+import { setupSpyglass } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, deepEqual, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
@@ -29,6 +30,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	}
 
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
+
+	useEffect(() => {
+		setupSpyglass()
+	}, [])
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
