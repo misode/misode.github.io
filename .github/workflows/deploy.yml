@@ -31,4 +31,5 @@ jobs:
                   port: ${{ secrets.SSH_PORT }}
                   username: ${{ secrets.SSH_USER }}
                   password: ${{ secrets.SSH_PASSWORD }}
-                  rmRemote: true
+                  concurrency: 20
+                  dotfiles: true
