@@ -44,7 +44,6 @@ export async function renderItem(version: VersionId, item: ItemStack) {
 			throw new Error('Cannot get WebGL2 context')
 		}
 		const renderer = new ItemRenderer(gl, item, resources)
-		console.log('Rendering', item.toString())
 		renderer.drawItem()
 		return canvas.toDataURL()
 	})()

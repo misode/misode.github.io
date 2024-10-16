@@ -1,4 +1,5 @@
 import type { DocAndNode } from '@spyglassmc/core'
+import { useDocAndNode } from '../../contexts/Spyglass.jsx'
 import { useVersion } from '../../contexts/Version.jsx'
 import { checkVersion } from '../../services/index.js'
 import { BiomeSourcePreview, BlockStatePreview, DecoratorPreview, DensityFunctionPreview, LootTablePreview, ModelPreview, NoisePreview, NoiseSettingsPreview, RecipePreview, StructureSetPreview } from '../previews/index.js'
@@ -11,10 +12,12 @@ type PreviewPanelProps = {
 	shown: boolean,
 	onError: (message: string) => unknown,
 }
-export function PreviewPanel({ docAndNode, id, shown }: PreviewPanelProps) {
+export function PreviewPanel({ docAndNode: original, id, shown }: PreviewPanelProps) {
 	const { version } = useVersion()
 
-	if (!docAndNode) return <></>
+	if (!original) return <></>
+
+	const docAndNode = useDocAndNode(original)
 
 	if (id === 'loot_table') {
 		return <LootTablePreview {...{ docAndNode, shown }} />

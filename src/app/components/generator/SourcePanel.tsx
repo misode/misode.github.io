@@ -2,6 +2,7 @@ import type { DocAndNode } from '@spyglassmc/core'
 import { fileUtil } from '@spyglassmc/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
+import { useDocAndNode } from '../../contexts/Spyglass.jsx'
 import { useLocalStorage } from '../../hooks/index.js'
 import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
 import type { Spyglass } from '../../services/Spyglass.js'
@@ -47,7 +48,7 @@ export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport
 		return stringifySource(data, format, indent)
 	}, [indent, format, sort])
 
-	const text = docAndNode?.doc.getText()
+	const text = useDocAndNode(docAndNode)?.doc.getText()
 	
 	useEffect(() => {
 		retransform.current = () => {

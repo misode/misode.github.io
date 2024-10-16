@@ -11,19 +11,34 @@ import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
 import type { ConfigGenerator, ConfigVersion } from '../Config.js'
 import siteConfig from '../Config.js'
-import { genPath } from '../Utils.js'
+import { computeIfAbsent, genPath } from '../Utils.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
 export class Spyglass {
 	private static readonly INSTANCES = new Map<VersionId, Promise<Spyglass>>()
 
+	private readonly watchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
+
 	private constructor(
 		private readonly service: core.Service,
 		private readonly version: ConfigVersion,
-	) {}
+	) {
+		this.service.project.on('documentUpdated', (e) => {
+			const uriWatchers = this.watchers.get(e.doc.uri) ?? []
+			for (const handler of uriWatchers) {
+				handler(e)
+			}
+		})
+	}
 
-	public async setFileContents(uri: string, contents: string) {
+	public async setFileContents(uri: string, contents?: string) {
+		if (contents !== undefined) {
+			await this.service.project.externals.fs.writeFile(uri, contents)
+		} else {
+			const buffer = await this.service.project.externals.fs.readFile(uri)
+			contents = new TextDecoder().decode(buffer)
+		}
 		await this.service.project.onDidOpen(uri, 'json', 1, contents)
 		const docAndNode = await this.service.project.ensureClientManagedChecked(uri)
 		if (!docAndNode) {
@@ -37,7 +52,18 @@ export class Spyglass {
 	}
 
 	public getUnsavedFileUri(gen: ConfigGenerator) {
-		return `file:project/data/draft/${genPath(gen, this.version.id)}/unsaved.json`
+		return `file:///project/data/draft/${genPath(gen, this.version.id)}/unsaved.json`
+	}
+
+	public watchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
+		const uriWatchers = computeIfAbsent(this.watchers, uri, () => [])
+		uriWatchers.push(handler)
+	}
+
+	public unwatchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
+		const uriWatchers = computeIfAbsent(this.watchers, uri, () => [])
+		const index = uriWatchers.findIndex(w => w === handler)
+		uriWatchers.splice(index, 1)
 	}
 
 	public static async initialize(versionId: VersionId) {
@@ -54,8 +80,8 @@ export class Spyglass {
 					'project#ready',
 				]),
 				project: {
-					cacheRoot: 'file:cache/',
-					projectRoots: ['file:project/'],
+					cacheRoot: 'file:///cache/',
+					projectRoots: ['file:///project/'],
 					externals: {
 						...BrowserExternals,
 						archive: {

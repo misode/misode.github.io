@@ -1,13 +1,13 @@
 import { route } from 'preact-router'
-import { useCallback, useEffect, useErrorBoundary, useMemo, useState } from 'preact/hooks'
+import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { useSpyglass, watchSpyglassUri } from '../../contexts/Spyglass.jsx'
 import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
-import { Spyglass } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
@@ -21,7 +21,8 @@ interface Props {
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { projects, project, file, updateProject, closeFile } = useProject()
+	const { spyglass, spyglassLoading } = useSpyglass()
+	const { projects, project, file, updateProject, updateFile, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
@@ -31,10 +32,6 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
 
-	const { value: spyglass, loading: spyglassLoading } = useAsync(() => {
-		return Spyglass.initialize(version)
-	}, [version])
-
 	const uri = useMemo(() => {
 		// TODO: return different uri when project file is open
 		return spyglass?.getUnsavedFileUri(gen)
@@ -42,13 +39,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
-	const backup = useMemo(() => Store.getBackup(gen.id), [gen.id])
-
-	const loadBackup = () => {
-		if (backup !== undefined) {
-			// TODO: implement
-		}
-	}
+	const ignoreChange = useRef(false)
 
 	const { value: docAndNode } = useAsync(async () => {
 		if (spyglassLoading || !spyglass || !uri) {
@@ -61,6 +52,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 		if (currentPreset) {
 			data = await loadPreset(currentPreset)
+			ignoreChange.current = true
 		} else if (sharedSnippetId) {
 			const snippet = await getSnippet(sharedSnippetId)
 			let cancel = false
@@ -83,25 +75,36 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				setSourceShown(false)
 			}
 			Analytics.openSnippet(gen.id, sharedSnippetId, version)
+			ignoreChange.current = true
 			data = snippet.data
 		} else if (file) {
 			if (project.version && project.version !== version) {
 				changeVersion(project.version, false)
 				return AsyncCancel
 			}
+			ignoreChange.current = true
 			data = file.data
 		}
-		const docAndNode = await spyglass.setFileContents(uri, JSON.stringify(data ?? {}))
+		// TODO: if data is undefined, set to generator's default
+		const docAndNode = await spyglass.setFileContents(uri, data ? JSON.stringify(data) : undefined)
 		Analytics.setGenerator(gen.id)
 		return docAndNode
 	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, spyglass, spyglassLoading])
 
-	const { doc } = docAndNode ?? {} 
+	const { doc } = docAndNode ?? {}
 
-	// TODO: when contents of file change:
-	// - remove preset and share id from url
-	// - update project
-	// - store backup
+	watchSpyglassUri(uri, ({ doc }) => {
+		if (!ignoreChange.current) {
+			setCurrentPreset(undefined, true)
+			setSharedSnippetId(undefined, true)
+		}
+		const data = JSON.parse(doc.getText())
+		if (file) {
+			updateFile(gen.id, file.id, { id: file.id, data })
+		}
+		ignoreChange.current = false
+		setError(null)
+	}, [updateFile])
 
 	const reset = () => {
 		Analytics.resetGenerator(gen.id, 1, 'menu')
@@ -304,7 +307,6 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
 				<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
 					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
-					{backup !== undefined && <Btn icon="history" label={locale('restore_backup')} onClick={loadBackup} />}
 					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
 					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={onNewFile} />
