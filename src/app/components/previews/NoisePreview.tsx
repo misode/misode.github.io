@@ -11,16 +11,17 @@ import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const NoisePreview = ({ model, shown }: PreviewProps) => {
+export const NoisePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(model.data)
+
+	const text = docAndNode.doc.getText()
 
 	const noise = useMemo(() => {
 		const random = XoroshiroRandom.create(seed)
-		const params = NoiseParameters.fromJson(model.data)
+		const params = NoiseParameters.fromJson(JSON.parse(text))
 		return new NormalNoise(random, params)
-	}, [state, seed])
+	}, [text, seed])
 
 	const imageData = useRef<ImageData>()
 	const ctx = useRef<CanvasRenderingContext2D>()

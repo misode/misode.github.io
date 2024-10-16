@@ -1,14 +1,14 @@
+import type { DocAndNode } from '@spyglassmc/core'
 import { useErrorBoundary } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import type { FileModel } from '../../services/index.js'
 
 type TreePanelProps = {
-	model: FileModel | undefined,
+	docAndNode: DocAndNode,
 	onError: (message: string) => unknown,
 }
-export function Tree({ model, onError }: TreePanelProps) {
+export function Tree({ onError }: TreePanelProps) {
 	const { lang } = useLocale()
-	if (!model || lang === 'none') return <></>
+	if (lang === 'none') return <></>
 
 	const [error] = useErrorBoundary(e => {
 		onError(`Error rendering the tree: ${e.message}`)

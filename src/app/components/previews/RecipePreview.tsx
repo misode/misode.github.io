@@ -11,7 +11,7 @@ import type { PreviewProps } from './index.js'
 
 const ANIMATION_TIME = 1000
 
-export const RecipePreview = ({ model }: PreviewProps) => {
+export const RecipePreview = ({ docAndNode }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
@@ -29,11 +29,11 @@ export const RecipePreview = ({ model }: PreviewProps) => {
 		return () => clearInterval(interval)
 	}, [])
 
-	const recipe = model.data
-	const state = JSON.stringify(recipe)
+	const text = docAndNode.doc.getText()
+	const recipe = JSON.parse(text)
 	const items = useMemo<Map<Slot, ItemStack>>(() => {
 		return placeItems(version, recipe, animation, itemTags ?? new Map())
-	}, [state, animation, itemTags])
+	}, [text, animation, itemTags])
 
 	const gui = useMemo(() => {
 		const type = recipe.type?.replace(/^minecraft:/, '')
@@ -46,7 +46,7 @@ export const RecipePreview = ({ model }: PreviewProps) => {
 		} else {
 			return '/images/crafting_table.png'
 		}
-	}, [state])
+	}, [text])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">

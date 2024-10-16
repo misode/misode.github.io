@@ -12,17 +12,18 @@ import { DEEPSLATE } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const StructureSetPreview = ({ model, shown }: PreviewProps) => {
+export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(model.data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value: structureSet } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version)
-		const structureSet = DEEPSLATE.loadStructureSet(model.data, seed)
+		const structureSet = DEEPSLATE.loadStructureSet(JSON.parse(text), seed)
 		return structureSet
-	}, [state, version, seed])
+	}, [text, version, seed])
 
 	const { chunkStructures, structureColors } = useMemo(() => {
 		return {

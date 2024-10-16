@@ -1,18 +1,18 @@
+import type { DocAndNode } from '@spyglassmc/core'
 import { useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import { useLocale, useProject } from '../../contexts/index.js'
-import type { FileModel } from '../../services/index.js'
 import { Btn } from '../Btn.js'
 import { TextInput } from '../forms/index.js'
 import { Modal } from '../Modal.js'
 
 interface Props {
-	model: FileModel,
+	docAndNode: DocAndNode,
 	id: string,
 	method: string,
 	onClose: () => void,
 }
-export function FileCreation({ model, id, method, onClose }: Props) {
+export function FileCreation({ docAndNode, id, method, onClose }: Props) {
 	const { locale } = useLocale()
 	const { projects, project, updateFile } = useProject()
 	const [fileId, setFileId] = useState(id === 'pack_mcmeta' ? 'pack' : '')
@@ -29,7 +29,8 @@ export function FileCreation({ model, id, method, onClose }: Props) {
 			return
 		}
 		Analytics.saveProjectFile(id, projects.length, project.files.length, method as any)
-		updateFile(id, undefined, { type: id, id: fileId, data: model.data })
+		const data = JSON.parse(docAndNode.doc.getText())
+		updateFile(id, undefined, { type: id, id: fileId, data })
 		onClose()
 	}
 

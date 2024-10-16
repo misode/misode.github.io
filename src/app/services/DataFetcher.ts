@@ -1,8 +1,8 @@
 import config from '../Config.js'
 import { Store } from '../Store.js'
 import { message } from '../Utils.js'
-import type { VersionId } from './Schemas.js'
-import { checkVersion } from './Schemas.js'
+import type { VersionId } from './Versions.js'
+import { checkVersion } from './Versions.js'
 
 const CACHE_NAME = 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'

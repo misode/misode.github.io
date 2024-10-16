@@ -1,4 +1,4 @@
-import type { FileModel } from '../../services/index.js'
+import type { DocAndNode } from '@spyglassmc/core'
 
 export * from './BiomeSourcePreview.js'
 export * from './BlockStatePreview.jsx'
@@ -12,6 +12,6 @@ export * from './RecipePreview.jsx'
 export * from './StructureSetPreview.jsx'
 
 export interface PreviewProps {
-	model: FileModel
+	docAndNode: DocAndNode
 	shown: boolean
 }

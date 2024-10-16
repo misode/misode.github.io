@@ -3,7 +3,7 @@ import type { Random } from 'deepslate/core'
 import { Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate/nbt'
 import { ResolvedItem } from '../../services/ResolvedItem.js'
-import type { VersionId } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
 import { clamp, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
 
 export interface SlottedItem {

@@ -3,7 +3,7 @@ import { BlockDefinition, BlockModel, Identifier, ItemRenderer, TextureAtlas, up
 import config from '../Config.js'
 import { message } from '../Utils.js'
 import { fetchLanguage, fetchResources } from './DataFetcher.js'
-import type { VersionId } from './Schemas.js'
+import type { VersionId } from './Versions.js'
 
 const Resources: Record<string, ResourceManager | Promise<ResourceManager>> = {}
 

@@ -1,8 +1,10 @@
+import type { DocAndNode } from '@spyglassmc/core'
+import { fileUtil } from '@spyglassmc/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useLocalStorage } from '../../hooks/index.js'
-import type { FileModel } from '../../services/index.js'
 import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
+import type { Spyglass } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { message } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
@@ -15,15 +17,15 @@ interface Editor {
 }
 
 type SourcePanelProps = {
-	name: string,
-	model: FileModel | undefined,
+	spyglass: Spyglass | undefined,
+	docAndNode: DocAndNode | undefined,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
 	copySuccess: () => unknown,
 	onError: (message: string | Error) => unknown,
 }
-export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
+export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
@@ -37,20 +39,23 @@ export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuc
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
-	const getSerializedOutput = useCallback((model: FileModel) => {
-		let data = model.data
+	const getSerializedOutput = useCallback((text: string) => {
+		let data = JSON.parse(text)
 		if (sort === 'alphabetically') {
 			data = sortData(data)
 		}
 		return stringifySource(data, format, indent)
 	}, [indent, format, sort])
 
+	const text = docAndNode?.doc.getText()
+	
 	useEffect(() => {
 		retransform.current = () => {
-			if (!editor.current) return
-			if (!model) return
+			if (!editor.current || text === undefined) {
+				return
+			}
 			try {
-				const output = getSerializedOutput(model)
+				const output = getSerializedOutput(text)
 				editor.current.setValue(output)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -68,9 +73,10 @@ export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuc
 			if (!editor.current) return
 			const value = editor.current.getValue()
 			if (value.length === 0) return
+			if (!spyglass || !docAndNode) return
 			try {
-				await parseSource(value, format)
-				// TODO: import
+				const data = await parseSource(value, format)
+				await spyglass.setFileContents(docAndNode.doc.uri, JSON.stringify(data))
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`
@@ -81,7 +87,7 @@ export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuc
 				console.error(e)
 			}
 		}
-	}, [model, indent, format, sort, highlighting])
+	}, [spyglass, docAndNode, text, indent, format, sort, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
@@ -144,9 +150,10 @@ export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuc
 
 	// TODO: when file contents change, retransform
 	useEffect(() => {
-		if (!retransform.current) return
-		if (model) retransform.current()
-	}, [model])
+		if (retransform.current && text !== undefined) {
+			retransform.current()
+		}
+	}, [text])
 
 	useEffect(() => {
 		if (!editor.current || !retransform.current) return
@@ -157,18 +164,18 @@ export function SourcePanel({ name, model, doCopy, doDownload, doImport, copySuc
 	}, [indent, format, sort, highlighting, braceLoaded])
 
 	useEffect(() => {
-		if (doCopy && model) {
-			navigator.clipboard.writeText(getSerializedOutput(model)).then(() => {
+		if (doCopy && text !== undefined) {
+			navigator.clipboard.writeText(getSerializedOutput(text)).then(() => {
 				copySuccess()
 			})
 		}
-	}, [doCopy])
+	}, [doCopy, text])
 
 	useEffect(() => {
-		if (doDownload && model && download.current) {
-			const content = encodeURIComponent(getSerializedOutput(model))
+		if (doDownload && docAndNode && text !== undefined && download.current) {
+			const content = encodeURIComponent(getSerializedOutput(text))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
-			const fileName = name === 'pack_mcmeta' ? 'pack.mcmeta' : `${name}.${format}`
+			const fileName = fileUtil.basename(docAndNode.doc.uri)
 			download.current.setAttribute('download', fileName)
 			download.current.click()
 		}

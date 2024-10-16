@@ -18,7 +18,7 @@ import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 const MODES = ['side', 'top', '3d'] as const
 
-export const DensityFunctionPreview = ({ model, shown }: PreviewProps) => {
+export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { project } = useProject()
 	const { version } = useVersion()
@@ -28,13 +28,14 @@ export const DensityFunctionPreview = ({ model, shown }: PreviewProps) => {
 	const [seed, setSeed] = useState(randomSeed())
 	const [minY] = useState(0)
 	const [height] = useState(256)
-	const serializedData = JSON.stringify(model.data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value: df } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
-		const df = DEEPSLATE.loadDensityFunction(model.data, minY, height, seed)
+		const df = DEEPSLATE.loadDensityFunction(JSON.parse(text), minY, height, seed)
 		return df
-	}, [version, project, minY, height, seed, serializedData])
+	}, [version, project, minY, height, seed, text])
 
 	// === 2D ===
 	const imageData = useRef<ImageData>()

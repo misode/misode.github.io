@@ -1,59 +1,59 @@
+import type { DocAndNode } from '@spyglassmc/core'
 import { useVersion } from '../../contexts/Version.jsx'
-import type { FileModel } from '../../services/index.js'
 import { checkVersion } from '../../services/index.js'
 import { BiomeSourcePreview, BlockStatePreview, DecoratorPreview, DensityFunctionPreview, LootTablePreview, ModelPreview, NoisePreview, NoiseSettingsPreview, RecipePreview, StructureSetPreview } from '../previews/index.js'
 
-export const HasPreview = ['loot_table', 'recipe', 'dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature', 'worldgen/structure_set', 'block_definition', 'model']
+export const HasPreview = ['loot_table', 'recipe', 'dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature', 'worldgen/structure_set', 'block_definition', 'docAndNode']
 
 type PreviewPanelProps = {
-	model: FileModel | undefined,
+	docAndNode: DocAndNode | undefined,
 	id: string,
 	shown: boolean,
 	onError: (message: string) => unknown,
 }
-export function PreviewPanel({ model, id, shown }: PreviewPanelProps) {
+export function PreviewPanel({ docAndNode, id, shown }: PreviewPanelProps) {
 	const { version } = useVersion()
 
-	if (!model) return <></>
+	if (!docAndNode) return <></>
 
 	if (id === 'loot_table') {
-		return <LootTablePreview {...{ model, shown }} />
+		return <LootTablePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'recipe') {
-		return <RecipePreview {...{ model, shown }} />
+		return <RecipePreview {...{ docAndNode, shown }} />
 	}
 
-	if (id === 'dimension' && model.data.generator?.type?.endsWith('noise')) {
-		return <BiomeSourcePreview {...{ model, shown }} />
+	if (id === 'dimension' && JSON.parse(docAndNode.doc.getText()).generator?.type?.endsWith('noise')) {
+		return <BiomeSourcePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/density_function') {
-		return <DensityFunctionPreview {...{ model, shown }} />
+		return <DensityFunctionPreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/noise') {
-		return <NoisePreview {...{ model, shown }} />
+		return <NoisePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/noise_settings' && checkVersion(version, '1.18')) {
-		return <NoiseSettingsPreview {...{ model, shown }} />
+		return <NoiseSettingsPreview {...{ docAndNode, shown }} />
 	}
 
 	if ((id === 'worldgen/placed_feature' ||  (id === 'worldgen/configured_feature' && checkVersion(version, '1.16', '1.17')))) {
-		return <DecoratorPreview {...{ model, shown }} />
+		return <DecoratorPreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/structure_set' && checkVersion(version, '1.19')) {
-		return <StructureSetPreview {...{ model, shown }} />
+		return <StructureSetPreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'block_definition') {
-		return <BlockStatePreview {...{ model, shown }} />
+		return <BlockStatePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'model') {
-		return <ModelPreview {...{ model, shown }} />
+		return <ModelPreview {...{ docAndNode, shown }} />
 	}
 
 	return <></>

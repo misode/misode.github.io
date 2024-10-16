@@ -9,11 +9,12 @@ import { decorateChunk } from './Decorator.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const DecoratorPreview = ({ model, shown }: PreviewProps) => {
+export const DecoratorPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(model.data)
+
+	const text = docAndNode.doc.getText()
 
 	const { context, chunkFeatures } = useMemo(() => {
 		const random = new LegacyRandom(seed)
@@ -32,7 +33,7 @@ export const DecoratorPreview = ({ model, shown }: PreviewProps) => {
 			context,
 			chunkFeatures: new Map<string, PlacedFeature[]>(),
 		}
-	}, [state, version, seed])
+	}, [text, version, seed])
 
 	const ctx = useRef<CanvasRenderingContext2D>()
 	const imageData = useRef<ImageData>()
@@ -49,10 +50,10 @@ export const DecoratorPreview = ({ model, shown }: PreviewProps) => {
 	}, [])
 	const onDraw = useCallback(function onDraw(transform: mat3) {
 		if (!ctx.current || !imageData.current || !shown) return
-
+		const data = JSON.parse(text)
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(Math.floor(x / 16), Math.floor(-y / 16))
-			const features = computeIfAbsent(chunkFeatures, `${pos[0]} ${pos[1]}`, () => decorateChunk(pos, model.data, context))
+			const features = computeIfAbsent(chunkFeatures, `${pos[0]} ${pos[1]}`, () => decorateChunk(pos, data, context))
 			return features.find(f => f.pos[0] === x && f.pos[2] == -y) ?? { pos: BlockPos.create(x, 0, -y) }
 		}, (feature) => {
 			if ('color' in feature) {

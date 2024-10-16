@@ -11,7 +11,7 @@ import type { PreviewProps } from './index.js'
 import { generateLootTable } from './LootTable.js'
 import { generateLootTable as generateLootTable1204 } from './LootTable1204.js'
 
-export const LootTablePreview = ({ model }: PreviewProps) => {
+export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const use1204 = !checkVersion(version, '1.20.5')
@@ -34,13 +34,13 @@ export const LootTablePreview = ({ model }: PreviewProps) => {
 		])
 	}, [version])
 
-	const table = model.data
-	const state = JSON.stringify(table)
+	const text = docAndNode.doc.getText()
 	const items = useMemo(() => {
 		if (dependencies === undefined || loading) {
 			return []
 		}
 		const [itemTags, lootTables, itemComponents, enchantments, enchantmentTags] = dependencies
+		const table = JSON.parse(text)
 		if (use1204) {
 			return generateLootTable1204(table, {
 				version, seed, luck, daytime, weather,
@@ -60,7 +60,7 @@ export const LootTablePreview = ({ model }: PreviewProps) => {
 			getEnchantmentTag: (id) => (enchantmentTags?.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
 			getBaseComponents: (id) => new Map([...(itemComponents?.get(Identifier.parse(id).toString()) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
 		})
-	}, [version, seed, luck, daytime, weather, mixItems, state, dependencies, loading])
+	}, [version, seed, luck, daytime, weather, mixItems, text, dependencies, loading])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">

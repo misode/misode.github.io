@@ -5,11 +5,11 @@ import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
-import type { FileModel, VersionId } from '../../services/index.js'
-import { checkVersion, createMockFileModel, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
-import { setupSpyglass } from '../../services/Spyglass.js'
+import type { VersionId } from '../../services/index.js'
+import { checkVersion, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
+import { Spyglass } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
-import { cleanUrl, deepEqual, genPath } from '../../Utils.js'
+import { cleanUrl, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 
 export const SHARE_KEY = 'share'
@@ -31,9 +31,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
 
-	useEffect(() => {
-		setupSpyglass(version)
+	const { value: spyglass, loading: spyglassLoading } = useAsync(() => {
+		return Spyglass.initialize(version)
 	}, [version])
+
+	const uri = useMemo(() => {
+		// TODO: return different uri when project file is open
+		return spyglass?.getUnsavedFileUri(gen)
+	}, [spyglass, gen.id])
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
@@ -45,7 +50,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 	}
 
-	const {} = useAsync(async () => {
+	const { value: docAndNode } = useAsync(async () => {
+		if (spyglassLoading || !spyglass || !uri) {
+			return AsyncCancel
+		}
 		let data: unknown = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
@@ -83,14 +91,12 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			}
 			data = file.data
 		}
-		if (data) {
-			// TODO: set file contents to data
-		}
+		const docAndNode = await spyglass.setFileContents(uri, JSON.stringify(data ?? {}))
 		Analytics.setGenerator(gen.id)
-		return {}
-	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id])
+		return docAndNode
+	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, spyglass, spyglassLoading])
 
-	const model: FileModel = createMockFileModel()
+	const { doc } = docAndNode ?? {} 
 
 	// TODO: when contents of file change:
 	// - remove preset and share id from url
@@ -184,13 +190,13 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			setShareShown(true)
 			copySharedId()
 		} else {
-			// TODO: get contents from file, and compare to default of type
-			if (deepEqual(model.data, {})) {
+			// TODO: check if files hasn't been modified compared to the default
+			if (false) {
 				setShareUrl(`${location.origin}/${gen.url}/?version=${version}`)
 				setShareShown(true)
-			} else {
+			} else if (doc) {
 				setShareLoading(true)
-				shareSnippet(gen.id, version, model.data, previewShown)
+				shareSnippet(gen.id, version, JSON.parse(doc.getText()), previewShown)
 					.then(({ id, length, compressed, rate }) => {
 						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
 						const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`
@@ -306,7 +312,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			<Tree model={model} onError={setError} />
+			{docAndNode && <Tree docAndNode={docAndNode} onError={setError} />}
 			<Footer donate={!gen.tags?.includes('partners')} />
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
@@ -327,10 +333,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel model={model} id={gen.id} shown={previewShown} onError={setError} />
+			<PreviewPanel docAndNode={docAndNode} id={gen.id} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel {...{model, doCopy, doDownload, doImport}} name={gen.schema ?? 'data'} copySuccess={copySuccess} onError={setError} />
+			<SourcePanel spyglass={spyglass} docAndNode={docAndNode} {...{doCopy, doDownload, doImport}} copySuccess={copySuccess} onError={setError} />
 		</div>
 		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
 			<TextInput value={shareUrl} readonly />
@@ -346,7 +352,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		</div>
 		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
 		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
-		{model && fileSaving && <FileCreation id={gen.id} model={model} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
+		{docAndNode && fileSaving && <FileCreation id={gen.id} docAndNode={docAndNode} method={fileSaving} onClose={() => setFileSaving(undefined)} />}
 		{fileRenaming && <FileRenaming id={fileRenaming.type } name={fileRenaming.id} onClose={() => setFileRenaming(undefined)} />}
 	</>
 }

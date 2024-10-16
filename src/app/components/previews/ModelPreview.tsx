@@ -11,14 +11,15 @@ import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 const PREVIEW_ID = Identifier.parse('misode:preview')
 const PREVIEW_DEFINITION = new BlockDefinition({ '': { model: PREVIEW_ID.toString() }}, undefined)
 
-export const ModelPreview = ({ model, shown }: PreviewProps) => {
+export const ModelPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { version } = useVersion()
-	const serializedData = JSON.stringify(model.data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
 		const resources = await getResources(version)
-		const blockModel = BlockModel.fromJson(model.data)
+		const blockModel = BlockModel.fromJson(JSON.parse(text))
 		blockModel.flatten(resources)
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {
@@ -31,7 +32,7 @@ export const ModelPreview = ({ model, shown }: PreviewProps) => {
 			},
 		})
 		return wrapper
-	}, [shown, version, serializedData])
+	}, [shown, version, text])
 
 	const renderer = useRef<StructureRenderer | undefined>(undefined)
 

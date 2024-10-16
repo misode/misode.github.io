@@ -15,24 +15,25 @@ import { DEEPSLATE } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const NoiseSettingsPreview = ({ model, shown }: PreviewProps) => {
+export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const { project } = useProject()
 	const [seed, setSeed] = useState(randomSeed())
 	const [biome, setBiome] = useState('minecraft:plains')
 	const [layer, setLayer] = useState('terrain')
-	const state = JSON.stringify(model.data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value, error } = useAsync(async () => {
-		const unwrapped = model.data
+		const data = JSON.parse(text)
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
 		const biomeSource = { type: 'fixed', biome }
-		await DEEPSLATE.loadChunkGenerator(unwrapped, biomeSource, seed)
+		await DEEPSLATE.loadChunkGenerator(data, biomeSource, seed)
 		const noiseSettings = DEEPSLATE.getNoiseSettings()
-		const finalDensity = DEEPSLATE.loadDensityFunction(unwrapped?.noise_router?.final_density, noiseSettings.minY, noiseSettings.height, seed)
+		const finalDensity = DEEPSLATE.loadDensityFunction(data?.noise_router?.final_density, noiseSettings.minY, noiseSettings.height, seed)
 		return { noiseSettings, finalDensity }
-	}, [state, seed, version, project, biome])
+	}, [text, seed, version, project, biome])
 	const { noiseSettings, finalDensity } = value ?? {}
 
 	const imageData = useRef<ImageData>()

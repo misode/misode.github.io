@@ -9,61 +9,87 @@ import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
 import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
-import type { ConfigVersion } from '../Config.js'
+import type { ConfigGenerator, ConfigVersion } from '../Config.js'
 import siteConfig from '../Config.js'
-import type { VersionId } from './index.js'
-import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './index.js'
+import { genPath } from '../Utils.js'
+import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
+import type { VersionId } from './Versions.js'
 
-const externals: core.Externals = {
-	...BrowserExternals,
-	archive: {
-		...BrowserExternals.archive,
-		async decompressBall(buffer, { stripLevel } = {}) {
-			const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
-			const entries = await reader.getEntries()
-			return await Promise.all(entries.map(async e => {
-				const data = await e.getData?.(new zip.Uint8ArrayWriter())
-				const path = stripLevel === 1 ? e.filename.substring(e.filename.indexOf('/') + 1) : e.filename
-				const type = e.directory ? 'dir' : 'file'
-				return { data, path, mtime: '', type, mode: 0 }
-			}))
-		},
-	},
+export class Spyglass {
+	private static readonly INSTANCES = new Map<VersionId, Promise<Spyglass>>()
+
+	private constructor(
+		private readonly service: core.Service,
+		private readonly version: ConfigVersion,
+	) {}
+
+	public async setFileContents(uri: string, contents: string) {
+		await this.service.project.onDidOpen(uri, 'json', 1, contents)
+		const docAndNode = await this.service.project.ensureClientManagedChecked(uri)
+		if (!docAndNode) {
+			throw new Error('[Spyglass setFileContents] Cannot get doc and node')
+		}
+		return docAndNode
+	}
+
+	public getFile(uri: string): Partial<core.DocAndNode> {
+		return this.service.project.getClientManaged(uri) ?? {}
+	}
+
+	public getUnsavedFileUri(gen: ConfigGenerator) {
+		return `file:project/data/draft/${genPath(gen, this.version.id)}/unsaved.json`
+	}
+
+	public static async initialize(versionId: VersionId) {
+		const instance = this.INSTANCES.get(versionId)
+		if (instance) {
+			return instance
+		}
+		const promise = (async () => {
+			const version = siteConfig.versions.find(v => v.id === versionId)!
+			const service = new core.Service({
+				logger: console,
+				profilers: new core.ProfilerFactory(console, [
+					'project#init',
+					'project#ready',
+				]),
+				project: {
+					cacheRoot: 'file:cache/',
+					projectRoots: ['file:project/'],
+					externals: {
+						...BrowserExternals,
+						archive: {
+							...BrowserExternals.archive,
+							decompressBall,
+						},
+					},
+					defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
+						env: {
+							gameVersion: version.ref ?? version.id,
+							dependencies: ['@vanilla-mcdoc'],
+						},
+					}),
+					initializers: [mcdoc.initialize, initialize],
+				},
+			})
+			await service.project.ready()
+			await service.project.cacheService.save()
+			return new Spyglass(service, version)
+		})()
+		this.INSTANCES.set(versionId, promise)
+		return promise
+	}
 }
 
-export async function setupSpyglass(versionId: VersionId) {
-	const version = siteConfig.versions.find(v => v.id === versionId)!
-	const gameVersion = version.ref ?? version.id
-	const logger: core.Logger = console
-	const profilers = new core.ProfilerFactory(logger, [
-		'project#init',
-		'project#ready',
-		'misode#setup',
-	])
-	const profiler = profilers.get('misode#setup')
-	const service = new core.Service({
-		logger,
-		profilers,
-		project: {
-			cacheRoot: 'file:cache/',
-			projectRoots: ['file:project/'],
-			externals: externals,
-			defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
-				env: {
-					gameVersion: gameVersion,
-					dependencies: ['@vanilla-mcdoc'],
-				},
-			}),
-			initializers: [mcdoc.initialize, initialize],
-		},
-	})
-	await service.project.ready()
-	profiler.task('Project ready')
-	await service.project.cacheService.save()
-	profiler.task('Save cache')
-	profiler.finalize()
-
-	service.logger.info(service.project.symbols.global)
+const decompressBall: core.Externals['archive']['decompressBall'] = async (buffer, options) => {
+	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
+	const entries = await reader.getEntries()
+	return await Promise.all(entries.map(async e => {
+		const data = await e.getData?.(new zip.Uint8ArrayWriter())
+		const path = options?.stripLevel === 1 ? e.filename.substring(e.filename.indexOf('/') + 1) : e.filename
+		const type = e.directory ? 'dir' : 'file'
+		return { data, path, mtime: '', type, mode: 0 }
+	}))
 }
 
 const initialize: core.ProjectInitializer = async (ctx) => {
