@@ -5,54 +5,69 @@ import { initPartners } from '../partners/index.js'
 import { message } from '../Utils.js'
 import { fetchData } from './DataFetcher.js'
 
-export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19', '1.19.3', '1.19.4', '1.20', '1.20.2', '1.20.3', '1.20.5', '1.21', '1.21.2'] as const
-export type VersionId = typeof VersionIds[number]
+export const VersionIds = [
+	'1.15',
+	'1.16',
+	'1.17',
+	'1.18',
+	'1.18.2',
+	'1.19',
+	'1.19.3',
+	'1.19.4',
+	'1.20',
+	'1.20.2',
+	'1.20.3',
+	'1.20.5',
+	'1.21',
+	'1.21.2',
+] as const
+export type VersionId = (typeof VersionIds)[number]
 
-export const DEFAULT_VERSION: VersionId = '1.21'
+export const DEFAULT_VERSION: VersionId = '1.20'
 
 export type BlockStateRegistry = {
 	[block: string]: {
 		properties?: {
-			[key: string]: string[],
-		},
+			[key: string]: string[]
+		}
 		default?: {
-			[key: string]: string,
-		},
-	},
+			[key: string]: string
+		}
+	}
 }
 
 type VersionData = {
-	collections: CollectionRegistry,
-	schemas: SchemaRegistry,
-	blockStates: BlockStateRegistry,
+	collections: CollectionRegistry
+	schemas: SchemaRegistry
+	blockStates: BlockStateRegistry
 }
 const Versions: Record<string, VersionData | Promise<VersionData>> = {}
 
 type ModelData = {
-	model: DataModel,
-	version: VersionId,
+	model: DataModel
+	version: VersionId
 }
 const Models: Record<string, ModelData> = {}
 
 const versionGetter: {
 	[versionId in VersionId]: () => Promise<{
-		getCollections: () => CollectionRegistry,
-		getSchemas: (collections: CollectionRegistry) => SchemaRegistry,
+		getCollections: () => CollectionRegistry
+		getSchemas: (collections: CollectionRegistry) => SchemaRegistry
 	}>
 } = {
-	1.15: () => import('@mcschema/java-1.15'),
-	1.16: () => import('@mcschema/java-1.16'),
-	1.17: () => import('@mcschema/java-1.17'),
-	1.18: () => import('@mcschema/java-1.18'),
+	'1.15': () => import('@mcschema/java-1.15'),
+	'1.16': () => import('@mcschema/java-1.16'),
+	'1.17': () => import('@mcschema/java-1.17'),
+	'1.18': () => import('@mcschema/java-1.18'),
 	'1.18.2': () => import('@mcschema/java-1.18.2'),
-	1.19: () => import('@mcschema/java-1.19'),
+	'1.19': () => import('@mcschema/java-1.19'),
 	'1.19.3': () => import('@mcschema/java-1.19.3'),
 	'1.19.4': () => import('@mcschema/java-1.19.4'),
 	'1.20': () => import('@mcschema/java-1.20'),
 	'1.20.2': () => import('@mcschema/java-1.20.2'),
 	'1.20.3': () => import('@mcschema/java-1.20.3'),
 	'1.20.5': () => import('@mcschema/java-1.20.5'),
-	1.21: () => import('@mcschema/java-1.21'),
+	'1.21': () => import('@mcschema/java-1.21'),
 	'1.21.2': () => import('@mcschema/java-1.21.2'),
 }
 
@@ -85,20 +100,26 @@ async function getVersion(id: VersionId): Promise<VersionData> {
 export async function getModel(version: VersionId, id: string): Promise<DataModel> {
 	if (!Models[id] || Models[id].version !== version) {
 		const versionData = await getVersion(version)
-		
-		CachedDecorator = Reference(versionData.schemas, 'configured_decorator')
-		CachedFeature = ChoiceNode([
-			{
-				type: 'string',
-				node: StringNode(versionData.collections, { validator: 'resource', params: { pool: '$worldgen/configured_feature' } }),
-			},
-			{
-				type: 'object',
-				node: Reference(versionData.schemas, 'configured_feature'),
-			},
-		], { choiceContext: 'feature' })
 
-		const schemaName = config.generators.find(g => g.id === id)?.schema
+		CachedDecorator = Reference(versionData.schemas, 'configured_decorator')
+		CachedFeature = ChoiceNode(
+			[
+				{
+					type: 'string',
+					node: StringNode(versionData.collections, {
+						validator: 'resource',
+						params: { pool: '$worldgen/configured_feature' },
+					}),
+				},
+				{
+					type: 'object',
+					node: Reference(versionData.schemas, 'configured_feature'),
+				},
+			],
+			{ choiceContext: 'feature' }
+		)
+
+		const schemaName = config.generators.find((g) => g.id === id)?.schema
 		if (!schemaName) {
 			throw new Error(`Cannot find model ${id}`)
 		}
@@ -139,8 +160,10 @@ export async function getSchemas(version: VersionId): Promise<SchemaRegistry> {
 }
 
 export function checkVersion(versionId: string, minVersionId: string | undefined, maxVersionId?: string) {
-	const version = config.versions.findIndex(v => v.id === versionId)
-	const minVersion = minVersionId ? config.versions.findIndex(v => v.id === minVersionId) : 0
-	const maxVersion = maxVersionId ? config.versions.findIndex(v => v.id === maxVersionId) : config.versions.length - 1
+	const version = config.versions.findIndex((v) => v.id === versionId)
+	const minVersion = minVersionId ? config.versions.findIndex((v) => v.id === minVersionId) : 0
+	const maxVersion = maxVersionId
+		? config.versions.findIndex((v) => v.id === maxVersionId)
+		: config.versions.length - 1
 	return minVersion <= version && version <= maxVersion
 }
