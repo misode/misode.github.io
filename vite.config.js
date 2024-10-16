@@ -8,7 +8,6 @@ const config = require('./src/config.json')
 const English = require('./src/locales/en.json')
 
 export default defineConfig({
-	base: './',
 	server: {
 		port: 3000,
 	},
