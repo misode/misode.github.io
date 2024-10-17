@@ -82,11 +82,11 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		`${ID}:shardborne_prerequisites_type`,
 		ListNode(
 			ObjectNode({
-				type: StringNode({ enum: ['questline'] }),
+				type: StringNode({ enum: ['quest_lines'] }),
 				[Switch]: [{ push: 'type' }],
 				[Case]: {
 					questline: {
-						questline: StringNode(),
+						quests: StringNode(),
 					},
 				},
 			})
