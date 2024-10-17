@@ -26,9 +26,152 @@
       "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
     },
     {
-      "id": "shardborne.processors",
-      "url": "processors",
-      "path": "shardborne/processors",
+      "id": "dimension",
+      "url": "dimension",
+      "schema": "dimension",
+      "tags": [
+        "worldgen"
+      ],
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Custom_dimension"
+    },
+    {
+      "id": "dimension_type",
+      "url": "dimension-type",
+      "schema": "dimension_type",
+      "tags": [
+        "worldgen"
+      ],
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Dimension_type"
+    },
+    {
+      "id": "worldgen/biome",
+      "url": "worldgen/biome",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "biome",
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Custom_biome"
+    },
+    {
+      "id": "worldgen/configured_carver",
+      "url": "worldgen/carver",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "configured_carver",
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Custom_carver"
+    },
+    {
+      "id": "worldgen/configured_feature",
+      "url": "worldgen/feature",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "configured_feature",
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Configured_feature"
+    },
+    {
+      "id": "worldgen/placed_feature",
+      "url": "worldgen/placed-feature",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "placed_feature",
+      "minVersion": "1.18",
+      "wiki": "https://minecraft.wiki/w/Placed_feature"
+    },
+    {
+      "id": "worldgen/density_function",
+      "url": "worldgen/density-function",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "density_function",
+      "minVersion": "1.18.2",
+      "wiki": "https://minecraft.wiki/w/Density_function"
+    },
+    {
+      "id": "worldgen/noise",
+      "url": "worldgen/noise",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "noise_parameters",
+      "minVersion": "1.18",
+      "wiki": "https://minecraft.wiki/w/Noise"
+    },
+    {
+      "id": "worldgen/noise_settings",
+      "url": "worldgen/noise-settings",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "noise_settings",
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Custom_noise_settings"
+    },
+    {
+      "id": "worldgen/configured_structure_feature",
+      "url": "worldgen/structure-feature",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "configured_structure_feature",
+      "minVersion": "1.16",
+      "maxVersion": "1.18.2"
+    },
+    {
+      "id": "worldgen/structure",
+      "url": "worldgen/structure",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "structure",
+      "minVersion": "1.19",
+      "wiki": "https://minecraft.wiki/w/Custom_structure"
+    },
+    {
+      "id": "worldgen/structure_set",
+      "url": "worldgen/structure-set",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "structure_set",
+      "minVersion": "1.18.2",
+      "wiki": "https://minecraft.wiki/w/Structure_set"
+    },
+    {
+      "id": "worldgen/configured_surface_builder",
+      "url": "worldgen/surface-builder",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "configured_surface_builder",
+      "minVersion": "1.16",
+      "maxVersion": "1.17",
+      "wiki": "https://minecraft.wiki/w/Configured_surface_builder"
+    },
+    {
+      "id": "worldgen/template_pool",
+      "url": "worldgen/template-pool",
+      "tags": [
+        "worldgen"
+      ],
+      "schema": "shardborne:template_pools",
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Template_pool"
+    },
+    {
+      "id": "worldgen/processor_list",
+      "url": "worldgen/processor-list",
+      "tags": [
+        "worldgen"
+      ],
       "schema": "shardborne:processors",
       "minVersion": "1.20",
       "maxVersion": "1.20",

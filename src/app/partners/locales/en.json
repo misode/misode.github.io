@@ -192,5 +192,11 @@
   "processor.shardborne:dungeon_room_processor.min_blocks": "Min Blocks",
   "processor.shardborne:dungeon_room_processor.fail_replacement": "Fail Replacement",
   "processor.shardborne:dungeon_room_processor.success_replacement": "Success Replacement",
-  "processor.shardborne:dungeon_room_processor.target": "Target"
+  "processor.shardborne:dungeon_room_processor.target": "Target",
+  "template_element.element_type.empty_pool_element": "Empty",
+  "template_element.element_type.feature_pool_element": "Feature",
+  "template_element.element_type.legacy_single_pool_element": "Legacy single",
+  "template_element.element_type.list_pool_element": "List",
+  "template_element.element_type.single_pool_element": "Single",
+  "template_element.element_type.shardborne:dungeon_pool_element": "Dungeon Pool Element"
 }

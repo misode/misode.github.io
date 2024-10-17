@@ -1,6 +1,8 @@
 import type { CollectionRegistry, SchemaRegistry } from '@mcschema/core'
 import {
+	BooleanNode,
 	Case,
+	ChoiceNode,
 	ListNode,
 	Mod,
 	NumberNode,
@@ -171,7 +173,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 							validator: 'resource',
 							params: { pool: `${ID}:block` as any },
 						}),
-						probability: NumberNode({ min: 0, max: 1 }),
+						probability: Opt(NumberNode({ min: 0, max: 1 })),
 					},
 					'minecraft:block_ignore': {
 						blocks: ListNode(Reference('block_state')),
@@ -207,6 +209,100 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 			{
 				default: () => ({
 					processors: [{ processor_type: 'shardborne:block_replacement_processor' }],
+				}),
+			}
+		)
+	)
+
+	const Processors = ChoiceNode([
+		{
+			type: 'string',
+			node: StringNode({ validator: 'resource', params: { pool: '$worldgen/processor_list' } }),
+			change: (v) => undefined,
+		},
+		{
+			type: 'list',
+			node: ListNode(Reference('processor')),
+			change: (v) =>
+				typeof v === 'object' && v !== null && Array.isArray(v.processors)
+					? v.processors
+					: [{ processor_type: 'minecraft:nop' }],
+		},
+		{
+			type: 'object',
+			node: Reference('processor_list'),
+			change: (v) => ({
+				processors: Array.isArray(v) ? v : [{ processor_type: 'minecraft:nop' }],
+			}),
+		},
+	])
+
+	schemas.register(
+		'shardborne:template_element',
+		ObjectNode(
+			{
+				element_type: StringNode({
+					enum: ['shardborne:dungeon_pool_element', ...collections.get('worldgen/structure_pool_element')],
+				}),
+				[Switch]: [{ push: 'element_type' }],
+				[Case]: {
+					'minecraft:feature_pool_element': {
+						projection: StringNode({ enum: ['rigid', 'terrain_matching'] }),
+						feature: StringNode({ validator: 'resource', params: { pool: '$worldgen/placed_feature' } }),
+					},
+					'minecraft:legacy_single_pool_element': {
+						projection: StringNode({ enum: ['rigid', 'terrain_matching'] }),
+						location: StringNode({ validator: 'resource', params: { pool: '$structure' } }),
+						processors: Processors,
+					},
+					'shardborne:dungeon_pool_element': {
+						projection: StringNode({ enum: ['rigid', 'terrain_matching'] }),
+						location: StringNode({ validator: 'resource', params: { pool: '$structure' } }),
+						processors: ListNode(StringNode()),
+						allow_overlap: Mod(Opt(BooleanNode()), { default: () => false }),
+						is_room: Mod(Opt(BooleanNode()), { default: () => false }),
+						disable_block_replacement: Mod(Opt(BooleanNode()), { default: () => false }),
+					},
+					'minecraft:list_pool_element': {
+						projection: StringNode({ enum: ['rigid', 'terrain_matching'] }),
+						elements: ListNode(Reference('template_element')),
+					},
+					'minecraft:single_pool_element': {
+						projection: StringNode({ enum: ['rigid', 'terrain_matching'] }),
+						location: StringNode({ validator: 'resource', params: { pool: '$structure' } }),
+						processors: Processors,
+					},
+				},
+			},
+			{ context: 'template_element', category: 'function' }
+		)
+	)
+
+	schemas.register(
+		'shardborne:template_pools',
+		Mod(
+			ObjectNode({
+				fallback: StringNode(),
+				elements: ListNode(
+					ObjectNode({
+						weight: NumberNode({ integer: true, min: 1, max: 150 }),
+						element: Reference('shardborne:template_element'),
+					})
+				),
+			}),
+			{
+				default: () => ({
+					fallback: 'minecraft:empty',
+					elements: [
+						{
+							weight: 1,
+							element: {
+								element_type: 'minecraft:single_pool_element',
+								projection: 'rigid',
+								processors: 'minecraft:empty',
+							},
+						},
+					],
 				}),
 			}
 		)

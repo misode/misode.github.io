@@ -46,7 +46,11 @@ function AvailableGenerators() {
 			/>
 			<GeneratorCard
 				minimal
-				id='shardborne.processors'
+				id='worldgen/processor_list'
+			/>
+			<GeneratorCard
+				minimal
+				id='worldgen/template_pool'
 			/>
 		</ToolGroup>
 	)
