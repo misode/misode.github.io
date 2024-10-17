@@ -34,10 +34,14 @@ export function watchSpyglassUri(
 	}, [spyglass, uri, handler, ...inputs])
 }
 
-export function useDocAndNode(origina: DocAndNode, inputs?: Inputs): DocAndNode
-export function useDocAndNode(origina: DocAndNode | undefined, inputs?: Inputs): DocAndNode | undefined
+export function useDocAndNode(original: DocAndNode, inputs?: Inputs): DocAndNode
+export function useDocAndNode(original: DocAndNode | undefined, inputs?: Inputs): DocAndNode | undefined
 export function useDocAndNode(original: DocAndNode | undefined, inputs: Inputs = []) {
 	const [wrapped, setWrapped] = useState(original)
+
+	useEffect(() => {
+		setWrapped(original)
+	}, [original, setWrapped, ...inputs])
 
 	watchSpyglassUri(original?.doc.uri, updated => {
 		setWrapped(updated)

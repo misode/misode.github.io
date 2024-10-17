@@ -36,8 +36,12 @@ export class Spyglass {
 		if (contents !== undefined) {
 			await this.service.project.externals.fs.writeFile(uri, contents)
 		} else {
-			const buffer = await this.service.project.externals.fs.readFile(uri)
-			contents = new TextDecoder().decode(buffer)
+			try {
+				const buffer = await this.service.project.externals.fs.readFile(uri)
+				contents = new TextDecoder().decode(buffer)
+			} catch (e) {
+				contents = '{}'
+			}
 		}
 		await this.service.project.onDidOpen(uri, 'json', 1, contents)
 		const docAndNode = await this.service.project.ensureClientManagedChecked(uri)
@@ -52,6 +56,9 @@ export class Spyglass {
 	}
 
 	public getUnsavedFileUri(gen: ConfigGenerator) {
+		if (gen.id === 'pack_mcmeta') {
+			return 'file:///project/pack.mcmeta'
+		}
 		return `file:///project/data/draft/${genPath(gen, this.version.id)}/unsaved.json`
 	}
 
