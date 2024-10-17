@@ -30,10 +30,12 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 
 	schemas.register(`${ID}:npc_type`, StringNode({ validator: 'resource', params: { pool: `${ID}:npcs` as any } }))
 
+	collections.register(`${ID}:block`, [...collections.get('block'), 'shardborne:custom_block'])
+
 	schemas.register(
 		`${ID}:item_type`,
 		ObjectNode({
-			id: StringNode({ validator: 'resource', params: { pool: 'block' } }),
+			id: StringNode({ validator: 'resource', params: { pool: `${ID}:block` as any } }),
 			count: Opt(NumberNode({ max: 64 })),
 			nbt: Opt(StringNode()),
 		})
@@ -148,13 +150,13 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 						mossiness: NumberNode(),
 					},
 					'shardborne:dungeon_room_processor': {
-						target: StringNode({ validator: 'resource', params: { pool: 'block', requireTag: true } }),
+						target: StringNode({ validator: 'resource', params: { pool: `${ID}:block` as any } }),
 						success_replacement: StringNode({
 							validator: 'resource',
-							params: { pool: 'block', requireTag: true },
+							params: { pool: `${ID}:block` as any },
 						}),
 						fail_replacement: Opt(
-							StringNode({ validator: 'resource', params: { pool: 'block', requireTag: true } })
+							StringNode({ validator: 'resource', params: { pool: `${ID}:block` as any } })
 						),
 						min_blocks: NumberNode(),
 						max_blocks: NumberNode(),
@@ -163,11 +165,11 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 					'shardborne:block_replacement_processor': {
 						input_block: StringNode({
 							validator: 'resource',
-							params: { pool: 'block', requireTag: true },
+							params: { pool: `${ID}:block` as any },
 						}),
 						output_block: StringNode({
 							validator: 'resource',
-							params: { pool: 'block', requireTag: true },
+							params: { pool: `${ID}:block` as any },
 						}),
 						probability: NumberNode({ min: 0, max: 1 }),
 					},
@@ -183,7 +185,10 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 						offset: NumberNode({ integer: true }),
 					},
 					'minecraft:protected_blocks': {
-						value: StringNode({ validator: 'resource', params: { pool: 'block', requireTag: true } }),
+						value: StringNode({
+							validator: 'resource',
+							params: { pool: `${ID}:block` as any, requireTag: true },
+						}),
 					},
 					'minecraft:rule': {
 						rules: ListNode(Reference('processor_rule')),
