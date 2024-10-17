@@ -44,6 +44,10 @@ function AvailableGenerators() {
 				minimal
 				id='shardborne.custom_npc'
 			/>
+			<GeneratorCard
+				minimal
+				id='shardborne.processors'
+			/>
 		</ToolGroup>
 	)
 }

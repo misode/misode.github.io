@@ -24,6 +24,15 @@
       "minVersion": "1.20",
       "maxVersion": "1.20",
       "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
+    },
+    {
+      "id": "shardborne.processors",
+      "url": "processors",
+      "path": "shardborne/processors",
+      "schema": "shardborne:processors",
+      "minVersion": "1.20",
+      "maxVersion": "1.20",
+      "wiki": "https://minecraft.wiki/w/Processor_list"
     }
   ],
   "legacyGuides": []

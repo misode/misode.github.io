@@ -10,6 +10,7 @@ import {
 	StringNode as RawStringNode,
 	Switch,
 } from '@mcschema/core'
+import { Tag } from '../common/common.js'
 
 const ID = 'shardborne'
 
@@ -17,7 +18,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 	const Reference = RawReference.bind(undefined, schemas)
 	const StringNode = RawStringNode.bind(undefined, collections)
 
-	collections.register('shardborne:features', ['shardborne:custom_npc'])
+	collections.register('shardborne:features', ['shardborne:custom_npc', 'shardborne:processor_rules'])
 
 	collections.register(`${ID}:npcs`, [
 		'shardborne:wisp',
@@ -123,6 +124,84 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 			{
 				default: () => ({
 					id: 'questline_one',
+				}),
+			}
+		)
+	)
+
+	schemas.register(
+		'shardborne:processor_rules',
+		ObjectNode(
+			{
+				processor_type: StringNode({
+					enum: [
+						'shardborne:dungeon_room_processor',
+						'shardborne:block_replacement_processor',
+						...collections
+							.get('worldgen/structure_processor')
+							.filter((value) => value !== 'minecraft:block_rot'),
+					],
+				}),
+				[Switch]: [{ push: 'processor_type' }],
+				[Case]: {
+					'minecraft:block_age': {
+						mossiness: NumberNode(),
+					},
+					'shardborne:dungeon_room_processor': {
+						target: StringNode({ validator: 'resource', params: { pool: 'block', requireTag: true } }),
+						success_replacement: StringNode({
+							validator: 'resource',
+							params: { pool: 'block', requireTag: true },
+						}),
+						fail_replacement: Opt(
+							StringNode({ validator: 'resource', params: { pool: 'block', requireTag: true } })
+						),
+						min_blocks: NumberNode(),
+						max_blocks: NumberNode(),
+						replacement_chance: NumberNode({ min: 0, max: 1 }),
+					},
+					'shardborne:block_replacement_processor': {
+						input_block: StringNode({
+							validator: 'resource',
+							params: { pool: 'block', requireTag: true },
+						}),
+						output_block: StringNode({
+							validator: 'resource',
+							params: { pool: 'block', requireTag: true },
+						}),
+						probability: NumberNode({ min: 0, max: 1 }),
+					},
+					'minecraft:block_ignore': {
+						blocks: ListNode(Reference('block_state')),
+					},
+					'minecraft:block_rot': {
+						integrity: NumberNode({ min: 0, max: 1 }),
+						rottable_blocks: Opt(Tag({ resource: 'block' })),
+					},
+					'minecraft:gravity': {
+						heightmap: StringNode({ enum: 'heightmap_type' }),
+						offset: NumberNode({ integer: true }),
+					},
+					'minecraft:protected_blocks': {
+						value: StringNode({ validator: 'resource', params: { pool: 'block', requireTag: true } }),
+					},
+					'minecraft:rule': {
+						rules: ListNode(Reference('processor_rule')),
+					},
+				},
+			},
+			{ context: 'processor', category: 'function' }
+		)
+	)
+	schemas.register(
+		'shardborne:processors',
+		Mod(
+			ObjectNode({
+				processors: ListNode(Reference('shardborne:processor_rules')),
+			}),
+			{
+				default: () => ({
+					processors: [{ processor_type: 'shardborne:block_replacement_processor' }],
 				}),
 			}
 		)
