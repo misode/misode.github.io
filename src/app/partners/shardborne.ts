@@ -82,11 +82,11 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		`${ID}:shardborne_prerequisites_type`,
 		ListNode(
 			ObjectNode({
-				type: StringNode({ enum: ['level'] }),
+				type: StringNode({ enum: ['questline'] }),
 				[Switch]: [{ push: 'type' }],
 				[Case]: {
-					level: {
-						level: NumberNode({ max: 100 }),
+					questline: {
+						questline: StringNode(),
 					},
 				},
 			})
@@ -99,6 +99,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 			ObjectNode(
 				{
 					id: StringNode(),
+					prerequisites: Opt(Reference(`${ID}:shardborne_prerequisites_type`)),
 					quests: ListNode(
 						ObjectNode({
 							id: StringNode(),
@@ -116,7 +117,6 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 							dialogue: Reference(`${ID}:shardborne_dialogue_type`),
 						})
 					),
-					prerequisites: Opt(Reference(`${ID}:shardborne_prerequisites_type`)),
 				},
 				{ context: 'shardborne.custom_npc' }
 			),
