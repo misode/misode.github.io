@@ -344,26 +344,18 @@ button.move:disabled {
 
 /* Node body and list entry */
 
-.node {
-  margin-bottom: 4px;
-}
-
-.node-body > .node:first-child {
-  margin-top: 4px;
-}
-
-.node:last-child {
-  margin-bottom: 0;
-}
-
-.node-body {
-  border-left: 3px solid var(--node-indent-border);
+.node, .node-root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .node-body {
   display: flex;
   flex-direction: column;
+  gap: 4px;
   padding-left: 18px;
+  border-left: 3px solid var(--node-indent-border);
 }
 
 .list-node > .node-body > .object-node > .node-body,

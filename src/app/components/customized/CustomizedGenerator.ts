@@ -1,7 +1,7 @@
 import { Identifier } from 'deepslate'
-import { deepClone, deepEqual } from '../../Utils.js'
 import { fetchAllPresets, fetchBlockStates } from '../../services/DataFetcher.js'
-import type { VersionId } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
+import { deepClone, deepEqual } from '../../Utils.js'
 import type { CustomizedOreModel } from './CustomizedModel.js'
 import { CustomizedModel } from './CustomizedModel.js'
 

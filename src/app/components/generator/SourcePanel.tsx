@@ -1,10 +1,11 @@
-import { DataModel } from '@mcschema/core'
+import type { DocAndNode } from '@spyglassmc/core'
+import { fileUtil } from '@spyglassmc/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useLocalStorage, useModel } from '../../hooks/index.js'
-import { getOutput } from '../../schema/transformOutput.js'
-import type { BlockStateRegistry } from '../../services/index.js'
+import { useDocAndNode } from '../../contexts/Spyglass.jsx'
+import { useLocalStorage } from '../../hooks/index.js'
 import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
+import type { Spyglass } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { message } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
@@ -17,16 +18,15 @@ interface Editor {
 }
 
 type SourcePanelProps = {
-	name: string,
-	model: DataModel | undefined,
-	blockStates: BlockStateRegistry | undefined,
+	spyglass: Spyglass | undefined,
+	docAndNode: DocAndNode | undefined,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
 	copySuccess: () => unknown,
 	onError: (message: string | Error) => unknown,
 }
-export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
+export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
@@ -40,20 +40,23 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
-	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
-		let data = getOutput(model, blockStates)
+	const getSerializedOutput = useCallback((text: string) => {
+		let data = JSON.parse(text)
 		if (sort === 'alphabetically') {
 			data = sortData(data)
 		}
 		return stringifySource(data, format, indent)
 	}, [indent, format, sort])
 
+	const text = useDocAndNode(docAndNode)?.doc.getText()
+	
 	useEffect(() => {
 		retransform.current = () => {
-			if (!editor.current) return
-			if (!model || !blockStates) return
+			if (!editor.current || text === undefined) {
+				return
+			}
 			try {
-				const output = getSerializedOutput(model, blockStates)
+				const output = getSerializedOutput(text)
 				editor.current.setValue(output)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -71,9 +74,10 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			if (!editor.current) return
 			const value = editor.current.getValue()
 			if (value.length === 0) return
+			if (!spyglass || !docAndNode) return
 			try {
 				const data = await parseSource(value, format)
-				model?.reset(DataModel.wrapLists(data), false)
+				await spyglass.setFileContents(docAndNode.doc.uri, JSON.stringify(data))
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`
@@ -84,7 +88,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				console.error(e)
 			}
 		}
-	}, [model, blockStates, indent, format, sort, highlighting])
+	}, [spyglass, docAndNode, text, indent, format, sort, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
@@ -145,14 +149,12 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		}
 	}, [highlighting])
 
-	useModel(model, () => {
-		if (!retransform.current) return
-		retransform.current()
-	})
+	// TODO: when file contents change, retransform
 	useEffect(() => {
-		if (!retransform.current) return
-		if (model) retransform.current()
-	}, [model])
+		if (retransform.current && text !== undefined) {
+			retransform.current()
+		}
+	}, [text])
 
 	useEffect(() => {
 		if (!editor.current || !retransform.current) return
@@ -163,18 +165,18 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [indent, format, sort, highlighting, braceLoaded])
 
 	useEffect(() => {
-		if (doCopy && model && blockStates) {
-			navigator.clipboard.writeText(getSerializedOutput(model, blockStates)).then(() => {
+		if (doCopy && text !== undefined) {
+			navigator.clipboard.writeText(getSerializedOutput(text)).then(() => {
 				copySuccess()
 			})
 		}
-	}, [doCopy])
+	}, [doCopy, text])
 
 	useEffect(() => {
-		if (doDownload && model && blockStates && download.current) {
-			const content = encodeURIComponent(getSerializedOutput(model, blockStates))
+		if (doDownload && docAndNode && text !== undefined && download.current) {
+			const content = encodeURIComponent(getSerializedOutput(text))
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
-			const fileName = name === 'pack_mcmeta' ? 'pack.mcmeta' : `${name}.${format}`
+			const fileName = fileUtil.basename(docAndNode.doc.uri)
 			download.current.setAttribute('download', fileName)
 			download.current.click()
 		}

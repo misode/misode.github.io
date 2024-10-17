@@ -1,19 +1,22 @@
-import type { DataModel } from '@mcschema/core'
-import { useErrorBoundary, useState } from 'preact/hooks'
+import type { DocAndNode } from '@spyglassmc/core'
+import { JsonFileNode } from '@spyglassmc/json'
+import { useErrorBoundary } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useModel } from '../../hooks/index.js'
-import { FullNode } from '../../schema/renderHtml.js'
-import type { BlockStateRegistry, VersionId } from '../../services/index.js'
+import { useDocAndNode } from '../../contexts/Spyglass.jsx'
+import { McdocRoot } from './McdocRenderer.jsx'
 
 type TreePanelProps = {
-	version: VersionId,
-	model: DataModel | undefined,
-	blockStates: BlockStateRegistry | undefined,
+	docAndNode: DocAndNode,
 	onError: (message: string) => unknown,
 }
-export function Tree({ version, model, blockStates, onError }: TreePanelProps) {
+export function Tree({ docAndNode, onError }: TreePanelProps) {
 	const { lang } = useLocale()
-	if (!model || !blockStates || lang === 'none') return <></>
+	if (lang === 'none') return <></>
+
+	const fileChild = useDocAndNode(docAndNode).node.children[0]
+	if (!JsonFileNode.is(fileChild)) {
+		return <></>
+	}
 
 	const [error] = useErrorBoundary(e => {
 		onError(`Error rendering the tree: ${e.message}`)
@@ -21,12 +24,7 @@ export function Tree({ version, model, blockStates, onError }: TreePanelProps) {
 	})
 	if (error) return <></>
 
-	const [, setState] = useState(0)
-	useModel(model, () => {
-		setState(state => state + 1)
-	})
-
-	return <div class="tree" data-cy="tree">
-		<FullNode {...{model, lang, version, blockStates}}/>
+	return <div class="tree node-root" data-cy="tree">
+		<McdocRoot node={fileChild.children[0]} />
 	</div>
 }

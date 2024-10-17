@@ -3,8 +3,8 @@ import { Identifier } from 'deepslate-1.20.4/core'
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
+import { fetchRegistries } from '../services/index.js'
 import { renderItem } from '../services/Resources1204.js'
-import { getCollections } from '../services/Schemas.js'
 import { ItemTooltip1204 } from './ItemTooltip1204.jsx'
 import { Octicon } from './Octicon.jsx'
 import { itemHasGlint } from './previews/LootTable1204.js'
@@ -69,14 +69,17 @@ function ItemItself({ item }: Props) {
 		return Octicon.package
 	}
 
-	const { value: collections } = useAsync(() => getCollections(version), [])
+	const { value: allModels, loading: loadingModels } = useAsync(async () => {
+		const registries = await fetchRegistries(version)
+		return registries.get('model')
+	}, [version])
 
-	if (collections === undefined) {
+	if (loadingModels || allModels === undefined) {
 		return null
 	}
 
 	const modelPath = `item/${item.id.path}`
-	if (collections.get('model').includes('minecraft:' + modelPath)) {
+	if (allModels && allModels.includes('minecraft:' + modelPath)) {
 		return <RenderedItem item={item} hasGlint={hasGlint} />
 	}
 

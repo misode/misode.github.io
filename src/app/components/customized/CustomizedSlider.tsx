@@ -1,4 +1,3 @@
-import type { NodeChildren } from '@mcschema/core'
 import { NumberInput, RangeInput } from '../index.js'
 import { CustomizedInput } from './CustomizedInput.jsx'
 
@@ -12,7 +11,6 @@ interface Props {
 	initial?: number,
 	error?: string,
 	onChange: (value: number) => void,
-	children?: NodeChildren,
 }
 export function CustomizedSlider(props: Props) {
 	const isInteger = (props.step ?? 1) >= 1

@@ -1,5 +1,5 @@
 import lz from 'lz-string'
-import type { VersionId } from './Schemas.js'
+import type { VersionId } from './Versions.js'
 
 const API_PREFIX = 'https://snippets.misode.workers.dev'
 

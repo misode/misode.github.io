@@ -1,7 +1,6 @@
-import { DataModel } from '@mcschema/core'
 import { Identifier, ItemStack } from 'deepslate'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
+import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchAllPresets } from '../../services/index.js'
@@ -12,8 +11,9 @@ import type { PreviewProps } from './index.js'
 
 const ANIMATION_TIME = 1000
 
-export const RecipePreview = ({ data, version }: PreviewProps) => {
+export const RecipePreview = ({ docAndNode }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [advancedTooltips, setAdvancedTooltips] = useState(true)
 	const [animation, setAnimation] = useState(0)
 	const overlay = useRef<HTMLDivElement>(null)
@@ -29,11 +29,11 @@ export const RecipePreview = ({ data, version }: PreviewProps) => {
 		return () => clearInterval(interval)
 	}, [])
 
-	const recipe = DataModel.unwrapLists(data)
-	const state = JSON.stringify(recipe)
+	const text = docAndNode.doc.getText()
+	const recipe = JSON.parse(text)
 	const items = useMemo<Map<Slot, ItemStack>>(() => {
 		return placeItems(version, recipe, animation, itemTags ?? new Map())
-	}, [state, animation, itemTags])
+	}, [text, animation, itemTags])
 
 	const gui = useMemo(() => {
 		const type = recipe.type?.replace(/^minecraft:/, '')
@@ -46,7 +46,7 @@ export const RecipePreview = ({ data, version }: PreviewProps) => {
 		} else {
 			return '/images/crafting_table.png'
 		}
-	}, [state])
+	}, [text])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">
