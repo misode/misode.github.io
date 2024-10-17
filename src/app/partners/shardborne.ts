@@ -86,7 +86,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 				[Switch]: [{ push: 'type' }],
 				[Case]: {
 					questline: {
-						quests: StringNode(),
+						quests: ListNode(StringNode()),
 					},
 				},
 			})
