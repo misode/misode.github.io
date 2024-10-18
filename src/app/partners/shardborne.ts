@@ -329,7 +329,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		{
 			type: 'string',
 			node: StringNode({ validator: 'resource', params: { pool: '$worldgen/processor_list' } }),
-			change: (v) => undefined,
+			change: () => undefined,
 		},
 		{
 			type: 'list',
