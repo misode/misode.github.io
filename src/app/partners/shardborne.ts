@@ -145,6 +145,12 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		'shardborne:yellow_decorative_placeholder',
 	])
 
+	collections.register(`${ID}:dimensions`, [
+		...collections.get('dimension'),
+		'shardborne:realm',
+		'shardborne:dungeon',
+	])
+
 	schemas.register(
 		`${ID}:item_type`,
 		ObjectNode({
@@ -158,11 +164,14 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		`${ID}:shardborne_dialogue_type`,
 		ListNode(
 			ObjectNode({
-				type: StringNode({ enum: ['text', 'display_item', 'give_item'] }),
+				type: StringNode({ enum: ['text', 'display_item', 'give_item', 'give_recipe'] }),
 				[Switch]: [{ push: 'type' }],
 				[Case]: {
 					text: {
 						text: ListNode(StringNode()),
+					},
+					give_recipe: {
+						recipe: ListNode(StringNode({ validator: 'resource', params: { pool: '$recipe' } })),
 					},
 					give_item: {
 						item: Reference(`${ID}:item_type`),
@@ -180,14 +189,20 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		`${ID}:shardborne_requirement_type`,
 		ListNode(
 			ObjectNode({
-				type: StringNode({ enum: ['enter_dimension', 'locate_structure'] }),
+				type: StringNode({ enum: ['enter_dimension', 'structure', 'carry_item', 'make_recipe'] }),
 				[Switch]: [{ push: 'type' }],
 				[Case]: {
 					enter_dimension: {
-						dimension: StringNode({ validator: 'resource', params: { pool: '$dimension' } }),
+						dimension: StringNode({ validator: 'resource', params: { pool: `${ID}:dimensions` as any } }),
 					},
-					locate_structure: {
+					structure: {
 						structure: StringNode({ validator: 'resource', params: { pool: '$structure' } }),
+					},
+					carry_item: {
+						item: Reference(`${ID}:item_type`),
+					},
+					make_recipe: {
+						item: Reference(`${ID}:item_type`),
 					},
 				},
 			})
@@ -198,11 +213,14 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 		`${ID}:shardborne_prerequisites_type`,
 		ListNode(
 			ObjectNode({
-				type: StringNode({ enum: ['quest_lines'] }),
+				type: StringNode({ enum: ['questline', 'level'] }),
 				[Switch]: [{ push: 'type' }],
 				[Case]: {
 					questline: {
-						quests: ListNode(StringNode()),
+						questlines: ListNode(StringNode()),
+					},
+					level: {
+						level: NumberNode({ min: 0 }),
 					},
 				},
 			})
