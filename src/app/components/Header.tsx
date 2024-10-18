@@ -20,47 +20,98 @@ export function Header() {
 	const url = getCurrentUrl()
 	const gen = getGenerator(url)
 
-	return <header>
-		<div class="title">
-			<Link class="home-link" href="/" aria-label={locale('home')} data-cy="home-link">{Icons.home}</Link>
-			<h1 class="font-bold">{title}</h1>
-			{gen && <BtnMenu icon="chevron_down" tooltip={locale('switch_generator')} data-cy="generator-switcher">
-				{config.generators
-					.filter(g => g.tags?.[0] === gen?.tags?.[0] && checkVersion(version, g.minVersion))
-					.map(g =>
-						<Btn label={locale(`generator.${g.id}`)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
-					)}
-			</BtnMenu>}
-			{!gen && url.match(/\/?project\/?$/) && <BtnMenu icon="chevron_down" tooltip={locale('switch_project')}>
-				{projects.map(p =>
-					<Btn label={p.name} active={p.name === project.name} onClick={() => changeProject(p.name)} />
+	return (
+		<header>
+			<div class='title'>
+				<Link
+					class='home-link'
+					href='/'
+					aria-label={locale('home')}
+					data-cy='home-link'
+				>
+					{Icons.home}
+				</Link>
+				<h1 class='font-bold'>{title}</h1>
+				{gen && (
+					<BtnMenu
+						icon='chevron_down'
+						tooltip={locale('switch_generator')}
+						data-cy='generator-switcher'
+					>
+						{config.generators
+							.filter(
+								(g) =>
+									g.tags?.some((tag) => gen?.tags?.includes(tag)) &&
+									checkVersion(version, g.minVersion)
+							)
+							.map((g) => (
+								<Btn
+									label={locale(`generator.${g.id}`)}
+									active={g.id === gen.id}
+									onClick={() => route(cleanUrl(g.url))}
+								/>
+							))}
+					</BtnMenu>
 				)}
-			</BtnMenu>}
-		</div>
-		<nav>
-			<ul>
-				<li data-cy="language-switcher">
-					<BtnMenu icon="globe" tooltip={locale('language')}>
-						{config.languages.map(({ code, name }) =>
-							<Btn label={name} active={code === lang}
-								onClick={() => changeLanguage(code)} />
-						)}
+				{!gen && url.match(/\/?project\/?$/) && (
+					<BtnMenu
+						icon='chevron_down'
+						tooltip={locale('switch_project')}
+					>
+						{projects.map((p) => (
+							<Btn
+								label={p.name}
+								active={p.name === project.name}
+								onClick={() => changeProject(p.name)}
+							/>
+						))}
 					</BtnMenu>
-				</li>
-				<li data-cy="theme-switcher">
-					<BtnMenu icon={Themes[theme]} tooltip={locale('theme')}>
-						{Object.entries(Themes).map(([th, icon]) =>
-							<Btn icon={icon} label={locale(`theme.${th}`)} active={th === theme}
-								onClick={() => changeTheme(th)} />
-						)}
-					</BtnMenu>
-				</li>
-				<li class="dimmed">
-					<a href="https://github.com/misode/misode.github.io" target="_blank" rel="noreferrer" class="tooltipped tip-sw" aria-label={locale('github')}>
-						{Octicon.mark_github}
-					</a>
-				</li>
-			</ul>
-		</nav>
-	</header>
+				)}
+			</div>
+			<nav>
+				<ul>
+					<li data-cy='language-switcher'>
+						<BtnMenu
+							icon='globe'
+							tooltip={locale('language')}
+						>
+							{config.languages.map(({ code, name }) => (
+								<Btn
+									label={name}
+									active={code === lang}
+									onClick={() => changeLanguage(code)}
+								/>
+							))}
+						</BtnMenu>
+					</li>
+					<li data-cy='theme-switcher'>
+						<BtnMenu
+							icon={Themes[theme]}
+							tooltip={locale('theme')}
+						>
+							{Object.entries(Themes).map(([th, icon]) => (
+								<Btn
+									icon={icon}
+									label={locale(`theme.${th}`)}
+									active={th === theme}
+									onClick={() => changeTheme(th)}
+								/>
+							))}
+						</BtnMenu>
+					</li>
+					<li class='dimmed'>
+						<a
+							href='https://github.com/misode/misode.github.io'
+							target='_blank'
+							rel='noreferrer'
+							class='tooltipped tip-sw'
+							aria-label={locale('github')}
+						>
+							{Octicon.mark_github}
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</header>
+	)
 }
