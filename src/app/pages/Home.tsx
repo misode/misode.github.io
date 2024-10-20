@@ -52,6 +52,10 @@ function AvailableGenerators() {
 				minimal
 				id='worldgen/template_pool'
 			/>
+			<GeneratorCard
+				minimal
+				id='loot_table'
+			/>
 		</ToolGroup>
 	)
 }

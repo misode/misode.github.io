@@ -59,6 +59,16 @@
       "wiki": "https://minecraft.wiki/w/Custom_biome"
     },
     {
+      "id": "loot_table",
+      "url": "loot-table",
+      "tags": [
+        "shardborne"
+      ],
+      "schema": "loot_table",
+      "minVersion": "1.16",
+      "wiki": "https://minecraft.wiki/w/Loot_table"
+    },
+    {
       "id": "worldgen/template_pool",
       "url": "worldgen/template-pool",
       "tags": [

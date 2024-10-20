@@ -6,7 +6,8 @@ import { initLithostitched } from './Lithostitched.js'
 import { initNeoForge } from './NeoForge.js'
 import { initObsidian } from './Obsidian.js'
 import { initOhTheTreesYoullGrow } from './OhTheTreesYoullGrow.js'
-import { initShardborne } from './shardborne.js'
+import { initLootTableSchemas } from './shardborne/loot_table.js'
+import { initShardborne } from './shardborne/shardborne.js'
 
 export * from './ImmersiveWeathering.js'
 export * from './Lithostitched.js'
@@ -19,4 +20,5 @@ export function initPartners(schemas: SchemaRegistry, collections: CollectionReg
 	initObsidian(schemas, collections)
 	initOhTheTreesYoullGrow(schemas, collections)
 	initShardborne(schemas, collections)
+	initLootTableSchemas(schemas, collections)
 }

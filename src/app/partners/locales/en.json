@@ -198,5 +198,7 @@
   "template_element.element_type.legacy_single_pool_element": "Legacy single",
   "template_element.element_type.list_pool_element": "List",
   "template_element.element_type.single_pool_element": "Single",
-  "template_element.element_type.shardborne:dungeon_pool_element": "Dungeon Pool Element"
+  "template_element.element_type.shardborne:dungeon_pool_element": "Dungeon Pool Element",
+  "loot_condition_type.shardborne:dungeon_level": "Dungeon Level",
+  "loot_condition_type.shardborne:dungeon_category": "Dungeon Category"
 }

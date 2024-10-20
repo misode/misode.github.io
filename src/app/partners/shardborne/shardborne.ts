@@ -12,7 +12,7 @@ import {
 	StringNode as RawStringNode,
 	Switch,
 } from '@mcschema/core'
-import { Tag } from '../common/common.js'
+import { Tag } from '../../common/common.js'
 
 const ID = 'shardborne'
 
