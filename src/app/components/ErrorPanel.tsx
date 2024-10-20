@@ -22,7 +22,7 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 	const [stack, setStack] = useState<string | undefined>(undefined)
 
 	const gen = getGenerator(getCurrentUrl())
-	const source = gen ? spyglass?.getFile(spyglass.getUnsavedFileUri(gen)).doc?.getText() : undefined
+	const source = gen ? spyglass?.getFileContents(spyglass.getUnsavedFileUri(version, gen)) : undefined
 	const name = (prefix ?? '') + (error instanceof Error ? error.message : error)
 
 	useEffect(() => {

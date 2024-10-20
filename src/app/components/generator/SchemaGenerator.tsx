@@ -21,7 +21,7 @@ interface Props {
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { spyglass, spyglassLoading } = useSpyglass()
+	const { spyglass } = useSpyglass()
 	const { projects, project, file, updateProject, updateFile, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
@@ -34,17 +34,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const uri = useMemo(() => {
 		// TODO: return different uri when project file is open
-		return spyglass?.getUnsavedFileUri(gen)
-	}, [spyglass, gen.id])
+		return spyglass?.getUnsavedFileUri(version, gen)
+	}, [spyglass, version, gen])
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
 	const ignoreChange = useRef(false)
 
 	const { value: docAndNode } = useAsync(async () => {
-		if (spyglassLoading || !spyglass || !uri) {
-			return AsyncCancel
-		}
 		let data: unknown = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
@@ -86,10 +83,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			data = file.data
 		}
 		// TODO: if data is undefined, set to generator's default
-		const docAndNode = await spyglass.setFileContents(uri, data ? JSON.stringify(data) : undefined)
+		const docAndNode = await spyglass.setFileContents(version, uri, data ? JSON.stringify(data) : undefined)
 		Analytics.setGenerator(gen.id)
 		return docAndNode
-	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, spyglass, spyglassLoading])
+	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, spyglass])
 
 	const { doc } = docAndNode ?? {}
 

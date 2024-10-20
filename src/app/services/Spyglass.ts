@@ -16,50 +16,38 @@ import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksu
 import type { VersionId } from './Versions.js'
 
 export class Spyglass {
-	private static readonly INSTANCES = new Map<VersionId, Promise<Spyglass>>()
-
+	private readonly instances = new Map<VersionId, Promise<core.Service>>()
 	private readonly watchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
 
-	private constructor(
-		private readonly service: core.Service,
-		private readonly version: ConfigVersion,
-	) {
-		this.service.project.on('documentUpdated', (e) => {
-			const uriWatchers = this.watchers.get(e.doc.uri) ?? []
-			for (const handler of uriWatchers) {
-				handler(e)
-			}
-		})
-	}
-
-	public async setFileContents(uri: string, contents?: string) {
+	public async setFileContents(versionId: VersionId, uri: string, contents?: string) {
+		const service = await this.getService(versionId)
 		if (contents !== undefined) {
-			await this.service.project.externals.fs.writeFile(uri, contents)
+			await service.project.externals.fs.writeFile(uri, contents)
 		} else {
 			try {
-				const buffer = await this.service.project.externals.fs.readFile(uri)
+				const buffer = await service.project.externals.fs.readFile(uri)
 				contents = new TextDecoder().decode(buffer)
 			} catch (e) {
 				contents = '{}'
 			}
 		}
-		await this.service.project.onDidOpen(uri, 'json', 1, contents)
-		const docAndNode = await this.service.project.ensureClientManagedChecked(uri)
+		await service.project.onDidOpen(uri, 'json', 1, contents)
+		const docAndNode = await service.project.ensureClientManagedChecked(uri)
 		if (!docAndNode) {
 			throw new Error('[Spyglass setFileContents] Cannot get doc and node')
 		}
 		return docAndNode
 	}
 
-	public getFile(uri: string): Partial<core.DocAndNode> {
-		return this.service.project.getClientManaged(uri) ?? {}
+	public getFileContents(_uri: string): string | undefined {
+		return undefined // TODO
 	}
 
-	public getUnsavedFileUri(gen: ConfigGenerator) {
+	public getUnsavedFileUri(versionId: VersionId, gen: ConfigGenerator) {
 		if (gen.id === 'pack_mcmeta') {
 			return 'file:///project/pack.mcmeta'
 		}
-		return `file:///project/data/draft/${genPath(gen, this.version.id)}/unsaved.json`
+		return `file:///project/data/draft/${genPath(gen, versionId)}/unsaved.json`
 	}
 
 	public watchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
@@ -73,8 +61,8 @@ export class Spyglass {
 		uriWatchers.splice(index, 1)
 	}
 
-	public static async initialize(versionId: VersionId) {
-		const instance = this.INSTANCES.get(versionId)
+	private async getService(versionId: VersionId) {
+		const instance = this.instances.get(versionId)
 		if (instance) {
 			return instance
 		}
@@ -107,9 +95,15 @@ export class Spyglass {
 			})
 			await service.project.ready()
 			await service.project.cacheService.save()
-			return new Spyglass(service, version)
+			service.project.on('documentUpdated', (e) => {
+				const uriWatchers = this.watchers.get(e.doc.uri) ?? []
+				for (const handler of uriWatchers) {
+					handler(e)
+				}
+			})
+			return service
 		})()
-		this.INSTANCES.set(versionId, promise)
+		this.instances.set(versionId, promise)
 		return promise
 	}
 }

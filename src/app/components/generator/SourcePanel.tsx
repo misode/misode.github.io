@@ -1,7 +1,7 @@
 import type { DocAndNode } from '@spyglassmc/core'
 import { fileUtil } from '@spyglassmc/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
+import { useLocale, useVersion } from '../../contexts/index.js'
 import { useDocAndNode } from '../../contexts/Spyglass.jsx'
 import { useLocalStorage } from '../../hooks/index.js'
 import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
@@ -28,6 +28,7 @@ type SourcePanelProps = {
 }
 export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
 	const [sort, setSort] = useLocalStorage('misode_output_sort', 'schema')
@@ -77,7 +78,7 @@ export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport
 			if (!spyglass || !docAndNode) return
 			try {
 				const data = await parseSource(value, format)
-				await spyglass.setFileContents(docAndNode.doc.uri, JSON.stringify(data))
+				await spyglass.setFileContents(version, docAndNode.doc.uri, JSON.stringify(data))
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`
@@ -88,7 +89,7 @@ export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport
 				console.error(e)
 			}
 		}
-	}, [spyglass, docAndNode, text, indent, format, sort, highlighting])
+	}, [spyglass, version, docAndNode, text, indent, format, sort, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
