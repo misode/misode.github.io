@@ -9,34 +9,74 @@ import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
 import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
+import type { TextEdit } from 'vscode-languageserver-textdocument'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator, ConfigVersion } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
+interface DocumentData {
+	doc: TextDocument
+	undoStack: { edits: TextEdit[] }[]
+	redoStack: { edits: TextEdit[] }[]
+}
+
 export class Spyglass {
+	private static readonly LOGGER: core.Logger = console
+	private static readonly EXTERNALS: core.Externals = {
+		...BrowserExternals,
+		archive: {
+			...BrowserExternals.archive,
+			decompressBall,
+		},
+	}
+
 	private readonly instances = new Map<VersionId, Promise<core.Service>>()
+	private readonly documents = new Map<string, DocumentData>()
 	private readonly watchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
 
-	public async setFileContents(versionId: VersionId, uri: string, contents?: string) {
-		const service = await this.getService(versionId)
-		if (contents !== undefined) {
-			await service.project.externals.fs.writeFile(uri, contents)
-		} else {
+	public async getFile(version: VersionId, uri: string, emptyContent?: () => string) {
+		const service = await this.getService(version)
+		const document = this.documents.get(uri)
+		let docAndNode: core.DocAndNode | undefined
+		if (document === undefined) {
+			let doc: TextDocument
 			try {
-				const buffer = await service.project.externals.fs.readFile(uri)
-				contents = new TextDecoder().decode(buffer)
+				const buffer = await Spyglass.EXTERNALS.fs.readFile(uri)
+				const content = new TextDecoder().decode(buffer)
+				doc = TextDocument.create(uri, 'json', 1, content)
+				Spyglass.LOGGER.info(`[Spyglass#openFile] Opening file with content from fs: ${uri}`)
 			} catch (e) {
-				contents = '{}'
+				doc = TextDocument.create(uri, 'json', 1, emptyContent ? emptyContent() : '')
+				Spyglass.LOGGER.info(`[Spyglass#openFile] Opening empty file: ${uri}`)
 			}
+			this.documents.set(uri, { doc, undoStack: [], redoStack: [] })
+			await service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
+			docAndNode = await service.project.ensureClientManagedChecked(uri)
+		} else {
+			docAndNode = service.project.getClientManaged(uri)
+			Spyglass.LOGGER.info(`[Spyglass#openFile] Opening already open file: ${uri}`)
 		}
-		await service.project.onDidOpen(uri, 'json', 1, contents)
-		const docAndNode = await service.project.ensureClientManagedChecked(uri)
 		if (!docAndNode) {
-			throw new Error('[Spyglass setFileContents] Cannot get doc and node')
+			throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
 		}
 		return docAndNode
+	}
+
+	public async writeFile(versionId: VersionId, uri: string, content: string) {
+		await Spyglass.EXTERNALS.fs.writeFile(uri, content)
+		Spyglass.LOGGER.info(`[Spyglass#writeFile] Writing file: ${uri} ${content.substring(0, 50)}`)
+		const doc = this.documents.get(uri)?.doc
+		if (doc !== undefined) {
+			const service = await this.getService(versionId)
+			await service.project.onDidChange(doc.uri, [{ text: content }], doc.version + 1)
+			const docAndNode = service.project.getClientManaged(doc.uri)
+			if (docAndNode) {
+				service.project.emit('documentUpdated', docAndNode)
+			}
+		}
 	}
 
 	public getFileContents(_uri: string): string | undefined {
@@ -69,21 +109,15 @@ export class Spyglass {
 		const promise = (async () => {
 			const version = siteConfig.versions.find(v => v.id === versionId)!
 			const service = new core.Service({
-				logger: console,
-				profilers: new core.ProfilerFactory(console, [
+				logger: Spyglass.LOGGER,
+				profilers: new core.ProfilerFactory(Spyglass.LOGGER, [
 					'project#init',
 					'project#ready',
 				]),
 				project: {
 					cacheRoot: 'file:///cache/',
 					projectRoots: ['file:///project/'],
-					externals: {
-						...BrowserExternals,
-						archive: {
-							...BrowserExternals.archive,
-							decompressBall,
-						},
-					},
+					externals: Spyglass.EXTERNALS,
 					defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
 						env: {
 							gameVersion: version.ref ?? version.id,
@@ -108,7 +142,7 @@ export class Spyglass {
 	}
 }
 
-const decompressBall: core.Externals['archive']['decompressBall'] = async (buffer, options) => {
+async function decompressBall(buffer: Uint8Array, options?: { stripLevel?: number }): Promise<core.DecompressedFile[]> {
 	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
 	const entries = await reader.getEntries()
 	return await Promise.all(entries.map(async e => {

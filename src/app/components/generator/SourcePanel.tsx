@@ -78,7 +78,7 @@ export function SourcePanel({ spyglass, docAndNode, doCopy, doDownload, doImport
 			if (!spyglass || !docAndNode) return
 			try {
 				const data = await parseSource(value, format)
-				await spyglass.setFileContents(version, docAndNode.doc.uri, JSON.stringify(data))
+				await spyglass.writeFile(version, docAndNode.doc.uri, JSON.stringify(data))
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`

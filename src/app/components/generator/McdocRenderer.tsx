@@ -63,7 +63,6 @@ function Head({ simpleType, optional, node }: HeadProps) {
 		</select>
 	}
 	if (type.kind === 'struct' && optional) {
-		console.log(type, node)
 		if (node && JsonObjectNode.is(node)) {
 			return <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')}>
 				{Octicon.trashcan}
@@ -83,7 +82,7 @@ function Head({ simpleType, optional, node }: HeadProps) {
 			{Octicon.plus_circle}
 		</button>
 	}
-	console.warn('Unhandled head', type)
+	// console.warn('Unhandled head', type)
 	return <></>
 }
 
@@ -108,7 +107,7 @@ function Body({ simpleType, node }: BodyProps) {
 	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'boolean') {
 		return <></>
 	}
-	console.warn('Unhandled body', type, node)
+	// console.warn('Unhandled body', type, node)
 	return <></>
 }
 
@@ -124,8 +123,8 @@ function StructBody({ type, node }: StructBodyProps) {
 	const dynamicFields = type.fields.filter(field =>
 		field.key.kind === 'string')
 	if (type.fields.length !== staticFields.length + dynamicFields.length) {
-		console.warn('Missed struct fields', type.fields.filter(field =>
-			!staticFields.includes(field) && !dynamicFields.includes(field)))
+		// console.warn('Missed struct fields', type.fields.filter(field =>
+		// 	!staticFields.includes(field) && !dynamicFields.includes(field)))
 	}
 	return <>
 		{staticFields.map(field => {

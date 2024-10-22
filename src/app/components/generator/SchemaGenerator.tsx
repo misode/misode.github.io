@@ -82,8 +82,11 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			ignoreChange.current = true
 			data = file.data
 		}
+		if (data) {
+			await spyglass.writeFile(version, uri, JSON.stringify(data))
+		}
 		// TODO: if data is undefined, set to generator's default
-		const docAndNode = await spyglass.setFileContents(version, uri, data ? JSON.stringify(data) : undefined)
+		const docAndNode = await spyglass.getFile(version, uri, () => '{}')
 		Analytics.setGenerator(gen.id)
 		return docAndNode
 	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, spyglass])
