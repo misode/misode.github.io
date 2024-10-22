@@ -9,7 +9,7 @@ import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
 import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
-import type { TextEdit } from 'vscode-languageserver-textdocument'
+import type { Position, Range } from 'vscode-languageserver-textdocument'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator, ConfigVersion } from '../Config.js'
 import siteConfig from '../Config.js'
@@ -17,10 +17,15 @@ import { computeIfAbsent, genPath } from '../Utils.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
+export interface Edit {
+	range?: core.Range
+	text: string
+}
+
 interface DocumentData {
 	doc: TextDocument
-	undoStack: { edits: TextEdit[] }[]
-	redoStack: { edits: TextEdit[] }[]
+	undoStack: string[]
+	redoStack: string[]
 }
 
 export class Spyglass {
@@ -42,22 +47,15 @@ export class Spyglass {
 		const document = this.documents.get(uri)
 		let docAndNode: core.DocAndNode | undefined
 		if (document === undefined) {
-			let doc: TextDocument
-			try {
-				const buffer = await Spyglass.EXTERNALS.fs.readFile(uri)
-				const content = new TextDecoder().decode(buffer)
-				doc = TextDocument.create(uri, 'json', 1, content)
-				Spyglass.LOGGER.info(`[Spyglass#openFile] Opening file with content from fs: ${uri}`)
-			} catch (e) {
-				doc = TextDocument.create(uri, 'json', 1, emptyContent ? emptyContent() : '')
-				Spyglass.LOGGER.info(`[Spyglass#openFile] Opening empty file: ${uri}`)
-			}
+			Spyglass.LOGGER.info(`[Spyglass#openFile] Opening file with content from fs: ${uri}`)
+			const content = await this.readFile(uri)
+			const doc = TextDocument.create(uri, 'json', 1, content ?? (emptyContent ? emptyContent() : ''))
 			this.documents.set(uri, { doc, undoStack: [], redoStack: [] })
 			await service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
 			docAndNode = await service.project.ensureClientManagedChecked(uri)
 		} else {
-			docAndNode = service.project.getClientManaged(uri)
 			Spyglass.LOGGER.info(`[Spyglass#openFile] Opening already open file: ${uri}`)
+			docAndNode = service.project.getClientManaged(uri)
 		}
 		if (!docAndNode) {
 			throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
@@ -65,22 +63,80 @@ export class Spyglass {
 		return docAndNode
 	}
 
-	public async writeFile(versionId: VersionId, uri: string, content: string) {
-		await Spyglass.EXTERNALS.fs.writeFile(uri, content)
-		Spyglass.LOGGER.info(`[Spyglass#writeFile] Writing file: ${uri} ${content.substring(0, 50)}`)
-		const doc = this.documents.get(uri)?.doc
-		if (doc !== undefined) {
-			const service = await this.getService(versionId)
-			await service.project.onDidChange(doc.uri, [{ text: content }], doc.version + 1)
-			const docAndNode = service.project.getClientManaged(doc.uri)
-			if (docAndNode) {
-				service.project.emit('documentUpdated', docAndNode)
-			}
+	public async readFile(uri: string): Promise<string | undefined> {
+		try {
+			const buffer = await Spyglass.EXTERNALS.fs.readFile(uri)
+			return new TextDecoder().decode(buffer)
+		} catch (e) {
+			return undefined
 		}
 	}
 
-	public getFileContents(_uri: string): string | undefined {
-		return undefined // TODO
+	private async notifyChange(versionId: VersionId, doc: TextDocument) {
+		const service = await this.getService(versionId)
+		await service.project.onDidChange(doc.uri, [{ text: doc.getText() }], doc.version + 1)
+		const docAndNode = service.project.getClientManaged(doc.uri)
+		if (docAndNode) {
+			service.project.emit('documentUpdated', docAndNode)
+		}
+		return docAndNode
+	}
+
+	public async writeFile(versionId: VersionId, uri: string, content: string) {
+		const document = this.documents.get(uri)
+		if (document !== undefined) {
+			document.undoStack.push(document.doc.getText())
+			document.redoStack = []
+			TextDocument.update(document.doc, [{ text: content }], document.doc.version + 1)
+		}
+		await Spyglass.EXTERNALS.fs.writeFile(uri, content)
+		if (document) {
+			await this.notifyChange(versionId, document.doc)
+		}
+	}
+
+	public async applyEdits(versionId: VersionId, uri: string, edits: Edit[]) {
+		const document = this.documents.get(uri)
+		if (document !== undefined) {
+			document.undoStack.push(document.doc.getText())
+			document.redoStack = []
+			TextDocument.update(document.doc, edits.map(e => ({
+				range: e.range ? getLsRange(e.range, document.doc) : undefined,
+				text: e.text,
+			})), document.doc.version + 1)
+			await Spyglass.EXTERNALS.fs.writeFile(uri, document.doc.getText())
+			await this.notifyChange(versionId, document.doc)
+		}
+	}
+
+	public async undoEdits(versionId: VersionId, uri: string) {
+		const document = this.documents.get(uri)
+		if (document === undefined) {
+			throw new Error(`[Spyglass#undoEdits] Document doesn't exist: ${uri}`)
+		}
+		const lastUndo = document.undoStack.pop()
+		if (lastUndo === undefined) {
+			return
+		}
+		document.redoStack.push(document.doc.getText())
+		TextDocument.update(document.doc, [{ text: lastUndo }], document.doc.version + 1)
+		await Spyglass.EXTERNALS.fs.writeFile(uri, document.doc.getText())
+		await this.notifyChange(versionId, document.doc)
+	}
+
+	public async redoEdits(versionId: VersionId, uri: string) {
+		const document = this.documents.get(uri)
+		if (document === undefined) {
+			throw new Error(`[Spyglass#redoEdits] Document doesn't exist: ${uri}`)
+		}
+		const lastRedo = document.redoStack.pop()
+		if (lastRedo === undefined) {
+			return
+		}
+		document.undoStack.push(document.doc.getText())
+		TextDocument.update(document.doc, [{ text: lastRedo }], document.doc.version + 1)
+		await Spyglass.EXTERNALS.fs.writeFile(uri, document.doc.getText())
+		await this.notifyChange(versionId, document.doc)
 	}
 
 	public getUnsavedFileUri(versionId: VersionId, gen: ConfigGenerator) {
@@ -271,4 +327,12 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
 			} as core.CompletionItem))
 		},
 	})
+}
+
+function getLsPosition(offset: number, doc: TextDocument): Position {
+	return doc.positionAt(offset)
+}
+
+export function getLsRange(range: core.Range, doc: TextDocument): Range {
+	return { start: getLsPosition(range.start, doc), end: getLsPosition(range.end, doc) }
 }

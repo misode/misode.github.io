@@ -110,25 +110,25 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		Analytics.resetGenerator(gen.id, 1, 'menu')
 		// TODO
 	}
-	const undo = (e: MouseEvent) => {
+	const undo = async (e: MouseEvent) => {
 		e.stopPropagation()
 		Analytics.undoGenerator(gen.id, 1, 'menu')
-		// TODO
+		await spyglass.undoEdits(version, uri)
 	}
-	const redo = (e: MouseEvent) => {
+	const redo = async (e: MouseEvent) => {
 		e.stopPropagation()
 		Analytics.redoGenerator(gen.id, 1, 'menu')
-		// TODO
+		await spyglass.redoEdits(version, uri)
 	}
 
 	useEffect(() => {
-		const onKeyUp = (e: KeyboardEvent) => {
+		const onKeyUp = async (e: KeyboardEvent) => {
 			if (e.ctrlKey && e.key === 'z') {
 				Analytics.undoGenerator(gen.id, 1, 'hotkey')
-				// TODO
+				await spyglass.undoEdits(version, uri)
 			} else if (e.ctrlKey && e.key === 'y') {
 				Analytics.redoGenerator(gen.id, 1, 'hotkey')
-				// TODO
+				await spyglass.redoEdits(version, uri)
 			}
 		}
 		const onKeyDown = (e: KeyboardEvent) => {
@@ -145,7 +145,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			document.removeEventListener('keyup', onKeyUp)
 			document.removeEventListener('keydown', onKeyDown)
 		}
-	}, [gen.id])
+	}, [gen.id, spyglass, version, uri])
 
 	const { value: presets } = useAsync(async () => {
 		const registries = await fetchRegistries(version)

@@ -3,23 +3,25 @@ import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStr
 import type { ListType, LiteralType, McdocType } from '@spyglassmc/mcdoc'
 import type { SimplifiedStructType } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { useLocale } from '../../contexts/Locale.jsx'
+import type { Edit } from '../../services/Spyglass.js'
 import { Octicon } from '../Octicon.jsx'
 
 interface Props {
 	node: JsonNode | undefined
+	makeEdits: (edits: Edit[]) => void
 }
-export function McdocRoot({ node } : Props) {
+export function McdocRoot({ node, makeEdits } : Props) {
 	const type = node?.typeDef ?? { kind: 'unsafe' }
 
 	if (type.kind === 'struct') {
-		return <StructBody type={type} node={node} />
+		return <StructBody type={type} node={node} makeEdits={makeEdits} />
 	}
 
 	return <>
 		<div class="node-header">
-			<Head simpleType={type} node={node} />
+			<Head simpleType={type} node={node} makeEdits={makeEdits} />
 		</div>
-		<Body simpleType={type} node={node} />
+		<Body simpleType={type} node={node} makeEdits={makeEdits} />
 	</>
 }
 
@@ -89,19 +91,23 @@ function Head({ simpleType, optional, node }: HeadProps) {
 interface BodyProps extends Props {
 	simpleType: McdocType
 }
-function Body({ simpleType, node }: BodyProps) {
+function Body({ simpleType, node, makeEdits }: BodyProps) {
 	const type = node?.typeDef ?? simpleType
 	if (node?.typeDef?.kind === 'struct') {
 		if (node.typeDef.fields.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
-			<StructBody type={node.typeDef} node={node} />
+			<StructBody type={node.typeDef} node={node} makeEdits={makeEdits} />
 		</div>
 	}
 	if (node?.typeDef?.kind === 'list') {
+		const fixedRange = node.typeDef.lengthRange?.min !== undefined && node.typeDef.lengthRange.min === node.typeDef.lengthRange.max
+		if (!fixedRange && node.children?.length === 0) {
+			return <></>
+		}
 		return <div class="node-body">
-			<ListBody type={node.typeDef} node={node} />
+			<ListBody type={node.typeDef} node={node} makeEdits={makeEdits} />
 		</div>
 	}
 	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'boolean') {
@@ -114,7 +120,7 @@ function Body({ simpleType, node }: BodyProps) {
 interface StructBodyProps extends Props {
 	type: SimplifiedStructType
 }
-function StructBody({ type, node }: StructBodyProps) {
+function StructBody({ type, node, makeEdits }: StructBodyProps) {
 	if (!JsonObjectNode.is(node)) {
 		return <></>
 	}
@@ -133,9 +139,9 @@ function StructBody({ type, node }: StructBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Key label={key} />
-					<Head simpleType={field.type} node={child} optional={field.optional} />
+					<Head simpleType={field.type} node={child} optional={field.optional} makeEdits={makeEdits} />
 				</div>
-				<Body simpleType={field.type} node={child} />
+				<Body simpleType={field.type} node={child} makeEdits={makeEdits} />
 			</div>
 		})}
 	</>
@@ -150,7 +156,7 @@ function Key({ label }: { label: string | number | boolean }) {
 interface ListBodyProps extends Props {
 	type: ListType
 }
-function ListBody({ type, node }: ListBodyProps) {
+function ListBody({ type, node, makeEdits }: ListBodyProps) {
 	const { locale } = useLocale()
 	if (!JsonArrayNode.is(node)) {
 		return <></>
@@ -160,7 +166,7 @@ function ListBody({ type, node }: ListBodyProps) {
 			const child = item.value
 			return <div class="node">
 				<div class="node-header">
-					<button class="remove tooltipped tip-se" aria-label={locale('remove')}>
+					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => makeEdits([{ range: item.range, text: '' }])}>
 						{Octicon.trashcan}
 					</button>
 					{node.children.length > 1 && <div class="node-move">
@@ -172,9 +178,9 @@ function ListBody({ type, node }: ListBodyProps) {
 						</button>
 					</div>}
 					<Key label="entry" />
-					<Head simpleType={type.item} node={child} />
+					<Head simpleType={type.item} node={child} makeEdits={makeEdits} />
 				</div>
-				<Body simpleType={type.item} node={child} />
+				<Body simpleType={type.item} node={child} makeEdits={makeEdits} />
 			</div>
 		})}
 	</>

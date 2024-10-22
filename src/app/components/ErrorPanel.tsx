@@ -3,6 +3,7 @@ import { getCurrentUrl } from 'preact-router'
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { useSpyglass } from '../contexts/Spyglass.jsx'
 import { useVersion } from '../contexts/Version.jsx'
+import { useAsync } from '../hooks/useAsync.js'
 import { latestVersion } from '../services/DataFetcher.js'
 import { getGenerator } from '../Utils.js'
 import { Octicon } from './index.js'
@@ -21,9 +22,14 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 	const [stackVisible, setStackVisible] = useState(false)
 	const [stack, setStack] = useState<string | undefined>(undefined)
 
-	const gen = getGenerator(getCurrentUrl())
-	const source = gen ? spyglass?.getFileContents(spyglass.getUnsavedFileUri(version, gen)) : undefined
 	const name = (prefix ?? '') + (error instanceof Error ? error.message : error)
+	const gen = getGenerator(getCurrentUrl())
+	const { value: source } = useAsync(async () => {
+		if (gen) {
+			return await spyglass?.readFile(spyglass.getUnsavedFileUri(version, gen))
+		}
+		return undefined
+	}, [spyglass, version, gen])
 
 	useEffect(() => {
 		if (error instanceof Error) {
@@ -57,7 +63,7 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 			body += `\n### Stack trace\n\`\`\`\n${fullName}\n${stack}\n\`\`\`\n`
 		}
 		if (source) {
-			body += `\n### Generator JSON\n<details>\n<pre>\n${JSON.stringify(source, null, 2)}\n</pre>\n</details>\n`
+			body += `\n### Generator JSON\n<details>\n<pre>\n${source}\n</pre>\n</details>\n`
 		}
 		if (body_) {
 			body += body_
