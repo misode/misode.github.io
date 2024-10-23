@@ -1,6 +1,8 @@
+import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
+import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
-import type { ListType, LiteralType, McdocType } from '@spyglassmc/mcdoc'
+import type { ListType, LiteralType, McdocType, NumericType } from '@spyglassmc/mcdoc'
 import type { SimplifiedStructType } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { useCallback } from 'preact/hooks'
 import { useLocale } from '../../contexts/Locale.jsx'
@@ -30,13 +32,11 @@ interface HeadProps extends Props {
 	simpleType: McdocType
 	optional?: boolean
 }
-function Head({ simpleType, optional, node }: HeadProps) {
+function Head({ simpleType, optional, node, makeEdit }: HeadProps) {
 	const { locale } = useLocale()
 	const type = node?.typeDef ?? simpleType
 	if (type.kind === 'string') {
-		const value = JsonStringNode.is(node) ? node.value : undefined
-		
-		return <input value={value} />
+		return <StringHead node={node} makeEdit={makeEdit} />
 	}
 	if (type.kind === 'enum') {
 		const value = JsonStringNode.is(node) ? node.value : undefined
@@ -48,15 +48,10 @@ function Head({ simpleType, optional, node }: HeadProps) {
 		</select>
 	}
 	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'long' || type.kind === 'float' || type.kind === 'double') {
-		const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
-		return <input type="number" value={value} />
+		return <NumericHead type={type} node={node} makeEdit={makeEdit} />
 	}
 	if (type.kind === 'boolean') {
-		const value = node && JsonBooleanNode.is(node) ? node.value : undefined
-		return <>
-			<button class={value === false ? 'selected' : ''}>False</button>
-			<button class={value === true ? 'selected' : ''}>True</button>
-		</>
+		return <BooleanHead node={node} makeEdit={makeEdit} />
 	}
 	if (type.kind === 'union') {
 		return <select>
@@ -87,6 +82,93 @@ function Head({ simpleType, optional, node }: HeadProps) {
 	}
 	// console.warn('Unhandled head', type)
 	return <></>
+}
+
+function StringHead({ node, makeEdit }: Props) {
+	const value = JsonStringNode.is(node) ? node.value : undefined
+
+	const onChangeValue = useCallback((value: string) => {
+		makeEdit(() => {
+			replaceNode(node, (range, parent) => {
+				const newNode: JsonStringNode = {
+					type: 'json:string',
+					range,
+					options: json.parser.JsonStringOptions,
+					value: value,
+					valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
+					parent,
+				}
+				return newNode
+			})
+		})
+	}, [node, makeEdit])
+
+	return <input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+}
+
+interface NumericHeadProps extends Props {
+	type: NumericType,
+}
+function NumericHead({ type, node, makeEdit }: NumericHeadProps) {
+	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
+
+	const isFloat = type.kind === 'float' || type.kind === 'double'
+
+	const onChangeValue = useCallback((value: string) => {
+		const number = value.length === 0 ? undefined : Number(value)
+		if (number !== undefined && Number.isNaN(number)) {
+			return
+		}
+		makeEdit(() => {
+			if (number === undefined) {
+				removeNode(node)
+				return
+			}
+			replaceNode(node, (range, parent) => {
+				const newValue: core.FloatNode | core.LongNode = isFloat
+					? { type: 'float', range, value: number }
+					: { type: 'long', range, value: BigInt(number) }
+				const newNode: JsonNumberNode = {
+					type: 'json:number',
+					range,
+					value: newValue,
+					children: [newValue],
+					parent,
+				}
+				newValue.parent = newNode
+				return newNode
+			})
+		})
+	}, [isFloat, node, makeEdit])
+
+	return <input type="number" value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+}
+
+function BooleanHead({ node, makeEdit }: Props) {
+	const value = node && JsonBooleanNode.is(node) ? node.value : undefined
+
+	const onSelect = useCallback((newValue: boolean) => {
+		makeEdit(() => {
+			if (value === newValue) {
+				removeNode(node)
+			} else {
+				replaceNode(node, (range, parent) => {
+					const newNode: JsonBooleanNode = {
+						type: 'json:boolean',
+						range,
+						value: newValue,
+						parent,
+					}
+					return newNode
+				})
+			}
+		})
+	}, [node, makeEdit, value]) 
+
+	return <>
+		<button class={value === false ? 'selected' : ''} onClick={() => onSelect(false)}>False</button>
+		<button class={value === true ? 'selected' : ''} onClick={() => onSelect(true)}>True</button>
+	</>
 }
 
 interface BodyProps extends Props {
@@ -190,4 +272,28 @@ function ListBody({ type, node, makeEdit }: ListBodyProps) {
 			</div>
 		})}
 	</>
+}
+
+function replaceNode<T extends core.AstNode>(node: T | undefined, getNewNode: (range: core.Range, parent: core.AstNode) => T) {
+	if (node !== undefined && node.parent?.children) {
+		const index = node.parent.children.findIndex(c => c === node)
+		if (index !== -1) {
+			const newNode = getNewNode(node.range, node.parent)
+			node.parent.children[index] = newNode
+			if (core.PairNode.is(node.parent)) {
+				;(node.parent as core.Mutable<core.PairNode<core.AstNode, core.AstNode>>).value = newNode
+			}
+		}
+	}
+}
+
+function removeNode<T extends core.AstNode>(node: T | undefined) {
+	if (node !== undefined && node.parent?.children) {
+		if (core.PairNode.is(node.parent)) {
+			removeNode(node.parent)
+		} else {
+			const index = node.parent.children.findIndex(c => c === node)
+			node.parent.children.splice(index, 1)
+		}
+	}
 }
