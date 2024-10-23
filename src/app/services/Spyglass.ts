@@ -58,6 +58,10 @@ export class SpyglassService {
 		})
 	}
 
+	public getSymbols() {
+		return this.service.project.symbols
+	}
+
 	public async getFile(uri: string, emptyContent?: () => string) {
 		let docAndNode = this.service.project.getClientManaged(uri)
 		if (docAndNode === undefined) {
