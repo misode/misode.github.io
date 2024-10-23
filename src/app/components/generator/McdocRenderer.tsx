@@ -4,16 +4,13 @@ import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType } from '@spyglassmc/mcdoc'
 import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
-import type { SimplifiedStructType } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { useCallback } from 'preact/hooks'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { useLocale } from '../../contexts/Locale.jsx'
 import { Octicon } from '../Octicon.jsx'
 
-export interface McdocContext {
-	doc: TextDocument,
-	symbols: core.SymbolUtil,
-}
+export interface McdocContext extends core.CheckerContext {}
 
 type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
 
@@ -31,19 +28,18 @@ export function McdocRoot({ node, makeEdit, ctx } : Props) {
 
 	return <>
 		<div class="node-header">
-			<Head simpleType={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<Head type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
-		<Body simpleType={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		<Body type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	</>
 }
 
 interface HeadProps extends Props {
-	simpleType: McdocType
+	type: SimplifiedMcdocType
 	optional?: boolean
 }
-function Head({ simpleType, optional, node, makeEdit, ctx }: HeadProps) {
+function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	const { locale } = useLocale()
-	const type = node?.typeDef ?? simpleType
 	if (type.kind === 'string') {
 		return <StringHead node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
@@ -64,9 +60,9 @@ function Head({ simpleType, optional, node, makeEdit, ctx }: HeadProps) {
 	}
 	if (type.kind === 'union') {
 		return <select>
-			{type.members.map((member, index) => {
+			{type.members.map((member, index) =>
 				<option value={index}>{member.kind}</option>
-			})}
+			)}
 		</select>
 	}
 	if (type.kind === 'struct' && optional) {
@@ -180,11 +176,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 	const onAdd = useCallback(() => {
 		if (canAdd) {
 			makeEdit((range) => {
-				const itemType: McdocType = type.kind === 'list' ? type.item
-					: type.kind === 'byte_array' ? { kind: 'byte' }
-						: type.kind === 'int_array' ? { kind: 'int' }
-							: type.kind === 'long_array' ? { kind: 'long' }
-								: { kind: 'any' }
+				const itemType = getItemType(type, ctx)
 				const newValue = getDefault(itemType, range, ctx)
 				const newItem: core.ItemNode<JsonNode> = {
 					type: 'item',
@@ -215,25 +207,24 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 }
 
 interface BodyProps extends Props {
-	simpleType: McdocType
+	type: SimplifiedMcdocType
 }
-function Body({ simpleType, node, makeEdit, ctx }: BodyProps) {
-	const type = node?.typeDef ?? simpleType
-	if (node?.typeDef?.kind === 'struct') {
-		if (node.typeDef.fields.length === 0) {
+function Body({ type, node, makeEdit, ctx }: BodyProps) {
+	if (type.kind === 'struct') {
+		if (type.fields.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
-			<StructBody type={node.typeDef} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
 	}
-	if (node?.typeDef?.kind === 'list') {
-		const fixedRange = node.typeDef.lengthRange?.min !== undefined && node.typeDef.lengthRange.min === node.typeDef.lengthRange.max
-		if (!fixedRange && node.children?.length === 0) {
+	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
+		const fixedRange = type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
+		if (!fixedRange && (!node || node.children?.length === 0)) {
 			return <></>
 		}
 		return <div class="node-body">
-			<ListBody type={node.typeDef} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<ListBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
 	}
 	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'boolean') {
@@ -246,10 +237,11 @@ function Body({ simpleType, node, makeEdit, ctx }: BodyProps) {
 interface StructBodyProps extends Props {
 	type: SimplifiedStructType
 }
-function StructBody({ type, node, makeEdit, ctx }: StructBodyProps) {
+function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 	if (!JsonObjectNode.is(node)) {
 		return <></>
 	}
+	const type = node.typeDef?.kind === 'struct' ? node.typeDef : outerType
 	const staticFields = type.fields.filter(field =>
 		field.key.kind === 'literal' && field.key.value.kind === 'string')
 	const dynamicFields = type.fields.filter(field =>
@@ -264,6 +256,7 @@ function StructBody({ type, node, makeEdit, ctx }: StructBodyProps) {
 			const childIndex = node.children.findIndex(p => p.key?.value === key)
 			const child = childIndex === -1 ? undefined : node.children[childIndex]
 			const childValue = child?.value
+			const fieldType = simplifyType(field.type, ctx)
 			const makeFieldEdit: MakeEdit = (edit) => {
 				if (child) {
 					makeEdit(() => {
@@ -304,9 +297,9 @@ function StructBody({ type, node, makeEdit, ctx }: StructBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Key label={key} />
-					<Head simpleType={field.type} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
+					<Head type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
-				<Body simpleType={field.type} node={childValue} makeEdit={makeFieldEdit} ctx={ctx} />
+				<Body type={fieldType} node={childValue} makeEdit={makeFieldEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -319,13 +312,14 @@ function Key({ label }: { label: string | number | boolean }) {
 }
 
 interface ListBodyProps extends Props {
-	type: ListType
+	type: ListType | PrimitiveArrayType
 }
-function ListBody({ type, node, makeEdit, ctx }: ListBodyProps) {
+function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 	const { locale } = useLocale()
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
+	const type = (node.typeDef?.kind === 'list' || node.typeDef?.kind === 'byte_array' || node.typeDef?.kind === 'int_array' || node.typeDef?.kind === 'long_array') ? node.typeDef : outerType
 	const onRemoveItem = useCallback((index: number) => {
 		makeEdit(() => {
 			node.children.splice(index, 1)
@@ -335,6 +329,7 @@ function ListBody({ type, node, makeEdit, ctx }: ListBodyProps) {
 	return <>
 		{node.children.map((item, index) => {
 			const child = item.value
+			const itemType = getItemType(type, ctx)
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? item.range)
@@ -360,9 +355,9 @@ function ListBody({ type, node, makeEdit, ctx }: ListBodyProps) {
 						</button>
 					</div>}
 					<Key label="entry" />
-					<Head simpleType={type.item} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
-				<Body simpleType={type.item} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				<Body type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -438,4 +433,38 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 		return getDefault(def, range, ctx)
 	}
 	return { type: 'json:null', range }
+}
+
+function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
+	const node: SimplifyValueNode<any> = {
+		entryNode: {
+			parent: undefined,
+			runtimeKey: undefined,
+		},
+		node: {
+			originalNode: null,
+			inferredType: { kind: 'any' },
+		},
+	}
+	const context: McdocCheckerContext<any> = { 
+		...ctx,
+		allowMissingKeys: false,
+		requireCanonical: false,
+		isEquivalent: () => false,
+		getChildren: () => [],
+		reportError: () => {},
+		attachTypeInfo: () => {},
+		nodeAttacher:  () => {},
+		stringAttacher:  () => {},
+	}
+	const result = simplify(type, { node, ctx: context })
+	return result.typeDef
+}
+
+function getItemType(type: ListType | PrimitiveArrayType, ctx: McdocContext): SimplifiedMcdocType {
+	return type.kind === 'list' ? simplifyType(type.item, ctx)
+		: type.kind === 'byte_array' ? { kind: 'byte' }
+			: type.kind === 'int_array' ? { kind: 'int' }
+				: type.kind === 'long_array' ? { kind: 'long' }
+					: { kind: 'any' }
 }

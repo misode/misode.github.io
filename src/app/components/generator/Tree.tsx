@@ -49,7 +49,7 @@ export function Tree({ docAndNode, onError }: TreePanelProps) {
 		if (!service) {
 			return undefined
 		}
-		return { doc: docAndNode.doc, symbols: service.getSymbols() }
+		return service.getCheckerContext(docAndNode.doc)
 	}, [docAndNode, service])
 
 	return <div class="tree node-root" data-cy="tree">

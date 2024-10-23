@@ -1,4 +1,5 @@
 import * as core from '@spyglassmc/core'
+import { ErrorReporter } from '@spyglassmc/core'
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js'
 import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import { Fluids, ReleaseVersion, symbolRegistrar } from '@spyglassmc/java-edition/lib/dependency/index.js'
@@ -56,8 +57,9 @@ export class SpyglassService {
 		})
 	}
 
-	public getSymbols() {
-		return this.service.project.symbols
+	public getCheckerContext(doc: TextDocument) {
+		const err = new ErrorReporter()
+		return core.CheckerContext.create(this.service.project, { doc, err })
 	}
 
 	public async getFile(uri: string, emptyContent?: () => string) {
