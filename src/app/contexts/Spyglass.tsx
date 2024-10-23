@@ -59,17 +59,9 @@ export function SpyglassProvider({ children }: { children: ComponentChildren }) 
 	const { version } = useVersion()
 	const [client] = useState(new SpyglassClient())
 
-	const { value: service, error } = useAsync(() => {
+	const { value: service } = useAsync(() => {
 		return client.createService(version)
 	}, [client, version])
-
-	useEffect(() => {
-		if (error) {
-			console.warn(error)
-		}
-	}, [error])
-
-	console.log('->', service)
 
 	const value: SpyglassContext = {
 		client,

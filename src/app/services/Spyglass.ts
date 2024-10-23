@@ -4,6 +4,7 @@ import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/inde
 import { Fluids, ReleaseVersion, symbolRegistrar } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
 import * as jeMcf from '@spyglassmc/java-edition/lib/mcfunction/index.js'
+import type { JsonFileNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
@@ -17,10 +18,7 @@ import { computeIfAbsent, genPath } from '../Utils.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
-export interface Edit {
-	range?: core.Range
-	text: string
-}
+export type AstEdit = (docAndNode: core.DocAndNode) => void
 
 interface ClientDocument {
 	doc: TextDocument
@@ -63,7 +61,6 @@ export class SpyglassService {
 	public async getFile(uri: string, emptyContent?: () => string) {
 		let docAndNode = this.service.project.getClientManaged(uri)
 		if (docAndNode === undefined) {
-			console.info(`[Spyglass#openFile] Opening file with content from fs: ${uri}`)
 			const content = await this.readFile(uri)
 			const doc = TextDocument.create(uri, 'json', 1, content ?? (emptyContent ? emptyContent() : ''))
 			await this.service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
@@ -110,21 +107,24 @@ export class SpyglassService {
 		}
 	}
 
-	public async applyEdits(uri: string, edits: Edit[]) {
+	public async applyEdit(uri: string, edit: AstEdit) {
 		const document = this.client.documents.get(uri)
 		if (document !== undefined) {
 			document.undoStack.push(document.doc.getText())
 			document.redoStack = []
-			TextDocument.update(document.doc, edits.map(e => ({
-				range: e.range ? getLsRange(e.range, document.doc) : undefined,
-				text: e.text,
-			})), document.doc.version + 1)
+			const docAndNode = this.service.project.getClientManaged(uri)
+			if (!docAndNode) {
+				throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
+			}
+			edit(docAndNode)
+			const newText = this.service.format(docAndNode.node, docAndNode.doc, 2, true)
+			TextDocument.update(document.doc, [{ text: newText }], document.doc.version + 1)
 			await this.service.project.externals.fs.writeFile(uri, document.doc.getText())
 			await this.notifyChange(document.doc)
 		}
 	}
 
-	public async undoEdits(uri: string) {
+	public async undoEdit(uri: string) {
 		const document = this.client.documents.get(uri)
 		if (document === undefined) {
 			throw new Error(`[Spyglass#undoEdits] Document doesn't exist: ${uri}`)
@@ -139,7 +139,7 @@ export class SpyglassService {
 		await this.notifyChange(document.doc)
 	}
 
-	public async redoEdits(uri: string) {
+	public async redoEdit(uri: string) {
 		const document = this.client.documents.get(uri)
 		if (document === undefined) {
 			throw new Error(`[Spyglass#redoEdits] Document doesn't exist: ${uri}`)
@@ -249,6 +249,10 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	jeJson.initialize(ctx)
 	jeMcf.initialize(ctx, summary.commands, release)
 	nbt.initialize(ctx)
+
+	meta.registerFormatter<JsonFileNode>('json:file', (node, ctx) => {
+		return ctx.meta.getFormatter(node.children[0].type)(node.children[0], ctx)
+	})
 
 	return { loadedVersion: release }
 }

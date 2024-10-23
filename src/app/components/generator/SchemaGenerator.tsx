@@ -119,7 +119,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			return
 		}
 		Analytics.undoGenerator(gen.id, 1, 'menu')
-		await service.undoEdits(uri)
+		await service.undoEdit(uri)
 	}
 	const redo = async (e: MouseEvent) => {
 		e.stopPropagation()
@@ -127,7 +127,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			return
 		}
 		Analytics.redoGenerator(gen.id, 1, 'menu')
-		await service?.redoEdits(uri)
+		await service?.redoEdit(uri)
 	}
 
 	useEffect(() => {
@@ -137,10 +137,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			}
 			if (e.ctrlKey && e.key === 'z') {
 				Analytics.undoGenerator(gen.id, 1, 'hotkey')
-				await service.undoEdits(uri)
+				await service.undoEdit(uri)
 			} else if (e.ctrlKey && e.key === 'y') {
 				Analytics.redoGenerator(gen.id, 1, 'hotkey')
-				await service.redoEdits(uri)
+				await service.redoEdit(uri)
 			}
 		}
 		const onKeyDown = (e: KeyboardEvent) => {
