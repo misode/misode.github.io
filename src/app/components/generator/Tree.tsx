@@ -1,9 +1,9 @@
-import type { DocAndNode } from '@spyglassmc/core'
+import type { DocAndNode, Range } from '@spyglassmc/core'
+import type { JsonNode } from '@spyglassmc/json'
 import { JsonFileNode } from '@spyglassmc/json'
 import { useCallback, useErrorBoundary, useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
-import type { AstEdit } from '../../services/Spyglass.js'
 import type { McdocContext } from './McdocRenderer.jsx'
 import { McdocRoot } from './McdocRenderer.jsx'
 
@@ -28,11 +28,21 @@ export function Tree({ docAndNode, onError }: TreePanelProps) {
 	})
 	if (error) return <></>
 
-	const makeEdit = useCallback((edit: AstEdit) => {
+	const makeEdit = useCallback((edit: (range: Range) => JsonNode | undefined) => {
 		if (!service) {
 			return
 		}
-		service.applyEdit(docAndNode.doc.uri, edit)
+		service.applyEdit(docAndNode.doc.uri, (fileNode) => {
+			const jsonFile = fileNode.children[0]
+			if (JsonFileNode.is(jsonFile)) {
+				const original = jsonFile.children[0]
+				const newNode = edit(original.range)
+				if (newNode !== undefined) {
+					newNode.parent = fileNode
+					fileNode.children[0] = newNode
+				}
+			}
+		})
 	}, [service, docAndNode])
 
 	const ctx = useMemo<McdocContext | undefined>(() => {

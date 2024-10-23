@@ -8,7 +8,6 @@ import type { SimplifiedStructType } from '@spyglassmc/mcdoc/lib/runtime/checker
 import { useCallback } from 'preact/hooks'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { useLocale } from '../../contexts/Locale.jsx'
-import type { AstEdit } from '../../services/Spyglass.js'
 import { Octicon } from '../Octicon.jsx'
 
 export interface McdocContext {
@@ -16,9 +15,11 @@ export interface McdocContext {
 	symbols: core.SymbolUtil,
 }
 
+type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
+
 interface Props {
 	node: JsonNode | undefined
-	makeEdit: (edit: AstEdit) => void
+	makeEdit: MakeEdit
 	ctx: McdocContext
 }
 export function McdocRoot({ node, makeEdit, ctx } : Props) {
@@ -90,18 +91,17 @@ function StringHead({ node, makeEdit }: Props) {
 	const value = JsonStringNode.is(node) ? node.value : undefined
 
 	const onChangeValue = useCallback((value: string) => {
-		makeEdit(() => {
-			replaceNode(node, (range, parent) => {
-				const newNode: JsonStringNode = {
-					type: 'json:string',
-					range,
-					options: json.parser.JsonStringOptions,
-					value: value,
-					valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
-					parent,
-				}
-				return newNode
-			})
+		makeEdit((range) => {
+			if (value.length === 0) {
+				return undefined
+			}
+			return {
+				type: 'json:string',
+				range,
+				options: json.parser.JsonStringOptions,
+				value: value,
+				valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
+			}
 		})
 	}, [node, makeEdit])
 
@@ -121,25 +121,21 @@ function NumericHead({ type, node, makeEdit }: NumericHeadProps) {
 		if (number !== undefined && Number.isNaN(number)) {
 			return
 		}
-		makeEdit(() => {
+		makeEdit((range) => {
 			if (number === undefined) {
-				removeNode(node)
-				return
+				return undefined
 			}
-			replaceNode(node, (range, parent) => {
-				const newValue: core.FloatNode | core.LongNode = isFloat
-					? { type: 'float', range, value: number }
-					: { type: 'long', range, value: BigInt(number) }
-				const newNode: JsonNumberNode = {
-					type: 'json:number',
-					range,
-					value: newValue,
-					children: [newValue],
-					parent,
-				}
-				newValue.parent = newNode
-				return newNode
-			})
+			const newValue: core.FloatNode | core.LongNode = isFloat
+				? { type: 'float', range, value: number }
+				: { type: 'long', range, value: BigInt(number) }
+			const newNode: JsonNumberNode = {
+				type: 'json:number',
+				range,
+				value: newValue,
+				children: [newValue],
+			}
+			newValue.parent = newNode
+			return newNode
 		})
 	}, [isFloat, node, makeEdit])
 
@@ -150,19 +146,14 @@ function BooleanHead({ node, makeEdit }: Props) {
 	const value = node && JsonBooleanNode.is(node) ? node.value : undefined
 
 	const onSelect = useCallback((newValue: boolean) => {
-		makeEdit(() => {
+		makeEdit((range) => {
 			if (value === newValue) {
-				removeNode(node)
-			} else {
-				replaceNode(node, (range, parent) => {
-					const newNode: JsonBooleanNode = {
-						type: 'json:boolean',
-						range,
-						value: newValue,
-						parent,
-					}
-					return newNode
-				})
+				return undefined
+			}
+			return {
+				type: 'json:boolean',
+				range,
+				value: newValue,
 			}
 		})
 	}, [node, makeEdit, value]) 
@@ -188,23 +179,32 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 
 	const onAdd = useCallback(() => {
 		if (canAdd) {
-			makeEdit(() => {
+			makeEdit((range) => {
 				const itemType: McdocType = type.kind === 'list' ? type.item
 					: type.kind === 'byte_array' ? { kind: 'byte' }
 						: type.kind === 'int_array' ? { kind: 'int' }
 							: type.kind === 'long_array' ? { kind: 'long' }
 								: { kind: 'any' }
-				addNode(node, (range, parent) => {
-					const newValue = getDefault(itemType, range, ctx)
-					const newNode: core.ItemNode<JsonNode> = {
-						type: 'item',
-						range,
-						children: [newValue],
-						value: newValue,
-						parent,
-					}
-					return newNode
-				})
+				const newValue = getDefault(itemType, range, ctx)
+				const newItem: core.ItemNode<JsonNode> = {
+					type: 'item',
+					range,
+					children: [newValue],
+					value: newValue,
+				}
+				newValue.parent = newItem
+				if (JsonArrayNode.is(node)) {
+					node.children.push(newItem)
+					newItem.parent = node
+					return node
+				}
+				const newArray: JsonArrayNode = {
+					type: 'json:array',
+					range,
+					children: [newItem],
+				}
+				newItem.parent = newArray
+				return newArray
 			})
 		}
 	}, [type, node, makeEdit, canAdd])
@@ -260,14 +260,53 @@ function StructBody({ type, node, makeEdit, ctx }: StructBodyProps) {
 	}
 	return <>
 		{staticFields.map(field => {
-			const key = (field.key as LiteralType).value.value
-			const child = node.children.find(p => p.key?.value === key)?.value
+			const key = (field.key as LiteralType).value.value.toString()
+			const childIndex = node.children.findIndex(p => p.key?.value === key)
+			const child = childIndex === -1 ? undefined : node.children[childIndex]
+			const childValue = child?.value
+			const makeFieldEdit: MakeEdit = (edit) => {
+				if (child) {
+					makeEdit(() => {
+						const newChild = edit(childValue?.range ?? core.Range.create(child.range.end))
+						if (newChild === undefined) {
+							node.children.splice(childIndex, 1)
+						} else {
+							node.children[childIndex] = {
+								type: 'pair',
+								range: child.range,
+								key: child.key,
+								value: newChild,
+							}
+						}
+						return node
+					})
+				} else {
+					const newChild = edit(core.Range.create(node.range.end))
+					if (newChild) {
+						makeEdit(() => {
+							node.children.push({
+								type: 'pair',
+								range: newChild.range,
+								key: {
+									type: 'json:string',
+									range: newChild.range,
+									options: json.parser.JsonStringOptions,
+									value: key,
+									valueMap: [{ inner: core.Range.create(0), outer: newChild.range }],
+								},
+								value: newChild,
+							})
+							return node
+						})
+					}
+				}
+			}
 			return <div class="node">
 				<div class="node-header">
 					<Key label={key} />
-					<Head simpleType={field.type} node={child} optional={field.optional} makeEdit={makeEdit} ctx={ctx} />
+					<Head simpleType={field.type} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
-				<Body simpleType={field.type} node={child} makeEdit={makeEdit} ctx={ctx} />
+				<Body simpleType={field.type} node={childValue} makeEdit={makeFieldEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -290,11 +329,23 @@ function ListBody({ type, node, makeEdit, ctx }: ListBodyProps) {
 	const onRemoveItem = useCallback((index: number) => {
 		makeEdit(() => {
 			node.children.splice(index, 1)
+			return node
 		})
 	}, [makeEdit, node])
 	return <>
 		{node.children.map((item, index) => {
 			const child = item.value
+			const makeItemEdit: MakeEdit = (edit) => {
+				makeEdit(() => {
+					const newChild = edit(child?.range ?? item.range)
+					node.children[index] = {
+						type: 'item',
+						range: item.range,
+						value: newChild,
+					}
+					return node
+				})
+			}
 			return <div class="node">
 				<div class="node-header">
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
@@ -309,44 +360,12 @@ function ListBody({ type, node, makeEdit, ctx }: ListBodyProps) {
 						</button>
 					</div>}
 					<Key label="entry" />
-					<Head simpleType={type.item} node={child} makeEdit={makeEdit} ctx={ctx} />
+					<Head simpleType={type.item} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
-				<Body simpleType={type.item} node={child} makeEdit={makeEdit} ctx={ctx} />
+				<Body simpleType={type.item} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
-}
-
-function addNode<T extends core.AstNode>(parent: T | undefined, getNewNode: (range: core.Range, parent: T) => core.AstNode) {
-	if (parent?.children !== undefined) {
-		const range = core.Range.create(parent.range.end)
-		const newNode = getNewNode(range, parent)
-		parent.children.push(newNode)
-	}
-}
-
-function replaceNode<T extends core.AstNode>(node: T | undefined, getNewNode: (range: core.Range, parent: core.AstNode) => T) {
-	if (node !== undefined && node.parent?.children) {
-		const index = node.parent.children.findIndex(c => c === node)
-		if (index !== -1) {
-			const newNode = getNewNode(node.range, node.parent)
-			node.parent.children[index] = newNode
-			if (core.PairNode.is(node.parent)) {
-				;(node.parent as core.Mutable<core.PairNode<core.AstNode, core.AstNode>>).value = newNode
-			}
-		}
-	}
-}
-
-function removeNode<T extends core.AstNode>(node: T | undefined) {
-	if (node !== undefined && node.parent?.children) {
-		if (core.PairNode.is(node.parent)) {
-			removeNode(node.parent)
-		} else {
-			const index = node.parent.children.findIndex(c => c === node)
-			node.parent.children.splice(index, 1)
-		}
-	}
 }
 
 function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): JsonNode {

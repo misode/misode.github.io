@@ -122,8 +122,11 @@ function shuffle<T>(array: T[], ctx: LootContext) {
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
+	if (!Array.isArray(table.pools)) {
+		return
+	}
 	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
-	for (const pool of table.pools ?? []) {
+	for (const pool of table.pools) {
 		generatePool(pool, tableConsumer, ctx)
 	}
 }

@@ -18,8 +18,6 @@ import { computeIfAbsent, genPath } from '../Utils.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
-export type AstEdit = (docAndNode: core.DocAndNode) => void
-
 interface ClientDocument {
 	doc: TextDocument
 	undoStack: string[]
@@ -111,7 +109,7 @@ export class SpyglassService {
 		}
 	}
 
-	public async applyEdit(uri: string, edit: AstEdit) {
+	public async applyEdit(uri: string, edit: (node: core.FileNode<core.AstNode>) => void) {
 		const document = this.client.documents.get(uri)
 		if (document !== undefined) {
 			document.undoStack.push(document.doc.getText())
@@ -120,7 +118,7 @@ export class SpyglassService {
 			if (!docAndNode) {
 				throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
 			}
-			edit(docAndNode)
+			edit(docAndNode.node)
 			const newText = this.service.format(docAndNode.node, docAndNode.doc, 2, true)
 			TextDocument.update(document.doc, [{ text: newText }], document.doc.version + 1)
 			await this.service.project.externals.fs.writeFile(uri, document.doc.getText())
