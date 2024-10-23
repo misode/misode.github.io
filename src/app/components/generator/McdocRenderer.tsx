@@ -2,9 +2,9 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
-import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType } from '@spyglassmc/mcdoc'
+import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, UnionType } from '@spyglassmc/mcdoc'
 import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
-import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { useCallback } from 'preact/hooks'
 import { useLocale } from '../../contexts/Locale.jsx'
@@ -44,13 +44,7 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 		return <StringHead node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'enum') {
-		const value = JsonStringNode.is(node) ? node.value : undefined
-		return <select value={value}>
-			{optional && <option value={undefined}>-- select --</option>}
-			{type.values.map(value =>
-				<option value={value.value}>{value.value}</option>
-			)}
-		</select>
+		return <EnumHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'long' || type.kind === 'float' || type.kind === 'double') {
 		return <NumericHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -59,11 +53,7 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 		return <BooleanHead node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'union') {
-		return <select>
-			{type.members.map((member, index) =>
-				<option value={index}>{member.kind}</option>
-			)}
-		</select>
+		return <UnionHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'struct' && optional) {
 		if (node && JsonObjectNode.is(node)) {
@@ -86,22 +76,72 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 function StringHead({ node, makeEdit }: Props) {
 	const value = JsonStringNode.is(node) ? node.value : undefined
 
-	const onChangeValue = useCallback((value: string) => {
+	const onChangeValue = useCallback((newValue: string) => {
+		if (value === newValue) {
+			return
+		}
 		makeEdit((range) => {
-			if (value.length === 0) {
+			if (newValue.length === 0) {
 				return undefined
 			}
 			return {
 				type: 'json:string',
 				range,
 				options: json.parser.JsonStringOptions,
-				value: value,
+				value: newValue,
 				valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 			}
 		})
 	}, [node, makeEdit])
 
 	return <input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+}
+
+interface EnumHeadProps extends HeadProps {
+	type: SimplifiedEnum,
+}
+function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
+	const value = JsonStringNode.is(node) ? node.value : undefined
+
+	const onChangeValue = useCallback((newValue: string) => {
+		if (value === newValue) {
+			return
+		}
+		makeEdit((range) => {
+			if (newValue === '__unset__') {
+				return undefined
+			}
+			if (type.enumKind === 'string') {
+				return {
+					type: 'json:string',
+					range,
+					options: json.parser.JsonStringOptions,
+					value: newValue,
+					valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
+				}
+			}
+			const number: core.FloatNode = {
+				type: 'float',
+				range,
+				value: parseFloat(newValue),
+			}
+			const result: JsonNumberNode = {
+				type: 'json:number',
+				range,
+				children: [number],
+				value: number,
+			}
+			number.parent = result
+			return result
+		})
+	}, [type.enumKind, value, makeEdit])
+
+	return <select value={value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
+		{(value === undefined || optional) && <option value="__unset__">-- unset --</option>}
+		{type.values.map(value =>
+			<option value={value.value}>{value.value}</option>
+		)}
+	</select>
 }
 
 interface NumericHeadProps extends Props {
@@ -160,6 +200,35 @@ function BooleanHead({ node, makeEdit }: Props) {
 	</>
 }
 
+interface UnionHeadProps extends HeadProps {
+	type: UnionType<SimplifiedMcdocTypeNoUnion>
+}
+function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
+	const selectedType = node?.typeDef
+
+	const onSelect = useCallback((newValue: string) => {
+		makeEdit((range) => {
+			if (newValue === '__unset__') {
+				return undefined
+			}
+			const newSelected = type.members[parseInt(newValue)]
+			return getDefault(newSelected, range, ctx)
+		})
+	}, [type, makeEdit, ctx])
+
+	const memberIndex = selectedType ? type.members.findIndex(m => quickEqualTypes(m, selectedType)) : -1
+
+	return <>
+		<select value={memberIndex > -1 ? memberIndex : '__unset__'} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
+			{optional && <option value="__unset__">-- unset --</option>}
+			{type.members.map((member, index) =>
+				<option value={index}>{member.kind}</option>
+			)}
+		</select>
+		{(selectedType || !optional) && <Head type={selectedType ?? type.members[0]} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />}
+	</>
+}
+
 interface ListHeadProps extends Props {
 	type: ListType | PrimitiveArrayType,
 }
@@ -199,7 +268,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 				return newArray
 			})
 		}
-	}, [type, node, makeEdit, canAdd])
+	}, [type, node, makeEdit, ctx, canAdd])
 
 	return <button class="add tooltipped tip-se" aria-label={locale('add_top')} onClick={() => onAdd()} disabled={!canAdd}>
 		{Octicon.plus_circle}
@@ -208,8 +277,12 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 
 interface BodyProps extends Props {
 	type: SimplifiedMcdocType
+	optional?: boolean
 }
-function Body({ type, node, makeEdit, ctx }: BodyProps) {
+function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
+	if (type.kind === 'union') {
+		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+	}
 	if (type.kind === 'struct') {
 		if (type.fields.length === 0) {
 			return <></>
@@ -232,6 +305,17 @@ function Body({ type, node, makeEdit, ctx }: BodyProps) {
 	}
 	// console.warn('Unhandled body', type, node)
 	return <></>
+}
+
+interface UnionBodyProps extends BodyProps {
+	type: UnionType<SimplifiedMcdocTypeNoUnion>
+}
+function UnionBody({ type, optional, node, makeEdit, ctx }: UnionBodyProps) {
+	const selectedType = node?.typeDef
+	if (!selectedType && optional) {
+		return <></>
+	}
+	return <Body type={selectedType ?? type.members[0]} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 }
 
 interface StructBodyProps extends Props {
@@ -299,7 +383,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 					<Key label={key} />
 					<Head type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
-				<Body type={fieldType} node={childValue} makeEdit={makeFieldEdit} ctx={ctx} />
+				<Body type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -467,4 +551,12 @@ function getItemType(type: ListType | PrimitiveArrayType, ctx: McdocContext): Si
 			: type.kind === 'int_array' ? { kind: 'int' }
 				: type.kind === 'long_array' ? { kind: 'long' }
 					: { kind: 'any' }
+}
+
+function quickEqualTypes(a: SimplifiedMcdocType, b: SimplifiedMcdocType) {
+	if (a.kind !== b.kind) {
+		return false
+	}
+	// TODO: improve this
+	return true
 }
