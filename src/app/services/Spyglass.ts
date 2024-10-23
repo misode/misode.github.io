@@ -22,15 +22,14 @@ export interface Edit {
 	text: string
 }
 
-interface DocumentData {
+interface ClientDocument {
 	doc: TextDocument
 	undoStack: string[]
 	redoStack: string[]
 }
 
-export class Spyglass {
-	private static readonly LOGGER: core.Logger = console
-	private static readonly EXTERNALS: core.Externals = {
+export class SpyglassClient {
+	public readonly externals: core.Externals = {
 		...BrowserExternals,
 		archive: {
 			...BrowserExternals.archive,
@@ -38,65 +37,81 @@ export class Spyglass {
 		},
 	}
 
-	private readonly instances = new Map<VersionId, Promise<core.Service>>()
-	private readonly documents = new Map<string, DocumentData>()
+	public readonly documents = new Map<string, ClientDocument>()
+
+	public async createService(version: VersionId) {
+		return SpyglassService.create(version, this)
+	}
+}
+
+export class SpyglassService {
 	private readonly watchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
 
-	public async getFile(version: VersionId, uri: string, emptyContent?: () => string) {
-		const service = await this.getService(version)
-		const document = this.documents.get(uri)
-		let docAndNode: core.DocAndNode | undefined
-		if (document === undefined) {
-			Spyglass.LOGGER.info(`[Spyglass#openFile] Opening file with content from fs: ${uri}`)
+	private constructor (
+		public readonly version: VersionId,
+		private readonly service: core.Service,
+		private readonly client: SpyglassClient,
+	) {
+		service.project.on('documentUpdated', (e) => {
+			const uriWatchers = this.watchers.get(e.doc.uri) ?? []
+			for (const handler of uriWatchers) {
+				handler(e)
+			}
+		})
+	}
+
+	public async getFile(uri: string, emptyContent?: () => string) {
+		let docAndNode = this.service.project.getClientManaged(uri)
+		if (docAndNode === undefined) {
+			console.info(`[Spyglass#openFile] Opening file with content from fs: ${uri}`)
 			const content = await this.readFile(uri)
 			const doc = TextDocument.create(uri, 'json', 1, content ?? (emptyContent ? emptyContent() : ''))
-			this.documents.set(uri, { doc, undoStack: [], redoStack: [] })
-			await service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
-			docAndNode = await service.project.ensureClientManagedChecked(uri)
-		} else {
-			Spyglass.LOGGER.info(`[Spyglass#openFile] Opening already open file: ${uri}`)
-			docAndNode = service.project.getClientManaged(uri)
+			await this.service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
+			docAndNode = await this.service.project.ensureClientManagedChecked(uri)
 		}
 		if (!docAndNode) {
 			throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
+		}
+		const document = this.client.documents.get(uri)
+		if (document === undefined) {
+			this.client.documents.set(uri, { doc: docAndNode.doc, undoStack: [], redoStack: [] })
 		}
 		return docAndNode
 	}
 
 	public async readFile(uri: string): Promise<string | undefined> {
 		try {
-			const buffer = await Spyglass.EXTERNALS.fs.readFile(uri)
+			const buffer = await this.service.project.externals.fs.readFile(uri)
 			return new TextDecoder().decode(buffer)
 		} catch (e) {
 			return undefined
 		}
 	}
 
-	private async notifyChange(versionId: VersionId, doc: TextDocument) {
-		const service = await this.getService(versionId)
-		await service.project.onDidChange(doc.uri, [{ text: doc.getText() }], doc.version + 1)
-		const docAndNode = service.project.getClientManaged(doc.uri)
+	private async notifyChange(doc: TextDocument) {
+		await this.service.project.onDidChange(doc.uri, [{ text: doc.getText() }], doc.version + 1)
+		const docAndNode = this.service.project.getClientManaged(doc.uri)
 		if (docAndNode) {
-			service.project.emit('documentUpdated', docAndNode)
+			this.service.project.emit('documentUpdated', docAndNode)
 		}
 		return docAndNode
 	}
 
-	public async writeFile(versionId: VersionId, uri: string, content: string) {
-		const document = this.documents.get(uri)
+	public async writeFile(uri: string, content: string) {
+		const document = this.client.documents.get(uri)
 		if (document !== undefined) {
 			document.undoStack.push(document.doc.getText())
 			document.redoStack = []
 			TextDocument.update(document.doc, [{ text: content }], document.doc.version + 1)
 		}
-		await Spyglass.EXTERNALS.fs.writeFile(uri, content)
+		await this.service.project.externals.fs.writeFile(uri, content)
 		if (document) {
-			await this.notifyChange(versionId, document.doc)
+			await this.notifyChange(document.doc)
 		}
 	}
 
-	public async applyEdits(versionId: VersionId, uri: string, edits: Edit[]) {
-		const document = this.documents.get(uri)
+	public async applyEdits(uri: string, edits: Edit[]) {
+		const document = this.client.documents.get(uri)
 		if (document !== undefined) {
 			document.undoStack.push(document.doc.getText())
 			document.redoStack = []
@@ -104,13 +119,13 @@ export class Spyglass {
 				range: e.range ? getLsRange(e.range, document.doc) : undefined,
 				text: e.text,
 			})), document.doc.version + 1)
-			await Spyglass.EXTERNALS.fs.writeFile(uri, document.doc.getText())
-			await this.notifyChange(versionId, document.doc)
+			await this.service.project.externals.fs.writeFile(uri, document.doc.getText())
+			await this.notifyChange(document.doc)
 		}
 	}
 
-	public async undoEdits(versionId: VersionId, uri: string) {
-		const document = this.documents.get(uri)
+	public async undoEdits(uri: string) {
+		const document = this.client.documents.get(uri)
 		if (document === undefined) {
 			throw new Error(`[Spyglass#undoEdits] Document doesn't exist: ${uri}`)
 		}
@@ -120,12 +135,12 @@ export class Spyglass {
 		}
 		document.redoStack.push(document.doc.getText())
 		TextDocument.update(document.doc, [{ text: lastUndo }], document.doc.version + 1)
-		await Spyglass.EXTERNALS.fs.writeFile(uri, document.doc.getText())
-		await this.notifyChange(versionId, document.doc)
+		await this.service.project.externals.fs.writeFile(uri, document.doc.getText())
+		await this.notifyChange(document.doc)
 	}
 
-	public async redoEdits(versionId: VersionId, uri: string) {
-		const document = this.documents.get(uri)
+	public async redoEdits(uri: string) {
+		const document = this.client.documents.get(uri)
 		if (document === undefined) {
 			throw new Error(`[Spyglass#redoEdits] Document doesn't exist: ${uri}`)
 		}
@@ -135,15 +150,15 @@ export class Spyglass {
 		}
 		document.undoStack.push(document.doc.getText())
 		TextDocument.update(document.doc, [{ text: lastRedo }], document.doc.version + 1)
-		await Spyglass.EXTERNALS.fs.writeFile(uri, document.doc.getText())
-		await this.notifyChange(versionId, document.doc)
+		await this.service.project.externals.fs.writeFile(uri, document.doc.getText())
+		await this.notifyChange(document.doc)
 	}
 
-	public getUnsavedFileUri(versionId: VersionId, gen: ConfigGenerator) {
+	public getUnsavedFileUri(gen: ConfigGenerator) {
 		if (gen.id === 'pack_mcmeta') {
 			return 'file:///project/pack.mcmeta'
 		}
-		return `file:///project/data/draft/${genPath(gen, versionId)}/unsaved.json`
+		return `file:///project/data/draft/${genPath(gen, this.version)}/unsaved.json`
 	}
 
 	public watchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
@@ -157,44 +172,31 @@ export class Spyglass {
 		uriWatchers.splice(index, 1)
 	}
 
-	private async getService(versionId: VersionId) {
-		const instance = this.instances.get(versionId)
-		if (instance) {
-			return instance
-		}
-		const promise = (async () => {
-			const version = siteConfig.versions.find(v => v.id === versionId)!
-			const service = new core.Service({
-				logger: Spyglass.LOGGER,
-				profilers: new core.ProfilerFactory(Spyglass.LOGGER, [
-					'project#init',
-					'project#ready',
-				]),
-				project: {
-					cacheRoot: 'file:///cache/',
-					projectRoots: ['file:///project/'],
-					externals: Spyglass.EXTERNALS,
-					defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
-						env: {
-							gameVersion: version.ref ?? version.id,
-							dependencies: ['@vanilla-mcdoc'],
-						},
-					}),
-					initializers: [mcdoc.initialize, initialize],
-				},
-			})
-			await service.project.ready()
-			await service.project.cacheService.save()
-			service.project.on('documentUpdated', (e) => {
-				const uriWatchers = this.watchers.get(e.doc.uri) ?? []
-				for (const handler of uriWatchers) {
-					handler(e)
-				}
-			})
-			return service
-		})()
-		this.instances.set(versionId, promise)
-		return promise
+	public static async create(versionId: VersionId, client: SpyglassClient) {
+		const version = siteConfig.versions.find(v => v.id === versionId)!
+		const logger = console
+		const service = new core.Service({
+			logger,
+			profilers: new core.ProfilerFactory(logger, [
+				'project#init',
+				'project#ready',
+			]),
+			project: {
+				cacheRoot: 'file:///cache/',
+				projectRoots: ['file:///project/'],
+				externals: client.externals,
+				defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
+					env: {
+						gameVersion: version.ref ?? version.id,
+						dependencies: ['@vanilla-mcdoc'],
+					},
+				}),
+				initializers: [mcdoc.initialize, initialize],
+			},
+		})
+		await service.project.ready()
+		await service.project.cacheService.save()
+		return new SpyglassService(versionId, service, client)
 	}
 }
 

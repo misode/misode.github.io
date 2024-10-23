@@ -21,7 +21,7 @@ interface Props {
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
-	const { spyglass } = useSpyglass()
+	const { service } = useSpyglass()
 	const { projects, project, file, updateProject, updateFile, closeFile } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
@@ -34,8 +34,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const uri = useMemo(() => {
 		// TODO: return different uri when project file is open
-		return spyglass?.getUnsavedFileUri(version, gen)
-	}, [spyglass, version, gen])
+		return service?.getUnsavedFileUri(gen)
+	}, [service, version, gen])
 
 	const [currentPreset, setCurrentPreset] = useSearchParam('preset')
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
@@ -82,14 +82,17 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			ignoreChange.current = true
 			data = file.data
 		}
+		if (!service || !uri) {
+			return AsyncCancel
+		}
 		if (data) {
-			await spyglass.writeFile(version, uri, JSON.stringify(data))
+			await service.writeFile(uri, JSON.stringify(data))
 		}
 		// TODO: if data is undefined, set to generator's default
-		const docAndNode = await spyglass.getFile(version, uri, () => '{}')
+		const docAndNode = await service.getFile(uri, () => '{}')
 		Analytics.setGenerator(gen.id)
 		return docAndNode
-	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, spyglass])
+	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, service])
 
 	const { doc } = docAndNode ?? {}
 
@@ -112,23 +115,32 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	}
 	const undo = async (e: MouseEvent) => {
 		e.stopPropagation()
+		if (!service || !uri) {
+			return
+		}
 		Analytics.undoGenerator(gen.id, 1, 'menu')
-		await spyglass.undoEdits(version, uri)
+		await service.undoEdits(uri)
 	}
 	const redo = async (e: MouseEvent) => {
 		e.stopPropagation()
+		if (!service || !uri) {
+			return
+		}
 		Analytics.redoGenerator(gen.id, 1, 'menu')
-		await spyglass.redoEdits(version, uri)
+		await service?.redoEdits(uri)
 	}
 
 	useEffect(() => {
 		const onKeyUp = async (e: KeyboardEvent) => {
+			if (!service || !uri) {
+				return
+			}
 			if (e.ctrlKey && e.key === 'z') {
 				Analytics.undoGenerator(gen.id, 1, 'hotkey')
-				await spyglass.undoEdits(version, uri)
+				await service.undoEdits(uri)
 			} else if (e.ctrlKey && e.key === 'y') {
 				Analytics.redoGenerator(gen.id, 1, 'hotkey')
-				await spyglass.redoEdits(version, uri)
+				await service.redoEdits(uri)
 			}
 		}
 		const onKeyDown = (e: KeyboardEvent) => {
@@ -145,7 +157,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			document.removeEventListener('keyup', onKeyUp)
 			document.removeEventListener('keydown', onKeyDown)
 		}
-	}, [gen.id, spyglass, version, uri])
+	}, [gen.id, service, uri])
 
 	const { value: presets } = useAsync(async () => {
 		const registries = await fetchRegistries(version)
@@ -338,7 +350,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			<PreviewPanel docAndNode={docAndNode} id={gen.id} shown={previewShown} onError={setError} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-			<SourcePanel spyglass={spyglass} docAndNode={docAndNode} {...{doCopy, doDownload, doImport}} copySuccess={copySuccess} onError={setError} />
+			<SourcePanel docAndNode={docAndNode} {...{doCopy, doDownload, doImport}} copySuccess={copySuccess} onError={setError} />
 		</div>
 		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
 			<TextInput value={shareUrl} readonly />

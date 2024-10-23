@@ -18,18 +18,23 @@ type ErrorPanelProps = {
 }
 export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, children }: ErrorPanelProps) {
 	const { version } = useVersion()
-	const { spyglass } = useSpyglass()
+	const { service } = useSpyglass()
 	const [stackVisible, setStackVisible] = useState(false)
 	const [stack, setStack] = useState<string | undefined>(undefined)
 
 	const name = (prefix ?? '') + (error instanceof Error ? error.message : error)
 	const gen = getGenerator(getCurrentUrl())
 	const { value: source } = useAsync(async () => {
-		if (gen) {
-			return await spyglass?.readFile(spyglass.getUnsavedFileUri(version, gen))
+		if (!service || !gen) {
+			return undefined
 		}
-		return undefined
-	}, [spyglass, version, gen])
+		// TODO: read project file if open
+		const uri = service.getUnsavedFileUri(gen)
+		if (!uri) {
+			return undefined
+		}
+		return await service.readFile(uri)
+	}, [service, version, gen])
 
 	useEffect(() => {
 		if (error instanceof Error) {

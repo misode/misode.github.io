@@ -1,7 +1,7 @@
 import type { DocAndNode } from '@spyglassmc/core'
 import { JsonFileNode } from '@spyglassmc/json'
 import { useCallback, useErrorBoundary } from 'preact/hooks'
-import { useLocale, useVersion } from '../../contexts/index.js'
+import { useLocale } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
 import type { Edit } from '../../services/Spyglass.js'
 import { McdocRoot } from './McdocRenderer.jsx'
@@ -12,8 +12,7 @@ type TreePanelProps = {
 }
 export function Tree({ docAndNode, onError }: TreePanelProps) {
 	const { lang } = useLocale()
-	const { version } = useVersion()
-	const { spyglass } = useSpyglass()
+	const { service } = useSpyglass()
 
 	if (lang === 'none') return <></>
 
@@ -29,8 +28,11 @@ export function Tree({ docAndNode, onError }: TreePanelProps) {
 	if (error) return <></>
 
 	const makeEdits = useCallback((edits: Edit[]) => {
-		spyglass.applyEdits(version, docAndNode.doc.uri, edits)
-	}, [spyglass, version, docAndNode])
+		if (!service) {
+			return
+		}
+		service.applyEdits(docAndNode.doc.uri, edits)
+	}, [service, docAndNode])
 
 	return <div class="tree node-root" data-cy="tree">
 		<McdocRoot node={fileChild.children[0]} makeEdits={makeEdits} />

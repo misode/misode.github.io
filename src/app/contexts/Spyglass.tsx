@@ -3,10 +3,14 @@ import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import type { Inputs } from 'preact/hooks'
 import { useContext, useEffect, useState } from 'preact/hooks'
-import { Spyglass } from '../services/Spyglass.js'
+import { useAsync } from '../hooks/useAsync.js'
+import type { SpyglassService } from '../services/Spyglass.js'
+import { SpyglassClient } from '../services/Spyglass.js'
+import { useVersion } from './Version.jsx'
 
 interface SpyglassContext {
-	spyglass: Spyglass,
+	client: SpyglassClient
+	service: SpyglassService | undefined
 }
 
 const SpyglassContext = createContext<SpyglassContext | undefined>(undefined)
@@ -24,15 +28,15 @@ export function watchSpyglassUri(
 	handler: (docAndNode: DocAndNode) => void,
 	inputs: Inputs = [],
 ) {
-	const { spyglass } = useSpyglass()
+	const { service } = useSpyglass()
 
 	useEffect(() => {
-		if (!uri || !spyglass) {
+		if (!uri || !service) {
 			return
 		}
-		spyglass.watchFile(uri, handler)
-		return () => spyglass.unwatchFile(uri, handler)
-	}, [spyglass, uri, handler, ...inputs])
+		service.watchFile(uri, handler)
+		return () => service.unwatchFile(uri, handler)
+	}, [service, uri, handler, ...inputs])
 }
 
 export function useDocAndNode(original: DocAndNode, inputs?: Inputs): DocAndNode
@@ -52,10 +56,24 @@ export function useDocAndNode(original: DocAndNode | undefined, inputs: Inputs =
 }
 
 export function SpyglassProvider({ children }: { children: ComponentChildren }) {
-	const [spyglass] = useState(new Spyglass())
+	const { version } = useVersion()
+	const [client] = useState(new SpyglassClient())
+
+	const { value: service, error } = useAsync(() => {
+		return client.createService(version)
+	}, [client, version])
+
+	useEffect(() => {
+		if (error) {
+			console.warn(error)
+		}
+	}, [error])
+
+	console.log('->', service)
 
 	const value: SpyglassContext = {
-		spyglass,
+		client,
+		service,
 	}
 
 	return <SpyglassContext.Provider value={value}>
