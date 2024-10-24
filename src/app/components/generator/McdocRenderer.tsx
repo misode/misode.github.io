@@ -289,16 +289,16 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 		})
 	}, [type, makeEdit, ctx])
 
-	const memberIndex = type.members.findIndex(m => quickEqualTypes(m, selectedType))
+	const memberIndex = selectedType ? type.members.findIndex(m => quickEqualTypes(m, selectedType)) : -1
 
 	return <>
 		<select value={memberIndex > -1 ? memberIndex : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
-			{optional && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
+			{(selectedType === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
 			{type.members.map((member, index) =>
 				<option value={index}>{formatIdentifier(member.kind)}</option>
 			)}
 		</select>
-		{(selectedType || !optional) && <Head type={selectedType ?? type.members[0]} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />}
+		{selectedType && <Head type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />}
 	</>
 }
 
@@ -430,6 +430,9 @@ interface UnionBodyProps extends BodyProps {
 }
 function UnionBody({ type, optional, node, makeEdit, ctx }: UnionBodyProps) {
 	const selectedType = findSelectedMember(type, node)
+	if (selectedType === undefined) {
+		return <></>
+	}
 	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 }
 
@@ -494,7 +497,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 					}
 				}
 			}
-			return <div class="node" data-category={getCategory(field.type)}>
+			return <div key={key} class="node" data-category={getCategory(field.type)}>
 				<div class="node-header">
 					{!field.optional && child === undefined && <ErrorIndicator error={{ message: locale('missing_key', localeQuote(key)), range: node.range, severity: 3 }} />}
 					<Errors type={childType} node={child} ctx={ctx} />
@@ -543,7 +546,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 					return node
 				})
 			}
-			return <div class="node" data-category={getCategory(itemType)}>
+			return <div key={index} class="node" data-category={getCategory(itemType)}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
@@ -592,7 +595,7 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 					return node
 				})
 			}
-			return <div class="node">
+			return <div key={index} class="node">
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
 					<Key label="entry" />
@@ -620,7 +623,7 @@ function Errors({ type, node, ctx }: ErrorsProps) {
 			// Unless they are inside a child node
 			.filter(e => !node.children?.some(c => (c.type === 'item' || c.type === 'pair') && core.Range.containsRange(c.range, e.range, true)))
 			// Filter out "Missing key" errors
-			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && findSelectedMember(type, node).kind === 'struct'))))
+			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && (findSelectedMember(type, node) ?? type.members[0]).kind === 'struct'))))
 		// Hide warnings if there are errors
 		return errors.find(e => e.severity === 3)
 			? errors.filter(e => e.severity === 3)
@@ -794,7 +797,6 @@ function getCategory(type: McdocType) {
 }
 
 const selectRegistries = new Set([
-	'atlas',
 	'block_predicate_type',
 	'chunk_status',
 	'consume_effect_type',
@@ -892,10 +894,10 @@ function quickEqualTypes(a: SimplifiedMcdocType, b: SimplifiedMcdocType) {
 	return true
 }
 
-function findSelectedMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
+function findSelectedMember(_union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
 	const selectedType = node?.typeDef
 	if (!selectedType) {
-		return union.members[0]
+		return undefined
 	}
 	if (selectedType.kind === 'union') {
 		// The node technically matches all members of this union,

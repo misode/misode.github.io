@@ -86,7 +86,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			return AsyncCancel
 		}
 		if (data) {
-			await service.writeFile(uri, JSON.stringify(data))
+			await service.writeFile(uri, JSON.stringify(data, null, 2))
 		}
 		// TODO: if data is undefined, set to generator's default
 		const docAndNode = await service.getFile(uri, () => '{}')
@@ -101,8 +101,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			setCurrentPreset(undefined, true)
 			setSharedSnippetId(undefined, true)
 		}
-		const data = JSON.parse(doc.getText())
 		if (file) {
+			const data = JSON.parse(doc.getText())
 			updateFile(gen.id, file.id, { id: file.id, data })
 		}
 		ignoreChange.current = false
