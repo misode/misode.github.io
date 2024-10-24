@@ -221,7 +221,7 @@ interface UnionHeadProps extends HeadProps {
 	type: UnionType<SimplifiedMcdocTypeNoUnion>
 }
 function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
-	const selectedType = node?.typeDef
+	const selectedType = findSelectedMember(type, node)
 
 	const onSelect = useCallback((newValue: string) => {
 		makeEdit((range) => {
@@ -233,7 +233,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 		})
 	}, [type, makeEdit, ctx])
 
-	const memberIndex = selectedType ? type.members.findIndex(m => quickEqualTypes(m, selectedType)) : -1
+	const memberIndex = type.members.findIndex(m => quickEqualTypes(m, selectedType))
 
 	return <>
 		<select value={memberIndex > -1 ? memberIndex : '__unset__'} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
@@ -328,11 +328,8 @@ interface UnionBodyProps extends BodyProps {
 	type: UnionType<SimplifiedMcdocTypeNoUnion>
 }
 function UnionBody({ type, optional, node, makeEdit, ctx }: UnionBodyProps) {
-	const selectedType = node?.typeDef
-	if (!selectedType && optional) {
-		return <></>
-	}
-	return <Body type={selectedType ?? type.members[0]} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+	const selectedType = findSelectedMember(type, node)
+	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 }
 
 interface StructBodyProps extends Props {
@@ -576,4 +573,17 @@ function quickEqualTypes(a: SimplifiedMcdocType, b: SimplifiedMcdocType) {
 	}
 	// TODO: improve this
 	return true
+}
+
+function findSelectedMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
+	const selectedType = node?.typeDef
+	if (!selectedType) {
+		return union.members[0]
+	}
+	if (selectedType.kind === 'union') {
+		// The node technically matches all members of this union,
+		// ideally the editor should show a combination of all members
+		return selectedType.members[0]
+	}
+	return selectedType
 }
