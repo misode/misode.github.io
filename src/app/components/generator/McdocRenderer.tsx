@@ -14,6 +14,8 @@ import { useFocus } from '../../hooks/useFocus.js'
 import { generateColor, hexId } from '../../Utils.js'
 import { Octicon } from '../Octicon.jsx'
 
+const SPECIAL_UNSET = '__unset__'
+
 export interface McdocContext extends core.CheckerContext {}
 
 type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
@@ -47,7 +49,7 @@ interface HeadProps extends Props {
 }
 function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	if (type.kind === 'string') {
-		return <StringHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <StringHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'enum') {
 		return <EnumHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -76,10 +78,10 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	return <></>
 }
 
-interface StringHeadProps extends Props {
+interface StringHeadProps extends HeadProps {
 	type: StringType
 }
-function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
+function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 	const { locale } = useLocale()
 
 	const value = JsonStringNode.is(node) ? node.value : undefined
@@ -89,7 +91,7 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 			return
 		}
 		makeEdit((range) => {
-			if (newValue.length === 0) {
+			if (newValue.length === 0 && optional) {
 				return undefined
 			}
 			return {
@@ -100,7 +102,7 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 				valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 			}
 		})
-	}, [node, makeEdit])
+	}, [optional, node, makeEdit])
 
 	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
 	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
@@ -127,7 +129,9 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 
 	return <>
 		{isSelect ? <>
-			<select value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
+			<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
+				{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
+				{(value !== undefined && !completions.map(c => c.value).includes(value)) && <option value={value}>{value}</option>}
 				{completions.map(c => <option value={c.value}>{formatIdentifier(c.value)}</option>)}
 			</select>
 		</> : <>
@@ -147,14 +151,16 @@ interface EnumHeadProps extends HeadProps {
 	type: SimplifiedEnum,
 }
 function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
-	const value = JsonStringNode.is(node) ? node.value : undefined
+	const { locale } = useLocale()
+
+	const value = JsonStringNode.is(node) ? node.value : (node && JsonNumberNode.is(node)) ? Number(node.value.value) : undefined
 
 	const onChangeValue = useCallback((newValue: string) => {
 		if (value === newValue) {
 			return
 		}
 		makeEdit((range) => {
-			if (newValue === '__unset__') {
+			if (newValue === SPECIAL_UNSET) {
 				return undefined
 			}
 			if (type.enumKind === 'string') {
@@ -182,8 +188,9 @@ function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
 		})
 	}, [type.enumKind, value, makeEdit])
 
-	return <select value={value === undefined ? '__unset__' : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
-		{(value === undefined || optional) && <option value="__unset__">-- unset --</option>}
+	return <select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
+		{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
+		{(value !== undefined && !type.values.map(v => v.value).includes(value)) && <option value={value}>{value}</option>}
 		{type.values.map(value =>
 			<option value={value.value}>{formatIdentifier(value.value.toString())}</option>
 		)}
@@ -268,11 +275,13 @@ interface UnionHeadProps extends HeadProps {
 	type: UnionType<SimplifiedMcdocTypeNoUnion>
 }
 function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
+	const { locale } = useLocale()
+
 	const selectedType = findSelectedMember(type, node)
 
 	const onSelect = useCallback((newValue: string) => {
 		makeEdit((range) => {
-			if (newValue === '__unset__') {
+			if (newValue === SPECIAL_UNSET) {
 				return undefined
 			}
 			const newSelected = type.members[parseInt(newValue)]
@@ -283,8 +292,8 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 	const memberIndex = type.members.findIndex(m => quickEqualTypes(m, selectedType))
 
 	return <>
-		<select value={memberIndex > -1 ? memberIndex : '__unset__'} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
-			{optional && <option value="__unset__">-- unset --</option>}
+		<select value={memberIndex > -1 ? memberIndex : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
+			{optional && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
 			{type.members.map((member, index) =>
 				<option value={index}>{formatIdentifier(member.kind)}</option>
 			)}
@@ -605,18 +614,18 @@ function Errors({ type, node, ctx }: ErrorsProps) {
 		if (node === undefined) {
 			return []
 		}
-		return ctx.err.errors
+		const errors = ctx.err.errors
 			// Get all errors inside the current node
 			.filter(e => core.Range.containsRange(node.range, e.range, true))
 			// Unless they are inside a child node
 			.filter(e => !node.children?.some(c => (c.type === 'item' || c.type === 'pair') && core.Range.containsRange(c.range, e.range, true)))
 			// Filter out "Missing key" errors
 			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && findSelectedMember(type, node).kind === 'struct'))))
+		// Hide warnings if there are errors
+		return errors.find(e => e.severity === 3)
+			? errors.filter(e => e.severity === 3)
+			: errors
 	}, [type, node, ctx])
-
-	if (errors.length > 0) {
-		console.log(type, node, errors)
-	}
 
 	return <>
 		{errors.map(e => <ErrorIndicator error={e} />)}	
@@ -631,7 +640,7 @@ function ErrorIndicator({ error }: ErrorIndicatorProps) {
 
 	return <div class={`node-icon ${error.severity === 2 ? 'node-warning' : 'node-error'} ${active ? 'show' : ''}`} onClick={() => setActive()}>
 		{Octicon.issue_opened}
-		<span class="icon-popup">{error.message}</span>
+		<span class="icon-popup">{error.message.replace(/ \(rule: [a-zA-Z]+\)$/, '')}</span>
 	</div>
 }
 
