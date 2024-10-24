@@ -33,7 +33,6 @@ export function McdocRoot({ node, makeEdit, ctx } : Props) {
 	return <>
 		<div class="node-header">
 			<Errors node={node} ctx={ctx} />
-			<Docs hover={node?.hover} />
 			<Key label={locale('root')} />
 			<Head type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
@@ -479,7 +478,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Errors node={childValue} ctx={ctx} />
-					<Docs hover={childValue?.hover ?? child?.key?.hover ?? child?.hover} />
+					<Docs desc={field.desc} />
 					<Key label={key} />
 					<Head type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
@@ -528,7 +527,6 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Errors node={child} ctx={ctx} />
-					<Docs hover={child?.hover ?? item.hover} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
 						{Octicon.trashcan}
 					</button>
@@ -578,7 +576,6 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Errors node={child} ctx={ctx} />
-					<Docs hover={child?.hover ?? itemNode.hover} />
 					<Key label="entry" />
 					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
@@ -620,15 +617,10 @@ function ErrorIndicator({ error }: ErrorIndicatorProps) {
 }
 
 interface DocsProps {
-	hover: string | undefined
+	desc: string | undefined
 }
-function Docs({ hover }: DocsProps) {
-	if (hover === undefined) {
-		return <></>
-	}
-	const descStart = hover.indexOf('```', hover.indexOf('```') + 3) + 4
-	const desc = hover.substring(descStart).trim().replaceAll('`', '')
-	if (desc.length === 0) {
+function Docs({ desc }: DocsProps) {
+	if (!desc || desc.length === 0) {
 		return <></>
 	}
 
