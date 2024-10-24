@@ -2,12 +2,14 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
-import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, UnionType } from '@spyglassmc/mcdoc'
+import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, UnionType } from '@spyglassmc/mcdoc'
 import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
-import { useCallback } from 'preact/hooks'
+import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
+import { useCallback, useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/Locale.jsx'
+import { hexId } from '../../Utils.js'
 import { Octicon } from '../Octicon.jsx'
 
 export interface McdocContext extends core.CheckerContext {}
@@ -41,7 +43,7 @@ interface HeadProps extends Props {
 function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	const { locale } = useLocale()
 	if (type.kind === 'string') {
-		return <StringHead node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <StringHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'enum') {
 		return <EnumHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -73,7 +75,10 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	return <></>
 }
 
-function StringHead({ node, makeEdit }: Props) {
+interface StringHeadProps extends Props {
+	type: StringType
+}
+function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 	const value = JsonStringNode.is(node) ? node.value : undefined
 
 	const onChangeValue = useCallback((newValue: string) => {
@@ -94,7 +99,19 @@ function StringHead({ node, makeEdit }: Props) {
 		})
 	}, [node, makeEdit])
 
-	return <input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+	const completions = useMemo(() => {
+		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
+			.filter(c => c.kind === 'string')
+	}, [type, node, ctx])
+
+	const datalistId = `mcdoc_completions_${hexId()}`
+
+	return <>
+		{completions && <datalist id={datalistId}>
+			{completions.map(c => <option>{c.value}</option>)}
+		</datalist>}
+		<input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions ? datalistId : undefined} />
+	</>
 }
 
 interface EnumHeadProps extends HeadProps {

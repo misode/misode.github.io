@@ -317,13 +317,13 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
 					ctx.err.report(
 						localize('java-edition.pack-format.unsupported', target),
 						node,
-						core.ErrorSeverity.Warning,
+						2,
 					)
 				} else if (targetVersion.id !== release) {
 					ctx.err.report(
 						localize('java-edition.pack-format.not-loaded', target, release),
 						node,
-						core.ErrorSeverity.Warning,
+						2,
 					)
 				}
 			}
