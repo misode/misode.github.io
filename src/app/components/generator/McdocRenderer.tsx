@@ -524,12 +524,37 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 		return <></>
 	}
 	const type = (node.typeDef?.kind === 'list' || node.typeDef?.kind === 'byte_array' || node.typeDef?.kind === 'int_array' || node.typeDef?.kind === 'long_array') ? node.typeDef : outerType
+	const fixedRange = type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
+
 	const onRemoveItem = useCallback((index: number) => {
 		makeEdit(() => {
 			node.children.splice(index, 1)
 			return node
 		})
 	}, [makeEdit, node])
+
+	const onMoveUp = useCallback((index: number) => {
+		if (node.children.length <= 1 || index <= 0) {
+			return
+		}
+		makeEdit(() => {
+			const moved = node.children.splice(index, 1)
+			node.children.splice(index - 1, 0, ...moved)
+			return node
+		})
+	}, [makeEdit])
+
+	const onMoveDown = useCallback((index: number) => {
+		if (node.children.length <= 1 || index >= node.children.length - 1) {
+			return
+		}
+		makeEdit(() => {
+			const moved = node.children.splice(index, 1)
+			node.children.splice(index + 1, 0, ...moved)
+			return node
+		})
+	}, [makeEdit])
+
 	return <>
 		{node.children.map((item, index) => {
 			const child = item.value
@@ -546,20 +571,24 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 					return node
 				})
 			}
+			const canMoveUp = node.children.length > 1 && index > 0
+			const canMoveDown = node.children.length > 1 && index < (node.children.length - 1)
 			return <div key={index} class="node" data-category={getCategory(itemType)}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
-					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
-						{Octicon.trashcan}
-					</button>
-					{node.children.length > 1 && <div class="node-move">
-						<button class="move tooltipped tip-se" aria-label={locale('move_up')} disabled={index === 0}>
-							{Octicon.chevron_up}
+					{!fixedRange && <>
+						<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
+							{Octicon.trashcan}
 						</button>
-						<button class="move tooltipped tip-se" aria-label={locale('move_down')} disabled={index === node.children.length - 1}>
-							{Octicon.chevron_down}
-						</button>
-					</div>}
+						{(canMoveUp || canMoveDown) && <div class="node-move">
+							<button class="move tooltipped tip-se" aria-label={locale('move_up')} disabled={!canMoveUp} onClick={() => onMoveUp(index)}>
+								{Octicon.chevron_up}
+							</button>
+							<button class="move tooltipped tip-se" aria-label={locale('move_down')} disabled={!canMoveDown} onClick={() => onMoveDown(index)}>
+								{Octicon.chevron_down}
+							</button>
+						</div>}
+					</>}
 					<Key label="entry" />
 					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
