@@ -195,6 +195,9 @@ export class SpyglassService {
 						gameVersion: version.ref ?? version.id,
 						dependencies: ['@vanilla-mcdoc'],
 					},
+					lint: {
+						idOmitDefaultNamespace: false,
+					},
 				}),
 				initializers: [mcdoc.initialize, initialize],
 			},

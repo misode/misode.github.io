@@ -101,6 +101,14 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 		})
 	}, [node, makeEdit])
 
+	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
+	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
+		? idAttribute.value.value
+		: idAttribute?.kind === 'tree' && idAttribute.values.registry?.kind === 'literal' && idAttribute.values.registry?.value.kind === 'string'
+			? idAttribute.values.registry?.value.value
+			: undefined
+	const isSelect = idRegistry && selectRegistries.has(idRegistry)
+
 	const completions = useMemo(() => {
 		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
 			.filter(c => c.kind === 'string')
@@ -117,10 +125,16 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 	}, [onChangeValue])
 
 	return <>
-		{completions.length > 0 && <datalist id={datalistId}>
-			{completions.map(c => <option>{c.value}</option>)}
-		</datalist>}
-		<input class={colorKind === 'hex_rgb' ? 'short-input' : ''} value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+		{isSelect ? <>
+			<select value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
+				{completions.map(c => <option value={c.value}>{formatIdentifier(c.value)}</option>)}
+			</select>
+		</> : <>
+			{completions.length > 0 && <datalist id={datalistId}>
+				{completions.map(c => <option>{c.value}</option>)}
+			</datalist>}
+			<input class={colorKind === 'hex_rgb' ? 'short-input' : ''} value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+		</>}
 		{colorKind === 'hex_rgb' && <>
 			<input class="short-input" type="color" value={value} onChange={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
 			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
@@ -170,7 +184,7 @@ function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
 	return <select value={value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
 		{(value === undefined || optional) && <option value="__unset__">-- unset --</option>}
 		{type.values.map(value =>
-			<option value={value.value}>{value.value.toString()?.replace(/^minecraft:/, '')}</option>
+			<option value={value.value}>{formatIdentifier(value.value.toString())}</option>
 		)}
 	</select>
 }
@@ -271,7 +285,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 		<select value={memberIndex > -1 ? memberIndex : '__unset__'} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
 			{optional && <option value="__unset__">-- unset --</option>}
 			{type.members.map((member, index) =>
-				<option value={index}>{member.kind}</option>
+				<option value={index}>{formatIdentifier(member.kind)}</option>
 			)}
 		</select>
 		{(selectedType || !optional) && <Head type={selectedType ?? type.members[0]} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />}
@@ -483,9 +497,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 }
 
 function Key({ label }: { label: string | number | boolean }) {
-	const formatted = label.toString().replaceAll('_', ' ')
-	const captizalized = formatted.charAt(0).toUpperCase() + formatted.substring(1)
-	return <label>{captizalized}</label>
+	return <label>{formatIdentifier(label.toString())}</label>
 }
 
 interface ListBodyProps extends Props {
@@ -735,6 +747,11 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 	return { type: 'json:null', range }
 }
 
+function formatIdentifier(id: string) {
+	const formatted = id.replace(/^minecraft:/, '').replaceAll('_', ' ')
+	return formatted.charAt(0).toUpperCase() + formatted.substring(1)
+}
+
 function getCategory(type: McdocType) {
 	if (type.kind === 'reference' && type.path) {
 		switch (type.path) {
@@ -754,6 +771,63 @@ function getCategory(type: McdocType) {
 	}
 	return undefined
 }
+
+const selectRegistries = new Set([
+	'atlas',
+	'block_predicate_type',
+	'chunk_status',
+	'consume_effect_type',
+	'creative_mode_tab',
+	'enchantment_effect_component_type',
+	'enchantment_entity_effect_type',
+	'enchantment_level_based_value_type',
+	'enchantment_location_based_effect_type',
+	'enchantment_provider_type',
+	'enchantment_value_effect_type',
+	'entity_sub_predicate_type',
+	'float_provider_type',
+	'frog_variant',
+	'height_provider_type',
+	'int_provider_type',
+	'loot_condition_type',
+	'loot_function_type',
+	'loot_nbt_provider_type',
+	'loot_number_provider_type',
+	'loot_pool_entry_type',
+	'loot_score_provider_type',
+	'map_decoration_type',
+	'number_format_type',
+	'pos_rule_test',
+	'position_source_type',
+	'recipe_book_category',
+	'recipe_display',
+	'recipe_serializer',
+	'recipe_type',
+	'rule_block_entity_modifier',
+	'rule_test',
+	'slot_display',
+	'stat_type',
+	'trigger_type',
+	'worldgen/biome_source',
+	'worldgen/block_state_provider_type',
+	'worldgen/carver',
+	'worldgen/chunk_generator',
+	'worldgen/density_function_type',
+	'worldgen/feature',
+	'worldgen/feature_size_type',
+	'worldgen/foliage_placer_type',
+	'worldgen/material_condition',
+	'worldgen/material_rule',
+	'worldgen/placement_modifier_type',
+	'worldgen/pool_alias_binding',
+	'worldgen/root_placer_type',
+	'worldgen/structure_placement',
+	'worldgen/structure_pool_element',
+	'worldgen/structure_processor',
+	'worldgen/structure_type',
+	'worldgen/tree_decorator_type',
+	'worldgen/trunk_placer_type',
+])
 
 function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
 	const node: SimplifyValueNode<any> = {

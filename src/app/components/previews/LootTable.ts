@@ -516,6 +516,9 @@ function testCondition(condition: any, ctx: LootContext): boolean {
 	if (Array.isArray(condition)) {
 		return composeConditions(condition)(ctx)
 	}
+	if (!isObject(condition) || typeof condition.condition !== 'string') {
+		return false
+	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
 }
