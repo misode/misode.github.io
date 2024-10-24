@@ -4,7 +4,6 @@ import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
-import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
@@ -117,7 +116,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 
 	const completions = useMemo(() => {
 		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
-			.filter(c => c.kind === 'string')
+			.filter(c => c.kind === 'string' && c.value !== 'THIS')
 	}, [type, node, ctx])
 
 	const datalistId = `mcdoc_completions_${hexId()}`
@@ -703,7 +702,7 @@ function Docs({ desc }: DocsProps) {
 	</div>
 }
 
-function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): JsonNode {
+function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: McdocContext): JsonNode {
 	if (type.kind === 'string') {
 		return JsonStringNode.mock(range)
 	}
@@ -726,7 +725,7 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 						value: typeof field.key === 'string' ? field.key : field.key.value.value.toString(),
 						valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 					}
-					const value = getDefault(field.type, range, ctx)
+					const value = getDefault(simplifyType(field.type, ctx), range, ctx)
 					const pair: core.PairNode<JsonStringNode, JsonNode> = {
 						type: 'pair',
 						range,
@@ -748,7 +747,7 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 		const minLength = type.lengthRange?.min ?? 0
 		if (minLength > 0) {
 			for (let i = 0; i < minLength; i += 1) {
-				const child = getDefault(getItemType(type), range, ctx)
+				const child = getDefault(simplifyType(getItemType(type), ctx), range, ctx)
 				const itemNode: core.ItemNode<JsonNode> = {
 					type: 'item',
 					range,
@@ -767,7 +766,7 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 			type: 'json:array',
 			range,
 			children: type.items.map(item => {
-				const valueNode = getDefault(item, range, ctx)
+				const valueNode = getDefault(simplifyType(item, ctx), range, ctx)
 				const itemNode: core.ItemNode<JsonNode> = {
 					type: 'item',
 					range,
@@ -796,23 +795,6 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 			? { type: 'float', range, value: type.value.value }
 			: { type: 'long', range, value: BigInt(type.value.value) }
 		return { type: 'json:number', range, value, children: [value] }
-	}
-	if (type.kind === 'reference') {
-		if (!type.path) {
-			return { type: 'json:null', range }
-		}
-		const symbol = ctx.symbols.query(ctx.doc, 'mcdoc', type.path)
-		const def = symbol.getData(TypeDefSymbolData.is)?.typeDef
-		if (!def) {
-			return { type: 'json:null', range }
-		}
-		if (type.attributes?.length) {
-			return getDefault({
-				...def,
-				attributes: [...type.attributes, ...def.attributes ?? []],
-			}, range, ctx)
-		}
-		return getDefault(def, range, ctx)
 	}
 	return { type: 'json:null', range }
 }
