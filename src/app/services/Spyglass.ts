@@ -197,6 +197,13 @@ export class SpyglassService {
 					},
 					lint: {
 						idOmitDefaultNamespace: false,
+						undeclaredSymbol: [
+							{
+								if: { category: ['bossbar', 'objective', 'team'] },
+								then: { declare: 'block' },
+							},
+							...core.VanillaConfig.lint.undeclaredSymbol as any[],
+						],
 					},
 				}),
 				initializers: [mcdoc.initialize, initialize],

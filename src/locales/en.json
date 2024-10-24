@@ -160,6 +160,7 @@
   "layer.vegetation": "Humidity",
   "learn_on_the_wiki": "Learn on the wiki",
   "loading": "Loading...",
+  "missing_key": "Missing required key %0%",
   "mode.3d": "3D",
   "mode.side": "Side",
   "mode.top": "Top",

@@ -2,6 +2,7 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
+import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
@@ -32,7 +33,7 @@ export function McdocRoot({ node, makeEdit, ctx } : Props) {
 
 	return <>
 		<div class="node-header">
-			<Errors node={node} ctx={ctx} />
+			<Errors type={type} node={node} ctx={ctx} />
 			<Key label={locale('root')} />
 			<Head type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
@@ -181,7 +182,7 @@ function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
 		})
 	}, [type.enumKind, value, makeEdit])
 
-	return <select value={value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
+	return <select value={value === undefined ? '__unset__' : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
 		{(value === undefined || optional) && <option value="__unset__">-- unset --</option>}
 		{type.values.map(value =>
 			<option value={value.value}>{formatIdentifier(value.value.toString())}</option>
@@ -427,6 +428,7 @@ interface StructBodyProps extends Props {
 	type: SimplifiedStructType
 }
 function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
+	const { locale } = useLocale()
 	if (!JsonObjectNode.is(node)) {
 		return <></>
 	}
@@ -485,7 +487,8 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			}
 			return <div class="node" data-category={getCategory(field.type)}>
 				<div class="node-header">
-					<Errors node={child} ctx={ctx} />
+					{!field.optional && child === undefined && <ErrorIndicator error={{ message: locale('missing_key', localeQuote(key)), range: node.range, severity: 3 }} />}
+					<Errors type={childType} node={child} ctx={ctx} />
 					<Docs desc={field.desc} />
 					<Key label={key} />
 					<Head type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
@@ -533,7 +536,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 			}
 			return <div class="node" data-category={getCategory(itemType)}>
 				<div class="node-header">
-					<Errors node={child} ctx={ctx} />
+					<Errors type={childType} node={child} ctx={ctx} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
 						{Octicon.trashcan}
 					</button>
@@ -582,7 +585,7 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 			}
 			return <div class="node">
 				<div class="node-header">
-					<Errors node={child} ctx={ctx} />
+					<Errors type={childType} node={child} ctx={ctx} />
 					<Key label="entry" />
 					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
@@ -593,18 +596,27 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 }
 
 interface ErrorsProps {
+	type: SimplifiedMcdocType
 	node: JsonNode | undefined
 	ctx: McdocContext
 }
-function Errors({ node, ctx }: ErrorsProps) {
+function Errors({ type, node, ctx }: ErrorsProps) {
 	const errors = useMemo(() => {
 		if (node === undefined) {
 			return []
 		}
 		return ctx.err.errors
+			// Get all errors inside the current node
 			.filter(e => core.Range.containsRange(node.range, e.range, true))
+			// Unless they are inside a child node
 			.filter(e => !node.children?.some(c => (c.type === 'item' || c.type === 'pair') && core.Range.containsRange(c.range, e.range, true)))
-	}, [node, ctx])
+			// Filter out "Missing key" errors
+			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && findSelectedMember(type, node).kind === 'struct'))))
+	}, [type, node, ctx])
+
+	if (errors.length > 0) {
+		console.log(type, node, errors)
+	}
 
 	return <>
 		{errors.map(e => <ErrorIndicator error={e} />)}	
