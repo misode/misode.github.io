@@ -422,6 +422,10 @@ button.move:disabled {
   width: 100px;
 }
 
+.long-input {
+  width: 300px;
+}
+
 /* Color categories */
 
 [data-category=predicate] > .node-header > label,

@@ -8,10 +8,13 @@ import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
+import { Identifier, ItemStack } from 'deepslate'
 import { useCallback, useMemo } from 'preact/hooks'
+import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
 import { generateColor, hexId } from '../../Utils.js'
+import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
 
 const SPECIAL_UNSET = '__unset__'
@@ -119,6 +122,8 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 
 	const datalistId = `mcdoc_completions_${hexId()}`
 
+	const gen = idRegistry ? config.generators.find(gen => gen.id === idRegistry) : undefined
+
 	const color = type.attributes?.find(a => a.name === 'color')?.value
 	const colorKind = color?.kind === 'literal' && color.value.kind === 'string' ? color.value.value : undefined
 
@@ -128,6 +133,9 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 	}, [onChangeValue])
 
 	return <>
+		{(idRegistry === 'item' && value) && <label>
+			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
+		</label>}
 		{isSelect ? <>
 			<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
 				{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
@@ -138,7 +146,10 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 			{completions.length > 0 && <datalist id={datalistId}>
 				{completions.map(c => <option>{c.value}</option>)}
 			</datalist>}
-			<input class={colorKind === 'hex_rgb' ? 'short-input' : ''} value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+			<input class={colorKind === 'hex_rgb' ? 'short-input' : idRegistry ? 'long-input' : ''} value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+			{value && gen && <a href={`/${gen.url}/?preset=${value?.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale('follow_reference')}>
+				{Octicon.link_external}
+			</a>}
 		</>}
 		{colorKind === 'hex_rgb' && <>
 			<input class="short-input" type="color" value={value} onChange={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
