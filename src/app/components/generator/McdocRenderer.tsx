@@ -33,6 +33,7 @@ export function McdocRoot({ node, makeEdit, ctx } : Props) {
 	return <>
 		<div class="node-header">
 			<Errors node={node} ctx={ctx} />
+			<Docs hover={node?.hover} />
 			<Key label={locale('root')} />
 			<Head type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
@@ -170,7 +171,7 @@ function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
 	return <select value={value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
 		{(value === undefined || optional) && <option value="__unset__">-- unset --</option>}
 		{type.values.map(value =>
-			<option value={value.value}>{value.value}</option>
+			<option value={value.value}>{value.value.toString()?.replace(/^minecraft:/, '')}</option>
 		)}
 	</select>
 }
@@ -478,6 +479,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Errors node={childValue} ctx={ctx} />
+					<Docs hover={childValue?.hover ?? child?.key?.hover ?? child?.hover} />
 					<Key label={key} />
 					<Head type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
@@ -526,6 +528,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Errors node={child} ctx={ctx} />
+					<Docs hover={child?.hover ?? item.hover} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
 						{Octicon.trashcan}
 					</button>
@@ -555,7 +558,8 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 	}
 	return <>
 		{type.items.map((item, index) => {
-			const child = node?.children?.[index]?.value
+			const itemNode = node?.children?.[index]
+			const child = itemNode?.value
 			const itemType = simplifyType(item, ctx)
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
@@ -574,6 +578,7 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 			return <div class="node">
 				<div class="node-header">
 					<Errors node={child} ctx={ctx} />
+					<Docs hover={child?.hover ?? itemNode.hover} />
 					<Key label="entry" />
 					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
@@ -611,6 +616,27 @@ function ErrorIndicator({ error }: ErrorIndicatorProps) {
 	return <div class={`node-icon ${error.severity === 2 ? 'node-warning' : 'node-error'} ${active ? 'show' : ''}`} onClick={() => setActive()}>
 		{Octicon.issue_opened}
 		<span class="icon-popup">{error.message}</span>
+	</div>
+}
+
+interface DocsProps {
+	hover: string | undefined
+}
+function Docs({ hover }: DocsProps) {
+	if (hover === undefined) {
+		return <></>
+	}
+	const descStart = hover.indexOf('```', hover.indexOf('```') + 3) + 4
+	const desc = hover.substring(descStart).trim().replaceAll('`', '')
+	if (desc.length === 0) {
+		return <></>
+	}
+
+	const [active, setActive] = useFocus()
+
+	return <div class={`node-icon node-help ${active ? 'show' : ''}`} onClick={() => setActive()}>
+		{Octicon.info}
+		<span class="icon-popup">{desc}</span>
 	</div>
 }
 
