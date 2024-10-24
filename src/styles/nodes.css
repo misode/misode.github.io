@@ -140,18 +140,18 @@
   cursor: pointer;
 }
 
-.node-error ~ select:last-child,
-.node-error ~ input:last-child,
-.node-error ~ input[list]:nth-last-child(2),
-.node-error + .fixed-list ~ input {
-  border-color: var(--node-remove) !important;
-}
-
 .node-warning ~ select:last-child,
 .node-warning ~ input:last-child,
 .node-warning ~ input[list]:nth-last-child(2),
 .node-warning + .fixed-list ~ input {
   border-color: var(--node-selected) !important;
+}
+
+.node-error ~ select:last-child,
+.node-error ~ input:last-child,
+.node-error ~ input[list]:nth-last-child(2),
+.node-error + .fixed-list ~ input {
+  border-color: var(--node-remove) !important;
 }
 
 /** Rounded corners */

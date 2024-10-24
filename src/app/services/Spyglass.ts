@@ -7,13 +7,13 @@ import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
 import * as jeMcf from '@spyglassmc/java-edition/lib/mcfunction/index.js'
 import type { JsonFileNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
-import { localize } from '@spyglassmc/locales'
+import { localeQuote, localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
 import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
 import type { Position, Range } from 'vscode-languageserver-textdocument'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import type { ConfigGenerator, ConfigVersion } from '../Config.js'
+import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
@@ -302,10 +302,7 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
 			},
 		},
 	)
-	const packFormats = new Map<number, ConfigVersion>()
-	for (const version of siteConfig.versions) {
-		packFormats.set(version.pack_format, version)
-	}
+	const expectedPackFormat = siteConfig.versions.find(v => (v.ref || v.id) === release)?.pack_format
 	mcdoc.runtime.registerAttribute(meta, 'pack_format', () => undefined, {
 		checker: (_, typeDef) => {
 			if (typeDef.kind !== 'literal' || typeof typeDef.value.value !== 'number') {
@@ -313,29 +310,14 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
 			}
 			const target = typeDef.value.value
 			return (node, ctx) => {
-				const targetVersion = packFormats.get(target)
-				if (!targetVersion) {
+				if (expectedPackFormat && expectedPackFormat !== target) {
 					ctx.err.report(
-						localize('java-edition.pack-format.unsupported', target),
-						node,
-						2,
-					)
-				} else if (targetVersion.id !== release) {
-					ctx.err.report(
-						localize('java-edition.pack-format.not-loaded', target, release),
+						localize('expected', localeQuote(expectedPackFormat.toFixed())),
 						node,
 						2,
 					)
 				}
 			}
-		},
-		numericCompleter: (_, ctx) => {
-			return [...packFormats.values()].map((v, i) => ({
-				range: core.Range.create(ctx.offset),
-				label: `${v.pack_format}`,
-				labelSuffix: ` (${v.id})`,
-				sortText: `${i}`.padStart(4, '0'),
-			} as core.CompletionItem))
 		},
 	})
 }
