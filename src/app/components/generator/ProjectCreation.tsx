@@ -48,7 +48,8 @@ export function ProjectCreation({ onClose }: Props) {
 					const file = disectFilePath(entry[0], version)
 					if (file) {
 						try {
-							const data = await parseSource(entry[1], 'json')
+							const text = await parseSource(entry[1], 'json')
+							const data = JSON.parse(text)
 							project.files!.push({ ...file, data })
 							return
 						} catch (e) {

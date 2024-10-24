@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
 import { useLocalStorage } from '../../hooks/index.js'
-import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
+import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { message } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
@@ -40,11 +40,11 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 	const editor = useRef<Editor>()
 
 	const getSerializedOutput = useCallback((text: string) => {
-		let data = JSON.parse(text)
-		if (sort === 'alphabetically') {
-			data = sortData(data)
-		}
-		return stringifySource(data, format, indent)
+		// TODO: implement sort
+		// if (sort === 'alphabetically') {
+		// 	data = sortData(data)
+		// }
+		return stringifySource(text, format, indent)
 	}, [indent, format, sort])
 
 	const text = useDocAndNode(docAndNode)?.doc.getText()
@@ -75,8 +75,8 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 			if (value.length === 0) return
 			if (!service || !docAndNode) return
 			try {
-				const data = await parseSource(value, format)
-				await service.writeFile(docAndNode.doc.uri, JSON.stringify(data))
+				const text = await parseSource(value, format)
+				await service.writeFile(docAndNode.doc.uri, text)
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`

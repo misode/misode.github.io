@@ -70,14 +70,14 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 			const path = getFilePath(file, version)
 			if (path === undefined) return []
 			if (path === 'pack.mcmeta') hasPack = true
-			return [[path, stringifySource(file.data)]] as [string, string][]
+			return [[path, stringifySource(JSON.stringify(file.data))]] as [string, string][]
 		})
 		project.unknownFiles?.forEach(({ path, data }) => {
 			entries.push([path, data])
 		})
 		if (!hasPack) {
 			const pack_format = config.versions.find(v => v.id === version)!.pack_format
-			entries.push(['pack.mcmeta', stringifySource({ pack: { pack_format, description: '' } })])
+			entries.push(['pack.mcmeta', stringifySource(JSON.stringify({ pack: { pack_format, description: '' } }, null, 2))])
 		}
 		const url = await writeZip(entries)
 		download.current.setAttribute('href', url)
