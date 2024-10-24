@@ -9,7 +9,7 @@ import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { useCallback, useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/Locale.jsx'
-import { hexId } from '../../Utils.js'
+import { generateColor, hexId } from '../../Utils.js'
 import { Octicon } from '../Octicon.jsx'
 
 export interface McdocContext extends core.CheckerContext {}
@@ -75,6 +75,8 @@ interface StringHeadProps extends Props {
 	type: StringType
 }
 function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
+	const { locale } = useLocale()
+
 	const value = JsonStringNode.is(node) ? node.value : undefined
 
 	const onChangeValue = useCallback((newValue: string) => {
@@ -102,11 +104,23 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 
 	const datalistId = `mcdoc_completions_${hexId()}`
 
+	const color = type.attributes?.find(a => a.name === 'color')?.value
+	const colorKind = color?.kind === 'literal' && color.value.kind === 'string' ? color.value.value : undefined
+
+	const onRandomColor = useCallback(() => {
+		const color = generateColor()
+		onChangeValue('#' + (color.toString(16).padStart(6, '0') ?? '000000'))
+	}, [onChangeValue])
+
 	return <>
 		{completions.length > 0 && <datalist id={datalistId}>
 			{completions.map(c => <option>{c.value}</option>)}
 		</datalist>}
-		<input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+		<input class={colorKind === 'hex_rgb' ? 'short-input' : ''} value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+		{colorKind === 'hex_rgb' && <>
+			<input class="short-input" type="color" value={value} onChange={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
+		</>}
 	</>
 }
 
@@ -161,8 +175,9 @@ interface NumericHeadProps extends Props {
 	type: NumericType,
 }
 function NumericHead({ type, node, makeEdit }: NumericHeadProps) {
-	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
+	const { locale } = useLocale()
 
+	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
 	const isFloat = type.kind === 'float' || type.kind === 'double'
 
 	const onChangeValue = useCallback((value: string) => {
@@ -188,7 +203,24 @@ function NumericHead({ type, node, makeEdit }: NumericHeadProps) {
 		})
 	}, [isFloat, node, makeEdit])
 
-	return <input type="number" value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+	const color = type.attributes?.find(a => a.name === 'color')?.value
+	const colorKind = color?.kind === 'literal' && color.value.kind === 'string' ? color.value.value : undefined
+
+	const onChangeColor = useCallback((value: string) => {
+		onChangeValue(parseInt(value.slice(1), 16).toString())
+	}, [onChangeValue])
+
+	const onRandomColor = useCallback(() => {
+		onChangeValue(generateColor().toString())
+	}, [onChangeValue])
+
+	return <>
+		<input class="short-input" type="number" value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+		{colorKind && <>
+			<input class="short-input" type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={(e) => onChangeColor((e.target as HTMLInputElement).value)} />
+			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
+		</>}
+	</>
 }
 
 function BooleanHead({ node, makeEdit }: Props) {

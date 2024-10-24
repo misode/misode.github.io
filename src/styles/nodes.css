@@ -411,9 +411,7 @@ button.move:disabled {
   display: none;
 }
 
-.number-node input,
-.range-node input,
-.fixed-list ~ input {
+.short-input {
   width: 100px;
 }
 
