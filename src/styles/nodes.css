@@ -136,21 +136,15 @@
   background-color: var(--node-background-input);
 }
 
-.object-node > .node-header > .node-collapse {
-  cursor: pointer;
-}
-
 .node-warning ~ select:last-child,
 .node-warning ~ input:last-child,
-.node-warning ~ input[list]:nth-last-child(2),
-.node-warning + .fixed-list ~ input {
+.node-warning ~ input[list]:nth-last-child(2) {
   border-color: var(--node-selected) !important;
 }
 
 .node-error ~ select:last-child,
 .node-error ~ input:last-child,
-.node-error ~ input[list]:nth-last-child(2),
-.node-error + .fixed-list ~ input {
+.node-error ~ input[list]:nth-last-child(2) {
   border-color: var(--node-remove) !important;
 }
 
@@ -174,13 +168,6 @@
 
 .node-header > * {
   margin-right: -1px;
-}
-
-.object-node:not(.no-body) > .node-header > *:first-child,
-.map-node > .node-header > *:first-child,
-.list-node > .node-header > *:first-child {
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 0;
 }
 
 /* Buttons */
@@ -355,7 +342,7 @@ button.move:disabled {
 
 /* Node body and list entry */
 
-.node, .node-root {
+.node, .node-root, .node-body-flat {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -369,26 +356,8 @@ button.move:disabled {
   border-left: 3px solid var(--node-indent-border);
 }
 
-.list-node > .node-body > .object-node > .node-body,
-.map-node > .node-body > .object-node > .node-body {
-  padding-left: 0;
-}
-
-.list-node > .node-body > .object-node > .node-body > .node > .node-body,
-.map-node > .node-body > .object-node > .node-body > .node > .node-body {
-  border-left: none;
-}
-
-.list-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon:first-child + *,
-.list-node > .node-body > .object-node > .node-body > .node > .node-header > *:first-child,
-.map-node > .node-body > .object-node > .node-body > .node > .node-header > .node-icon:first-child + *,
-.map-node > .node-body > .object-node > .node-body > .node > .node-header > *:first-child {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: none;
-}
-
-.node-body > .node[data-category] {
+.node-body > .node[data-category],
+.node-body-flat > .node[data-category] {
   width: 100%;
   min-width: max-content;
   padding: 5px;
@@ -397,26 +366,26 @@ button.move:disabled {
   border-radius: 3px;
 }
 
-.node-body > .node[data-category] > .node-header > .node-icon:first-child + *,
-.node-body > .node[data-category] > .node-header > *:first-child {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: none;
-}
-
 .node-body > .node[data-category] > .node-body {
   border: none;
 }
 
+.node > .node-body-flat > .node > .node-body {
+  border-left: none;
+}
+
+.node > .node-body-flat > .node > .node-header > .node-icon + *,
+.node > .node-body-flat > .node > .node-header > *:first-child {
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.node:not([data-category]) > .node-body-flat {
+  border-left: 3px solid var(--node-indent-border);
+}
+
 /* Node type specifics */
-
-.range-node select {
-  width: 25px;
-}
-
-.fixed-list {
-  display: none;
-}
 
 .short-input {
   width: 100px;
@@ -429,52 +398,61 @@ button.move:disabled {
 /* Color categories */
 
 [data-category=predicate] > .node-header > label,
-[data-category=predicate] > .node-body > .node > .node-header > label {
+[data-category=predicate] > .node-body > .node > .node-header > label,
+[data-category=predicate] > .node-body-flat > .node > .node-header > label {
   background-color: var(--category-predicate);
 }
 
 [data-category=predicate] > .node-body,
 [data-category=predicate] > .node-header > label,
 [data-category=predicate] > .node-header > *:not(.selected),
-[data-category=predicate] > .node-body > .node > .node-header > *:not(.selected) {
+[data-category=predicate] > .node-body > .node > .node-header > *:not(.selected),
+[data-category=predicate] > .node-body-flat > .node > .node-header > *:not(.selected) {
   border-color: var(--category-predicate-border);
 }
 
-.node-body > .node[data-category=predicate] {
+.node-body > .node[data-category=predicate],
+.node-body-flat > .node[data-category=predicate] {
   background-color: var(--category-predicate-background);
   border-color: var(--category-predicate-border);
 }
 
 [data-category=function] > .node-header > label,
-[data-category=function] > .node-body > .node > .node-header > label {
+[data-category=function] > .node-body > .node > .node-header > label,
+[data-category=function] > .node-body-flat > .node > .node-header > label {
   background-color: var(--category-function);
 }
 
 [data-category=function] > .node-body,
 [data-category=function] > .node-header > label,
 [data-category=function] > .node-header > *:not(.selected),
-[data-category=function] > .node-body > .node > .node-header > *:not(.selected) {
+[data-category=function] > .node-body > .node > .node-header > *:not(.selected),
+[data-category=function] > .node-body-flat > .node > .node-header > *:not(.selected) {
   border-color: var(--category-function-border);
 }
 
-.node-body > .node[data-category=function] {
+.node-body > .node[data-category=function],
+.node-body-flat > .node[data-category=function] {
   background-color: var(--category-function-background);
   border-color: var(--category-function-border);
 }
 
 [data-category=pool] > .node-header > label,
-[data-category=pool] > .node-body > .node > .node-header > label {
+[data-category=pool] > .node-body > .node > .node-header > label,
+[data-category=pool] > .node-body-flat > .node > .node-header > label {
   background-color: var(--category-pool);
 }
 
 [data-category=pool] > .node-body,
 [data-category=pool] > .node-header > label,
 [data-category=pool] > .node-header > *:not(.selected),
-[data-category=pool] > .node-body > .node > .node-header > *:not(.selected) {
+[data-category=pool] > .node-body > .node > .node-header > *:not(.selected),
+[data-category=pool] > .node-body-flat > .node > .node-header > *:not(.selected) {
   border-color: var(--category-pool-border);
 }
 
-.node-body > .node[data-category=pool] {
+.node-body > .node[data-category=pool],
+.node-body-flat > .node[data-category=pool] {
   background-color: var(--category-pool-background);
   border-color: var(--category-pool-border);
 }

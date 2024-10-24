@@ -632,7 +632,11 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 					<Key label="entry" />
 					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
-				<Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				{childType.kind === 'struct'
+					? <div class="node-body-flat">
+						<StructBody type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+					</div>
+					: <Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />}
 			</div>
 		})}
 		{node.children.length > 0 && <div class="node-header">
