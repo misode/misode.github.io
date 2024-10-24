@@ -88,12 +88,20 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 
 	const value = JsonStringNode.is(node) ? node.value : undefined
 
+	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
+	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
+		? idAttribute.value.value
+		: idAttribute?.kind === 'tree' && idAttribute.values.registry?.kind === 'literal' && idAttribute.values.registry?.value.kind === 'string'
+			? idAttribute.values.registry?.value.value
+			: undefined
+	const isSelect = idRegistry && selectRegistries.has(idRegistry)
+
 	const onChangeValue = useCallback((newValue: string) => {
 		if (value === newValue) {
 			return
 		}
 		makeEdit((range) => {
-			if (newValue.length === 0 && optional) {
+			if ((newValue.length === 0 && optional) || (isSelect && newValue === SPECIAL_UNSET)) {
 				return undefined
 			}
 			return {
@@ -104,15 +112,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 				valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 			}
 		})
-	}, [optional, node, makeEdit])
-
-	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
-	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
-		? idAttribute.value.value
-		: idAttribute?.kind === 'tree' && idAttribute.values.registry?.kind === 'literal' && idAttribute.values.registry?.value.kind === 'string'
-			? idAttribute.values.registry?.value.value
-			: undefined
-	const isSelect = idRegistry && selectRegistries.has(idRegistry)
+	}, [optional, node, makeEdit, isSelect])
 
 	const completions = useMemo(() => {
 		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
@@ -308,7 +308,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 				<option value={index}>{formatIdentifier(member.kind)}</option>
 			)}
 		</select>
-		{selectedType && <Head type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />}
+		{selectedType && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
 	</>
 }
 
