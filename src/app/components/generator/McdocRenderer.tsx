@@ -26,7 +26,7 @@ export function McdocRoot({ node, makeEdit, ctx } : Props) {
 	const { locale } = useLocale()
 	const type = node?.typeDef ?? { kind: 'unsafe' }
 
-	if (type.kind === 'struct' && JsonObjectNode.is(node)) {
+	if (type.kind === 'struct' && type.fields.length > 0 && JsonObjectNode.is(node)) {
 		return <StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 
@@ -373,13 +373,7 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'struct') {
-		if (!JsonObjectNode.is(node)) {
-			return <></>
-		}
-		if (type.fields.length === 0) {
-			return <></>
-		}
-		if (optional && !node) {
+		if (!JsonObjectNode.is(node) || optional || type.fields.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
@@ -434,21 +428,21 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 	return <>
 		{staticFields.map(field => {
 			const key = (field.key as LiteralType).value.value.toString()
-			const childIndex = node.children.findIndex(p => p.key?.value === key)
-			const child = childIndex === -1 ? undefined : node.children[childIndex]
-			const childValue = child?.value
-			const fieldType = simplifyType(field.type, ctx)
+			const index = node.children.findIndex(p => p.key?.value === key)
+			const pair = index === -1 ? undefined : node.children[index]
+			const child = pair?.value
+			const childType = simplifyType(field.type, ctx)
 			const makeFieldEdit: MakeEdit = (edit) => {
-				if (child) {
+				if (pair) {
 					makeEdit(() => {
-						const newChild = edit(childValue?.range ?? core.Range.create(child.range.end))
+						const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
 						if (newChild === undefined) {
-							node.children.splice(childIndex, 1)
+							node.children.splice(index, 1)
 						} else {
-							node.children[childIndex] = {
+							node.children[index] = {
 								type: 'pair',
-								range: child.range,
-								key: child.key,
+								range: pair.range,
+								key: pair.key,
 								value: newChild,
 							}
 						}
@@ -477,12 +471,12 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			}
 			return <div class="node" data-category={getCategory(field.type)}>
 				<div class="node-header">
-					<Errors node={childValue} ctx={ctx} />
+					<Errors node={child} ctx={ctx} />
 					<Docs desc={field.desc} />
 					<Key label={key} />
-					<Head type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
+					<Head type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
-				<Body type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
+				<Body type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -513,7 +507,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 		{node.children.map((item, index) => {
 			const child = item.value
 			const itemType = getItemType(type)
-			const simplifiedItemType = simplifyType(itemType, ctx)
+			const childType = simplifyType(itemType, ctx)
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? item.range)
@@ -540,9 +534,9 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 						</button>
 					</div>}
 					<Key label="entry" />
-					<Head type={simplifiedItemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
-				<Body type={simplifiedItemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				<Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -556,10 +550,10 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 		return <></>
 	}
 	return <>
-		{type.items.map((item, index) => {
-			const itemNode = node?.children?.[index]
-			const child = itemNode?.value
-			const itemType = simplifyType(item, ctx)
+		{type.items.map((itemType, index) => {
+			const item = node?.children?.[index]
+			const child = item?.value
+			const childType = simplifyType(itemType, ctx)
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? node.range)
@@ -578,9 +572,9 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 				<div class="node-header">
 					<Errors node={child} ctx={ctx} />
 					<Key label="entry" />
-					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
-				<Body type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				<Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
