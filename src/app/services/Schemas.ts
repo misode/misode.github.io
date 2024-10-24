@@ -8,7 +8,7 @@ import { fetchData } from './DataFetcher.js'
 export const VersionIds = ['1.15', '1.16', '1.17', '1.18', '1.18.2', '1.19', '1.19.3', '1.19.4', '1.20', '1.20.2', '1.20.3', '1.20.5', '1.21', '1.21.2'] as const
 export type VersionId = typeof VersionIds[number]
 
-export const DEFAULT_VERSION: VersionId = '1.21'
+export const DEFAULT_VERSION: VersionId = '1.21.2'
 
 export type BlockStateRegistry = {
 	[block: string]: {
