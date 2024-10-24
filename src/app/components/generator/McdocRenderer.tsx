@@ -9,6 +9,7 @@ import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { useCallback, useMemo } from 'preact/hooks'
 import { useLocale } from '../../contexts/Locale.jsx'
+import { useFocus } from '../../hooks/useFocus.js'
 import { generateColor, hexId } from '../../Utils.js'
 import { Octicon } from '../Octicon.jsx'
 
@@ -22,14 +23,17 @@ interface Props {
 	ctx: McdocContext
 }
 export function McdocRoot({ node, makeEdit, ctx } : Props) {
+	const { locale } = useLocale()
 	const type = node?.typeDef ?? { kind: 'unsafe' }
 
-	if (type.kind === 'struct') {
+	if (type.kind === 'struct' && JsonObjectNode.is(node)) {
 		return <StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 
 	return <>
 		<div class="node-header">
+			<Errors node={node} ctx={ctx} />
+			<Key label={locale('root')} />
 			<Head type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
 		<Body type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -369,6 +373,9 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'struct') {
+		if (!JsonObjectNode.is(node)) {
+			return <></>
+		}
 		if (type.fields.length === 0) {
 			return <></>
 		}
@@ -470,6 +477,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			}
 			return <div class="node">
 				<div class="node-header">
+					<Errors node={childValue} ctx={ctx} />
 					<Key label={key} />
 					<Head type={fieldType} node={childValue} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
@@ -517,6 +525,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 			}
 			return <div class="node">
 				<div class="node-header">
+					<Errors node={child} ctx={ctx} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
 						{Octicon.trashcan}
 					</button>
@@ -564,6 +573,7 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 			}
 			return <div class="node">
 				<div class="node-header">
+					<Errors node={child} ctx={ctx} />
 					<Key label="entry" />
 					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
@@ -571,6 +581,37 @@ function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
 			</div>
 		})}
 	</>
+}
+
+interface ErrorsProps {
+	node: JsonNode | undefined
+	ctx: McdocContext
+}
+function Errors({ node, ctx }: ErrorsProps) {
+	const errors = useMemo(() => {
+		if (node === undefined) {
+			return []
+		}
+		return ctx.err.errors
+			.filter(e => core.Range.containsRange(node.range, e.range, true))
+			.filter(e => !node.children?.some(c => (c.type === 'item' || c.type === 'pair') && core.Range.containsRange(c.range, e.range, true)))
+	}, [node, ctx])
+
+	return <>
+		{errors.map(e => <ErrorIndicator error={e} />)}	
+	</>
+}
+
+interface ErrorIndicatorProps {
+	error: core.LanguageError
+}
+function ErrorIndicator({ error }: ErrorIndicatorProps) {
+	const [active, setActive] = useFocus()
+
+	return <div class={`node-icon ${error.severity === 2 ? 'node-warning' : 'node-error'} ${active ? 'show' : ''}`} onClick={() => setActive()}>
+		{Octicon.issue_opened}
+		<span class="icon-popup">{error.message}</span>
+	</div>
 }
 
 function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): JsonNode {

@@ -11,13 +11,14 @@ type TreePanelProps = {
 	docAndNode: DocAndNode,
 	onError: (message: string) => unknown,
 }
-export function Tree({ docAndNode, onError }: TreePanelProps) {
+export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 	const { lang } = useLocale()
 	const { service } = useSpyglass()
 
 	if (lang === 'none') return <></>
 
-	const fileChild = useDocAndNode(docAndNode).node.children[0]
+	const docAndNode = useDocAndNode(original)
+	const fileChild = docAndNode.node.children[0]
 	if (!JsonFileNode.is(fileChild)) {
 		return <></>
 	}
@@ -49,7 +50,12 @@ export function Tree({ docAndNode, onError }: TreePanelProps) {
 		if (!service) {
 			return undefined
 		}
-		return service.getCheckerContext(docAndNode.doc)
+		const errors = [
+			...docAndNode.node.binderErrors ?? [],
+			...docAndNode.node.checkerErrors ?? [],
+			...docAndNode.node.linterErrors ?? [],
+		]
+		return service.getCheckerContext(docAndNode.doc, errors)
 	}, [docAndNode, service])
 
 	return <div class="tree node-root" data-cy="tree">

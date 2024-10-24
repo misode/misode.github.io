@@ -147,6 +147,13 @@
   border-color: var(--node-remove) !important;
 }
 
+.node-warning ~ select:last-child,
+.node-warning ~ input:last-child,
+.node-warning ~ input[list]:nth-last-child(2),
+.node-warning + .fixed-list ~ input {
+  border-color: var(--node-selected) !important;
+}
+
 /** Rounded corners */
 
 .node-header > .node-icon {
@@ -294,6 +301,10 @@ button.move:disabled {
 
 .node-icon.node-error svg {
   fill: var(--node-remove);
+}
+
+.node-icon.node-warning svg {
+  fill: var(--node-selected);
 }
 
 .node-menu {

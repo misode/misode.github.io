@@ -57,8 +57,9 @@ export class SpyglassService {
 		})
 	}
 
-	public getCheckerContext(doc: TextDocument) {
+	public getCheckerContext(doc: TextDocument, errors: core.LanguageError[]) {
 		const err = new ErrorReporter()
+		err.errors = errors
 		return core.CheckerContext.create(this.service.project, { doc, err })
 	}
 
