@@ -1,5 +1,5 @@
 import config from '../config.json'
-import type { VersionId } from './services/Schemas.js'
+import type { VersionId } from './services/Versions.js'
 
 export interface ConfigLanguage {
 	code: string,

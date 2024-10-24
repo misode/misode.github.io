@@ -3,10 +3,9 @@ import { Identifier } from 'deepslate/core'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { fetchItemComponents } from '../services/index.js'
+import { fetchItemComponents, fetchRegistries } from '../services/index.js'
 import { ResolvedItem } from '../services/ResolvedItem.js'
 import { renderItem } from '../services/Resources.js'
-import { getCollections } from '../services/Schemas.js'
 import { jsonToNbt } from '../Utils.js'
 import { ItemTooltip } from './ItemTooltip.jsx'
 import { Octicon } from './Octicon.jsx'
@@ -83,14 +82,17 @@ function ItemItself({ item }: ResolvedProps) {
 		return Octicon.package
 	}
 
-	const { value: collections } = useAsync(() => getCollections(version), [])
+	const { value: allModels, loading: loadingModels } = useAsync(async () => {
+		const registries = await fetchRegistries(version)
+		return registries.get('model')
+	}, [version])
 
-	if (collections === undefined) {
+	if (loadingModels || allModels === undefined) {
 		return null
 	}
 
 	const modelPath = `item/${item.id.path}`
-	if (collections.get('model').includes('minecraft:' + modelPath)) {
+	if (allModels && allModels.includes('minecraft:' + modelPath)) {
 		return <RenderedItem item={item} />
 	}
 

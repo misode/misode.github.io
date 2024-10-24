@@ -225,6 +225,7 @@
   "reset_default": "Reset to default",
   "resource_location": "Resource location",
   "restore_backup": "Restore last backup",
+  "root": "Root",
   "search": "Search",
   "settings": "Settings",
   "settings.fields.description": "Customize advanced field settings",

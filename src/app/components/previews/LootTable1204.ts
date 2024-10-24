@@ -1,7 +1,7 @@
 import type { Random } from 'deepslate-1.20.4/core'
 import { Enchantment, Identifier, ItemStack, LegacyRandom } from 'deepslate-1.20.4/core'
 import { NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate-1.20.4/nbt'
-import type { VersionId } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
 import { clamp, getWeightedRandom, isObject } from '../../Utils.js'
 
 export interface SlottedItem {
@@ -117,8 +117,11 @@ function shuffle<T>(array: T[], ctx: LootContext) {
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
+	if (!Array.isArray(table.pools)) {
+		return
+	}
 	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
-	for (const pool of table.pools ?? []) {
+	for (const pool of table.pools) {
 		generatePool(pool, tableConsumer, ctx)
 	}
 }

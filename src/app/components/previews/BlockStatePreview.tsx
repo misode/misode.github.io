@@ -1,4 +1,3 @@
-import { DataModel } from '@mcschema/core'
 import { BlockDefinition, Identifier, Structure, StructureRenderer } from 'deepslate/render'
 import type { mat4 } from 'gl-matrix'
 import { useCallback, useRef } from 'preact/hooks'
@@ -11,14 +10,15 @@ import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 const PREVIEW_ID = Identifier.parse('misode:preview')
 
-export const BlockStatePreview = ({ data, shown }: PreviewProps) => {
+export const BlockStatePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { version } = useVersion()
-	const serializedData = JSON.stringify(data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
 		const resources = await getResources(version)
-		const definition = BlockDefinition.fromJson(DataModel.unwrapLists(data))
+		const definition = BlockDefinition.fromJson(JSON.parse(text))
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {
 				if (id.equals(PREVIEW_ID)) return definition
@@ -26,7 +26,7 @@ export const BlockStatePreview = ({ data, shown }: PreviewProps) => {
 			},
 		})
 		return wrapper
-	}, [shown, version, serializedData])
+	}, [shown, version, text])
 
 	const renderer = useRef<StructureRenderer | undefined>(undefined)
 
