@@ -475,7 +475,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 					}
 				}
 			}
-			return <div class="node">
+			return <div class="node" data-category={getCategory(field.type)}>
 				<div class="node-header">
 					<Errors node={childValue} ctx={ctx} />
 					<Docs desc={field.desc} />
@@ -512,7 +512,8 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 	return <>
 		{node.children.map((item, index) => {
 			const child = item.value
-			const itemType = simplifyType(getItemType(type), ctx)
+			const itemType = getItemType(type)
+			const simplifiedItemType = simplifyType(itemType, ctx)
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? item.range)
@@ -524,7 +525,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 					return node
 				})
 			}
-			return <div class="node">
+			return <div class="node" data-category={getCategory(itemType)}>
 				<div class="node-header">
 					<Errors node={child} ctx={ctx} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
@@ -539,9 +540,9 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 						</button>
 					</div>}
 					<Key label="entry" />
-					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+					<Head type={simplifiedItemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
-				<Body type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				<Body type={simplifiedItemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -738,6 +739,26 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 		return getDefault(def, range, ctx)
 	}
 	return { type: 'json:null', range }
+}
+
+function getCategory(type: McdocType) {
+	if (type.kind === 'reference' && type.path) {
+		switch (type.path) {
+			case '::java::data::loot::LootPool':
+			case '::java::data::worldgen::surface_rule::SurfaceRule':
+			case '::java::data::worldgen::template_pool::WeightedElement':
+				return 'pool'
+			case '::java::data::loot::LootCondition':
+			case '::java::data::worldgen::dimension::biome_source::BiomeSource':
+			case '::java::data::worldgen::processor_list::ProcessorRule':
+				return 'predicate'
+			case '::java::data::loot::LootFunction':
+			case '::java::data::worldgen::density_function::CubicSpline':
+			case '::java::data::worldgen::processor_list::Processor':
+				return 'function'
+		}
+	}
+	return undefined
 }
 
 function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
