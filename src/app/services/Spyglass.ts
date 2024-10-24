@@ -7,7 +7,7 @@ import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
 import * as jeMcf from '@spyglassmc/java-edition/lib/mcfunction/index.js'
 import type { JsonFileNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
-import { localeQuote, localize } from '@spyglassmc/locales'
+import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
 import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
@@ -16,7 +16,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
-import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, getVersionChecksum } from './DataFetcher.js'
+import type { VersionMeta } from './DataFetcher.js'
+import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
 interface ClientDocument {
@@ -236,6 +237,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 		return { info: { startDepth: 1 }, uri }
 	})
 
+	const versions = await fetchVersions()
 	const release = config.env.gameVersion as ReleaseVersion
 	const version = siteConfig.versions.find(v => {
 		return v.ref ? v.ref === release : v.id === release
@@ -258,7 +260,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 		registrar: symbolRegistrar(summary),
 	})
 
-	registerAttributes(meta, release)
+	registerAttributes(meta, release, versions)
 
 	json.initialize(ctx)
 	jeJson.initialize(ctx)
@@ -273,7 +275,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 }
 
 // Duplicate these from spyglass for now, until they are exported separately
-function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
+function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, versions: VersionMeta[]) {
 	mcdoc.runtime.registerAttribute(meta, 'since', mcdoc.runtime.attribute.validator.string, {
 		filterElement: (config, ctx) => {
 			if (!config.startsWith('1.')) {
@@ -312,7 +314,7 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
 			},
 		},
 	)
-	const expectedPackFormat = siteConfig.versions.find(v => (v.ref || v.id) === release)?.pack_format
+	const maxPackFormat = versions[0].data_pack_version
 	mcdoc.runtime.registerAttribute(meta, 'pack_format', () => undefined, {
 		checker: (_, typeDef) => {
 			if (typeDef.kind !== 'literal' || typeof typeDef.value.value !== 'number') {
@@ -320,11 +322,11 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion) {
 			}
 			const target = typeDef.value.value
 			return (node, ctx) => {
-				if (expectedPackFormat && expectedPackFormat !== target) {
+				if (target > maxPackFormat) {
 					ctx.err.report(
-						localize('expected', localeQuote(expectedPackFormat.toFixed())),
+						localize('expected', localize('mcdoc.runtime.checker.range.number', localize('mcdoc.runtime.checker.range.right-inclusive', maxPackFormat))),
 						node,
-						2,
+						3,
 					)
 				}
 			}
