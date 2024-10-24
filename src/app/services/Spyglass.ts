@@ -15,7 +15,7 @@ import type { Position, Range } from 'vscode-languageserver-textdocument'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
-import { computeIfAbsent, genPath } from '../Utils.js'
+import { computeIfAbsent, genPath, message } from '../Utils.js'
 import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
@@ -328,6 +328,23 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 						node,
 						3,
 					)
+				}
+			}
+		},
+	})
+
+	// Until spyglass implements this attribute itself
+	mcdoc.runtime.registerAttribute(meta, 'regex_pattern', () => undefined, {
+		checker: (_, typeDef) => {
+			if (typeDef.kind !== 'literal' || typeDef.value.kind !== 'string') {
+				return undefined
+			}
+			const pattern = typeDef.value.value
+			return (node, ctx) => {
+				try {
+					RegExp(pattern)
+				} catch (e) {
+					ctx.err.report(message(e), node, 2)
 				}
 			}
 		},

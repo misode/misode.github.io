@@ -397,7 +397,7 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'struct') {
-		if (!JsonObjectNode.is(node) || optional || type.fields.length === 0) {
+		if (!JsonObjectNode.is(node) || type.fields.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
@@ -678,8 +678,14 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 		const object = JsonObjectNode.mock(range)
 		if (type.kind === 'struct') {
 			for (const field of type.fields) {
-				if (field.kind === 'pair' && !field.optional && typeof field.key === 'string') {
-					const key: JsonStringNode = { type: 'json:string', range, options: json.parser.JsonStringOptions, value: field.key, valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }] }
+				if (field.kind === 'pair' && !field.optional && (typeof field.key === 'string' || field.key.kind === 'literal')) {
+					const key: JsonStringNode = {
+						type: 'json:string',
+						range,
+						options: json.parser.JsonStringOptions,
+						value: typeof field.key === 'string' ? field.key : field.key.value.value.toString(),
+						valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
+					}
 					const value = getDefault(field.type, range, ctx)
 					const pair: core.PairNode<JsonStringNode, JsonNode> = {
 						type: 'pair',
