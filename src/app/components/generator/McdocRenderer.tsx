@@ -132,7 +132,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 	}, [onChangeValue])
 
 	return <>
-		{(idRegistry === 'item' && value) && <label>
+		{(idRegistry === 'item' && value && !value.startsWith('#')) && <label>
 			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
 		</label>}
 		{isSelect ? <>
@@ -358,7 +358,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
 
-	const onAdd = useCallback(() => {
+	const onAddTop = useCallback(() => {
 		if (canAdd) {
 			makeEdit((range) => {
 				const itemType = simplifyType(getItemType(type), ctx)
@@ -371,7 +371,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 				}
 				newValue.parent = newItem
 				if (JsonArrayNode.is(node)) {
-					node.children.push(newItem)
+					node.children.unshift(newItem)
 					newItem.parent = node
 					return node
 				}
@@ -386,7 +386,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 		}
 	}, [type, node, makeEdit, ctx, canAdd])
 
-	return <button class="add tooltipped tip-se" aria-label={locale('add_top')} onClick={() => onAdd()} disabled={!canAdd}>
+	return <button class="add tooltipped tip-se" aria-label={locale('add_top')} onClick={() => onAddTop()} disabled={!canAdd}>
 		{Octicon.plus_circle}
 	</button>
 }
@@ -536,6 +536,8 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 	const type = (node.typeDef?.kind === 'list' || node.typeDef?.kind === 'byte_array' || node.typeDef?.kind === 'int_array' || node.typeDef?.kind === 'long_array') ? node.typeDef : outerType
 	const fixedRange = type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
 
+	const canAdd = !fixedRange && (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
+
 	const onRemoveItem = useCallback((index: number) => {
 		makeEdit(() => {
 			node.children.splice(index, 1)
@@ -564,6 +566,34 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 			return node
 		})
 	}, [makeEdit])
+
+	const onAddBottom = useCallback(() => {
+		if (canAdd) {
+			makeEdit((range) => {
+				const itemType = simplifyType(getItemType(type), ctx)
+				const newValue = getDefault(itemType, range, ctx)
+				const newItem: core.ItemNode<JsonNode> = {
+					type: 'item',
+					range,
+					children: [newValue],
+					value: newValue,
+				}
+				newValue.parent = newItem
+				if (JsonArrayNode.is(node)) {
+					node.children.push(newItem)
+					newItem.parent = node
+					return node
+				}
+				const newArray: JsonArrayNode = {
+					type: 'json:array',
+					range,
+					children: [newItem],
+				}
+				newItem.parent = newArray
+				return newArray
+			})
+		}
+	}, [type, node, makeEdit, ctx, canAdd])
 
 	return <>
 		{node.children.map((item, index) => {
@@ -605,6 +635,11 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 				<Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 			</div>
 		})}
+		{node.children.length > 0 && <div class="node-header">
+			<button class="add tooltipped tip-se" aria-label={locale('add_bottom')} onClick={() => onAddBottom()} disabled={!canAdd}>
+				{Octicon.plus_circle}
+			</button>
+		</div>}
 	</>
 }
 
