@@ -2,7 +2,7 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
-import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, UnionType } from '@spyglassmc/mcdoc'
+import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
@@ -41,7 +41,6 @@ interface HeadProps extends Props {
 	optional?: boolean
 }
 function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
-	const { locale } = useLocale()
 	if (type.kind === 'string') {
 		return <StringHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
@@ -57,21 +56,18 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	if (type.kind === 'union') {
 		return <UnionHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
-	if (type.kind === 'struct' && optional) {
-		if (node && JsonObjectNode.is(node)) {
-			return <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')}>
-				{Octicon.trashcan}
-			</button>
-		} else {
-			return <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')}>
-				{Octicon.plus_circle}
-			</button>
-		}
+	if (type.kind === 'struct') {
+		return <StructHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
 		return <ListHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
-	// console.warn('Unhandled head', type)
+	if (type.kind === 'tuple') {
+		return <></>
+	}
+	if (type.kind === 'literal') {
+		return <LiteralHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+	}
 	return <></>
 }
 
@@ -107,10 +103,10 @@ function StringHead({ type, node, makeEdit, ctx }: StringHeadProps) {
 	const datalistId = `mcdoc_completions_${hexId()}`
 
 	return <>
-		{completions && <datalist id={datalistId}>
+		{completions.length > 0 && <datalist id={datalistId}>
 			{completions.map(c => <option>{c.value}</option>)}
 		</datalist>}
-		<input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions ? datalistId : undefined} />
+		<input value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
 	</>
 }
 
@@ -246,6 +242,39 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 	</>
 }
 
+function StructHead({ type, optional, node, makeEdit, ctx }: HeadProps) {
+	const { locale } = useLocale()
+
+	const onRemove = useCallback(() => {
+		makeEdit(() => {
+			return undefined
+		})
+	}, [makeEdit])
+
+	const onSetDefault = useCallback(() => {
+		makeEdit((range) => {
+			return getDefault(type, range, ctx)
+		})
+	}, [type, ctx])
+
+	if (optional) {
+		if (node && JsonObjectNode.is(node)) {
+			return <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+				{Octicon.trashcan}
+			</button>
+		} else {
+			return <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+				{Octicon.plus_circle}
+			</button>
+		}
+	} else {
+		if (!node || !JsonObjectNode.is(node)) {
+			return <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>{Octicon.history}</button>
+		}
+		return <></>
+	}
+}
+
 interface ListHeadProps extends Props {
 	type: ListType | PrimitiveArrayType,
 }
@@ -262,7 +291,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 	const onAdd = useCallback(() => {
 		if (canAdd) {
 			makeEdit((range) => {
-				const itemType = getItemType(type, ctx)
+				const itemType = simplifyType(getItemType(type), ctx)
 				const newValue = getDefault(itemType, range, ctx)
 				const newItem: core.ItemNode<JsonNode> = {
 					type: 'item',
@@ -292,6 +321,13 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 	</button>
 }
 
+interface LiteralHeadProps extends HeadProps {
+	type: LiteralType
+}
+function LiteralHead({ type }: LiteralHeadProps) {
+	return <input value={type.value.value.toString()} disabled />
+}
+
 interface BodyProps extends Props {
 	type: SimplifiedMcdocType
 	optional?: boolean
@@ -302,6 +338,9 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 	}
 	if (type.kind === 'struct') {
 		if (type.fields.length === 0) {
+			return <></>
+		}
+		if (optional && !node) {
 			return <></>
 		}
 		return <div class="node-body">
@@ -317,7 +356,12 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 			<ListBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
 	}
-	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'boolean') {
+	if (type.kind === 'tuple') {
+		return <div class="node-body">
+			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		</div>
+	}
+	if (type.kind === 'boolean' || type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'float' || type.kind === 'double') {
 		return <></>
 	}
 	// console.warn('Unhandled body', type, node)
@@ -427,7 +471,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 	return <>
 		{node.children.map((item, index) => {
 			const child = item.value
-			const itemType = getItemType(type, ctx)
+			const itemType = simplifyType(getItemType(type), ctx)
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? item.range)
@@ -461,6 +505,42 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 	</>
 }
 
+interface TupleBodyProps extends BodyProps{
+	type: TupleType
+}
+function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
+	if (!JsonArrayNode.is(node)) {
+		return <></>
+	}
+	return <>
+		{type.items.map((item, index) => {
+			const child = node?.children?.[index]?.value
+			const itemType = simplifyType(item, ctx)
+			const makeItemEdit: MakeEdit = (edit) => {
+				makeEdit(() => {
+					const newChild = edit(child?.range ?? node.range)
+					if (newChild === undefined) {
+						return node
+					}
+					node.children[index] = {
+						type: 'item',
+						range: newChild.range,
+						value: newChild,
+					}
+					return node
+				})
+			}
+			return <div class="node">
+				<div class="node-header">
+					<Key label="entry" />
+					<Head type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				</div>
+				<Body type={itemType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+			</div>
+		})}
+	</>
+}
+
 function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): JsonNode {
 	if (type.kind === 'string') {
 		return JsonStringNode.mock(range)
@@ -473,10 +553,46 @@ function getDefault(type: McdocType, range: core.Range, ctx: McdocContext): Json
 		return { type: 'json:number', range, value, children: [value] }
 	}
 	if (type.kind === 'struct' || type.kind === 'any' || type.kind === 'unsafe') {
-		return JsonObjectNode.mock(range)
+		const object = JsonObjectNode.mock(range)
+		if (type.kind === 'struct') {
+			for (const field of type.fields) {
+				if (field.kind === 'pair' && !field.optional && typeof field.key === 'string') {
+					const key: JsonStringNode = { type: 'json:string', range, options: json.parser.JsonStringOptions, value: field.key, valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }] }
+					const value = getDefault(field.type, range, ctx)
+					const pair: core.PairNode<JsonStringNode, JsonNode> = {
+						type: 'pair',
+						range,
+						key: key,
+						value: value,
+						children: [key, value],
+					}
+					key.parent = pair
+					value.parent = pair
+					object.children.push(pair)
+					pair.parent = object
+				}
+			}
+		}
+		return object
 	}
 	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
-		return JsonArrayNode.mock(range)
+		const array = JsonArrayNode.mock(range)
+		const minLength = type.lengthRange?.min ?? 0
+		if (minLength > 0) {
+			for (let i = 0; i < minLength; i += 1) {
+				const child = getDefault(getItemType(type), range, ctx)
+				const itemNode: core.ItemNode<JsonNode> = {
+					type: 'item',
+					range,
+					children: [child],
+					value: child,
+				}
+				child.parent = itemNode
+				array.children.push(itemNode)
+				itemNode.parent = array
+			}
+		}
+		return array
 	}
 	if (type.kind === 'tuple') {
 		return {
@@ -559,8 +675,8 @@ function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
 	return result.typeDef
 }
 
-function getItemType(type: ListType | PrimitiveArrayType, ctx: McdocContext): SimplifiedMcdocType {
-	return type.kind === 'list' ? simplifyType(type.item, ctx)
+function getItemType(type: ListType | PrimitiveArrayType): McdocType {
+	return type.kind === 'list' ? type.item
 		: type.kind === 'byte_array' ? { kind: 'byte' }
 			: type.kind === 'int_array' ? { kind: 'int' }
 				: type.kind === 'long_array' ? { kind: 'long' }

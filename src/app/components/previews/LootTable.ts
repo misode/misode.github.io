@@ -386,6 +386,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		item.set('written_book_content', newContent)
 	},
 	set_components: ({ components }) => (item) => {
+		if (typeof components !== 'object' || components === null) {
+			return
+		}
 		for (const [key, value] of Object.entries(components)) {
 			item.set(key, jsonToNbt(value))
 		}
