@@ -148,7 +148,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 			{completions.length > 0 && <datalist id={datalistId}>
 				{completions.map(c => <option>{c.value}</option>)}
 			</datalist>}
-			<input class={colorKind === 'hex_rgb' ? 'short-input' : idRegistry ? 'long-input' : ''} value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+			<input class={colorKind === 'hex_rgb' ? 'short-input' : idRegistry ? 'long-input' : ''} value={value ?? ''} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
 			{value && gen && <a href={`/${gen.url}/?preset=${value?.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale('follow_reference')}>
 				{Octicon.link_external}
 			</a>}
@@ -315,8 +315,12 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 	</>
 }
 
-function StructHead({ type, optional, node, makeEdit, ctx }: HeadProps) {
+interface StructHeadProps extends HeadProps {
+	type: SimplifiedStructType
+}
+function StructHead({ type: outerType, optional, node, makeEdit, ctx }: StructHeadProps) {
 	const { locale } = useLocale()
+	const type = node?.typeDef?.kind === 'struct' ? node.typeDef : outerType
 
 	const onRemove = useCallback(() => {
 		makeEdit(() => {
@@ -330,22 +334,22 @@ function StructHead({ type, optional, node, makeEdit, ctx }: HeadProps) {
 		})
 	}, [type, ctx])
 
-	if (optional) {
-		if (node && JsonObjectNode.is(node)) {
-			return <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
-				{Octicon.trashcan}
-			</button>
-		} else {
-			return <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
-				{Octicon.plus_circle}
-			</button>
-		}
-	} else {
-		if (!node || !JsonObjectNode.is(node)) {
-			return <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>{Octicon.history}</button>
-		}
-		return <></>
-	}
+	return <>
+		{optional
+			? (JsonObjectNode.is(node)
+				? <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+					{Octicon.trashcan}
+				</button>
+				: <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+					{Octicon.plus_circle}
+				</button>)
+			: (!JsonObjectNode.is(node)
+				? <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>
+					{Octicon.history}
+				</button>
+				: <></>
+			)}
+	</>
 }
 
 interface ListHeadProps extends Props {
@@ -469,10 +473,6 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
 	}
-	if (type.kind === 'boolean' || type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'float' || type.kind === 'double') {
-		return <></>
-	}
-	// console.warn('Unhandled body', type, node)
 	return <></>
 }
 
@@ -496,19 +496,17 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 		return <></>
 	}
 	const type = node.typeDef?.kind === 'struct' ? node.typeDef : outerType
-	const staticFields = type.fields.filter(field =>
-		field.key.kind === 'literal' && field.key.value.kind === 'string')
-	const dynamicFields = type.fields.filter(field =>
-		field.key.kind === 'string')
-	if (type.fields.length !== staticFields.length + dynamicFields.length) {
-		// console.warn('Missed struct fields', type.fields.filter(field =>
-		// 	!staticFields.includes(field) && !dynamicFields.includes(field)))
-	}
+	const staticFields = type.fields.filter(field => field.key.kind === 'literal')
+	const dynamicFields = type.fields.filter(field => field.key.kind !== 'literal')
+	const staticChilds: core.PairNode<JsonStringNode, JsonNode>[] = []
 	return <>
 		{staticFields.map(field => {
 			const key = (field.key as LiteralType).value.value.toString()
 			const index = node.children.findIndex(p => p.key?.value === key)
 			const pair = index === -1 ? undefined : node.children[index]
+			if (pair) {
+				staticChilds.push(pair)
+			}
 			const child = pair?.value
 			const childType = simplifyType(field.type, ctx)
 			const makeFieldEdit: MakeEdit = (edit) => {
@@ -557,6 +555,103 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 					<Head type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
 				<Body type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
+			</div>
+		})}
+		{dynamicFields.map((field, index) => {
+			const incompletePairs = node.children.filter(pair => pair.value && core.Range.length(pair.value.range) === 0)
+			const pair = index < incompletePairs.length ? incompletePairs[index] : undefined
+			const keyType = simplifyType(field.key, ctx)
+			const makeKeyEdit: MakeEdit = (edit) => {
+				makeEdit(() => {
+					const newKey = edit(pair?.key?.range ?? core.Range.create(node.range.end))
+					const index = pair ? node.children.indexOf(pair) : -1
+					if (!newKey || !JsonStringNode.is(newKey) || newKey.value.length === 0) {
+						if (index !== -1) {
+							node.children.splice(index, 1)
+						}
+						return node
+					}
+					const newPair: core.PairNode<JsonStringNode, JsonNode> = {
+						type: 'pair',
+						range: newKey?.range,
+						key: newKey,
+					}
+					newKey.parent = newPair
+					if (index !== -1) {
+						node.children.splice(index, 1, newPair)
+					} else {
+						node.children.push(newPair)
+					}
+					newPair.parent = node
+					return node
+				})
+			}
+			const onAddKey = () => {
+				const keyNode = pair?.key
+				const index = pair ? node.children.indexOf(pair) : -1
+				if (!pair || !keyNode || index === -1) {
+					return
+				}
+				makeEdit((range) => {
+					const valueNode = getDefault(simplifyType(field.type, ctx), range, ctx)
+					const newPair: core.PairNode<JsonStringNode, JsonNode> = {
+						type: 'pair',
+						range: keyNode.range,
+						key: keyNode,
+						value: valueNode,
+					}
+					valueNode.parent = newPair
+					node.children.splice(index, 1, newPair)
+					newPair.parent = node
+					return node
+				})
+			}
+			return <div class="node">
+				<div key={`__dynamic_${index}__`} class="node-header">
+					<Docs desc={field.desc} />
+					<Head type={keyType} node={pair?.key} makeEdit={makeKeyEdit} ctx={ctx} />
+					<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={onAddKey} disabled={pair === undefined}>{Octicon.plus_circle}</button>
+				</div>
+			</div>
+		})}
+		{node.children.map((pair, index) => {
+			const key = pair.key?.value
+			if (staticChilds.includes(pair) || !key) {
+				return <></>
+			}
+			if (pair.value && core.Range.length(pair.value.range) === 0) {
+				return <></>
+			}
+			const child = pair.value
+			// TODO: correctly determine which dynamic field this is a key for
+			const fieldType = dynamicFields[0].type
+			const childType = simplifyType(dynamicFields[0].type, ctx)
+			const makeFieldEdit: MakeEdit = (edit) => {
+				makeEdit(() => {
+					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
+					if (newChild === undefined) {
+						node.children.splice(index, 1)
+					} else {
+						node.children[index] = {
+							type: 'pair',
+							range: pair.range,
+							key: pair.key,
+							value: newChild,
+						}
+					}
+					return node
+				})
+			}
+			return <div key={key} class="node" data-category={getCategory(fieldType)}>
+				<div class="node-header">
+					<Errors type={childType} node={child} ctx={ctx} />
+					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => makeFieldEdit(() => undefined)}>
+						{Octicon.trashcan}
+					</button>
+					<Key label={key} />
+					<Head type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
+				</div>
+				<Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
 			</div>
 		})}
 	</>
@@ -888,6 +983,7 @@ function getCategory(type: McdocType) {
 			case '::java::data::worldgen::template_pool::WeightedElement':
 				return 'pool'
 			case '::java::data::loot::LootCondition':
+			case '::java::data::advancement::AdvancementCriterion':
 			case '::java::data::worldgen::dimension::biome_source::BiomeSource':
 			case '::java::data::worldgen::processor_list::ProcessorRule':
 			case '::java::data::worldgen::feature::placement::PlacementModifier':

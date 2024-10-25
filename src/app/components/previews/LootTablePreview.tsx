@@ -40,7 +40,10 @@ export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 			return []
 		}
 		const [itemTags, lootTables, itemComponents, enchantments, enchantmentTags] = dependencies
-		const table = JSON.parse(text)
+		let table = {}
+		try {
+			table = JSON.parse(text)
+		} catch (e) {}
 		if (use1204) {
 			return generateLootTable1204(table, {
 				version, seed, luck, daytime, weather,

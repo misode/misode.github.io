@@ -137,14 +137,12 @@
 }
 
 .node-warning ~ select:last-child,
-.node-warning ~ input:last-child,
-.node-warning ~ input[list]:nth-last-child(2) {
+.node-warning ~ input:last-child {
   border-color: var(--node-selected) !important;
 }
 
 .node-error ~ select:last-child,
-.node-error ~ input:last-child,
-.node-error ~ input[list]:nth-last-child(2) {
+.node-error ~ input:last-child {
   border-color: var(--node-remove) !important;
 }
 
@@ -160,8 +158,7 @@
   border-bottom-left-radius: 3px;
 }
 
-.node-header > *:last-child,
-.node-header > input[list]:nth-last-child(2) {
+.node-header > *:last-child {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
