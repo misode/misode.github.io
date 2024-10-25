@@ -22,14 +22,15 @@ export interface McdocContext extends core.CheckerContext {}
 
 type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
 
-interface Props {
+interface Props<Type extends SimplifiedMcdocType = SimplifiedMcdocType> {
+	type: Type
+	optional?: boolean
 	node: JsonNode | undefined
 	makeEdit: MakeEdit
 	ctx: McdocContext
 }
-export function McdocRoot({ node, makeEdit, ctx } : Props) {
+export function McdocRoot({ type, node, makeEdit, ctx } : Props) {
 	const { locale } = useLocale()
-	const type = node?.typeDef ?? { kind: 'unsafe' }
 
 	if (type.kind === 'struct' && type.fields.length > 0 && JsonObjectNode.is(node)) {
 		return <StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -45,11 +46,7 @@ export function McdocRoot({ node, makeEdit, ctx } : Props) {
 	</>
 }
 
-interface HeadProps extends Props {
-	type: SimplifiedMcdocType
-	optional?: boolean
-}
-function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
+function Head({ type, optional, node, makeEdit, ctx }: Props) {
 	if (type.kind === 'string') {
 		return <StringHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
@@ -60,7 +57,7 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 		return <NumericHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'boolean') {
-		return <BooleanHead node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <BooleanHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'union') {
 		return <UnionHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -83,10 +80,7 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 	return <></>
 }
 
-interface StringHeadProps extends HeadProps {
-	type: StringType
-}
-function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
+function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
 
 	const value = JsonStringNode.is(node) ? node.value : undefined
@@ -160,10 +154,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: StringHeadProps) {
 	</>
 }
 
-interface EnumHeadProps extends HeadProps {
-	type: SimplifiedEnum,
-}
-function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
+function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
 	const { locale } = useLocale()
 
 	const value = JsonStringNode.is(node) ? node.value : (node && JsonNumberNode.is(node)) ? Number(node.value.value) : undefined
@@ -210,10 +201,7 @@ function EnumHead({ type, optional, node, makeEdit }: EnumHeadProps) {
 	</select>
 }
 
-interface NumericHeadProps extends Props {
-	type: NumericType,
-}
-function NumericHead({ type, node, makeEdit }: NumericHeadProps) {
+function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 	const { locale } = useLocale()
 
 	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
@@ -284,10 +272,7 @@ function BooleanHead({ node, makeEdit }: Props) {
 	</>
 }
 
-interface UnionHeadProps extends HeadProps {
-	type: UnionType<SimplifiedMcdocTypeNoUnion>
-}
-function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
+function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
 	const { locale } = useLocale()
 
 	const selectedType = findSelectedMember(type, node)
@@ -315,10 +300,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: UnionHeadProps) {
 	</>
 }
 
-interface StructHeadProps extends HeadProps {
-	type: SimplifiedStructType
-}
-function StructHead({ type: outerType, optional, node, makeEdit, ctx }: StructHeadProps) {
+function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<SimplifiedStructType>) {
 	const { locale } = useLocale()
 	const type = node?.typeDef?.kind === 'struct' ? node.typeDef : outerType
 
@@ -352,10 +334,7 @@ function StructHead({ type: outerType, optional, node, makeEdit, ctx }: StructHe
 	</>
 }
 
-interface ListHeadProps extends Props {
-	type: ListType | PrimitiveArrayType,
-}
-function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
+function ListHead({ type, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
 	const { locale } = useLocale()
 
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
@@ -393,10 +372,7 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 	</button>
 }
 
-interface TupleHeadProps extends HeadProps {
-	type: TupleType,
-}
-function TupleHead({ type, optional, node, makeEdit, ctx }: TupleHeadProps) {
+function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
 	const { locale } = useLocale()
 
 	const onRemove = useCallback(() => {
@@ -429,18 +405,11 @@ function TupleHead({ type, optional, node, makeEdit, ctx }: TupleHeadProps) {
 	}
 }
 
-interface LiteralHeadProps extends HeadProps {
-	type: LiteralType
-}
-function LiteralHead({ type }: LiteralHeadProps) {
+function LiteralHead({ type }: Props<LiteralType>) {
 	return <input value={type.value.value.toString()} disabled />
 }
 
-interface BodyProps extends Props {
-	type: SimplifiedMcdocType
-	optional?: boolean
-}
-function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
+function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType>) {
 	if (type.kind === 'union') {
 		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
@@ -458,7 +427,7 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 		}
 		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
 			return <div class="node-body">
-				<TupleBody type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }}  node={node} makeEdit={makeEdit} ctx={ctx} />
+				<TupleBody type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} node={node} makeEdit={makeEdit} ctx={ctx} />
 			</div>
 		}
 		if (node.children?.length === 0) {
@@ -476,10 +445,7 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 	return <></>
 }
 
-interface UnionBodyProps extends BodyProps {
-	type: UnionType<SimplifiedMcdocTypeNoUnion>
-}
-function UnionBody({ type, optional, node, makeEdit, ctx }: UnionBodyProps) {
+function UnionBody({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
 	const selectedType = findSelectedMember(type, node)
 	if (selectedType === undefined) {
 		return <></>
@@ -624,8 +590,11 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			}
 			const child = pair.value
 			// TODO: correctly determine which dynamic field this is a key for
-			const fieldType = dynamicFields[0].type
-			const childType = simplifyType(dynamicFields[0].type, ctx)
+			const fieldType = dynamicFields[0]?.type
+			if (!fieldType) {
+				return <></>
+			}
+			const childType = simplifyType(fieldType, ctx)
 			const makeFieldEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
@@ -661,10 +630,7 @@ function Key({ label }: { label: string | number | boolean }) {
 	return <label>{formatIdentifier(label.toString())}</label>
 }
 
-interface ListBodyProps extends Props {
-	type: ListType | PrimitiveArrayType
-}
-function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
+function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
 	const { locale } = useLocale()
 	if (!JsonArrayNode.is(node)) {
 		return <></>
@@ -779,10 +745,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 	</>
 }
 
-interface TupleBodyProps extends BodyProps{
-	type: TupleType
-}
-function TupleBody({ type, node, makeEdit, ctx }: TupleBodyProps) {
+function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
@@ -1053,7 +1016,7 @@ const selectRegistries = new Set([
 	'worldgen/trunk_placer_type',
 ])
 
-function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
+export function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
 	const node: SimplifyValueNode<any> = {
 		entryNode: {
 			parent: undefined,
