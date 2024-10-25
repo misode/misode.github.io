@@ -69,10 +69,13 @@ function Head({ type, optional, node, makeEdit, ctx }: HeadProps) {
 		return <StructHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
+		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
+			return <TupleHead type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		}
 		return <ListHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'tuple') {
-		return <></>
+		return <TupleHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'literal') {
 		return <LiteralHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -351,11 +354,6 @@ interface ListHeadProps extends Props {
 function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 	const { locale } = useLocale()
 
-	const fixedRange = type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
-	if (fixedRange) {
-		return <></>
-	}
-
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
 
 	const onAddTop = useCallback(() => {
@@ -391,6 +389,42 @@ function ListHead({ type, node, makeEdit, ctx }: ListHeadProps) {
 	</button>
 }
 
+interface TupleHeadProps extends HeadProps {
+	type: TupleType,
+}
+function TupleHead({ type, optional, node, makeEdit, ctx }: TupleHeadProps) {
+	const { locale } = useLocale()
+
+	const onRemove = useCallback(() => {
+		makeEdit(() => {
+			return undefined
+		})
+	}, [makeEdit])
+
+	const onSetDefault = useCallback(() => {
+		makeEdit((range) => {
+			return getDefault(type, range, ctx)
+		})
+	}, [type, ctx])
+
+	if (optional) {
+		if (node && JsonArrayNode.is(node)) {
+			return <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+				{Octicon.trashcan}
+			</button>
+		} else {
+			return <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+				{Octicon.plus_circle}
+			</button>
+		}
+	} else {
+		if (!node || !JsonArrayNode.is(node)) {
+			return <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>{Octicon.history}</button>
+		}
+		return <></>
+	}
+}
+
 interface LiteralHeadProps extends HeadProps {
 	type: LiteralType
 }
@@ -415,8 +449,15 @@ function Body({ type, optional, node, makeEdit, ctx }: BodyProps) {
 		</div>
 	}
 	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
-		const fixedRange = type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
-		if (!fixedRange && (!node || node.children?.length === 0)) {
+		if (!JsonArrayNode.is(node)) {
+			return <></>
+		}
+		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
+			return <div class="node-body">
+				<TupleBody type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }}  node={node} makeEdit={makeEdit} ctx={ctx} />
+			</div>
+		}
+		if (node.children?.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
@@ -534,9 +575,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 		return <></>
 	}
 	const type = (node.typeDef?.kind === 'list' || node.typeDef?.kind === 'byte_array' || node.typeDef?.kind === 'int_array' || node.typeDef?.kind === 'long_array') ? node.typeDef : outerType
-	const fixedRange = type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
-
-	const canAdd = !fixedRange && (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
+	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
 
 	const onRemoveItem = useCallback((index: number) => {
 		makeEdit(() => {
@@ -616,19 +655,17 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: ListBodyProps) {
 			return <div key={index} class="node" data-category={getCategory(itemType)}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
-					{!fixedRange && <>
-						<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
-							{Octicon.trashcan}
+					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
+						{Octicon.trashcan}
+					</button>
+					{(canMoveUp || canMoveDown) && <div class="node-move">
+						<button class="move tooltipped tip-se" aria-label={locale('move_up')} disabled={!canMoveUp} onClick={() => onMoveUp(index)}>
+							{Octicon.chevron_up}
 						</button>
-						{(canMoveUp || canMoveDown) && <div class="node-move">
-							<button class="move tooltipped tip-se" aria-label={locale('move_up')} disabled={!canMoveUp} onClick={() => onMoveUp(index)}>
-								{Octicon.chevron_up}
-							</button>
-							<button class="move tooltipped tip-se" aria-label={locale('move_down')} disabled={!canMoveDown} onClick={() => onMoveDown(index)}>
-								{Octicon.chevron_down}
-							</button>
-						</div>}
-					</>}
+						<button class="move tooltipped tip-se" aria-label={locale('move_down')} disabled={!canMoveDown} onClick={() => onMoveDown(index)}>
+							{Octicon.chevron_down}
+						</button>
+					</div>}
 					<Key label="entry" />
 					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 				</div>
@@ -853,6 +890,7 @@ function getCategory(type: McdocType) {
 			case '::java::data::loot::LootCondition':
 			case '::java::data::worldgen::dimension::biome_source::BiomeSource':
 			case '::java::data::worldgen::processor_list::ProcessorRule':
+			case '::java::data::worldgen::feature::placement::PlacementModifier':
 				return 'predicate'
 			case '::java::data::loot::LootFunction':
 			case '::java::data::worldgen::density_function::CubicSpline':

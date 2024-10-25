@@ -62,7 +62,9 @@ function decorateY(pos: BlockPos, y: number): BlockPos[] {
 }
 
 export function sampleInt(value: any, ctx: PlacementContext): number {
-	if (typeof value === 'number') {
+	if (value === undefined) {
+		return 0
+	} else if (typeof value === 'number') {
 		return value
 	} else if (value.base) {
 		return value.base ?? 1 + ctx.nextInt(1 + (value.spread ?? 0))
