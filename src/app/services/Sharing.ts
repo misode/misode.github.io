@@ -1,5 +1,4 @@
 import lz from 'lz-string'
-import { safeJsonParse } from '../Utils.js'
 import type { VersionId } from './Versions.js'
 
 const API_PREFIX = 'https://snippets.misode.workers.dev'
@@ -30,7 +29,7 @@ export async function getSnippet(id: string) {
 		const snippet = await fetchApi(`/${id}`)
 		return {
 			...snippet,
-			data: safeJsonParse(lz.decompressFromBase64(snippet.data) ?? '{}') ?? {},
+			text: lz.decompressFromBase64(snippet.data) ?? '{}',
 		}
 	} catch (e) {
 		if (e instanceof Error) {

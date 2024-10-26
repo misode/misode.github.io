@@ -42,13 +42,13 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const ignoreChange = useRef(false)
 
 	const { value: docAndNode } = useAsync(async () => {
-		let data: unknown = undefined
+		let text: string | undefined = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
 			return AsyncCancel
 		}
 		if (currentPreset) {
-			data = await loadPreset(currentPreset)
+			text = await loadPreset(currentPreset)
 			ignoreChange.current = true
 		} else if (sharedSnippetId) {
 			const snippet = await getSnippet(sharedSnippetId)
@@ -73,22 +73,22 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			}
 			Analytics.openSnippet(gen.id, sharedSnippetId, version)
 			ignoreChange.current = true
-			data = snippet.data
+			text = snippet.text
 		} else if (file) {
 			if (project.version && project.version !== version) {
 				changeVersion(project.version, false)
 				return AsyncCancel
 			}
 			ignoreChange.current = true
-			data = file.data
+			text = JSON.stringify(file.data, null, 2)
 		}
 		if (!service || !uri) {
 			return AsyncCancel
 		}
-		if (data) {
-			await service.writeFile(uri, JSON.stringify(data, null, 2))
+		if (text !== undefined) {
+			await service.writeFile(uri, text)
 		}
-		// TODO: if data is undefined, set to generator's default
+		// TODO: if text is undefined, set to generator's default
 		const docAndNode = await service.getFile(uri, () => '{}')
 		Analytics.setGenerator(gen.id)
 		return docAndNode
@@ -182,6 +182,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		} catch (e) {
 			setError(`Cannot load preset ${id} in ${version}`)
 			setCurrentPreset(undefined, true)
+			return undefined
 		}
 	}
 
