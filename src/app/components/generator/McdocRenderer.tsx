@@ -1,7 +1,7 @@
 import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
-import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
+import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonPairNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
@@ -597,7 +597,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			if (!fieldType) {
 				return <></>
 			}
-			const childType = simplifyType(fieldType, ctx)
+			const childType = simplifyType(fieldType, ctx, child)
 			const makeFieldEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
@@ -1024,11 +1024,15 @@ const selectRegistries = new Set([
 	'worldgen/trunk_placer_type',
 ])
 
-export function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdocType {
-	const node: SimplifyValueNode<any> = {
+export function simplifyType(type: McdocType, ctx: McdocContext, node?: JsonNode): SimplifiedMcdocType {
+	const key = node?.parent && JsonPairNode.is(node.parent) && JsonStringNode.is(node.parent.key) ? node.parent.key : undefined
+	const simplifyNode: SimplifyValueNode<any> = {
 		entryNode: {
 			parent: undefined,
-			runtimeKey: undefined,
+			runtimeKey: key ? {
+				originalNode: key,
+				inferredType: { kind: 'literal', value: { kind: 'string', value: key.value } },
+			} : undefined,
 		},
 		node: {
 			originalNode: null,
@@ -1046,7 +1050,7 @@ export function simplifyType(type: McdocType, ctx: McdocContext): SimplifiedMcdo
 		nodeAttacher:  () => {},
 		stringAttacher:  () => {},
 	}
-	const result = simplify(type, { node, ctx: context })
+	const result = simplify(type, { node: simplifyNode, ctx: context })
 	return result.typeDef
 }
 
