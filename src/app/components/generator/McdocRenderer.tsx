@@ -578,7 +578,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			return <div class="node">
 				<div key={`__dynamic_${index}__`} class="node-header">
 					<Docs desc={field.desc} />
-					<Head type={keyType} node={pair?.key} makeEdit={makeKeyEdit} ctx={ctx} />
+					<Head type={keyType} optional={true} node={pair?.key} makeEdit={makeKeyEdit} ctx={ctx} />
 					<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={onAddKey} disabled={pair === undefined}>{Octicon.plus_circle}</button>
 				</div>
 			</div>
@@ -936,9 +936,12 @@ function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: McdocCont
 	return { type: 'json:null', range }
 }
 
-function formatIdentifier(id: string) {
-	const formatted = id.replace(/^minecraft:/, '').replaceAll('_', ' ')
-	return formatted.charAt(0).toUpperCase() + formatted.substring(1)
+function formatIdentifier(id: string): string {
+	if (id.startsWith('!')) {
+		return '! ' + formatIdentifier(id.substring(1))
+	}
+	const text = id.replace(/^minecraft:/, '').replaceAll('_', ' ')
+	return text.charAt(0).toUpperCase() + text.substring(1)
 }
 
 function getCategory(type: McdocType) {
@@ -968,6 +971,7 @@ const selectRegistries = new Set([
 	'chunk_status',
 	'consume_effect_type',
 	'creative_mode_tab',
+	'data_component_type',
 	'enchantment_effect_component_type',
 	'enchantment_entity_effect_type',
 	'enchantment_level_based_value_type',
@@ -979,6 +983,7 @@ const selectRegistries = new Set([
 	'frog_variant',
 	'height_provider_type',
 	'int_provider_type',
+	'item_sub_predicate_type',
 	'loot_condition_type',
 	'loot_function_type',
 	'loot_nbt_provider_type',
