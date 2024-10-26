@@ -129,7 +129,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 	}, [onChangeValue])
 
 	return <>
-		{(idRegistry === 'item' && value && !value.startsWith('#')) && <label>
+		{((idRegistry === 'item' || idRegistry === 'block') && value && !value.startsWith('#')) && <label>
 			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
 		</label>}
 		{isSelect ? <>

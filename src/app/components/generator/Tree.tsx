@@ -83,6 +83,9 @@ function getRootType(id: string): McdocType {
 	if (id === 'pack_mcmeta') {
 		return { kind: 'reference', path: '::java::pack::Pack' }
 	}
+	if (id === 'text_component' ) {
+		return { kind: 'reference', path: '::java::server::util::text::Text' }
+	}
 	if (id.startsWith('tag/')) {
 		const attribute: AttributeValue = {
 			kind: 'tree',
