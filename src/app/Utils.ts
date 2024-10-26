@@ -623,3 +623,11 @@ export function makeDescriptionId(prefix: string, id: Identifier | undefined) {
 	}
 	return `${prefix}.${id.namespace}.${id.path.replaceAll('/', '.')}`
 }
+
+export function safeJsonParse(text: string): any {
+	try {
+		return JSON.parse(text)
+	} catch (e) {
+		return undefined
+	}
+}

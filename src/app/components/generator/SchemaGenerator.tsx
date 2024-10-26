@@ -9,7 +9,7 @@ import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../h
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
 import { Store } from '../../Store.js'
-import { cleanUrl, genPath } from '../../Utils.js'
+import { cleanUrl, genPath, safeJsonParse } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 
 export const SHARE_KEY = 'share'
@@ -102,8 +102,10 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			setSharedSnippetId(undefined, true)
 		}
 		if (file) {
-			const data = JSON.parse(doc.getText())
-			updateFile(gen.id, file.id, { id: file.id, data })
+			const data = safeJsonParse(doc.getText())
+			if (data !== undefined) {
+				updateFile(gen.id, file.id, { id: file.id, data })
+			}
 		}
 		ignoreChange.current = false
 		setError(null)
@@ -211,7 +213,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				setShareShown(true)
 			} else if (doc) {
 				setShareLoading(true)
-				shareSnippet(gen.id, version, JSON.parse(doc.getText()), previewShown)
+				shareSnippet(gen.id, version, doc.getText(), previewShown)
 					.then(({ id, length, compressed, rate }) => {
 						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
 						const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`

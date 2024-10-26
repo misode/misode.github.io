@@ -4,6 +4,7 @@ import type { Project } from './contexts/index.js'
 import { DRAFT_PROJECT } from './contexts/index.js'
 import type { VersionId } from './services/index.js'
 import { DEFAULT_VERSION, VersionIds } from './services/index.js'
+import { safeJsonParse } from './Utils.js'
 
 export namespace Store {
 	export const ID_LANGUAGE = 'language'
@@ -65,7 +66,7 @@ export namespace Store {
 	export function getProjects(): Project[] {
 		const projects = localStorage.getItem(ID_PROJECTS)
 		if (projects) {
-			return JSON.parse(projects) as Project[]
+			return safeJsonParse(projects) ?? []
 		}
 		return [DRAFT_PROJECT]
 	}
@@ -73,13 +74,13 @@ export namespace Store {
 	export function getPreviewPanelOpen(): boolean | undefined {
 		const open = localStorage.getItem(ID_PREVIEW_PANEL_OPEN)
 		if (open === null) return undefined
-		return JSON.parse(open)
+		return safeJsonParse(open)
 	}
 
 	export function getProjectPanelOpen(): boolean | undefined {
 		const open = localStorage.getItem(ID_PROJECT_PANEL_OPEN)
 		if (open === null) return undefined
-		return JSON.parse(open)
+		return safeJsonParse(open)
 	}
 
 	export function getOpenProject() {
@@ -99,7 +100,8 @@ export namespace Store {
 	}
 
 	export function getGeneratorHistory(): string[] {
-		return JSON.parse(localStorage.getItem(ID_GENERATOR_HISTORY) ?? '[]')
+		const value = localStorage.getItem(ID_GENERATOR_HISTORY) ?? '[]'
+		return safeJsonParse(value) ?? []
 	}
 
 	export function setLanguage(language: string | undefined) {
@@ -173,7 +175,8 @@ export namespace Store {
 	}
 
 	export function getWhatsNewSeen(): { id: string, time: string }[] {
-		return JSON.parse(localStorage.getItem(ID_WHATS_NEW_SEEN) ?? '[]')
+		const value = localStorage.getItem(ID_WHATS_NEW_SEEN) ?? '[]'
+		return safeJsonParse(value) ?? []
 	}
 
 	export function seeWhatsNew(ids: string[]) {

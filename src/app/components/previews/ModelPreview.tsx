@@ -5,6 +5,7 @@ import { useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncCancel } from '../../hooks/useAsyncFn.js'
 import { getResources, ResourceWrapper } from '../../services/Resources.js'
+import { safeJsonParse } from '../../Utils.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
@@ -19,7 +20,7 @@ export const ModelPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
 		const resources = await getResources(version)
-		const blockModel = BlockModel.fromJson(JSON.parse(text))
+		const blockModel = BlockModel.fromJson(safeJsonParse(text) ?? {})
 		blockModel.flatten(resources)
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {

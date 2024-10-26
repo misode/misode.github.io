@@ -6,7 +6,7 @@ import { getProjectData, useLocale, useProject, useVersion } from '../../context
 import { useAsync } from '../../hooks/useAsync.js'
 import { useLocalStorage } from '../../hooks/useLocalStorage.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -33,7 +33,7 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const { value: df } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
-		const df = DEEPSLATE.loadDensityFunction(JSON.parse(text), minY, height, seed)
+		const df = DEEPSLATE.loadDensityFunction(safeJsonParse(text) ?? {}, minY, height, seed)
 		return df
 	}, [version, project, minY, height, seed, text])
 

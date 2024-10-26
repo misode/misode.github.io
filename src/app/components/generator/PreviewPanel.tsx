@@ -2,6 +2,7 @@ import type { DocAndNode } from '@spyglassmc/core'
 import { useDocAndNode } from '../../contexts/Spyglass.jsx'
 import { useVersion } from '../../contexts/Version.jsx'
 import { checkVersion } from '../../services/index.js'
+import { safeJsonParse } from '../../Utils.js'
 import { BiomeSourcePreview, BlockStatePreview, DecoratorPreview, DensityFunctionPreview, LootTablePreview, ModelPreview, NoisePreview, NoiseSettingsPreview, RecipePreview, StructureSetPreview } from '../previews/index.js'
 
 export const HasPreview = ['loot_table', 'recipe', 'dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature', 'worldgen/structure_set', 'block_definition', 'docAndNode']
@@ -27,7 +28,7 @@ export function PreviewPanel({ docAndNode: original, id, shown }: PreviewPanelPr
 		return <RecipePreview {...{ docAndNode, shown }} />
 	}
 
-	if (id === 'dimension' && JSON.parse(docAndNode.doc.getText()).generator?.type?.endsWith('noise')) {
+	if (id === 'dimension' && safeJsonParse(docAndNode.doc.getText())?.generator?.type?.endsWith('noise')) {
 		return <BiomeSourcePreview {...{ docAndNode, shown }} />
 	}
 

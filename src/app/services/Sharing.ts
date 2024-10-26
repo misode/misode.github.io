@@ -1,14 +1,14 @@
 import lz from 'lz-string'
+import { safeJsonParse } from '../Utils.js'
 import type { VersionId } from './Versions.js'
 
 const API_PREFIX = 'https://snippets.misode.workers.dev'
 
 const ShareCache = new Map<string, string>()
 
-export async function shareSnippet(type: string, version: VersionId, jsonData: any, show_preview: boolean) {
+export async function shareSnippet(type: string, version: VersionId, text: string, show_preview: boolean) {
 	try {
-		const raw = JSON.stringify(jsonData)
-		const data = lz.compressToBase64(raw)
+		const data = lz.compressToBase64(text)
 		const body = JSON.stringify({ data, type, version, show_preview })
 		let id = ShareCache.get(body)
 		if (!id) {
@@ -16,7 +16,7 @@ export async function shareSnippet(type: string, version: VersionId, jsonData: a
 			ShareCache.set(body, snippet.id)
 			id = snippet.id as string
 		}
-		return { id, length: raw.length, compressed: data.length, rate: raw.length / data.length }
+		return { id, length: text.length, compressed: data.length, rate: text.length / data.length }
 	} catch (e) {
 		if (e instanceof Error) {
 			e.message = `Error creating share link: ${e.message}`
@@ -30,7 +30,7 @@ export async function getSnippet(id: string) {
 		const snippet = await fetchApi(`/${id}`)
 		return {
 			...snippet,
-			data: JSON.parse(lz.decompressFromBase64(snippet.data) ?? '{}'),
+			data: safeJsonParse(lz.decompressFromBase64(snippet.data) ?? '{}') ?? {},
 		}
 	} catch (e) {
 		if (e instanceof Error) {

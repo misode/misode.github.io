@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { checkVersion, fetchAllPresets, fetchItemComponents } from '../../services/index.js'
-import { clamp, jsonToNbt, randomSeed } from '../../Utils.js'
+import { clamp, jsonToNbt, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
@@ -40,10 +40,7 @@ export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 			return []
 		}
 		const [itemTags, lootTables, itemComponents, enchantments, enchantmentTags] = dependencies
-		let table = {}
-		try {
-			table = JSON.parse(text)
-		} catch (e) {}
+		const table = safeJsonParse(text) ?? {}
 		if (use1204) {
 			return generateLootTable1204(table, {
 				version, seed, luck, daytime, weather,

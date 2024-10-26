@@ -5,7 +5,7 @@ import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import type { Color } from '../../Utils.js'
-import { computeIfAbsent, iterateWorld2D, randomSeed, stringToColor } from '../../Utils.js'
+import { computeIfAbsent, iterateWorld2D, randomSeed, safeJsonParse, stringToColor } from '../../Utils.js'
 import { Btn } from '../index.js'
 import { featureColors } from './Decorator.js'
 import { DEEPSLATE } from './Deepslate.js'
@@ -21,7 +21,7 @@ export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const { value: structureSet } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version)
-		const structureSet = DEEPSLATE.loadStructureSet(JSON.parse(text), seed)
+		const structureSet = DEEPSLATE.loadStructureSet(safeJsonParse(text) ?? {}, seed)
 		return structureSet
 	}, [text, version, seed])
 

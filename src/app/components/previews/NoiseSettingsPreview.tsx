@@ -6,7 +6,7 @@ import { getProjectData, useLocale, useProject, useVersion } from '../../context
 import { useAsync } from '../../hooks/index.js'
 import { fetchRegistries } from '../../services/index.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnInput, BtnMenu, ErrorPanel } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -26,7 +26,7 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const text = docAndNode.doc.getText()
 
 	const { value, error } = useAsync(async () => {
-		const data = JSON.parse(text)
+		const data = safeJsonParse(text) ?? {}
 		await DEEPSLATE.loadVersion(version, getProjectData(project))
 		const biomeSource = { type: 'fixed', biome }
 		await DEEPSLATE.loadChunkGenerator(data, biomeSource, seed)

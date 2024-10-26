@@ -3,7 +3,7 @@ import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -19,7 +19,7 @@ export const NoisePreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const noise = useMemo(() => {
 		const random = XoroshiroRandom.create(seed)
-		const params = NoiseParameters.fromJson(JSON.parse(text))
+		const params = NoiseParameters.fromJson(safeJsonParse(text) ?? {})
 		return new NormalNoise(random, params)
 	}, [text, seed])
 

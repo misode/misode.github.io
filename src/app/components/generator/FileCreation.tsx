@@ -2,6 +2,7 @@ import type { DocAndNode } from '@spyglassmc/core'
 import { useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import { useLocale, useProject } from '../../contexts/index.js'
+import { safeJsonParse } from '../../Utils.js'
 import { Btn } from '../Btn.js'
 import { TextInput } from '../forms/index.js'
 import { Modal } from '../Modal.js'
@@ -29,8 +30,11 @@ export function FileCreation({ docAndNode, id, method, onClose }: Props) {
 			return
 		}
 		Analytics.saveProjectFile(id, projects.length, project.files.length, method as any)
-		const data = JSON.parse(docAndNode.doc.getText())
-		updateFile(id, undefined, { type: id, id: fileId, data })
+		const text = docAndNode.doc.getText()
+		const data = safeJsonParse(text)
+		if (data !== undefined) {
+			updateFile(id, undefined, { type: id, id: fileId, data })
+		}
 		onClose()
 	}
 

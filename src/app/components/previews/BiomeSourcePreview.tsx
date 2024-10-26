@@ -5,7 +5,7 @@ import { getProjectData, useLocale, useProject, useStore, useVersion } from '../
 import { useAsync } from '../../hooks/index.js'
 import { checkVersion } from '../../services/Versions.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed, stringToColor } from '../../Utils.js'
+import { iterateWorld2D, randomSeed, safeJsonParse, stringToColor } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -32,7 +32,7 @@ export const BiomeSourcePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const [focused2, setFocused2] = useState<string[]>([])
 
 	const text = docAndNode.doc.getText()
-	const data = JSON.parse(text)
+	const data = safeJsonParse(text) ?? {}
 	const type: string = data?.generator?.biome_source?.type?.replace(/^minecraft:/, '') ?? ''
 	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 

@@ -5,6 +5,7 @@ import { useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncCancel } from '../../hooks/useAsyncFn.js'
 import { getResources, ResourceWrapper } from '../../services/Resources.js'
+import { safeJsonParse } from '../../Utils.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
@@ -18,7 +19,7 @@ export const BlockStatePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
 		const resources = await getResources(version)
-		const definition = BlockDefinition.fromJson(JSON.parse(text))
+		const definition = BlockDefinition.fromJson(safeJsonParse(text) ?? {})
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {
 				if (id.equals(PREVIEW_ID)) return definition

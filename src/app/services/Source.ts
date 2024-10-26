@@ -1,7 +1,7 @@
 import { NbtTag } from 'deepslate'
 import yaml from 'js-yaml'
 import { Store } from '../Store.js'
-import { jsonToNbt } from '../Utils.js'
+import { jsonToNbt, safeJsonParse } from '../Utils.js'
 
 const INDENTS: Record<string, number | string | undefined> = {
 	'2_spaces': 2,
@@ -21,7 +21,7 @@ const FORMATS: Record<string, {
 	snbt: {
 		parse: (s) => JSON.stringify(NbtTag.fromString(s).toSimplifiedJson(), null, 2),
 		stringify: (s, i) => {
-			const tag = jsonToNbt(JSON.parse(s))
+			const tag = jsonToNbt(safeJsonParse(s) ?? {})
 			if (i === undefined) {
 				return tag.toString()
 			}
@@ -30,7 +30,7 @@ const FORMATS: Record<string, {
 	},
 	yaml: {
 		parse: (s) => JSON.stringify(yaml.load(s), null, 2),
-		stringify: (s, i) => yaml.dump(JSON.parse(s), {
+		stringify: (s, i) => yaml.dump(safeJsonParse(s) ?? {}, {
 			flowLevel: i === undefined ? 0 : -1,
 			indent: typeof i === 'string' ? 4 : i,
 		}),

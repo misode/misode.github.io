@@ -2,7 +2,7 @@ import { BlockPos, ChunkPos, LegacyRandom, PerlinNoise } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
-import { computeIfAbsent, iterateWorld2D, randomSeed } from '../../Utils.js'
+import { computeIfAbsent, iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { PlacedFeature, PlacementContext } from './Decorator.js'
 import { decorateChunk } from './Decorator.js'
@@ -50,7 +50,7 @@ export const DecoratorPreview = ({ docAndNode, shown }: PreviewProps) => {
 	}, [])
 	const onDraw = useCallback(function onDraw(transform: mat3) {
 		if (!ctx.current || !imageData.current || !shown) return
-		const data = JSON.parse(text)
+		const data = safeJsonParse(text) ?? {}
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(Math.floor(x / 16), Math.floor(-y / 16))
 			const features = computeIfAbsent(chunkFeatures, `${pos[0]} ${pos[1]}`, () => decorateChunk(pos, data, context))

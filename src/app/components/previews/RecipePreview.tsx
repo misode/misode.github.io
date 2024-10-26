@@ -4,7 +4,7 @@ import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchAllPresets } from '../../services/index.js'
-import { jsonToNbt } from '../../Utils.js'
+import { jsonToNbt, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import type { PreviewProps } from './index.js'
@@ -30,13 +30,13 @@ export const RecipePreview = ({ docAndNode }: PreviewProps) => {
 	}, [])
 
 	const text = docAndNode.doc.getText()
-	const recipe = JSON.parse(text)
+	const recipe = safeJsonParse(text) ?? {}
 	const items = useMemo<Map<Slot, ItemStack>>(() => {
 		return placeItems(version, recipe, animation, itemTags ?? new Map())
 	}, [text, animation, itemTags])
 
 	const gui = useMemo(() => {
-		const type = recipe.type?.replace(/^minecraft:/, '')
+		const type = recipe?.type?.replace(/^minecraft:/, '')
 		if (type === 'smelting' || type === 'blasting' || type === 'smoking' || type === 'campfire_cooking') {
 			return '/images/furnace.png'
 		} else if (type === 'stonecutting') {
