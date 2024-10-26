@@ -524,6 +524,9 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			</div>
 		})}
 		{dynamicFields.map((field, index) => {
+			if (field.key.kind === 'any' && field.type.kind === 'any') {
+				return <></>
+			}
 			const incompletePairs = node.children.filter(pair => pair.value && core.Range.length(pair.value.range) === 0)
 			const pair = index < incompletePairs.length ? incompletePairs[index] : undefined
 			const keyType = simplifyType(field.key, ctx)
