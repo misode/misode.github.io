@@ -12,7 +12,7 @@ import { useCallback, useMemo } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
-import { generateColor, hexId } from '../../Utils.js'
+import { generateColor, hexId, randomInt, randomSeed } from '../../Utils.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
 
@@ -207,8 +207,10 @@ function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
 	const isFloat = type.kind === 'float' || type.kind === 'double'
 
-	const onChangeValue = useCallback((value: string) => {
-		const number = value.length === 0 ? undefined : Number(value)
+	const onChangeValue = useCallback((value: string | bigint | number) => {
+		const number = typeof value === 'string'
+			? (value.length === 0 ? undefined : Number(value))
+			: value
 		if (number !== undefined && Number.isNaN(number)) {
 			return
 		}
@@ -217,7 +219,7 @@ function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 				return undefined
 			}
 			const newValue: core.FloatNode | core.LongNode = isFloat
-				? { type: 'float', range, value: number }
+				? { type: 'float', range, value: Number(number) }
 				: { type: 'long', range, value: BigInt(number) }
 			const newNode: JsonNumberNode = {
 				type: 'json:number',
@@ -241,11 +243,20 @@ function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 		onChangeValue(generateColor().toString())
 	}, [onChangeValue])
 
+	const random = type.attributes?.find(a => a.name === 'random')
+
+	const onRandom = useCallback(() => {
+		onChangeValue(type.kind === 'long' ? randomSeed() : randomInt())
+	}, [type, onChangeValue])
+
 	return <>
 		<input class="short-input" type="number" value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
 		{colorKind && <>
 			<input class="short-input" type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={(e) => onChangeColor((e.target as HTMLInputElement).value)} />
 			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
+		</>}
+		{random && <>
+			<button class="tooltipped tip-se" aria-label={locale('generate_new_seed')} onClick={onRandom}>{Octicon.sync}</button>
 		</>}
 	</>
 }

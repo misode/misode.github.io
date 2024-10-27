@@ -30,7 +30,11 @@ export function hexId(length = 12) {
 }
 
 export function randomSeed() {
-	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+	return BigInt(Math.floor((Math.random() - 0.5) * 2 * Number.MAX_SAFE_INTEGER))
+}
+
+export function randomInt() {
+	return Math.floor(Math.random() * 4294967296) - 2147483648
 }
 
 export function generateUUID() {

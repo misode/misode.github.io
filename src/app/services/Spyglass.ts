@@ -29,7 +29,7 @@ dispatch minecraft:resource[text_component] to Text
 dispatch minecraft:resource[world] to struct WorldSettings {
 	generate_features: boolean,
 	bonus_chest: boolean,
-	seed: #[random] int,
+	seed: #[random] long,
 	dimensions: struct {
 		[#[id="dimension"] string]: Dimension,
 	},
