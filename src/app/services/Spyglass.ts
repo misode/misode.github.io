@@ -22,7 +22,18 @@ import type { VersionId } from './Versions.js'
 
 const builtinMcdoc = `
 use ::java::server::util::text::Text
+use ::java::data::worldgen::dimension::Dimension
+
 dispatch minecraft:resource[text_component] to Text
+
+dispatch minecraft:resource[world] to struct WorldSettings {
+	generate_features: boolean,
+	bonus_chest: boolean,
+	seed: #[random] int,
+	dimensions: struct {
+		[#[id="dimension"] string]: Dimension,
+	},
+}
 `
 
 interface ClientDocument {
@@ -203,6 +214,9 @@ export class SpyglassService {
 						customResources: {
 							text_component: {
 								category: 'text_component',
+							},
+							world: {
+								category: 'world',
 							},
 						},
 					},

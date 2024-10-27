@@ -948,6 +948,7 @@ function getCategory(type: McdocType) {
 	if (type.kind === 'reference' && type.path) {
 		switch (type.path) {
 			case '::java::data::loot::LootPool':
+			case '::java::data::worldgen::dimension::Dimension':
 			case '::java::data::worldgen::surface_rule::SurfaceRule':
 			case '::java::data::worldgen::template_pool::WeightedElement':
 				return 'pool'
