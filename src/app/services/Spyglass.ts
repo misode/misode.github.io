@@ -20,6 +20,11 @@ import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
 
+const builtinMcdoc = `
+use ::java::server::util::text::Text
+dispatch minecraft:resource[text_component] to Text
+`
+
 interface ClientDocument {
 	doc: TextDocument
 	undoStack: string[]
@@ -194,7 +199,12 @@ export class SpyglassService {
 				defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
 					env: {
 						gameVersion: version.ref ?? version.id,
-						dependencies: ['@vanilla-mcdoc'],
+						dependencies: ['@vanilla-mcdoc', '@misode-mcdoc'],
+						customResources: {
+							text_component: {
+								category: 'text_component',
+							},
+						},
 					},
 					lint: {
 						idOmitDefaultNamespace: false,
@@ -227,6 +237,14 @@ async function decompressBall(buffer: Uint8Array, options?: { stripLevel?: numbe
 	}))
 }
 
+async function compressBall(files: [string, string][]): Promise<Uint8Array> {
+	const writer = new zip.ZipWriter(new zip.Uint8ArrayWriter())
+	await Promise.all(files.map(async ([name, data]) => {
+		await writer.add(name, new zip.TextReader(data))
+	}))
+	return await writer.close()
+}
+
 const initialize: core.ProjectInitializer = async (ctx) => {
 	const { config, logger, meta, externals, cacheRoot } = ctx
 
@@ -235,6 +253,13 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 		const buffer = await fetchVanillaMcdoc()
 		await core.fileUtil.writeFile(externals, uri, new Uint8Array(buffer))
 		return { info: { startDepth: 1 }, uri }
+	})
+
+	meta.registerDependencyProvider('@misode-mcdoc', async () => {
+		const uri: string = new core.Uri('downloads/misode-mcdoc.tar.gz', cacheRoot).toString()
+		const buffer = await compressBall([['builtin.mcdoc', builtinMcdoc]])
+		await core.fileUtil.writeFile(externals, uri, buffer)
+		return { uri }
 	})
 
 	const versions = await fetchVersions()
