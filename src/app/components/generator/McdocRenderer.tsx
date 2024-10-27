@@ -4,7 +4,7 @@ import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonPairNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
-import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier, ItemStack } from 'deepslate'
@@ -604,11 +604,11 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			}
 			const child = pair.value
 			// TODO: correctly determine which dynamic field this is a key for
-			const fieldType = dynamicFields[0]?.type
-			if (!fieldType) {
+			const field = dynamicFields[0] as SimplifiedStructTypePairField | undefined
+			if (!field) {
 				return <></>
 			}
-			const childType = simplifyType(fieldType, ctx, child)
+			const childType = simplifyType(field.type, ctx, child)
 			const makeFieldEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
@@ -625,13 +625,13 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 					return node
 				})
 			}
-			return <div key={key} class="node" data-category={getCategory(fieldType)}>
+			return <div key={key} class="node" data-category={getCategory(field.type)}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => makeFieldEdit(() => undefined)}>
 						{Octicon.trashcan}
 					</button>
-					<Key label={key} />
+					<Key label={key} raw={field.key.kind === 'string'} />
 					<Head type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
 				</div>
 				<Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
@@ -640,8 +640,12 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 	</>
 }
 
-function Key({ label }: { label: string | number | boolean }) {
-	return <label>{formatIdentifier(label.toString())}</label>
+interface KeyProps {
+	label: string | number | boolean
+	raw?: boolean
+}
+function Key({ label, raw }: KeyProps) {
+	return <label>{raw ? label.toString() : formatIdentifier(label.toString())}</label>
 }
 
 function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {

@@ -218,6 +218,19 @@ export class SpyglassService {
 							world: {
 								category: 'world',
 							},
+							// TODO: move these to the assets folder
+							atlases: {
+								category: 'atlas',
+							},
+							blockstates: {
+								category: 'block_definition',
+							},
+							font: {
+								category: 'font',
+							},
+							models: {
+								category: 'model',
+							},
 						},
 					},
 					lint: {
