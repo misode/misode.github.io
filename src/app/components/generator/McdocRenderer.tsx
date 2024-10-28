@@ -1,7 +1,7 @@
 import * as core from '@spyglassmc/core'
-import type { JsonNode } from '@spyglassmc/json'
+import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
-import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonPairNode, JsonStringNode } from '@spyglassmc/json'
+import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
@@ -485,7 +485,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 				staticChilds.push(pair)
 			}
 			const child = pair?.value
-			const childType = simplifyType(field.type, ctx)
+			const childType = simplifyType(field.type, ctx, pair)
 			const makeFieldEdit: MakeEdit = (edit) => {
 				if (pair) {
 					makeEdit(() => {
@@ -573,7 +573,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 					return
 				}
 				makeEdit((range) => {
-					const valueNode = getDefault(simplifyType(field.type, ctx), range, ctx)
+					const valueNode = getDefault(simplifyType(field.type, ctx, pair), range, ctx)
 					const newPair: core.PairNode<JsonStringNode, JsonNode> = {
 						type: 'pair',
 						range: keyNode.range,
@@ -608,7 +608,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 			if (!field) {
 				return <></>
 			}
-			const childType = simplifyType(field.type, ctx, child)
+			const childType = simplifyType(field.type, ctx, pair)
 			const makeFieldEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
@@ -1040,27 +1040,45 @@ const selectRegistries = new Set([
 	'worldgen/trunk_placer_type',
 ])
 
-export function simplifyType(type: McdocType, ctx: McdocContext, node?: JsonNode): SimplifiedMcdocType {
-	const key = node?.parent && JsonPairNode.is(node.parent) && JsonStringNode.is(node.parent.key) ? node.parent.key : undefined
-	const simplifyNode: SimplifyValueNode<any> = {
+export function simplifyType(type: McdocType, ctx: McdocContext, pair?: JsonPairNode): SimplifiedMcdocType {
+	const simplifyNode: SimplifyValueNode<JsonNode | undefined> = {
 		entryNode: {
-			parent: undefined,
-			runtimeKey: key ? {
-				originalNode: key,
-				inferredType: { kind: 'literal', value: { kind: 'string', value: key.value } },
+			parent: pair && JsonObjectNode.is(pair?.parent) ? {
+				entryNode: {
+					parent: undefined,
+					runtimeKey: undefined,
+				},
+				node: {
+					originalNode: pair.parent,
+					inferredType: inferType(pair.parent),
+				},
+			} : undefined,
+			runtimeKey: pair?.key ? {
+				originalNode: pair.key,
+				inferredType: inferType(pair.key),
 			} : undefined,
 		},
 		node: {
-			originalNode: null,
+			originalNode: undefined,
 			inferredType: { kind: 'any' },
 		},
 	}
-	const context: McdocCheckerContext<any> = { 
+	const context: McdocCheckerContext<JsonNode | undefined> = { 
 		...ctx,
 		allowMissingKeys: false,
 		requireCanonical: false,
 		isEquivalent: () => false,
-		getChildren: () => [],
+		getChildren: (node) => {
+			if (JsonObjectNode.is(node)) {
+				return node.children.filter(kvp => kvp.key).map(kvp => ({
+					key: { originalNode: kvp.key!, inferredType: inferType(kvp.key!) },
+					possibleValues: kvp.value
+						? [{ originalNode: kvp.value, inferredType: inferType(kvp.value) }]
+						: [],
+				}))
+			}
+			return []
+		},
 		reportError: () => {},
 		attachTypeInfo: () => {},
 		nodeAttacher:  () => {},
@@ -1068,6 +1086,26 @@ export function simplifyType(type: McdocType, ctx: McdocContext, node?: JsonNode
 	}
 	const result = simplify(type, { node: simplifyNode, ctx: context })
 	return result.typeDef
+}
+
+function inferType(node: JsonNode): Exclude<McdocType, UnionType> {
+	switch (node.type) {
+		case 'json:boolean':
+			return { kind: 'literal', value: { kind: 'boolean', value: node.value! } }
+		case 'json:number':
+			return {
+				kind: 'literal',
+				value: { kind: node.value.type, value: Number(node.value.value) },
+			}
+		case 'json:null':
+			return { kind: 'any' } // null is always invalid?
+		case 'json:string':
+			return { kind: 'literal', value: { kind: 'string', value: node.value } }
+		case 'json:array':
+			return { kind: 'list', item: { kind: 'any' } }
+		case 'json:object':
+			return { kind: 'struct', fields: [] }
+	}
 }
 
 function getItemType(type: ListType | PrimitiveArrayType): McdocType {
