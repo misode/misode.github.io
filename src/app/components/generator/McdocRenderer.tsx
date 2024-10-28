@@ -286,6 +286,10 @@ function BooleanHead({ node, makeEdit }: Props) {
 function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
 	const { locale } = useLocale()
 
+	if (type.members.length === 0) {
+		return <></>
+	}
+
 	const selectedType = findSelectedMember(type, node)
 
 	const onSelect = useCallback((newValue: string) => {
@@ -931,6 +935,9 @@ function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: McdocCont
 		}
 	}
 	if (type.kind === 'union') {
+		if (type.members.length === 0) {
+			return { type: 'json:null', range }
+		}
 		return getDefault(type.members[0], range, ctx)
 	}
 	if (type.kind === 'enum') {
