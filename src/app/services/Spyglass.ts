@@ -5,7 +5,7 @@ import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/inde
 import { Fluids, ReleaseVersion, symbolRegistrar } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
 import * as jeMcf from '@spyglassmc/java-edition/lib/mcfunction/index.js'
-import type { JsonFileNode } from '@spyglassmc/json'
+import type { JsonFileNode, JsonStringNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
@@ -322,8 +322,12 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	jeMcf.initialize(ctx, summary.commands, release)
 	nbt.initialize(ctx)
 
+	// Until spyglass registers these correctly
 	meta.registerFormatter<JsonFileNode>('json:file', (node, ctx) => {
 		return ctx.meta.getFormatter(node.children[0].type)(node.children[0], ctx)
+	})
+	meta.registerFormatter<JsonStringNode>('json:string', (node) => {
+		return JSON.stringify(node.value)
 	})
 
 	return { loadedVersion: release }

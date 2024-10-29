@@ -111,12 +111,12 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 			if ((newValue.length === 0 && optional) || (isSelect && newValue === SPECIAL_UNSET)) {
 				return undefined
 			}
+			const valueMap = [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }]
+			const source = new core.Source(JSON.stringify(newValue), valueMap)
+			const string = core.string(json.parser.JsonStringOptions)(source, ctx)
 			return {
+				...string,
 				type: 'json:string',
-				range,
-				options: json.parser.JsonStringOptions,
-				value: newValue,
-				valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 			}
 		})
 	}, [optional, node, makeEdit, isSelect])
