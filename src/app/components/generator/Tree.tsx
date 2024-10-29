@@ -60,22 +60,23 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 		return service.getCheckerContext(docAndNode.doc, errors)
 	}, [docAndNode, service])
 
-	const type = useMemo(() => {
-		if (!ctx) {
-			return undefined
-		}
+	const resourceType = useMemo(() => {
 		const path = original.doc.uri
 			.replace(/^file:\/\/\/project\//, '')
 			.replace(/\.json$/, '')
 		const res = disectFilePath(path, version)
-		if (!res) {
+		return res?.type
+	}, [original, version])
+
+	const mcdocType = useMemo(() => {
+		if (!ctx || !resourceType) {
 			return undefined
 		}
-		return simplifyType(getRootType(res.type), ctx)
-	}, [original.doc.uri, version, ctx])
+		return simplifyType(getRootType(resourceType), ctx)
+	}, [resourceType, ctx])
 
-	return <div class="tree node-root" data-cy="tree">
-		{(ctx && type) && <McdocRoot type={type} node={fileChild.children[0]} makeEdit={makeEdit} ctx={ctx} />}
+	return <div class="tree node-root" data-cy="tree" data-category={getCategory(resourceType)}>
+		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={fileChild.children[0]} makeEdit={makeEdit} ctx={ctx} />}
 	</div>
 }
 
@@ -104,5 +105,13 @@ function getRootType(id: string): McdocType {
 		kind: 'dispatcher',
 		registry: 'minecraft:resource',
 		parallelIndices: [{ kind: 'static', value: id }],
+	}
+}
+
+function getCategory(type: string | undefined) {
+	switch (type) {
+		case 'item_modifier': return 'function'
+		case 'predicate': return 'predicate'
+		default: return undefined
 	}
 }
