@@ -344,10 +344,10 @@ function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<Si
 	return <>
 		{optional
 			? (JsonObjectNode.is(node)
-				? <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+				? <button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
 					{Octicon.trashcan}
 				</button>
-				: <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+				: <button class="add tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
 					{Octicon.plus_circle}
 				</button>)
 			: (!JsonObjectNode.is(node)

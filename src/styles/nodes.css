@@ -5,14 +5,14 @@
   --node-background-hover: #e7e7e7;
   --node-text: #000000;
   --node-text-dimmed: #2c2c2c;
-  --node-selected: #f0e65e;
-  --node-selected-hover: #faf06c;
-  --node-selected-border: #b9a327;
+  --node-selected: #f0bc5c;
+  --node-selected-hover: #fdce75;
+  --node-selected-border: #d6a343;
   --node-add: #9bd464;
-  --node-add-hover: #a5dd70;
+  --node-add-hover: #b0e77c;
   --node-add-border: #498d09;
   --node-remove: #e76f51;
-  --node-remove-hover: #f57656;
+  --node-remove-hover: #f77c5d;
   --node-remove-border: #be4b2e;
   --node-indent-border: #b9b9b9;
   --category-predicate: #65b5b8;
@@ -33,14 +33,14 @@
   --node-background-hover: #1f1f1f;
   --node-text: #dadada;
   --node-text-dimmed: #b4b4b4;
-  --node-selected: #ad9715;
-  --node-selected-hover: #a38c0a;
-  --node-selected-border: #8d7a0d;
+  --node-selected: hsl(39, 92%, 26%);
+  --node-selected-hover: #724c04;
+  --node-selected-border: #6c4702;
   --node-add: #487c13;
-  --node-add-hover: #3e7409;
+  --node-add-hover: #396a08;
   --node-add-border: #3b6e0c;
   --node-remove: #9b341b;
-  --node-remove-hover: #922d13;
+  --node-remove-hover: #86270f;
   --node-remove-border: #7e1d05;
   --node-indent-border: #454749;
   --category-predicate: #306163;
@@ -120,7 +120,7 @@
   background-color: var(--node-background-input);
 }
 
-.node-header button:not([disabled]):hover {
+.node-header button:enabled:hover {
   background-color: var(--node-background-hover);
 }
 
@@ -173,41 +173,37 @@ button.selected {
   background-color: var(--node-selected);
   border-color: var(--node-selected-border);
 }
-button:not([disabled]).selected:hover {
+
+button.selected:enabled:hover {
   background-color: var(--node-selected-hover);
 }
 
-.node-collapse svg {
-  fill: var(--node-text);
-}
-
-.node-collapse.closed,
 button.add {
   background-color: var(--node-add);
   border-color: var(--node-add-border);
 }
 
-.node-collapse:not([disabled]).closed:hover,
-button:not([disabled]).add:hover {
+button.add:enabled:hover {
   background-color: var(--node-add-hover);
 }
 
-.node-collapse.open,
 button.remove {
   background-color: var(--node-remove);
   border-color: var(--node-remove-border);
 }
 
-.node-collapse:not([disabled]).open:hover,
-button:not([disabled]).remove:hover {
+button.remove:enabled:hover {
   background-color: var(--node-remove-hover);
+}
+
+.node-header button:disabled {
+  cursor: unset;
 }
 
 .node-header > button svg {
   fill: var(--node-text);
 }
 
-.node-header > button.node-collapse:last-child,
 .node-header > button.add:last-child {
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
