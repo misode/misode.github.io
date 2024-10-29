@@ -206,7 +206,7 @@ function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
 		{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
 		{(value !== undefined && !type.values.map(v => v.value).includes(value)) && <option value={value}>{value}</option>}
 		{type.values.map(value =>
-			<option value={value.value}>{formatIdentifier(value.value.toString())}</option>
+			<option value={value.value}>{formatIdentifier(value.identifier)}</option>
 		)}
 	</select>
 }
@@ -414,11 +414,11 @@ function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
 
 	if (optional) {
 		if (node && JsonArrayNode.is(node)) {
-			return <button class="node-collapse open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+			return <button class="remove open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
 				{Octicon.trashcan}
 			</button>
 		} else {
-			return <button class="node-collapse closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+			return <button class="add closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
 				{Octicon.plus_circle}
 			</button>
 		}
@@ -1029,7 +1029,10 @@ function formatIdentifier(id: string): string {
 	if (id.startsWith('!')) {
 		return '! ' + formatIdentifier(id.substring(1))
 	}
-	const text = id.replace(/^minecraft:/, '').replaceAll('_', ' ')
+	const text = id
+		.replace(/^minecraft:/, '')
+		.replaceAll('_', ' ')
+		.replace(/[a-z][A-Z]+/g, m => m.charAt(0) + ' ' + m.substring(1).toLowerCase())
 	return text.charAt(0).toUpperCase() + text.substring(1)
 }
 
