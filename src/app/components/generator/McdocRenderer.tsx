@@ -318,10 +318,10 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 		<select value={memberIndex > -1 ? memberIndex : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
 			{(selectedType === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
 			{type.members.map((member, index) =>
-				<option value={index}>{formatIdentifier(member.kind)}</option>
+				<option value={index}>{formatUnionMember(member, type.members.filter(m => m !== member))}</option>
 			)}
 		</select>
-		{selectedType && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
+		{selectedType && selectedType.kind !== 'literal' && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
 	</>
 }
 
@@ -1007,6 +1007,24 @@ function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: McdocCont
 	return { type: 'json:null', range }
 }
 
+function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedMcdocTypeNoUnion[]): string {
+	if (type.kind === 'literal') {
+		return formatIdentifier(type.value.value.toString())
+	}
+	if (!others.some(o => o.kind === type.kind)) {
+		// No other member is of this kind
+		return formatIdentifier(type.kind)
+	}
+	if (type.kind === 'struct') {
+		// Show the first literal key
+		const firstKey = type.fields.find(f => f.key.kind === 'literal')?.key
+		if (firstKey) {
+			return formatUnionMember(firstKey, [])
+		}
+	}
+	return formatIdentifier(type.kind)
+}
+
 function formatIdentifier(id: string): string {
 	if (id.startsWith('!')) {
 		return '! ' + formatIdentifier(id.substring(1))
@@ -1172,11 +1190,23 @@ function getItemType(type: ListType | PrimitiveArrayType): McdocType {
 					: { kind: 'any' }
 }
 
-function quickEqualTypes(a: SimplifiedMcdocType, b: SimplifiedMcdocType) {
+function quickEqualTypes(a: SimplifiedMcdocTypeNoUnion, b: SimplifiedMcdocTypeNoUnion): boolean {
+	if (a === b) {
+		return true
+	}
 	if (a.kind !== b.kind) {
 		return false
 	}
-	// TODO: improve this
+	if (a.kind === 'literal' && b.kind === 'literal') {
+		return a.value.kind === b.value.kind && a.value.value === b.value.value
+	}
+	if (a.kind === 'struct' && b.kind === 'struct') {
+		// Compare the first key of both structs
+		const keyA = a.fields[0]?.key
+		const keyB = b.fields[0]?.key
+		return (!keyA && !keyB) || (keyA && keyB && quickEqualTypes(keyA, keyB))
+	}
+	// Types are of the same kind	
 	return true
 }
 
