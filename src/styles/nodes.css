@@ -14,6 +14,7 @@
   --node-remove: #e76f51;
   --node-remove-hover: #f77c5d;
   --node-remove-border: #be4b2e;
+  --node-help: #babcc0;
   --node-indent-border: #b9b9b9;
   --category-predicate: #65b5b8;
   --category-predicate-border: #187e81;
@@ -33,7 +34,7 @@
   --node-background-hover: #1f1f1f;
   --node-text: #dadada;
   --node-text-dimmed: #b4b4b4;
-  --node-selected: hsl(39, 92%, 26%);
+  --node-selected: #7f5505;
   --node-selected-hover: #724c04;
   --node-selected-border: #6c4702;
   --node-add: #487c13;
@@ -42,13 +43,14 @@
   --node-remove: #9b341b;
   --node-remove-hover: #86270f;
   --node-remove-border: #7e1d05;
+  --node-help: #494949;
   --node-indent-border: #454749;
   --category-predicate: #306163;
   --category-predicate-border: #224849;
   --category-predicate-background: #1d3333;
-  --category-function: #838383;
-  --category-function-border: #6b6b6b;
-  --category-function-background: #414141;
+  --category-function: #5f5f5f;
+  --category-function-border: #4a4a4a;
+  --category-function-background: #2c2c2c;
   --category-pool: #386330;
   --category-pool-border: #2e4922;
   --category-pool-background: #21331d;
@@ -276,7 +278,7 @@ button.move:disabled {
 }
 
 .node-icon.node-help svg {
-  fill: var(--node-border);
+  fill: var(--node-help);
 }
 
 .node-icon.node-error svg {
