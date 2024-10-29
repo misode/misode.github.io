@@ -82,7 +82,7 @@ function Head({ type, optional, node, makeEdit, ctx }: Props) {
 		return <TupleHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'literal') {
-		return <LiteralHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <LiteralHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'any' || type.kind === 'unsafe') {
 		return <AnyHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -430,8 +430,8 @@ function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
 	}
 }
 
-function LiteralHead({ type }: Props<LiteralType>) {
-	return <input value={type.value.value.toString()} disabled />
+function LiteralHead({ type, optional, node, makeEdit, ctx }: Props<LiteralType>) {
+	return <UnionHead type={{ kind: 'union', members: [type] }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 }
 
 function AnyHead({ optional, node, makeEdit, ctx }: Props) {
@@ -1210,15 +1210,16 @@ function quickEqualTypes(a: SimplifiedMcdocTypeNoUnion, b: SimplifiedMcdocTypeNo
 	return true
 }
 
-function findSelectedMember(_union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
+function findSelectedMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
 	const selectedType = node?.typeDef
 	if (!selectedType || selectedType.kind === 'any' || selectedType.kind === 'unsafe') {
 		return undefined
 	}
 	if (selectedType.kind === 'union') {
+		// Find the first selected type that is also part of the original definition.
 		// The node technically matches all members of this union,
 		// ideally the editor should show a combination of all members
-		return selectedType.members[0]
+		return selectedType.members.find(m1 => union.members.find(m2 => quickEqualTypes(m1, m2)))
 	}
 	return selectedType
 }
