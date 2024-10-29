@@ -17,6 +17,13 @@ import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
 
 const SPECIAL_UNSET = '__unset__'
+const ANY_TYPES: SimplifiedMcdocType[] = [
+	{ kind: 'boolean' },
+	{ kind: 'double' },
+	{ kind: 'string' },
+	{ kind: 'list', item: { kind: 'any' } },
+	{ kind: 'struct', fields: [ { kind: 'pair', key: { kind: 'string' }, type: { kind: 'any' } }] },
+]
 
 export interface McdocContext extends core.CheckerContext {}
 
@@ -76,6 +83,9 @@ function Head({ type, optional, node, makeEdit, ctx }: Props) {
 	}
 	if (type.kind === 'literal') {
 		return <LiteralHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+	}
+	if (type.kind === 'any' || type.kind === 'unsafe') {
+		return <AnyHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	return <></>
 }
@@ -424,6 +434,32 @@ function LiteralHead({ type }: Props<LiteralType>) {
 	return <input value={type.value.value.toString()} disabled />
 }
 
+function AnyHead({ optional, node, makeEdit, ctx }: Props) {
+	const { locale } = useLocale()
+
+	const selectedType = findSelectedAnyType(node)
+
+	const onSelect = useCallback((newValue: string) => {
+		makeEdit((range) => {
+			const newSelected = ANY_TYPES.find(t => t.kind === newValue)
+			if (!newSelected) {
+				return undefined
+			}
+			return getDefault(newSelected, range, ctx)
+		})
+	}, [makeEdit, ctx])
+
+	return <>
+		<select value={selectedType ? selectedType.kind : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
+			{(!selectedType || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
+			{ANY_TYPES.map((type) =>
+				<option value={type.kind}>{formatIdentifier(type.kind)}</option>
+			)}
+		</select>
+		{selectedType && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
+	</>
+}
+
 function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType>) {
 	if (type.kind === 'union') {
 		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -456,6 +492,9 @@ function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType
 		return <div class="node-body">
 			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
+	}
+	if (type.kind === 'any' || type.kind === 'unsafe') {
+		return <AnyBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	return <></>
 }
@@ -802,6 +841,16 @@ function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {
 	</>
 }
 
+function AnyBody({ optional, node, makeEdit, ctx }: Props) {
+	const selectedType = findSelectedAnyType(node)
+
+	if (!selectedType) {
+		return <></>
+	}
+
+	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+}
+
 interface ErrorsProps {
 	type: SimplifiedMcdocType
 	node: JsonNode | undefined
@@ -1133,7 +1182,7 @@ function quickEqualTypes(a: SimplifiedMcdocType, b: SimplifiedMcdocType) {
 
 function findSelectedMember(_union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
 	const selectedType = node?.typeDef
-	if (!selectedType) {
+	if (!selectedType || selectedType.kind === 'any' || selectedType.kind === 'unsafe') {
 		return undefined
 	}
 	if (selectedType.kind === 'union') {
@@ -1142,4 +1191,15 @@ function findSelectedMember(_union: UnionType<SimplifiedMcdocTypeNoUnion>, node:
 		return selectedType.members[0]
 	}
 	return selectedType
+}
+
+function findSelectedAnyType(node: JsonNode | undefined) {
+	switch (node?.type) {
+		case 'json:boolean': return ANY_TYPES[0]
+		case 'json:number': return ANY_TYPES[1]
+		case 'json:string': return ANY_TYPES[2]
+		case 'json:array': return ANY_TYPES[3]
+		case 'json:object': return ANY_TYPES[4]
+		default: return undefined
+	}
 }

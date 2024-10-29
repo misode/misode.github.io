@@ -27,9 +27,12 @@ use ::java::data::worldgen::dimension::Dimension
 dispatch minecraft:resource[text_component] to Text
 
 dispatch minecraft:resource[world] to struct WorldSettings {
-	generate_features: boolean,
-	bonus_chest: boolean,
 	seed: #[random] long,
+	/// Defaults to \`true\`.
+	generate_features?: boolean,
+	/// Defaults to \`false\`.
+	bonus_chest?: boolean,
+	legacy_custom_options?: string,
 	dimensions: struct {
 		[#[id="dimension"] string]: Dimension,
 	},
