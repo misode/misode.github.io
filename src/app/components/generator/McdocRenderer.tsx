@@ -4,6 +4,7 @@ import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
 import type { McdocCheckerContext, SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
@@ -516,8 +517,21 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 		return <></>
 	}
 	const type = node.typeDef?.kind === 'struct' ? node.typeDef : outerType
-	const staticFields = type.fields.filter(field => field.key.kind === 'literal')
-	const dynamicFields = type.fields.filter(field => field.key.kind !== 'literal')
+	// For some reason spyglass can include fields that haven't been filtered out in node.typeDef
+	const fields = type.fields.filter(field => {
+		let keep = true
+		handleAttributes(field.attributes, ctx, (handler, config) => {
+			if (!keep || !handler.filterElement) {
+				return
+			}
+			if (!handler.filterElement(config, ctx)) {
+				keep = false
+			}
+		})
+		return keep
+	})
+	const staticFields = fields.filter(field => field.key.kind === 'literal')
+	const dynamicFields = fields.filter(field => field.key.kind !== 'literal')
 	const staticChilds: core.PairNode<JsonStringNode, JsonNode>[] = []
 	return <>
 		{staticFields.map(field => {

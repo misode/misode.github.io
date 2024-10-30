@@ -329,6 +329,9 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	meta.registerFormatter<JsonStringNode>('json:string', (node) => {
 		return JSON.stringify(node.value)
 	})
+	meta.registerFormatter<core.ErrorNode>('error', () => {
+		return ''
+	})
 
 	return { loadedVersion: release }
 }
