@@ -17,15 +17,6 @@ import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
 import { formatIdentifier, getCategory, getDefault, getItemType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
-const SPECIAL_UNSET = '__unset__'
-const ANY_TYPES: SimplifiedMcdocType[] = [
-	{ kind: 'boolean' },
-	{ kind: 'double' },
-	{ kind: 'string' },
-	{ kind: 'list', item: { kind: 'any' } },
-	{ kind: 'struct', fields: [ { kind: 'pair', key: { kind: 'string' }, type: { kind: 'any' } }] },
-]
-
 export interface McdocContext extends core.CheckerContext {}
 
 type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
@@ -90,6 +81,47 @@ function Head({ type, optional, node, makeEdit, ctx }: Props) {
 	}
 	return <></>
 }
+
+function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType>) {
+	if (type.kind === 'union') {
+		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+	}
+	if (type.kind === 'struct') {
+		if (!JsonObjectNode.is(node) || type.fields.length === 0) {
+			return <></>
+		}
+		return <div class="node-body">
+			<StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		</div>
+	}
+	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
+		if (!JsonArrayNode.is(node)) {
+			return <></>
+		}
+		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
+			return <div class="node-body">
+				<TupleBody type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} node={node} makeEdit={makeEdit} ctx={ctx} />
+			</div>
+		}
+		if (node.children?.length === 0) {
+			return <></>
+		}
+		return <div class="node-body">
+			<ListBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		</div>
+	}
+	if (type.kind === 'tuple') {
+		return <div class="node-body">
+			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		</div>
+	}
+	if (type.kind === 'any' || type.kind === 'unsafe') {
+		return <AnyBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+	}
+	return <></>
+}
+
+const SPECIAL_UNSET = '__unset__'
 
 function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
@@ -301,7 +333,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 		return <></>
 	}
 
-	const selectedType = findSelectedMember(type, node)
+	const selectedType = selectUnionMember(type, node)
 
 	const onSelect = useCallback((newValue: string) => {
 		makeEdit((range) => {
@@ -324,6 +356,46 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 		</select>
 		{selectedType && selectedType.kind !== 'literal' && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
 	</>
+}
+
+function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedMcdocTypeNoUnion[]): string {
+	if (type.kind === 'literal') {
+		return formatIdentifier(type.value.value.toString())
+	}
+	if (!others.some(o => o.kind === type.kind)) {
+		// No other member is of this kind
+		return formatIdentifier(type.kind)
+	}
+	if (type.kind === 'struct') {
+		// Show the first literal key
+		const firstKey = type.fields.find(f => f.key.kind === 'literal')?.key
+		if (firstKey) {
+			return formatUnionMember(firstKey, [])
+		}
+	}
+	return formatIdentifier(type.kind)
+}
+
+function UnionBody({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
+	const selectedType = selectUnionMember(type, node)
+	if (selectedType === undefined) {
+		return <></>
+	}
+	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+}
+
+function selectUnionMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
+	const selectedType = node?.typeDef
+	if (!selectedType || selectedType.kind === 'any' || selectedType.kind === 'unsafe') {
+		return undefined
+	}
+	if (selectedType.kind === 'union') {
+		// Find the first selected type that is also part of the original definition.
+		// The node technically matches all members of this union,
+		// ideally the editor should show a combination of all members
+		return selectedType.members.find(m1 => union.members.find(m2 => quickEqualTypes(m1, m2)))
+	}
+	return selectedType
 }
 
 function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<SimplifiedStructType>) {
@@ -360,158 +432,7 @@ function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<Si
 	</>
 }
 
-function ListHead({ type, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
-	const { locale } = useLocale()
-
-	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
-
-	const onAddTop = useCallback(() => {
-		if (canAdd) {
-			makeEdit((range) => {
-				const itemType = simplifyType(getItemType(type), ctx)
-				const newValue = getDefault(itemType, range, ctx)
-				const newItem: core.ItemNode<JsonNode> = {
-					type: 'item',
-					range,
-					children: [newValue],
-					value: newValue,
-				}
-				newValue.parent = newItem
-				if (JsonArrayNode.is(node)) {
-					node.children.unshift(newItem)
-					newItem.parent = node
-					return node
-				}
-				const newArray: JsonArrayNode = {
-					type: 'json:array',
-					range,
-					children: [newItem],
-				}
-				newItem.parent = newArray
-				return newArray
-			})
-		}
-	}, [type, node, makeEdit, ctx, canAdd])
-
-	return <button class="add tooltipped tip-se" aria-label={locale('add_top')} onClick={() => onAddTop()} disabled={!canAdd}>
-		{Octicon.plus_circle}
-	</button>
-}
-
-function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
-	const { locale } = useLocale()
-
-	const onRemove = useCallback(() => {
-		makeEdit(() => {
-			return undefined
-		})
-	}, [makeEdit])
-
-	const onSetDefault = useCallback(() => {
-		makeEdit((range) => {
-			return getDefault(type, range, ctx)
-		})
-	}, [type, ctx])
-
-	if (optional) {
-		if (node && JsonArrayNode.is(node)) {
-			return <button class="remove open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
-				{Octicon.trashcan}
-			</button>
-		} else {
-			return <button class="add closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
-				{Octicon.plus_circle}
-			</button>
-		}
-	} else {
-		if (!node || !JsonArrayNode.is(node)) {
-			return <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>{Octicon.history}</button>
-		}
-		return <></>
-	}
-}
-
-function LiteralHead({ type, optional, node, makeEdit, ctx }: Props<LiteralType>) {
-	return <UnionHead type={{ kind: 'union', members: [type] }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
-}
-
-function AnyHead({ optional, node, makeEdit, ctx }: Props) {
-	const { locale } = useLocale()
-
-	const selectedType = findSelectedAnyType(node)
-
-	const onSelect = useCallback((newValue: string) => {
-		makeEdit((range) => {
-			const newSelected = ANY_TYPES.find(t => t.kind === newValue)
-			if (!newSelected) {
-				return undefined
-			}
-			return getDefault(newSelected, range, ctx)
-		})
-	}, [makeEdit, ctx])
-
-	return <>
-		<select value={selectedType ? selectedType.kind : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
-			{(!selectedType || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
-			{ANY_TYPES.map((type) =>
-				<option value={type.kind}>{formatIdentifier(type.kind)}</option>
-			)}
-		</select>
-		{selectedType && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
-	</>
-}
-
-function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType>) {
-	if (type.kind === 'union') {
-		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
-	}
-	if (type.kind === 'struct') {
-		if (!JsonObjectNode.is(node) || type.fields.length === 0) {
-			return <></>
-		}
-		return <div class="node-body">
-			<StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
-		</div>
-	}
-	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
-		if (!JsonArrayNode.is(node)) {
-			return <></>
-		}
-		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
-			return <div class="node-body">
-				<TupleBody type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} node={node} makeEdit={makeEdit} ctx={ctx} />
-			</div>
-		}
-		if (node.children?.length === 0) {
-			return <></>
-		}
-		return <div class="node-body">
-			<ListBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
-		</div>
-	}
-	if (type.kind === 'tuple') {
-		return <div class="node-body">
-			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
-		</div>
-	}
-	if (type.kind === 'any' || type.kind === 'unsafe') {
-		return <AnyBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
-	}
-	return <></>
-}
-
-function UnionBody({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
-	const selectedType = findSelectedMember(type, node)
-	if (selectedType === undefined) {
-		return <></>
-	}
-	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
-}
-
-interface StructBodyProps extends Props {
-	type: SimplifiedStructType
-}
-function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
+function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedStructType>) {
 	const { locale } = useLocale()
 	if (!JsonObjectNode.is(node)) {
 		return <></>
@@ -697,12 +618,42 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: StructBodyProps) {
 	</>
 }
 
-interface KeyProps {
-	label: string | number | boolean
-	raw?: boolean
-}
-function Key({ label, raw }: KeyProps) {
-	return <label>{raw ? label.toString() : formatIdentifier(label.toString())}</label>
+function ListHead({ type, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
+	const { locale } = useLocale()
+
+	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
+
+	const onAddTop = useCallback(() => {
+		if (canAdd) {
+			makeEdit((range) => {
+				const itemType = simplifyType(getItemType(type), ctx)
+				const newValue = getDefault(itemType, range, ctx)
+				const newItem: core.ItemNode<JsonNode> = {
+					type: 'item',
+					range,
+					children: [newValue],
+					value: newValue,
+				}
+				newValue.parent = newItem
+				if (JsonArrayNode.is(node)) {
+					node.children.unshift(newItem)
+					newItem.parent = node
+					return node
+				}
+				const newArray: JsonArrayNode = {
+					type: 'json:array',
+					range,
+					children: [newItem],
+				}
+				newItem.parent = newArray
+				return newArray
+			})
+		}
+	}, [type, node, makeEdit, ctx, canAdd])
+
+	return <button class="add tooltipped tip-se" aria-label={locale('add_top')} onClick={() => onAddTop()} disabled={!canAdd}>
+		{Octicon.plus_circle}
+	</button>
 }
 
 function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
@@ -820,6 +771,39 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 	</>
 }
 
+function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
+	const { locale } = useLocale()
+
+	const onRemove = useCallback(() => {
+		makeEdit(() => {
+			return undefined
+		})
+	}, [makeEdit])
+
+	const onSetDefault = useCallback(() => {
+		makeEdit((range) => {
+			return getDefault(type, range, ctx)
+		})
+	}, [type, ctx])
+
+	if (optional) {
+		if (node && JsonArrayNode.is(node)) {
+			return <button class="remove open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+				{Octicon.trashcan}
+			</button>
+		} else {
+			return <button class="add closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+				{Octicon.plus_circle}
+			</button>
+		}
+	} else {
+		if (!node || !JsonArrayNode.is(node)) {
+			return <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>{Octicon.history}</button>
+		}
+		return <></>
+	}
+}
+
 function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {
 	if (!JsonArrayNode.is(node)) {
 		return <></>
@@ -855,14 +839,71 @@ function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {
 	</>
 }
 
+function LiteralHead({ type, optional, node, makeEdit, ctx }: Props<LiteralType>) {
+	return <UnionHead type={{ kind: 'union', members: [type] }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+}
+
+const ANY_TYPES: SimplifiedMcdocType[] = [
+	{ kind: 'boolean' },
+	{ kind: 'double' },
+	{ kind: 'string' },
+	{ kind: 'list', item: { kind: 'any' } },
+	{ kind: 'struct', fields: [ { kind: 'pair', key: { kind: 'string' }, type: { kind: 'any' } }] },
+]
+
+function AnyHead({ optional, node, makeEdit, ctx }: Props) {
+	const { locale } = useLocale()
+
+	const selectedType = selectAnyType(node)
+
+	const onSelect = useCallback((newValue: string) => {
+		makeEdit((range) => {
+			const newSelected = ANY_TYPES.find(t => t.kind === newValue)
+			if (!newSelected) {
+				return undefined
+			}
+			return getDefault(newSelected, range, ctx)
+		})
+	}, [makeEdit, ctx])
+
+	return <>
+		<select value={selectedType ? selectedType.kind : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
+			{(!selectedType || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
+			{ANY_TYPES.map((type) =>
+				<option value={type.kind}>{formatIdentifier(type.kind)}</option>
+			)}
+		</select>
+		{selectedType && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
+	</>
+}
+
 function AnyBody({ optional, node, makeEdit, ctx }: Props) {
-	const selectedType = findSelectedAnyType(node)
+	const selectedType = selectAnyType(node)
 
 	if (!selectedType) {
 		return <></>
 	}
 
 	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+}
+
+function selectAnyType(node: JsonNode | undefined) {
+	switch (node?.type) {
+		case 'json:boolean': return ANY_TYPES[0]
+		case 'json:number': return ANY_TYPES[1]
+		case 'json:string': return ANY_TYPES[2]
+		case 'json:array': return ANY_TYPES[3]
+		case 'json:object': return ANY_TYPES[4]
+		default: return undefined
+	}
+}
+
+interface KeyProps {
+	label: string | number | boolean
+	raw?: boolean
+}
+function Key({ label, raw }: KeyProps) {
+	return <label>{raw ? label.toString() : formatIdentifier(label.toString())}</label>
 }
 
 interface ErrorsProps {
@@ -881,7 +922,7 @@ function Errors({ type, node, ctx }: ErrorsProps) {
 			// Unless they are inside a child node
 			.filter(e => !node.children?.some(c => (c.type === 'item' || c.type === 'pair') && core.Range.containsRange(c.range, e.range, true)))
 			// Filter out "Missing key" errors
-			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && (findSelectedMember(type, node) ?? type.members[0]).kind === 'struct'))))
+			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && (selectUnionMember(type, node) ?? type.members[0]).kind === 'struct'))))
 		// Hide warnings if there are errors
 		return errors.find(e => e.severity === 3)
 			? errors.filter(e => e.severity === 3)
@@ -919,47 +960,4 @@ function Docs({ desc }: DocsProps) {
 		{Octicon.info}
 		<span class="icon-popup">{desc}</span>
 	</div>
-}
-
-function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedMcdocTypeNoUnion[]): string {
-	if (type.kind === 'literal') {
-		return formatIdentifier(type.value.value.toString())
-	}
-	if (!others.some(o => o.kind === type.kind)) {
-		// No other member is of this kind
-		return formatIdentifier(type.kind)
-	}
-	if (type.kind === 'struct') {
-		// Show the first literal key
-		const firstKey = type.fields.find(f => f.key.kind === 'literal')?.key
-		if (firstKey) {
-			return formatUnionMember(firstKey, [])
-		}
-	}
-	return formatIdentifier(type.kind)
-}
-
-function findSelectedMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
-	const selectedType = node?.typeDef
-	if (!selectedType || selectedType.kind === 'any' || selectedType.kind === 'unsafe') {
-		return undefined
-	}
-	if (selectedType.kind === 'union') {
-		// Find the first selected type that is also part of the original definition.
-		// The node technically matches all members of this union,
-		// ideally the editor should show a combination of all members
-		return selectedType.members.find(m1 => union.members.find(m2 => quickEqualTypes(m1, m2)))
-	}
-	return selectedType
-}
-
-function findSelectedAnyType(node: JsonNode | undefined) {
-	switch (node?.type) {
-		case 'json:boolean': return ANY_TYPES[0]
-		case 'json:number': return ANY_TYPES[1]
-		case 'json:string': return ANY_TYPES[2]
-		case 'json:array': return ANY_TYPES[3]
-		case 'json:object': return ANY_TYPES[4]
-		default: return undefined
-	}
 }
