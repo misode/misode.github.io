@@ -5,8 +5,9 @@ import type { AttributeValue, McdocType } from '@spyglassmc/mcdoc'
 import { useCallback, useErrorBoundary, useMemo } from 'preact/hooks'
 import { disectFilePath, useLocale, useVersion } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
+import { simplifyType } from './McdocHelpers.js'
 import type { McdocContext } from './McdocRenderer.jsx'
-import { McdocRoot, simplifyType } from './McdocRenderer.jsx'
+import { McdocRoot } from './McdocRenderer.jsx'
 
 type TreePanelProps = {
 	docAndNode: DocAndNode,
