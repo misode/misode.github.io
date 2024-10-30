@@ -164,6 +164,13 @@
       "name": "1.21.2 — 1.21.3",
       "pack_format": 57,
       "show": true
+    },
+    {
+      "id": "1.21.4",
+      "dynamic": true,
+      "name": "1.21.4",
+      "pack_format": 58,
+      "show": true
     }
   ],
   "generators": [
