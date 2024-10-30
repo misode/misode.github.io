@@ -32,7 +32,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 
 	schemas.register(`${ID}:npc_type`, StringNode({ validator: 'resource', params: { pool: `${ID}:npcs` as any } }))
 
-	collections.register(`${ID}:block`, [
+	collections.register('block', [
 		...collections.get('block'),
 		'shardborne:adderstone',
 		'shardborne:adderstone_stairs',
@@ -154,7 +154,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 	schemas.register(
 		`${ID}:item_type`,
 		ObjectNode({
-			id: StringNode({ validator: 'resource', params: { pool: `${ID}:block` as any } }),
+			id: StringNode({ validator: 'resource', params: { pool: 'block' } }),
 			count: Opt(NumberNode({ max: 64 })),
 			nbt: Opt(StringNode()),
 		})
@@ -281,14 +281,12 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 						mossiness: NumberNode(),
 					},
 					'shardborne:dungeon_room_processor': {
-						target: StringNode({ validator: 'resource', params: { pool: `${ID}:block` as any } }),
+						target: StringNode({ validator: 'resource', params: { pool: 'block' } }),
 						success_replacement: StringNode({
 							validator: 'resource',
-							params: { pool: `${ID}:block` as any },
+							params: { pool: 'block' },
 						}),
-						fail_replacement: Opt(
-							StringNode({ validator: 'resource', params: { pool: `${ID}:block` as any } })
-						),
+						fail_replacement: Opt(StringNode({ validator: 'resource', params: { pool: 'block' } })),
 						min_blocks: NumberNode(),
 						max_blocks: NumberNode(),
 						replacement_chance: NumberNode({ min: 0, max: 1 }),
@@ -296,11 +294,11 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 					'shardborne:block_replacement_processor': {
 						input_block: StringNode({
 							validator: 'resource',
-							params: { pool: `${ID}:block` as any },
+							params: { pool: 'block' },
 						}),
 						output_block: StringNode({
 							validator: 'resource',
-							params: { pool: `${ID}:block` as any },
+							params: { pool: 'block' },
 						}),
 						probability: Opt(NumberNode({ min: 0, max: 1 })),
 					},
@@ -318,7 +316,7 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 					'minecraft:protected_blocks': {
 						value: StringNode({
 							validator: 'resource',
-							params: { pool: `${ID}:block` as any, requireTag: true },
+							params: { pool: 'block', requireTag: true },
 						}),
 					},
 					'minecraft:rule': {
