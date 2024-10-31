@@ -8,7 +8,7 @@ import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier, ItemStack } from 'deepslate'
-import { useCallback, useMemo } from 'preact/hooks'
+import { useCallback, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
@@ -440,10 +440,13 @@ function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<Si
 }
 
 function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedStructType>) {
-	const { locale } = useLocale()
 	if (!JsonObjectNode.is(node)) {
 		return <></>
 	}
+
+	const { locale } = useLocale()
+	const { expand, collapse, isToggled } = useToggles()
+
 	const type = node.typeDef?.kind === 'struct' ? node.typeDef : outerType
 	// For some reason spyglass can include fields that haven't been filtered out in node.typeDef
 	const fields = type.fields.filter(field => {
@@ -588,6 +591,9 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 				return <></>
 			}
 			const child = pair.value
+			const canToggle = JsonObjectNode.is(child)
+			const toggled = isToggled(key)
+			const isCollapsed = canToggle && (toggled === false || (toggled === undefined && (node.children.length - staticChilds.length) > 20))
 			// TODO: correctly determine which dynamic field this is a key for
 			const field = dynamicFields[0] as SimplifiedStructTypePairField | undefined
 			if (!field) {
@@ -613,13 +619,17 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 			return <div key={key} class="node" data-category={getCategory(field.type)}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
+					{canToggle && (isCollapsed
+						? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
+						: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>
+					)}
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => makeFieldEdit(() => undefined)}>
 						{Octicon.trashcan}
 					</button>
 					<Key label={key} raw={field.key.kind === 'string'} />
-					<Head type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
+					{!isCollapsed && <Head type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />}
 				</div>
-				<Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
+				{!isCollapsed && <Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />}
 			</div>
 		})}
 	</>
@@ -664,10 +674,12 @@ function ListHead({ type, node, makeEdit, ctx }: Props<ListType | PrimitiveArray
 }
 
 function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
-	const { locale } = useLocale()
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
+
+	const { locale } = useLocale()
+	const { expand, collapse, isToggled } = useToggles()
 
 	const type = node.typeDef && isListOrArray(node.typeDef) ? node.typeDef : outerType
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
@@ -734,6 +746,9 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 			const child = item.value
 			const itemType = getItemType(type)
 			const childType = simplifyType(itemType, ctx)
+			const canToggle = JsonObjectNode.is(child)
+			const toggled = isToggled(index.toString())
+			const isCollapsed = canToggle && (toggled === false || (toggled === undefined && node.children.length > 20))
 			const makeItemEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? item.range)
@@ -750,6 +765,10 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 			return <div key={index} class="node" data-category={getCategory(itemType)}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
+					{canToggle && (isCollapsed
+						? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand(index.toString())}>{Octicon.chevron_right}</button>
+						: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse(index.toString())}>{Octicon.chevron_down}</button>
+					)}
 					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
 						{Octicon.trashcan}
 					</button>
@@ -762,13 +781,13 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 						</button>
 					</div>}
 					<Key label="entry" />
-					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+					{!isCollapsed && <Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />}
 				</div>
-				{childType.kind === 'struct'
+				{!isCollapsed && (childType.kind === 'struct'
 					? <div class="node-body-flat">
 						<StructBody type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
 					</div>
-					: <Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />}
+					: <Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />)}
 			</div>
 		})}
 		{node.children.length > 0 && <div class="node-header">
@@ -990,4 +1009,34 @@ function Docs({ desc }: DocsProps) {
 		{Octicon.info}
 		<span class="icon-popup">{desc}</span>
 	</div>
+}
+
+function useToggles() {
+	const [toggleState, setToggleState] = useState(new Map<string, boolean>())
+	const [toggleAll, setToggleAll] = useState<boolean | undefined>(undefined)
+
+	const expand = useCallback((key: string) => (evt: MouseEvent) => {
+		if (evt.ctrlKey) {
+			setToggleState(new Map())
+			setToggleAll(true)
+		} else {
+			setToggleState(state => new Map(state.set(key, true)))
+		}
+	}, [])
+
+	const collapse = useCallback((key: string) => (evt: MouseEvent) => {
+		if (evt.ctrlKey) {
+			setToggleState(new Map())
+			setToggleAll(false)
+		} else {
+			setToggleState(state => new Map(state.set(key, false)))
+		}
+	}, [])
+	
+	const isToggled = useCallback((key: string) => {
+		if (!(toggleState instanceof Map)) return false
+		return toggleState.get(key) ?? toggleAll
+	}, [toggleState, toggleAll])
+
+	return { expand, collapse, isToggled }
 }
