@@ -15,7 +15,7 @@ import { useFocus } from '../../hooks/useFocus.js'
 import { generateColor, hexId, randomInt, randomSeed } from '../../Utils.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
-import { formatIdentifier, getCategory, getDefault, getItemType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
+import { formatIdentifier, getCategory, getDefault, getItemType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
 export interface McdocContext extends core.CheckerContext {}
 
@@ -52,7 +52,7 @@ function Head({ type, optional, node, makeEdit, ctx }: Props) {
 	if (type.kind === 'enum') {
 		return <EnumHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
-	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'long' || type.kind === 'float' || type.kind === 'double') {
+	if (isNumericType(type)) {
 		return <NumericHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
 	if (type.kind === 'boolean') {
@@ -64,8 +64,8 @@ function Head({ type, optional, node, makeEdit, ctx }: Props) {
 	if (type.kind === 'struct') {
 		return <StructHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 	}
-	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
-		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
+	if (isListOrArray(type)) {
+		if (isFixedList(type)) {
 			return <TupleHead type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
 		}
 		return <ListHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
@@ -94,13 +94,17 @@ function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType
 			<StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
 	}
-	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
+	if (isListOrArray(type)) {
 		if (!JsonArrayNode.is(node)) {
 			return <></>
 		}
-		if (type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max) {
+		if (isFixedList(type)) {
+			const tupleType: TupleType = { kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }
+			if (isInlineTuple(tupleType)) {
+				return <></>
+			}
 			return <div class="node-body">
-				<TupleBody type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} node={node} makeEdit={makeEdit} ctx={ctx} />
+				<TupleBody type={tupleType} node={node} makeEdit={makeEdit} ctx={ctx} />
 			</div>
 		}
 		if (node.children?.length === 0) {
@@ -111,6 +115,9 @@ function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType
 		</div>
 	}
 	if (type.kind === 'tuple') {
+		if (isInlineTuple(type)) {
+			return <></>
+		}
 		return <div class="node-body">
 			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
 		</div>
@@ -661,7 +668,8 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
-	const type = (node.typeDef?.kind === 'list' || node.typeDef?.kind === 'byte_array' || node.typeDef?.kind === 'int_array' || node.typeDef?.kind === 'long_array') ? node.typeDef : outerType
+
+	const type = node.typeDef && isListOrArray(node.typeDef) ? node.typeDef : outerType
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
 
 	const onRemoveItem = useCallback((index: number) => {
@@ -774,6 +782,8 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
 	const { locale } = useLocale()
 
+	const isInline = isInlineTuple(type)
+
 	const onRemove = useCallback(() => {
 		makeEdit(() => {
 			return undefined
@@ -786,22 +796,42 @@ function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
 		})
 	}, [type, ctx])
 
-	if (optional) {
-		if (node && JsonArrayNode.is(node)) {
-			return <button class="remove open tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
-				{Octicon.trashcan}
-			</button>
-		} else {
-			return <button class="add closed tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
-				{Octicon.plus_circle}
-			</button>
-		}
-	} else {
-		if (!node || !JsonArrayNode.is(node)) {
-			return <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>{Octicon.history}</button>
-		}
-		return <></>
-	}
+	return <>
+		{optional
+			? (JsonArrayNode.is(node)
+				? <button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+					{Octicon.trashcan}
+				</button>
+				: <button class="add tooltipped tip-se" aria-label={locale('expand')} onClick={onSetDefault}>
+					{Octicon.plus_circle}
+				</button>)
+			: (!JsonArrayNode.is(node)
+				? <button class="add tooltipped tip-se" aria-label={locale('reset')} onClick={onSetDefault}>
+					{Octicon.history}
+				</button>
+				: <></>
+			)}
+		{isInline && JsonArrayNode.is(node) && type.items.map((itemType, index) => {
+			const item = node?.children?.[index]
+			const child = item?.value
+			const childType = simplifyType(itemType, ctx)
+			const makeItemEdit: MakeEdit = (edit) => {
+				makeEdit((range) => {
+					const newChild = edit(child?.range ?? node?.range ?? range)
+					if (newChild === undefined) {
+						return node
+					}
+					node.children[index] = {
+						type: 'item',
+						range: newChild.range,
+						value: newChild,
+					}
+					return node
+				})
+			}
+			return <Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+		})}
+	</>
 }
 
 function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {

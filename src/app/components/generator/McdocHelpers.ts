@@ -2,7 +2,7 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
-import type { ListType, McdocType, PrimitiveArrayType, UnionType } from '@spyglassmc/mcdoc'
+import type { ListType, McdocType, NumericRange, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 
@@ -13,7 +13,7 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 	if (type.kind === 'boolean') {
 		return { type: 'json:boolean', range, value: false }
 	}
-	if (type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'long' || type.kind === 'float' || type.kind === 'double') {
+	if (isNumericType(type)) {
 		const value: core.LongNode = { type: 'long', range, value: BigInt(0) }
 		return { type: 'json:number', range, value, children: [value] }
 	}
@@ -46,7 +46,7 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 		}
 		return object
 	}
-	if (type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array') {
+	if (isListOrArray(type)) {
 		const array = JsonArrayNode.mock(range)
 		const minLength = type.lengthRange?.min ?? 0
 		if (minLength > 0) {
@@ -106,12 +106,28 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 	return { type: 'json:null', range }
 }
 
+export function isNumericType(type: McdocType): type is NumericType {
+	return type.kind === 'byte' || type.kind === 'short' || type.kind === 'int' || type.kind === 'long' || type.kind === 'float' || type.kind === 'double'
+}
+
+export function isListOrArray(type: McdocType): type is ListType | PrimitiveArrayType {
+	return type.kind === 'list' || type.kind === 'byte_array' || type.kind === 'int_array' || type.kind === 'long_array'
+}
+
 export function getItemType(type: ListType | PrimitiveArrayType): McdocType {
 	return type.kind === 'list' ? type.item
 		: type.kind === 'byte_array' ? { kind: 'byte' }
 			: type.kind === 'int_array' ? { kind: 'int' }
 				: type.kind === 'long_array' ? { kind: 'long' }
 					: { kind: 'any' }
+}
+
+export function isFixedList<T extends ListType | PrimitiveArrayType>(type: T): type is T & { lengthRange: NumericRange } {
+	return type.lengthRange?.min !== undefined && type.lengthRange.min === type.lengthRange.max
+}
+
+export function isInlineTuple(type: TupleType) {
+	return type.items.length <= 4 && type.items.every(isNumericType)
 }
 
 export function formatIdentifier(id: string): string {
