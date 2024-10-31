@@ -680,6 +680,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 
 	const { locale } = useLocale()
 	const { expand, collapse, isToggled } = useToggles()
+	const [maxShown, setMaxShown] = useState(50)
 
 	const type = node.typeDef && isListOrArray(node.typeDef) ? node.typeDef : outerType
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
@@ -743,6 +744,16 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 
 	return <>
 		{node.children.map((item, index) => {
+			if (index === maxShown) {
+				return <div class="node-header">
+					<label>{locale('entries_hidden', `${node.children.length - maxShown}`)}</label>
+					<button onClick={() => setMaxShown(Math.min(maxShown + 50, node.children.length))}>{locale('entries_hidden.more', '50')}</button>
+					<button onClick={() => setMaxShown(node.children.length)}>{locale('entries_hidden.all')}</button>
+				</div>
+			}
+			if (index > maxShown) {
+				return <></>
+			}
 			const child = item.value
 			const itemType = getItemType(type)
 			const childType = simplifyType(itemType, ctx)
