@@ -1,0 +1,179 @@
+use ::java::data::worldgen::DecorationStep
+use ::java::data::worldgen::CarveStep
+use ::java::data::worldgen::biome::SpawnerData
+use ::java::data::worldgen::biome::MobSpawnCost
+use ::java::data::worldgen::biome::MobCategory
+
+dispatch minecraft:resource[neoforge:biome_modifier] to struct BiomeModifier {
+	type: #[id] BiomeModifierType,
+	...neoforge:biome_modifier[[type]],
+}
+
+enum(string) BiomeModifierType {
+	None = "neoforge:none",
+	AddFeatures = "neoforge:add_features",
+	RemoveFeatures = "neoforge:remove_features",
+	AddSpawns = "neoforge:add_spawns",
+	RemoveSpawns = "neoforge:remove_spawns",
+	AddCarvers = "neoforge:add_carvers",
+	RemoveCarvers = "neoforge:remove_carvers",
+	AddSpawnCosts = "neoforge:add_spawn_costs",
+	RemoveSpawnCosts = "neoforge:remove_spawn_costs",
+}
+
+dispatch neoforge:biome_modifier[neoforge:none] to struct {}
+
+struct BiomeModifierBase {
+	biomes: (#[id(registry="worldgen/biome",tags="allowed")] string | [#[id="worldgen/biome"] string]),
+}
+
+dispatch neoforge:biome_modifier[neoforge:add_features] to struct AddFeatures {
+	...BiomeModifierBase,
+	features: (#[id(registry="worldgen/placed_feature",tags="allowed")] string | [#[id="worldgen/placed_feature"] string]),
+	step: DecorationStep,
+}
+
+dispatch neoforge:biome_modifier[neoforge:remove_features] to struct RemoveFeatures {
+	...BiomeModifierBase,
+	features: (#[id(registry="worldgen/placed_feature",tags="allowed")] string | [#[id="worldgen/placed_feature"] string]),
+	steps: (DecorationStep | [DecorationStep]),
+}
+
+dispatch neoforge:biome_modifier[neoforge:add_spawns] to struct AddSpawns {
+	...BiomeModifierBase,
+	spawners: (SpawnerData | [SpawnerData]),
+}
+
+dispatch neoforge:biome_modifier[neoforge:remove_spawns] to struct RemoveSpawns {
+	...BiomeModifierBase,
+	entity_types: (#[id(registry="entity_type",tags="allowed")] string | [#[id="entity_type"] string]),
+}
+
+dispatch neoforge:biome_modifier[neoforge:add_carvers] to struct AddCarvers {
+	...BiomeModifierBase,
+	carvers: (#[id(registry="worldgen/configured_carver",tags="allowed")] string | [#[id="worldgen/configured_carver"] string]),
+	step: CarveStep,
+}
+
+dispatch neoforge:biome_modifier[neoforge:remove_carvers] to struct RemoveCarvers {
+	...BiomeModifierBase,
+	carvers: (#[id(registry="worldgen/configured_carver",tags="allowed")] string | [#[id="worldgen/configured_carver"] string]),
+	step: (CarveStep | [CarveStep]),
+}
+
+dispatch neoforge:biome_modifier[neoforge:add_spawn_costs] to struct AddSpawnCosts {
+	...BiomeModifierBase,
+	entity_types: (#[id(registry="entity_type",tags="allowed")] string | [#[id="entity_type"] string]),
+	spawn_cost: MobSpawnCost,
+}
+
+dispatch neoforge:biome_modifier[neoforge:remove_spawn_costs] to struct RemoveSpawnCosts {
+	...BiomeModifierBase,
+	entity_types: (#[id(registry="entity_type",tags="allowed")] string | [#[id="entity_type"] string]),
+}
+
+
+dispatch minecraft:resource[neoforge:structure_modifier] to struct StructureModifier {
+	type: #[id] StructureModifierType,
+	...neoforge:structure_modifier[[type]],
+}
+
+enum(string) StructureModifierType {
+	None = "neoforge:none",
+	AddSpawns = "neoforge:add_spawns",
+	RemoveSpawns = "neoforge:remove_spawns",
+	ClearSpawns = "neoforge:clear_spawns",
+}
+
+dispatch neoforge:structure_modifier[neoforge:none] to struct {}
+
+struct StructureModifierBase {
+	structures: (#[id(registry="worldgen/structure",tags="allowed")] string | [#[id="worldgen/structure"] string]),
+}
+
+dispatch neoforge:structure_modifier[neoforge:add_spawns] to struct AddStructureSpawns {
+	...StructureModifierBase,
+	spawners: (SpawnerData | [SpawnerData]),
+}
+
+dispatch neoforge:structure_modifier[neoforge:remove_spawns] to struct RemoveStructureSpawns {
+	...StructureModifierBase,
+	entity_types: (#[id(registry="entity_type",tags="allowed")] string | [#[id="entity_type"] string]),
+}
+
+dispatch neoforge:structure_modifier[neoforge:clear_spawns] to struct ClearStructureSpawns {
+	...StructureModifierBase,
+	categories: (MobCategory | [MobCategory]),
+}
+
+
+type DataMap<K, V> = struct {
+	replace?: boolean,
+	values: struct DataMapValues {
+		[K]: (
+			V |
+			struct ReplaceableValue {
+				replace?: boolean,
+				value: V,
+			} |
+		)
+	},
+	remove?: [K],
+}
+
+dispatch minecraft:resource[neoforge:data_map_compostables] to DataMap<#[id(registry="item",tags="allowed")] string, (
+	float @ 0..1 |
+	struct Compostable {
+		chance: float @ 0..1,
+		can_villager_compost?: boolean,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_furnace_fuels] to DataMap<#[id(registry="item", tags="allowed")] string, (
+	int @ 1.. |
+	struct FurnaceFuel {
+		burn_time: int @ 1..,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_monster_room_mobs] to DataMap<#[id(registry="entity_type",tags="allowed")] string, (
+	int @ 0.. |
+	struct MonsterRoomMob {
+		weight: int @ 0..,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_oxidizables] to DataMap<#[id(registry="block",tags="allowed")] string, (
+	#[id="block"] string |
+	struct Oxidizable {
+		next_oxidation_stage: #[id="block"] string,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_parrot_imitations] to DataMap<#[id(registry="entity_type",tags="allowed")] string, (
+	#[id="sound_event"] string |
+	struct ParrotImitation {
+		sound: #[id="sound_event"] string,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_raid_hero_gifts] to DataMap<#[id(registry="villager_profession",tags="allowed")] string, (
+	#[id="loot_table"] string |
+	struct RaidHeroGift {
+		loot_table: #[id="loot_table"] string,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_vibration_frequencies] to DataMap<#[id(registry="game_event",tags="allowed")] string, (
+	int @ 1..15 |
+	struct VibrationFrequency {
+		frequency: int @ 1..15,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_waxables] to DataMap<#[id(registry="block",tags="allowed")] string, (
+	#[id="block"] string |
+	struct Waxable {
+		waxed: #[id="block"] string,
+	} |
+)>

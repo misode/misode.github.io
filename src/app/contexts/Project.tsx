@@ -33,8 +33,10 @@ export type UnknownFile = {
 }
 
 export const FilePatterns = [
-	'worldgen/[a-z_]+',
+	'immersive_weathering/[a-z_]+',
+	'neoforge/[a-z_]+',
 	'ohthetreesyoullgrow/[a-z_]+',
+	'worldgen/[a-z_]+',
 	'tags/worldgen/[a-z_]+',
 	'tags/[a-z_]+',
 	'[a-z_]+',

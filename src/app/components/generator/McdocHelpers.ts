@@ -2,7 +2,7 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
-import type { ListType, McdocType, NumericRange, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import type { Attributes, ListType, McdocType, NumericRange, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 
@@ -130,15 +130,16 @@ export function isInlineTuple(type: TupleType) {
 	return type.items.length <= 4 && type.items.every(isNumericType)
 }
 
-export function formatIdentifier(id: string): string {
+export function formatIdentifier(id: string, attributes?: Attributes): string {
 	if (id.startsWith('!')) {
-		return '! ' + formatIdentifier(id.substring(1))
+		return '! ' + formatIdentifier(id.substring(1), attributes)
 	}
+	const isStarred = attributes?.some(a => a.name === 'starred')
 	const text = id
 		.replace(/^minecraft:/, '')
 		.replaceAll('_', ' ')
 		.replace(/[a-z][A-Z]+/g, m => m.charAt(0) + ' ' + m.substring(1).toLowerCase())
-	return text.charAt(0).toUpperCase() + text.substring(1)
+	return (isStarred ? '✨ ' : '') + text.charAt(0).toUpperCase() + text.substring(1)
 }
 
 export function getCategory(type: McdocType) {

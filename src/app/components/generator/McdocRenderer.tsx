@@ -247,7 +247,7 @@ function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
 		{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
 		{(value !== undefined && !type.values.map(v => v.value).includes(value)) && <option value={value}>{value}</option>}
 		{type.values.map(value =>
-			<option value={value.value}>{formatIdentifier(value.identifier)}</option>
+			<option value={value.value}>{formatIdentifier(value.identifier, value.attributes)}</option>
 		)}
 	</select>
 }

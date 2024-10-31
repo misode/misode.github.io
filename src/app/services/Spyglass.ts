@@ -237,9 +237,11 @@ export class SpyglassService {
 								category: 'model',
 							},
 							// Partner resources
-							'ohthetreesyoullgrow/configured_feature': {
-								category: 'ohthetreesyoullgrow:configured_feature',
-							},
+							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
+								[gen.path, {
+									category: gen.id,
+								}]
+							)),
 						},
 					},
 					lint: {

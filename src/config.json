@@ -585,15 +585,6 @@
       "minVersion": "1.18.2"
     },
     {
-      "id": "lithostitched:worldgen_modifier",
-      "url": "lithostitched/worldgen-modifier",
-      "path": "lithostitched/worldgen_modifier",
-      "tags": ["partners"],
-      "dependency": "lithostitched",
-      "minVersion": "1.20.2",
-      "wiki": "https://github.com/Apollounknowndev/lithostitched/wiki/Worldgen-Modifiers"
-    },
-    {
       "id": "neoforge:biome_modifier",
       "url": "neoforge/biome-modifier",
       "path": "neoforge/biome_modifier",
@@ -682,20 +673,6 @@
       "dependency": "neoforge",
       "minVersion": "1.20.2",
       "wiki": "https://github.com/neoforged/NeoForge/blob/1.21.x/src/main/java/net/neoforged/neoforge/common/world/StructureModifiers.java"
-    },
-    {
-      "id": "obsidian:item",
-      "url": "obsidian/item",
-      "path": "obsidian_item",
-      "tags": ["partners"],
-      "dependency": "obsidian"
-    },
-    {
-      "id": "obsidian:block",
-      "url": "obsidian/block",
-      "path": "obsidian_block",
-      "tags": ["partners"],
-      "dependency": "obsidian"
     },
     {
       "id": "ohthetreesyoullgrow:configured_feature",
