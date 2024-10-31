@@ -294,6 +294,7 @@ button.move:disabled {
   left: 0;
   top: 100%;
   width: min-content;
+  height: unset;
   margin-top: 4px;
   margin-left: 4px;
   z-index: 1;

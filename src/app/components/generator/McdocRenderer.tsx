@@ -13,6 +13,7 @@ import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
 import { generateColor, hexId, randomInt, randomSeed } from '../../Utils.js'
+import { Btn } from '../Btn.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
 import { formatIdentifier, getCategory, getDefault, getItemType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
@@ -683,36 +684,10 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 	const [maxShown, setMaxShown] = useState(50)
 
 	const type = node.typeDef && isListOrArray(node.typeDef) ? node.typeDef : outerType
+	const itemType = getItemType(type)
+	const category = getCategory(itemType)
+	const childType = simplifyType(itemType, ctx)
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
-
-	const onRemoveItem = useCallback((index: number) => {
-		makeEdit(() => {
-			node.children.splice(index, 1)
-			return node
-		})
-	}, [makeEdit, node])
-
-	const onMoveUp = useCallback((index: number) => {
-		if (node.children.length <= 1 || index <= 0) {
-			return
-		}
-		makeEdit(() => {
-			const moved = node.children.splice(index, 1)
-			node.children.splice(index - 1, 0, ...moved)
-			return node
-		})
-	}, [makeEdit])
-
-	const onMoveDown = useCallback((index: number) => {
-		if (node.children.length <= 1 || index >= node.children.length - 1) {
-			return
-		}
-		makeEdit(() => {
-			const moved = node.children.splice(index, 1)
-			node.children.splice(index + 1, 0, ...moved)
-			return node
-		})
-	}, [makeEdit])
 
 	const onAddBottom = useCallback(() => {
 		if (canAdd) {
@@ -754,52 +729,8 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 			if (index > maxShown) {
 				return <></>
 			}
-			const child = item.value
-			const itemType = getItemType(type)
-			const childType = simplifyType(itemType, ctx)
-			const canToggle = JsonObjectNode.is(child)
-			const toggled = isToggled(index.toString())
-			const isCollapsed = canToggle && (toggled === false || (toggled === undefined && node.children.length > 20))
-			const makeItemEdit: MakeEdit = (edit) => {
-				makeEdit(() => {
-					const newChild = edit(child?.range ?? item.range)
-					node.children[index] = {
-						type: 'item',
-						range: item.range,
-						value: newChild,
-					}
-					return node
-				})
-			}
-			const canMoveUp = node.children.length > 1 && index > 0
-			const canMoveDown = node.children.length > 1 && index < (node.children.length - 1)
-			return <div key={index} class="node" data-category={getCategory(itemType)}>
-				<div class="node-header">
-					<Errors type={childType} node={child} ctx={ctx} />
-					{canToggle && (isCollapsed
-						? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand(index.toString())}>{Octicon.chevron_right}</button>
-						: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse(index.toString())}>{Octicon.chevron_down}</button>
-					)}
-					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => onRemoveItem(index)}>
-						{Octicon.trashcan}
-					</button>
-					{(canMoveUp || canMoveDown) && <div class="node-move">
-						<button class="move tooltipped tip-se" aria-label={locale('move_up')} disabled={!canMoveUp} onClick={() => onMoveUp(index)}>
-							{Octicon.chevron_up}
-						</button>
-						<button class="move tooltipped tip-se" aria-label={locale('move_down')} disabled={!canMoveDown} onClick={() => onMoveDown(index)}>
-							{Octicon.chevron_down}
-						</button>
-					</div>}
-					<Key label="entry" />
-					{!isCollapsed && <Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />}
-				</div>
-				{!isCollapsed && (childType.kind === 'struct'
-					? <div class="node-body-flat">
-						<StructBody type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
-					</div>
-					: <Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />)}
-			</div>
+			const key = index.toString()
+			return <ListItem key={key} item={item} index={index} category={category} type={childType} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} node={node} makeEdit={makeEdit} ctx={ctx} />
 		})}
 		{node.children.length > 0 && <div class="node-header">
 			<button class="add tooltipped tip-se" aria-label={locale('add_bottom')} onClick={() => onAddBottom()} disabled={!canAdd}>
@@ -807,6 +738,113 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 			</button>
 		</div>}
 	</>
+}
+
+interface ListItemProps extends Props {
+	item: core.ItemNode<JsonNode>
+	index: number
+	category: string | undefined
+	isToggled: boolean | undefined
+	expand: (e: MouseEvent) => void
+	collapse: (e: MouseEvent) => void
+	node: JsonArrayNode
+}
+function ListItem({ item, index, category, type, isToggled, expand, collapse, node, makeEdit, ctx }: ListItemProps) {
+	const { locale } = useLocale()
+	const [active, setActive] = useFocus()
+
+	const child = item.value
+	const canToggle = JsonObjectNode.is(child)
+	const isCollapsed = canToggle && (isToggled === false || (isToggled === undefined && node.children.length > 20))
+	const canMoveUp = node.children.length > 1 && index > 0
+	const canMoveDown = node.children.length > 1 && index < (node.children.length - 1)
+
+	const onRemove = useCallback(() => {
+		makeEdit(() => {
+			node.children.splice(index, 1)
+			return node
+		})
+	}, [makeEdit, node, index])
+
+	const onMoveUp = useCallback(() => {
+		if (node.children.length <= 1 || index <= 0) {
+			return
+		}
+		makeEdit(() => {
+			const moved = node.children.splice(index, 1)
+			node.children.splice(index - 1, 0, ...moved)
+			return node
+		})
+	}, [makeEdit, node, index])
+
+	const onMoveDown = useCallback(() => {
+		if (node.children.length <= 1 || index >= node.children.length - 1) {
+			return
+		}
+		makeEdit(() => {
+			const moved = node.children.splice(index, 1)
+			node.children.splice(index + 1, 0, ...moved)
+			return node
+		})
+	}, [makeEdit, node, index])
+
+	const onDuplicate = useCallback(() => {
+		makeEdit(() => {
+			node.children.splice(index + 1, 0, node.children[index])
+			return node
+		})
+	}, [makeEdit, node, index])
+
+	const makeItemEdit: MakeEdit = useCallback((edit) => {
+		makeEdit(() => {
+			const newChild = edit(child?.range ?? item.range)
+			node.children[index] = {
+				type: 'item',
+				range: item.range,
+				value: newChild,
+			}
+			return node
+		})
+	}, [makeEdit, child, item, node])
+
+	const onContextMenu = (evt: MouseEvent) => {
+		evt.preventDefault()
+		setActive()
+	}
+
+	return <div class="node" data-category={category}>
+		<div class="node-header" onContextMenu={onContextMenu}>
+			<Errors type={type} node={child} ctx={ctx} />
+			{canToggle && (isCollapsed
+				? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand}>{Octicon.chevron_right}</button>
+				: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse}>{Octicon.chevron_down}</button>
+			)}
+			<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={onRemove}>
+				{Octicon.trashcan}
+			</button>
+			{(canMoveUp || canMoveDown) && <div class="node-move">
+				<button class="move tooltipped tip-se" aria-label={locale('move_up')} disabled={!canMoveUp} onClick={onMoveUp}>
+					{Octicon.chevron_up}
+				</button>
+				<button class="move tooltipped tip-se" aria-label={locale('move_down')} disabled={!canMoveDown} onClick={onMoveDown}>
+					{Octicon.chevron_down}
+				</button>
+			</div>}
+			{active && <div class="node-menu">
+				<div class="menu-item">
+					<Btn icon="duplicate" onClick={onDuplicate}/>
+					<span>{locale('duplicate')}</span>
+				</div>
+			</div>}
+			<Key label="entry" />
+			{!isCollapsed && <Head type={type} node={child} makeEdit={makeItemEdit} ctx={ctx} />}
+		</div>
+		{!isCollapsed && (type.kind === 'struct'
+			? <div class="node-body-flat">
+				<StructBody type={type} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+			</div>
+			: <Body type={type} node={child} makeEdit={makeItemEdit} ctx={ctx} />)}
+	</div>
 }
 
 function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
