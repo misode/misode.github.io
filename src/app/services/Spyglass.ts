@@ -86,8 +86,10 @@ export class SpyglassService {
 	public async getFile(uri: string, emptyContent?: () => string) {
 		let docAndNode = this.service.project.getClientManaged(uri)
 		if (docAndNode === undefined) {
+			const lang = core.fileUtil.extname(uri)?.slice(1) ?? 'txt'
 			const content = await this.readFile(uri)
-			const doc = TextDocument.create(uri, 'json', 1, content ?? (emptyContent ? emptyContent() : ''))
+			this.service.project['bindUri'](uri)
+			const doc = TextDocument.create(uri, lang, 1, content ?? (emptyContent ? emptyContent() : ''))
 			await this.service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
 			docAndNode = await this.service.project.ensureClientManagedChecked(uri)
 		}
@@ -233,6 +235,10 @@ export class SpyglassService {
 							},
 							models: {
 								category: 'model',
+							},
+							// Partner resources
+							'ohthetreesyoullgrow/configured_feature': {
+								category: 'ohthetreesyoullgrow:configured_feature',
 							},
 						},
 					},

@@ -20,11 +20,10 @@ export interface ConfigVersion {
 export interface ConfigGenerator {
 	id: string,
 	url: string,
-	schema: string,
 	path?: string,
 	noPath?: boolean,
 	tags?: string[],
-	partner?: string,
+	dependency?: string,
 	minVersion?: string,
 	maxVersion?: string,
 	wiki?: string,

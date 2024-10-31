@@ -57,6 +57,14 @@ export async function fetchVanillaMcdoc() {
 	}
 }
 
+export async function fetchDependencyMcdoc(dependency: string) {
+	try {
+		return cachedFetch(`/mcdoc/${dependency}.mcdoc`, { decode: res => res.text(), refresh: true })
+	} catch (e) {
+		throw new Error(`Error occured while fetching ${dependency} mcdoc: ${message(e)}`)
+	}
+}
+
 export async function fetchRegistries(versionId: VersionId) {
 	console.debug(`[fetchRegistries] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!

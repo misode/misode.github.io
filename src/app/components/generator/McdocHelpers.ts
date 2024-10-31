@@ -1,5 +1,5 @@
 import * as core from '@spyglassmc/core'
-import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
+import type { JsonNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
 import type { ListType, McdocType, NumericRange, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
@@ -226,22 +226,26 @@ export function isSelectRegistry(registry: string) {
 	return selectRegistries.has(registry)
 }
 
-export function simplifyType(type: McdocType, ctx: core.CheckerContext, pair?: JsonPairNode): SimplifiedMcdocType {
+interface SimplifyNodeContext {
+	key?: JsonStringNode
+	parent?: JsonObjectNode
+}
+export function simplifyType(type: McdocType, ctx: core.CheckerContext, { key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
 	const simplifyNode: SimplifyValueNode<JsonNode | undefined> = {
 		entryNode: {
-			parent: pair && JsonObjectNode.is(pair?.parent) ? {
+			parent: parent ? {
 				entryNode: {
 					parent: undefined,
 					runtimeKey: undefined,
 				},
 				node: {
-					originalNode: pair.parent,
-					inferredType: inferType(pair.parent),
+					originalNode: parent,
+					inferredType: inferType(parent),
 				},
 			} : undefined,
-			runtimeKey: pair?.key ? {
-				originalNode: pair.key,
-				inferredType: inferType(pair.key),
+			runtimeKey: key ? {
+				originalNode: key,
+				inferredType: inferType(key),
 			} : undefined,
 		},
 		node: {

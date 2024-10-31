@@ -7,7 +7,7 @@ import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts
 import { useSpyglass, watchSpyglassUri } from '../../contexts/Spyglass.jsx'
 import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
-import { checkVersion, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
+import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, genPath, safeJsonParse } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
@@ -87,6 +87,11 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 		if (text !== undefined) {
 			await service.writeFile(uri, text)
+		}
+		if (gen.dependency) {
+			const dependency = await fetchDependencyMcdoc(gen.dependency)
+			const dependencyUri = `file:///project/mcdoc/${gen.dependency}.mcdoc`
+			await service.getFile(dependencyUri, () => dependency)
 		}
 		// TODO: if text is undefined, set to generator's default
 		const docAndNode = await service.getFile(uri, () => '{}')

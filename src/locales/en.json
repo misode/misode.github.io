@@ -88,7 +88,7 @@
   "generator.not_found": "Cannot find generator \"%0%\"",
   "generator.obsidian.block": "Obsidian Block",
   "generator.obsidian.item": "Obsidian Item",
-  "generator.ohthetreesyoullgrow.configured_feature": "OTTYG Feature",
+  "generator.ohthetreesyoullgrow:configured_feature": "OTTYG Feature",
   "generator.pack_mcmeta": "Pack.mcmeta",
   "generator.painting_variant": "Painting Variant",
   "generator.predicate": "Predicate",

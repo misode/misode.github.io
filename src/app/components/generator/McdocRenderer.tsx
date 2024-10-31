@@ -474,7 +474,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 				staticChilds.push(pair)
 			}
 			const child = pair?.value
-			const childType = simplifyType(field.type, ctx, pair)
+			const childType = simplifyType(field.type, ctx, { key: pair?.key, parent: node })
 			const makeFieldEdit: MakeEdit = (edit) => {
 				if (pair) {
 					makeEdit(() => {
@@ -562,7 +562,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 					return
 				}
 				makeEdit((range) => {
-					const valueNode = getDefault(simplifyType(field.type, ctx, pair), range, ctx)
+					const valueNode = getDefault(simplifyType(field.type, ctx, { key: pair.key, parent: node }), range, ctx)
 					const newPair: core.PairNode<JsonStringNode, JsonNode> = {
 						type: 'pair',
 						range: keyNode.range,
@@ -600,7 +600,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 			if (!field) {
 				return <></>
 			}
-			const childType = simplifyType(field.type, ctx, pair)
+			const childType = simplifyType(field.type, ctx, { key: pair.key, parent: node })
 			const makeFieldEdit: MakeEdit = (edit) => {
 				makeEdit(() => {
 					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
