@@ -85,16 +85,22 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		if (!service || !uri) {
 			return AsyncCancel
 		}
-		if (text !== undefined) {
-			await service.writeFile(uri, text)
-		}
 		if (gen.dependency) {
 			const dependency = await fetchDependencyMcdoc(gen.dependency)
 			const dependencyUri = `file:///project/mcdoc/${gen.dependency}.mcdoc`
-			await service.getFile(dependencyUri, () => dependency)
+			await service.writeFile(dependencyUri, dependency)
 		}
-		// TODO: if text is undefined, set to generator's default
-		const docAndNode = await service.getFile(uri, () => '{}')
+		if (text !== undefined) {
+			await service.writeFile(uri, text)
+		} else {
+			text = await service.readFile(uri)
+			if (text === undefined) {
+				// TODO: set to generator's default
+				text = '{}'
+				await service.writeFile(uri, text)
+			}
+		}
+		const docAndNode = await service.openFile(uri)
 		Analytics.setGenerator(gen.id)
 		return docAndNode
 	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, file?.id, service])
@@ -138,30 +144,27 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	}
 
 	useEffect(() => {
-		const onKeyUp = async (e: KeyboardEvent) => {
+		const onKeyDown = async (e: KeyboardEvent) => {
 			if (!service || !uri) {
 				return
 			}
 			if (e.ctrlKey && e.key === 'z') {
+				e.preventDefault()
 				Analytics.undoGenerator(gen.id, 1, 'hotkey')
 				await service.undoEdit(uri)
 			} else if (e.ctrlKey && e.key === 'y') {
+				e.preventDefault()
 				Analytics.redoGenerator(gen.id, 1, 'hotkey')
 				await service.redoEdit(uri)
-			}
-		}
-		const onKeyDown = (e: KeyboardEvent) => {
-			if (e.ctrlKey && e.key === 's') {
+			} else if (e.ctrlKey && e.key === 's') {
 				setFileSaving('hotkey')
 				e.preventDefault()
 				e.stopPropagation()
 			}
 		}
 
-		document.addEventListener('keyup', onKeyUp)
 		document.addEventListener('keydown', onKeyDown)
 		return () => {
-			document.removeEventListener('keyup', onKeyUp)
 			document.removeEventListener('keydown', onKeyDown)
 		}
 	}, [gen.id, service, uri])

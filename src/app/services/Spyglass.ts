@@ -82,18 +82,16 @@ export class SpyglassService {
 		return core.CheckerContext.create(this.service.project, { doc, err })
 	}
 
-	public async getFile(uri: string, emptyContent?: () => string) {
-		let docAndNode = this.service.project.getClientManaged(uri)
-		if (docAndNode === undefined) {
-			const lang = core.fileUtil.extname(uri)?.slice(1) ?? 'txt'
-			const content = await this.readFile(uri)
-			this.service.project['bindUri'](uri)
-			const doc = TextDocument.create(uri, lang, 1, content ?? (emptyContent ? emptyContent() : ''))
-			await this.service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
-			docAndNode = await this.service.project.ensureClientManagedChecked(uri)
+	public async openFile(uri: string) {
+		const lang = core.fileUtil.extname(uri)?.slice(1) ?? 'txt'
+		const content = await this.readFile(uri)
+		if (!content) {
+			return undefined
 		}
+		await this.service.project.onDidOpen(uri, lang, 1, content)
+		const docAndNode = await this.service.project.ensureClientManagedChecked(uri)
 		if (!docAndNode) {
-			throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
+			return undefined
 		}
 		const document = this.client.documents.get(uri)
 		if (document === undefined) {
@@ -113,11 +111,7 @@ export class SpyglassService {
 
 	private async notifyChange(doc: TextDocument) {
 		await this.service.project.onDidChange(doc.uri, [{ text: doc.getText() }], doc.version + 1)
-		const docAndNode = this.service.project.getClientManaged(doc.uri)
-		if (docAndNode) {
-			this.service.project.emit('documentUpdated', docAndNode)
-		}
-		return docAndNode
+		await this.service.project.ensureClientManagedChecked(doc.uri)
 	}
 
 	public async writeFile(uri: string, content: string) {
@@ -140,7 +134,7 @@ export class SpyglassService {
 			document.redoStack = []
 			const docAndNode = this.service.project.getClientManaged(uri)
 			if (!docAndNode) {
-				throw new Error(`[Spyglass#openFile] Cannot get doc and node: ${uri}`)
+				throw new Error(`[Spyglass#applyEdit] Cannot get doc and node: ${uri}`)
 			}
 			edit(docAndNode.node)
 			const newText = this.service.format(docAndNode.node, docAndNode.doc, 2, true)
@@ -426,6 +420,7 @@ class SpyglassFileSystem implements core.ExternalFileSystem {
 	public static readonly storeName = 'files'
 
 	private readonly db: Promise<IDBDatabase>
+	private watcher: SpyglassWatcher | undefined
 
 	constructor() {
 		this.db = new Promise((res, rej) => {
@@ -567,6 +562,7 @@ class SpyglassFileSystem implements core.ExternalFileSystem {
 				} else {
 					const deleteRequest = store.delete(location)
 					deleteRequest.onsuccess = () => {
+						this.watcher?.tryEmit('unlink', location)
 						res()
 					}
 					deleteRequest.onerror = () => {
@@ -580,7 +576,8 @@ class SpyglassFileSystem implements core.ExternalFileSystem {
 		})
 	}
 	watch(locations: core.FsLocation[], _options: { usePolling?: boolean | undefined }): core.FsWatcher {
-		return new SpyglassWatcher(this.db, locations)
+		this.watcher = new SpyglassWatcher(this.db, locations)
+		return this.watcher
 	}
 	async writeFile(
 		location: core.FsLocation,
@@ -595,11 +592,23 @@ class SpyglassFileSystem implements core.ExternalFileSystem {
 		return new Promise((res, rej) => {
 			const transaction = db.transaction(SpyglassFileSystem.storeName, 'readwrite')
 			const store = transaction.objectStore(SpyglassFileSystem.storeName)
-			const request = store.put({ uri: location, type: 'file', content: data })
-			request.onsuccess = () => {
-				res()
+			const getRequest = store.get(location)
+			getRequest.onsuccess = () => {
+				const entry = getRequest.result
+				const putRequest = store.put({ uri: location, type: 'file', content: data })
+				putRequest.onsuccess = () => {
+					if (entry) {
+						this.watcher?.tryEmit('change', location)
+					} else {
+						this.watcher?.tryEmit('add', location)
+					}
+					res()
+				}
+				putRequest.onerror = () => {
+					rej()
+				}
 			}
-			request.onerror = () => {
+			getRequest.onerror = () => {
 				rej()
 			}
 		})
@@ -647,7 +656,10 @@ class BrowserEventEmitter implements core.ExternalEventEmitter {
 }
 
 class SpyglassWatcher extends BrowserEventEmitter implements core.FsWatcher {
-	constructor(dbPromise: Promise<IDBDatabase>, locations: core.FsLocation[]) {
+	constructor(
+		dbPromise: Promise<IDBDatabase>,
+		private readonly locations: core.FsLocation[],
+	) {
 		super()
 		dbPromise.then((db) => {
 			const transaction = db.transaction(SpyglassFileSystem.storeName, 'readonly')
@@ -656,12 +668,7 @@ class SpyglassWatcher extends BrowserEventEmitter implements core.FsWatcher {
 			request.onsuccess = () => {
 				if (request.result) {
 					const uri = request.result.key.toString()
-					for (const location of locations) {
-						if (uri.startsWith(location)) {
-							this.emit('add', uri)
-							break
-						}
-					}
+					this.tryEmit('add', uri)
 					request.result.continue()
 				} else {
 					this.emit('ready')
@@ -671,6 +678,15 @@ class SpyglassWatcher extends BrowserEventEmitter implements core.FsWatcher {
 				this.emit('error', new Error('Watcher error'))
 			}
 		})
+	}
+
+	tryEmit(eventName: string, uri: string) {
+		for (const location of this.locations) {
+			if (uri.startsWith(location)) {
+				this.emit(eventName, uri)
+				break
+			}
+		}
 	}
 
 	async close(): Promise<void> {}
