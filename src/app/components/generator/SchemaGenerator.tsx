@@ -11,6 +11,7 @@ import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSn
 import { Store } from '../../Store.js'
 import { cleanUrl, genPath, safeJsonParse } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
+import { getRootDefault } from './McdocHelpers.js'
 
 export const SHARE_KEY = 'share'
 
@@ -95,8 +96,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		} else {
 			text = await service.readFile(uri)
 			if (text === undefined) {
-				// TODO: set to generator's default
-				text = '{}'
+				const node = getRootDefault(gen.id, service.getCheckerContext())
+				text = service.formatNode(node, uri)
 				await service.writeFile(uri, text)
 			}
 		}
@@ -122,9 +123,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setError(null)
 	}, [updateFile])
 
-	const reset = () => {
+	const reset = async () => {
+		if (!service || !uri) {
+			return
+		}
 		Analytics.resetGenerator(gen.id, 1, 'menu')
-		// TODO
+		const node = getRootDefault(gen.id, service.getCheckerContext())
+		const newText = service.formatNode(node, uri)
+		await service.writeFile(uri, newText)
 	}
 	const undo = async (e: MouseEvent) => {
 		e.stopPropagation()

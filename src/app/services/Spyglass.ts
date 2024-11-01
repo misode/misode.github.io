@@ -1,10 +1,11 @@
 import * as core from '@spyglassmc/core'
+import { FormatterContext } from '@spyglassmc/core'
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js'
 import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import { Fluids, ReleaseVersion, symbolRegistrar } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
 import * as jeMcf from '@spyglassmc/java-edition/lib/mcfunction/index.js'
-import type { JsonFileNode, JsonStringNode } from '@spyglassmc/json'
+import type { JsonFileNode, JsonNode, JsonStringNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
@@ -76,9 +77,14 @@ export class SpyglassService {
 		})
 	}
 
-	public getCheckerContext(doc: TextDocument, errors: core.LanguageError[]) {
+	public getCheckerContext(doc?: TextDocument, errors?: core.LanguageError[]) {
+		if (!doc) {
+			doc = TextDocument.create('file:///temp.json', 'json', 1, '')
+		}
 		const err = new core.ErrorReporter()
-		err.errors = errors
+		if (errors) {
+			err.errors = errors
+		}
 		return core.CheckerContext.create(this.service.project, { doc, err })
 	}
 
@@ -142,6 +148,13 @@ export class SpyglassService {
 			await this.service.project.externals.fs.writeFile(uri, document.doc.getText())
 			await this.notifyChange(document.doc)
 		}
+	}
+
+	public formatNode(node: JsonNode, uri: string) {
+		const formatter = this.service.project.meta.getFormatter(node.type)
+		const doc = TextDocument.create(uri, 'json', 1, '')
+		const ctx = FormatterContext.create(this.service.project, { doc, tabSize: 2, insertSpaces: true })
+		return formatter(node, ctx)
 	}
 
 	public async undoEdit(uri: string) {

@@ -2,9 +2,45 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
-import type { Attributes, ListType, McdocType, NumericRange, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import type { Attributes, AttributeValue, ListType, McdocType, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import { NumericRange, RangeKind } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import config from '../../Config.js'
+import { randomInt, randomSeed } from '../../Utils.js'
+
+export function getRootType(id: string): McdocType {
+	if (id === 'pack_mcmeta') {
+		return { kind: 'reference', path: '::java::pack::Pack' }
+	}
+	if (id === 'text_component' ) {
+		return { kind: 'reference', path: '::java::server::util::text::Text' }
+	}
+	if (id.startsWith('tag/')) {
+		const attribute: AttributeValue = {
+			kind: 'tree',
+			values: {
+				registry: { kind: 'literal', value: { kind: 'string', value: id.slice(4) } },
+				tags: { kind: 'literal', value: { kind: 'string', value: 'allowed' } },
+			},
+		}
+		return {
+			kind: 'concrete',
+			child: { kind: 'reference', path: '::java::data::tag::Tag' },
+			typeArgs: [{ kind: 'string', attributes: [{ name: 'id', value: attribute }] }],
+		}
+	}
+	return {
+		kind: 'dispatcher',
+		registry: 'minecraft:resource',
+		parallelIndices: [{ kind: 'static', value: id }],
+	}
+}
+
+export function getRootDefault(id: string, ctx: core.CheckerContext) {
+	const type = simplifyType(getRootType(id), ctx)
+	return getDefault(type, core.Range.create(0), ctx)
+}
 
 export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: core.CheckerContext): JsonNode {
 	if (type.kind === 'string') {
@@ -14,7 +50,41 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 		return { type: 'json:boolean', range, value: false }
 	}
 	if (isNumericType(type)) {
-		const value: core.LongNode = { type: 'long', range, value: BigInt(0) }
+		let num: number | bigint = 0
+		if (type.valueRange) {
+			// Best effort. First try 0 or 1, else set to the lowest bound
+			if (NumericRange.isInRange(type.valueRange, 0)) {
+				num = 0
+			} else if (NumericRange.isInRange(type.valueRange, 1)) {
+				num = 1
+			} else if (type.valueRange.min && type.valueRange.min > 0) {
+				num = type.valueRange.min
+				if (RangeKind.isLeftExclusive(type.valueRange.kind)) {
+					// Assume that left exclusive ranges are longer than 1
+					num += 1
+				}
+			}
+		}
+		if (type.attributes?.some(a => a.name === 'pack_format')) {
+			// Set to the latest pack format
+			const release = ctx.project['loadedVersion']
+			console
+			const version = config.versions.find(v => v.ref === release || v.id === release)
+			if (version) {
+				num = version.pack_format
+			}
+		}
+		if (type.attributes?.some(a => a.name === 'random')) {
+			// Generate random number
+			if (type.kind === 'long') {
+				num = randomSeed()
+			} else {
+				num = randomInt()
+			}
+		}
+		const value: core.LongNode | core.FloatNode = typeof num !== 'number' || Number.isInteger(num)
+			? { type: 'long', range, value: typeof num === 'number' ? BigInt(num) : num }
+			: { type: 'float', range, value: num }
 		return { type: 'json:number', range, value, children: [value] }
 	}
 	if (type.kind === 'struct' || type.kind === 'any' || type.kind === 'unsafe') {

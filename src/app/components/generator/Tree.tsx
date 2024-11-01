@@ -1,11 +1,10 @@
 import type { DocAndNode, Range } from '@spyglassmc/core'
 import type { JsonNode } from '@spyglassmc/json'
 import { JsonFileNode } from '@spyglassmc/json'
-import type { AttributeValue, McdocType } from '@spyglassmc/mcdoc'
 import { useCallback, useErrorBoundary, useMemo } from 'preact/hooks'
 import { disectFilePath, useLocale, useVersion } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
-import { simplifyType } from './McdocHelpers.js'
+import { getRootType, simplifyType } from './McdocHelpers.js'
 import type { McdocContext } from './McdocRenderer.jsx'
 import { McdocRoot } from './McdocRenderer.jsx'
 
@@ -73,40 +72,13 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 		if (!ctx || !resourceType) {
 			return undefined
 		}
-		return simplifyType(getRootType(resourceType), ctx)
+		const rootType = getRootType(resourceType)
+		return simplifyType(rootType, ctx)
 	}, [resourceType, ctx])
 
 	return <div class="tree node-root" data-cy="tree" data-category={getCategory(resourceType)}>
 		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={fileChild.children[0]} makeEdit={makeEdit} ctx={ctx} />}
 	</div>
-}
-
-function getRootType(id: string): McdocType {
-	if (id === 'pack_mcmeta') {
-		return { kind: 'reference', path: '::java::pack::Pack' }
-	}
-	if (id === 'text_component' ) {
-		return { kind: 'reference', path: '::java::server::util::text::Text' }
-	}
-	if (id.startsWith('tag/')) {
-		const attribute: AttributeValue = {
-			kind: 'tree',
-			values: {
-				registry: { kind: 'literal', value: { kind: 'string', value: id.slice(4) } },
-				tags: { kind: 'literal', value: { kind: 'string', value: 'allowed' } },
-			},
-		}
-		return {
-			kind: 'concrete',
-			child: { kind: 'reference', path: '::java::data::tag::Tag' },
-			typeArgs: [{ kind: 'string', attributes: [{ name: 'id', value: attribute }] }],
-		}
-	}
-	return {
-		kind: 'dispatcher',
-		registry: 'minecraft:resource',
-		parallelIndices: [{ kind: 'static', value: id }],
-	}
 }
 
 function getCategory(type: string | undefined) {
