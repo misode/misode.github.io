@@ -81,10 +81,7 @@ export async function fetchRegistries(versionId: VersionId) {
 	}
 }
 
-export interface BlockStateData {
-	properties: Record<string, string[]>
-	default: Record<string, string>
-}
+export type BlockStateData = [Record<string, string[]>, Record<string, string>]
 
 export async function fetchBlockStates(versionId: VersionId) {
 	console.debug(`[fetchBlockStates] ${versionId}`)
@@ -94,10 +91,7 @@ export async function fetchBlockStates(versionId: VersionId) {
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
 		for (const id in data) {
-			result.set('minecraft:' + id, {
-				properties: data[id][0],
-				default: data[id][1],
-			})
+			result.set(id, data[id])
 		}
 	} catch (e) {
 		console.warn('Error occurred while fetching block states:', message(e))

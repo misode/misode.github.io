@@ -319,14 +319,46 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	const summary: McmetaSummary = {
 		registries: Object.fromEntries((await fetchRegistries(version.id)).entries()),
 		blocks: Object.fromEntries([...(await fetchBlockStates(version.id)).entries()]
-			.map(([id, data]) => [id, [data.properties, data.default]])),
+			.map(([id, data]) => [id, data])),
 		fluids: Fluids,
 		commands: { type: 'root', children: {} },
 	}
 
+	const versionChecksum = getVersionChecksum(version.id)
+
 	meta.registerSymbolRegistrar('mcmeta-summary', {
-		checksum: getVersionChecksum(version.id),
+		checksum: versionChecksum,
 		registrar: symbolRegistrar(summary),
+	})
+
+	meta.registerSymbolRegistrar('mcdoc-block-states', {
+		checksum: versionChecksum,
+		registrar: (symbols) => {
+			const uri = 'mcmeta://summary/block_states.json'
+			symbols.query(uri, 'mcdoc/dispatcher', 'mcdoc:block_states').enter({
+				usage: { type: 'declaration' },
+			}).onEach(Object.entries(summary.blocks), ([id, [properties]], blockQuery) => {
+				const data: mcdoc.binder.TypeDefSymbolData = { typeDef: {
+					kind: 'struct',
+					fields: Object.entries(properties).map(([propKey, propValues]) => ({
+						kind: 'pair',
+						key: propKey,
+						type: {
+							kind: 'union',
+							members: propValues.map(value => ({
+								kind: 'literal', value: { kind: 'string', value },
+							})),
+						},
+					})),
+				} }
+				blockQuery.member(id, (stateQuery) => {
+					stateQuery.enter({
+						data: { data },
+						usage: { type: 'declaration' },
+					})
+				})
+			})
+		},
 	})
 
 	registerAttributes(meta, release, versions)

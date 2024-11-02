@@ -1,4 +1,5 @@
 import { Identifier } from 'deepslate'
+import type { BlockStateData } from '../../services/DataFetcher.js'
 import { fetchAllPresets, fetchBlockStates } from '../../services/DataFetcher.js'
 import type { VersionId } from '../../services/Versions.js'
 import { deepClone, deepEqual } from '../../Utils.js'
@@ -17,7 +18,7 @@ interface Context {
 	model: CustomizedModel,
 	initial: CustomizedModel,
 	version: VersionId,
-	blockStates: Map<string, {properties: Record<string, string[]>, default: Record<string, string>}>,
+	blockStates: Map<string, BlockStateData>,
 	vanilla: CustomizedPack,
 	out: CustomizedPack,
 	featureCollisionIndex: number,
@@ -77,7 +78,7 @@ function generateNoiseSettings(ctx: Context) {
 		sea_level: ctx.model.seaLevel,
 		default_fluid: {
 			Name: defaultFluid,
-			Properties: ctx.blockStates.get(defaultFluid)?.default,
+			Properties: ctx.blockStates.get(defaultFluid.replace(/^minecraft:/, ''))?.[1],
 		},
 		noise: {
 			...vanilla.noise,
