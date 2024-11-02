@@ -358,6 +358,23 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 					})
 				})
 			})
+			symbols.query(uri, 'mcdoc/dispatcher', 'mcdoc:block_state_keys').enter({
+				usage: { type: 'declaration' },
+			}).onEach(Object.entries(summary.blocks), ([id, [properties]], blockQuery) => {
+				const data: mcdoc.binder.TypeDefSymbolData = { typeDef: {
+					kind: 'union',
+					members: Object.keys(properties).map(propKey => ({
+						kind: 'literal',
+						value: { kind: 'string', value: propKey },
+					})),
+				} }
+				blockQuery.member(id, (stateQuery) => {
+					stateQuery.enter({
+						data: { data },
+						usage: { type: 'declaration' },
+					})
+				})
+			})
 		},
 	})
 
