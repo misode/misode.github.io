@@ -1,5 +1,5 @@
 import * as core from '@spyglassmc/core'
-import type { JsonNode } from '@spyglassmc/json'
+import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
 import type { Attributes, AttributeValue, ListType, McdocType, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
@@ -68,7 +68,6 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 		if (type.attributes?.some(a => a.name === 'pack_format')) {
 			// Set to the latest pack format
 			const release = ctx.project['loadedVersion']
-			console
 			const version = config.versions.find(v => v.ref === release || v.id === release)
 			if (version) {
 				num = version.pack_format
@@ -100,7 +99,7 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 						valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 					}
 					const value = getDefault(simplifyType(field.type, ctx), range, ctx)
-					const pair: core.PairNode<JsonStringNode, JsonNode> = {
+					const pair: JsonPairNode = {
 						type: 'pair',
 						range,
 						key: key,
@@ -174,6 +173,91 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 		return { type: 'json:number', range, value, children: [value] }
 	}
 	return { type: 'json:null', range }
+}
+
+export function getChange(type: SimplifiedMcdocTypeNoUnion, oldType: SimplifiedMcdocTypeNoUnion, oldNode: JsonNode, ctx: core.CheckerContext): JsonNode {
+	const node = getDefault(type, oldNode.range, ctx)
+	if (JsonArrayNode.is(node) && isListOrArray(type)) {
+		// From X to [X]
+		const newItemType = simplifyType(getItemType(type), ctx)
+		const possibleItemTypes = newItemType.kind === 'union' ? newItemType.members : [newItemType]
+		for (const possibleType of possibleItemTypes) {
+			if (quickEqualTypes(oldType, possibleType)) {
+				const newItem: core.ItemNode<JsonNode> = {
+					type: 'item',
+					range: node.range,
+					children: [oldNode],
+					value: oldNode,
+					parent: node,
+				}
+				oldNode.parent = newItem
+				node.children.splice(0, node.children.length, newItem)
+				return node
+			}
+		}
+	}
+	if (JsonArrayNode.is(oldNode) && isListOrArray(oldType)) {
+		// From [X] to X
+		const oldItemType = simplifyType(getItemType(oldType), ctx)
+		if (oldItemType.kind !== 'union' && quickEqualTypes(type, oldItemType)) {
+			const oldItem = oldNode.children[0]
+			if (oldItem?.value) {
+				return oldItem.value
+			}
+		}
+	}
+	if (JsonObjectNode.is(node) && type.kind === 'struct') {
+		// From X to {k: X}
+		for (const field of type.fields) {
+			const fieldKey = field.key
+			if (field.optional || fieldKey.kind !== 'literal') {
+				continue
+			}
+			const fieldType = simplifyType(field.type, ctx)
+			if (fieldType.kind !== 'union' && quickEqualTypes(fieldType, oldType)) {
+				const index = node.children.findIndex(pair => pair.key?.value === fieldKey.value.value.toString())
+				if (index !== -1) {
+					node.children.splice(index, 1)
+				}
+				const key: JsonStringNode = {
+					type: 'json:string',
+					range: node.range,
+					options: JsonStringOptions,
+					value: typeof field.key === 'string' ? field.key : fieldKey.value.value.toString(),
+					valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(node.range.start) }],
+				}
+				const pair: JsonPairNode = {
+					type: 'pair',
+					range: node.range,
+					key,
+					value: oldNode,
+					children: [oldNode],
+				}
+				key.parent = pair
+				oldNode.parent = pair
+				node.children.push(pair)
+				pair.parent = node
+				return node
+			}
+		}
+	}
+	if (JsonObjectNode.is(oldNode) && oldType.kind === 'struct') {
+		// From {k: X} to X
+		for (const oldField of oldType.fields) {
+			const oldFieldKey = oldField.key
+			if (oldFieldKey.kind !== 'literal') {
+				continue
+			}
+			const oldFieldType = simplifyType(oldField.type, ctx)
+			if (oldFieldType.kind !== 'union' && quickEqualTypes(oldFieldType, type)) {
+				const oldPair = oldNode.children.find(pair => pair.key?.value === oldFieldKey.value.value.toString())
+				if (oldPair?.value) {
+					return oldPair.value
+				}
+			}
+		}
+	}
+	return node
 }
 
 export function isNumericType(type: McdocType): type is NumericType {

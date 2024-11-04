@@ -16,7 +16,7 @@ import { generateColor, hexId, randomInt, randomSeed } from '../../Utils.js'
 import { Btn } from '../Btn.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
-import { formatIdentifier, getCategory, getDefault, getItemType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
+import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
 export interface McdocContext extends core.CheckerContext {}
 
@@ -349,9 +349,12 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 				return undefined
 			}
 			const newSelected = type.members[parseInt(newValue)]
+			if (node && selectedType) {
+				return getChange(newSelected, selectedType, node, ctx)
+			}
 			return getDefault(newSelected, range, ctx)
 		})
-	}, [type, makeEdit, ctx])
+	}, [type, node, makeEdit, ctx, selectedType])
 
 	const memberIndex = selectedType ? type.members.findIndex(m => quickEqualTypes(m, selectedType)) : -1
 
