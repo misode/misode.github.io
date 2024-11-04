@@ -139,9 +139,12 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
 	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
 		? idAttribute.value.value
-		: idAttribute?.kind === 'tree' && idAttribute.values.registry?.kind === 'literal' && idAttribute.values.registry?.value.kind === 'string'
-			? idAttribute.values.registry?.value.value
+		: idAttribute?.kind === 'tree' && idAttribute.values.registry?.kind === 'literal' && idAttribute.values.registry.value.kind === 'string'
+			? idAttribute.values.registry.value.value
 			: undefined
+	const idTags = idAttribute?.kind === 'tree' && idAttribute.values.tags?.kind === 'literal' && idAttribute.values.tags.value.kind === 'string'
+		? idAttribute.values.tags.value.value
+		: undefined
 	const isSelect = idRegistry && isSelectRegistry(idRegistry)
 
 	const onChangeValue = useCallback((newValue: string) => {
@@ -180,7 +183,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 	}, [onChangeValue])
 
 	return <>
-		{((idRegistry === 'item' || idRegistry === 'block') && value && !value.startsWith('#')) && <label>
+		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <label>
 			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
 		</label>}
 		{isSelect ? <>
