@@ -41,6 +41,204 @@ class BrowserEventEmitter implements core.ExternalEventEmitter {
 	}
 }
 
+export class MixedFileSystem implements core.ExternalFileSystem {
+	private watcher: MixedWatcher | undefined
+
+	constructor(
+		public readonly base: core.ExternalFileSystem,
+		public readonly overlays: Map<string, core.ExternalFileSystem> = new Map(),
+	) {}
+
+	async setOverlay(prefix: string, fileSystem: core.ExternalFileSystem) {
+		this.overlays.set(prefix, fileSystem)
+		if (this.watcher) {
+			await this.watcher.withOverlay(prefix, fileSystem)
+		}
+		return this
+	}
+
+	getFileSystem(location: core.FsLocation) {
+		for (const [prefix, fs] of this.overlays.entries()) {
+			if (location.toString().startsWith(prefix)) {
+				return fs
+			}
+		}
+		return this.base
+	}
+
+	chmod(location: core.FsLocation, mode: number) {
+		return this.getFileSystem(location).chmod(location, mode)
+	}
+	mkdir(location: core.FsLocation, options?: { mode?: number | undefined, recursive?: boolean | undefined } | undefined) {
+		return this.getFileSystem(location).mkdir(location, options)
+	}
+	readdir(location: core.FsLocation) {
+		return this.getFileSystem(location).readdir(location)
+	}
+	readFile(location: core.FsLocation) {
+		return this.getFileSystem(location).readFile(location)
+	}
+	showFile(path: core.FsLocation) {
+		return this.getFileSystem(path).showFile(path)
+	}
+	stat(location: core.FsLocation) {
+		return this.getFileSystem(location).stat(location)
+	}
+	unlink(location: core.FsLocation) {
+		return this.getFileSystem(location).unlink(location)
+	}
+	watch(locations: core.FsLocation[], options: { usePolling?: boolean | undefined }) {
+		this.watcher = new MixedWatcher(this, locations, options)
+		return this.watcher
+	}
+	writeFile(location: core.FsLocation, data: string | Uint8Array, options?: { mode: number } | undefined) {
+		return this.getFileSystem(location).writeFile(location, data, options)
+	}
+}
+
+class MixedWatcher extends BrowserEventEmitter implements core.FsWatcher {
+	constructor(
+		fs: MixedFileSystem,
+		private readonly locations: core.FsLocation[],
+		private readonly options: { usePolling?: boolean | undefined },
+	) {
+		super()
+		Promise.all([
+			this.initWatcher(fs.base, locations, options),
+			...[...fs.overlays.values()].map(overlay => this.initWatcher(overlay, locations, options)),
+		]).then(() => {
+			this.emit('ready')
+		})
+	}
+
+	private initWatcher(fs: core.ExternalFileSystem, locations: core.FsLocation[], options: { usePolling?: boolean | undefined }) {
+		return new Promise<void>((res, rej) => {
+			fs.watch(locations, options)
+				.once('ready', () => res())
+				.on('add', uri => this.emit('add', uri))
+				.on('change', uri => this.emit('change', uri))
+				.on('unlink', uri => this.emit('unlink', uri))
+				.on('error', e => rej(e))
+		})
+	}
+
+	withOverlay(_prefix: string, fs: core.ExternalFileSystem) {
+		return this.initWatcher(fs, this.locations, this.options)
+	}
+
+	async close(): Promise<void> {}
+}
+
+export class MemoryFileSystem implements core.ExternalFileSystem {
+	private readonly states = new Map<string, { type: 'file', content: Uint8Array } | { type: 'directory' }>()
+	private watcher: MemoryWatcher | undefined
+
+	async chmod(_location: core.FsLocation, _mode: number): Promise<void> {
+		return
+	}
+	async mkdir(
+		location: core.FsLocation,
+		_options?: { mode?: number | undefined, recursive?: boolean | undefined } | undefined,
+	): Promise<void> {
+		location = core.fileUtil.ensureEndingSlash(location.toString())
+		if (this.states.has(location)) {
+			throw new Error(`EEXIST: ${location}`)
+		}
+		this.states.set(location, { type: 'directory' })
+	}
+	async readdir(location: core.FsLocation): Promise<{ name: string, isDirectory(): boolean, isFile(): boolean, isSymbolicLink(): boolean }[]> {
+		const result: { name: string, isDirectory(): boolean, isFile(): boolean, isSymbolicLink(): boolean }[] = []
+		for (const [path, entry] of this.states.entries()) {
+			if (path.startsWith(location)) {
+				result.push({
+					name: path,
+					isDirectory: () => entry.type === 'directory',
+					isFile: () => entry.type === 'file',
+					isSymbolicLink: () => false,
+				})	
+			}
+		}
+		return []
+	}
+	async readFile(location: core.FsLocation): Promise<Uint8Array> {
+		location = location.toString()
+		const entry = this.states.get(location)
+		if (!entry) {
+			throw new Error(`ENOENT: ${location}`)
+		} else if (entry.type === 'directory') {
+			throw new Error(`EISDIR: ${location}`)
+		}
+		return entry.content
+	}
+	async showFile(_path: core.FsLocation): Promise<void> {
+		throw new Error('showFile not supported on browser')
+	}
+	async stat(location: core.FsLocation): Promise<{ isDirectory(): boolean, isFile(): boolean }> {
+		location = location.toString()
+		const entry = this.states.get(location)
+		if (!entry) {
+			throw new Error(`ENOENT: ${location}`)
+		}
+		return { isDirectory: () => entry.type === 'directory', isFile: () => entry.type === 'file' }
+	}
+	async unlink(location: core.FsLocation): Promise<void> {
+		location = location.toString()
+		const entry = this.states.get(location)
+		if (!entry) {
+			throw new Error(`ENOENT: ${location}`)
+		}
+		this.states.delete(location)
+		this.watcher?.tryEmit('unlink', location)
+	}
+	watch(locations: core.FsLocation[]): core.FsWatcher {
+		this.watcher = new MemoryWatcher(this.states, locations)
+		return this.watcher
+	}
+	async writeFile(
+		location: core.FsLocation,
+		data: string | Uint8Array,
+		_options?: { mode: number } | undefined,
+	): Promise<void> {
+		location = location.toString()
+		if (typeof data === 'string') {
+			data = new TextEncoder().encode(data)
+		}
+		const existed = this.states.has(location)
+		this.states.set(location, { type: 'file', content: data })
+		if (existed) {
+			this.watcher?.tryEmit('change', location)
+		} else {
+			this.watcher?.tryEmit('add', location)
+		}
+	}
+}
+
+class MemoryWatcher extends BrowserEventEmitter implements core.FsWatcher {
+	constructor(
+		states: Map<string, { type: 'file', content: Uint8Array } | { type: 'directory' }>,
+		private readonly locations: core.FsLocation[],
+	) {
+		super()
+		setTimeout(() => {
+			for (const location of states.keys()) {
+				this.tryEmit('add', location)
+			}
+			this.emit('ready')
+		})
+	}
+
+	tryEmit(eventName: string, uri: string) {
+		for (const location of this.locations) {
+			if (uri.startsWith(location)) {
+				this.emit(eventName, uri)
+				break
+			}
+		}
+	}
+
+	async close(): Promise<void> {}
+}
+
 export class IndexedDbFileSystem implements core.ExternalFileSystem {
 	public static readonly dbName = 'misode-spyglass-fs'
 	public static readonly dbVersion = 1

@@ -17,7 +17,7 @@ import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath, message } from '../Utils.js'
 import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
-import { IndexedDbFileSystem } from './FileSystem.js'
+import { IndexedDbFileSystem, MixedFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
 
 const builtinMcdoc = `
@@ -46,13 +46,14 @@ interface ClientDocument {
 }
 
 export class SpyglassClient {
+	public readonly fs = new MixedFileSystem(new IndexedDbFileSystem())
 	public readonly externals: core.Externals = {
 		...BrowserExternals,
 		archive: {
 			...BrowserExternals.archive,
 			decompressBall,
 		},
-		fs: new IndexedDbFileSystem(),
+		fs: this.fs,
 	}
 
 	public readonly documents = new Map<string, ClientDocument>()
@@ -212,8 +213,11 @@ export class SpyglassService {
 		const service = new core.Service({
 			logger,
 			profilers: new core.ProfilerFactory(logger, [
+				'cache#load',
+				'cache#save',
 				'project#init',
 				'project#ready',
+				'project#ready#bind',
 			]),
 			project: {
 				cacheRoot: 'file:///cache/',
@@ -266,7 +270,9 @@ export class SpyglassService {
 			},
 		})
 		await service.project.ready()
-		await service.project.cacheService.save()
+		setTimeout(() => {
+			service.project.cacheService.save()
+		}, 10_000)
 		return new SpyglassService(versionId, service, client)
 	}
 }
