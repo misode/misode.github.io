@@ -610,6 +610,14 @@
       "wiki": "https://minecraft.wiki/w/Tutorials/Models#Block_states"
     },
     {
+      "id": "item_definition",
+      "url": "assets/item",
+      "path": "items",
+      "tags": ["assets"],
+      "schema": "item_definition",
+      "minVersion": "1.21.4"
+    },
+    {
       "id": "model",
       "url": "assets/model",
       "path": "models",
