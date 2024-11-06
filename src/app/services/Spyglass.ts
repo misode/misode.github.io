@@ -17,7 +17,7 @@ import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath, message } from '../Utils.js'
 import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
-import { IndexedDbFileSystem, MixedFileSystem } from './FileSystem.js'
+import { IndexedDbFileSystem, MemoryFileSystem, MixedFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
 
 const builtinMcdoc = `
@@ -46,7 +46,9 @@ interface ClientDocument {
 }
 
 export class SpyglassClient {
-	public readonly fs = new MixedFileSystem(new IndexedDbFileSystem())
+	public readonly fs = new MixedFileSystem(new IndexedDbFileSystem(), [
+		{ prefix: 'file:///project/mcdoc/', fs: new MemoryFileSystem() },
+	])
 	public readonly externals: core.Externals = {
 		...BrowserExternals,
 		archive: {

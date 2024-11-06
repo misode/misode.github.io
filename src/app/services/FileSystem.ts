@@ -46,19 +46,22 @@ export class MixedFileSystem implements core.ExternalFileSystem {
 
 	constructor(
 		public readonly base: core.ExternalFileSystem,
-		public readonly overlays: Map<string, core.ExternalFileSystem> = new Map(),
-	) {}
+		public readonly overlays: { prefix: string, fs: core.ExternalFileSystem }[] = [],
+	) {
+		this.overlays.sort((a, b) => b.prefix.length - a.prefix.length)
+	}
 
-	async setOverlay(prefix: string, fileSystem: core.ExternalFileSystem) {
-		this.overlays.set(prefix, fileSystem)
+	async setOverlay(prefix: string, fs: core.ExternalFileSystem) {
+		this.overlays.push({ prefix, fs })
+		this.overlays.sort((a, b) => b.prefix.length - a.prefix.length)
 		if (this.watcher) {
-			await this.watcher.withOverlay(prefix, fileSystem)
+			await this.watcher.withOverlay(prefix, fs)
 		}
 		return this
 	}
 
 	getFileSystem(location: core.FsLocation) {
-		for (const [prefix, fs] of this.overlays.entries()) {
+		for (const { prefix, fs } of this.overlays) {
 			if (location.toString().startsWith(prefix)) {
 				return fs
 			}
@@ -105,7 +108,7 @@ class MixedWatcher extends BrowserEventEmitter implements core.FsWatcher {
 		super()
 		Promise.all([
 			this.initWatcher(fs.base, locations, options),
-			...[...fs.overlays.values()].map(overlay => this.initWatcher(overlay, locations, options)),
+			...fs.overlays.map(overlay => this.initWatcher(overlay.fs, locations, options)),
 		]).then(() => {
 			this.emit('ready')
 		})
