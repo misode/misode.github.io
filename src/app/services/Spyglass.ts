@@ -1,6 +1,7 @@
 import * as core from '@spyglassmc/core'
 import { FormatterContext } from '@spyglassmc/core'
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js'
+import { dissectUri } from '@spyglassmc/java-edition/lib/binder/index.js'
 import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import { Fluids, ReleaseVersion, symbolRegistrar } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
@@ -17,8 +18,14 @@ import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath, message } from '../Utils.js'
 import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
-import { IndexedDbFileSystem, MemoryFileSystem, MixedFileSystem } from './FileSystem.js'
+import { IndexedDbFileSystem, MixedFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
+
+export const CACHE_URI = 'file:///cache/'
+export const ROOT_URI = 'file:///root/'
+export const DEPENDENCY_URI = `${ROOT_URI}dependency/`
+export const UNSAVED_URI = `${ROOT_URI}unsaved/`
+export const PROJECTS_URI = `${ROOT_URI}projects/`
 
 const builtinMcdoc = `
 use ::java::server::util::text::Text
@@ -47,7 +54,7 @@ interface ClientDocument {
 
 export class SpyglassClient {
 	public readonly fs = new MixedFileSystem(new IndexedDbFileSystem(), [
-		{ prefix: 'file:///project/mcdoc/', fs: new MemoryFileSystem() },
+		// { prefix: DEPENDENCY_URI, fs: new MemoryFileSystem() },
 	])
 	public readonly externals: core.Externals = {
 		...BrowserExternals,
@@ -83,13 +90,17 @@ export class SpyglassService {
 
 	public getCheckerContext(doc?: TextDocument, errors?: core.LanguageError[]) {
 		if (!doc) {
-			doc = TextDocument.create('file:///temp.json', 'json', 1, '')
+			doc = TextDocument.create('file:///unknown.json', 'json', 1, '')
 		}
 		const err = new core.ErrorReporter()
 		if (errors) {
 			err.errors = errors
 		}
 		return core.CheckerContext.create(this.service.project, { doc, err })
+	}
+
+	public dissectUri(uri: string) {
+		return dissectUri(uri, this.getCheckerContext(TextDocument.create(uri, 'json', 1, '')))
 	}
 
 	public async openFile(uri: string) {
@@ -193,9 +204,9 @@ export class SpyglassService {
 
 	public getUnsavedFileUri(gen: ConfigGenerator) {
 		if (gen.id === 'pack_mcmeta') {
-			return 'file:///project/pack.mcmeta'
+			return `${UNSAVED_URI}pack.mcmeta`
 		}
-		return `file:///project/data/draft/${genPath(gen, this.version)}/unsaved.json`
+		return `${UNSAVED_URI}data/draft/${genPath(gen, this.version)}/draft.json`
 	}
 
 	public watchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
@@ -222,8 +233,8 @@ export class SpyglassService {
 				'project#ready#bind',
 			]),
 			project: {
-				cacheRoot: 'file:///cache/',
-				projectRoots: ['file:///project/'],
+				cacheRoot: CACHE_URI,
+				projectRoots: [ROOT_URI],
 				externals: client.externals,
 				defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
 					env: {
@@ -251,7 +262,7 @@ export class SpyglassService {
 							},
 							// Partner resources
 							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
-								[gen.path, {
+								[gen.path ?? gen.id, {
 									category: gen.id,
 								}]
 							)),

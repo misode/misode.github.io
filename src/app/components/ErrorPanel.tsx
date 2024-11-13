@@ -1,6 +1,7 @@
 import type { ComponentChildren } from 'preact'
 import { getCurrentUrl } from 'preact-router'
 import { useEffect, useMemo, useState } from 'preact/hooks'
+import { useProject } from '../contexts/Project.jsx'
 import { useSpyglass } from '../contexts/Spyglass.jsx'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
@@ -19,6 +20,7 @@ type ErrorPanelProps = {
 export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, children }: ErrorPanelProps) {
 	const { version } = useVersion()
 	const { service } = useSpyglass()
+	const { projectUri } = useProject()
 	const [stackVisible, setStackVisible] = useState(false)
 	const [stack, setStack] = useState<string | undefined>(undefined)
 
@@ -28,13 +30,12 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 		if (!service || !gen) {
 			return undefined
 		}
-		// TODO: read project file if open
-		const uri = service.getUnsavedFileUri(gen)
+		const uri = projectUri ?? service.getUnsavedFileUri(gen)
 		if (!uri) {
 			return undefined
 		}
 		return await service.readFile(uri)
-	}, [service, version, gen])
+	}, [service, version, projectUri, gen])
 
 	useEffect(() => {
 		if (error instanceof Error) {

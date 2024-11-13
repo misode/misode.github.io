@@ -1,46 +1,56 @@
 import type { DocAndNode } from '@spyglassmc/core'
-import { useState } from 'preact/hooks'
+import { Identifier } from 'deepslate'
+import { useCallback, useState } from 'preact/hooks'
+import type { Method } from '../../Analytics.js'
 import { Analytics } from '../../Analytics.js'
-import { useLocale, useProject } from '../../contexts/index.js'
-import { safeJsonParse } from '../../Utils.js'
+import type { ConfigGenerator } from '../../Config.js'
+import { getProjectRoot, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { useSpyglass } from '../../contexts/Spyglass.jsx'
+import { genPath, message } from '../../Utils.js'
 import { Btn } from '../Btn.js'
 import { TextInput } from '../forms/index.js'
 import { Modal } from '../Modal.js'
 
 interface Props {
 	docAndNode: DocAndNode,
-	id: string,
-	method: string,
+	gen: ConfigGenerator,
+	method: Method,
+	onCreate: (uri: string) => void,
 	onClose: () => void,
 }
-export function FileCreation({ docAndNode, id, method, onClose }: Props) {
+export function FileCreation({ docAndNode, gen, method, onCreate, onClose }: Props) {
 	const { locale } = useLocale()
-	const { projects, project, updateFile } = useProject()
-	const [fileId, setFileId] = useState(id === 'pack_mcmeta' ? 'pack' : '')
-	const [error, setError] = useState<string>()
+	const { version } = useVersion()
+	const { project } = useProject()
+	const { client } = useSpyglass()
 
+	const [fileId, setFileId] = useState(gen.id === 'pack_mcmeta' ? 'pack' : '')
+	const [error, setError] = useState<string>()
+	
 	const changeFileId = (str: string) => {
 		setError(undefined)
 		setFileId(str)
 	}
 
-	const doSave = () => {
+	const doSave = useCallback(() => {
 		if (!fileId.match(/^([a-z0-9_.-]+:)?[a-z0-9/_.-]+$/)) {
 			setError('Invalid resource location')
 			return
 		}
-		Analytics.saveProjectFile(id, projects.length, project.files.length, method as any)
+		const id = Identifier.parse(fileId.includes(':') || project.namespace === undefined ? fileId : `${project.namespace}:${fileId}`)
+		const uri = `${getProjectRoot(project)}data/${id.namespace}/${genPath(gen, version)}/${id.path}.json`
+		Analytics.saveProjectFile(method)
 		const text = docAndNode.doc.getText()
-		const data = safeJsonParse(text)
-		if (data !== undefined) {
-			updateFile(id, undefined, { type: id, id: fileId, data })
-		}
-		onClose()
-	}
+		client.fs.writeFile(uri, text).then(() => {
+			onCreate(uri)
+		}).catch((e) => {
+			setError(message(e))
+		})
+	}, [version, project, client, fileId ])
 
 	return <Modal class="file-modal" onDismiss={onClose}>
 		<p>{locale('project.save_current_file')}</p>
-		<TextInput autofocus={id !== 'pack_mcmeta'} class="btn btn-input" value={fileId} onChange={changeFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} readOnly={id === 'pack_mcmeta'} />
+		<TextInput autofocus={gen.id !== 'pack_mcmeta'} class="btn btn-input" value={fileId} onChange={changeFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} readOnly={gen.id === 'pack_mcmeta'} />
 		{error !== undefined && <span class="invalid">{error}</span>}
 		<Btn icon="file" label={locale('project.save')} onClick={doSave} />
 	</Modal>

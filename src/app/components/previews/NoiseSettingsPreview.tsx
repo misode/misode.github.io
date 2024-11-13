@@ -2,7 +2,7 @@ import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { vec2 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
-import { getProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
 import { fetchRegistries } from '../../services/index.js'
 import { Store } from '../../Store.js'
@@ -27,7 +27,7 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const { value, error } = useAsync(async () => {
 		const data = safeJsonParse(text) ?? {}
-		await DEEPSLATE.loadVersion(version, getProjectData(project))
+		await DEEPSLATE.loadVersion(version, {}) // TODO: get project data
 		const biomeSource = { type: 'fixed', biome }
 		await DEEPSLATE.loadChunkGenerator(data, biomeSource, seed)
 		const noiseSettings = DEEPSLATE.getNoiseSettings()

@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { Analytics } from '../../Analytics.js'
+import { route } from 'preact-router'
+import { useCallback, useMemo, useRef } from 'preact/hooks'
 import config from '../../Config.js'
-import { disectFilePath, DRAFT_PROJECT, getFilePath, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { DRAFT_PROJECT, getProjectRoot, useLocale, useProject } from '../../contexts/index.js'
+import { useSpyglass } from '../../contexts/Spyglass.jsx'
+import { useAsync } from '../../hooks/useAsync.js'
 import { useFocus } from '../../hooks/useFocus.js'
-import { stringifySource } from '../../services/index.js'
-import { Store } from '../../Store.js'
-import { writeZip } from '../../Utils.js'
+import { cleanUrl, writeZip } from '../../Utils.js'
 import { Btn } from '../Btn.js'
 import { BtnMenu } from '../BtnMenu.js'
 import { Octicon } from '../Octicon.jsx'
@@ -13,73 +13,35 @@ import type { TreeViewGroupRenderer, TreeViewLeafRenderer } from '../TreeView.js
 import { TreeView } from '../TreeView.js'
 
 interface Props {
-	onError: (message: string) => unknown,
-	onRename: (file: { type: string, id: string }) => unknown,
-	onCreate: () => unknown,
-	onDeleteProject: () => unknown,
+	onError: (message: string) => void,
+	onRename: (uri: string) => void,
+	onCreateProject: () => void,
+	onDeleteProject: () => void,
 }
-export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
+export function ProjectPanel({ onRename, onCreateProject, onDeleteProject}: Props) {
 	const { locale } = useLocale()
-	const { version } = useVersion()
-	const { projects, project, changeProject, file, openFile, updateFile } = useProject()
+	const { projects, project, projectUri, setProjectUri, changeProject } = useProject()
+	const { client, service } = useSpyglass()
 
-	const [treeViewMode, setTreeViewMode] = useState(Store.getTreeViewMode())
+	const projectRoot = getProjectRoot(project)
 
-	const changeTreeViewMode = useCallback((mode: string) => {
-		Store.setTreeViewMode(mode)
-		Analytics.setTreeViewMode(mode)
-		setTreeViewMode(mode)
-	}, [])
-
-	const disectEntry = useCallback((entry: string) => {
-		if (treeViewMode === 'resources' && entry !== 'pack.mcmeta') {
-			const [type, id] = entry.split('/')
-			return {
-				type: type.replaceAll('\u2215', '/'),
-				id: id.replaceAll('\u2215', '/'),
-			}
-		}
-		return disectFilePath(entry, version)
-	}, [treeViewMode, version])
-
-	const entries = useMemo(() => project.files.flatMap(f => {
-		const path = getFilePath(f, version)
-		if (!path) return []
-		if (f.type === 'pack_mcmeta') return 'pack.mcmeta'
-		if (treeViewMode === 'resources') {
-			return [`${f.type.replaceAll('/', '\u2215')}/${f.id.replaceAll('/', '\u2215')}`]
-		}
-		return [path]
-	}), [treeViewMode, version, ...project.files])
-
-	const selected = useMemo(() => file && getFilePath(file, version), [file, version])
-
-	const selectFile = useCallback((entry: string) => {
-		const file = disectEntry(entry)
-		if (file) {
-			openFile(file.type, file.id)
-		}
-	}, [disectEntry])
+	const { value: entries } = useAsync(async () => {
+		const entries = await client.fs.readdir(projectRoot)
+		return entries.flatMap(e => {
+			return e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []
+		})
+	}, [project])
 
 	const download = useRef<HTMLAnchorElement>(null)
 
 	const onDownload = async () => {
-		if (!download.current) return
-		let hasPack = false
-		const entries = project.files.flatMap(file => {
-			const path = getFilePath(file, version)
-			if (path === undefined) return []
-			if (path === 'pack.mcmeta') hasPack = true
-			return [[path, stringifySource(JSON.stringify(file.data))]] as [string, string][]
-		})
-		project.unknownFiles?.forEach(({ path, data }) => {
-			entries.push([path, data])
-		})
-		if (!hasPack) {
-			const pack_format = config.versions.find(v => v.id === version)!.pack_format
-			entries.push(['pack.mcmeta', stringifySource(JSON.stringify({ pack: { pack_format, description: '' } }, null, 2))])
-		}
-		const url = await writeZip(entries)
+		if (!download.current || entries === undefined) return
+		const zipEntries = await Promise.all(entries.map(async e => {
+			const data = await client.fs.readFile(projectRoot + e)
+			const text = new TextDecoder().decode(data)
+			return [e, text] as [string, string]
+		}))
+		const url = await writeZip(zipEntries)
 		download.current.setAttribute('href', url)
 		download.current.setAttribute('download', `${project.name.replaceAll(' ', '_')}.zip`)
 		download.current.click()
@@ -89,25 +51,20 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 		{
 			icon: 'pencil',
 			label: locale('project.rename_file'),
-			onAction: (entry: string) => {
-				const file = disectEntry(entry)
-				if (file) {
-					onRename(file)
-				}
+			onAction: (uri: string) => {
+				onRename(uri)
 			},
 		},
 		{
 			icon: 'trashcan',
 			label: locale('project.delete_file'),
-			onAction: (entry: string) => {
-				const file = disectEntry(entry)
-				if (file) {
-					Analytics.deleteProjectFile(file.type, projects.length, project.files.length, 'menu')
-					updateFile(file.type, file.id, {})
-				}
+			onAction: (uri: string) => {
+				client.fs.unlink(uri).then(() => {
+					setProjectUri(undefined)
+				})
 			},
 		},
-	], [disectEntry, updateFile, onRename])
+	], [client, onRename, projectRoot])
 
 	const FolderEntry: TreeViewGroupRenderer = useCallback(({ name, open, onClick }) => {
 		return <div class="entry" onClick={onClick} >
@@ -118,23 +75,34 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 
 	const FileEntry: TreeViewLeafRenderer<string> = useCallback(({ entry }) => {
 		const [focused, setFocus] = useFocus()
+		const uri = projectRoot + entry
 		const onContextMenu = (evt: MouseEvent) => {
 			evt.preventDefault()
 			setFocus()
 		}
-		const file = disectEntry(entry)
+		const onClick = () => {
+			const category = uri.endsWith('/pack.mcmeta')
+				? 'pack_mcmeta'
+				: service?.dissectUri(uri)?.category
+			const gen = config.generators.find(g => g.id === category)
+			if (!gen) {
+				throw new Error(`Cannot find generator for uri ${uri}`)
+			}
+			route(cleanUrl(gen.url))
+			setProjectUri(uri)
+		}
 
-		return <div class={`entry ${file && getFilePath(file, version) === selected ? 'active' : ''} ${focused ? 'focused' : ''}`} onClick={() => selectFile(entry)} onContextMenu={onContextMenu} >
+		return <div class={`entry ${uri === projectUri ? 'active' : ''} ${focused ? 'focused' : ''}`} onClick={onClick} onContextMenu={onContextMenu} >
 			{Octicon.file}
 			<span>{entry.split('/').at(-1)}</span>
 			{focused && <div class="entry-menu">
-				{actions?.map(a => <div class="action [&>svg]:inline" onClick={e => { a.onAction(entry); e.stopPropagation(); setFocus(false) }}>
+				{actions?.map(a => <div class="action [&>svg]:inline" onClick={e => { a.onAction(uri); e.stopPropagation(); setFocus(false) }}>
 					{(Octicon as any)[a.icon]}
 					<span>{a.label}</span>
 				</div>)}
 			</div>}
 		</div>
-	}, [actions, disectEntry])
+	}, [service, actions, projectRoot, projectUri])
 
 	return <>
 		<div class="project-controls">
@@ -143,15 +111,16 @@ export function ProjectPanel({ onRename, onCreate, onDeleteProject }: Props) {
 			</BtnMenu>
 			<BtnMenu icon="kebab_horizontal" >
 				<Btn icon="file_zip" label={locale('project.download')} onClick={onDownload} />
-				<Btn icon="plus_circle" label={locale('project.new')} onClick={onCreate} />
-				<Btn icon={treeViewMode === 'resources' ? 'three_bars' : 'rows'} label={locale(treeViewMode === 'resources' ? 'project.show_file_paths' : 'project.show_resources')} onClick={() => changeTreeViewMode(treeViewMode === 'resources' ? 'files' : 'resources')} />
+				<Btn icon="plus_circle" label={locale('project.new')} onClick={onCreateProject} />
 				{project.name !== DRAFT_PROJECT.name && <Btn icon="trashcan" label={locale('project.delete')} onClick={onDeleteProject} />}
 			</BtnMenu>
 		</div>
 		<div class="file-view">
-			{entries.length === 0
-				? <span>{locale('project.no_files')}</span>
-				: <TreeView entries={entries} split={path => path.split('/')} group={FolderEntry} leaf={FileEntry} />}
+			{entries === undefined
+				? <></>
+				: entries.length === 0
+					? <span>{locale('project.no_files')}</span>
+					: <TreeView entries={entries} split={path => path.split('/')} group={FolderEntry} leaf={FileEntry} />}
 		</div>
 		<a ref={download} style="display: none;"></a>
 	</>

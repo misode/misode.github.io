@@ -52,8 +52,13 @@ export class MixedFileSystem implements core.ExternalFileSystem {
 	}
 
 	async setOverlay(prefix: string, fs: core.ExternalFileSystem) {
-		this.overlays.push({ prefix, fs })
-		this.overlays.sort((a, b) => b.prefix.length - a.prefix.length)
+		const index = this.overlays.findIndex(overlay => overlay.prefix === prefix)
+		if (index !== -1) {
+			this.overlays.splice(index, 1, { prefix, fs })
+		} else {
+			this.overlays.push({ prefix, fs })
+			this.overlays.sort((a, b) => b.prefix.length - a.prefix.length)
+		}
 		if (this.watcher) {
 			await this.watcher.withOverlay(prefix, fs)
 		}

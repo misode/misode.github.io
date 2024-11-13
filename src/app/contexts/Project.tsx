@@ -1,97 +1,96 @@
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
-import { route } from 'preact-router'
-import { useCallback, useContext, useMemo, useState } from 'preact/hooks'
-import config from '../Config.js'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
 import type { VersionId } from '../services/index.js'
+import { ROOT_URI } from '../services/Spyglass.js'
 import { Store } from '../Store.js'
-import { cleanUrl, genPath } from '../Utils.js'
-import { useVersion } from './Version.jsx'
 
-export type Project = {
+export type ProjectMeta = {
 	name: string,
 	namespace?: string,
 	version?: VersionId,
-	files: ProjectFile[],
+	storage?: ProjectStorage,
+	/** @deprecated */
+	files?: ProjectFile[],
+	/** @deprecated */
 	unknownFiles?: UnknownFile[],
 }
-export const DRAFT_PROJECT: Project = {
-	name: 'Drafts',
-	namespace: 'draft',
-	files: [],
+
+export type ProjectStorage = {
+	type: 'indexeddb',
+	rootUri: string,
 }
 
-export type ProjectFile = {
+type ProjectFile = {
 	type: string,
 	id: string,
 	data: any,
 }
 
-export type UnknownFile = {
+type UnknownFile = {
 	path: string,
 	data: string,
 }
 
-export const FilePatterns = [
-	'immersive_weathering/[a-z_]+',
-	'neoforge/[a-z_]+',
-	'ohthetreesyoullgrow/[a-z_]+',
-	'worldgen/[a-z_]+',
-	'tags/worldgen/[a-z_]+',
-	'tags/[a-z_]+',
-	'[a-z_]+',
-].map(e => RegExp(`^data/([a-z0-9._-]+)/(${e})/([a-z0-9/._-]+)$`))
+export const DRAFT_PROJECT: ProjectMeta = {
+	name: 'Drafts',
+	namespace: 'draft',
+	storage: {
+		type: 'indexeddb',
+		rootUri: `${ROOT_URI}drafts/`,
+	},
+}
 
 interface ProjectContext {
-	projects: Project[],
-	project: Project,
-	file?: ProjectFile,
-	createProject: (name: string, namespace?: string, version?: VersionId) => unknown,
-	deleteProject: (name: string) => unknown,
-	changeProject: (name: string) => unknown,
-	updateProject: (project: Partial<Project>) => unknown,
-	updateFile: (type: string, id: string | undefined, file: Partial<ProjectFile>) => boolean,
-	openFile: (type: string, id: string) => unknown,
-	closeFile: () => unknown,
+	projects: ProjectMeta[],
+	project: ProjectMeta,
+	projectUri: string | undefined,
+	setProjectUri: (uri: string | undefined) => void,
+	createProject: (project: ProjectMeta) => void,
+	deleteProject: (name: string) => void,
+	changeProject: (name: string) => void,
+	updateProject: (project: Partial<ProjectMeta>) => void,
 }
-const Project = createContext<ProjectContext>({
-	projects: [DRAFT_PROJECT],
-	project: DRAFT_PROJECT,
-	createProject: () => {},
-	deleteProject: () => {},
-	changeProject: () => {},
-	updateProject: () => {},
-	updateFile: () => false,
-	openFile: () => {},
-	closeFile: () => {},
-})
+const Project = createContext<ProjectContext | undefined>(undefined)
 
 export function useProject() {
-	return useContext(Project)
+	const context = useContext(Project)
+	if (context === undefined) {
+		throw new Error('Cannot use project outside of provider')
+	}
+	return context
 }
 
 export function ProjectProvider({ children }: { children: ComponentChildren }) {
-	const [projects, setProjects] = useState<Project[]>(Store.getProjects())
-	const { version } = useVersion()
+	const [projects, setProjects] = useState<ProjectMeta[]>(Store.getProjects())
+	const [openProject, setProjectName] = useState<string>()
 
-	const [projectName, setProjectName] = useState<string>(Store.getOpenProject())
+	useEffect(() => {
+		const initialProject = Store.getOpenProject()
+		const project = projects.find(p => p.name === initialProject)
+		if (!project) {
+			return
+		}
+		if (project.storage !== undefined) {
+			setProjectName(initialProject)
+			return
+		}
+		// TODO: Import legacy projects
+	}, [])
+
 	const project = useMemo(() => {
-		return projects.find(p => p.name === projectName) ?? DRAFT_PROJECT
-	}, [projects, projectName])
+		return projects.find(p => p.name === openProject) ?? DRAFT_PROJECT
+	}, [projects, openProject])
 
-	const [fileId, setFileId] = useState<[string, string] | undefined>(undefined)
-	const file = useMemo(() => {
-		if (!fileId) return undefined
-		return project.files.find(f => f.type === fileId[0] && f.id === fileId[1])
-	}, [project, fileId])
+	const [projectUri, setProjectUri] = useState<string>()
 
-	const changeProjects = useCallback((projects: Project[]) => {
+	const changeProjects = useCallback((projects: ProjectMeta[]) => {
 		Store.setProjects(projects)
 		setProjects(projects)
 	}, [])
 
-	const createProject = useCallback((name: string, namespace?: string, version?: VersionId) => {
-		changeProjects([...projects, { name, namespace, version, files: [] }])
+	const createProject = useCallback((project: ProjectMeta) => {
+		changeProjects([...projects, project])
 	}, [projects])
 
 	const deleteProject = useCallback((name: string) => {
@@ -104,55 +103,19 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		setProjectName(name)
 	}, [])
 
-	const updateProject = useCallback((edits: Partial<Project>) => {
-		changeProjects(projects.map(p => p.name === projectName ?	{ ...p, ...edits } : p))
-	}, [projects, projectName])
-
-	const updateFile = useCallback((type: string, id: string | undefined, edits: Partial<ProjectFile>) => {
-		if (!edits.id) { // remove
-			updateProject({ files: project.files.filter(f => f.type !== type || f.id !== id) })
-		} else {
-			const newId = type === 'pack_mcmeta' ? 'pack' : edits.id.includes(':') ? edits.id : `${project.namespace ?? 'minecraft'}:${edits.id}`
-			const exists = project.files.some(f => f.type === type && f.id === newId)
-			if (!id) { // create
-				if (exists) return false
-				updateProject({ files: [...project.files, { type, id: newId, data: edits.data ?? {} } ]})
-				setFileId([type, newId])
-			} else { // rename or update data
-				if (file?.id === id && id !== newId && exists) {
-					return false
-				}
-				updateProject({ files: project.files.map(f => f.type === type && f.id === id ? { ...f, ...edits, id: newId } : f)})
-				if (file?.id === id) setFileId([type, newId])
-			}
-		}
-		return true
-	}, [updateProject, project, file])
-
-	const openFile = useCallback((type: string, id: string) => {
-		const gen = config.generators.find(g => g.id === type || genPath(g, version) === type)
-		if (!gen) {
-			throw new Error(`Cannot find generator of type ${type}`)
-		}
-		setFileId([gen.id, id])
-		route(cleanUrl(gen.url))
-	}, [version])
-
-	const closeFile = useCallback(() => {
-		setFileId(undefined)
-	}, [])
+	const updateProject = useCallback((edits: Partial<ProjectMeta>) => {
+		changeProjects(projects.map(p => p.name === openProject ?	{ ...p, ...edits } : p))
+	}, [projects, openProject])
 
 	const value: ProjectContext = {
 		projects,
 		project,
-		file,
+		projectUri,
+		setProjectUri,
 		createProject,
 		changeProject,
 		deleteProject,
 		updateProject,
-		updateFile,
-		openFile,
-		closeFile,
 	}
 
 	return <Project.Provider value={value}>
@@ -160,44 +123,9 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	</Project.Provider>
 }
 
-export function getFilePath(file: { id: string, type: string }, version: VersionId) {
-	const [namespace, id] = file.id.includes(':') ? file.id.split(':') : ['minecraft', file.id]
-	if (file.type === 'pack_mcmeta') {
-		if (file.id === 'pack') return 'pack.mcmeta'
-		return undefined
+export function getProjectRoot(project: ProjectMeta) {
+	if (project.storage?.type === 'indexeddb') {
+		return project.storage.rootUri
 	}
-	const gen = config.generators.find(g => g.id === file.type)
-	if (!gen) {
-		return undefined
-	}
-	return `data/${namespace}/${genPath(gen, version)}/${id}.json`
-}
-
-export function disectFilePath(path: string, version: VersionId) {
-	if (path === 'pack.mcmeta') {
-		return { type: 'pack_mcmeta', id: 'pack' }
-	}
-	for (const p of FilePatterns) {
-		const match = path.match(p)
-		if (!match) continue
-		const gen = config.generators.find(g => (genPath(g, version) ?? g.id) === match[2])
-		if (!gen) continue
-		const namespace = match[1]
-		const name = match[3].replace(/\.[a-z]+$/, '')
-		return {
-			type: gen.id,
-			id: `${namespace}:${name}`,
-		}
-	}
-	return undefined
-}
-
-export function getProjectData(project: Project) {
-	return Object.fromEntries(['worldgen/noise_settings', 'worldgen/noise', 'worldgen/density_function'].map(type => {
-		const resources = Object.fromEntries(
-			project.files.filter(file => file.type === type)
-				.map<[string, unknown]>(file => [file.id, file.data])
-		)
-		return [type, resources]
-	}))
+	throw new Error(`Unsupported project storage ${project.storage?.type}`)
 }

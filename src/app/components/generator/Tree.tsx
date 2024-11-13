@@ -1,8 +1,9 @@
 import type { DocAndNode, Range } from '@spyglassmc/core'
+import { dissectUri } from '@spyglassmc/java-edition/lib/binder/index.js'
 import type { JsonNode } from '@spyglassmc/json'
 import { JsonFileNode } from '@spyglassmc/json'
 import { useCallback, useErrorBoundary, useMemo } from 'preact/hooks'
-import { disectFilePath, useLocale, useVersion } from '../../contexts/index.js'
+import { useLocale } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
 import { getRootType, simplifyType } from './McdocHelpers.js'
 import type { McdocContext } from './McdocRenderer.jsx'
@@ -14,7 +15,6 @@ type TreePanelProps = {
 }
 export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 	const { lang } = useLocale()
-	const { version } = useVersion()
 	const { service } = useSpyglass()
 
 	if (lang === 'none') return <></>
@@ -61,19 +61,23 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 	}, [docAndNode, service])
 
 	const resourceType = useMemo(() => {
-		const path = original.doc.uri
-			.replace(/^file:\/\/\/project\//, '')
-			.replace(/\.json$/, '')
-		const res = disectFilePath(path, version)
-		return res?.type
-	}, [original, version])
+		if (original.doc.uri.endsWith('/pack.mcmeta')) {
+			return 'pack_mcmeta'
+		}
+		if (ctx === undefined) {
+			return undefined
+		}
+		const res = dissectUri(original.doc.uri, ctx)
+		return res?.category
+	}, [original, ctx])
 
 	const mcdocType = useMemo(() => {
 		if (!ctx || !resourceType) {
 			return undefined
 		}
 		const rootType = getRootType(resourceType)
-		return simplifyType(rootType, ctx)
+		const type = simplifyType(rootType, ctx)
+		return type
 	}, [resourceType, ctx])
 
 	return <div class="tree node-root" data-cy="tree" data-category={getCategory(resourceType)}>

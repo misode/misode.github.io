@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { useCallback, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
-import type { Project } from '../../contexts/index.js'
-import { disectFilePath, useLocale, useProject } from '../../contexts/index.js'
+import { useLocale, useProject } from '../../contexts/index.js'
+import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import type { VersionId } from '../../services/index.js'
-import { DEFAULT_VERSION, parseSource } from '../../services/index.js'
-import { message, readZip } from '../../Utils.js'
+import { DEFAULT_VERSION } from '../../services/index.js'
+import { PROJECTS_URI } from '../../services/Spyglass.js'
+import { hexId, readZip } from '../../Utils.js'
 import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '../index.js'
 import { Modal } from '../Modal.js'
 
@@ -13,7 +14,8 @@ interface Props {
 }
 export function ProjectCreation({ onClose }: Props) {
 	const { locale } = useLocale()
-	const { projects, createProject, changeProject, updateProject } = useProject()
+	const { projects, createProject, changeProject } = useProject()
+	const { client } = useSpyglass()
 
 	const [name, setName] = useState('')
 	const [namespace, setNamespace] = useState('')
@@ -32,36 +34,17 @@ export function ProjectCreation({ onClose }: Props) {
 		}
 	}
 
-	const projectUpdater = useRef(updateProject)
-	useEffect(() => {
-		projectUpdater.current = updateProject
-	}, [updateProject])
-
-	const onCreate = () => {
+	const onCreate = useCallback(() => {
 		setCreating(true)
-		createProject(name, namespace || undefined, version)
+		const rootUri = `${PROJECTS_URI}${hexId()}/`
+		createProject({ name, namespace, version, storage: { type: 'indexeddb', rootUri } })
 		changeProject(name)
 		if (file) {
 			readZip(file).then(async (entries) => {
-				const project: Partial<Project> = { files: [] }
-				await Promise.all(entries.map(async (entry) => {
-					const file = disectFilePath(entry[0], version)
-					if (file) {
-						try {
-							const text = await parseSource(entry[1], 'json')
-							const data = JSON.parse(text)
-							project.files!.push({ ...file, data })
-							return
-						} catch (e) {
-							console.warn(`Failed parsing ${file.type} ${file.id}: ${message(e)}`)
-						}
-					}
-					if (project.unknownFiles === undefined) {
-						project.unknownFiles = []
-					}
-					project.unknownFiles.push({ path: entry[0], data: entry[1] })
+				await Promise.all(entries.map((entry) => {
+					const path = entry[0].startsWith('/') ? entry[0].slice(1) : entry[0]
+					return client.fs.writeFile(rootUri + path, entry[1])
 				}))
-				projectUpdater.current(project)
 				onClose()
 			}).catch(() => {
 				onClose()
@@ -69,7 +52,7 @@ export function ProjectCreation({ onClose }: Props) {
 		} else {
 			onClose()
 		}
-	}
+	}, [createProject, changeProject, client, version, name, namespace, file])
 
 	const invalidName = useMemo(() => {
 		return projects.map(p => p.name.trim().toLowerCase()).includes(name.trim().toLowerCase())

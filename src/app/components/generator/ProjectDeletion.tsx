@@ -1,3 +1,4 @@
+import { useCallback } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
 import { useLocale, useProject } from '../../contexts/index.js'
 import { Btn } from '../Btn.js'
@@ -8,13 +9,13 @@ interface Props {
 }
 export function ProjectDeletion({ onClose }: Props) {
 	const { locale } = useLocale()
-	const { projects, project, deleteProject } = useProject()
+	const { project, deleteProject } = useProject()
 
-	const doSave = () => {
-		Analytics.deleteProject(projects.length, project.files.length, 'menu')
+	const doSave = useCallback(() => {
+		Analytics.deleteProject('menu')
 		deleteProject(project.name)
 		onClose()
-	}
+	}, [onClose, deleteProject])
 
 	return <Modal class="file-modal" onDismiss={onClose}>
 		<p>{locale('project.delete_confirm.1', project.name)}</p>

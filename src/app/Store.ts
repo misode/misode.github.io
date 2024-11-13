@@ -1,6 +1,6 @@
 import type { ColormapType } from './components/previews/Colormap.js'
 import { ColormapTypes } from './components/previews/Colormap.js'
-import type { Project } from './contexts/index.js'
+import type { ProjectMeta } from './contexts/index.js'
 import { DRAFT_PROJECT } from './contexts/index.js'
 import type { VersionId } from './services/index.js'
 import { DEFAULT_VERSION, VersionIds } from './services/index.js'
@@ -63,7 +63,7 @@ export namespace Store {
 		return localStorage.getItem(ID_SOUNDS_VERSION) ?? 'latest'
 	}
 
-	export function getProjects(): Project[] {
+	export function getProjects(): ProjectMeta[] {
 		const projects = localStorage.getItem(ID_PROJECTS)
 		if (projects) {
 			return safeJsonParse(projects) ?? []
@@ -132,7 +132,7 @@ export namespace Store {
 		if (version) localStorage.setItem(ID_SOUNDS_VERSION, version)
 	}
 
-	export function setProjects(projects: Project[] | undefined) {
+	export function setProjects(projects: ProjectMeta[] | undefined) {
 		if (projects) localStorage.setItem(ID_PROJECTS, JSON.stringify(projects))
 	}
 

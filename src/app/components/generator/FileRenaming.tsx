@@ -1,19 +1,17 @@
 import { useState } from 'preact/hooks'
 import { Analytics } from '../../Analytics.js'
-import { useLocale, useProject } from '../../contexts/index.js'
+import { useLocale } from '../../contexts/index.js'
 import { Btn } from '../Btn.js'
 import { TextInput } from '../forms/index.js'
 import { Modal } from '../Modal.js'
 
 interface Props {
-	id: string,
-	name: string,
+	uri: string,
 	onClose: () => void,
 }
-export function FileRenaming({ id, name, onClose }: Props) {
+export function FileRenaming({ uri, onClose }: Props) {
 	const { locale } = useLocale()
-	const { projects, project, updateFile } = useProject()
-	const [fileId, setFileId] = useState(name)
+	const [fileId, setFileId] = useState(uri) // TODO: get original file id
 	const [error, setError] = useState<string>()
 
 	const changeFileId = (str: string) => {
@@ -26,8 +24,8 @@ export function FileRenaming({ id, name, onClose }: Props) {
 			setError('Invalid resource location')
 			return
 		}
-		Analytics.renameProjectFile(id, projects.length, project.files.length, 'menu')
-		updateFile(id, name, { type: id, id: fileId })
+		Analytics.renameProjectFile('menu')
+		// TODO: rename file
 		onClose()
 	}
 
