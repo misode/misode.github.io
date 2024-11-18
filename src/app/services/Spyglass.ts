@@ -1,12 +1,7 @@
 import * as core from '@spyglassmc/core'
-import { FormatterContext } from '@spyglassmc/core'
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js'
-import { dissectUri } from '@spyglassmc/java-edition/lib/binder/index.js'
-import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/index.js'
-import { Fluids, ReleaseVersion, symbolRegistrar } from '@spyglassmc/java-edition/lib/dependency/index.js'
-import * as jeJson from '@spyglassmc/java-edition/lib/json/index.js'
-import * as jeMcf from '@spyglassmc/java-edition/lib/mcfunction/index.js'
-import type { JsonFileNode, JsonNode, JsonStringNode } from '@spyglassmc/json'
+import * as je from '@spyglassmc/java-edition'
+import { ReleaseVersion } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as json from '@spyglassmc/json'
 import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
@@ -100,7 +95,7 @@ export class SpyglassService {
 	}
 
 	public dissectUri(uri: string) {
-		return dissectUri(uri, this.getCheckerContext(TextDocument.create(uri, 'json', 1, '')))
+		return je.binder.dissectUri(uri, this.getCheckerContext(TextDocument.create(uri, 'json', 1, '')))
 	}
 
 	public async openFile(uri: string) {
@@ -165,10 +160,10 @@ export class SpyglassService {
 		}
 	}
 
-	public formatNode(node: JsonNode, uri: string) {
+	public formatNode(node: json.JsonNode, uri: string) {
 		const formatter = this.service.project.meta.getFormatter(node.type)
 		const doc = TextDocument.create(uri, 'json', 1, '')
-		const ctx = FormatterContext.create(this.service.project, { doc, tabSize: 2, insertSpaces: true })
+		const ctx = core.FormatterContext.create(this.service.project, { doc, tabSize: 2, insertSpaces: true })
 		return formatter(node, ctx)
 	}
 
@@ -336,11 +331,11 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 		return
 	}
 
-	const summary: McmetaSummary = {
+	const summary: je.dependency.McmetaSummary = {
 		registries: Object.fromEntries((await fetchRegistries(version.id)).entries()),
 		blocks: Object.fromEntries([...(await fetchBlockStates(version.id)).entries()]
 			.map(([id, data]) => [id, data])),
-		fluids: Fluids,
+		fluids: je.dependency.Fluids,
 		commands: { type: 'root', children: {} },
 	}
 
@@ -348,7 +343,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 
 	meta.registerSymbolRegistrar('mcmeta-summary', {
 		checksum: versionChecksum,
-		registrar: symbolRegistrar(summary),
+		registrar: je.dependency.symbolRegistrar(summary),
 	})
 
 	meta.registerSymbolRegistrar('mcdoc-block-states', {
@@ -401,15 +396,15 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	registerAttributes(meta, release, versions)
 
 	json.initialize(ctx)
-	jeJson.initialize(ctx)
-	jeMcf.initialize(ctx, summary.commands, release)
+	je.json.initialize(ctx)
+	je.mcf.initialize(ctx, summary.commands, release)
 	nbt.initialize(ctx)
 
 	// Until spyglass registers these correctly
-	meta.registerFormatter<JsonFileNode>('json:file', (node, ctx) => {
+	meta.registerFormatter<json.JsonFileNode>('json:file', (node, ctx) => {
 		return ctx.meta.getFormatter(node.children[0].type)(node.children[0], ctx)
 	})
-	meta.registerFormatter<JsonStringNode>('json:string', (node) => {
+	meta.registerFormatter<json.JsonStringNode>('json:string', (node) => {
 		return JSON.stringify(node.value)
 	})
 	meta.registerFormatter<core.ErrorNode>('error', () => {
