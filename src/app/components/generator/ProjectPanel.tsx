@@ -2,6 +2,7 @@ import { route } from 'preact-router'
 import { useCallback, useMemo, useRef } from 'preact/hooks'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, getProjectRoot, useLocale, useProject } from '../../contexts/index.js'
+import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useFocus } from '../../hooks/useFocus.js'
@@ -11,15 +12,13 @@ import { BtnMenu } from '../BtnMenu.js'
 import { Octicon } from '../Octicon.jsx'
 import type { TreeViewGroupRenderer, TreeViewLeafRenderer } from '../TreeView.js'
 import { TreeView } from '../TreeView.js'
+import { FileRenaming } from './FileRenaming.jsx'
+import { ProjectCreation } from './ProjectCreation.jsx'
+import { ProjectDeletion } from './ProjectDeletion.jsx'
 
-interface Props {
-	onError: (message: string) => void,
-	onRename: (uri: string) => void,
-	onCreateProject: () => void,
-	onDeleteProject: () => void,
-}
-export function ProjectPanel({ onRename, onCreateProject, onDeleteProject}: Props) {
+export function ProjectPanel() {
 	const { locale } = useLocale()
+	const { showModal } = useModal()
 	const { projects, project, projectUri, setProjectUri, changeProject } = useProject()
 	const { client, service } = useSpyglass()
 
@@ -47,12 +46,20 @@ export function ProjectPanel({ onRename, onCreateProject, onDeleteProject}: Prop
 		download.current.click()
 	}
 
+	const onDeleteProject = useCallback(() => {
+		showModal(() => <ProjectDeletion />)
+	}, [])
+
+	const onCreateProject = useCallback(() => {
+		showModal(() => <ProjectCreation />)
+	}, [])
+
 	const actions = useMemo(() => [
 		{
 			icon: 'pencil',
 			label: locale('project.rename_file'),
 			onAction: (uri: string) => {
-				onRename(uri)
+				showModal(() => <FileRenaming uri={uri} />)
 			},
 		},
 		{
@@ -64,7 +71,7 @@ export function ProjectPanel({ onRename, onCreateProject, onDeleteProject}: Prop
 				})
 			},
 		},
-	], [client, onRename, projectRoot])
+	], [client, projectRoot, showModal])
 
 	const FolderEntry: TreeViewGroupRenderer = useCallback(({ name, open, onClick }) => {
 		return <div class="entry" onClick={onClick} >

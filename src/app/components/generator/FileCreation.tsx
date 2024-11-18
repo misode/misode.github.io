@@ -5,6 +5,7 @@ import type { Method } from '../../Analytics.js'
 import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import { getProjectRoot, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import { genPath, message } from '../../Utils.js'
 import { Btn } from '../Btn.js'
@@ -15,12 +16,11 @@ interface Props {
 	docAndNode: DocAndNode,
 	gen: ConfigGenerator,
 	method: Method,
-	onCreate: (uri: string) => void,
-	onClose: () => void,
 }
-export function FileCreation({ docAndNode, gen, method, onCreate, onClose }: Props) {
+export function FileCreation({ docAndNode, gen, method }: Props) {
 	const { locale } = useLocale()
 	const { version } = useVersion()
+	const { hideModal } = useModal()
 	const { project } = useProject()
 	const { client } = useSpyglass()
 
@@ -42,15 +42,15 @@ export function FileCreation({ docAndNode, gen, method, onCreate, onClose }: Pro
 		Analytics.saveProjectFile(method)
 		const text = docAndNode.doc.getText()
 		client.fs.writeFile(uri, text).then(() => {
-			onCreate(uri)
+			hideModal()
 		}).catch((e) => {
 			setError(message(e))
 		})
 	}, [version, project, client, fileId ])
 
-	return <Modal class="file-modal" onDismiss={onClose}>
+	return <Modal class="file-modal">
 		<p>{locale('project.save_current_file')}</p>
-		<TextInput autofocus={gen.id !== 'pack_mcmeta'} class="btn btn-input" value={fileId} onChange={changeFileId} onEnter={doSave} onCancel={onClose} placeholder={locale('resource_location')} spellcheck={false} readOnly={gen.id === 'pack_mcmeta'} />
+		<TextInput autofocus={gen.id !== 'pack_mcmeta'} class="btn btn-input" value={fileId} onChange={changeFileId} onEnter={doSave} onCancel={hideModal} placeholder={locale('resource_location')} spellcheck={false} readOnly={gen.id === 'pack_mcmeta'} />
 		{error !== undefined && <span class="invalid">{error}</span>}
 		<Btn icon="file" label={locale('project.save')} onClick={doSave} />
 	</Modal>

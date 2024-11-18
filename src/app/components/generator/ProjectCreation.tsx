@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale, useProject } from '../../contexts/index.js'
+import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import type { VersionId } from '../../services/index.js'
 import { DEFAULT_VERSION } from '../../services/index.js'
@@ -9,11 +10,9 @@ import { hexId, readZip } from '../../Utils.js'
 import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '../index.js'
 import { Modal } from '../Modal.js'
 
-interface Props {
-	onClose: () => unknown,
-}
-export function ProjectCreation({ onClose }: Props) {
+export function ProjectCreation() {
 	const { locale } = useLocale()
+	const { hideModal } = useModal()
 	const { projects, createProject, changeProject } = useProject()
 	const { client } = useSpyglass()
 
@@ -45,12 +44,13 @@ export function ProjectCreation({ onClose }: Props) {
 					const path = entry[0].startsWith('/') ? entry[0].slice(1) : entry[0]
 					return client.fs.writeFile(rootUri + path, entry[1])
 				}))
-				onClose()
+				hideModal()
 			}).catch(() => {
-				onClose()
+				// TODO: handle errors
+				hideModal()
 			})
 		} else {
-			onClose()
+			hideModal()
 		}
 	}, [createProject, changeProject, client, version, name, namespace, file])
 
@@ -64,7 +64,7 @@ export function ProjectCreation({ onClose }: Props) {
 
 	const versions = config.versions.map(v => v.id as VersionId).reverse()
 
-	return <Modal class="project-creation" onDismiss={onClose}>
+	return <Modal class="project-creation">
 		<p>{locale('project.create')}</p>
 		<div class="input-group">
 			<TextInput autofocus class={`btn btn-input${!creating && (invalidName || name.length === 0) ? ' invalid': ''}`} placeholder={locale('project.name')} value={name} onChange={setName} />

@@ -63,7 +63,7 @@ export function useProject() {
 
 export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const [projects, setProjects] = useState<ProjectMeta[]>(Store.getProjects())
-	const [openProject, setProjectName] = useState<string>()
+	const [openProject, setOpenProject] = useState<string>()
 
 	useEffect(() => {
 		const initialProject = Store.getOpenProject()
@@ -72,7 +72,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 			return
 		}
 		if (project.storage !== undefined) {
-			setProjectName(initialProject)
+			setOpenProject(initialProject)
 			return
 		}
 		// TODO: Import legacy projects
@@ -96,11 +96,12 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const deleteProject = useCallback((name: string) => {
 		if (name === DRAFT_PROJECT.name) return
 		changeProjects(projects.filter(p => p.name !== name))
+		setOpenProject(undefined)
 	}, [projects])
 
 	const changeProject = useCallback((name: string) => {
 		Store.setOpenProject(name)
-		setProjectName(name)
+		setOpenProject(name)
 	}, [])
 
 	const updateProject = useCallback((edits: Partial<ProjectMeta>) => {

@@ -5,6 +5,7 @@ import { Analytics } from '../../Analytics.js'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass, watchSpyglassUri } from '../../contexts/Spyglass.jsx'
 import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
@@ -12,7 +13,7 @@ import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSn
 import { DEPENDENCY_URI } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, genPath } from '../../Utils.js'
-import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileRenaming, Footer, HasPreview, Octicon, PreviewPanel, ProjectCreation, ProjectDeletion, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, Footer, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
 import { getRootDefault } from './McdocHelpers.js'
 
 export const SHARE_KEY = 'share'
@@ -25,6 +26,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion, changeTargetVersion } = useVersion()
 	const { service } = useSpyglass()
+	const { showModal } = useModal()
 	const { project, projectUri, setProjectUri, updateProject } = useProject()
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
@@ -164,7 +166,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				Analytics.redoGenerator(gen.id, 1, 'hotkey')
 				await service.redoEdit(uri)
 			} else if (e.ctrlKey && e.key === 's') {
-				setFileSaving('hotkey')
+				saveFile('hotkey')
 				e.preventDefault()
 				e.stopPropagation()
 			}
@@ -302,7 +304,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 	}
 
-	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? window.innerWidth > 1000)
+	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? false)
 	const toggleProjectShown = useCallback(() => {
 		if (projectShown) {
 			Analytics.hideProject('menu')
@@ -313,15 +315,22 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setProjectShown(!projectShown)
 	}, [projectShown])
 
-	const [projectCreating, setProjectCreating] = useState(false)
-	const [projectDeleting, setprojectDeleting] = useState(false)
-	const [fileSaving, setFileSaving] = useState<Method | undefined>(undefined)
-	const [fileRenaming, setFileRenaming] = useState<string | undefined>(undefined)
+	const saveFile = useCallback((method: Method) => {
+		if (!docAndNode) {
+			return
+		}
+		showModal(() => <FileCreation gen={gen} docAndNode={docAndNode} method={method} />)
+	}, [showModal, gen, docAndNode])
 
-	const onNewFile = useCallback(() => {
+	const newEmptyFile = useCallback(async () => {
+		if (service) {
+			const unsavedUri = service.getUnsavedFileUri(gen)
+			const node = getRootDefault(gen.id, service.getCheckerContext())
+			const text = service.formatNode(node, unsavedUri)
+			await service.writeFile(unsavedUri, text)
+		}
 		setProjectUri(undefined)
-		// TODO: create new file with default contents
-	}, [setProjectUri])
+	}, [showModal])
 
 	return <>
 		<main class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`}>
@@ -339,8 +348,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
 					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
-					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={onNewFile} />
-					<Btn icon="file" label={locale('project.save')} onClick={() => setFileSaving('menu')} />
+					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={newEmptyFile} />
+					<Btn icon="file" label={locale('project.save')} onClick={() => saveFile('menu')} />
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
@@ -380,11 +389,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			</div>
 		</div>
 		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
-			<ProjectPanel onError={setError} onRename={setFileRenaming} onDeleteProject={() => setprojectDeleting(true)} onCreateProject={() => setProjectCreating(true)} />
+			<ProjectPanel />
 		</div>
-		{projectCreating && <ProjectCreation onClose={() => setProjectCreating(false)} />}
-		{projectDeleting && <ProjectDeletion onClose={() => setprojectDeleting(false)} />}
-		{docAndNode && fileSaving && <FileCreation gen={gen} docAndNode={docAndNode} method={fileSaving} onCreate={(uri) => {setFileSaving(undefined); setProjectUri(uri)}} onClose={() => setFileSaving(undefined)} />}
-		{fileRenaming && <FileRenaming uri={fileRenaming} onClose={() => setFileRenaming(undefined)} />}
 	</>
 }
