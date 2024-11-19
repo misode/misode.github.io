@@ -80,7 +80,7 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 		return type
 	}, [resourceType, ctx])
 
-	return <div class="tree node-root" data-cy="tree" data-category={getCategory(resourceType)}>
+	return <div class="tree node-root" data-category={getCategory(resourceType)}>
 		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={fileChild.children[0]} makeEdit={makeEdit} ctx={ctx} />}
 	</div>
 }

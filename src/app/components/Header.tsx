@@ -22,9 +22,9 @@ export function Header() {
 
 	return <header>
 		<div class="title">
-			<Link class="home-link" href="/" aria-label={locale('home')} data-cy="home-link">{Icons.home}</Link>
+			<Link class="home-link" href="/" aria-label={locale('home')}>{Icons.home}</Link>
 			<h1 class="font-bold">{title}</h1>
-			{gen && <BtnMenu icon="chevron_down" tooltip={locale('switch_generator')} data-cy="generator-switcher">
+			{gen && <BtnMenu icon="chevron_down" tooltip={locale('switch_generator')}>
 				{config.generators
 					.filter(g => g.tags?.[0] === gen?.tags?.[0] && checkVersion(version, g.minVersion))
 					.map(g =>
@@ -39,7 +39,7 @@ export function Header() {
 		</div>
 		<nav>
 			<ul>
-				<li data-cy="language-switcher">
+				<li>
 					<BtnMenu icon="globe" tooltip={locale('language')}>
 						{config.languages.map(({ code, name }) =>
 							<Btn label={name} active={code === lang}
@@ -47,7 +47,7 @@ export function Header() {
 						)}
 					</BtnMenu>
 				</li>
-				<li data-cy="theme-switcher">
+				<li>
 					<BtnMenu icon={Themes[theme]} tooltip={locale('theme')}>
 						{Object.entries(Themes).map(([th, icon]) =>
 							<Btn icon={icon} label={locale(`theme.${th}`)} active={th === theme}

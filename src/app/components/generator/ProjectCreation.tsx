@@ -74,7 +74,7 @@ export function ProjectCreation() {
 			<TextInput class={`btn btn-input${!creating && invalidNamespace ? ' invalid' : ''}`} placeholder={locale('project.namespace')} value={namespace} onChange={setNamespace} />
 			{!creating && invalidNamespace && <div class="status-icon danger tooltipped tip-e" aria-label={locale('project.namespace.invalid')}>{Octicon.issue_opened}</div>}
 		</div>
-		<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
+		<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')}>
 			{versions.map(v =>
 				<Btn label={v} active={v === version} onClick={() => setVersion(v)} />
 			)}

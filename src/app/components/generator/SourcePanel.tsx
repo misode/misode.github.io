@@ -216,7 +216,7 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 			{window.matchMedia('(pointer: coarse)').matches && <>
 				<Btn icon="paste" onClick={importFromClipboard} />
 			</>}
-			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
+			<BtnMenu icon="gear" tooltip={locale('output_settings')}>
 				{getSourceIndents().map(key =>
 					<Btn label={locale(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>
