@@ -16,7 +16,7 @@ import { generateColor, hexId, randomInt, randomSeed } from '../../Utils.js'
 import { Btn } from '../Btn.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
-import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
+import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
 export interface McdocContext extends core.CheckerContext {}
 
@@ -481,6 +481,8 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 			}
 			const child = pair?.value
 			const childType = simplifyType(field.type, ctx, { key: pair?.key, parent: node })
+			const canToggle = isDefaultCollapsedType(field.type)
+			const isCollapsed = canToggle && isToggled(key) !== true
 			const makeFieldEdit: MakeEdit = (edit) => {
 				if (pair) {
 					makeEdit(() => {
@@ -523,10 +525,14 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 					{!field.optional && child === undefined && <ErrorIndicator error={{ message: locale('missing_key', localeQuote(key)), range: node.range, severity: 3 }} />}
 					<Errors type={childType} node={child} ctx={ctx} />
 					<Docs desc={field.desc} />
+					{canToggle && (isCollapsed
+						? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
+						: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>
+					)}
 					<Key label={key} />
-					<Head type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
+					{!isCollapsed && <Head type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />}
 				</div>
-				<Body type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />
+				{!isCollapsed && <Body type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />}
 			</div>
 		})}
 		{dynamicFields.map((field, index) => {

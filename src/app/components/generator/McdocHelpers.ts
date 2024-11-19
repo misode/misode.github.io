@@ -381,6 +381,17 @@ export function isSelectRegistry(registry: string) {
 	return selectRegistries.has(registry)
 }
 
+const defaultCollapsedTypes = new Set([
+	'::java::data::worldgen::surface_rule::SurfaceRule',
+])
+
+export function isDefaultCollapsedType(type: McdocType) {
+	if (type.kind === 'reference' && type.path) {
+		return defaultCollapsedTypes.has(type.path)
+	}
+	return false
+}
+
 interface SimplifyNodeContext {
 	key?: JsonStringNode
 	parent?: JsonObjectNode
