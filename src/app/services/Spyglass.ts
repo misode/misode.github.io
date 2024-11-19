@@ -279,7 +279,7 @@ export class SpyglassService {
 				externals: client.externals,
 				defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
 					env: {
-						gameVersion: version.ref ?? version.id,
+						gameVersion: version.dynamic ? version.id : version.ref,
 						dependencies: ['@vanilla-mcdoc', '@misode-mcdoc'],
 						customResources: {
 							text_component: {
