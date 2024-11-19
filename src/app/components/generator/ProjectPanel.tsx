@@ -1,3 +1,4 @@
+import { Identifier } from 'deepslate'
 import { route } from 'preact-router'
 import { useCallback, useMemo, useRef } from 'preact/hooks'
 import config from '../../Config.js'
@@ -59,7 +60,24 @@ export function ProjectPanel() {
 			icon: 'pencil',
 			label: locale('project.rename_file'),
 			onAction: (uri: string) => {
-				showModal(() => <FileRenaming uri={uri} />)
+				const res = service?.dissectUri(uri)
+				if (res?.ok) {
+					// This is pretty hacky, improve this in the future when spyglass has a "constructUri" function
+					const oldSuffix = `/${res.namespace}/${res.path}/${res.identifier}${res.ext}`
+					if (!uri.endsWith(oldSuffix)) {
+						console.warn(`Expected ${uri} to end with ${oldSuffix}`)
+						return
+					}
+					const onRename = (newId: string) => {
+						const prefix = uri.substring(0, uri.length - oldSuffix.length)
+						const { namespace, path } = Identifier.parse(newId)
+						const newUri = prefix + `/${namespace}/${res.path}/${path}${res.ext}`
+						service?.renameFile(uri, newUri).then(() => {
+							setProjectUri(newUri)
+						})
+					}
+					showModal(() => <FileRenaming oldId={`${res.namespace}:${res.identifier}`} onRename={onRename} />)
+				}
 			},
 		},
 		{
@@ -71,7 +89,7 @@ export function ProjectPanel() {
 				})
 			},
 		},
-	], [client, projectRoot, showModal])
+	], [client, service, projectRoot, showModal])
 
 	const FolderEntry: TreeViewGroupRenderer = useCallback(({ name, open, onClick }) => {
 		return <div class="entry" onClick={onClick} >

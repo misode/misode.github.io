@@ -132,7 +132,7 @@ export class SpyglassService {
 
 	public async writeFile(uri: string, content: string) {
 		const document = this.client.documents.get(uri)
-		if (document !== undefined) {
+		if (document) {
 			document.undoStack.push(document.doc.getText())
 			document.redoStack = []
 			TextDocument.update(document.doc, [{ text: content }], document.doc.version + 1)
@@ -140,6 +140,21 @@ export class SpyglassService {
 		await this.service.project.externals.fs.writeFile(uri, content)
 		if (document) {
 			await this.notifyChange(document.doc)
+		}
+	}
+
+	public async renameFile(oldUri: string, newUri: string) {
+		const content = await this.readFile(oldUri)
+		if (!content) {
+			throw new Error(`Cannot rename nonexistent file ${oldUri}`)
+		}
+		await this.service.project.externals.fs.writeFile(newUri, content)
+		await this.service.project.externals.fs.unlink(oldUri)
+		const d = this.client.documents.get(oldUri)
+		if (d) {
+			const doc = TextDocument.create(newUri, d.doc.languageId, d.doc.version, d.doc.getText())
+			this.client.documents.set(newUri, { ...d, doc })
+			this.client.documents.delete(oldUri)
 		}
 	}
 
