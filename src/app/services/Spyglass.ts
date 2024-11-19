@@ -298,6 +298,9 @@ export class SpyglassService {
 							font: {
 								category: 'font',
 							},
+							items: {
+								category: 'item_definition',
+							},
 							models: {
 								category: 'model',
 							},
