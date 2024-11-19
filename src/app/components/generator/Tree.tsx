@@ -57,8 +57,9 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 			...docAndNode.node.checkerErrors ?? [],
 			...docAndNode.node.linterErrors ?? [],
 		]
-		return service.getCheckerContext(docAndNode.doc, errors)
-	}, [docAndNode, service])
+		const checkerCtx = service.getCheckerContext(docAndNode.doc, errors)
+		return { ...checkerCtx, makeEdit }
+	}, [docAndNode, service, makeEdit])
 
 	const resourceType = useMemo(() => {
 		if (original.doc.uri.endsWith('/pack.mcmeta')) {
@@ -81,7 +82,7 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 	}, [resourceType, ctx])
 
 	return <div class="tree node-root" data-category={getCategory(resourceType)}>
-		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={fileChild.children[0]} makeEdit={makeEdit} ctx={ctx} />}
+		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={fileChild.children[0]} ctx={ctx} />}
 	</div>
 }
 

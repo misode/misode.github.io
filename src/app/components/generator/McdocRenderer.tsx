@@ -1,5 +1,5 @@
 import * as core from '@spyglassmc/core'
-import type { JsonNode } from '@spyglassmc/json'
+import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
@@ -18,7 +18,9 @@ import { ItemDisplay } from '../ItemDisplay.jsx'
 import { Octicon } from '../Octicon.jsx'
 import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
-export interface McdocContext extends core.CheckerContext {}
+export interface McdocContext extends core.CheckerContext {
+	makeEdit: MakeEdit
+}
 
 type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
 
@@ -26,73 +28,72 @@ interface Props<Type extends SimplifiedMcdocType = SimplifiedMcdocType> {
 	type: Type
 	optional?: boolean
 	node: JsonNode | undefined
-	makeEdit: MakeEdit
 	ctx: McdocContext
 }
-export function McdocRoot({ type, node, makeEdit, ctx } : Props) {
+export function McdocRoot({ type, node, ctx } : Props) {
 	const { locale } = useLocale()
 
 	if (type.kind === 'struct' && type.fields.length > 0 && JsonObjectNode.is(node)) {
-		return <StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <StructBody type={type} node={node} ctx={ctx} />
 	}
 
 	return <>
 		<div class="node-header">
 			<Errors type={type} node={node} ctx={ctx} />
 			<Key label={locale('root')} />
-			<Head type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<Head type={type} node={node} ctx={ctx} />
 		</div>
-		<Body type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		<Body type={type} node={node} ctx={ctx} />
 	</>
 }
 
-function Head({ type, optional, node, makeEdit, ctx }: Props) {
+function Head({ type, optional, node, ctx }: Props) {
 	if (type.kind === 'string') {
-		return <StringHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <StringHead type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'enum') {
-		return <EnumHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <EnumHead type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (isNumericType(type)) {
-		return <NumericHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <NumericHead type={type} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'boolean') {
-		return <BooleanHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <BooleanHead type={type} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'union') {
-		return <UnionHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <UnionHead type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'struct') {
-		return <StructHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <StructHead type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (isListOrArray(type)) {
 		if (isFixedList(type)) {
-			return <TupleHead type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+			return <TupleHead type={{ kind: 'tuple', items: [...Array(type.lengthRange.min)].map(() => getItemType(type)), attributes: type.attributes }} optional={optional} node={node} ctx={ctx} />
 		}
-		return <ListHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <ListHead type={type} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'tuple') {
-		return <TupleHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <TupleHead type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'literal') {
-		return <LiteralHead type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <LiteralHead type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'any' || type.kind === 'unsafe') {
-		return <AnyHead type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <AnyHead type={type} node={node} ctx={ctx} />
 	}
 	return <></>
 }
 
-function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType>) {
+function Body({ type, optional, node, ctx }: Props<SimplifiedMcdocType>) {
 	if (type.kind === 'union') {
-		return <UnionBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <UnionBody type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'struct') {
 		if (!JsonObjectNode.is(node) || type.fields.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
-			<StructBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<StructBody type={type} node={node} ctx={ctx} />
 		</div>
 	}
 	if (isListOrArray(type)) {
@@ -105,14 +106,14 @@ function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType
 				return <></>
 			}
 			return <div class="node-body">
-				<TupleBody type={tupleType} node={node} makeEdit={makeEdit} ctx={ctx} />
+				<TupleBody type={tupleType} node={node} ctx={ctx} />
 			</div>
 		}
 		if (node.children?.length === 0) {
 			return <></>
 		}
 		return <div class="node-body">
-			<ListBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<ListBody type={type} node={node} ctx={ctx} />
 		</div>
 	}
 	if (type.kind === 'tuple') {
@@ -120,18 +121,18 @@ function Body({ type, optional, node, makeEdit, ctx }: Props<SimplifiedMcdocType
 			return <></>
 		}
 		return <div class="node-body">
-			<TupleBody type={type} node={node} makeEdit={makeEdit} ctx={ctx} />
+			<TupleBody type={type} node={node} ctx={ctx} />
 		</div>
 	}
 	if (type.kind === 'any' || type.kind === 'unsafe') {
-		return <AnyBody type={type} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+		return <AnyBody type={type} optional={optional} node={node} ctx={ctx} />
 	}
 	return <></>
 }
 
 const SPECIAL_UNSET = '__unset__'
 
-function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) {
+function StringHead({ type, optional, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
 
 	const value = JsonStringNode.is(node) ? node.value : undefined
@@ -151,7 +152,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 		if (value === newValue) {
 			return
 		}
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			if ((newValue.length === 0 && optional) || (isSelect && newValue === SPECIAL_UNSET)) {
 				return undefined
 			}
@@ -163,7 +164,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 				type: 'json:string',
 			}
 		})
-	}, [optional, node, makeEdit, isSelect])
+	}, [optional, node, ctx, isSelect])
 
 	const completions = useMemo(() => {
 		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
@@ -208,7 +209,7 @@ function StringHead({ type, optional, node, makeEdit, ctx }: Props<StringType>) 
 	</>
 }
 
-function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
+function EnumHead({ type, optional, node, ctx }: Props<SimplifiedEnum>) {
 	const { locale } = useLocale()
 
 	const value = JsonStringNode.is(node) ? node.value : (node && JsonNumberNode.is(node)) ? Number(node.value.value) : undefined
@@ -217,7 +218,7 @@ function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
 		if (value === newValue) {
 			return
 		}
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			if (newValue === SPECIAL_UNSET) {
 				return undefined
 			}
@@ -244,7 +245,7 @@ function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
 			number.parent = result
 			return result
 		})
-	}, [type.enumKind, value, makeEdit])
+	}, [type.enumKind, value, ctx])
 
 	return <select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
 		{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
@@ -255,7 +256,7 @@ function EnumHead({ type, optional, node, makeEdit }: Props<SimplifiedEnum>) {
 	</select>
 }
 
-function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
+function NumericHead({ type, node, ctx }: Props<NumericType>) {
 	const { locale } = useLocale()
 
 	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
@@ -268,7 +269,7 @@ function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 		if (number !== undefined && Number.isNaN(number)) {
 			return
 		}
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			if (number === undefined) {
 				return undefined
 			}
@@ -284,7 +285,7 @@ function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 			newValue.parent = newNode
 			return newNode
 		})
-	}, [isFloat, node, makeEdit])
+	}, [isFloat, node, ctx])
 
 	const color = type.attributes?.find(a => a.name === 'color')?.value
 	const colorKind = color?.kind === 'literal' && color.value.kind === 'string' ? color.value.value : undefined
@@ -315,11 +316,11 @@ function NumericHead({ type, node, makeEdit }: Props<NumericType>) {
 	</>
 }
 
-function BooleanHead({ node, makeEdit }: Props) {
+function BooleanHead({ node, ctx }: Props) {
 	const value = node && JsonBooleanNode.is(node) ? node.value : undefined
 
 	const onSelect = useCallback((newValue: boolean) => {
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			if (value === newValue) {
 				return undefined
 			}
@@ -329,7 +330,7 @@ function BooleanHead({ node, makeEdit }: Props) {
 				value: newValue,
 			}
 		})
-	}, [node, makeEdit, value]) 
+	}, [node, ctx, value]) 
 
 	return <>
 		<button class={value === false ? 'selected' : ''} onClick={() => onSelect(false)}>False</button>
@@ -337,7 +338,7 @@ function BooleanHead({ node, makeEdit }: Props) {
 	</>
 }
 
-function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
+function UnionHead({ type, optional, node, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
 	const { locale } = useLocale()
 
 	if (type.members.length === 0) {
@@ -347,7 +348,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 	const selectedType = selectUnionMember(type, node)
 
 	const onSelect = useCallback((newValue: string) => {
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			if (newValue === SPECIAL_UNSET) {
 				return undefined
 			}
@@ -357,7 +358,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 			}
 			return getDefault(newSelected, range, ctx)
 		})
-	}, [type, node, makeEdit, ctx, selectedType])
+	}, [type, node, ctx, selectedType])
 
 	const memberIndex = selectedType ? type.members.findIndex(m => quickEqualTypes(m, selectedType)) : -1
 
@@ -368,7 +369,7 @@ function UnionHead({ type, optional, node, makeEdit, ctx }: Props<UnionType<Simp
 				<option value={index}>{formatUnionMember(member, type.members.filter(m => m !== member))}</option>
 			)}
 		</select>
-		{selectedType && selectedType.kind !== 'literal' && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
+		{selectedType && selectedType.kind !== 'literal' && <Head type={selectedType} node={node} ctx={ctx} />}
 	</>
 }
 
@@ -390,12 +391,12 @@ function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedM
 	return formatIdentifier(type.kind)
 }
 
-function UnionBody({ type, optional, node, makeEdit, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
+function UnionBody({ type, optional, node, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {
 	const selectedType = selectUnionMember(type, node)
 	if (selectedType === undefined) {
 		return <></>
 	}
-	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+	return <Body type={selectedType} optional={optional} node={node} ctx={ctx} />
 }
 
 function selectUnionMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: JsonNode | undefined) {
@@ -412,18 +413,18 @@ function selectUnionMember(union: UnionType<SimplifiedMcdocTypeNoUnion>, node: J
 	return selectedType
 }
 
-function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<SimplifiedStructType>) {
+function StructHead({ type: outerType, optional, node, ctx }: Props<SimplifiedStructType>) {
 	const { locale } = useLocale()
 	const type = node?.typeDef?.kind === 'struct' ? node.typeDef : outerType
 
 	const onRemove = useCallback(() => {
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			return undefined
 		})
-	}, [makeEdit])
+	}, [ctx])
 
 	const onSetDefault = useCallback(() => {
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			return getDefault(type, range, ctx)
 		})
 	}, [type, ctx])
@@ -446,12 +447,11 @@ function StructHead({ type: outerType, optional, node, makeEdit, ctx }: Props<Si
 	</>
 }
 
-function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedStructType>) {
+function StructBody({ type: outerType, node, ctx }: Props<SimplifiedStructType>) {
 	if (!JsonObjectNode.is(node)) {
 		return <></>
 	}
 
-	const { locale } = useLocale()
 	const { expand, collapse, isToggled } = useToggles()
 
 	const type = node.typeDef?.kind === 'struct' ? node.typeDef : outerType
@@ -479,61 +479,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 			if (pair) {
 				staticChilds.push(pair)
 			}
-			const child = pair?.value
-			const childType = simplifyType(field.type, ctx, { key: pair?.key, parent: node })
-			const canToggle = isDefaultCollapsedType(field.type)
-			const isCollapsed = canToggle && isToggled(key) !== true
-			const makeFieldEdit: MakeEdit = (edit) => {
-				if (pair) {
-					makeEdit(() => {
-						const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
-						if (newChild === undefined) {
-							node.children.splice(index, 1)
-						} else {
-							node.children[index] = {
-								type: 'pair',
-								range: pair.range,
-								key: pair.key,
-								value: newChild,
-							}
-						}
-						return node
-					})
-				} else {
-					const newChild = edit(core.Range.create(node.range.end))
-					if (newChild) {
-						makeEdit(() => {
-							node.children.push({
-								type: 'pair',
-								range: newChild.range,
-								key: {
-									type: 'json:string',
-									range: newChild.range,
-									options: json.parser.JsonStringOptions,
-									value: key,
-									valueMap: [{ inner: core.Range.create(0), outer: newChild.range }],
-								},
-								value: newChild,
-							})
-							return node
-						})
-					}
-				}
-			}
-			return <div key={key} class="node" data-category={getCategory(field.type)}>
-				<div class="node-header">
-					{!field.optional && child === undefined && <ErrorIndicator error={{ message: locale('missing_key', localeQuote(key)), range: node.range, severity: 3 }} />}
-					<Errors type={childType} node={child} ctx={ctx} />
-					<Docs desc={field.desc} />
-					{canToggle && (isCollapsed
-						? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
-						: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>
-					)}
-					<Key label={key} />
-					{!isCollapsed && <Head type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />}
-				</div>
-				{!isCollapsed && <Body type={childType} node={child} optional={field.optional} makeEdit={makeFieldEdit} ctx={ctx} />}
-			</div>
+			return <StaticField key={key} pair={pair} index={index} field={field} fieldKey={key} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} type={type} node={node} ctx={ctx} />
 		})}
 		{dynamicFields.map((field, index) => {
 			if (field.key.kind === 'any' && field.type.kind === 'any') {
@@ -544,7 +490,7 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 			return <div key={`__dynamic_${index}__`} class="node">
 				<div class="node-header">
 					<Docs desc={field.desc} />
-					<DynamicKey keyType={keyType} valueType={field.type} parent={node} makeEdit={makeEdit} ctx={ctx} />
+					<DynamicKey keyType={keyType} valueType={field.type} parent={node} ctx={ctx} />
 				</div>
 			</div>
 		})}
@@ -556,10 +502,6 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 			if (pair.value && core.Range.length(pair.value.range) === 0) {
 				return <></>
 			}
-			const child = pair.value
-			const canToggle = JsonObjectNode.is(child) || JsonArrayNode.is(child)
-			const toggled = isToggled(key)
-			const isCollapsed = canToggle && (toggled === false || (toggled === undefined && (node.children.length - staticChilds.length) > 20))
 			// TODO: correctly determine which dynamic field this is a key for
 			// Hack to support component negations, the only place with more than one dynamic field currently
 			const field = dynamicFields[key.startsWith('!') ? 1 : 0] as SimplifiedStructTypePairField | undefined
@@ -567,55 +509,94 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 				// Hide dispatch fallback
 				return <></>
 			}
-			const childType = simplifyType(field.type, ctx, { key: pair.key, parent: node })
-			const makeFieldEdit: MakeEdit = (edit) => {
-				makeEdit(() => {
-					const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
-					if (newChild === undefined) {
-						node.children.splice(index, 1)
-					} else {
-						node.children[index] = {
-							type: 'pair',
-							range: pair.range,
-							key: pair.key,
-							value: newChild,
-						}
+			return <DynamicField key={key} pair={pair} index={index} field={field} fieldKey={key} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)}type={type} node={node} ctx={ctx} />
+		})}
+	</>
+}
+
+interface StaticFieldProps extends Props {
+	pair: JsonPairNode | undefined
+	index: number
+	field: SimplifiedStructTypePairField
+	fieldKey: string
+	isToggled: boolean | undefined
+	expand: (e: MouseEvent) => void
+	collapse: (e: MouseEvent) => void
+	node: JsonObjectNode
+}
+function StaticField({ pair, index, field, fieldKey, isToggled, expand, collapse, node, ctx }: StaticFieldProps) {
+	const { locale } = useLocale()
+
+	const child = pair?.value
+	const childType = simplifyType(field.type, ctx, { key: pair?.key, parent: node })
+	const canToggle = isDefaultCollapsedType(field.type)
+	const isCollapsed = canToggle && isToggled !== true
+
+	const makeFieldEdit = useCallback<MakeEdit>((edit) => {
+		if (pair) {
+			ctx.makeEdit(() => {
+				const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
+				if (newChild === undefined) {
+					node.children.splice(index, 1)
+				} else {
+					node.children[index] = {
+						type: 'pair',
+						range: pair.range,
+						key: pair.key,
+						value: newChild,
 					}
+				}
+				return node
+			})
+		} else {
+			const newChild = edit(core.Range.create(node.range.end))
+			if (newChild) {
+				ctx.makeEdit(() => {
+					node.children.push({
+						type: 'pair',
+						range: newChild.range,
+						key: {
+							type: 'json:string',
+							range: newChild.range,
+							options: json.parser.JsonStringOptions,
+							value: fieldKey,
+							valueMap: [{ inner: core.Range.create(0), outer: newChild.range }],
+						},
+						value: newChild,
+					})
 					return node
 				})
 			}
-			const category = getCategory(field.type)
-			return <div key={key} class="node" data-category={category}>
-				<div class="node-header">
-					<Errors type={childType} node={child} ctx={ctx} />
-					{canToggle && (isCollapsed
-						? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand(key)}>{Octicon.chevron_right}</button>
-						: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse(key)}>{Octicon.chevron_down}</button>
-					)}
-					<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => makeFieldEdit(() => undefined)}>
-						{Octicon.trashcan}
-					</button>
-					<Key label={key} raw={field.key.kind === 'string'} />
-					{!isCollapsed && <Head type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />}
-				</div>
-				{!isCollapsed && (childType.kind === 'struct' && category
-					? <div class="node-body-flat">
-						<StructBody type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
-					</div>
-					: <Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />)}
-			</div>
-		})}
-	</>
+		}
+	}, [pair, index, node, ctx])
+
+	const fieldCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeFieldEdit }
+	}, [ctx, makeFieldEdit])
+
+	return <div class="node" data-category={getCategory(field.type)}>
+		<div class="node-header">
+			{!field.optional && child === undefined && <ErrorIndicator error={{ message: locale('missing_key', localeQuote(fieldKey)), range: node.range, severity: 3 }} />}
+			<Errors type={childType} node={child} ctx={ctx} />
+			<Docs desc={field.desc} />
+			{canToggle && (isCollapsed
+				? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand}>{Octicon.chevron_right}</button>
+				: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse}>{Octicon.chevron_down}</button>
+			)}
+			<Key label={fieldKey} />
+			{!isCollapsed && <Head type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
+		</div>
+		{!isCollapsed && <Body type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
+	</div>
 }
 
 interface DynamicKeyProps {
 	keyType: SimplifiedMcdocType
 	valueType: McdocType
 	parent: JsonObjectNode
-	makeEdit: MakeEdit
 	ctx: McdocContext
 }
-function DynamicKey({ keyType, valueType, parent, makeEdit, ctx }: DynamicKeyProps) {
+function DynamicKey({ keyType, valueType, parent, ctx }: DynamicKeyProps) {
 	const { locale } = useLocale()
 	const [key, setKey] = useState<string>('')
 
@@ -632,9 +613,13 @@ function DynamicKey({ keyType, valueType, parent, makeEdit, ctx }: DynamicKeyPro
 		}
 	}, [])
 
+	const keyCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeKeyEdit }
+	}, [ctx, makeKeyEdit])
+
 	const addKey = useCallback(() => {
 		setKey('')
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			const valueNode = getDefault(simplifyType(valueType, ctx, { key: keyNode, parent }), range, ctx)
 			const newPair: core.PairNode<JsonStringNode, JsonNode> = {
 				type: 'pair',
@@ -647,22 +632,83 @@ function DynamicKey({ keyType, valueType, parent, makeEdit, ctx }: DynamicKeyPro
 			newPair.parent = parent
 			return parent
 		})
-	}, [keyNode, makeEdit, ctx])
+	}, [keyNode, ctx])
 
 	return <>
-		<Head type={keyType} optional={true} node={keyNode} makeEdit={makeKeyEdit} ctx={ctx} />
+		<Head type={keyType} optional={true} node={keyNode} ctx={keyCtx} />
 		<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={addKey} disabled={key.length === 0}>{Octicon.plus_circle}</button>
 	</>
 }
 
-function ListHead({ type, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
+interface DynamicFieldProps extends Props {
+	pair: JsonPairNode
+	index: number
+	field: SimplifiedStructTypePairField
+	fieldKey: string
+	isToggled: boolean | undefined
+	expand: (e: MouseEvent) => void
+	collapse: (e: MouseEvent) => void
+	node: JsonObjectNode
+}
+function DynamicField({ pair, index, field, fieldKey, isToggled, expand, collapse, node, ctx }: DynamicFieldProps) {
+	const { locale } = useLocale()
+
+	const child = pair.value
+	const canToggle = JsonObjectNode.is(child) || JsonArrayNode.is(child)
+	const isCollapsed = canToggle && (isToggled === false || (isToggled === undefined && (node.children.length - node.children.length) > 20))
+	const childType = simplifyType(field.type, ctx, { key: pair.key, parent: node })
+	const category = getCategory(field.type)
+	
+	const makeFieldEdit = useCallback<MakeEdit>((edit) => {
+		ctx.makeEdit(() => {
+			const newChild = edit(child?.range ?? core.Range.create(pair.range.end))
+			if (newChild === undefined) {
+				node.children.splice(index, 1)
+			} else {
+				node.children[index] = {
+					type: 'pair',
+					range: pair.range,
+					key: pair.key,
+					value: newChild,
+				}
+			}
+			return node
+		})
+	}, [pair, index, node, ctx])
+
+	const fieldCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeFieldEdit }
+	}, [ctx, makeFieldEdit])
+	
+	return <div class="node" data-category={category}>
+		<div class="node-header">
+			<Errors type={childType} node={child} ctx={ctx} />
+			{canToggle && (isCollapsed
+				? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand}>{Octicon.chevron_right}</button>
+				: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse}>{Octicon.chevron_down}</button>
+			)}
+			<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={() => makeFieldEdit(() => undefined)}>
+				{Octicon.trashcan}
+			</button>
+			<Key label={fieldKey} raw={field.key.kind === 'string'} />
+			{!isCollapsed && <Head type={childType} node={child} ctx={fieldCtx} />}
+		</div>
+		{!isCollapsed && (childType.kind === 'struct' && category
+			? <div class="node-body-flat">
+				<StructBody type={childType} node={child} ctx={fieldCtx} />
+			</div>
+			: <Body type={childType} node={child} ctx={fieldCtx} />)}
+	</div>
+}
+
+function ListHead({ type, node, ctx }: Props<ListType | PrimitiveArrayType>) {
 	const { locale } = useLocale()
 
 	const canAdd = (type.lengthRange?.max ?? Infinity) > (node?.children?.length ?? 0)
 
 	const onAddTop = useCallback(() => {
 		if (canAdd) {
-			makeEdit((range) => {
+			ctx.makeEdit((range) => {
 				const itemType = simplifyType(getItemType(type), ctx)
 				const newValue = getDefault(itemType, range, ctx)
 				const newItem: core.ItemNode<JsonNode> = {
@@ -686,14 +732,14 @@ function ListHead({ type, node, makeEdit, ctx }: Props<ListType | PrimitiveArray
 				return newArray
 			})
 		}
-	}, [type, node, makeEdit, ctx, canAdd])
+	}, [type, node, ctx, canAdd])
 
 	return <button class="add tooltipped tip-se" aria-label={locale('add_top')} onClick={() => onAddTop()} disabled={!canAdd}>
 		{Octicon.plus_circle}
 	</button>
 }
 
-function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | PrimitiveArrayType>) {
+function ListBody({ type: outerType, node, ctx }: Props<ListType | PrimitiveArrayType>) {
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
@@ -710,7 +756,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 
 	const onAddBottom = useCallback(() => {
 		if (canAdd) {
-			makeEdit((range) => {
+			ctx.makeEdit((range) => {
 				const itemType = simplifyType(getItemType(type), ctx)
 				const newValue = getDefault(itemType, range, ctx)
 				const newItem: core.ItemNode<JsonNode> = {
@@ -734,7 +780,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 				return newArray
 			})
 		}
-	}, [type, node, makeEdit, ctx, canAdd])
+	}, [type, node, ctx, canAdd])
 
 	return <>
 		{node.children.map((item, index) => {
@@ -749,7 +795,7 @@ function ListBody({ type: outerType, node, makeEdit, ctx }: Props<ListType | Pri
 				return <></>
 			}
 			const key = index.toString()
-			return <ListItem key={key} item={item} index={index} category={category} type={childType} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} node={node} makeEdit={makeEdit} ctx={ctx} />
+			return <ListItem key={key} item={item} index={index} category={category} type={childType} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} node={node} ctx={ctx} />
 		})}
 		{node.children.length > 0 && <div class="node-header">
 			<button class="add tooltipped tip-se" aria-label={locale('add_bottom')} onClick={() => onAddBottom()} disabled={!canAdd}>
@@ -768,7 +814,7 @@ interface ListItemProps extends Props {
 	collapse: (e: MouseEvent) => void
 	node: JsonArrayNode
 }
-function ListItem({ item, index, category, type, isToggled, expand, collapse, node, makeEdit, ctx }: ListItemProps) {
+function ListItem({ item, index, category, type, isToggled, expand, collapse, node, ctx }: ListItemProps) {
 	const { locale } = useLocale()
 	const [active, setActive] = useFocus()
 
@@ -779,43 +825,43 @@ function ListItem({ item, index, category, type, isToggled, expand, collapse, no
 	const canMoveDown = node.children.length > 1 && index < (node.children.length - 1)
 
 	const onRemove = useCallback(() => {
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			node.children.splice(index, 1)
 			return node
 		})
-	}, [makeEdit, node, index])
+	}, [ctx, node, index])
 
 	const onMoveUp = useCallback(() => {
 		if (node.children.length <= 1 || index <= 0) {
 			return
 		}
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			const moved = node.children.splice(index, 1)
 			node.children.splice(index - 1, 0, ...moved)
 			return node
 		})
-	}, [makeEdit, node, index])
+	}, [ctx, node, index])
 
 	const onMoveDown = useCallback(() => {
 		if (node.children.length <= 1 || index >= node.children.length - 1) {
 			return
 		}
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			const moved = node.children.splice(index, 1)
 			node.children.splice(index + 1, 0, ...moved)
 			return node
 		})
-	}, [makeEdit, node, index])
+	}, [ctx, node, index])
 
 	const onDuplicate = useCallback(() => {
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			node.children.splice(index + 1, 0, node.children[index])
 			return node
 		})
-	}, [makeEdit, node, index])
+	}, [ctx, node, index])
 
 	const makeItemEdit: MakeEdit = useCallback((edit) => {
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			const newChild = edit(child?.range ?? item.range)
 			node.children[index] = {
 				type: 'item',
@@ -824,7 +870,11 @@ function ListItem({ item, index, category, type, isToggled, expand, collapse, no
 			}
 			return node
 		})
-	}, [makeEdit, child, item, node])
+	}, [ctx, child, item, node])
+
+	const itemCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeItemEdit }
+	}, [ctx, makeItemEdit])
 
 	const onContextMenu = (evt: MouseEvent) => {
 		evt.preventDefault()
@@ -856,29 +906,29 @@ function ListItem({ item, index, category, type, isToggled, expand, collapse, no
 				</div>
 			</div>}
 			<Key label="entry" />
-			{!isCollapsed && <Head type={type} node={child} makeEdit={makeItemEdit} ctx={ctx} />}
+			{!isCollapsed && <Head type={type} node={child} ctx={itemCtx} />}
 		</div>
 		{!isCollapsed && (type.kind === 'struct'
 			? <div class="node-body-flat">
-				<StructBody type={type} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+				<StructBody type={type} node={child} ctx={itemCtx} />
 			</div>
-			: <Body type={type} node={child} makeEdit={makeItemEdit} ctx={ctx} />)}
+			: <Body type={type} node={child} ctx={itemCtx} />)}
 	</div>
 }
 
-function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
+function TupleHead({ type, optional, node, ctx }: Props<TupleType>) {
 	const { locale } = useLocale()
 
 	const isInline = isInlineTuple(type)
 
 	const onRemove = useCallback(() => {
-		makeEdit(() => {
+		ctx.makeEdit(() => {
 			return undefined
 		})
-	}, [makeEdit])
+	}, [ctx])
 
 	const onSetDefault = useCallback(() => {
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			return getDefault(type, range, ctx)
 		})
 	}, [type, ctx])
@@ -902,26 +952,41 @@ function TupleHead({ type, optional, node, makeEdit, ctx }: Props<TupleType>) {
 			const item = node?.children?.[index]
 			const child = item?.value
 			const childType = simplifyType(itemType, ctx)
-			const makeItemEdit: MakeEdit = (edit) => {
-				makeEdit((range) => {
-					const newChild = edit(child?.range ?? node?.range ?? range)
-					if (newChild === undefined) {
-						return node
-					}
-					node.children[index] = {
-						type: 'item',
-						range: newChild.range,
-						value: newChild,
-					}
-					return node
-				})
-			}
-			return <Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
+			return <TupleHeadItem child={child} childType={childType} index={index} type={type} node={node} ctx={ctx} />
 		})}
 	</>
 }
 
-function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {
+interface TupleHeadItemProps extends Props {
+	child: JsonNode | undefined
+	childType: SimplifiedMcdocType
+	index: number
+	node: JsonArrayNode
+}
+function TupleHeadItem({ child, childType, index, node, ctx }: TupleHeadItemProps) {
+	const makeItemEdit = useCallback<MakeEdit>((edit) => {
+		ctx.makeEdit((range) => {
+			const newChild = edit(child?.range ?? node?.range ?? range)
+			if (newChild === undefined) {
+				return node
+			}
+			node.children[index] = {
+				type: 'item',
+				range: newChild.range,
+				value: newChild,
+			}
+			return node
+		})
+	}, [index, node, ctx])
+
+	const itemCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeItemEdit }
+	}, [ctx, makeItemEdit])
+
+	return <Head type={childType} node={child} ctx={itemCtx} />
+}
+
+function TupleBody({ type, node, ctx }: Props<TupleType>) {
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
@@ -930,34 +995,49 @@ function TupleBody({ type, node, makeEdit, ctx }: Props<TupleType>) {
 			const item = node?.children?.[index]
 			const child = item?.value
 			const childType = simplifyType(itemType, ctx)
-			const makeItemEdit: MakeEdit = (edit) => {
-				makeEdit(() => {
-					const newChild = edit(child?.range ?? node.range)
-					if (newChild === undefined) {
-						return node
-					}
-					node.children[index] = {
-						type: 'item',
-						range: newChild.range,
-						value: newChild,
-					}
-					return node
-				})
-			}
-			return <div key={index} class="node">
-				<div class="node-header">
-					<Errors type={childType} node={child} ctx={ctx} />
-					<Key label="entry" />
-					<Head type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
-				</div>
-				<Body type={childType} node={child} makeEdit={makeItemEdit} ctx={ctx} />
-			</div>
+			return <TupleBodyItem child={child} childType={childType} index={index} type={type} node={node} ctx={ctx} />
 		})}
 	</>
 }
 
-function LiteralHead({ type, optional, node, makeEdit, ctx }: Props<LiteralType>) {
-	return <UnionHead type={{ kind: 'union', members: [type] }} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+interface TupleBodyItemProps extends Props {
+	child: JsonNode | undefined
+	childType: SimplifiedMcdocType
+	index: number
+	node: JsonArrayNode
+}
+function TupleBodyItem({ child, childType, index, node, ctx }: TupleBodyItemProps) {
+	const makeItemEdit = useCallback<MakeEdit>((edit) => {
+		ctx.makeEdit(() => {
+			const newChild = edit(child?.range ?? node.range)
+			if (newChild === undefined) {
+				return node
+			}
+			node.children[index] = {
+				type: 'item',
+				range: newChild.range,
+				value: newChild,
+			}
+			return node
+		})
+	}, [index, node, ctx])
+
+	const itemCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeItemEdit }
+	}, [ctx, makeItemEdit])
+
+	return <div key={index} class="node">
+		<div class="node-header">
+			<Errors type={childType} node={child} ctx={itemCtx} />
+			<Key label="entry" />
+			<Head type={childType} node={child} ctx={itemCtx} />
+		</div>
+		<Body type={childType} node={child} ctx={itemCtx} />
+	</div>
+}
+
+function LiteralHead({ type, optional, node, ctx }: Props<LiteralType>) {
+	return <UnionHead type={{ kind: 'union', members: [type] }} optional={optional} node={node} ctx={ctx} />
 }
 
 const ANY_TYPES: SimplifiedMcdocType[] = [
@@ -968,20 +1048,20 @@ const ANY_TYPES: SimplifiedMcdocType[] = [
 	{ kind: 'struct', fields: [ { kind: 'pair', key: { kind: 'string' }, type: { kind: 'any' } }] },
 ]
 
-function AnyHead({ optional, node, makeEdit, ctx }: Props) {
+function AnyHead({ optional, node, ctx }: Props) {
 	const { locale } = useLocale()
 
 	const selectedType = selectAnyType(node)
 
 	const onSelect = useCallback((newValue: string) => {
-		makeEdit((range) => {
+		ctx.makeEdit((range) => {
 			const newSelected = ANY_TYPES.find(t => t.kind === newValue)
 			if (!newSelected) {
 				return undefined
 			}
 			return getDefault(newSelected, range, ctx)
 		})
-	}, [makeEdit, ctx])
+	}, [ctx])
 
 	return <>
 		<select value={selectedType ? selectedType.kind : SPECIAL_UNSET} onInput={(e) => onSelect((e.target as HTMLSelectElement).value)}>
@@ -990,18 +1070,18 @@ function AnyHead({ optional, node, makeEdit, ctx }: Props) {
 				<option value={type.kind}>{formatIdentifier(type.kind)}</option>
 			)}
 		</select>
-		{selectedType && <Head type={selectedType} node={node} makeEdit={makeEdit} ctx={ctx} />}
+		{selectedType && <Head type={selectedType} node={node} ctx={ctx} />}
 	</>
 }
 
-function AnyBody({ optional, node, makeEdit, ctx }: Props) {
+function AnyBody({ optional, node, ctx }: Props) {
 	const selectedType = selectAnyType(node)
 
 	if (!selectedType) {
 		return <></>
 	}
 
-	return <Body type={selectedType} optional={optional} node={node} makeEdit={makeEdit} ctx={ctx} />
+	return <Body type={selectedType} optional={optional} node={node} ctx={ctx} />
 }
 
 function selectAnyType(node: JsonNode | undefined) {
