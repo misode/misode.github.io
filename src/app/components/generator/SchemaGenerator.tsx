@@ -152,6 +152,13 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		await service?.redoEdit(uri)
 	}
 
+	const saveFile = useCallback((method: Method) => {
+		if (!docAndNode) {
+			return
+		}
+		showModal(() => <FileCreation gen={gen} docAndNode={docAndNode} method={method} />)
+	}, [showModal, gen, docAndNode])
+
 	useEffect(() => {
 		const onKeyDown = async (e: KeyboardEvent) => {
 			if (!service || !uri) {
@@ -176,7 +183,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		return () => {
 			document.removeEventListener('keydown', onKeyDown)
 		}
-	}, [gen.id, service, uri])
+	}, [gen.id, service, uri, saveFile])
 
 	const { value: presets } = useAsync(async () => {
 		const registries = await fetchRegistries(version)
@@ -315,13 +322,6 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setProjectShown(!projectShown)
 	}, [projectShown])
 
-	const saveFile = useCallback((method: Method) => {
-		if (!docAndNode) {
-			return
-		}
-		showModal(() => <FileCreation gen={gen} docAndNode={docAndNode} method={method} />)
-	}, [showModal, gen, docAndNode])
-
 	const newEmptyFile = useCallback(async () => {
 		if (service) {
 			const unsavedUri = service.getUnsavedFileUri(gen)
@@ -330,7 +330,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			await service.writeFile(unsavedUri, text)
 		}
 		setProjectUri(undefined)
-	}, [showModal])
+	}, [gen, service, showModal])
 
 	return <>
 		<main class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`}>
