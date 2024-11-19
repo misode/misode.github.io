@@ -1,11 +1,10 @@
 import { Identifier } from 'deepslate'
 import { route } from 'preact-router'
-import { useCallback, useMemo, useRef } from 'preact/hooks'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, getProjectRoot, useLocale, useProject } from '../../contexts/index.js'
 import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass } from '../../contexts/Spyglass.jsx'
-import { useAsync } from '../../hooks/useAsync.js'
 import { useFocus } from '../../hooks/useFocus.js'
 import { cleanUrl, writeZip } from '../../Utils.js'
 import { Btn } from '../Btn.js'
@@ -25,12 +24,17 @@ export function ProjectPanel() {
 
 	const projectRoot = getProjectRoot(project)
 
-	const { value: entries } = useAsync(async () => {
-		const entries = await client.fs.readdir(projectRoot)
-		return entries.flatMap(e => {
-			return e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []
+	const [entries, setEntries] = useState<string[]>()
+	useEffect(() => {
+		if (!service) {
+			return
+		}
+		service.watchTree(projectRoot, setEntries)
+		client.fs.readdir(projectRoot).then(entries => {
+			setEntries(entries.flatMap(e => e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []))
 		})
-	}, [project])
+		return () => service.unwatchTree(projectRoot, setEntries)
+	}, [service, projectRoot])
 
 	const download = useRef<HTMLAnchorElement>(null)
 

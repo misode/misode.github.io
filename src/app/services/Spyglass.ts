@@ -68,7 +68,8 @@ export class SpyglassClient {
 }
 
 export class SpyglassService {
-	private readonly watchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
+	private readonly fileWatchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
+	private readonly treeWatchers: { prefix: string, handler: (uris: string[]) => void }[] = []
 
 	private constructor (
 		public readonly version: VersionId,
@@ -76,11 +77,30 @@ export class SpyglassService {
 		private readonly client: SpyglassClient,
 	) {
 		service.project.on('documentUpdated', (e) => {
-			const uriWatchers = this.watchers.get(e.doc.uri) ?? []
+			const uriWatchers = this.fileWatchers.get(e.doc.uri) ?? []
 			for (const handler of uriWatchers) {
 				handler(e)
 			}
 		})
+		let treeWatcherTask = Promise.resolve()
+		let hasPendingTask = false
+		const treeWatcher = () => {
+			hasPendingTask = true
+			// Wait for previous task to finish, then re-run once after 5 ms
+			treeWatcherTask = treeWatcherTask.finally(async () => {
+				if (!hasPendingTask) {
+					return
+				}
+				hasPendingTask = false
+				await new Promise((res) => setTimeout(res, 5))
+				await Promise.all(this.treeWatchers.map(async ({ prefix, handler }) => {
+					const entries = await client.fs.readdir(prefix)
+					handler(entries.flatMap(e => e.name.startsWith(prefix) ? [e.name.slice(prefix.length)] : []))
+				}))
+			})
+		}
+		service.project.on('fileCreated', treeWatcher)
+		service.project.on('fileDeleted', treeWatcher)
 	}
 
 	public getCheckerContext(doc?: TextDocument, errors?: core.LanguageError[]) {
@@ -150,6 +170,8 @@ export class SpyglassService {
 		}
 		await this.service.project.externals.fs.writeFile(newUri, content)
 		await this.service.project.externals.fs.unlink(oldUri)
+		// await this.service.project.externals.fs.writeFile(oldUri, content)
+		// await this.service.project.externals.fs.unlink(oldUri)
 		const d = this.client.documents.get(oldUri)
 		if (d) {
 			const doc = TextDocument.create(newUri, d.doc.languageId, d.doc.version, d.doc.getText())
@@ -220,14 +242,23 @@ export class SpyglassService {
 	}
 
 	public watchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
-		const uriWatchers = computeIfAbsent(this.watchers, uri, () => [])
+		const uriWatchers = computeIfAbsent(this.fileWatchers, uri, () => [])
 		uriWatchers.push(handler)
 	}
 
 	public unwatchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
-		const uriWatchers = computeIfAbsent(this.watchers, uri, () => [])
+		const uriWatchers = computeIfAbsent(this.fileWatchers, uri, () => [])
 		const index = uriWatchers.findIndex(w => w === handler)
 		uriWatchers.splice(index, 1)
+	}
+
+	public watchTree(prefix: string, handler: (uris: string[]) => void) {
+		this.treeWatchers.push({ prefix, handler })
+	}
+
+	public unwatchTree(prefix: string, handler: (uris: string[]) => void) {
+		const index = this.treeWatchers.findIndex(w => w.prefix === prefix && w.handler === handler)
+		this.treeWatchers.splice(index, 1)
 	}
 
 	public static async create(versionId: VersionId, client: SpyglassClient) {
