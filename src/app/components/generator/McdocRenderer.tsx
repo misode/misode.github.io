@@ -578,7 +578,8 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 					return node
 				})
 			}
-			return <div key={key} class="node" data-category={getCategory(field.type)}>
+			const category = getCategory(field.type)
+			return <div key={key} class="node" data-category={category}>
 				<div class="node-header">
 					<Errors type={childType} node={child} ctx={ctx} />
 					{canToggle && (isCollapsed
@@ -591,7 +592,11 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 					<Key label={key} raw={field.key.kind === 'string'} />
 					{!isCollapsed && <Head type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />}
 				</div>
-				{!isCollapsed && <Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />}
+				{!isCollapsed && (childType.kind === 'struct' && category
+					? <div class="node-body-flat">
+						<StructBody type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />
+					</div>
+					: <Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />)}
 			</div>
 		})}
 	</>

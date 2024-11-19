@@ -371,7 +371,9 @@ button.move:disabled {
 }
 
 .node > .node-body-flat > .node > .node-header > .node-icon + *,
-.node > .node-body-flat > .node > .node-header > *:first-child {
+.node > .node-body-flat > .node > .node-header > *:first-child,
+.node[data-category] > .node-header > .node-icon + *,
+.node[data-category] > .node-header > *:first-child {
   border-left: none;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -394,6 +396,7 @@ button.move:disabled {
 /* Color categories */
 
 [data-category=predicate] > .node-header > label,
+[data-category=predicate] > .node-header > button.toggle,
 [data-category=predicate] > .node-body > .node > .node-header > label,
 [data-category=predicate] > .node-body-flat > .node > .node-header > label {
   background-color: var(--category-predicate);
@@ -414,6 +417,7 @@ button.move:disabled {
 }
 
 [data-category=function] > .node-header > label,
+[data-category=function] > .node-header > button.toggle,
 [data-category=function] > .node-body > .node > .node-header > label,
 [data-category=function] > .node-body-flat > .node > .node-header > label {
   background-color: var(--category-function);
@@ -434,6 +438,7 @@ button.move:disabled {
 }
 
 [data-category=pool] > .node-header > label,
+[data-category=pool] > .node-header > button.toggle,
 [data-category=pool] > .node-body > .node > .node-header > label,
 [data-category=pool] > .node-body-flat > .node > .node-header > label {
   background-color: var(--category-pool);
