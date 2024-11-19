@@ -3,7 +3,7 @@ import type { JsonNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
-import type { ListType, LiteralType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
@@ -531,61 +531,14 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 		})}
 		{dynamicFields.map((field, index) => {
 			if (field.key.kind === 'any' && field.type.kind === 'any') {
+				// Hide dispatch fallback
 				return <></>
 			}
-			const incompletePairs = node.children.filter(pair => pair.value && core.Range.length(pair.value.range) === 0)
-			const pair = index < incompletePairs.length ? incompletePairs[index] : undefined
 			const keyType = simplifyType(field.key, ctx)
-			const makeKeyEdit: MakeEdit = (edit) => {
-				makeEdit(() => {
-					const newKey = edit(pair?.key?.range ?? core.Range.create(node.range.end))
-					const index = pair ? node.children.indexOf(pair) : -1
-					if (!newKey || !JsonStringNode.is(newKey) || newKey.value.length === 0) {
-						if (index !== -1) {
-							node.children.splice(index, 1)
-						}
-						return node
-					}
-					const newPair: core.PairNode<JsonStringNode, JsonNode> = {
-						type: 'pair',
-						range: newKey?.range,
-						key: newKey,
-					}
-					newKey.parent = newPair
-					if (index !== -1) {
-						node.children.splice(index, 1, newPair)
-					} else {
-						node.children.push(newPair)
-					}
-					newPair.parent = node
-					return node
-				})
-			}
-			const onAddKey = () => {
-				const keyNode = pair?.key
-				const index = pair ? node.children.indexOf(pair) : -1
-				if (!pair || !keyNode || index === -1) {
-					return
-				}
-				makeEdit((range) => {
-					const valueNode = getDefault(simplifyType(field.type, ctx, { key: pair.key, parent: node }), range, ctx)
-					const newPair: core.PairNode<JsonStringNode, JsonNode> = {
-						type: 'pair',
-						range: keyNode.range,
-						key: keyNode,
-						value: valueNode,
-					}
-					valueNode.parent = newPair
-					node.children.splice(index, 1, newPair)
-					newPair.parent = node
-					return node
-				})
-			}
-			return <div class="node">
-				<div key={`__dynamic_${index}__`} class="node-header">
+			return <div key={`__dynamic_${index}__`} class="node">
+				<div class="node-header">
 					<Docs desc={field.desc} />
-					<Head type={keyType} optional={true} node={pair?.key} makeEdit={makeKeyEdit} ctx={ctx} />
-					<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={onAddKey} disabled={pair === undefined}>{Octicon.plus_circle}</button>
+					<DynamicKey keyType={keyType} valueType={field.type} parent={node} makeEdit={makeEdit} ctx={ctx} />
 				</div>
 			</div>
 		})}
@@ -598,12 +551,14 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 				return <></>
 			}
 			const child = pair.value
-			const canToggle = JsonObjectNode.is(child)
+			const canToggle = JsonObjectNode.is(child) || JsonArrayNode.is(child)
 			const toggled = isToggled(key)
 			const isCollapsed = canToggle && (toggled === false || (toggled === undefined && (node.children.length - staticChilds.length) > 20))
 			// TODO: correctly determine which dynamic field this is a key for
-			const field = dynamicFields[0] as SimplifiedStructTypePairField | undefined
-			if (!field) {
+			// Hack to support component negations, the only place with more than one dynamic field currently
+			const field = dynamicFields[key.startsWith('!') ? 1 : 0] as SimplifiedStructTypePairField | undefined
+			if (!field || (field.key.kind === 'any' && field.type.kind === 'any')) {
+				// Hide dispatch fallback
 				return <></>
 			}
 			const childType = simplifyType(field.type, ctx, { key: pair.key, parent: node })
@@ -639,6 +594,53 @@ function StructBody({ type: outerType, node, makeEdit, ctx }: Props<SimplifiedSt
 				{!isCollapsed && <Body type={childType} node={child} makeEdit={makeFieldEdit} ctx={ctx} />}
 			</div>
 		})}
+	</>
+}
+
+interface DynamicKeyProps {
+	keyType: SimplifiedMcdocType
+	valueType: McdocType
+	parent: JsonObjectNode
+	makeEdit: MakeEdit
+	ctx: McdocContext
+}
+function DynamicKey({ keyType, valueType, parent, makeEdit, ctx }: DynamicKeyProps) {
+	const { locale } = useLocale()
+	const [key, setKey] = useState<string>('')
+
+	const keyNode = useMemo(() => {
+		const node = JsonStringNode.mock(core.Range.create(0))
+		node.value = key
+		return node
+	}, [key])
+
+	const makeKeyEdit = useCallback<MakeEdit>((edit) => {
+		const newKeyNode = edit(core.Range.create(0))
+		if (JsonStringNode.is(newKeyNode)) {
+			setKey(newKeyNode.value)
+		}
+	}, [])
+
+	const addKey = useCallback(() => {
+		setKey('')
+		makeEdit((range) => {
+			const valueNode = getDefault(simplifyType(valueType, ctx, { key: keyNode, parent }), range, ctx)
+			const newPair: core.PairNode<JsonStringNode, JsonNode> = {
+				type: 'pair',
+				range: keyNode.range,
+				key: keyNode,
+				value: valueNode,
+			}
+			valueNode.parent = newPair
+			parent.children.push(newPair)
+			newPair.parent = parent
+			return parent
+		})
+	}, [keyNode, makeEdit, ctx])
+
+	return <>
+		<Head type={keyType} optional={true} node={keyNode} makeEdit={makeKeyEdit} ctx={ctx} />
+		<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={addKey} disabled={key.length === 0}>{Octicon.plus_circle}</button>
 	</>
 }
 
