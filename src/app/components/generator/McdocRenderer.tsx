@@ -1,7 +1,7 @@
 import * as core from '@spyglassmc/core'
-import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
+import type { JsonPairNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
-import { JsonArrayNode, JsonBooleanNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
+import { JsonArrayNode, JsonBooleanNode, JsonNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
@@ -506,8 +506,7 @@ function StructBody({ type: outerType, node, ctx }: Props<SimplifiedStructType>)
 			// Hack to support component negations, the only place with more than one dynamic field currently
 			const field = dynamicFields[key.startsWith('!') ? 1 : 0] as SimplifiedStructTypePairField | undefined
 			if (!field || (field.key.kind === 'any' && field.type.kind === 'any')) {
-				// Hide dispatch fallback
-				return <></>
+				return <UnknownField key={key} pair={pair} index={index} fieldKey={key} type={type} node={node} ctx={ctx} />
 			}
 			return <DynamicField key={key} pair={pair} index={index} field={field} fieldKey={key} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)}type={type} node={node} ctx={ctx} />
 		})}
@@ -698,6 +697,33 @@ function DynamicField({ pair, index, field, fieldKey, isToggled, expand, collaps
 				<StructBody type={childType} node={child} ctx={fieldCtx} />
 			</div>
 			: <Body type={childType} node={child} ctx={fieldCtx} />)}
+	</div>
+}
+
+interface UnknownFieldProps extends Props {
+	pair: JsonPairNode
+	index: number
+	fieldKey: string
+	node: JsonObjectNode
+}
+function UnknownField({ pair, index, fieldKey, node, ctx }: UnknownFieldProps) {
+	const { locale } = useLocale()
+
+	const removeField = useCallback(() => {
+		ctx.makeEdit(() => {
+			node.children.splice(index, 1)
+			return node
+		})
+	}, [index, node, ctx])
+
+	return <div class="node">
+		<div class="node-header">
+			<Errors type={{ kind: 'any' }} node={pair} ctx={ctx} />
+			<button class="remove tooltipped tip-se" aria-label={locale('remove')} onClick={removeField}>
+				{Octicon.trashcan}
+			</button>
+			<Key label={fieldKey} />
+		</div>
 	</div>
 }
 
@@ -1105,7 +1131,7 @@ function Key({ label, raw }: KeyProps) {
 
 interface ErrorsProps {
 	type: SimplifiedMcdocType
-	node: JsonNode | undefined
+	node: core.AstNode | undefined
 	ctx: McdocContext
 }
 function Errors({ type, node, ctx }: ErrorsProps) {
@@ -1119,7 +1145,7 @@ function Errors({ type, node, ctx }: ErrorsProps) {
 			// Unless they are inside a child node
 			.filter(e => !node.children?.some(c => (c.type === 'item' || c.type === 'pair') && core.Range.containsRange(c.range, e.range, true)))
 			// Filter out "Missing key" errors
-			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && (selectUnionMember(type, node) ?? type.members[0]).kind === 'struct'))))
+			.filter(e => !(core.Range.length(e.range) === 1 && (type.kind === 'struct' || (type.kind === 'union' && JsonNode.is(node) && (selectUnionMember(type, node) ?? type.members[0]).kind === 'struct'))))
 		// Hide warnings if there are errors
 		return errors.find(e => e.severity === 3)
 			? errors.filter(e => e.severity === 3)
