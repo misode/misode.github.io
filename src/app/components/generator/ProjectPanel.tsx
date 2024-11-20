@@ -133,7 +133,7 @@ export function ProjectPanel() {
 		</div>
 	}, [service, actions, projectRoot, projectUri])
 
-	return <>
+	return <div class="panel-content">
 		<div class="project-controls">
 			<BtnMenu icon="chevron_down" label={project.name} tooltip={locale('switch_project')} tooltipLoc="se">
 				{projects.map(p => <Btn label={p.name} active={p.name === project.name} onClick={() => changeProject(p.name)} />)}
@@ -152,5 +152,5 @@ export function ProjectPanel() {
 					: <TreeView entries={entries} split={path => path.split('/')} group={FolderEntry} leaf={FileEntry} />}
 		</div>
 		<a ref={download} style="display: none;"></a>
-	</>
+	</div>
 }

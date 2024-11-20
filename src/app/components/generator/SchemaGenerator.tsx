@@ -7,7 +7,7 @@ import config from '../../Config.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass, watchSpyglassUri } from '../../contexts/Spyglass.jsx'
-import { AsyncCancel, useActiveTimeout, useAsync, useSearchParam } from '../../hooks/index.js'
+import { AsyncCancel, useActiveTimeout, useAsync, useLocalStorage, useSearchParam } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
 import { DEPENDENCY_URI } from '../../services/Spyglass.js'
@@ -17,6 +17,7 @@ import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, Footer, HasPreview, Octicon
 import { getRootDefault } from './McdocHelpers.js'
 
 export const SHARE_KEY = 'share'
+const MIN_PROJECT_PANEL_WIDTH = 200
 
 interface Props {
 	gen: ConfigGenerator
@@ -322,6 +323,38 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setProjectShown(!projectShown)
 	}, [projectShown])
 
+	const [panelWidth, setPanelWidth] = useLocalStorage('misode_project_panel_width', MIN_PROJECT_PANEL_WIDTH, (s) => Number(s), (v) => v.toString())
+	const [realPanelWidth, setRealPanelWidth] = useState(panelWidth)
+	const [resizeStart, setResizeStart] = useState<number>()
+
+	useEffect(() => {
+		const onMouseMove = (e: MouseEvent) => {
+			if (resizeStart) {
+				const targetWidth = e.clientX - resizeStart
+				if (targetWidth < 50) {
+					setProjectShown(false)
+				} else {
+					setRealPanelWidth(Math.max(MIN_PROJECT_PANEL_WIDTH, targetWidth))
+				}
+			}
+		}
+		window.addEventListener('mousemove', onMouseMove)
+		return () => window.removeEventListener('mousemove', onMouseMove)
+	}, [resizeStart])
+
+	useEffect(() => {
+		const onMouseUp = () => {
+			setResizeStart(undefined)
+			if (realPanelWidth < MIN_PROJECT_PANEL_WIDTH) {
+				setRealPanelWidth(panelWidth)
+			} else {
+				setPanelWidth(realPanelWidth)
+			}
+		}
+		window.addEventListener('mouseup', onMouseUp)
+		return () => window.removeEventListener('mouseup', onMouseUp)
+	}, [panelWidth, realPanelWidth])
+
 	const newEmptyFile = useCallback(async () => {
 		if (service) {
 			const unsavedUri = service.getUnsavedFileUri(gen)
@@ -333,7 +366,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	}, [gen, service, showModal])
 
 	return <>
-		<main class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`}>
+		<main class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`} style={`--project-panel-width: ${realPanelWidth}px`}>
 			{!gen.tags?.includes('partners') && <Ad id="data-pack-generator" type="text" />}
 			<div class="controls generator-controls">
 				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={gen.wiki} target="_blank">
@@ -388,8 +421,9 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				{projectShown ? Octicon.chevron_left : Octicon.repo}
 			</div>
 		</div>
-		<div class={`popup-project${projectShown ? ' shown' : ''}`}>
-			<ProjectPanel />
+		<div class={`popup-project${projectShown ? ' shown' : ''}`} style={`width: ${realPanelWidth}px`}>
+			<ProjectPanel/>
+			<div class="panel-resize" onMouseDown={(e) => setResizeStart(e.clientX - panelWidth)}></div>
 		</div>
 	</>
 }

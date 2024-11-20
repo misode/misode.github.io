@@ -330,6 +330,7 @@ main > .controls {
 
 .project-controls {
 	margin: 8px;
+	margin-right: 0;
 	display: flex;
 	z-index: 2;
 }
@@ -520,10 +521,8 @@ canvas.preview-details.visible {
 .popup-project {
 	position: fixed;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	height: calc(100% - 56px);
-	width: 200px;
-	width: max(200px, 20vw);
 	right: 100%;
 	bottom: 0;
 	z-index: 3;
@@ -538,8 +537,20 @@ canvas.preview-details.visible {
 }
 
 main.has-project {
-	padding-left: 200px;
-	padding-left: max(200px, 20vw);
+	padding-left: var(--project-panel-width, 200px);
+}
+
+.popup-project .panel-content {
+	display: flex;
+	flex-direction: column;
+	width: calc(100% - 8px);
+}
+
+.panel-resize {
+	width: 8px;
+	height: 100%;
+	cursor: ew-resize;
+	user-select: none;
 }
 
 .preview-overlay {
