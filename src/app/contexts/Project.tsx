@@ -2,7 +2,7 @@ import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
 import type { VersionId } from '../services/index.js'
-import { ROOT_URI } from '../services/Spyglass.js'
+import { ROOT_URI, SpyglassClient } from '../services/Spyglass.js'
 import { Store } from '../Store.js'
 
 export type ProjectMeta = {
@@ -93,8 +93,19 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		changeProjects([...projects, project])
 	}, [projects])
 
-	const deleteProject = useCallback((name: string) => {
+	const deleteProject = useCallback(async (name: string) => {
 		if (name === DRAFT_PROJECT.name) return
+		const project = projects.find(p => p.name === name)
+		if (project) {
+			const projectRoot = getProjectRoot(project)
+			const entries = await SpyglassClient.FS.readdir(projectRoot)
+			await Promise.all(entries.flatMap(async e => {
+				if (e.name.startsWith(projectRoot)) {
+					return [await SpyglassClient.FS.unlink(e.name)]
+				}
+				return []
+			}))
+		}
 		changeProjects(projects.filter(p => p.name !== name))
 		setOpenProject(undefined)
 	}, [projects])

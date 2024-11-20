@@ -6,7 +6,7 @@ import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import type { VersionId } from '../../services/index.js'
 import { DEFAULT_VERSION } from '../../services/index.js'
 import { PROJECTS_URI } from '../../services/Spyglass.js'
-import { hexId, readZip } from '../../Utils.js'
+import { hexId, message, readZip } from '../../Utils.js'
 import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '../index.js'
 import { Modal } from '../Modal.js'
 
@@ -45,8 +45,9 @@ export function ProjectCreation() {
 					return client.fs.writeFile(rootUri + path, entry[1])
 				}))
 				hideModal()
-			}).catch(() => {
+			}).catch((e) => {
 				// TODO: handle errors
+				console.warn(`Error importing data pack: ${message(e)}`)
 				hideModal()
 			})
 		} else {

@@ -48,16 +48,15 @@ interface ClientDocument {
 }
 
 export class SpyglassClient {
-	public readonly fs = new MixedFileSystem(new IndexedDbFileSystem(), [
-		// { prefix: DEPENDENCY_URI, fs: new MemoryFileSystem() },
-	])
+	public static readonly FS = new MixedFileSystem(new IndexedDbFileSystem(), [])
+	public readonly fs = SpyglassClient.FS
 	public readonly externals: core.Externals = {
 		...BrowserExternals,
 		archive: {
 			...BrowserExternals.archive,
 			decompressBall,
 		},
-		fs: this.fs,
+		fs: SpyglassClient.FS,
 	}
 
 	public readonly documents = new Map<string, ClientDocument>()
