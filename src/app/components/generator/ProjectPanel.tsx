@@ -26,6 +26,7 @@ export function ProjectPanel() {
 
 	const [entries, setEntries] = useState<string[]>()
 	useEffect(() => {
+		setEntries(undefined)
 		if (!service) {
 			return
 		}

@@ -59,7 +59,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
 	const ignoreChange = useRef(false)
 
-	const { value: docAndNode, loading: docLoading } = useAsync(async () => {
+	const { value: docAndNode, loading: docLoading, error: docError } = useAsync(async () => {
 		let text: string | undefined = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
@@ -386,7 +386,9 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			<FileView docAndNode={docLoading ? undefined : docAndNode} />
+			{docError
+				? <ErrorPanel error={docError} />
+				: <FileView docAndNode={docLoading ? undefined : docAndNode} />}
 			<Footer donate={!gen.tags?.includes('partners')} />
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
