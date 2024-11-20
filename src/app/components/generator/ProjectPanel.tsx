@@ -144,9 +144,15 @@ export function ProjectPanel() {
 				{project.name !== DRAFT_PROJECT.name && <Btn icon="trashcan" label={locale('project.delete')} onClick={onDeleteProject} />}
 			</BtnMenu>
 		</div>
-		<div class="file-view">
+		<div class="project-files">
 			{entries === undefined
-				? <></>
+				? <div class="p-2 flex flex-col gap-2">
+					<div class="skeleton-2 rounded h-4 w-24"></div>
+					<div class="skeleton-2 rounded h-4 w-32 ml-4"></div>
+					<div class="skeleton-2 rounded h-4 w-24 ml-8"></div>
+					<div class="skeleton-2 rounded h-4 w-36 ml-8"></div>
+					<div class="skeleton-2 rounded h-4 w-28"></div>
+				</div>
 				: entries.length === 0
 					? <span>{locale('project.no_files')}</span>
 					: <TreeView entries={entries} split={path => path.split('/')} group={FolderEntry} leaf={FileEntry} />}

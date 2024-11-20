@@ -13,7 +13,7 @@ import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSn
 import { DEPENDENCY_URI } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, genPath } from '../../Utils.js'
-import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, Footer, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, Tree, VersionSwitcher } from '../index.js'
+import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileView, Footer, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, VersionSwitcher } from '../index.js'
 import { getRootDefault } from './McdocHelpers.js'
 
 export const SHARE_KEY = 'share'
@@ -59,7 +59,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
 	const ignoreChange = useRef(false)
 
-	const { value: docAndNode } = useAsync(async () => {
+	const { value: docAndNode, loading: docLoading } = useAsync(async () => {
 		let text: string | undefined = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
@@ -386,7 +386,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
-			{docAndNode && <Tree docAndNode={docAndNode} onError={setError} />}
+			<FileView docAndNode={docLoading ? undefined : docAndNode} />
 			<Footer donate={!gen.tags?.includes('partners')} />
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>

@@ -1,7 +1,9 @@
 :root {
 	--background-1: #fafafa;
 	--background-2: #e2e2e2;
+	--background-2-shimmer: #d9d9d9;
 	--background-3: #d4d3d3;
+	--background-3-shimmer: #cbcbcb;
 	--background-4: #b8b8b8;
 	--background-5: #bdbdbd;
 	--background-6: #cecece;
@@ -53,8 +55,10 @@
 :root.dark {
 	--background-1: #1b1b1b;
 	--background-2: #252525;
+	--background-2-shimmer: #2c2c2c;
 	--background-3: #222222;
 	--background-4: #3d3d3d;
+	--background-4-shimmer: #424242;
 	--background-5: #383838;
 	--background-6: #575757;
 	--text-1: #ffffff;
@@ -361,14 +365,46 @@ main > .controls {
 	z-index: 10;
 }
 
-.tree {
+.file-view {
 	margin-top: -40px;
 	overflow-x: auto;
 	padding: 8px 16px 50vh;
 }
 
-.error + .tree {
+.error + .file-view {
 	margin-top: 0;
+}
+
+.skeleton {
+	opacity: 1;
+  background-image: linear-gradient(90deg, var(--background-2) 0px, var(--background-2-shimmer) 38px, var(--background-2-shimmer) 42px, var(--background-2) 80px);
+  background-size: 600px;
+  animation: skeleton-shimmer 2.5s infinite linear, skeleton-fade-in 1s forwards linear;
+}
+
+.skeleton-2 {
+	opacity: 1;
+  background-image: linear-gradient(90deg, var(--background-4) 0px, var(--background-4-shimmer) 38px, var(--background-4-shimmer) 42px, var(--background-4) 80px);
+  background-size: 600px;
+  animation: skeleton-shimmer 2.5s infinite linear, skeleton-fade-in 1s forwards linear;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -110px;
+  }
+  40%, 100% {
+    background-position: 300px;
+  }
+}
+
+@keyframes skeleton-fade-in {
+	0%, 20% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
 }
 
 .popup-source {
@@ -1434,7 +1470,7 @@ main.has-project {
 	font-size: 16px;
 }
 
-[data-modals] .tree {
+[data-modals] .file-view {
 	pointer-events: none;
 }
 
@@ -1786,7 +1822,7 @@ hr {
 	content: '\200b';
 }
 
-.file-view {
+.project-files {
 	background-color: var(--background-2);
 	color: var(--text-2);
 	overflow: hidden;
@@ -1795,7 +1831,7 @@ hr {
 	flex-grow: 1;
 }
 
-.file-view > span {
+.project-files > span {
 	padding: 4px 8px;
 }
 
@@ -1943,8 +1979,10 @@ hr {
 }
 
 .ea-content {
+	opacity: 1;
 	margin: 0 !important;
 	background: var(--background-2) !important;
+	animation: skeleton-fade-in 0.5s forwards linear;
 }
 
 .ea-content span {
@@ -2978,13 +3016,13 @@ hr {
 }
 
 @media screen and (max-width: 1300px) {
-	main.has-preview .tree {
+	main.has-preview .file-view {
 		margin-top: 4px;
 	}
 }
 
 @media screen and (max-width: 800px) {
-	main .tree {
+	main .file-view {
 		margin-top: 4px !important;
 	}
 }
@@ -3015,7 +3053,7 @@ hr {
 		top: 64px
 	}
 
-	.tree {
+	.file-view {
 		padding-left: 8px;
 		padding-right: 8px;
 	}

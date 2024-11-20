@@ -11,6 +11,7 @@ import { useVersion } from './Version.jsx'
 interface SpyglassContext {
 	client: SpyglassClient
 	service: SpyglassService | undefined
+	serviceLoading: boolean
 }
 
 const SpyglassContext = createContext<SpyglassContext | undefined>(undefined)
@@ -59,13 +60,14 @@ export function SpyglassProvider({ children }: { children: ComponentChildren }) 
 	const { version } = useVersion()
 	const [client] = useState(new SpyglassClient())
 
-	const { value: service } = useAsync(() => {
+	const { value: service, loading: serviceLoading } = useAsync(() => {
 		return client.createService(version)
 	}, [client, version])
 
 	const value: SpyglassContext = {
 		client,
 		service,
+		serviceLoading,
 	}
 
 	return <SpyglassContext.Provider value={value}>

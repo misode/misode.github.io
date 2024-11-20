@@ -2,34 +2,18 @@ import type { DocAndNode, Range } from '@spyglassmc/core'
 import { dissectUri } from '@spyglassmc/java-edition/lib/binder/index.js'
 import type { JsonNode } from '@spyglassmc/json'
 import { JsonFileNode } from '@spyglassmc/json'
-import { useCallback, useErrorBoundary, useMemo } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
-import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
+import { useCallback, useMemo } from 'preact/hooks'
+import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import { getRootType, simplifyType } from './McdocHelpers.js'
 import type { McdocContext } from './McdocRenderer.jsx'
 import { McdocRoot } from './McdocRenderer.jsx'
 
-type TreePanelProps = {
+type JsonFileViewProps = {
 	docAndNode: DocAndNode,
-	onError: (message: string) => unknown,
+	node: JsonNode,
 }
-export function Tree({ docAndNode: original, onError }: TreePanelProps) {
-	const { lang } = useLocale()
+export function JsonFileView({ docAndNode, node }: JsonFileViewProps) {
 	const { service } = useSpyglass()
-
-	if (lang === 'none') return <></>
-
-	const docAndNode = useDocAndNode(original)
-	const fileChild = docAndNode.node.children[0]
-	if (!JsonFileNode.is(fileChild)) {
-		return <></>
-	}
-
-	const [error] = useErrorBoundary(e => {
-		onError(`Error rendering the tree: ${e.message}`)
-		console.error(e)
-	})
-	if (error) return <></>
 
 	const makeEdit = useCallback((edit: (range: Range) => JsonNode | undefined) => {
 		if (!service) {
@@ -62,15 +46,15 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 	}, [docAndNode, service, makeEdit])
 
 	const resourceType = useMemo(() => {
-		if (original.doc.uri.endsWith('/pack.mcmeta')) {
+		if (docAndNode.doc.uri.endsWith('/pack.mcmeta')) {
 			return 'pack_mcmeta'
 		}
 		if (ctx === undefined) {
 			return undefined
 		}
-		const res = dissectUri(original.doc.uri, ctx)
+		const res = dissectUri(docAndNode.doc.uri, ctx)
 		return res?.category
-	}, [original, ctx])
+	}, [docAndNode, ctx])
 
 	const mcdocType = useMemo(() => {
 		if (!ctx || !resourceType) {
@@ -81,8 +65,8 @@ export function Tree({ docAndNode: original, onError }: TreePanelProps) {
 		return type
 	}, [resourceType, ctx])
 
-	return <div class="tree node-root" data-category={getCategory(resourceType)}>
-		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={fileChild.children[0]} ctx={ctx} />}
+	return <div class="file-view tree node-root" data-category={getCategory(resourceType)}>
+		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={node} ctx={ctx} />}
 	</div>
 }
 
