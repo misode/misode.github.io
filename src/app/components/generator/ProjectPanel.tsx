@@ -27,13 +27,17 @@ export function ProjectPanel() {
 	const [entries, setEntries] = useState<string[]>()
 	useEffect(() => {
 		setEntries(undefined)
+		client.fs.readdir(projectRoot).then(entries => {
+			setEntries(entries.flatMap(e => {
+				return e.isFile() && e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []
+			}))
+		})
+	}, [projectRoot])
+	useEffect(() => {
 		if (!service) {
 			return
 		}
 		service.watchTree(projectRoot, setEntries)
-		client.fs.readdir(projectRoot).then(entries => {
-			setEntries(entries.flatMap(e => e.isFile() && e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []))
-		})
 		return () => service.unwatchTree(projectRoot, setEntries)
 	}, [service, projectRoot])
 

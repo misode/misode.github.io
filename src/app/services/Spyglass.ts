@@ -97,7 +97,9 @@ export class SpyglassService {
 				await new Promise((res) => setTimeout(res, 5))
 				await Promise.all(this.treeWatchers.map(async ({ prefix, handler }) => {
 					const entries = await client.fs.readdir(prefix)
-					handler(entries.flatMap(e => e.name.startsWith(prefix) ? [e.name.slice(prefix.length)] : []))
+					handler(entries.flatMap(e => {
+						return e.isFile() && e.name.startsWith(prefix) ? [e.name.slice(prefix.length)] : []
+					}))
 				}))
 			})
 		}
