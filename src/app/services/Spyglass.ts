@@ -371,6 +371,8 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 		return { uri }
 	})
 
+	meta.registerUriBinder(je.binder.uriBinder)
+
 	const versions = await fetchVersions()
 	const release = config.env.gameVersion as ReleaseVersion
 	const version = siteConfig.versions.find(v => {
