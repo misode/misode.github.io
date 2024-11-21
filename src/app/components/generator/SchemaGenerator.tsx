@@ -67,7 +67,6 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 		if (currentPreset) {
 			text = await loadPreset(currentPreset)
-			ignoreChange.current = true
 		} else if (sharedSnippetId) {
 			const snippet = await getSnippet(sharedSnippetId)
 			let cancel = false
@@ -90,7 +89,6 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				setSourceShown(false)
 			}
 			Analytics.openSnippet(gen.id, sharedSnippetId, version)
-			ignoreChange.current = true
 			text = snippet.text
 		}
 		if (!service || !uri) {
@@ -106,7 +104,9 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			await service.writeFile(dependencyUri, dependency)
 		}
 		if (text !== undefined) {
+			ignoreChange.current = true
 			await service.writeFile(uri, text)
+			ignoreChange.current = false
 		} else {
 			text = await service.readFile(uri)
 			if (text === undefined) {
@@ -115,7 +115,9 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				await service.writeFile(uri, text)
 			}
 		}
+		ignoreChange.current = true
 		const docAndNode = await service.openFile(uri)
+		ignoreChange.current = false
 		Analytics.setGenerator(gen.id)
 		return docAndNode
 	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, service, uri])

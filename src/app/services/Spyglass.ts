@@ -412,6 +412,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 					fields: Object.entries(properties).map(([propKey, propValues]) => ({
 						kind: 'pair',
 						key: propKey,
+						optional: true,
 						type: {
 							kind: 'union',
 							members: propValues.map(value => ({
