@@ -33,9 +33,10 @@ export function ProjectCreation() {
 		}
 	}
 
-	const onCreate = useCallback(() => {
+	const onCreate = useCallback(async () => {
 		setCreating(true)
 		const rootUri = `${PROJECTS_URI}${hexId()}/`
+		await client.fs.mkdir(rootUri)
 		createProject({ name, namespace, version, storage: { type: 'indexeddb', rootUri } })
 		changeProject(name)
 		if (file) {

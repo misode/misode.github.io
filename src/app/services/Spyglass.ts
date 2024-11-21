@@ -21,6 +21,9 @@ export const ROOT_URI = 'file:///root/'
 export const DEPENDENCY_URI = `${ROOT_URI}dependency/`
 export const UNSAVED_URI = `${ROOT_URI}unsaved/`
 export const PROJECTS_URI = `${ROOT_URI}projects/`
+export const DRAFTS_URI = `${ROOT_URI}drafts/`
+
+const INITIAL_DIRS = [CACHE_URI, ROOT_URI, DEPENDENCY_URI, UNSAVED_URI, PROJECTS_URI, DRAFTS_URI]
 
 const builtinMcdoc = `
 use ::java::server::util::text::Text
@@ -169,8 +172,6 @@ export class SpyglassService {
 		}
 		await this.service.project.externals.fs.writeFile(newUri, content)
 		await this.service.project.externals.fs.unlink(oldUri)
-		// await this.service.project.externals.fs.writeFile(oldUri, content)
-		// await this.service.project.externals.fs.unlink(oldUri)
 		const d = this.client.documents.get(oldUri)
 		if (d) {
 			const doc = TextDocument.create(newUri, d.doc.languageId, d.doc.version, d.doc.getText())
@@ -261,6 +262,7 @@ export class SpyglassService {
 	}
 
 	public static async create(versionId: VersionId, client: SpyglassClient) {
+		await Promise.allSettled(INITIAL_DIRS.map(async uri => client.externals.fs.mkdir(uri)))
 		const version = siteConfig.versions.find(v => v.id === versionId)!
 		const logger = console
 		const service = new core.Service({

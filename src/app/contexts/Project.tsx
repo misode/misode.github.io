@@ -2,7 +2,7 @@ import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
 import type { VersionId } from '../services/index.js'
-import { ROOT_URI, SpyglassClient } from '../services/Spyglass.js'
+import { DRAFTS_URI, SpyglassClient } from '../services/Spyglass.js'
 import { Store } from '../Store.js'
 
 export type ProjectMeta = {
@@ -37,7 +37,7 @@ export const DRAFT_PROJECT: ProjectMeta = {
 	namespace: 'draft',
 	storage: {
 		type: 'indexeddb',
-		rootUri: `${ROOT_URI}drafts/`,
+		rootUri: DRAFTS_URI,
 	},
 }
 

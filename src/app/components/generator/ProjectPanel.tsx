@@ -32,7 +32,7 @@ export function ProjectPanel() {
 		}
 		service.watchTree(projectRoot, setEntries)
 		client.fs.readdir(projectRoot).then(entries => {
-			setEntries(entries.flatMap(e => e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []))
+			setEntries(entries.flatMap(e => e.isFile() && e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []))
 		})
 		return () => service.unwatchTree(projectRoot, setEntries)
 	}, [service, projectRoot])
