@@ -1,9 +1,13 @@
+import { Identifier } from 'deepslate'
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
+import config from '../Config.js'
 import type { VersionId } from '../services/index.js'
-import { DRAFTS_URI, SpyglassClient } from '../services/Spyglass.js'
+import { DEFAULT_VERSION } from '../services/index.js'
+import { DRAFTS_URI, PROJECTS_URI, SpyglassClient } from '../services/Spyglass.js'
 import { Store } from '../Store.js'
+import { genPath, hexId, message } from '../Utils.js'
 
 export type ProjectMeta = {
 	name: string,
@@ -65,17 +69,48 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const [projects, setProjects] = useState<ProjectMeta[]>(Store.getProjects())
 	const [openProject, setOpenProject] = useState<string>()
 
-	useEffect(() => {
-		const initialProject = Store.getOpenProject()
-		const project = projects.find(p => p.name === initialProject)
+	const tryOpenProject = useCallback(async (projectName: string) => {
+		const project = projects.find(p => p.name === projectName)
 		if (!project) {
 			return
 		}
-		if (project.storage !== undefined) {
-			setOpenProject(initialProject)
-			return
+		if (project.storage === undefined) {
+			try {
+				const projectRoot = `${PROJECTS_URI}${hexId()}/`
+				console.log(`Upgrading project ${projectName} to IndexedDB at ${projectRoot}`)
+				await SpyglassClient.FS.mkdir(projectRoot)
+				if (project.files) {
+					await Promise.all(project.files.map(async file => {
+						const gen = config.generators.find(g => g.id === file.type)
+						if (!gen) {
+							console.warn(`Could not upgrade file ${file.id} of type ${file.type}, no generator found!`)
+							return
+						}
+						const type = genPath(gen, project.version ?? DEFAULT_VERSION)
+						const { namespace, path } = Identifier.parse(file.id)
+						const uri = type === 'pack_mcmeta'
+							?	`${projectRoot}data/pack.mcmeta`
+							: `${projectRoot}data/${namespace}/${type}/${path}.json`
+						return SpyglassClient.FS.writeFile(uri, JSON.stringify(file.data, null, 2))
+					}))
+				}
+				if (project.unknownFiles) {
+					await Promise.all(project.unknownFiles.map(async file => {
+						const uri = projectRoot + file.path
+						return SpyglassClient.FS.writeFile(uri, file.data)
+					}))
+				}
+				changeProjects(projects.map(p => p === project ? { ...p, storage: { type: 'indexeddb', rootUri: projectRoot } } : p))
+			} catch (e) {
+				console.error(`Something went wrong upgrading project ${projectName}: ${message(e)}`)
+				return
+			}
 		}
-		// TODO: Import legacy projects
+		setOpenProject(projectName)
+	}, [projects])
+
+	useEffect(() => {
+		tryOpenProject(Store.getOpenProject())
 	}, [])
 
 	const project = useMemo(() => {
@@ -112,7 +147,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 
 	const changeProject = useCallback((name: string) => {
 		Store.setOpenProject(name)
-		setOpenProject(name)
+		tryOpenProject(name)
 	}, [])
 
 	const updateProject = useCallback((edits: Partial<ProjectMeta>) => {
