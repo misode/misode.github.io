@@ -135,7 +135,7 @@ const SPECIAL_UNSET = '__unset__'
 function StringHead({ type, optional, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
 
-	const value = JsonStringNode.is(node) ? node.value : undefined
+	const value = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
 
 	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
 	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
@@ -149,6 +149,7 @@ function StringHead({ type, optional, node, ctx }: Props<StringType>) {
 	const isSelect = idRegistry && isSelectRegistry(idRegistry)
 
 	const onChangeValue = useCallback((newValue: string) => {
+		newValue = newValue.replaceAll('\\n', '\n')
 		if (value === newValue) {
 			return
 		}
