@@ -38,7 +38,8 @@ export function FileCreation({ docAndNode, gen, method }: Props) {
 			return
 		}
 		const id = Identifier.parse(fileId.includes(':') || project.namespace === undefined ? fileId : `${project.namespace}:${fileId}`)
-		const uri = `${getProjectRoot(project)}data/${id.namespace}/${genPath(gen, version)}/${id.path}.json`
+		const pack = gen.tags?.includes('assets') ? 'assets' : 'data'
+		const uri = `${getProjectRoot(project)}${pack}/${id.namespace}/${genPath(gen, version)}/${id.path}.json`
 		Analytics.saveProjectFile(method)
 		const text = docAndNode.doc.getText()
 		client.fs.writeFile(uri, text).then(() => {

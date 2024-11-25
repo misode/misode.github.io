@@ -10,7 +10,7 @@ import * as zip from '@zip.js/zip.js'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
-import { computeIfAbsent, genPath, message } from '../Utils.js'
+import { computeIfAbsent, genPath } from '../Utils.js'
 import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import { IndexedDbFileSystem, MixedFileSystem } from './FileSystem.js'
@@ -240,7 +240,8 @@ export class SpyglassService {
 		if (gen.id === 'pack_mcmeta') {
 			return `${UNSAVED_URI}pack.mcmeta`
 		}
-		return `${UNSAVED_URI}data/draft/${genPath(gen, this.version)}/draft.json`
+		const pack = gen.tags?.includes('assets') ? 'assets' : 'data'
+		return `${UNSAVED_URI}${pack}/draft/${genPath(gen, this.version)}/draft.json`
 	}
 
 	public watchFile(uri: string, handler: (docAndNode: core.DocAndNode) => void) {
@@ -290,22 +291,6 @@ export class SpyglassService {
 							},
 							world: {
 								category: 'world',
-							},
-							// TODO: move these to the assets folder
-							atlases: {
-								category: 'atlas',
-							},
-							blockstates: {
-								category: 'block_definition',
-							},
-							font: {
-								category: 'font',
-							},
-							items: {
-								category: 'item_definition',
-							},
-							models: {
-								category: 'model',
 							},
 							// Partner resources
 							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
@@ -397,55 +382,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 
 	meta.registerSymbolRegistrar('mcmeta-summary', {
 		checksum: versionChecksum,
-		registrar: je.dependency.symbolRegistrar(summary),
-	})
-
-	meta.registerSymbolRegistrar('mcdoc-block-states', {
-		checksum: versionChecksum,
-		registrar: (symbols) => {
-			const uri = 'mcmeta://summary/block_states.json'
-			symbols.query(uri, 'mcdoc/dispatcher', 'mcdoc:block_states').enter({
-				usage: { type: 'declaration' },
-			}).onEach(Object.entries(summary.blocks), ([id, [properties]], blockQuery) => {
-				const data: mcdoc.binder.TypeDefSymbolData = { typeDef: {
-					kind: 'struct',
-					fields: Object.entries(properties).map(([propKey, propValues]) => ({
-						kind: 'pair',
-						key: propKey,
-						optional: true,
-						type: {
-							kind: 'union',
-							members: propValues.map(value => ({
-								kind: 'literal', value: { kind: 'string', value },
-							})),
-						},
-					})),
-				} }
-				blockQuery.member(id, (stateQuery) => {
-					stateQuery.enter({
-						data: { data },
-						usage: { type: 'declaration' },
-					})
-				})
-			})
-			symbols.query(uri, 'mcdoc/dispatcher', 'mcdoc:block_state_keys').enter({
-				usage: { type: 'declaration' },
-			}).onEach(Object.entries(summary.blocks), ([id, [properties]], blockQuery) => {
-				const data: mcdoc.binder.TypeDefSymbolData = { typeDef: {
-					kind: 'union',
-					members: Object.keys(properties).map(propKey => ({
-						kind: 'literal',
-						value: { kind: 'string', value: propKey },
-					})),
-				} }
-				blockQuery.member(id, (stateQuery) => {
-					stateQuery.enter({
-						data: { data },
-						usage: { type: 'declaration' },
-					})
-				})
-			})
-		},
+		registrar: je.dependency.symbolRegistrar(summary, release),
 	})
 
 	registerAttributes(meta, release, versions)
@@ -454,17 +391,6 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	je.json.initialize(ctx)
 	je.mcf.initialize(ctx, summary.commands, release)
 	nbt.initialize(ctx)
-
-	// Until spyglass registers these correctly
-	meta.registerFormatter<json.JsonFileNode>('json:file', (node, ctx) => {
-		return ctx.meta.getFormatter(node.children[0].type)(node.children[0], ctx)
-	})
-	meta.registerFormatter<json.JsonStringNode>('json:string', (node) => {
-		return JSON.stringify(node.value)
-	})
-	meta.registerFormatter<core.ErrorNode>('error', () => {
-		return ''
-	})
 
 	return { loadedVersion: release }
 }
@@ -523,23 +449,6 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 						node,
 						3,
 					)
-				}
-			}
-		},
-	})
-
-	// Until spyglass implements this attribute itself
-	mcdoc.runtime.registerAttribute(meta, 'regex_pattern', () => undefined, {
-		checker: (_, typeDef) => {
-			if (typeDef.kind !== 'literal' || typeDef.value.kind !== 'string') {
-				return undefined
-			}
-			const pattern = typeDef.value.value
-			return (node, ctx) => {
-				try {
-					RegExp(pattern)
-				} catch (e) {
-					ctx.err.report(message(e), node, 2)
 				}
 			}
 		},

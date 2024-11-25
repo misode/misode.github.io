@@ -72,7 +72,7 @@ export function ProjectPanel() {
 				const res = service?.dissectUri(uri)
 				if (res?.ok) {
 					// This is pretty hacky, improve this in the future when spyglass has a "constructUri" function
-					const oldSuffix = `/${res.namespace}/${res.path}/${res.identifier}${res.ext}`
+					const oldSuffix = `${res.pack}/${res.namespace}/${res.path}/${res.identifier}${res.ext}`
 					if (!uri.endsWith(oldSuffix)) {
 						console.warn(`Expected ${uri} to end with ${oldSuffix}`)
 						return
@@ -80,7 +80,7 @@ export function ProjectPanel() {
 					const onRename = (newId: string) => {
 						const prefix = uri.substring(0, uri.length - oldSuffix.length)
 						const { namespace, path } = Identifier.parse(newId)
-						const newUri = prefix + `/${namespace}/${res.path}/${path}${res.ext}`
+						const newUri = prefix + `${res.pack}/${namespace}/${res.path}/${path}${res.ext}`
 						service?.renameFile(uri, newUri).then(() => {
 							setProjectUri(newUri)
 						})
