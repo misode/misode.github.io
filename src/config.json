@@ -569,6 +569,13 @@
       "wiki": "https://minecraft.wiki/w/Tutorials/Models"
     },
     {
+      "id": "lang",
+      "url": "assets/lang",
+      "path": "lang",
+      "tags": ["assets"],
+      "wiki": "https://minecraft.wiki/w/Resource_pack#Language"
+    },
+    {
       "id": "font",
       "url": "assets/font",
       "path": "font",
@@ -583,6 +590,14 @@
       "tags": ["assets"],
       "minVersion": "1.19.3",
       "wiki": "https://minecraft.wiki/w/Resource_pack#Atlases"
+    },
+    {
+      "id": "post_effect",
+      "url": "assets/post-effect",
+      "path": "post_effect",
+      "tags": ["assets"],
+      "minVersion": "1.21.2",
+      "wiki": "https://minecraft.wiki/w/Shader#Post-processing_effects"
     },
     {
       "id": "immersive_weathering:block_growth",
