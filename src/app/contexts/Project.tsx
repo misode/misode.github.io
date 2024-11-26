@@ -134,12 +134,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		if (project) {
 			const projectRoot = getProjectRoot(project)
 			const entries = await SpyglassClient.FS.readdir(projectRoot)
-			await Promise.all(entries.flatMap(async e => {
-				if (e.name.startsWith(projectRoot)) {
-					return [await SpyglassClient.FS.unlink(e.name)]
-				}
-				return []
-			}))
+			await Promise.all(entries.map(async e => SpyglassClient.FS.unlink(e.name)))
 		}
 		changeProjects(projects.filter(p => p.name !== name))
 		setOpenProject(undefined)

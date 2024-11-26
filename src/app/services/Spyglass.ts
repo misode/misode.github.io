@@ -14,7 +14,7 @@ import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
 import type { VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
-import { IndexedDbFileSystem, MixedFileSystem } from './FileSystem.js'
+import { IndexedDbFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
 
 export const CACHE_URI = 'file:///cache/'
@@ -52,7 +52,7 @@ interface ClientDocument {
 }
 
 export class SpyglassClient {
-	public static readonly FS = new MixedFileSystem(new IndexedDbFileSystem(), [])
+	public static readonly FS = new IndexedDbFileSystem()
 	public readonly fs = SpyglassClient.FS
 	public readonly externals: core.Externals = {
 		...BrowserExternals,
@@ -108,7 +108,7 @@ export class SpyglassService {
 				await Promise.all(this.treeWatchers.map(async ({ prefix, handler }) => {
 					const entries = await client.fs.readdir(prefix)
 					handler(entries.flatMap(e => {
-						return e.isFile() && e.name.startsWith(prefix) ? [e.name.slice(prefix.length)] : []
+						return e.isFile() ? [e.name.slice(prefix.length)] : []
 					}))
 				}))
 			})

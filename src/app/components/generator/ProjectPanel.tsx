@@ -29,7 +29,7 @@ export function ProjectPanel() {
 		setEntries(undefined)
 		client.fs.readdir(projectRoot).then(entries => {
 			setEntries(entries.flatMap(e => {
-				return e.isFile() && e.name.startsWith(projectRoot) ? [e.name.slice(projectRoot.length)] : []
+				return e.isFile() ? [e.name.slice(projectRoot.length)] : []
 			}))
 		})
 	}, [projectRoot])

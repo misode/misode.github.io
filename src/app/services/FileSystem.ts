@@ -311,8 +311,7 @@ export class IndexedDbFileSystem implements core.ExternalFileSystem {
 		return new Promise((res, rej) => {
 			const transaction = db.transaction(IndexedDbFileSystem.storeName, 'readonly')
 			const store = transaction.objectStore(IndexedDbFileSystem.storeName)
-			// TODO: specify range
-			const request = store.openCursor()
+			const request = store.openCursor(IDBKeyRange.bound(location, location + '\uffff'))
 			const result: { name: string, isDirectory(): boolean, isFile(): boolean, isSymbolicLink(): boolean }[] = []
 			request.onsuccess = () => {
 				if (request.result) {

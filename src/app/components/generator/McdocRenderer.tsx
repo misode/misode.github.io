@@ -381,7 +381,7 @@ function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedM
 	}
 	if (!others.some(o => o.kind === type.kind)) {
 		// No other member is of this kind
-		return formatIdentifier(type.kind)
+		return formatIdentifier(type.kind === 'struct' ? 'object' : type.kind)
 	}
 	if (type.kind === 'struct') {
 		// Show the first literal key
@@ -390,7 +390,7 @@ function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedM
 			return formatUnionMember(firstKey, [])
 		}
 	}
-	return formatIdentifier(type.kind)
+	return formatIdentifier(type.kind === 'struct' ? 'object' : type.kind)
 }
 
 function UnionBody({ type, optional, node, ctx }: Props<UnionType<SimplifiedMcdocTypeNoUnion>>) {

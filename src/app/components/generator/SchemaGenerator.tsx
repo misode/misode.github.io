@@ -12,7 +12,7 @@ import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
 import { DEPENDENCY_URI, SpyglassClient } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
-import { cleanUrl, genPath } from '../../Utils.js'
+import { cleanUrl, clearFolder, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileView, Footer, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, VersionSwitcher } from '../index.js'
 import { getRootDefault } from './McdocHelpers.js'
 
@@ -94,10 +94,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		if (!service || !uri) {
 			return AsyncCancel
 		}
-		const dependencies = await SpyglassClient.FS.readdir(DEPENDENCY_URI)
-		await Promise.all(dependencies.flatMap(async d => {
-			d.isFile() && d.name.startsWith(DEPENDENCY_URI) ? [await SpyglassClient.FS.unlink(d.name)] : []
-		}))
+		await clearFolder(SpyglassClient.FS, DEPENDENCY_URI)
 		if (gen.dependency) {
 			const dependency = await fetchDependencyMcdoc(gen.dependency)
 			const dependencyUri = `${DEPENDENCY_URI}${gen.dependency}.mcdoc`

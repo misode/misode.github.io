@@ -1,3 +1,4 @@
+import type { ExternalFileSystem } from '@spyglassmc/core'
 import * as zip from '@zip.js/zip.js'
 import type { Identifier, NbtTag, Random } from 'deepslate'
 import { Matrix3, Matrix4, NbtByte, NbtCompound, NbtDouble, NbtInt, NbtList, NbtString, Vector } from 'deepslate'
@@ -634,4 +635,13 @@ export function safeJsonParse(text: string): any {
 	} catch (e) {
 		return undefined
 	}
+}
+
+export async function clearFolder(fs: ExternalFileSystem, uri: string) {
+	const entries = await fs.readdir(uri)
+	return Promise.all(entries.map(async e => {
+		if (e.name !== uri) {
+			return await fs.unlink(e.name)
+		}
+	}))
 }
