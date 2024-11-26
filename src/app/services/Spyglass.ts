@@ -7,6 +7,7 @@ import { localize } from '@spyglassmc/locales'
 import * as mcdoc from '@spyglassmc/mcdoc'
 import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
+import sparkmd5 from 'spark-md5'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
@@ -58,6 +59,15 @@ export class SpyglassClient {
 		archive: {
 			...BrowserExternals.archive,
 			decompressBall,
+		},
+		crypto: {
+			// Swap the web crypto sha1 for an md5 implementation, which is about twice as fast
+			getSha1: async (data: string | Uint8Array) => {
+				if (typeof data === 'string') {
+					data = new TextEncoder().encode(data)
+				}
+				return sparkmd5.ArrayBuffer.hash(data)
+			},
 		},
 		fs: SpyglassClient.FS,
 	}
