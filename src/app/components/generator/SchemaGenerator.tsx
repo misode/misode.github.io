@@ -204,9 +204,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const loadPreset = async (id: string) => {
 		try {
-			const preset = await fetchPreset(version, genPath(gen, version), id)
-			// TODO: sync random seed
-			return preset
+			return await fetchPreset(version, genPath(gen, version), id)
 		} catch (e) {
 			setError(`Cannot load preset ${id} in ${version}`)
 			setCurrentPreset(undefined, true)
@@ -235,27 +233,21 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			setShareUrl(`${location.origin}/${gen.url}/?version=${version}&preset=${currentPreset}`)
 			setShareShown(true)
 			copySharedId()
-		} else {
-			// TODO: check if files hasn't been modified compared to the default
-			if (false) {
-				setShareUrl(`${location.origin}/${gen.url}/?version=${version}`)
-				setShareShown(true)
-			} else if (doc) {
-				setShareLoading(true)
-				shareSnippet(gen.id, version, doc.getText(), previewShown)
-					.then(({ id, length, compressed, rate }) => {
-						Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
-						const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`
-						setShareUrl(url)
-						setShareShown(true)
-					})
-					.catch(e => {
-						if (e instanceof Error) {
-							setError(e)
-						}
-					})
-					.finally(() => setShareLoading(false))
-			}
+		} else if (doc) {
+			setShareLoading(true)
+			shareSnippet(gen.id, version, doc.getText(), previewShown)
+				.then(({ id, length, compressed, rate }) => {
+					Analytics.createSnippet(gen.id, id, version, length, compressed, rate)
+					const url = `${location.origin}/${gen.url}/?${SHARE_KEY}=${id}`
+					setShareUrl(url)
+					setShareShown(true)
+				})
+				.catch(e => {
+					if (e instanceof Error) {
+						setError(e)
+					}
+				})
+				.finally(() => setShareLoading(false))
 		}
 	}
 	const copySharedId = () => {

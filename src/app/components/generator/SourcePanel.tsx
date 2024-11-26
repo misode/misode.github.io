@@ -148,7 +148,6 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 		}
 	}, [highlighting])
 
-	// TODO: when file contents change, retransform
 	useEffect(() => {
 		if (retransform.current && text !== undefined) {
 			retransform.current()

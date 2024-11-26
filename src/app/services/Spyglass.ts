@@ -160,7 +160,12 @@ export class SpyglassService {
 	}
 
 	private async notifyChange(doc: TextDocument) {
-		await this.service.project.onDidChange(doc.uri, [{ text: doc.getText() }], doc.version + 1)
+		const docAndNode = this.service.project.getClientManaged(doc.uri)
+		if (docAndNode) {
+			await this.service.project.onDidChange(doc.uri, [{ text: doc.getText() }], doc.version + 1)
+		} else {
+			await this.service.project.onDidOpen(doc.uri, doc.languageId, doc.version, doc.getText())
+		}
 		await this.service.project.ensureClientManagedChecked(doc.uri)
 	}
 
