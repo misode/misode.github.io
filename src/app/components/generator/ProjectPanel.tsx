@@ -69,7 +69,7 @@ export function ProjectPanel() {
 			label: locale('project.rename_file'),
 			onAction: (uri: string) => {
 				const res = service?.dissectUri(uri)
-				if (res?.ok) {
+				if (res) {
 					// This is pretty hacky, improve this in the future when spyglass has a "constructUri" function
 					const oldSuffix = `${res.pack}/${res.namespace}/${res.path}/${res.identifier}${res.ext}`
 					if (!uri.endsWith(oldSuffix)) {

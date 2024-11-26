@@ -1,8 +1,9 @@
 import { Identifier } from 'deepslate'
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
-import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
+import { useCallback, useContext, useState } from 'preact/hooks'
 import config from '../Config.js'
+import { useAsync } from '../hooks/useAsync.js'
 import type { VersionId } from '../services/index.js'
 import { DEFAULT_VERSION } from '../services/index.js'
 import { DRAFTS_URI, PROJECTS_URI, SpyglassClient } from '../services/Spyglass.js'
@@ -67,17 +68,20 @@ export function useProject() {
 
 export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const [projects, setProjects] = useState<ProjectMeta[]>(Store.getProjects())
-	const [openProject, setOpenProject] = useState<string>()
+	const [openProject, setOpenProject] = useState<string>(Store.getOpenProject())
 
-	const tryOpenProject = useCallback(async (projectName: string) => {
-		const project = projects.find(p => p.name === projectName)
+	const { value: project} = useAsync(async () => {
+		const project = projects.find(p => p.name === openProject)
 		if (!project) {
-			return
+			if (openProject !== undefined && openProject !== DRAFT_PROJECT.name) {
+				console.warn(`Cannot find project ${openProject} to open`)
+			}
+			return DRAFT_PROJECT
 		}
 		if (project.storage === undefined) {
 			try {
 				const projectRoot = `${PROJECTS_URI}${hexId()}/`
-				console.log(`Upgrading project ${projectName} to IndexedDB at ${projectRoot}`)
+				console.log(`Upgrading project ${openProject} to IndexedDB at ${projectRoot}`)
 				await SpyglassClient.FS.mkdir(projectRoot)
 				if (project.files) {
 					await Promise.all(project.files.map(async file => {
@@ -102,19 +106,11 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 				}
 				changeProjects(projects.map(p => p === project ? { ...p, storage: { type: 'indexeddb', rootUri: projectRoot } } : p))
 			} catch (e) {
-				console.error(`Something went wrong upgrading project ${projectName}: ${message(e)}`)
-				return
+				console.error(`Something went wrong upgrading project ${openProject}: ${message(e)}`)
+				return DRAFT_PROJECT
 			}
 		}
-		setOpenProject(projectName)
-	}, [projects])
-
-	useEffect(() => {
-		tryOpenProject(Store.getOpenProject())
-	}, [])
-
-	const project = useMemo(() => {
-		return projects.find(p => p.name === openProject) ?? DRAFT_PROJECT
+		return project
 	}, [projects, openProject])
 
 	const [projectUri, setProjectUri] = useState<string>()
@@ -137,12 +133,12 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 			await Promise.all(entries.map(async e => SpyglassClient.FS.unlink(e.name)))
 		}
 		changeProjects(projects.filter(p => p.name !== name))
-		setOpenProject(undefined)
+		setOpenProject(DRAFT_PROJECT.name)
 	}, [projects])
 
 	const changeProject = useCallback((name: string) => {
 		Store.setOpenProject(name)
-		tryOpenProject(name)
+		setOpenProject(name)
 	}, [])
 
 	const updateProject = useCallback((edits: Partial<ProjectMeta>) => {
@@ -151,7 +147,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 
 	const value: ProjectContext = {
 		projects,
-		project,
+		project: project ?? DRAFT_PROJECT,
 		projectUri,
 		setProjectUri,
 		createProject,
