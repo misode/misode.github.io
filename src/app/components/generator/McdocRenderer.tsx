@@ -481,7 +481,7 @@ function StructBody({ type: outerType, node, ctx }: Props<SimplifiedStructType>)
 			if (pair) {
 				staticChilds.push(pair)
 			}
-			return <StaticField key={key} pair={pair} index={index} field={field} fieldKey={key} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} type={type} node={node} ctx={ctx} />
+			return <StaticField key={key} pair={pair} index={index} field={field} fieldKey={key} staticFields={staticFields} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} type={type} node={node} ctx={ctx} />
 		})}
 		{dynamicFields.map((field, index) => {
 			if (field.key.kind === 'any' && field.type.kind === 'any') {
@@ -519,12 +519,13 @@ interface StaticFieldProps extends Props {
 	index: number
 	field: SimplifiedStructTypePairField
 	fieldKey: string
+	staticFields: SimplifiedStructTypePairField[]
 	isToggled: boolean | undefined
 	expand: (e: MouseEvent) => void
 	collapse: (e: MouseEvent) => void
 	node: JsonObjectNode
 }
-function StaticField({ pair, index, field, fieldKey, isToggled, expand, collapse, node, ctx }: StaticFieldProps) {
+function StaticField({ pair, index, field, fieldKey, staticFields, isToggled, expand, collapse, node, ctx }: StaticFieldProps) {
 	const { locale } = useLocale()
 
 	const child = pair?.value
@@ -549,10 +550,19 @@ function StaticField({ pair, index, field, fieldKey, isToggled, expand, collapse
 				return node
 			})
 		} else {
+			const newFieldIndex = staticFields.indexOf(field)
+			const insertIndex = node.children.findIndex(child => {
+				const childKey = child.key?.value
+				if (!childKey) {
+					return false
+				}
+				const otherChildIndex = staticFields.findIndex(f => (f.key as LiteralType).value.value.toString() === childKey)
+				return otherChildIndex > newFieldIndex
+			})
 			const newChild = edit(core.Range.create(node.range.end))
 			if (newChild) {
 				ctx.makeEdit(() => {
-					node.children.push({
+					const newPair: JsonPairNode = {
 						type: 'pair',
 						range: newChild.range,
 						key: {
@@ -563,7 +573,13 @@ function StaticField({ pair, index, field, fieldKey, isToggled, expand, collapse
 							valueMap: [{ inner: core.Range.create(0), outer: newChild.range }],
 						},
 						value: newChild,
-					})
+					}
+					if (insertIndex === -1) {
+						node.children.push(newPair)
+					} else {
+						node.children.splice(insertIndex, 0, newPair)
+					}
+					newPair.parent = node
 					return node
 				})
 			}
