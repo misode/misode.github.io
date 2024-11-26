@@ -295,23 +295,23 @@ export class BiMap<A, B> {
 	}
 }
 
-export async function readZip(file: File | ArrayBuffer, predicate: (name: string) => boolean = () => true): Promise<[string, string][]> {
+export async function readZip(file: File | ArrayBuffer, predicate: (name: string) => boolean = () => true): Promise<[string, Uint8Array][]> {
 	const buffer = file instanceof File ? await file.arrayBuffer() : file
 	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
 	const entries = await reader.getEntries()
 	return await Promise.all(entries
 		.filter(e => !e.directory && predicate(e.filename))
 		.map(async e => {
-			const writer = new zip.TextWriter('utf-8')
-			return [e.filename, await e.getData?.(writer)] as [string, string]
+			const writer = new zip.Uint8ArrayWriter()
+			return [e.filename, await e.getData?.(writer)]
 		})
 	)
 }
 
-export async function writeZip(entries: [string, string][]): Promise<string> {
+export async function writeZip(entries: [string, Uint8Array][]): Promise<string> {
 	const writer = new zip.ZipWriter(new zip.Data64URIWriter('application/zip'))
 	await Promise.all(entries.map(async ([name, data]) => {
-		await writer.add(name, new zip.TextReader(data))
+		await writer.add(name, new zip.Uint8ArrayReader(data))
 	}))
 	return await writer.close()
 }

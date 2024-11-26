@@ -47,8 +47,7 @@ export function ProjectPanel() {
 		if (!download.current || entries === undefined) return
 		const zipEntries = await Promise.all(entries.map(async e => {
 			const data = await client.fs.readFile(projectRoot + e)
-			const text = new TextDecoder().decode(data)
-			return [e, text] as [string, string]
+			return [e, data] as [string, Uint8Array]
 		}))
 		const url = await writeZip(zipEntries)
 		download.current.setAttribute('href', url)
