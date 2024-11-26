@@ -304,7 +304,7 @@ export class SpyglassService {
 						idOmitDefaultNamespace: false,
 						undeclaredSymbol: [
 							{
-								if: { category: ['bossbar', 'objective', 'team'] },
+								if: { category: ['bossbar', 'objective', 'team', 'shader'] },
 								then: { declare: 'block' },
 							},
 							...core.VanillaConfig.lint.undeclaredSymbol as any[],

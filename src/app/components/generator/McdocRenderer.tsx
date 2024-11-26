@@ -8,6 +8,7 @@ import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier, ItemStack } from 'deepslate'
+import { marked } from 'marked'
 import { useCallback, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
@@ -490,7 +491,6 @@ function StructBody({ type: outerType, node, ctx }: Props<SimplifiedStructType>)
 			const keyType = simplifyType(field.key, ctx)
 			return <div key={`__dynamic_${index}__`} class="node">
 				<div class="node-header">
-					<Docs desc={field.desc} />
 					<DynamicKey keyType={keyType} valueType={field.type} parent={node} ctx={ctx} />
 				</div>
 			</div>
@@ -578,12 +578,11 @@ function StaticField({ pair, index, field, fieldKey, isToggled, expand, collapse
 		<div class="node-header">
 			{!field.optional && child === undefined && <ErrorIndicator error={{ message: locale('missing_key', localeQuote(fieldKey)), range: node.range, severity: 3 }} />}
 			<Errors type={childType} node={child} ctx={ctx} />
-			<Docs desc={field.desc} />
 			{canToggle && (isCollapsed
 				? <button class="toggle tooltipped tip-se" aria-label={`${locale('expand')}\n${locale('expand_all', 'Ctrl')}`} onClick={expand}>{Octicon.chevron_right}</button>
 				: <button class="toggle tooltipped tip-se" aria-label={`${locale('collapse')}\n${locale('collapse_all', 'Ctrl')}`} onClick={collapse}>{Octicon.chevron_down}</button>
 			)}
-			<Key label={fieldKey} />
+			<Key label={fieldKey} doc={field.desc} />
 			{!isCollapsed && <Head type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
 		</div>
 		{!isCollapsed && <Body type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
@@ -598,9 +597,10 @@ interface DynamicKeyProps {
 }
 function DynamicKey({ keyType, valueType, parent, ctx }: DynamicKeyProps) {
 	const { locale } = useLocale()
-	const [key, setKey] = useState<string>('')
+	const [key, setKey] = useState<string>()
 
 	const keyNode = useMemo(() => {
+		if (key === undefined) return undefined
 		const node = JsonStringNode.mock(core.Range.create(0))
 		node.value = key
 		return node
@@ -618,7 +618,10 @@ function DynamicKey({ keyType, valueType, parent, ctx }: DynamicKeyProps) {
 	}, [ctx, makeKeyEdit])
 
 	const addKey = useCallback(() => {
-		setKey('')
+		if (!keyNode) {
+			return
+		}
+		setKey(undefined)
 		ctx.makeEdit((range) => {
 			const valueNode = getDefault(simplifyType(valueType, ctx, { key: keyNode, parent }), range, ctx)
 			const newPair: core.PairNode<JsonStringNode, JsonNode> = {
@@ -636,7 +639,7 @@ function DynamicKey({ keyType, valueType, parent, ctx }: DynamicKeyProps) {
 
 	return <>
 		<Head type={keyType} optional={true} node={keyNode} ctx={keyCtx} />
-		<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={addKey} disabled={key.length === 0}>{Octicon.plus_circle}</button>
+		<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={addKey} disabled={!key || key.length === 0}>{Octicon.plus_circle}</button>
 	</>
 }
 
@@ -1124,10 +1127,16 @@ function selectAnyType(node: JsonNode | undefined) {
 
 interface KeyProps {
 	label: string | number | boolean
+	doc?: string
 	raw?: boolean
 }
-function Key({ label, raw }: KeyProps) {
-	return <label>{raw ? label.toString() : formatIdentifier(label.toString())}</label>
+function Key({ label, doc, raw }: KeyProps) {
+	const [shown, setShown] = useFocus()
+
+	return <label onClick={() => setShown(true)}>
+		<span class={doc ? `underline ${shown ? '' : 'decoration-dotted hover:decoration-solid'}` : ''}>{raw ? label.toString() : formatIdentifier(label.toString())}</span>
+		{doc && <div class={`node-doc ${shown ? '' : 'hidden'}`} onClick={e => e.stopPropagation()} dangerouslySetInnerHTML={{ __html: marked(doc) }}></div>}
+	</label>
 }
 
 interface ErrorsProps {
@@ -1167,22 +1176,6 @@ function ErrorIndicator({ error }: ErrorIndicatorProps) {
 	return <div class={`node-icon ${error.severity === 2 ? 'node-warning' : 'node-error'} ${active ? 'show' : ''}`} onClick={() => setActive()}>
 		{Octicon.issue_opened}
 		<span class="icon-popup">{error.message.replace(/ \(rule: [a-zA-Z]+\)$/, '')}</span>
-	</div>
-}
-
-interface DocsProps {
-	desc: string | undefined
-}
-function Docs({ desc }: DocsProps) {
-	if (!desc || desc.length === 0) {
-		return <></>
-	}
-
-	const [active, setActive] = useFocus()
-
-	return <div class={`node-icon node-help ${active ? 'show' : ''}`} onClick={() => setActive()}>
-		{Octicon.info}
-		<span class="icon-popup">{desc}</span>
 	</div>
 }
 

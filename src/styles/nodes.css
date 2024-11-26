@@ -74,16 +74,49 @@
 
 .node-header > label {
   align-self: flex-start;
-  padding: 0 9px;
   line-height: 1.94rem;
+  background-color: var(--node-background-label);
+}
+
+.node-header > label > span {
+  padding: 0 9px;
   white-space: nowrap;
   user-select: none;
-  background-color: var(--node-background-label);
+  text-decoration-color: var(--node-text-dimmed);
 }
 
 .node-header > label > .item-display {
   width: 32px;
   height: 32px;
+}
+
+.node-doc {
+  position: absolute;
+  font-size: 16px;
+  line-height: 1.3;
+  z-index: 10;
+  margin-top: -1px;
+  margin-left: 3px;
+  padding: 4px 9px;
+  border-radius: 4px;
+  border: 1px solid;
+  color: var(--node-text-dimmed);
+  border-color: var(--node-border);
+  background-color: var(--node-background-label);
+	box-shadow: 0 1px 7px -2px #000;
+}
+
+.node-header > label > span:hover + .node-doc {
+  display: block;
+}
+
+.node-doc code {
+  color: var(--accent-primary);
+}
+
+.node-doc ul {
+  padding-left: 16px;
+  list-style-type: disc;
 }
 
 .node-header > input {
@@ -126,7 +159,7 @@
   background-color: var(--node-background-hover);
 }
 
-.node-header a {
+.node-header > a {
   display: flex;
   align-items: center;
   font-size: 18px;
