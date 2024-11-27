@@ -166,6 +166,9 @@ export function getProjectRoot(project: ProjectMeta) {
 	if (project.storage?.type === 'indexeddb') {
 		return project.storage.rootUri
 	}
+	if (project.name === DRAFT_PROJECT.name) {
+		return DRAFTS_URI
+	}
 	throw new Error(`Unsupported project storage ${project.storage?.type}`)
 }
 

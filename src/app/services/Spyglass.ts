@@ -385,7 +385,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	const versions = await fetchVersions()
 	const release = config.env.gameVersion as ReleaseVersion
 	const version = siteConfig.versions.find(v => {
-		return v.ref ? v.ref === release : v.id === release
+		return v.dynamic ? v.id === release : v.ref === release
 	})
 	if (version === undefined) {
 		logger.error(`[initialize] Failed finding game version matching ${release}.`)
