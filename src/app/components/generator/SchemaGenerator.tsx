@@ -118,7 +118,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		ignoreChange.current = false
 		Analytics.setGenerator(gen.id)
 		return docAndNode
-	}, [gen.id, version, sharedSnippetId, currentPreset, project.name, service, uri])
+	}, [gen.id, version, sharedSnippetId, currentPreset, service, uri])
 
 	const { doc } = docAndNode ?? {}
 
@@ -216,7 +216,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const selectVersion = (version: VersionId) => {
 		setSharedSnippetId(undefined, true)
 		changeVersion(version)
-		if (project.name !== DRAFT_PROJECT.name && project.version !== version) {
+		if (project && project.name !== DRAFT_PROJECT.name && project.version !== version) {
 			updateProject({ version })
 		}
 	}

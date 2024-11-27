@@ -33,6 +33,9 @@ export function FileCreation({ docAndNode, gen, method }: Props) {
 	}
 
 	const doSave = useCallback(() => {
+		if (!project) {
+			return
+		}
 		if (!fileId.match(/^([a-z0-9_.-]+:)?[a-z0-9/_.-]+$/)) {
 			setError('Invalid resource location')
 			return

@@ -49,7 +49,7 @@ export const DRAFT_PROJECT: ProjectMeta = {
 
 interface ProjectContext {
 	projects: ProjectMeta[],
-	project: ProjectMeta,
+	project: ProjectMeta | undefined,
 	projectUri: string | undefined,
 	setProjectUri: (uri: string | undefined) => void,
 	createProject: (project: ProjectMeta) => void,
@@ -71,7 +71,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 	const [projects, setProjects] = useState<ProjectMeta[]>(Store.getProjects())
 	const [openProject, setOpenProject] = useState<string>(Store.getOpenProject())
 
-	const { value: project} = useAsync(async () => {
+	const { value: project } = useAsync(async () => {
 		const project = projects.find(p => p.name === openProject)
 		if (!project) {
 			if (openProject !== undefined && openProject !== DRAFT_PROJECT.name) {
@@ -105,9 +105,12 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 						return SpyglassClient.FS.writeFile(uri, file.data)
 					}))
 				}
-				changeProjects(projects.map(p => p === project ? { ...p, storage: { type: 'indexeddb', rootUri: projectRoot } } : p))
+				const newProject: ProjectMeta = { ...project, storage: { type: 'indexeddb', rootUri: projectRoot } }
+				changeProjects(projects.map(p => p === project ? newProject : p))
+				return newProject
 			} catch (e) {
 				console.error(`Something went wrong upgrading project ${openProject}: ${message(e)}`)
+				setOpenProject(DRAFT_PROJECT.name)
 				return DRAFT_PROJECT
 			}
 		}
@@ -148,7 +151,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 
 	const value: ProjectContext = {
 		projects,
-		project: project ?? DRAFT_PROJECT,
+		project,
 		projectUri,
 		setProjectUri,
 		createProject,
@@ -166,13 +169,13 @@ export function getProjectRoot(project: ProjectMeta) {
 	if (project.storage?.type === 'indexeddb') {
 		return project.storage.rootUri
 	}
-	if (project.name === DRAFT_PROJECT.name) {
-		return DRAFTS_URI
-	}
 	throw new Error(`Unsupported project storage ${project.storage?.type}`)
 }
 
-export async function getWorldgenProjectData(project: ProjectMeta): Promise<ProjectData> {
+export async function getWorldgenProjectData(project: ProjectMeta | undefined): Promise<ProjectData> {
+	if (!project) {
+		return {}
+	}
 	const projectRoot = getProjectRoot(project)
 	const categories = ['worldgen/noise_settings', 'worldgen/noise', 'worldgen/density_function']
 	const result: ProjectData = Object.fromEntries(categories.map(c => [c, {}]))

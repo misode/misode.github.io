@@ -1,6 +1,6 @@
 import { getCurrentUrl, Link, route } from 'preact-router'
 import config from '../Config.js'
-import { useLocale, useProject, useTheme, useTitle, useVersion } from '../contexts/index.js'
+import { useLocale, useTheme, useTitle, useVersion } from '../contexts/index.js'
 import { checkVersion } from '../services/index.js'
 import { cleanUrl, getGenerator } from '../Utils.js'
 import { Btn, BtnMenu, Icons, Octicon } from './index.js'
@@ -15,7 +15,6 @@ export function Header() {
 	const { lang, locale, changeLocale: changeLanguage } = useLocale()
 	const { theme, changeTheme } = useTheme()
 	const { version } = useVersion()
-	const { projects, project, changeProject } = useProject()
 	const { title } = useTitle()
 	const url = getCurrentUrl()
 	const gen = getGenerator(url)
@@ -30,11 +29,6 @@ export function Header() {
 					.map(g =>
 						<Btn label={locale(`generator.${g.id}`)} active={g.id === gen.id} onClick={() => route(cleanUrl(g.url))} />
 					)}
-			</BtnMenu>}
-			{!gen && url.match(/\/?project\/?$/) && <BtnMenu icon="chevron_down" tooltip={locale('switch_project')}>
-				{projects.map(p =>
-					<Btn label={p.name} active={p.name === project.name} onClick={() => changeProject(p.name)} />
-				)}
 			</BtnMenu>}
 		</div>
 		<nav>

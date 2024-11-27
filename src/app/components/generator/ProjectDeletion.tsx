@@ -11,13 +11,16 @@ export function ProjectDeletion() {
 	const { project, deleteProject } = useProject()
 
 	const doSave = useCallback(() => {
+		if (!project) {
+			return
+		}
 		Analytics.deleteProject('menu')
-		deleteProject(project.name)
+		deleteProject(project!.name)
 		hideModal()
 	}, [deleteProject, hideModal])
 
 	return <Modal class="file-modal">
-		<p>{locale('project.delete_confirm.1', project.name)}</p>
+		<p>{project && locale('project.delete_confirm.1', project.name)}</p>
 		<p><b>{locale('project.delete_confirm.2')}</b></p>
 		<div class="button-group">
 			<Btn icon="trashcan" label={locale('project.delete')} onClick={doSave} class="danger" />

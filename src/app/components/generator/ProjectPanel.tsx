@@ -22,11 +22,14 @@ export function ProjectPanel() {
 	const { projects, project, projectUri, setProjectUri, changeProject } = useProject()
 	const { client, service } = useSpyglass()
 
-	const projectRoot = getProjectRoot(project)
+	const projectRoot = project ? getProjectRoot(project) : undefined
 
 	const [entries, setEntries] = useState<string[]>()
 	useEffect(() => {
 		setEntries(undefined)
+		if (!projectRoot) {
+			return
+		}
 		client.fs.readdir(projectRoot).then(entries => {
 			setEntries(entries.flatMap(e => {
 				return e.isFile() ? [e.name.slice(projectRoot.length)] : []
@@ -34,7 +37,7 @@ export function ProjectPanel() {
 		})
 	}, [projectRoot])
 	useEffect(() => {
-		if (!service) {
+		if (!service || !projectRoot) {
 			return
 		}
 		service.watchTree(projectRoot, setEntries)
@@ -44,7 +47,9 @@ export function ProjectPanel() {
 	const download = useRef<HTMLAnchorElement>(null)
 
 	const onDownload = async () => {
-		if (!download.current || entries === undefined) return
+		if (!download.current || entries === undefined || !project) {
+			return
+		}
 		const zipEntries = await Promise.all(entries.map(async e => {
 			const data = await client.fs.readFile(projectRoot + e)
 			return [e, data] as [string, Uint8Array]
@@ -139,13 +144,13 @@ export function ProjectPanel() {
 
 	return <div class="panel-content">
 		<div class="project-controls">
-			<BtnMenu icon="chevron_down" label={project.name} tooltip={locale('switch_project')} tooltipLoc="se">
-				{projects.map(p => <Btn label={p.name} active={p.name === project.name} onClick={() => changeProject(p.name)} />)}
+			<BtnMenu icon="chevron_down" label={project ? project.name : locale('loading')} tooltip={locale('switch_project')} tooltipLoc="se">
+				{projects.map(p => <Btn label={p.name} active={p.name === project?.name} onClick={() => changeProject(p.name)} />)}
 			</BtnMenu>
 			<BtnMenu icon="kebab_horizontal" >
 				<Btn icon="file_zip" label={locale('project.download')} onClick={onDownload} />
 				<Btn icon="plus_circle" label={locale('project.new')} onClick={onCreateProject} />
-				{project.name !== DRAFT_PROJECT.name && <Btn icon="trashcan" label={locale('project.delete')} onClick={onDeleteProject} />}
+				{(project && project.name !== DRAFT_PROJECT.name) && <Btn icon="trashcan" label={locale('project.delete')} onClick={onDeleteProject} />}
 			</BtnMenu>
 		</div>
 		<div class="project-files">
