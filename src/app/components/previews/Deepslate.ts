@@ -1,7 +1,7 @@
 import * as deepslate19 from 'deepslate/worldgen'
-import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, square } from '../../Utils.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchAllPresets, fetchPreset } from '../../services/index.js'
+import { clamp, computeIfAbsent, computeIfAbsentAsync, deepClone, deepEqual, isObject, safeJsonParse, square } from '../../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
 
@@ -131,7 +131,7 @@ export class Deepslate {
 			const preset = biomeState.preset.replace(/^minecraft:/, '')
 			const biomes = await computeIfAbsentAsync(this.presetCache, `${version}-${preset}`, async () => {
 				const dimension = await fetchPreset(version, 'dimension', preset === 'overworld' ? 'overworld' : 'the_nether')
-				return dimension.generator.biome_source.biomes
+				return safeJsonParse(dimension)?.generator.biome_source.biomes
 			})
 			biomeState = { type: biomeState.type, biomes }
 		}

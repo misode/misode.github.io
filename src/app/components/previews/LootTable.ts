@@ -3,7 +3,7 @@ import type { Random } from 'deepslate/core'
 import { Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate/nbt'
 import { ResolvedItem } from '../../services/ResolvedItem.js'
-import type { VersionId } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
 import { clamp, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
 
 export interface SlottedItem {
@@ -122,8 +122,11 @@ function shuffle<T>(array: T[], ctx: LootContext) {
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
+	if (!Array.isArray(table.pools)) {
+		return
+	}
 	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
-	for (const pool of table.pools ?? []) {
+	for (const pool of table.pools) {
 		generatePool(pool, tableConsumer, ctx)
 	}
 }
@@ -383,6 +386,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		item.set('written_book_content', newContent)
 	},
 	set_components: ({ components }) => (item) => {
+		if (typeof components !== 'object' || components === null) {
+			return
+		}
 		for (const [key, value] of Object.entries(components)) {
 			item.set(key, jsonToNbt(value))
 		}
@@ -509,6 +515,9 @@ function composeConditions(conditions: any[]): LootCondition {
 function testCondition(condition: any, ctx: LootContext): boolean {
 	if (Array.isArray(condition)) {
 		return composeConditions(condition)(ctx)
+	}
+	if (!isObject(condition) || typeof condition.condition !== 'string') {
+		return false
 	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)

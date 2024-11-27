@@ -1,10 +1,9 @@
-import { DataModel } from '@mcschema/core'
 import { Identifier } from 'deepslate'
 import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { checkVersion, fetchAllPresets, fetchItemComponents } from '../../services/index.js'
-import { clamp, jsonToNbt, randomSeed } from '../../Utils.js'
+import { clamp, jsonToNbt, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
@@ -12,7 +11,7 @@ import type { PreviewProps } from './index.js'
 import { generateLootTable } from './LootTable.js'
 import { generateLootTable as generateLootTable1204 } from './LootTable1204.js'
 
-export const LootTablePreview = ({ data }: PreviewProps) => {
+export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 	const use1204 = !checkVersion(version, '1.20.5')
@@ -35,13 +34,13 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 		])
 	}, [version])
 
-	const table = DataModel.unwrapLists(data)
-	const state = JSON.stringify(table)
+	const text = docAndNode.doc.getText()
 	const items = useMemo(() => {
 		if (dependencies === undefined || loading) {
 			return []
 		}
 		const [itemTags, lootTables, itemComponents, enchantments, enchantmentTags] = dependencies
+		const table = safeJsonParse(text) ?? {}
 		if (use1204) {
 			return generateLootTable1204(table, {
 				version, seed, luck, daytime, weather,
@@ -61,7 +60,7 @@ export const LootTablePreview = ({ data }: PreviewProps) => {
 			getEnchantmentTag: (id) => (enchantmentTags?.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
 			getBaseComponents: (id) => new Map([...(itemComponents?.get(Identifier.parse(id).toString()) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
 		})
-	}, [version, seed, luck, daytime, weather, mixItems, state, dependencies, loading])
+	}, [version, seed, luck, daytime, weather, mixItems, text, dependencies, loading])
 
 	return <>
 		<div ref={overlay} class="preview-overlay">

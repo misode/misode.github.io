@@ -1,69 +1,63 @@
-import type { DataModel } from '@mcschema/core'
-import { Path } from '@mcschema/core'
-import { useState } from 'preact/hooks'
-import { useModel } from '../../hooks/index.js'
-import type { VersionId } from '../../services/index.js'
+import type { DocAndNode } from '@spyglassmc/core'
+import { useDocAndNode } from '../../contexts/Spyglass.jsx'
+import { useVersion } from '../../contexts/Version.jsx'
 import { checkVersion } from '../../services/index.js'
+import { safeJsonParse } from '../../Utils.js'
 import { BiomeSourcePreview, BlockStatePreview, DecoratorPreview, DensityFunctionPreview, LootTablePreview, ModelPreview, NoisePreview, NoiseSettingsPreview, RecipePreview, StructureSetPreview } from '../previews/index.js'
 
-export const HasPreview = ['loot_table', 'recipe', 'dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature', 'worldgen/structure_set', 'block_definition', 'model']
+export const HasPreview = ['loot_table', 'recipe', 'dimension', 'worldgen/density_function', 'worldgen/noise', 'worldgen/noise_settings', 'worldgen/configured_feature', 'worldgen/placed_feature', 'worldgen/structure_set', 'block_definition', 'docAndNode']
 
 type PreviewPanelProps = {
-	model: DataModel | undefined,
-	version: VersionId,
+	docAndNode: DocAndNode | undefined,
 	id: string,
 	shown: boolean,
 	onError: (message: string) => unknown,
 }
-export function PreviewPanel({ model, version, id, shown }: PreviewPanelProps) {
-	const [, setCount] = useState(0)
+export function PreviewPanel({ docAndNode: original, id, shown }: PreviewPanelProps) {
+	const { version } = useVersion()
 
-	useModel(model, () => {
-		setCount(count => count + 1)
-	})
+	if (!original) return <></>
 
-	if (!model) return <></>
-	const data = model.get(new Path([]))
-	if (!data) return <></>
+	const docAndNode = useDocAndNode(original)
 
 	if (id === 'loot_table') {
-		return <LootTablePreview {...{ model, version, shown, data }} />
+		return <LootTablePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'recipe') {
-		return <RecipePreview {...{ model, version, shown, data }} />
+		return <RecipePreview {...{ docAndNode, shown }} />
 	}
 
-	if (id === 'dimension' && model.get(new Path(['generator', 'type']))?.endsWith('noise')) {
-		return <BiomeSourcePreview {...{ model, version, shown, data }} />
+	if (id === 'dimension' && safeJsonParse(docAndNode.doc.getText())?.generator?.type?.endsWith('noise')) {
+		return <BiomeSourcePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/density_function') {
-		return <DensityFunctionPreview {...{ model, version, shown, data }} />
+		return <DensityFunctionPreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/noise') {
-		return <NoisePreview {...{ model, version, shown, data }} />
+		return <NoisePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/noise_settings' && checkVersion(version, '1.18')) {
-		return <NoiseSettingsPreview {...{ model, version, shown, data }} />
+		return <NoiseSettingsPreview {...{ docAndNode, shown }} />
 	}
 
 	if ((id === 'worldgen/placed_feature' ||  (id === 'worldgen/configured_feature' && checkVersion(version, '1.16', '1.17')))) {
-		return <DecoratorPreview {...{ model, version, shown, data }} />
+		return <DecoratorPreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'worldgen/structure_set' && checkVersion(version, '1.19')) {
-		return <StructureSetPreview {...{ model, version, shown, data }} />
+		return <StructureSetPreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'block_definition') {
-		return <BlockStatePreview {...{ model, version, shown, data }} />
+		return <BlockStatePreview {...{ docAndNode, shown }} />
 	}
 
 	if (id === 'model') {
-		return <ModelPreview {...{ model, version, shown, data }} />
+		return <ModelPreview {...{ docAndNode, shown }} />
 	}
 
 	return <></>

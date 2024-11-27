@@ -1,12 +1,11 @@
-import { DataModel } from '@mcschema/core'
 import { clampedMap } from 'deepslate'
 import { mat3 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
-import { getProjectData, useLocale, useProject, useStore } from '../../contexts/index.js'
+import { getWorldgenProjectData, useLocale, useProject, useStore, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
-import { checkVersion } from '../../services/Schemas.js'
+import { checkVersion } from '../../services/Versions.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed, stringToColor } from '../../Utils.js'
+import { iterateWorld2D, randomSeed, safeJsonParse, stringToColor } from '../../Utils.js'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -21,8 +20,9 @@ type Layer = typeof LAYERS[number]
 const DETAIL_DELAY = 300
 const DETAIL_SCALE = 2
 
-export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
+export const BiomeSourcePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const { project } = useProject()
 	const { biomeColors } = useStore()
 	const [seed, setSeed] = useState(randomSeed())
@@ -31,18 +31,20 @@ export const BiomeSourcePreview = ({ data, shown, version }: PreviewProps) => {
 	const [focused, setFocused] = useState<string[]>([])
 	const [focused2, setFocused2] = useState<string[]>([])
 
-	const state = JSON.stringify(data)
+	const text = docAndNode.doc.getText()
+	const data = safeJsonParse(text) ?? {}
 	const type: string = data?.generator?.biome_source?.type?.replace(/^minecraft:/, '') ?? ''
 	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 
 	const { value } = useAsync(async function loadBiomeSource() {
-		await DEEPSLATE.loadVersion(version, getProjectData(project))
-		await DEEPSLATE.loadChunkGenerator(DataModel.unwrapLists(data?.generator?.settings), DataModel.unwrapLists(data?.generator?.biome_source), seed)
+		const projectData = await getWorldgenProjectData(project)
+		await DEEPSLATE.loadVersion(version, projectData)
+		await DEEPSLATE.loadChunkGenerator(data?.generator?.settings, data?.generator?.biome_source, seed)
 		return {
 			biomeSource: { loaded: true },
 			noiseRouter: checkVersion(version, '1.19') ? DEEPSLATE.getNoiseRouter() : undefined,
 		}
-	}, [state, seed, project, version])
+	}, [text, seed, project, version])
 	const { biomeSource, noiseRouter } = value ?? {}
 
 	const actualLayer = noiseRouter ? layer : 'biomes'

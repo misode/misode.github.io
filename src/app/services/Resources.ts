@@ -3,7 +3,7 @@ import { BlockDefinition, BlockModel, Identifier, ItemRenderer, TextureAtlas, up
 import config from '../Config.js'
 import { message } from '../Utils.js'
 import { fetchLanguage, fetchResources } from './DataFetcher.js'
-import type { VersionId } from './Schemas.js'
+import type { VersionId } from './Versions.js'
 
 const Resources: Record<string, ResourceManager | Promise<ResourceManager>> = {}
 
@@ -44,7 +44,6 @@ export async function renderItem(version: VersionId, item: ItemStack) {
 			throw new Error('Cannot get WebGL2 context')
 		}
 		const renderer = new ItemRenderer(gl, item, resources)
-		console.log('Rendering', item.toString())
 		renderer.drawItem()
 		return canvas.toDataURL()
 	})()

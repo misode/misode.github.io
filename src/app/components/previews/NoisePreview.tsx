@@ -1,10 +1,9 @@
-import { DataModel } from '@mcschema/core'
 import { clampedMap, NoiseParameters, NormalNoise, XoroshiroRandom } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed } from '../../Utils.js'
+import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -12,16 +11,17 @@ import { ColormapSelector } from './ColormapSelector.jsx'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const NoisePreview = ({ data, shown }: PreviewProps) => {
+export const NoisePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(data)
+
+	const text = docAndNode.doc.getText()
 
 	const noise = useMemo(() => {
 		const random = XoroshiroRandom.create(seed)
-		const params = NoiseParameters.fromJson(DataModel.unwrapLists(data))
+		const params = NoiseParameters.fromJson(safeJsonParse(text) ?? {})
 		return new NormalNoise(random, params)
-	}, [state, seed])
+	}, [text, seed])
 
 	const imageData = useRef<ImageData>()
 	const ctx = useRef<CanvasRenderingContext2D>()

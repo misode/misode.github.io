@@ -1,7 +1,7 @@
 import type { ColormapType } from './components/previews/Colormap.js'
 import type { VersionId } from './services/index.js'
 
-type Method = 'menu' | 'hotkey'
+export type Method = 'menu' | 'hotkey'
 
 export namespace Analytics {
 
@@ -226,61 +226,44 @@ export namespace Analytics {
 		})
 	}
 
-	export function showProject(file_type: string, projects_count: number, project_size: number, method: Method) {
+	export function showProject(method: Method) {
 		event(ID_GENERATOR, 'show-project', legacyMethod(method))
 		gtag('event', 'show_project', {
-			file_type,
-			projects_count,
-			project_size,
 			method,
 		})
 	}
 
-	export function hideProject(file_type: string, projects_count: number, project_size: number, method: Method) {
+	export function hideProject(method: Method) {
 		event(ID_GENERATOR, 'hide-project', legacyMethod(method))
 		gtag('event', 'hide_project', {
-			file_type,
-			projects_count,
-			project_size,
 			method,
 		})
 	}
 
-	export function saveProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+	export function saveProjectFile(method: Method) {
 		event(ID_GENERATOR, 'save-project-file', legacyMethod(method))
 		gtag('event', 'save_project_file', {
-			file_type,
-			projects_count,
-			project_size,
 			method,
 		})
 	}
 
-	export function deleteProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+	export function deleteProjectFile(method: Method) {
 		event(ID_GENERATOR, 'delete-project-file', legacyMethod(method))
 		gtag('event', 'delete_project_file', {
-			file_type,
-			projects_count,
-			project_size,
 			method,
 		})
 	}
 
-	export function renameProjectFile(file_type: string, projects_count: number, project_size: number, method: Method) {
+	export function renameProjectFile(method: Method) {
 		event(ID_GENERATOR, 'rename-project-file', legacyMethod(method))
 		gtag('event', 'rename_project_file', {
-			file_type,
-			projects_count,
-			project_size,
 			method,
 		})
 	}
 
-	export function deleteProject(projects_count: number, project_size: number, method: Method) {
+	export function deleteProject(method: Method) {
 		event(ID_GENERATOR, 'delete-project', legacyMethod(method))
 		gtag('event', 'delete_project', {
-			projects_count,
-			project_size,
 			method,
 		})
 	}

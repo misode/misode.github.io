@@ -1,9 +1,8 @@
-import { DataModel } from '@mcschema/core'
 import type { BlockPos, ChunkPos, PerlinNoise, Random } from 'deepslate/worldgen'
-import type { Color } from '../../Utils.js'
-import { clamp, isObject, stringToColor } from '../../Utils.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion } from '../../services/index.js'
+import type { Color } from '../../Utils.js'
+import { clamp, isObject, stringToColor } from '../../Utils.js'
 
 export type Placement = [BlockPos, number]
 
@@ -38,9 +37,9 @@ export const featureColors: Color[] = [
 
 export function decorateChunk(pos: ChunkPos, state: any, ctx: PlacementContext): PlacedFeature[] {
 	if (checkVersion(ctx.version, undefined, '1.17')) {
-		getPlacements([pos[0] * 16, 0, pos[1] * 16], DataModel.unwrapLists(state), ctx)
+		getPlacements([pos[0] * 16, 0, pos[1] * 16], state, ctx)
 	} else {
-		modifyPlacement([pos[0] * 16, 0, pos[1] * 16], DataModel.unwrapLists(state.placement), ctx)
+		modifyPlacement([pos[0] * 16, 0, pos[1] * 16], state.placement, ctx)
 	}
 
 	return ctx.placements.map(([pos, i]) => {
@@ -63,7 +62,9 @@ function decorateY(pos: BlockPos, y: number): BlockPos[] {
 }
 
 export function sampleInt(value: any, ctx: PlacementContext): number {
-	if (typeof value === 'number') {
+	if (value === undefined) {
+		return 0
+	} else if (typeof value === 'number') {
 		return value
 	} else if (value.base) {
 		return value.base ?? 1 + ctx.nextInt(1 + (value.spread ?? 0))

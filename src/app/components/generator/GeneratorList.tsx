@@ -2,7 +2,7 @@ import { useMemo, useState } from 'preact/hooks'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { useLocale, useVersion } from '../../contexts/index.js'
-import { checkVersion } from '../../services/Schemas.js'
+import { checkVersion } from '../../services/Versions.js'
 import { GeneratorCard, TextInput, VersionSwitcher } from '../index.js'
 
 interface Props {

@@ -1,21 +1,22 @@
 import type { JSX } from 'preact'
 import { useCallback, useEffect } from 'preact/hooks'
+import { useModal } from '../contexts/Modal.jsx'
 import { LOSE_FOCUS } from '../hooks/index.js'
 
 const MODALS_KEY = 'data-modals'
 
-interface Props extends JSX.HTMLAttributes<HTMLDivElement> {
-	onDismiss: () => void,
-}
+interface Props extends JSX.HTMLAttributes<HTMLDivElement> {}
 export function Modal(props: Props) {
+	const { hideModal } = useModal()
+
 	useEffect(() => {
 		addCurrentModals(1)
-		window.addEventListener('click', props.onDismiss)
+		window.addEventListener('click', hideModal)
 		return () => {
 			addCurrentModals(-1)
-			window.removeEventListener('click', props.onDismiss)
+			window.removeEventListener('click', hideModal)
 		}
-	})
+	}, [hideModal])
 
 	const onClick = useCallback((e: MouseEvent) => {
 		e.stopPropagation()

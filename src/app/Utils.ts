@@ -1,5 +1,3 @@
-import type { DataModel } from '@mcschema/core'
-import { Path } from '@mcschema/core'
 import * as zip from '@zip.js/zip.js'
 import type { Identifier, NbtTag, Random } from 'deepslate'
 import { Matrix3, Matrix4, NbtByte, NbtCompound, NbtDouble, NbtInt, NbtList, NbtString, Vector } from 'deepslate'
@@ -32,7 +30,11 @@ export function hexId(length = 12) {
 }
 
 export function randomSeed() {
-	return BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER))
+	return BigInt(Math.floor((Math.random() - 0.5) * 2 * Number.MAX_SAFE_INTEGER))
+}
+
+export function randomInt() {
+	return Math.floor(Math.random() * 4294967296) - 2147483648
 }
 
 export function generateUUID() {
@@ -45,21 +47,6 @@ export function generateUUID() {
 
 export function generateColor() {
 	return Math.floor(Math.random() * 16777215)
-}
-
-export function newSeed(model: DataModel) {
-	const seed = Math.floor(Math.random() * (4294967296)) - 2147483648
-	const dimensions = model.get(new Path(['dimensions']))
-	model.set(new Path(['seed']), seed, true)
-	if (isObject(dimensions)) {
-		Object.keys(dimensions).forEach(id => {
-			model.set(new Path(['dimensions', id, 'generator', 'seed']), seed, true)
-			model.set(new Path(['dimensions', id, 'generator', 'biome_source', 'seed']), seed, true)
-		})
-	}
-	model.set(new Path(['placement', 'salt']), Math.abs(seed), true)
-	model.set(new Path(['generator', 'seed']), seed, true)
-	model.set(new Path(['generator', 'biome_source', 'seed']), seed)
 }
 
 export function htmlEncode(str: string) {
@@ -308,23 +295,23 @@ export class BiMap<A, B> {
 	}
 }
 
-export async function readZip(file: File | ArrayBuffer, predicate: (name: string) => boolean = () => true): Promise<[string, string][]> {
+export async function readZip(file: File | ArrayBuffer, predicate: (name: string) => boolean = () => true): Promise<[string, Uint8Array][]> {
 	const buffer = file instanceof File ? await file.arrayBuffer() : file
 	const reader = new zip.ZipReader(new zip.BlobReader(new Blob([buffer])))
 	const entries = await reader.getEntries()
 	return await Promise.all(entries
 		.filter(e => !e.directory && predicate(e.filename))
 		.map(async e => {
-			const writer = new zip.TextWriter('utf-8')
-			return [e.filename, await e.getData?.(writer)] as [string, string]
+			const writer = new zip.Uint8ArrayWriter()
+			return [e.filename, await e.getData?.(writer)]
 		})
 	)
 }
 
-export async function writeZip(entries: [string, string][]): Promise<string> {
+export async function writeZip(entries: [string, Uint8Array][]): Promise<string> {
 	const writer = new zip.ZipWriter(new zip.Data64URIWriter('application/zip'))
 	await Promise.all(entries.map(async ([name, data]) => {
-		await writer.add(name, new zip.TextReader(data))
+		await writer.add(name, new zip.Uint8ArrayReader(data))
 	}))
 	return await writer.close()
 }
@@ -639,4 +626,12 @@ export function makeDescriptionId(prefix: string, id: Identifier | undefined) {
 		return `${prefix}.unregistered_sadface`
 	}
 	return `${prefix}.${id.namespace}.${id.path.replaceAll('/', '.')}`
+}
+
+export function safeJsonParse(text: string): any {
+	try {
+		return JSON.parse(text)
+	} catch (e) {
+		return undefined
+	}
 }
