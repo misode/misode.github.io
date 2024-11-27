@@ -9,7 +9,7 @@ import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, S
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier, ItemStack } from 'deepslate'
 import { marked } from 'marked'
-import { useCallback, useMemo, useState } from 'preact/hooks'
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
@@ -137,7 +137,12 @@ const SPECIAL_UNSET = '__unset__'
 function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
 
-	const value = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
+	const nodeValue = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
+	const [value, setValue] = useState(nodeValue)
+
+	useEffect(() => {
+		setValue(nodeValue)
+	}, [nodeValue])
 
 	const idAttribute = type.attributes?.find(a => a.name === 'id')?.value
 	const idRegistry = idAttribute?.kind === 'literal' && idAttribute.value.kind === 'string'
@@ -152,7 +157,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 
 	const onChangeValue = useCallback((newValue: string) => {
 		newValue = newValue.replaceAll('\\n', '\n')
-		if (value === newValue) {
+		if (nodeValue === newValue) {
 			return
 		}
 		ctx.makeEdit((range) => {
@@ -167,7 +172,11 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 				type: 'json:string',
 			}
 		})
-	}, [optional, node, ctx, isSelect])
+	}, [optional, node, ctx, nodeValue, isSelect])
+
+	const onCommitValue = useCallback(() => {
+		onChangeValue(value ?? '')
+	}, [value, onChangeValue])
 
 	const completions = useMemo(() => {
 		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
@@ -201,7 +210,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 			{completions.length > 0 && <datalist id={datalistId}>
 				{completions.map(c => <option>{c.value}</option>)}
 			</datalist>}
-			<input class={colorKind === 'hex_rgb' ? 'short-input' : idRegistry ? 'long-input' : ''} value={value ?? ''} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} list={completions.length > 0 ? datalistId : undefined} />
+			<input class={colorKind === 'hex_rgb' ? 'short-input' : idRegistry ? 'long-input' : ''} value={value ?? ''} onInput={(e) => setValue((e.target as HTMLInputElement).value)} onBlur={onCommitValue} onSubmit={onCommitValue} onKeyDown={(e) => {if (e.key === 'Enter') onCommitValue()}} list={completions.length > 0 ? datalistId : undefined} />
 			{value && gen && <a href={`/${gen.url}/?preset=${value?.replace(/^minecraft:/, '')}`} class="tooltipped tip-se" aria-label={locale('follow_reference')}>
 				{Octicon.link_external}
 			</a>}
@@ -263,8 +272,12 @@ function EnumHead({ type, optional, excludeStrings, node, ctx }: Props<Simplifie
 function NumericHead({ type, node, ctx }: Props<NumericType>) {
 	const { locale } = useLocale()
 
-	const value = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
-	const isFloat = type.kind === 'float' || type.kind === 'double'
+	const nodeValue = node && JsonNumberNode.is(node) ? Number(node.value.value) : undefined
+	const [value, setValue] = useState(nodeValue?.toString())
+
+	useEffect(() => {
+		setValue(nodeValue?.toString())
+	}, [nodeValue])
 
 	const onChangeValue = useCallback((value: string | bigint | number) => {
 		const number = typeof value === 'string'
@@ -277,9 +290,9 @@ function NumericHead({ type, node, ctx }: Props<NumericType>) {
 			if (number === undefined) {
 				return undefined
 			}
-			const newValue: core.FloatNode | core.LongNode = isFloat
-				? { type: 'float', range, value: Number(number) }
-				: { type: 'long', range, value: BigInt(number) }
+			const newValue: core.FloatNode | core.LongNode = typeof number === 'bigint' || Number.isInteger(number)
+				? { type: 'long', range, value: BigInt(number) }
+				: { type: 'float', range, value: Number(number) }
 			const newNode: JsonNumberNode = {
 				type: 'json:number',
 				range,
@@ -289,7 +302,11 @@ function NumericHead({ type, node, ctx }: Props<NumericType>) {
 			newValue.parent = newNode
 			return newNode
 		})
-	}, [isFloat, node, ctx])
+	}, [node, ctx])
+
+	const onCommitValue = useCallback(() => {
+		onChangeValue(value ?? '')
+	}, [value, onChangeValue])
 
 	const color = type.attributes?.find(a => a.name === 'color')?.value
 	const colorKind = color?.kind === 'literal' && color.value.kind === 'string' ? color.value.value : undefined
@@ -309,9 +326,9 @@ function NumericHead({ type, node, ctx }: Props<NumericType>) {
 	}, [type, onChangeValue])
 
 	return <>
-		<input class="short-input" type="number" value={value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)} />
+		<input class="short-input" type="number" value={value} onInput={(e) => setValue((e.target as HTMLInputElement).value)} onBlur={onCommitValue} onSubmit={onCommitValue} onKeyDown={(e) => {if (e.key === 'Enter') onCommitValue()}} />
 		{colorKind && <>
-			<input class="short-input" type="color" value={'#' + (value?.toString(16).padStart(6, '0') ?? '000000')} onChange={(e) => onChangeColor((e.target as HTMLInputElement).value)} />
+			<input class="short-input" type="color" value={'#' + (nodeValue?.toString(16).padStart(6, '0') ?? '000000')} onChange={(e) => onChangeColor((e.target as HTMLInputElement).value)} />
 			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
 		</>}
 		{random && <>
