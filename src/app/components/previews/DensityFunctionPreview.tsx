@@ -2,7 +2,7 @@ import type { Voxel } from 'deepslate/render'
 import { clampedMap, VoxelRenderer } from 'deepslate/render'
 import type { mat3, mat4 } from 'gl-matrix'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
-import { useLocale, useProject, useVersion } from '../../contexts/index.js'
+import { getWorldgenProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useLocalStorage } from '../../hooks/useLocalStorage.js'
 import { Store } from '../../Store.js'
@@ -32,7 +32,8 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const text = docAndNode.doc.getText()
 
 	const { value: df } = useAsync(async () => {
-		await DEEPSLATE.loadVersion(version, {}) // TODO: get project data
+		const projectData = await getWorldgenProjectData(project)
+		await DEEPSLATE.loadVersion(version, projectData)
 		const df = DEEPSLATE.loadDensityFunction(safeJsonParse(text) ?? {}, minY, height, seed)
 		return df
 	}, [version, project, minY, height, seed, text])

@@ -1,7 +1,7 @@
 import { clampedMap } from 'deepslate'
 import { mat3 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
-import { useLocale, useProject, useStore, useVersion } from '../../contexts/index.js'
+import { getWorldgenProjectData, useLocale, useProject, useStore, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
 import { checkVersion } from '../../services/Versions.js'
 import { Store } from '../../Store.js'
@@ -37,7 +37,8 @@ export const BiomeSourcePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const hasRandomness = type === 'multi_noise' || type === 'the_end'
 
 	const { value } = useAsync(async function loadBiomeSource() {
-		await DEEPSLATE.loadVersion(version, {}) // TODO: get project data
+		const projectData = await getWorldgenProjectData(project)
+		await DEEPSLATE.loadVersion(version, projectData)
 		await DEEPSLATE.loadChunkGenerator(data?.generator?.settings, data?.generator?.biome_source, seed)
 		return {
 			biomeSource: { loaded: true },

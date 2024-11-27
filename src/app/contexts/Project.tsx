@@ -2,13 +2,14 @@ import { Identifier } from 'deepslate'
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useState } from 'preact/hooks'
+import type { ProjectData } from '../components/previews/Deepslate.js'
 import config from '../Config.js'
 import { useAsync } from '../hooks/useAsync.js'
 import type { VersionId } from '../services/index.js'
 import { DEFAULT_VERSION } from '../services/index.js'
 import { DRAFTS_URI, PROJECTS_URI, SpyglassClient } from '../services/Spyglass.js'
 import { Store } from '../Store.js'
-import { genPath, hexId, message } from '../Utils.js'
+import { genPath, hexId, message, safeJsonParse } from '../Utils.js'
 
 export type ProjectMeta = {
 	name: string,
@@ -166,4 +167,25 @@ export function getProjectRoot(project: ProjectMeta) {
 		return project.storage.rootUri
 	}
 	throw new Error(`Unsupported project storage ${project.storage?.type}`)
+}
+
+export async function getWorldgenProjectData(project: ProjectMeta): Promise<ProjectData> {
+	const projectRoot = getProjectRoot(project)
+	const categories = ['worldgen/noise_settings', 'worldgen/noise', 'worldgen/density_function']
+	const result: ProjectData = Object.fromEntries(categories.map(c => [c, {}]))
+	const entries = await SpyglassClient.FS.readdir(projectRoot)
+	for (const entry of entries) {
+		for (const category of categories) {
+			if (entry.name.includes(category)) {
+				const pattern = RegExp(`data/([a-z0-9_.-]+)/${category}/([a-z0-9_./-]+).json$`)
+				const match = entry.name.match(pattern)
+				if (match) {
+					const data = await SpyglassClient.FS.readFile(entry.name)
+					const text = new TextDecoder().decode(data)
+					result[category][`${match[1]}:${match[2]}`] = safeJsonParse(text)
+				}
+			}
+		}
+	}
+	return result
 }
