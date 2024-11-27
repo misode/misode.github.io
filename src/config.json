@@ -564,7 +564,6 @@
       "url": "assets/model",
       "path": "models",
       "tags": ["assets"],
-      "minVersion": "1.21.4",
       "wiki": "https://minecraft.wiki/w/Model#Item_models"
     },
     {
@@ -572,6 +571,7 @@
       "url": "assets/equipment",
       "path": "equipment",
       "tags": ["assets"],
+      "minVersion": "1.21.4",
       "wiki": "https://minecraft.wiki/w/Model#Equipment_models"
     },
     {
