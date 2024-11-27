@@ -5,7 +5,6 @@ export interface ConfigLanguage {
 	code: string,
 	name: string,
 	mc: string,
-	schemas?: boolean,
 }
 
 export interface ConfigVersion {

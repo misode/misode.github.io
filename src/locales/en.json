@@ -65,6 +65,7 @@
   "generator.dimension_type": "Dimension Type",
   "generator.enchantment": "Enchantment",
   "generator.enchantment_provider": "Enchantment Provider",
+  "generator.equipment": "Equipment",
   "generator.error_max_version": "This generator is not available in versions above %0%",
   "generator.error_min_version": "The minimum version for this generator is %0%",
   "generator.font": "Font",

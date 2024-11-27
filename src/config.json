@@ -33,8 +33,7 @@
     {
       "code": "ko",
       "name": "한국어",
-      "mc": "ko_kr",
-      "schemas": false
+      "mc": "ko_kr"
     },
     {
       "code": "pl",
@@ -54,8 +53,7 @@
     {
       "code": "sk",
       "name": "Slovenčina",
-      "mc": "sk_sk",
-      "schemas": false
+      "mc": "sk_sk"
     },
     {
       "code": "tr",
@@ -551,22 +549,30 @@
       "url": "assets/blockstate",
       "path": "blockstates",
       "tags": ["assets"],
-      "wiki": "https://minecraft.wiki/w/Tutorials/Models#Block_states"
+      "wiki": "https://minecraft.wiki/w/Blockstates_definition"
     },
     {
       "id": "item_definition",
       "url": "assets/item",
       "path": "items",
       "tags": ["assets"],
-      "schema": "item_definition",
-      "minVersion": "1.21.4"
+      "minVersion": "1.21.4",
+      "wiki": "https://minecraft.wiki/w/Items_model_definition"
     },
     {
       "id": "model",
       "url": "assets/model",
       "path": "models",
       "tags": ["assets"],
-      "wiki": "https://minecraft.wiki/w/Tutorials/Models"
+      "minVersion": "1.21.4",
+      "wiki": "https://minecraft.wiki/w/Model#Item_models"
+    },
+    {
+      "id": "equipment",
+      "url": "assets/equipment",
+      "path": "equipment",
+      "tags": ["assets"],
+      "wiki": "https://minecraft.wiki/w/Model#Equipment_models"
     },
     {
       "id": "lang",
