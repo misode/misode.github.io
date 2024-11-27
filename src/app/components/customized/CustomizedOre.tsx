@@ -26,7 +26,7 @@ export function CustomizedOre({ model, value, initial, onChange }: Props) {
 			value={calcHeight(model, value.minAboveBottom, value.minBelowTop, value.minHeight) ?? 0}
 			onChange={v => changeOre(value.minAboveBottom !== undefined ? { minAboveBottom: v - model.minHeight } : value.minBelowTop != undefined ? { minBelowTop: model.maxHeight - v } : { minHeight: v })}
 			min={-64} max={320} initial={calcHeight(model, initial.minAboveBottom, initial.minBelowTop, initial.minHeight) ?? 0} />
-		<CustomizedSlider label={value.trapezoid ? 'Max triangle' : 'Max height'} help="The heighest Y level the ore vein can generate at"
+		<CustomizedSlider label={value.trapezoid ? 'Max triangle' : 'Max height'} help="The highest Y level the ore vein can generate at"
 			value={calcHeight(model, value.maxAboveBottom, value.maxBelowTop, value.maxHeight) ?? 0}
 			onChange={v => changeOre(value.maxAboveBottom !== undefined ? { maxAboveBottom: v - model.minHeight } : value.maxBelowTop != undefined ? { maxBelowTop: model.maxHeight - v } : { maxHeight: v })}
 			min={-64} max={320} initial={calcHeight(model, initial.maxAboveBottom, initial.maxBelowTop, initial.maxHeight) ?? 0} />
