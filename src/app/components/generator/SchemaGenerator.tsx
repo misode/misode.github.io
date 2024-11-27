@@ -10,9 +10,9 @@ import { useSpyglass, watchSpyglassUri } from '../../contexts/Spyglass.jsx'
 import { AsyncCancel, useActiveTimeout, useAsync, useLocalStorage, useSearchParam } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
-import { DEPENDENCY_URI, SpyglassClient } from '../../services/Spyglass.js'
+import { DEPENDENCY_URI } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
-import { cleanUrl, clearFolder, genPath } from '../../Utils.js'
+import { cleanUrl, genPath } from '../../Utils.js'
 import { Ad, Btn, BtnMenu, ErrorPanel, FileCreation, FileView, Footer, HasPreview, Octicon, PreviewPanel, ProjectPanel, SearchList, SourcePanel, TextInput, VersionSwitcher } from '../index.js'
 import { getRootDefault } from './McdocHelpers.js'
 
@@ -94,7 +94,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		if (!service || !uri) {
 			return AsyncCancel
 		}
-		await clearFolder(SpyglassClient.FS, DEPENDENCY_URI)
+		// TODO: clear the dependencies that are not used
+		// Right now if you do this, the mcdoc breaks when switching back to the dependency later
 		if (gen.dependency) {
 			const dependency = await fetchDependencyMcdoc(gen.dependency)
 			const dependencyUri = `${DEPENDENCY_URI}${gen.dependency}.mcdoc`
