@@ -50,8 +50,7 @@ export function getVersionChecksum(versionId: VersionId) {
 
 export async function fetchVanillaMcdoc() {
 	try {
-		// TODO: enable refresh
-		return cachedFetch(vanillaMcdocUrl, { decode: res => res.arrayBuffer(), refresh: false })
+		return cachedFetch(vanillaMcdocUrl, { decode: res => res.arrayBuffer(), refresh: true })
 	} catch (e) {
 		throw new Error(`Error occured while fetching vanilla-mcdoc: ${message(e)}`)
 	}
