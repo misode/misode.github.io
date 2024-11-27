@@ -65,7 +65,7 @@ export function JsonFileView({ docAndNode, node }: JsonFileViewProps) {
 		return type
 	}, [resourceType, ctx])
 
-	return <div class="file-view tree node-root" data-category={getCategory(resourceType)}>
+	return <div class="file-view node-root" data-category={getCategory(resourceType)}>
 		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={node} ctx={ctx} />}
 	</div>
 }

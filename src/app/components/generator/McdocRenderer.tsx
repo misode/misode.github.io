@@ -28,6 +28,7 @@ type MakeEdit = (edit: (range: core.Range) => JsonNode | undefined) => void
 interface Props<Type extends SimplifiedMcdocType = SimplifiedMcdocType> {
 	type: Type
 	optional?: boolean
+	excludeStrings?: string[]
 	node: JsonNode | undefined
 	ctx: McdocContext
 }
@@ -48,12 +49,12 @@ export function McdocRoot({ type, node, ctx } : Props) {
 	</>
 }
 
-function Head({ type, optional, node, ctx }: Props) {
+function Head({ type, optional, excludeStrings, node, ctx }: Props) {
 	if (type.kind === 'string') {
-		return <StringHead type={type} optional={optional} node={node} ctx={ctx} />
+		return <StringHead type={type} optional={optional} excludeStrings={excludeStrings} node={node} ctx={ctx} />
 	}
 	if (type.kind === 'enum') {
-		return <EnumHead type={type} optional={optional} node={node} ctx={ctx} />
+		return <EnumHead type={type} optional={optional} excludeStrings={excludeStrings} node={node} ctx={ctx} />
 	}
 	if (isNumericType(type)) {
 		return <NumericHead type={type} node={node} ctx={ctx} />
@@ -133,7 +134,7 @@ function Body({ type, optional, node, ctx }: Props<SimplifiedMcdocType>) {
 
 const SPECIAL_UNSET = '__unset__'
 
-function StringHead({ type, optional, node, ctx }: Props<StringType>) {
+function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
 
 	const value = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
@@ -171,7 +172,8 @@ function StringHead({ type, optional, node, ctx }: Props<StringType>) {
 	const completions = useMemo(() => {
 		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
 			.filter(c => c.kind === 'string' && c.value !== 'THIS')
-	}, [type, node, ctx])
+			.filter(c => !excludeStrings?.includes(c.value))
+	}, [type, excludeStrings, node, ctx])
 
 	const datalistId = `mcdoc_completions_${hexId()}`
 
@@ -211,7 +213,7 @@ function StringHead({ type, optional, node, ctx }: Props<StringType>) {
 	</>
 }
 
-function EnumHead({ type, optional, node, ctx }: Props<SimplifiedEnum>) {
+function EnumHead({ type, optional, excludeStrings, node, ctx }: Props<SimplifiedEnum>) {
 	const { locale } = useLocale()
 
 	const value = JsonStringNode.is(node) ? node.value : (node && JsonNumberNode.is(node)) ? Number(node.value.value) : undefined
@@ -252,7 +254,7 @@ function EnumHead({ type, optional, node, ctx }: Props<SimplifiedEnum>) {
 	return <select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
 		{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
 		{(value !== undefined && !type.values.map(v => v.value).includes(value)) && <option value={value}>{value}</option>}
-		{type.values.map(value =>
+		{type.values.filter(v => !excludeStrings?.includes(v.value.toString())).map(value =>
 			<option value={value.value}>{formatIdentifier(value.identifier, value.attributes)}</option>
 		)}
 	</select>
@@ -653,8 +655,12 @@ function DynamicKey({ keyType, valueType, parent, ctx }: DynamicKeyProps) {
 		})
 	}, [keyNode, ctx])
 
+	const excludeStrings = useMemo(() => {
+		return parent.children.flatMap(pair => pair.key ? [pair.key.value] : [])
+	}, [parent])
+
 	return <>
-		<Head type={keyType} optional={true} node={keyNode} ctx={keyCtx} />
+		<Head type={keyType} optional={true} excludeStrings={excludeStrings} node={keyNode} ctx={keyCtx} />
 		<button class="add tooltipped tip-se" aria-label={locale('add_key')} onClick={addKey} disabled={!key || key.length === 0}>{Octicon.plus_circle}</button>
 	</>
 }
