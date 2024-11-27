@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --ext .ts,.tsx",
+    "postinstall": "patch-package"
   },
   "keywords": [],
   "author": "Misode",
@@ -56,6 +57,7 @@
     "@typescript-eslint/parser": "^5.28.0",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.17.0",
+    "patch-package": "^8.0.0",
     "postcss": "^8.4.31",
     "preact": "^10.8.0",
     "preact-router": "^3.2.1",

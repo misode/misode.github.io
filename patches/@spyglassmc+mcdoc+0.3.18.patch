@@ -1,0 +1,44 @@
+diff --git a/node_modules/@spyglassmc/mcdoc/lib/runtime/checker/index.js b/node_modules/@spyglassmc/mcdoc/lib/runtime/checker/index.js
+index 2d51735..70ac4a0 100644
+--- a/node_modules/@spyglassmc/mcdoc/lib/runtime/checker/index.js
++++ b/node_modules/@spyglassmc/mcdoc/lib/runtime/checker/index.js
+@@ -545,9 +545,9 @@ function simplifyReference(typeDef, context) {
+         context.ctx.logger.warn(`Tried to access unknown reference ${typeDef.path}`);
+         return { typeDef: { kind: 'union', members: [] } };
+     }
+-    if (data.simplifiedTypeDef) {
+-        return { typeDef: data.simplifiedTypeDef };
+-    }
++    // if (data.simplifiedTypeDef) {
++    //     return { typeDef: data.simplifiedTypeDef };
++    // }
+     const simplifiedResult = simplify(data.typeDef, context);
+     if (typeDef.attributes?.length) {
+         simplifiedResult.typeDef = {
+@@ -555,16 +555,16 @@ function simplifyReference(typeDef, context) {
+             attributes: [...typeDef.attributes, ...simplifiedResult.typeDef.attributes ?? []],
+         };
+     }
+-    if (!simplifiedResult.dynamicData) {
+-        symbol.amend({
+-            data: {
+-                data: {
+-                    ...data,
+-                    simplifiedTypeDef: simplifiedResult.typeDef,
+-                },
+-            },
+-        });
+-    }
++    // if (!simplifiedResult.dynamicData) {
++    //     symbol.amend({
++    //         data: {
++    //             data: {
++    //                 ...data,
++    //                 simplifiedTypeDef: simplifiedResult.typeDef,
++    //             },
++    //         },
++    //     });
++    // }
+     return simplifiedResult;
+ }
+ function simplifyDispatcher(typeDef, context) {

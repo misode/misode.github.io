@@ -80,6 +80,7 @@ export class SpyglassClient {
 }
 
 export class SpyglassService {
+	private static activeServiceId = 1
 	private readonly fileWatchers = new Map<string, ((docAndNode: core.DocAndNode) => void)[]>()
 	private readonly treeWatchers: { prefix: string, handler: (uris: string[]) => void }[] = []
 
@@ -280,6 +281,8 @@ export class SpyglassService {
 	}
 
 	public static async create(versionId: VersionId, client: SpyglassClient) {
+		SpyglassService.activeServiceId += 1
+		const currentServiceId = SpyglassService.activeServiceId
 		await Promise.allSettled(INITIAL_DIRS.map(async uri => client.externals.fs.mkdir(uri)))
 		const version = siteConfig.versions.find(v => v.id === versionId)!
 		const logger = console
@@ -331,7 +334,11 @@ export class SpyglassService {
 		})
 		await service.project.ready()
 		setTimeout(() => {
-			service.project.cacheService.save()
+			if (currentServiceId === SpyglassService.activeServiceId) {
+				service.project.cacheService.save()
+			} else {
+				logger.info('[SpyglassService] Skipped saving the cache because another service is active')
+			}
 		}, 10_000)
 		return new SpyglassService(versionId, service, client)
 	}
