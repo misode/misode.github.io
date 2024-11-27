@@ -274,7 +274,7 @@ function composeFunctions(functions: any[]): LootFunction {
 		for (const fn of functions) {
 			if (Array.isArray(fn)) {
 				composeFunctions(fn)
-			} else if (composeConditions(fn.conditions ?? [])(ctx)) {
+			} else if (isObject(fn) && composeConditions(fn.conditions ?? [])(ctx)) {
 				const type = fn.function?.replace(/^minecraft:/, '');
 				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
@@ -349,7 +349,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_attributes: ({ modifiers, replace }) => (item, ctx) => {
 		if (!Array.isArray(modifiers)) return
 		const newModifiers = modifiers.map<AttributeModifier>(m => {
-			if (typeof m !== 'object' || m === null) m = {}
+			if (!isObject(m)) m = {}
 			return {
 				id: Identifier.parse(typeof m.id === 'string' ? m.id : ''),
 				type: Identifier.parse(typeof m.attribute === 'string' ? m.attribute : ''),
@@ -386,7 +386,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		item.set('written_book_content', newContent)
 	},
 	set_components: ({ components }) => (item) => {
-		if (typeof components !== 'object' || components === null) {
+		if (!isObject(components)) {
 			return
 		}
 		for (const [key, value] of Object.entries(components)) {
@@ -432,7 +432,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
-		if (typeof enchantments !== 'object' || enchantments === null) {
+		if (!isObject(enchantments)) {
 			return
 		}
 		if (item.is('book')) {
@@ -490,7 +490,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	toggle_tooltips: ({ toggles }) => (item) => {
-		if (typeof toggles !== 'object' || toggles === null) return
+		if (!isObject(toggles)) {
+			return
+		}
 		Object.entries(toggles).forEach(([key, value]) => {
 			if (typeof value !== 'boolean') return
 			const tag = item.get(key, tag => tag)

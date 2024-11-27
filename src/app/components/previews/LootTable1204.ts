@@ -271,7 +271,7 @@ function composeFunctions(functions: any[]): LootFunction {
 		for (const fn of functions) {
 			if (Array.isArray(fn)) {
 				composeFunctions(fn)
-			} else if (composeConditions(fn.conditions ?? [])(ctx)) {
+			} else if (isObject(fn) && composeConditions(fn.conditions ?? [])(ctx)) {
 				const type = fn.function?.replace(/^minecraft:/, '');
 				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
@@ -402,6 +402,9 @@ function composeConditions(conditions: any[]): LootCondition {
 function testCondition(condition: any, ctx: LootContext): boolean {
 	if (Array.isArray(condition)) {
 		return composeConditions(condition)(ctx)
+	}
+	if (!isObject(condition) || typeof condition.condition !== 'string') {
+		return false
 	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
