@@ -432,6 +432,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
+		if (typeof enchantments !== 'object' || enchantments === null) {
+			return
+		}
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
 			item.base = ctx.getBaseComponents(item.id.toString())
