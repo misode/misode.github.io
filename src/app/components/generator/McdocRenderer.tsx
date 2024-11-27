@@ -1,4 +1,5 @@
 import * as core from '@spyglassmc/core'
+import { ColorFormat } from '@spyglassmc/core'
 import type { JsonPairNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
@@ -260,13 +261,23 @@ function EnumHead({ type, optional, excludeStrings, node, ctx }: Props<Simplifie
 		})
 	}, [type.enumKind, value, ctx])
 
-	return <select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
-		{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
-		{(value !== undefined && !type.values.map(v => v.value).includes(value)) && <option value={value}>{value}</option>}
-		{type.values.filter(v => !excludeStrings?.includes(v.value.toString())).map(value =>
-			<option value={value.value}>{formatIdentifier(value.identifier, value.attributes)}</option>
-		)}
-	</select>
+	const color = type.attributes?.find(a => a.name === 'color')?.value
+	const colorKind = color?.kind === 'literal' && color.value.kind === 'string' ? color.value.value : undefined
+	const nodeColor = node?.color ? (Array.isArray(node.color) ? node.color : node.color.value ) : undefined
+	const inputColor = nodeColor ? core.ColorPresentation.fromColorFormat(ColorFormat.HexRGB, nodeColor, core.Range.create(0)).text : undefined
+
+	return <>
+		<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLSelectElement).value)}>
+			{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
+			{(value !== undefined && !type.values.map(v => v.value).includes(value)) && <option value={value}>{value}</option>}
+			{type.values.filter(v => !excludeStrings?.includes(v.value.toString())).map(value =>
+				<option value={value.value}>{formatIdentifier(value.identifier, value.attributes)}</option>
+			)}
+		</select>
+		{colorKind === 'named' && nodeColor && <>
+			<input class="short-input" type="color" value={inputColor} readonly disabled />
+		</>}
+	</>
 }
 
 function NumericHead({ type, node, ctx }: Props<NumericType>) {
