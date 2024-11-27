@@ -81,7 +81,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		}
 		if (project.storage === undefined) {
 			try {
-				const projectRoot = `${PROJECTS_URI}${hexId()}/`
+				const projectRoot = project.name === DRAFT_PROJECT.name ? DRAFTS_URI : `${PROJECTS_URI}${hexId()}/`
 				console.log(`Upgrading project ${openProject} to IndexedDB at ${projectRoot}`)
 				await SpyglassClient.FS.mkdir(projectRoot)
 				if (project.files) {
