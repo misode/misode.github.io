@@ -7,7 +7,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 const config = require('./src/config.json')
 const English = require('./src/locales/en.json')
 
-const convertFormats = ['give-command', 'loot-table', 'item-modifier']
+const convertFormats = ['give-command', 'loot-table', 'item-modifier', 'recipe-output']
 
 export default defineConfig({
 	server: {

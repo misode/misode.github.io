@@ -11,7 +11,8 @@ import type { VersionId } from '../services/Versions.js'
 import { checkVersion } from '../services/Versions.js'
 import { jsonToNbt } from '../Utils.js'
 
-const FORMATS = ['give-command', 'loot-table', 'item-modifier'] as const
+// When adding new formats, also update the list in vite.config.js !!!
+const FORMATS = ['give-command', 'loot-table', 'item-modifier', 'recipe-output'] as const
 type Format = typeof FORMATS[number]
 
 interface Props {
@@ -154,6 +155,11 @@ const CONVERSIONS: Record<Format, Partial<Record<Format, (input: string) => stri
 			const itemModifier = createItemModifier(itemStack)
 			return JSON.stringify(itemModifier, null, 2)
 		},
+		'recipe-output': (input) => {
+			const itemStack = parseGiveCommand(new StringReader(input))
+			const recipe = createRecipe(itemStack)
+			return JSON.stringify(recipe, null, 2)
+		},
 	},
 	'loot-table': {
 		'give-command': (input) => {
@@ -168,6 +174,12 @@ const CONVERSIONS: Record<Format, Partial<Record<Format, (input: string) => stri
 			const itemModifier = createItemModifier(itemStack)
 			return JSON.stringify(itemModifier, null, 2)
 		},
+		'recipe-output': (input) => {
+			const lootTable = JSON.parse(input)
+			const itemStack = getItemFromLootTable(lootTable)
+			const recipe = createRecipe(itemStack)
+			return JSON.stringify(recipe, null, 2)
+		},
 	},
 	'item-modifier': {
 		'give-command': (input) => {
@@ -181,6 +193,31 @@ const CONVERSIONS: Record<Format, Partial<Record<Format, (input: string) => stri
 			const itemStack = getItemFromItemModifier(itemModifier)
 			const lootTable = createLootTable(itemStack)
 			return JSON.stringify(lootTable, null, 2)
+		},
+		'recipe-output': (input) => {
+			const itemModifier = JSON.parse(input)
+			const itemStack = getItemFromItemModifier(itemModifier)
+			const recipe = createRecipe(itemStack)
+			return JSON.stringify(recipe, null, 2)
+		},
+	},
+	'recipe-output': {
+		'give-command': (input) => {
+			const recipe = JSON.parse(input)
+			const itemStack = getRecipeOutput(recipe)
+			return `give @s ${stringifyItemStack(itemStack)}`
+		},
+		'loot-table': (input) => {
+			const recipe = JSON.parse(input)
+			const itemStack = getRecipeOutput(recipe)
+			const lootTable = createLootTable(itemStack)
+			return JSON.stringify(lootTable, null, 2)
+		},
+		'item-modifier': (input) => {
+			const recipe = JSON.parse(input)
+			const itemStack = getRecipeOutput(recipe)
+			const itemModifier = createItemModifier(itemStack)
+			return JSON.stringify(itemModifier, null, 2)
 		},
 	},
 }
@@ -308,6 +345,14 @@ function createLootFunctions(item: ItemStack): Record<string, unknown>[] {
 	return functions
 }
 
+function createRecipe(item: ItemStack) {
+	return {
+		type: 'minecraft:crafting_shapeless',
+		ingredients: [],
+		result: item.toNbt().toSimplifiedJson(),
+	}
+}
+
 function getItemFromItemModifier(data: unknown): ItemStack {
 	const functions = Array.isArray(data)
 		? Json.readArray(data, e => Json.readObject(e) ?? {}) ?? []
@@ -367,6 +412,18 @@ function getItemFromLootFunctions(functions: Record<string, unknown>[], initialI
 		}
 	}
 	return new ItemStack(Identifier.parse(item ?? 'air'), count, components)
+}
+
+function getRecipeOutput(data: unknown) {
+	const root = Json.readObject(data) ?? {}
+	const result = Json.readObject(root.result) ?? {}
+	const id = Json.readString(result.id) ?? 'air'
+	const count = Json.readInt(result.count) ?? 1
+	const components = new Map()
+	for (const [key, value] of Object.entries(Json.readObject(result.components) ?? {})) {
+		components.set(key, jsonToNbt(value))
+	}
+	return new ItemStack(Identifier.parse(id), count, components)
 }
 
 function stringifyItemStack(itemStack: ItemStack) {
