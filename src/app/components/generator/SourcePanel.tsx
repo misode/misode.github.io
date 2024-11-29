@@ -35,6 +35,7 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>(() => {})
 	const onImport = useRef<() => Promise<void>>(async () => {})
+	const outputRef = useRef<string>()
 
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
@@ -56,6 +57,7 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 			}
 			try {
 				const output = getSerializedOutput(text)
+				outputRef.current = output
 				editor.current.setValue(output)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -163,22 +165,22 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 	}, [indent, format, sort, highlighting, braceLoaded])
 
 	useEffect(() => {
-		if (doCopy && text !== undefined) {
-			navigator.clipboard.writeText(getSerializedOutput(text)).then(() => {
+		if (doCopy && outputRef.current) {
+			navigator.clipboard.writeText(outputRef.current).then(() => {
 				copySuccess()
 			})
 		}
-	}, [doCopy, text])
+	}, [doCopy, textarea])
 
 	useEffect(() => {
-		if (doDownload && docAndNode && text !== undefined && download.current) {
-			const content = encodeURIComponent(getSerializedOutput(text))
+		if (doDownload && docAndNode && outputRef.current && download.current) {
+			const content = encodeURIComponent(outputRef.current)
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
 			const fileName = fileUtil.basename(docAndNode.doc.uri)
 			download.current.setAttribute('download', fileName)
 			download.current.click()
 		}
-	}, [doDownload])
+	}, [doDownload, outputRef])
 
 	useEffect(() => {
 		if (doImport && editor.current) {
