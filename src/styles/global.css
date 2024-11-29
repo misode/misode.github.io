@@ -978,6 +978,22 @@ main.has-project {
 	min-width: unset;;
 }
 
+.convert-select {
+	background-color: var(--background-2);
+	color: var(--text-1);
+}
+
+.convert-textarea {
+	background-color: var(--background-2);
+	color: var(--text-1);
+	height: calc(100vh - 250px);
+	min-height: 250px;
+}
+
+.convert-error {
+	color: var(--invalid-text);
+}
+
 .btn {
 	display: flex;
 	align-items: center;

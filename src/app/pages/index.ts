@@ -1,4 +1,5 @@
 export * from './Changelog.js'
+export * from './Convert.jsx'
 export * from './Customized.jsx'
 export * from './Generator.js'
 export * from './Generators.jsx'

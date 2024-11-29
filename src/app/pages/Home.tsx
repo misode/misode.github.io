@@ -87,6 +87,9 @@ function Tools() {
 	const { locale } = useLocale()
 
 	return <ToolGroup title={locale('tools')}>
+		<ToolCard title="Converter" icon="convert"
+			link="/convert/"
+			desc="Turn /give commands into loot tables" />
 		<ToolCard title="Customized Worlds" icon="customized"
 			link="/customized/"
 			desc="Create data packs to customize your world" />
@@ -99,9 +102,6 @@ function Tools() {
 		<ToolCard title="Transformation preview"
 			link="/transformation/"
 			desc="Visualize transformations for display entities" />
-		<ToolCard title="Data Pack Upgrader"
-			link="https://misode.github.io/upgrader/"
-			desc="Convert your data packs from 1.16 to 1.20" />
 		<ToolCard title="Template Placer"
 			link="https://misode.github.io/template-placer/"
 			desc="Automatically place all the structure pieces in your world" />

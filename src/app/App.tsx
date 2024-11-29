@@ -3,9 +3,9 @@ import { Router } from 'preact-router'
 import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics.js'
-import { cleanUrl } from './Utils.js'
 import { Header } from './components/index.js'
-import { Changelog, Customized, Generator, Generators, Guide, Guides, Home, LegacyPartners, Partners, Sounds, Transformation, Versions, WhatsNew, Worldgen } from './pages/index.js'
+import { Changelog, Convert, Customized, Generator, Generators, Guide, Guides, Home, LegacyPartners, Partners, Sounds, Transformation, Versions, WhatsNew, Worldgen } from './pages/index.js'
+import { cleanUrl } from './Utils.js'
 
 export function App() {
 	const changeRoute = (e: RouterOnChangeArgs) => {
@@ -27,6 +27,8 @@ export function App() {
 			<Versions path="/versions" />
 			<Transformation path="/transformation" />
 			<Customized path="/customized" />
+			<Convert path="/convert" />
+			<Convert path="/convert/:formats" />
 			<WhatsNew path="/whats-new" />
 			<Guides path="/guides" />
 			<Guide path="/guides/:id" />
