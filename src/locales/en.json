@@ -25,6 +25,7 @@
   "contributor.translation": "Translator",
   "convert.format.give-command": "/give",
   "convert.format.loot-table": "Loot Table",
+  "convert.format.item-modifier": "Item Modifier",
   "convert.select": "-- select --",
   "convert.swap": "Swap",
   "copied": "Copied!",

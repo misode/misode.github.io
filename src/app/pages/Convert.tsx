@@ -11,7 +11,7 @@ import type { VersionId } from '../services/Versions.js'
 import { checkVersion } from '../services/Versions.js'
 import { jsonToNbt } from '../Utils.js'
 
-const FORMATS = ['give-command', 'loot-table'] as const
+const FORMATS = ['give-command', 'loot-table', 'item-modifier'] as const
 type Format = typeof FORMATS[number]
 
 interface Props {
@@ -149,12 +149,38 @@ const CONVERSIONS: Record<Format, Partial<Record<Format, (input: string) => stri
 			const lootTable = createLootTable(itemStack)
 			return JSON.stringify(lootTable, null, 2)
 		},
+		'item-modifier': (input) => {
+			const itemStack = parseGiveCommand(new StringReader(input))
+			const itemModifier = createItemModifier(itemStack)
+			return JSON.stringify(itemModifier, null, 2)
+		},
 	},
 	'loot-table': {
 		'give-command': (input) => {
 			const lootTable = JSON.parse(input)
 			const itemStack = getItemFromLootTable(lootTable)
 			return `give @s ${stringifyItemStack(itemStack)}`
+		},
+		'item-modifier': (input) => {
+			// TODO: preserve more of the loot functions
+			const lootTable = JSON.parse(input)
+			const itemStack = getItemFromLootTable(lootTable)
+			const itemModifier = createItemModifier(itemStack)
+			return JSON.stringify(itemModifier, null, 2)
+		},
+	},
+	'item-modifier': {
+		'give-command': (input) => {
+			const itemModifier = JSON.parse(input)
+			const itemStack = getItemFromItemModifier(itemModifier)
+			return `give @s ${stringifyItemStack(itemStack)}`
+		},
+		'loot-table': (input) => {
+			// TODO: preserve more of the loot functions
+			const itemModifier = JSON.parse(input)
+			const itemStack = getItemFromItemModifier(itemModifier)
+			const lootTable = createLootTable(itemStack)
+			return JSON.stringify(lootTable, null, 2)
 		},
 	},
 }
@@ -238,6 +264,7 @@ function parseIdentifier(reader: StringReader) {
 }
 
 function createLootTable(item: ItemStack) {
+	const functions = createLootFunctions(item)
 	return {
 		pools: [
 			{
@@ -246,25 +273,46 @@ function createLootTable(item: ItemStack) {
 					{
 						type: 'minecraft:item',
 						name: item.id.toString(),
-						functions: (item.components.size > 0 || item.count > 1)
-							? [
-								...item.components.size > 0 ? [{
-									function: 'minecraft:set_components',
-									components: Object.fromEntries([...item.components.entries()].map(([key, value]) => {
-										return [key, value.toSimplifiedJson()]
-									})),
-								}] : [],
-								...item.count > 1 ? [{
-									function: 'minecraft:set_count',
-									count: item.count,
-								}]: [],
-							]
-							: undefined,
+						functions: functions.length > 0 ? functions : undefined,
 					},
 				],
 			},
 		],
 	}
+}
+
+function createItemModifier(item: ItemStack) {
+	const functions = createLootFunctions(item)
+	if (!item.id.is('air')) {
+		functions.unshift({ function: 'minecraft:set_item', item: item.id.toString() })
+	}
+	return functions.length === 1 ? functions[0] : functions
+}
+
+function createLootFunctions(item: ItemStack): Record<string, unknown>[] {
+	const functions = []
+	if (item.components.size > 0) {
+		functions.push({
+			function: 'minecraft:set_components',
+			components: Object.fromEntries([...item.components.entries()].map(([key, value]) => {
+				return [key, value.toSimplifiedJson()]
+			})),
+		})
+	}
+	if (item.count > 1) {
+		functions.push({
+			function: 'minecraft:set_count',
+			count: item.count,
+		})
+	}
+	return functions
+}
+
+function getItemFromItemModifier(data: unknown): ItemStack {
+	const functions = Array.isArray(data)
+		? Json.readArray(data, e => Json.readObject(e) ?? {}) ?? []
+		: [Json.readObject(data) ?? {}]
+	return getItemFromLootFunctions(functions)
 }
 
 function getItemFromLootTable(data: unknown): ItemStack {
@@ -292,11 +340,19 @@ function getItemFromLootTable(data: unknown): ItemStack {
 		...Json.readArray(pool.functions, e => Json.readObject(e) ?? {}) ?? [],
 		...Json.readArray(root.functions, e => Json.readObject(e) ?? {}) ?? [],
 	]
+	return getItemFromLootFunctions(functions, name)
+}
+
+function getItemFromLootFunctions(functions: Record<string, unknown>[], initialItem?: string) {
+	let item = initialItem
 	let count = 1
 	const components = new Map<string, NbtTag>()
 	for (const fn of functions) {
 		const type = Json.readString(fn.function)?.replace(/^minecraft:/, '')
 		switch (type) {
+			case 'set_item':
+				item = Json.readString(fn.item) ?? item
+				break
 			case 'set_count':
 				const value = Json.readInt(fn.count)
 				if (value) {
@@ -310,7 +366,7 @@ function getItemFromLootTable(data: unknown): ItemStack {
 				}
 		}
 	}
-	return new ItemStack(Identifier.parse(name), count, components)
+	return new ItemStack(Identifier.parse(item ?? 'air'), count, components)
 }
 
 function stringifyItemStack(itemStack: ItemStack) {
