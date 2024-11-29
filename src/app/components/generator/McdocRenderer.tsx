@@ -180,9 +180,11 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 	}, [value, onChangeValue])
 
 	const completions = useMemo(() => {
-		return getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
+		const values = getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
 			.filter(c => c.kind === 'string' && c.value !== 'THIS')
 			.filter(c => !excludeStrings?.includes(c.value))
+		values.sort((a, b) => a.value.localeCompare(b.value))
+		return values
 	}, [type, excludeStrings, node, ctx])
 
 	const datalistId = `mcdoc_completions_${hexId()}`
