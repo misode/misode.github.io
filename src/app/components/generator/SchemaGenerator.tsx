@@ -32,8 +32,11 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [error, setError] = useState<Error | string | null>(null)
 	const [errorBoundary, errorRetry] = useErrorBoundary()
 	if (errorBoundary) {
-		errorBoundary.message = `Something went wrong rendering the generator: ${errorBoundary.message}`
-		return <main><ErrorPanel error={errorBoundary} onDismiss={errorRetry} /></main>
+		const generatorError = new Error(`Generator error: ${errorBoundary.message}`)
+		if (errorBoundary.stack) {
+			generatorError.stack = errorBoundary.stack
+		}
+		return <main><ErrorPanel error={generatorError} onDismiss={errorRetry} /></main>
 	}
 
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
@@ -405,7 +408,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			</div>
 		</div>
 		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-			<PreviewPanel docAndNode={docAndNode} id={gen.id} shown={previewShown} onError={setError} />
+			<PreviewPanel docAndNode={docAndNode} id={gen.id} shown={previewShown} />
 		</div>
 		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
 			<SourcePanel docAndNode={docAndNode} {...{doCopy, doDownload, doImport}} copySuccess={copySuccess} onError={setError} />
