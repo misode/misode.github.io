@@ -29,7 +29,7 @@ export function PreviewPanel({ id, docAndNode: original, shown }: PreviewPanelPr
 		return <ErrorPanel error={previewError} onDismiss={dismissError} />
 	}
 
-	return <div>
+	return <div class="h-full">
 		<PreviewContent key={id} id={id} docAndNode={docAndNode} shown={shown} />
 	</div>
 }
