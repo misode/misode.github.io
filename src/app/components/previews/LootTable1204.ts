@@ -351,6 +351,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
+		if (!isObject(enchantments)) {
+			return
+		}
 		Object.entries(enchantments).forEach(([id, level]) => {
 			const lvl = computeInt(level, ctx)
 			try {
@@ -359,6 +362,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		})
 	},
 	set_lore: ({ lore, replace }) => (item) => {
+		if (!Array.isArray(lore)) return
 		const lines: string[] = lore.flatMap((line: any) => line !== undefined ? [JSON.stringify(line)] : [])
 		const newLore = replace ? lines : [...item.tag.getCompound('display').getList('Lore', NbtType.String).map(s => s.getAsString()), ...lines]
 		getOrCreateTag(item, 'display').set('Lore', new NbtList(newLore.map(l => new NbtString(l))))

@@ -471,6 +471,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 			.set('seed', new NbtLong(typeof seed === 'number' ? BigInt(seed) : BigInt(0))))
 	},
 	set_lore: ({ lore }) => (item) => {
+		if (!Array.isArray(lore)) return
 		const lines: string[] = lore.flatMap((line: any) => line !== undefined ? [JSON.stringify(line)] : [])
 		// TODO: account for mode
 		item.set('lore', new NbtList(lines.map(l => new NbtString(l))))
