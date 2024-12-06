@@ -61,7 +61,7 @@ export function ItemDisplay({ item, slotDecoration, tooltip, advancedTooltip }: 
 			</svg>}
 			<div class="item-slot-overlay"></div>
 		</>}
-		{tooltip !== false && <div class="item-tooltip" style={tooltipOffset && {
+		{tooltip !== false && !resolvedItem.has('hide_tooltip') && <div class="item-tooltip" style={tooltipOffset && {
 			left: (tooltipSwap ? undefined : `${tooltipOffset[0]}px`),
 			right: (tooltipSwap ? `${tooltipOffset[0]}px` : undefined),
 			top: `${tooltipOffset[1]}px`,

@@ -11,10 +11,6 @@ interface Props {
 	resolver: (item: ItemStack) => ResolvedItem,
 }
 export function ItemTooltip({ item, advanced, resolver }: Props) {
-	if (item.has('hide_tooltip')) {
-		return <></>
-	}
-
 	return <>
 		<TextComponent component={item.getStyledHoverName()} />
 		{!advanced && !item.has('custom_name') && item.is('filled_map') && item.has('map_id') && (
