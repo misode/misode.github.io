@@ -315,11 +315,12 @@ export class Deepslate {
 				finalDensity: this.d.DensityFunction.fromJson(state),
 			}),
 		})
+		const levelHeight: deepslate19.LevelHeight = { minY: 0, height: 256 }
 		const unknownBiome = this.d.Identifier.create('unknown')
 		const randomState = new this.d.RandomState(settings, seed)
 		const biomeSource = new this.d.FixedBiomeSource(unknownBiome)
 		const chunkGenerator = new this.d.NoiseChunkGenerator(biomeSource, settings)
-		this.structureContextCache = { seed, settings, randomState, biomeSource, chunkGenerator }
+		this.structureContextCache = { seed, settings, randomState, biomeSource, chunkGenerator, levelHeight }
 
 		class SimpleStructure extends this.d.WorldgenStructure {
 			constructor(settings: deepslate19.WorldgenStructure.StructureSettings) {

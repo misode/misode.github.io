@@ -1,4 +1,3 @@
-import { Identifier } from 'deepslate'
 import { useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -58,7 +57,7 @@ export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 			getPredicate: () => undefined,
 			getEnchantments: () => enchantments ?? new Map(),
 			getEnchantmentTag: (id) => (enchantmentTags?.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
-			getBaseComponents: (id) => new Map([...(itemComponents?.get(Identifier.parse(id).toString()) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
+			getItemComponents: (id) => new Map([...(itemComponents?.get(id.toString()) ?? new Map()).entries()].map(([k, v]) => [k, jsonToNbt(v)])),
 		})
 	}, [version, seed, luck, daytime, weather, mixItems, text, dependencies, loading])
 

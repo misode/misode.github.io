@@ -52,7 +52,7 @@ export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(x, y)
-			const structure = computeIfAbsent(chunkStructures, `${pos[0]} ${pos[1]}`, () => structureSet?.getStructureInChunk(pos[0], pos[1], context))
+			const structure = computeIfAbsent(chunkStructures, `${pos[0]} ${pos[1]}`, () => structureSet?.getStructureInChunk(pos[0], pos[1], context)?.id)
 			return { structure, pos }
 		}, ({ structure, pos }) => {
 			if (structure !== undefined) {

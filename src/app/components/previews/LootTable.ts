@@ -1,3 +1,4 @@
+import type { ItemComponentsProvider } from 'deepslate'
 import { NbtByte, NbtDouble, NbtLong } from 'deepslate'
 import type { Random } from 'deepslate/core'
 import { Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
@@ -20,7 +21,7 @@ const StackMixers = {
 
 type StackMixer = keyof typeof StackMixers
 
-interface LootOptions {
+interface LootOptions extends ItemComponentsProvider {
 	version: VersionId,
 	seed: bigint,
 	luck: number,
@@ -32,7 +33,6 @@ interface LootOptions {
 	getPredicate(id: string): any,
 	getEnchantments(): Map<string, any>,
 	getEnchantmentTag(id: string): string[],
-	getBaseComponents(id: string): Map<string, NbtTag>,
 }
 
 interface LootContext extends LootOptions {
@@ -235,12 +235,12 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	switch (type) {
 		case 'item':
 			const id = Identifier.parse(entry.name)
-			entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getBaseComponents(id.toString())))
+			entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
 			break
 		case 'tag':
 			ctx.getItemTag(entry.name).forEach(tagEntry => {
 				const id = Identifier.parse(tagEntry)
-				entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getBaseComponents(id.toString())))
+				entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
 			})
 			break
 		case 'loot_table':
@@ -303,7 +303,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		const level = ctx.random.nextInt(maxLevel - 1) + 1
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
-			item.base = ctx.getBaseComponents(item.id.toString())
+			item.base = ctx.getItemComponents(item.id)
 		}
 		updateEnchantments(item, levels => {
 			return levels.set(Identifier.parse(pick).toString(), level)
@@ -314,7 +314,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		const selected = selectEnchantments(item, computeInt(levels, ctx), allowed, ctx)
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
-			item.base = ctx.getBaseComponents(item.id.toString())
+			item.base = ctx.getItemComponents(item.id)
 		}
 		updateEnchantments(item, levelsMap => {
 			for (const { id, lvl } of selected) {
@@ -437,7 +437,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
-			item.base = ctx.getBaseComponents(item.id.toString())
+			item.base = ctx.getItemComponents(item.id)
 		}
 		updateEnchantments(item, levels => {
 			Object.entries(enchantments).forEach(([id, level]) => {
@@ -463,7 +463,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_item: ({ item: newId }) => (item, ctx) => {
 		if (typeof newId !== 'string') return
 		item.id = Identifier.parse(newId)
-		item.base = ctx.getBaseComponents(item.id.toString())
+		item.base = ctx.getItemComponents(item.id)
 	},
 	set_loot_table: ({ name, seed }) => (item) => {
 		item.set('container_loot', new NbtCompound()

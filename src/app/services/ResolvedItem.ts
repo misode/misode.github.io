@@ -11,28 +11,8 @@ export class ResolvedItem extends ItemStack {
 		super(item.id, item.count, item.components)
 	}
 
-	public static create(id: string | Identifier, count: number, components: Map<string, NbtTag>, baseGetter: (id: string) => ReadonlyMap<string, NbtTag>) {
-		if (typeof id === 'string') {
-			id = Identifier.parse(id)
-		}
-		const item = new ItemStack(id, count, components)
-		return new ResolvedItem(item, baseGetter(id.toString()))
-	}
-
 	public clone(): ResolvedItem {
 		return new ResolvedItem(super.clone(), this.base)
-	}
-
-	public flatten(): ItemStack {
-		const components = new Map(this.base)
-		for (const [key, value] of this.components) {
-			if (key.startsWith('!')) {
-				components.delete(key.slice(1))
-			} else {
-				components.set(key, value)
-			}
-		}
-		return new ItemStack(this.id, this.count, components)
 	}
 
 	private getTag(key: string) {

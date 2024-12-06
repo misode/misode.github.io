@@ -19,7 +19,7 @@ export const ModelPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
-		const resources = await getResources(version)
+		const resources = await getResources(version, new Map())
 		const blockModel = BlockModel.fromJson(safeJsonParse(text) ?? {})
 		blockModel.flatten(resources)
 		const wrapper = new ResourceWrapper(resources, {

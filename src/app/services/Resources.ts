@@ -1,18 +1,22 @@
+import { isObject } from '@spyglassmc/core'
+import type { ItemComponentsProvider, ItemModelProvider } from 'deepslate'
+import { ItemModel, NbtString } from 'deepslate'
 import type { BlockDefinitionProvider, BlockFlagsProvider, BlockModelProvider, BlockPropertiesProvider, ItemStack, TextureAtlasProvider, UV } from 'deepslate/render'
 import { BlockDefinition, BlockModel, Identifier, ItemRenderer, TextureAtlas, upperPowerOfTwo } from 'deepslate/render'
 import config from '../Config.js'
-import { message } from '../Utils.js'
+import { jsonToNbt, message } from '../Utils.js'
 import { fetchLanguage, fetchResources } from './DataFetcher.js'
 import type { VersionId } from './Versions.js'
+import { checkVersion } from './Versions.js'
 
 const Resources: Record<string, ResourceManager | Promise<ResourceManager>> = {}
 
-export async function getResources(version: VersionId) {
+export async function getResources(version: VersionId, itemComponents: Map<string, Map<string, unknown>>) {
 	if (!Resources[version]) {
 		Resources[version] = (async () => {
 			try {
-				const { blockDefinitions, models, uvMapping, atlas} = await fetchResources(version)
-				Resources[version] = new ResourceManager(blockDefinitions, models, uvMapping, atlas)
+				const { blockDefinitions, models, uvMapping, atlas, itemDefinitions } = await fetchResources(version)
+				Resources[version] = new ResourceManager(version, blockDefinitions, models, uvMapping, atlas, itemDefinitions, itemComponents)
 				return Resources[version]
 			} catch (e) {
 				console.error('Error: ', e)
@@ -27,7 +31,7 @@ export async function getResources(version: VersionId) {
 const RENDER_SIZE = 128
 const ItemRenderCache = new Map<string, Promise<string>>()
 
-export async function renderItem(version: VersionId, item: ItemStack) {
+export async function renderItem(version: VersionId, item: ItemStack, baseComponents: Map<string, Map<string, unknown>>) {
 	const cache_key = `${version} ${item.toString()}`
 	const cached = ItemRenderCache.get(cache_key)
 	if (cached !== undefined) {
@@ -38,12 +42,12 @@ export async function renderItem(version: VersionId, item: ItemStack) {
 		const canvas = document.createElement('canvas')
 		canvas.width = RENDER_SIZE
 		canvas.height = RENDER_SIZE
-		const resources = await getResources(version)
+		const resources = await getResources(version, baseComponents)
 		const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true })
 		if (!gl) {
 			throw new Error('Cannot get WebGL2 context')
 		}
-		const renderer = new ItemRenderer(gl, item, resources)
+		const renderer = new ItemRenderer(gl, item, resources, { display_context: 'gui' })
 		renderer.drawItem()
 		return canvas.toDataURL()
 	})()
@@ -51,20 +55,27 @@ export async function renderItem(version: VersionId, item: ItemStack) {
 	return promise
 }
 
-interface Resources extends BlockDefinitionProvider, BlockModelProvider, TextureAtlasProvider, BlockFlagsProvider, BlockPropertiesProvider {}
+interface Resources extends BlockDefinitionProvider, BlockModelProvider, TextureAtlasProvider, BlockFlagsProvider, BlockPropertiesProvider, ItemModelProvider, ItemComponentsProvider {}
 
 export class ResourceManager implements Resources {
+	private readonly version: VersionId
 	private readonly blockDefinitions: { [id: string]: BlockDefinition }
 	private readonly blockModels: { [id: string]: BlockModel }
+	private readonly itemModels: { [id: string]: ItemModel }
 	private textureAtlas: TextureAtlas
+	private readonly itemComponents: Map<string, Map<string, unknown>>
 
-	constructor(blockDefinitions: Map<string, unknown>, models: Map<string, unknown>, uvMapping: any, textureAtlas: HTMLImageElement) {
+	constructor(version: VersionId, blockDefinitions: Map<string, unknown>, models: Map<string, unknown>, uvMapping: any, textureAtlas: HTMLImageElement, itemDefinitions: Map<string, unknown>, itemComponents: Map<string, Map<string, unknown>>) {
+		this.version = version
 		this.blockDefinitions = {}
 		this.blockModels = {}
+		this.itemModels = {}
 		this.textureAtlas = TextureAtlas.empty()
 		this.loadBlockDefinitions(blockDefinitions)
 		this.loadBlockModels(models)
 		this.loadBlockAtlas(textureAtlas, uvMapping)
+		this.loadItemModels(itemDefinitions)
+		this.itemComponents = itemComponents
 	}
 
 	public getBlockDefinition(id: Identifier) {
@@ -95,6 +106,20 @@ export class ResourceManager implements Resources {
 		return null
 	}
 
+	public getItemModel(id: Identifier) {
+		return this.itemModels[id.toString()]
+	}
+
+	public getItemComponents(id: Identifier) {
+		const components = this.itemComponents.get(id.toString()) ?? new Map<string, unknown>()
+		const result = new Map([...components.entries()].map(([k, v]) => [k, jsonToNbt(v)]))
+		// Hack to make this version range work without needing another deepslate version
+		if (checkVersion(this.version, '1.20.5', '1.21.2')) {
+			result.set('minecraft:item_model', new NbtString(id.toString()))
+		}
+		return result
+	}
+
 	private loadBlockModels(models: Map<string, unknown>) {
 		[...models.entries()].forEach(([id, model]) => {
 			this.blockModels[Identifier.create(id).toString()] = BlockModel.fromJson(model)
@@ -105,6 +130,14 @@ export class ResourceManager implements Resources {
 	private loadBlockDefinitions(definitions: Map<string, unknown>) {
 		[...definitions.entries()].forEach(([id, definition]) => {
 			this.blockDefinitions[Identifier.create(id).toString()] = BlockDefinition.fromJson(definition)
+		})
+	}
+
+	private loadItemModels(definitions: Map<string, unknown>) {
+		[...definitions.entries()].forEach(([id, definition]) => {
+			if (isObject(definition) && isObject((definition as any).model)) {
+				this.itemModels[Identifier.create(id).toString()] = ItemModel.fromJson((definition as any).model)
+			}
 		})
 	}
 
@@ -160,6 +193,14 @@ export class ResourceWrapper implements Resources {
 
 	public getDefaultBlockProperties(id: Identifier) {
 		return this.overrides.getDefaultBlockProperties?.(id) ?? this.wrapped.getDefaultBlockProperties(id)
+	}
+
+	public getItemModel(id: Identifier) {
+		return this.overrides.getItemModel?.(id) ?? this.wrapped.getItemModel(id)
+	}
+
+	public getItemComponents(id: Identifier) {
+		return this.overrides.getItemComponents?.(id) ?? this.wrapped.getItemComponents(id)
 	}
 }
 

@@ -1,9 +1,8 @@
 import type { ItemStack } from 'deepslate/core'
-import { Identifier } from 'deepslate/core'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
-import { fetchItemComponents, fetchRegistries } from '../services/index.js'
+import { fetchItemComponents } from '../services/index.js'
 import { ResolvedItem } from '../services/ResolvedItem.js'
 import { renderItem } from '../services/Resources.js'
 import { jsonToNbt } from '../Utils.js'
@@ -42,13 +41,13 @@ export function ItemDisplay({ item, slotDecoration, tooltip, advancedTooltip }: 
 	}, [baseComponents])
 	const resolvedItem = useMemo(() => {
 		return itemResolver(item)
-	}, [item, baseComponents])
+	}, [item, itemResolver])
 
 	const maxDamage = resolvedItem.getMaxDamage()
 	const damage = resolvedItem.getDamage()
 
 	return <div class="item-display" ref={el}>
-		<ItemItself item={resolvedItem} />
+		<RenderedItem item={resolvedItem} baseComponents={baseComponents} />
 		{item.count !== 1 && <>
 			<svg class="item-count" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMinYMid meet">
 				<text x="95" y="93" font-size="50" textAnchor="end" fontFamily="MinecraftSeven" fill="#373737">{item.count}</text>
@@ -74,34 +73,16 @@ export function ItemDisplay({ item, slotDecoration, tooltip, advancedTooltip }: 
 
 interface ResolvedProps extends Props {
 	item: ResolvedItem
+	baseComponents: Map<string, Map<string, unknown>> | undefined
 }
-function ItemItself({ item }: ResolvedProps) {
+function RenderedItem({ item, baseComponents }: ResolvedProps) {
 	const { version } = useVersion()
-
-	if (item.id.namespace !== Identifier.DEFAULT_NAMESPACE) {
-		return Octicon.package
-	}
-
-	const { value: allModels, loading: loadingModels } = useAsync(async () => {
-		const registries = await fetchRegistries(version)
-		return registries.get('model')
-	}, [version])
-
-	if (loadingModels || allModels === undefined) {
-		return null
-	}
-
-	const modelPath = `item/${item.id.path}`
-	if (allModels && allModels.includes('minecraft:' + modelPath)) {
-		return <RenderedItem item={item} />
-	}
-
-	return Octicon.package
-}
-
-function RenderedItem({ item }: ResolvedProps) {
-	const { version } = useVersion()
-	const { value: src } = useAsync(() => renderItem(version, item.flatten()), [version, item])
+	const { value: src } = useAsync(async () => {
+		if (!baseComponents) {
+			return undefined
+		}
+		return renderItem(version, item, baseComponents)
+	}, [version, item, baseComponents])
 
 	if (src) {
 		return <>

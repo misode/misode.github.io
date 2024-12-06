@@ -209,15 +209,19 @@ export function getAssetUrl(versionId: VersionId, type: string, path: string): s
 
 export async function fetchResources(versionId: VersionId) {
 	const version = config.versions.find(v => v.id === versionId)!
+	const needsItemModels = checkVersion(versionId, '1.20.5')
+	const hasItemModels = checkVersion(versionId, '1.21.4')
 	await validateCache(version)
 	try {
-		const [blockDefinitions, models, uvMapping, atlas] = await Promise.all([
+		const [blockDefinitions, models, uvMapping, atlas, itemDefinitions] = await Promise.all([
 			fetchAllPresets(versionId, 'block_definition'),
 			fetchAllPresets(versionId, 'model'),
 			fetch(`${mcmeta(version, 'atlas')}/all/data.min.json`).then(r => r.json()),
 			loadImage(`${mcmeta(version, 'atlas')}/all/atlas.png`),
+			// Always download the 1.21.4 item models for the version range 1.20.5 - 1.21.3
+			needsItemModels ? fetchAllPresets(hasItemModels ? versionId : '1.21.4', 'item_definition') : new Map<string, unknown>(),
 		])
-		return { blockDefinitions, models, uvMapping, atlas }
+		return { blockDefinitions, models, uvMapping, atlas, itemDefinitions }
 	} catch (e) {
 		throw new Error(`Error occured while fetching resources: ${message(e)}`)
 	}

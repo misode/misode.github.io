@@ -18,7 +18,7 @@ export const BlockStatePreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
-		const resources = await getResources(version)
+		const resources = await getResources(version, new Map())
 		const definition = BlockDefinition.fromJson(safeJsonParse(text) ?? {})
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {
