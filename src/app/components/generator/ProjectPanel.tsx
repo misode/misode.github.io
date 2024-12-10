@@ -2,7 +2,7 @@ import { Identifier } from 'deepslate'
 import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../Config.js'
-import { DRAFT_PROJECT, getProjectRoot, useLocale, useProject } from '../../contexts/index.js'
+import { DRAFT_PROJECT, getProjectRoot, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
@@ -17,6 +17,7 @@ import { ProjectCreation } from './ProjectCreation.jsx'
 import { ProjectDeletion } from './ProjectDeletion.jsx'
 
 export function ProjectPanel() {
+	const { version } = useVersion()
 	const { locale } = useLocale()
 	const { showModal } = useModal()
 	const { projects, project, projectUri, setProjectUri, changeProject } = useProject()
@@ -54,6 +55,12 @@ export function ProjectPanel() {
 			const data = await client.fs.readFile(projectRoot + e)
 			return [e, data] as [string, Uint8Array]
 		}))
+		if (!zipEntries.some(e => e[0] === 'pack.mcmeta')) {
+			const packFormat = config.versions.find(v => v.id === version)!.pack_format
+			const packMcmeta = { pack: { description: project.name, pack_format: packFormat } }
+			const data = new TextEncoder().encode(JSON.stringify(packMcmeta, null, 2))
+			zipEntries.push(['pack.mcmeta', data])
+		}
 		const url = await writeZip(zipEntries)
 		download.current.setAttribute('href', url)
 		download.current.setAttribute('download', `${project.name.replaceAll(' ', '_')}.zip`)
