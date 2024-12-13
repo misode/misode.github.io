@@ -12,11 +12,11 @@ declare var __LATEST_VERSION__: string
 export const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
+const vanillaMcdocUrl = 'https://raw.githubusercontent.com/SpyglassMC/vanilla-mcdoc'
 const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 const fixesUrl = 'https://raw.githubusercontent.com/misode/mcfixes'
 const versionDiffUrl = 'https://mcmeta-diff.misode.workers.dev'
 const whatsNewUrl = 'https://whats-new.misode.workers.dev'
-const vanillaMcdocUrl = 'https://proxy.misode.workers.dev/mcdoc'
 
 type McmetaTypes = 'summary' | 'data' | 'data-json' | 'assets' | 'assets-json' | 'registries' | 'atlas'
 
@@ -48,9 +48,14 @@ export function getVersionChecksum(versionId: VersionId) {
 	return version.ref
 }
 
-export async function fetchVanillaMcdoc() {
+export interface VanillaMcdocSymbols {
+	ref: string,
+	mcdoc: Record<string, unknown>,
+	'mcdoc/dispatcher': Record<string, Record<string, unknown>>,
+}
+export async function fetchVanillaMcdoc(): Promise<VanillaMcdocSymbols> {
 	try {
-		return cachedFetch(vanillaMcdocUrl, { decode: res => res.arrayBuffer(), refresh: true })
+		return cachedFetch<VanillaMcdocSymbols>(`${vanillaMcdocUrl}/generated/symbols.json`, { refresh: true })
 	} catch (e) {
 		throw new Error(`Error occured while fetching vanilla-mcdoc: ${message(e)}`)
 	}

@@ -12,7 +12,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
-import type { VersionMeta } from './DataFetcher.js'
+import type { VanillaMcdocSymbols, VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import { IndexedDbFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
@@ -302,7 +302,7 @@ export class SpyglassService {
 				defaultConfig: core.ConfigService.merge(core.VanillaConfig, {
 					env: {
 						gameVersion: version.dynamic ? version.id : version.ref,
-						dependencies: ['@vanilla-mcdoc', '@misode-mcdoc'],
+						dependencies: ['@misode-mcdoc'],
 						customResources: {
 							text_component: {
 								category: 'text_component',
@@ -366,11 +366,10 @@ async function compressBall(files: [string, string][]): Promise<Uint8Array> {
 const initialize: core.ProjectInitializer = async (ctx) => {
 	const { config, logger, meta, externals, cacheRoot } = ctx
 
-	meta.registerDependencyProvider('@vanilla-mcdoc', async () => {
-		const uri: string = new core.Uri('downloads/vanilla-mcdoc.tar.gz', cacheRoot).toString()
-		const buffer = await fetchVanillaMcdoc()
-		await core.fileUtil.writeFile(externals, uri, new Uint8Array(buffer))
-		return { info: { startDepth: 1 }, uri }
+	const vanillaMcdoc = await fetchVanillaMcdoc()
+	meta.registerSymbolRegistrar('vanilla-mcdoc', {
+		checksum: vanillaMcdoc.ref,
+		registrar: vanillaMcdocRegistrar(vanillaMcdoc),
 	})
 
 	meta.registerDependencyProvider('@misode-mcdoc', async () => {
@@ -475,4 +474,32 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 			}
 		},
 	})
+}
+
+const VanillaMcdocUri = 'mcdoc://vanilla-mcdoc/symbols.json'
+
+function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols): core.SymbolRegistrar {
+	return (symbols) => {
+		const start = performance.now()
+		for (const [id, typeDef] of Object.entries(vanillaMcdoc.mcdoc)) {
+			symbols.query(VanillaMcdocUri, 'mcdoc', id).enter({
+				data: { data: { typeDef } },
+				usage: { type: 'declaration' },
+			})
+		}
+		for (const [dispatcher, ids] of Object.entries(vanillaMcdoc['mcdoc/dispatcher'])) {
+			symbols.query(VanillaMcdocUri, 'mcdoc/dispatcher', dispatcher)
+				.enter({ usage: { type: 'declaration' } })
+				.onEach(Object.entries(ids), ([id, typeDef], query) => {
+					query.member(id, (memberQuery) => {
+						memberQuery.enter({
+							data: { data: { typeDef } },
+							usage: { type: 'declaration' },
+						})
+					})
+				})
+		}
+		const duration = performance.now() - start
+		console.log(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
+	}
 }
