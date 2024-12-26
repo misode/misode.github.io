@@ -314,6 +314,7 @@ export class SpyglassService {
 							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
 								[gen.path ?? gen.id, {
 									category: gen.id,
+									pack: gen.tags?.includes('assets') ? 'assets' : 'data',
 								}]
 							)),
 						},
