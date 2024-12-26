@@ -711,6 +711,15 @@
       "dependency": "ohthetreesyoullgrow",
       "minVersion": "1.20",
       "wiki": "https://github.com/CorgiTaco/Oh-The-Trees-Youll-Grow/wiki/Generating-Your-Tree-With-Data-Packs!"
+    },
+    {
+      "id": "sky_aesthetics:sky",
+      "url": "sky_aesthetics/sky",
+      "path": "sky_aesthetics/sky",
+      "tags": ["partners"],
+      "dependency": "sky_aesthetics",
+      "minVersion": "1.21.3",
+      "wiki": "https://github.com/TathanDev/SkyAesthetics/wiki/Custom-Sky"
     }
   ],
   "legacyGuides": [
