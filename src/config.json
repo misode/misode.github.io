@@ -716,7 +716,7 @@
       "id": "sky_aesthetics:sky",
       "url": "sky_aesthetics/sky",
       "path": "sky",
-      "tags": ["partners", "assets"],
+      "tags": ["partners"],
       "dependency": "sky_aesthetics",
       "minVersion": "1.21.1",
       "wiki": "https://github.com/TathanDev/SkyAesthetics/wiki/Custom-Sky"

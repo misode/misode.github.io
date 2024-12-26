@@ -17,7 +17,6 @@ dispatch minecraft:resource[sky_aesthetics:sky] to struct SkyProperties {
         /// The R, G, B and alpha value for the color
         #[until="1.21.2"]
         color: [float] @ 4,
-        
         /// The R, G and B value for the color
         #[since="1.21.3"]
         color: [float] @ 3 ,
