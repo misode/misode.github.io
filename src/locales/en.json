@@ -97,7 +97,7 @@
   "generator.not_found": "Cannot find generator \"%0%\"",
   "generator.ohthetreesyoullgrow:configured_feature": "OTTYG Feature",
   "generator.sky_aesthetics:sky": "Custom Sky",
-  "generator.pack_mcmeta": "Pack.mcmeta",
+  "generator.pack_mcmeta": "pack.mcmeta",
   "generator.painting_variant": "Painting Variant",
   "generator.post_effect": "Post Effect",
   "generator.predicate": "Predicate",
