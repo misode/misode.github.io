@@ -65,7 +65,7 @@ enum(string) EnvironmentType {
 }
 
 struct Entrypoints {
-	[string]: (string | Entrypoint),
+	[string]: [(string | Entrypoint)],
 }
 
 struct Entrypoint {
