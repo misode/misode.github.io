@@ -722,7 +722,7 @@
     },
     {
       "id": "sky_aesthetics:sky",
-      "url": "sky_aesthetics/sky",
+      "url": "sky-aesthetics/sky",
       "path": "sky",
       "tags": ["partners", "assets"],
       "dependency": "sky_aesthetics",
