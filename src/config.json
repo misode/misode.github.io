@@ -606,6 +606,14 @@
       "wiki": "https://minecraft.wiki/w/Shader#Post-processing_effects"
     },
     {
+      "id": "fabric:fabric_mod_json",
+      "url": "fabric/fabric-mod-json",
+      "noPath": true,
+      "tags": ["partners"],
+      "dependency": "fabric",
+      "wiki": "https://wiki.fabricmc.net/documentation:fabric_mod_json"
+    },
+    {
       "id": "immersive_weathering:block_growth",
       "url": "immersive-weathering/block-growth",
       "path": "block_growths",

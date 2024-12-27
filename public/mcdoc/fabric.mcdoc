@@ -1,0 +1,132 @@
+// Sources:
+// - https://wiki.fabricmc.net/documentation:fabric_mod_json
+// - https://wiki.fabricmc.net/documentation:fabric_mod_json_spec
+// - https://github.com/FabricMC/fabric-loader/blob/master/src/main/java/net/fabricmc/loader/impl/metadata/V1ModMetadataParser.java
+dispatch minecraft:resource[fabric:fabric_mod_json] to struct FabricModJson {
+	/// Needed for internal mechanisms. Must always be `1`.
+	schemaVersion: 1,
+	/// The mod's identifier of Latin letters, digits, or underscores.
+	id: string,
+	/// The mod's version. Optionally matching the [Semantic Versioning 2.0.0](https://semver.org/) specification.
+	version: string @ 1..,
+	/// User-friendly mod's name. Defaults to `id`.
+	name?: string,
+	/// The mod's description. Defaults to an empty string.
+	description?: string,
+	/// Authors of the mod.
+	authors?: People,
+	/// Contributors to the mod.
+	contributors?: People,
+	/// Contact information for the project
+	contact?: ContactInfo,
+	/// Licensing information.
+	/// Should provide the complete set of preferred licenses conveying the entire mod package. In other words, compliance with all listed licenses should be sufficient for usage, redistribution, etc. of the mod package as a whole.
+	/// For cases where a part of code is dual-licensed, choose the preferred license. The list is not exhaustive, serves primarily as a kind of hint, and does not prevent you from granting additional rights/licenses on a case-by-case basis.
+	/// To aid automated tools, it is recommended to use [SPDX License Identifiers](https://spdx.org/licenses/) for open-source licenses.
+	license?: License,
+	/// The mod's icon file. Should be a square PNG image.
+	/// Resource packs use 128×128, but that is not a hard requirement. A power of two is recommended.
+	/// Can also be provided as a dictionary of images widths to their file paths.
+	icon?: Icon,
+	/// Defines the list of ids of the mod. It can be seen as the aliases of the mod.
+	/// Fabric Loader will treat these ids as mods that exist.
+	/// If there are other mods using that id, they will not be loaded.
+	provides?: [string],
+	/// Defines where the mod runs: only on the client side (client mod), only on the dedicated server side (plugin) or on both sides (regular mod).
+	environment?: EnvironmentType,
+	/// Main classes of the mod that will be loaded.
+	entrypoints?: Entrypoints,
+	/// Nested JARs inside your mod's JAR to load.
+	jars?: [Jar],
+	/// Adapters for used languages to their adapter classes full names.
+	languageAdapters?: LanguageAdapters,
+	/// List of mixin configuration files. Each entry is the path to the mixin configuration file inside your mod's JAR.
+	mixins?: Mixins,
+	/// Access widener configuration file.
+	accessWidener?: string,
+	/// Dependencies required to run. Without them a game will crash.
+	depends?: Dependencies,
+	/// Dependencies not required to run. Without them a game will log a warning.
+	recommends?: Dependencies,
+	/// Dependencies not required to run. Use this as a kind of metadata.
+	suggests?: Dependencies,
+	/// Mods whose together with yours might cause a game crash. With them a game will crash.
+	breaks?: Dependencies,
+	/// Mods whose together with yours cause some kind of bugs, etc. With them a game will log a warning.
+	conflicts?: Dependencies,
+	/// Custom fields. It is recommended to namespace fields to avoid conflicts.
+	custom?: CustomValues,
+}
+
+enum(string) EnvironmentType {
+	Universal = "*",
+	Client = "client",
+	Server = "server",
+}
+
+struct Entrypoints {
+	[string]: (string | Entrypoint),
+}
+
+struct Entrypoint {
+	value: string,
+	/// Defaults to `default`.
+	adapter?: string,
+}
+
+struct Jar {
+	/// Path inside your mod's JAR to the nested JAR.
+	file: string,
+}
+
+type Mixins = [(string | Mixin)]
+
+struct Mixin {
+	/// The path to the mixin configuration file inside your mod's JAR.
+	config: string,
+	/// Defaults to universal (`*`).
+	environment?: EnvironmentType,
+}
+
+struct Dependencies {
+	[string]: (string | [string]),
+}
+
+type People = [(string | Person)]
+
+struct Person {
+	/// The real name, or username of the person.
+	name: string,
+	/// The person's contact information.
+	contact?: ContactInfo,
+}	
+
+struct ContactInfo {
+	/// Contact e-mail address.
+	email?: #[email] string,
+	/// IRC channel.
+	irc?: string,
+	/// Link to the project or user homepage.
+	homepage?: #[url] string,
+	/// Link to the project's issue tracker.
+	issues?: #[url] string,
+	/// Link to the project's source code repository
+	sources?: string,
+	[string]: string,
+}
+
+type License = (string | [string])
+
+type Icon = (string | IconMap)
+
+struct IconMap {
+	[#[integer(min=1)] string]: string,
+}
+
+struct LanguageAdapters {
+	[string]: string,
+}
+
+struct CustomValues {
+	[string]: any,
+}
