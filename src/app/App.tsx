@@ -1,13 +1,22 @@
+import type { RouterOnChangeArgs } from 'preact-router'
 import { Router } from 'preact-router'
 import '../styles/global.css'
 import '../styles/nodes.css'
+import { Analytics } from './Analytics.js'
 import { Header } from './components/index.js'
 import { Changelog, Convert, Customized, Generator, Generators, Guide, Guides, Home, LegacyPartners, Partners, Sounds, Transformation, Versions, WhatsNew, Worldgen } from './pages/index.js'
+import { cleanUrl } from './Utils.js'
 
 export function App() {
+	const changeRoute = (e: RouterOnChangeArgs) => {
+		window.dispatchEvent(new CustomEvent('replacestate'))
+		// Needs a timeout to ensure the title is set correctly
+		setTimeout(() => Analytics.pageview(cleanUrl(e.url)))
+	}
+
 	return <>
 		<Header />
-		<Router>
+		<Router onChange={changeRoute}>
 			<Home path="/" />
 			<Generators path="/generators" />
 			<Worldgen path="/worldgen" />

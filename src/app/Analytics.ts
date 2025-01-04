@@ -4,6 +4,13 @@ import type { VersionId } from './services/index.js'
 export type Method = 'menu' | 'hotkey'
 
 export namespace Analytics {
+	export function pageview(url: string) {
+		gtag('event', 'page_view', {
+			page_location: url,
+			page_title: document.title,
+		})
+	}
+
 	export function setLocale(locale: string) {
 		gtag('set', {
 			locale,

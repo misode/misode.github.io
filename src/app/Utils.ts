@@ -64,7 +64,7 @@ export function hashString(s: string) {
 }
 
 export function cleanUrl(url: string) {
-	return `/${url}/`.replaceAll('//', '/')
+	return `/${url}/`.replaceAll(/\/\/+/g, '/')
 }
 
 export function getPath(url: string) {

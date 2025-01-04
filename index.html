@@ -8,6 +8,7 @@
 		function gtag(){dataLayer.push(arguments);}
 		gtag('js', new Date());
 		gtag('config', 'G-S982VZS08T', {
+			send_page_view: false,
 			theme: localStorage.getItem('theme') || 'default',
 			version: localStorage.getItem('schema_version') || '1.21.2',
 			locale: localStorage.getItem('language') || 'en',
