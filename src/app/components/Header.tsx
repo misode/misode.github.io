@@ -2,7 +2,7 @@ import { getCurrentUrl, Link, route } from 'preact-router'
 import config from '../Config.js'
 import { useLocale, useTheme, useTitle, useVersion } from '../contexts/index.js'
 import { checkVersion } from '../services/index.js'
-import { cleanUrl, getGenerator } from '../Utils.js'
+import { cleanUrl, getGenerator, SOURCE_REPO_URL } from '../Utils.js'
 import { Btn, BtnMenu, Icons, Octicon } from './index.js'
 
 const Themes: Record<string, keyof typeof Octicon> = {
@@ -50,7 +50,7 @@ export function Header() {
 					</BtnMenu>
 				</li>
 				<li class="dimmed">
-					<a href="https://github.com/misode/misode.github.io" target="_blank" rel="noreferrer" class="tooltipped tip-sw" aria-label={locale('github')}>
+					<a href={SOURCE_REPO_URL} target="_blank" rel="noreferrer" class="tooltipped tip-sw" aria-label={locale('github')}>
 						{Octicon.mark_github}
 					</a>
 				</li>

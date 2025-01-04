@@ -6,7 +6,7 @@ import { useSpyglass } from '../contexts/Spyglass.jsx'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { latestVersion } from '../services/DataFetcher.js'
-import { getGenerator } from '../Utils.js'
+import { getGenerator, SOURCE_REPO_URL } from '../Utils.js'
 import { Octicon } from './index.js'
 
 type ErrorPanelProps = {
@@ -55,7 +55,7 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 	}, [error])
 
 	const url = useMemo(() => {
-		let url ='https://github.com/misode/misode.github.io/issues/new'
+		let url =`${SOURCE_REPO_URL}/issues/new`
 		const fullName = (error instanceof Error ? `${error.name}: ` : '') + name
 		url += `?title=${encodeURIComponent(fullName)}`
 		let body = ''
