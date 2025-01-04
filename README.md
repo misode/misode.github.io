@@ -16,10 +16,10 @@ npm run dev
 ## Translating
 misode.github.io supports multiple languages. If you'd like to help us translate this project to your language, it would be really appreciated! If your language is not on this list, please create an issue for it.
 
-[![Localization status](https://l10n.spgoding.com/widgets/minecraft-schemas/-/multi-auto.svg)](https://l10n.spgoding.com/engage/minecraft-schemas/?utm_source=widget)
+[![Localization status](https://weblate.spyglassmc.com/widgets/misode-github-io/-/multi-auto.svg)](https://weblate.spyglassmc.com/engage/misode-github-io/?utm_source=widget)
 
-1. Go to the [localization website](https://l10n.spgoding.com) (hosted by [SPGoding](https://github.com/SPGoding)).
+1. Go to the [Spyglassmc localization website](https://weblate.spyglassmc.com/projects/) (hosted by [SPGoding](https://github.com/SPGoding)).
 2. [Register](https://l10n.spgoding.com/accounts/register) by linking your GitHub account (recommended), or using your email.
     - Note that the username and email will be shown in the [repository](https://github.com/misode/misode.github.io)'s git commit log.
-3. See the components of misode.github.io [here](https://l10n.spgoding.com/projects/minecraft-schemas/).
+3. See the components of misode.github.io [here](https://weblate.spyglassmc.com/projects/misode-github-io/web-app/).
 4. Start translating!
