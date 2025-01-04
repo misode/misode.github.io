@@ -23,3 +23,25 @@ misode.github.io supports multiple languages. If you'd like to help us translate
     - Note that the username and email will be shown in the [repository](https://github.com/misode/misode.github.io)'s git commit log.
 3. See the components of misode.github.io [here](https://weblate.spyglassmc.com/projects/misode-github-io/web-app/).
 4. Start translating!
+
+## Forking
+You are allowed to fork this repository and use its base as a way to publish your own generator site, but I ask to make a few changes before publishing.
+
+1. Change links to this repo to your own repo. This can be done at the top of `Utils.ts` by changing `export const SOURCE_REPO_URL = ...`.
+2. Remove or replace the Google Analytics tracking code in the root `index.html` file. To avoid breaking the rest of the website, you can replace everything between the `<!-- Global site tag (gtag.js) - Google Analytics -->` markers with this:
+```html
+<script>
+    function gtag() {}
+</script>
+```
+3. Disable the ads, first by remove two lines in `index.html`:
+```html
+<script async src="https://media.ethicalads.io/media/client/ethicalads.min.js"></script>
+...
+<div data-ea-publisher="misode-github-io" data-ea-manual="true" id="ad-placeholder"></div>
+```
+4. Secondly, you can remove the ad component, for example by returning `<></>` in `Ad.tsx`, or by removing the `{!gen.tags?.includes('partners') && <Ad id="data-pack-generator" type="text" />}` line in `SchemaGenerator.tsx`.
+5. Remove the contributors and giscus comment section on the homepage. You can do this easily by removing `<Contributors />` and `<Giscus />` in `Home.tsx`.
+6. Make some other changes to the home page. This will depend on what you need, but you might want to remove stuff like `<WhatsNew />` and/or `<Tools />`.
+7. Edit the `Footer.tsx` component. You can remove the donation link, but I would appreciate if you still kept a note that your fork is based on my work, for example by linking to my github profile or this repository.
+8. Change some of the translations in `src/locales/en.json`. Particularly you might want to change the `title.home` key.
