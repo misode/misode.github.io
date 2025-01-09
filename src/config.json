@@ -165,9 +165,16 @@
     },
     {
       "id": "1.21.4",
-      "dynamic": true,
+      "ref": "1.21.4",
       "name": "1.21.4",
       "pack_format": 61,
+      "show": true
+    },
+    {
+      "id": "1.21.5",
+      "dynamic": true,
+      "name": "1.21.5",
+      "pack_format": 62,
       "show": true
     }
   ],
@@ -263,6 +270,11 @@
       "id": "trial_spawner",
       "url": "trial-spawner",
       "minVersion": "1.21.2"
+    },
+    {
+      "id": "pig_variant",
+      "url": "pig-variant",
+      "minVersion": "1.21.5"
     },
     {
       "id": "text_component",
