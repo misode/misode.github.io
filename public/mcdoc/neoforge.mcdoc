@@ -52,12 +52,14 @@ dispatch neoforge:biome_modifier[neoforge:remove_spawns] to struct RemoveSpawns 
 dispatch neoforge:biome_modifier[neoforge:add_carvers] to struct AddCarvers {
 	...BiomeModifierBase,
 	carvers: (#[id(registry="worldgen/configured_carver",tags="allowed")] string | [#[id="worldgen/configured_carver"] string]),
+	#[until="1.21.2"]
 	step: CarveStep,
 }
 
 dispatch neoforge:biome_modifier[neoforge:remove_carvers] to struct RemoveCarvers {
 	...BiomeModifierBase,
 	carvers: (#[id(registry="worldgen/configured_carver",tags="allowed")] string | [#[id="worldgen/configured_carver"] string]),
+	#[until="1.21.2"]
 	step: (CarveStep | [CarveStep]),
 }
 
