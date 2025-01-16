@@ -355,6 +355,8 @@ const selectRegistries = new Set([
 	'rule_test',
 	'slot_display',
 	'stat_type',
+	'test_instance_type',
+	'test_environment_definition_type',
 	'trigger_type',
 	'worldgen/biome_source',
 	'worldgen/block_state_provider_type',

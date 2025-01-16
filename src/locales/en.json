@@ -121,6 +121,8 @@
   "generator.tag/worldgen/structure": "Structure Tag",
   "generator.tag/worldgen/structure_set": "Structure Set Tag",
   "generator.tag/worldgen/world_preset": "World Preset Tag",
+  "generator.test_instance": "Test Instance",
+  "generator.test_environment": "Test Environment",
   "generator.text_component": "Text Component",
   "generator.trial_spawner": "Trial Spawner",
   "generator.trim_material": "Trim Material",
