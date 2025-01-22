@@ -277,6 +277,16 @@
       "minVersion": "1.21.5"
     },
     {
+      "id": "cat_variant",
+      "url": "cat-variant",
+      "minVersion": "1.21.5"
+    },
+    {
+      "id": "frog_variant",
+      "url": "frog-variant",
+      "minVersion": "1.21.5"
+    },
+    {
       "id": "test_instance",
       "url": "test-instance",
       "minVersion": "1.21.5"
