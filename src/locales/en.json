@@ -10,6 +10,7 @@
   "back": "Back",
   "change.obsolete": "This change has been replaced by a later change in this release cycle",
   "changelog": "Technical changelog",
+  "changelog.edit_on_github": "Edit technical changes on GitHub",
   "changelog.no_results": "No documented changes",
   "changelog.search": "Search changes",
   "changelog.show_more": "Show %0% more changes",
