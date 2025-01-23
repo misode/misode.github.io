@@ -14,7 +14,11 @@ export function FileView({ docAndNode: original }: FileViewProps) {
 
 	const [error, errorRetry] = useErrorBoundary()
 	if (error) {
-		return <ErrorPanel error={`Error viewing the file: ${message(error)}`} onDismiss={errorRetry} />
+		const viewError = new Error(`Error viewing the file: ${message(error)}`)
+		if (error.stack) {
+			viewError.stack = error.stack
+		}
+		return <ErrorPanel error={viewError} onDismiss={errorRetry} />
 	}
 
 	const docAndNode = useDocAndNode(original)
