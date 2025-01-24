@@ -105,6 +105,10 @@ function GeneratorTitle({ title, gen }: GeneratorTitleProps) {
 					<Link class="flex items-center cursor-pointer no-underline rounded p-1" href={cleanUrl(g.url)} onClick={() => setActive(false)}>
 						{locale(`generator.${g.id}`)}
 						{Object.keys(Icons).includes(g.id) ? Icons[g.id as keyof typeof Icons] : undefined}
+						<div class="m-auto"></div>
+						{g.tags?.filter(t => t === 'assets').map(t =>
+							<div class="badge ml-2 mr-0 text-sm" style="--color: #555;">{t}</div>
+						)}
 					</Link>
 				)}
 			</div>}

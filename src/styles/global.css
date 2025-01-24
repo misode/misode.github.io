@@ -239,6 +239,7 @@ nav li .btn svg {
 	height: 16px;
 	fill: var(--nav);
 	margin-left: 8px;
+	margin-right: 6px;
 	transition: margin 0.2s;
 }
 
@@ -248,6 +249,7 @@ nav li .btn svg {
 
 .gen-results > a:hover svg {
 	margin-left: 14px;
+	margin-right: 0px;
 }
 
 header .btn-menu > .btn {
