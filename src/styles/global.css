@@ -136,18 +136,20 @@ header {
 	background-color: var(--background-2);
 }
 
-.title {
-	display: flex;
-	align-items: center;
-}
-
 .title h1 {
-	font-size: 27px;
 	color: var(--nav);
 }
 
-.home-link {
-	margin: 0 8px 0 0;
+.title h1 svg {
+	width: 24px;
+	height: 24px;
+	fill: var(--nav);
+	margin-left: 8px;
+	transition: margin 0.2s;
+}
+
+.title h1:hover svg {
+	margin-left: 14px;
 }
 
 .home-link svg {
@@ -221,6 +223,31 @@ nav li .btn svg {
 .title .btn-menu > .btn svg {
 	width: 24px;
 	height: 24px;
+}
+
+.gen-menu {
+	background-color: var(--background-2);
+	color: var(--text-2);
+}
+
+.gen-menu input {
+	background-color: var(--background-1);
+}
+
+.gen-results > a svg {
+	width: 16px;
+	height: 16px;
+	fill: var(--nav);
+	margin-left: 8px;
+	transition: margin 0.2s;
+}
+
+.gen-results > a:hover {
+	background-color: var(--background-3);
+}
+
+.gen-results > a:hover svg {
+	margin-left: 14px;
 }
 
 header .btn-menu > .btn {
@@ -3047,10 +3074,6 @@ hr {
 @media screen and (max-width: 580px) {
 	.card-group {
 		grid-template-columns: 1fr;
-	}
-
-	.title h1 {
-		font-size: 18px;
 	}
 
 	body nav li {
