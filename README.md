@@ -1,5 +1,5 @@
 # misode.github.io
-Data Pack Generators and Guides for Minecraft Java Edition
+> Data Pack Generators for Minecraft Java Edition
 
 https://misode.github.io/
 
@@ -23,6 +23,15 @@ misode.github.io supports multiple languages. If you'd like to help us translate
     - Note that the username and email will be shown in the [repository](https://github.com/misode/misode.github.io)'s git commit log.
 3. See the components of misode.github.io [here](https://weblate.spyglassmc.com/projects/misode-github-io/web-app/).
 4. Start translating!
+
+## Modded Generators
+This website contains a few [non-vanilla generators](https://misode.github.io/predicate/). It is possible to contribute additional generators. If instead you are interested in making custom generators but don't want them part of the main website, see the [forking section](#forking) below.
+
+1. Create a new file `public/mcdoc/<your_project>.mcdoc`. This will contain the definitions of the
+2. Create a new generator entry in the `src/app/config.json` file for each generator page that you want to add. Set its `dependency` field to the name of the mcdoc file you created.
+3. Add translation key for each generator in `src/locales/en.json`, named `generator.<id>`, and a translation key named `partner.<dependency>`.
+4. The final step will be to write the generator definitions in the mcdoc file. Apart from the [technical specification](https://spyglassmc.com/user/mcdoc/), there is no documentation for the mcdoc format. It is a custom language describing JSON and NBT structures in the game. I recommend taking a look at how the other modded generators have their types. You can also look at the [vanilla mcdoc definitions](https://github.com/SpyglassMC/vanilla-mcdoc).
+5. Feel free to open a PR even when you are not ready with the types, or if you want help with writing them.
 
 ## Forking
 You are allowed to fork this repository and use its base as a way to publish your own generator site, but I ask to make a few changes before publishing.
