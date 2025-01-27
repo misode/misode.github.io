@@ -234,6 +234,10 @@ nav li .btn svg {
 	background-color: var(--background-1);
 }
 
+.gen-results > a {
+	outline-offset: -2px;
+}
+
 .gen-results > a svg {
 	width: 16px;
 	height: 16px;
@@ -243,10 +247,12 @@ nav li .btn svg {
 	transition: margin 0.2s;
 }
 
+.gen-results > a:focus-visible,
 .gen-results > a:hover {
 	background-color: var(--background-3);
 }
 
+.gen-results > a:focus-visible svg,
 .gen-results > a:hover svg {
 	margin-left: 14px;
 	margin-right: 0px;
