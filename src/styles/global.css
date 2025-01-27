@@ -225,20 +225,20 @@ nav li .btn svg {
 	height: 24px;
 }
 
-.gen-menu {
+.fancy-menu {
 	background-color: var(--background-2);
 	color: var(--text-2);
 }
 
-.gen-menu input {
+.fancy-menu input {
 	background-color: var(--background-1);
 }
 
-.gen-results > a {
+.gen-result {
 	outline-offset: -2px;
 }
 
-.gen-results > a svg {
+.gen-result svg {
 	width: 16px;
 	height: 16px;
 	fill: var(--nav);
@@ -247,13 +247,13 @@ nav li .btn svg {
 	transition: margin 0.2s;
 }
 
-.gen-results > a:focus-visible,
-.gen-results > a:hover {
+.gen-result:focus-visible,
+.gen-result:hover {
 	background-color: var(--background-3);
 }
 
-.gen-results > a:focus-visible svg,
-.gen-results > a:hover svg {
+.gen-result:focus-visible svg,
+.gen-result:hover svg {
 	margin-left: 14px;
 	margin-right: 0px;
 }

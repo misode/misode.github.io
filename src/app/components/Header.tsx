@@ -1,10 +1,10 @@
 import { getCurrentUrl, Link } from 'preact-router'
-import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
+import { useCallback } from 'preact/hooks'
 import type { ConfigGenerator } from '../Config.js'
 import config from '../Config.js'
 import { useLocale, useTheme, useTitle, useVersion } from '../contexts/index.js'
-import { useFocus } from '../hooks/useFocus.js'
 import { cleanUrl, getGenerator, SOURCE_REPO_URL } from '../Utils.js'
+import { FancyMenu } from './FancyMenu.jsx'
 import { Btn, BtnMenu, Icons, Octicon } from './index.js'
 
 const Themes: Record<string, keyof typeof Octicon> = {
@@ -63,83 +63,40 @@ function GeneratorTitle({ title, gen }: GeneratorTitleProps) {
 	const { locale } = useLocale()
 	const { version } = useVersion()
 
-	const [active, setActive] = useFocus()
-	const [search, setSearch] = useState('')
-	const inputRef = useRef<HTMLInputElement>(null)
-	const resultsRef = useRef<HTMLDivElement>(null)
-
 	const icon = Object.keys(Icons).includes(gen.id) ? gen.id as keyof typeof Icons : undefined
 
-	const generators = useMemo(() => {
-		let result = config.generators
+	const getGenerators = useCallback((search: string, close: () => void) => {
+		let results = config.generators
 			.filter(g => !g.dependency)
 			.map(g => ({ ...g, name: locale(`generator.${g.id}`).toLowerCase() }))
 		if (search) {
 			const parts = search.split(' ')
-			result = result.filter(g => parts.some(p => g.name.includes(p))
+			results = results.filter(g => parts.some(p => g.name.includes(p))
 				|| parts.some(p => g.tags?.some(t => t.includes(p)) ?? false))
 		}
-		result.sort((a, b) => a.name.localeCompare(b.name))
+		results.sort((a, b) => a.name.localeCompare(b.name))
 		if (search) {
-			result.sort((a, b) => (b.name.startsWith(search) ? 1 : 0) - (a.name.startsWith(search) ? 1 : 0))
+			results.sort((a, b) => (b.name.startsWith(search) ? 1 : 0) - (a.name.startsWith(search) ? 1 : 0))
 		}
-		return result
-	}, [locale, version, search])
-
-	const open = useCallback(() => {
-		setActive(true)
-		setTimeout(() => {
-			inputRef.current?.select()
-		})
-	}, [setActive, inputRef])
-
-	const handleKeyDown = useCallback((e: KeyboardEvent) => {
-		if (e.key == 'Enter') {
-			if (document.activeElement == inputRef.current) {
-				const firstResult = resultsRef.current?.firstElementChild
-				if (firstResult instanceof HTMLElement) {
-					firstResult.click()
-				}
-			}
-		} else if (e.key == 'ArrowDown') {
-			const nextElement = document.activeElement == inputRef.current
-				? resultsRef.current?.firstElementChild
-				: document.activeElement?.nextElementSibling
-			if (nextElement instanceof HTMLElement) {
-				nextElement.focus()
-			}
-			e.preventDefault()
-		} else if (e.key == 'ArrowUp') {
-			const prevElement = document.activeElement?.previousElementSibling
-			if (prevElement instanceof HTMLElement) {
-				prevElement.focus()
-			}
-			e.preventDefault()
-		} else if (e.key == 'Escape') {
-			setActive(false)
+		if (results.length === 0) {
+			return [<span class="note">{locale('generators.no_results')}</span>]
 		}
-	}, [setActive, inputRef])
+		return results.map(g =>
+			<Link class="gen-result flex items-center cursor-pointer no-underline rounded p-1" href={cleanUrl(g.url)} onClick={close}>
+				{locale(`generator.${g.id}`)}
+				{Object.keys(Icons).includes(g.id) ? Icons[g.id as keyof typeof Icons] : undefined}
+				<div class="m-auto"></div>
+				{g.tags?.filter(t => t === 'assets').map(t =>
+					<div class="badge ml-2 mr-0 text-sm" style="--color: #555;">{t}</div>
+				)}
+			</Link>
+		)
+	}, [locale, version])
 
-	return <div class="px-1 relative">
-		<h1 class="font-bold flex items-center cursor-pointer text-lg sm:text-2xl" onClick={open}>
+	return <FancyMenu getResults={getGenerators} placeholder={locale('generators.search')}>
+		<h1 class="font-bold flex items-center cursor-pointer text-lg sm:text-2xl">
 			{title}
 			{icon && Icons[icon]}
 		</h1>
-		<div class={`gen-menu absolute flex flex-col gap-2 p-2 rounded-lg drop-shadow-xl ${active ? '' : 'hidden'}`} onKeyDown={handleKeyDown}>
-			<input ref={inputRef} type="text" class="py-1 px-2 w-full rounded" value={search} placeholder={locale('generators.search')} onInput={(e) => setSearch((e.target as HTMLInputElement).value)} onClick={(e) => e.stopPropagation()} />
-			{active && <div ref={resultsRef} class="gen-results overflow-y-auto overscroll-none flex flex-col pr-2 h-96 max-h-max min-w-max">
-				{generators.length === 0 && <span class="note">{locale('generators.no_results')}</span>}
-				{generators.map(g =>
-					<Link class="flex items-center cursor-pointer no-underline rounded p-1" href={cleanUrl(g.url)} onClick={() => setActive(false)}>
-						{locale(`generator.${g.id}`)}
-						{Object.keys(Icons).includes(g.id) ? Icons[g.id as keyof typeof Icons] : undefined}
-						<div class="m-auto"></div>
-						{g.tags?.filter(t => t === 'assets').map(t =>
-							<div class="badge ml-2 mr-0 text-sm" style="--color: #555;">{t}</div>
-						)}
-					</Link>
-				)}
-			</div>}
-		</div>
-	</div>
+	</FancyMenu>
 }
