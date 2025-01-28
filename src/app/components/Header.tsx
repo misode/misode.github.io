@@ -82,7 +82,7 @@ function GeneratorTitle({ title, gen }: GeneratorTitleProps) {
 			return [<span class="note">{locale('generators.no_results')}</span>]
 		}
 		return results.map(g =>
-			<Link class="gen-result flex items-center cursor-pointer no-underline rounded p-1" href={cleanUrl(g.url)} onClick={close}>
+			<Link class="flex items-center cursor-pointer no-underline rounded p-1" href={cleanUrl(g.url)} onClick={close}>
 				{locale(`generator.${g.id}`)}
 				{Object.keys(Icons).includes(g.id) ? Icons[g.id as keyof typeof Icons] : undefined}
 				<div class="m-auto"></div>

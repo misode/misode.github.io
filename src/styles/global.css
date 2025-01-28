@@ -226,6 +226,7 @@ nav li .btn svg {
 }
 
 .fancy-menu {
+	max-width: calc(100vw - 32px);
 	background-color: var(--background-2);
 	color: var(--text-2);
 }
@@ -234,11 +235,11 @@ nav li .btn svg {
 	background-color: var(--background-1);
 }
 
-.gen-result {
+.fancy-menu-results > * {
 	outline-offset: -2px;
 }
 
-.gen-result svg {
+.fancy-menu-results > * svg {
 	width: 16px;
 	height: 16px;
 	fill: var(--nav);
@@ -247,13 +248,13 @@ nav li .btn svg {
 	transition: margin 0.2s;
 }
 
-.gen-result:focus-visible,
-.gen-result:hover {
+.fancy-menu-results > *:focus-visible,
+.fancy-menu-results > *:hover {
 	background-color: var(--background-3);
 }
 
-.gen-result:focus-visible svg,
-.gen-result:hover svg {
+.fancy-menu-results > *:focus-visible svg,
+.fancy-menu-results > *:hover svg {
 	margin-left: 14px;
 	margin-right: 0px;
 }

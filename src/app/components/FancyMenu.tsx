@@ -4,10 +4,12 @@ import { useFocus } from '../hooks/index.js'
 
 interface Props {
 	placeholder?: string
+	relative?: boolean
+	class?: string
 	getResults: (search: string, close: () => void) => ComponentChildren
 	children: ComponentChildren
 }
-export function FancyMenu({ placeholder, getResults, children }: Props) {
+export function FancyMenu({ placeholder, relative, class: clazz, getResults, children }: Props) {
 	const [active, setActive] = useFocus()
 	const [search, setSearch] = useState('')
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -51,13 +53,13 @@ export function FancyMenu({ placeholder, getResults, children }: Props) {
 		}
 	}, [setActive, inputRef])
 
-	return <div class="px-1 relative">
+	return <div class={`px-1 ${relative ? 'relative' : ''}`}>
 		<div onClick={open}>
 			{children}
 		</div>
-		<div class={`fancy-menu absolute flex flex-col gap-2 p-2 rounded-lg drop-shadow-xl ${active ? '' : 'hidden'}`} onKeyDown={handleKeyDown}>
+		<div class={`fancy-menu absolute flex flex-col gap-2 p-2 rounded-lg drop-shadow-xl ${clazz} ${active ? '' : 'hidden'}`} onKeyDown={handleKeyDown}>
 			<input ref={inputRef} type="text" class="py-1 px-2 w-full rounded" value={search} placeholder={placeholder} onInput={(e) => setSearch((e.target as HTMLInputElement).value)} onClick={(e) => e.stopPropagation()} />
-			{active && <div ref={resultsRef} class="overflow-y-auto overscroll-none flex flex-col pr-2 h-96 max-h-max min-w-max">
+			{active && <div ref={resultsRef} class="fancy-menu-results overflow-y-auto overscroll-none flex flex-col pr-2 h-96 max-h-max w-max max-w-full">
 				{results}
 			</div>}
 		</div>
