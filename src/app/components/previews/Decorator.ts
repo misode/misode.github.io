@@ -207,7 +207,7 @@ const Decorators: {
 	},
 	count_extra: (config, pos, ctx) => {
 		let count = config?.count ?? 1
-		if (ctx.nextFloat() < config.extra_chance ?? 0){
+		if (ctx.nextFloat() < (config.extra_chance ?? 0)){
 			count += config.extra_count ?? 0
 		}
 		return new Array(count).fill(pos)
