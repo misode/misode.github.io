@@ -22,6 +22,7 @@ export interface ConfigGenerator {
 	path?: string,
 	noPath?: boolean,
 	tags?: string[],
+	aliases?: string[],
 	dependency?: string,
 	minVersion?: string,
 	maxVersion?: string,

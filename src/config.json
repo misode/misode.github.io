@@ -587,6 +587,7 @@
       "url": "assets/item",
       "path": "items",
       "tags": ["assets"],
+      "aliases": ["item model"],
       "minVersion": "1.21.4",
       "wiki": "https://minecraft.wiki/w/Items_model_definition"
     },

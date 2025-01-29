@@ -5,6 +5,7 @@ import config from '../Config.js'
 import { useLocale, useTheme, useTitle, useVersion } from '../contexts/index.js'
 import { cleanUrl, getGenerator, SOURCE_REPO_URL } from '../Utils.js'
 import { FancyMenu } from './FancyMenu.jsx'
+import { searchGenerators } from './generator/GeneratorList.jsx'
 import { Btn, BtnMenu, Icons, Octicon } from './index.js'
 
 const Themes: Record<string, keyof typeof Octicon> = {
@@ -69,15 +70,7 @@ function GeneratorTitle({ title, gen }: GeneratorTitleProps) {
 		let results = config.generators
 			.filter(g => !g.dependency)
 			.map(g => ({ ...g, name: locale(`generator.${g.id}`).toLowerCase() }))
-		if (search) {
-			const parts = search.split(' ')
-			results = results.filter(g => parts.some(p => g.name.includes(p))
-				|| parts.some(p => g.tags?.some(t => t.includes(p)) ?? false))
-		}
-		results.sort((a, b) => a.name.localeCompare(b.name))
-		if (search) {
-			results.sort((a, b) => (b.name.startsWith(search) ? 1 : 0) - (a.name.startsWith(search) ? 1 : 0))
-		}
+		results = searchGenerators(results, search)
 		if (results.length === 0) {
 			return [<span class="note">{locale('generators.no_results')}</span>]
 		}

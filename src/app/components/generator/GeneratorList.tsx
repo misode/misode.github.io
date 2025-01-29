@@ -26,16 +26,9 @@ export function GeneratorList({ predicate }: Props) {
 	}, [version, versionFilter])
 
 	const filteredGenerators = useMemo(() => {
-		const query = search.split(' ').map(q => q.trim().toLowerCase()).filter(q => q.length > 0)
-		return versionedGenerators.filter(gen => {
-			const content = `${gen.id} ${gen.tags?.join(' ') ?? ''} ${gen.path ?? ''} ${locale(`generator.${gen.id}`).toLowerCase()}`
-			return query.every(q => {
-				if (q.startsWith('!')) {
-					return q.length === 1 || !content.includes(q.slice(1))
-				}
-				return content.includes(q)
-			})
-		})
+		const results = versionedGenerators
+			.map(g => ({ ...g, name: locale(`generator.${g.id}`).toLowerCase() }))
+		return searchGenerators(results, search)
 	}, [versionedGenerators, search, locale])
 
 	return <div class="generator-list">
@@ -51,4 +44,19 @@ export function GeneratorList({ predicate }: Props) {
 			)}
 		</div>}
 	</div>
+}
+
+export function searchGenerators(generators: (ConfigGenerator & { name: string})[], search?: string) {
+	if (search) {
+		const parts = search.split(' ').map(q => q.trim().toLowerCase()).filter(q => q.length > 0)
+		generators = generators.filter(g => parts.some(p => g.name.includes(p))
+			|| parts.some(p => g.path?.includes(p) ?? false)
+			|| parts.some(p => g.tags?.some(t => t.includes(p)) ?? false)
+			|| parts.some(p => g.aliases?.some(a => a.includes(p)) ?? false))
+	}
+	generators.sort((a, b) => a.name.localeCompare(b.name))
+	if (search) {
+		generators.sort((a, b) => (b.name.startsWith(search) ? 1 : 0) - (a.name.startsWith(search) ? 1 : 0))
+	}
+	return generators
 }
