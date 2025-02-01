@@ -29,7 +29,7 @@
     "customized.error_min_version": "在 %0% 之前的版本中无法使用自定义世界",
     "customized.ores": "矿物",
     "customized.structures": "结构",
-    "developed_by": "开发者：",
+    "developed_by": "开发者",
     "disabled": "已禁用",
     "donate": "捐赠",
     "download": "下载",
@@ -47,7 +47,7 @@
     "format.json": "JSON",
     "format.yaml": "YAML",
     "format.snbt": "SNBT",
-    "generate_new_seed": "生成新种子",
+    "generate_new_seed": "生成新的种子",
     "generate_new_uuid": "生成新的 UUID",
     "generator.advancement": "进度",
     "generator.banner_pattern": "旗帜图案",
@@ -250,5 +250,9 @@
     "versions.search": "搜索版本",
     "worldgen": "世界生成",
     "zoom_in": "放大",
-    "zoom_out": "缩小"
+    "zoom_out": "缩小",
+    "generator.lang": "语言",
+    "generate_new_color": "生成新的颜色",
+    "convert.select": "-- 选择 --",
+    "convert.format.loot-table": "战利品表"
 }
