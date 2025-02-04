@@ -254,5 +254,11 @@
     "generator.lang": "语言",
     "generate_new_color": "生成新的颜色",
     "convert.select": "-- 选择 --",
-    "convert.format.loot-table": "战利品表"
+    "convert.format.loot-table": "战利品表",
+    "layer.vegetation": "湿度",
+    "versions.fixes": "已修复的漏洞",
+    "weight": "权重",
+    "convert.format.item-modifier": "物品修改",
+    "convert.swap": "交换",
+    "versions.fixes.no_results": "未修复的"
 }
