@@ -671,8 +671,8 @@ function prepareIntRange(range: any, ctx: LootContext) {
 	if (typeof range === 'number') {
 		range = { min: range, max: range }
 	}
-	const min = computeInt(range.min, ctx)
-	const max = computeInt(range.max, ctx)
+	const min = computeInt(range?.min, ctx)
+	const max = computeInt(range?.max, ctx)
 	return { min, max }
 }
 
