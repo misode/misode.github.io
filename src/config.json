@@ -755,7 +755,7 @@
     {
       "id": "sky_aesthetics:sky",
       "url": "sky-aesthetics/sky",
-      "path": "sky",
+      "path": "sky_aesthetics",
       "tags": ["partners", "assets"],
       "dependency": "sky_aesthetics",
       "minVersion": "1.21.1",
