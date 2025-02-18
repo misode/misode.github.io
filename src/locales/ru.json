@@ -345,5 +345,13 @@
     "generator.tag/banner_pattern": "Тег Паттерна для Баннера",
     "generator.tag/worldgen/structure_set": "Тег для Набора Структур",
     "generator.tag/painting_variant": "Тег для Вариантов Картин",
-    "generator.pig_variant": "Вариант Свиньи"
+    "generator.pig_variant": "Вариант Свиньи",
+    "changelog.edit_on_github": "Редактировать раздел \"Технические изменения\" на GitHub",
+    "presets.no_results": "Нет шаблонов",
+    "presets.no_results_for_query": "Нет шаблонов по этому запросу",
+    "generator.cat_variant": "Вариант Кошки",
+    "generator.cow_variant": "Вариант Коровы",
+    "generator.frog_variant": "Вариант Лягушки",
+    "generator.test_instance": "Тестовая Задача",
+    "generator.test_environment": "Тестовая Среда"
 }
