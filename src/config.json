@@ -1,6 +1,11 @@
 {
   "languages": [
     {
+      "code": "ar",
+      "name": "العربية",
+      "mc": "ar_sa"
+    },
+    {
       "code": "de",
       "name": "Deutsch",
       "mc": "de_de"
