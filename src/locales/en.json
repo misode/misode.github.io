@@ -132,6 +132,7 @@
   "generator.trim_material": "Trim Material",
   "generator.trim_pattern": "Trim Pattern",
   "generator.wolf_variant": "Wolf Variant",
+  "generator.wolf_sound_variant": "Wolf Sound Variant",
   "generator.world": "World Settings",
   "generator.worldgen/biome": "Biome",
   "generator.worldgen/configured_carver": "Configured Carver",
