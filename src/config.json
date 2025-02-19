@@ -243,6 +243,11 @@
       "minVersion": "1.20.5"
     },
     {
+      "id": "wolf_sound_variant",
+      "url": "wolf-sound-variant",
+      "minVersion": "1.21.5"
+    },
+    {
       "id": "enchantment",
       "url": "enchantment",
       "minVersion": "1.21",
