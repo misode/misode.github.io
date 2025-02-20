@@ -51,6 +51,19 @@ export function generateColor() {
 	return Math.floor(Math.random() * 16777215)
 }
 
+function intToUnsigned(n: number) {
+	n |= 0; // Force to signed 32-bit integer
+	return n < 0 ? n + 0x100000000 : n;
+}
+
+export function intToHexRgb(c: number | undefined) {
+	return c ? '#' + (c & 0xFFFFFF).toString(16).padStart(6, '0') : '#000000';
+}
+
+export function intToDisplayHexRgb(c: number | undefined) {
+	return c ? '#' + intToUnsigned(c).toString(16).toUpperCase().padStart(6, '0') : '#000000';
+}
+
 export function htmlEncode(str: string) {
 	return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
