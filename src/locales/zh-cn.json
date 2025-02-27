@@ -298,5 +298,8 @@
     "title.convert.formats": "从%0% 转换为 %1%",
     "title.customized": "自定义世界",
     "title.transformation": "(展示实体)渲染变换可视化工具",
-    "whats_new": "有什么新内容？"
+    "whats_new": "有什么新内容？",
+    "generator.fabric:fabric_mod_json": "fabric.mod.json",
+    "convert.format.give-command": "/give",
+    "mode.3d": "3D"
 }
