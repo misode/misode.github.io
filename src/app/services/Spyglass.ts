@@ -12,10 +12,12 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ConfigGenerator } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
-import type { VanillaMcdocSymbols, VersionMeta } from './DataFetcher.js'
-import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
+import type { VersionMeta } from './DataFetcher.js'
+import { fetchBlockStates, fetchRegistries, fetchVersions, fetchWithCache, getVersionChecksum } from './DataFetcher.js'
 import { IndexedDbFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
+
+const SPYGLASS_API = 'https://api.spyglassmc.com'
 
 export const CACHE_URI = 'file:///cache/'
 export const ROOT_URI = 'file:///root/'
@@ -367,10 +369,10 @@ async function compressBall(files: [string, string][]): Promise<Uint8Array> {
 const initialize: core.ProjectInitializer = async (ctx) => {
 	const { config, logger, meta, externals, cacheRoot } = ctx
 
-	const vanillaMcdoc = await fetchVanillaMcdoc()
+	const vanillaMcdocRes = await fetchWithCache(`${SPYGLASS_API}/vanilla-mcdoc/symbols`)
 	meta.registerSymbolRegistrar('vanilla-mcdoc', {
-		checksum: vanillaMcdoc.ref,
-		registrar: vanillaMcdocRegistrar(vanillaMcdoc),
+		checksum: vanillaMcdocRes.headers.get('ETag') ?? '',
+		registrar: vanillaMcdocRegistrar(await vanillaMcdocRes.json()),
 	})
 
 	meta.registerDependencyProvider('@misode-mcdoc', async () => {
@@ -479,6 +481,10 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 
 const VanillaMcdocUri = 'mcdoc://vanilla-mcdoc/symbols.json'
 
+interface VanillaMcdocSymbols {
+	mcdoc: Record<string, unknown>,
+	'mcdoc/dispatcher': Record<string, Record<string, unknown>>,
+}
 function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols): core.SymbolRegistrar {
 	return (symbols) => {
 		const start = performance.now()
