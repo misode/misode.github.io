@@ -27,9 +27,6 @@ export function initLootTableSchemas(schemas: SchemaRegistry, collections: Colle
 			})
 		}
 		cases.push({ match: (_) => true, node: getNode(collectionID) })
-		console.log('====================================')
-		console.log(cases)
-		console.log('====================================')
 		return SwitchNode(cases)
 	}
 	LootConditions.set('shardborne:loot_condition', [])
