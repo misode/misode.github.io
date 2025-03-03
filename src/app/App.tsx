@@ -32,8 +32,15 @@ function updateLinks() {
 	let links = document.links
 	for (let i = 0; i < links.length; i++) {
 		const link = links[i]
-		if (!link.href.startsWith(window.location.origin + BASE_URL)) {
+		if (link.getAttribute('href')?.startsWith("/") && !link.getAttribute('href')?.startsWith(BASE_URL)) {
 			link.href = BASE_URL + link.getAttribute('href')
+		}
+	}
+	let images = document.images
+	for (let i = 0; i < images.length; i++) {
+		const image = images[i]
+		if (image.getAttribute('src')?.startsWith("/") && !image.getAttribute('src')?.startsWith(BASE_URL)) {
+			image.src = BASE_URL + image.getAttribute('src')
 		}
 	}
 }
@@ -41,10 +48,12 @@ function updateLinks() {
 export function App() {
 	const changeRoute = (e: RouterOnChangeArgs) => {
 		window.dispatchEvent(new CustomEvent('replacestate'))
-		updateLinks()
 		// Needs a timeout to ensure the title is set correctly
 		setTimeout(() => Analytics.pageview(cleanUrl(e.url)))
 	}
+
+	new MutationObserver(updateLinks)
+		.observe(document.body, { childList: true, subtree: true })
 
 	return <>
 		<Header />

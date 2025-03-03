@@ -10,6 +10,9 @@ export function Footer({ donate }: Props) {
 
 	return <footer>
 		<p>
+			<span>{locale('modified_by')} <a href="https://github.com/flemmli97" target="_blank" rel="noreferrer">Flemmli97</a></span>
+		</p>
+		<p>
 			<span>{locale('developed_by')} <a href="https://github.com/misode" target="_blank" rel="noreferrer">Misode</a></span>
 		</p>
 		{donate !== false && <p class="donate">
