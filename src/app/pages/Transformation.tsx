@@ -1,6 +1,7 @@
 import { Matrix3, Matrix4, Mesh, Quad, Renderer, ShaderProgram, Vector, Vertex } from 'deepslate'
 import { mat4, quat, vec3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
+import { assetPath } from '../App.jsx'
 import { Footer, NumberInput, Octicon, RangeInput } from '../components/index.js'
 import { InteractiveCanvas3D } from '../components/previews/InteractiveCanvas3D.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
@@ -25,7 +26,7 @@ export function Transformation({}: Props) {
 	useTitle(locale('title.transformation'))
 
 	const { value: cubeTexture } = useAsync(async () => {
-		const img = await loadImage('/images/cube.png')
+		const img = await loadImage(assetPath('/images/cube.png'))
 		const canvas = document.createElement('canvas')
 		canvas.width = 64
 		canvas.height = 64

@@ -1,6 +1,6 @@
 import { Identifier } from 'deepslate'
-import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { appRoute } from '../../App.jsx'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, getProjectRoot, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useModal } from '../../contexts/Modal.jsx'
@@ -133,7 +133,7 @@ export function ProjectPanel() {
 			if (!gen) {
 				throw new Error(`Cannot find generator for uri ${uri}`)
 			}
-			route(cleanUrl(gen.url))
+			appRoute(cleanUrl(gen.url))
 			setProjectUri(uri)
 		}
 

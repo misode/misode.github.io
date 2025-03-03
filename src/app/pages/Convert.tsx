@@ -1,7 +1,7 @@
 import { Identifier, ItemStack, Json, NbtCompound, NbtString, NbtTag, StringReader } from 'deepslate'
-import { route } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../config.json'
+import { appRoute } from '../App.jsx'
 import { Footer, Octicon } from '../components/index.js'
 import { useLocale } from '../contexts/Locale.jsx'
 import { useTitle } from '../contexts/Title.jsx'
@@ -77,7 +77,7 @@ export function Convert({ formats }: Props) {
 			setInput(output)
 		}
 		if (target) {
-			route(`/convert/${newSource}-to-${target === newSource ? source : target}`)
+			appRoute(`/convert/${newSource}-to-${target === newSource ? source : target}`)
 		}
 	}, [source, target])
 
@@ -88,7 +88,7 @@ export function Convert({ formats }: Props) {
 			setInput(output)
 		}
 		if (source) {
-			route(`/convert/${source === newTarget ? target : source}-to-${newTarget}`)
+			appRoute(`/convert/${source === newTarget ? target : source}-to-${newTarget}`)
 		}
 	}, [source])
 
@@ -99,7 +99,7 @@ export function Convert({ formats }: Props) {
 			setInput(output)
 		}
 		if (source && target) {
-			route(`/convert/${target}-to-${source}`)
+			appRoute(`/convert/${target}-to-${source}`)
 		}
 	}, [source, target, output])
 

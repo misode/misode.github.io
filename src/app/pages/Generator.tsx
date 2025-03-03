@@ -1,5 +1,6 @@
-import { getCurrentUrl, route } from 'preact-router'
+import { getCurrentUrl } from 'preact-router'
 import { useMemo } from 'preact/hooks'
+import { appRoute } from '../App.jsx'
 import config from '../Config.js'
 import { getGenerator } from '../Utils.js'
 import { SchemaGenerator } from '../components/generator/SchemaGenerator.jsx'
@@ -40,7 +41,7 @@ export function Generator({}: Props) {
 					<div class="error-action" onClick={() => changeVersion(proposedVersion)}>
 						{locale('generator.switch_version', proposedVersion)} {Octicon.arrow_right}
 					</div>
-					<div class="error-action" onClick={() => route('/generators')}>
+					<div class="error-action" onClick={() => appRoute('/generators')}>
 						{locale('generator.browse_available', version)} {Octicon.arrow_right}
 					</div>
 				</div>

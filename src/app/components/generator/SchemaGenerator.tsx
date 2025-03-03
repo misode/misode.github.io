@@ -1,7 +1,7 @@
-import { route } from 'preact-router'
 import { useCallback, useEffect, useErrorBoundary, useMemo, useRef, useState } from 'preact/hooks'
 import type { Method } from '../../Analytics.js'
 import { Analytics } from '../../Analytics.js'
+import { appRoute } from '../../App.jsx'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { DRAFT_PROJECT, useLocale, useProject, useVersion } from '../../contexts/index.js'
@@ -81,7 +81,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			if (snippet.type && snippet.type !== gen.id) {
 				const snippetGen = config.generators.find(g => g.id === snippet.type)
 				if (snippetGen) {
-					route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
+					appRoute(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
 					cancel = true
 				}
 			}

@@ -1,5 +1,6 @@
 import { Identifier, ItemStack } from 'deepslate'
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { assetPath } from '../../App.jsx'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import type { VersionId } from '../../services/index.js'
@@ -38,13 +39,13 @@ export const RecipePreview = ({ docAndNode }: PreviewProps) => {
 	const gui = useMemo(() => {
 		const type = recipe?.type?.replace(/^minecraft:/, '')
 		if (type === 'smelting' || type === 'blasting' || type === 'smoking' || type === 'campfire_cooking') {
-			return '/images/furnace.png'
+			return assetPath('/images/furnace.png')
 		} else if (type === 'stonecutting') {
-			return '/images/stonecutter.png'
+			return assetPath('/images/stonecutter.png')
 		} else if (type === 'smithing_transform' || type === 'smithing_trim') {
-			return '/images/smithing.png'
+			return assetPath('/images/smithing.png')
 		} else {
-			return '/images/crafting_table.png'
+			return assetPath('/images/crafting_table.png')
 		}
 	}, [text])
 

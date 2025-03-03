@@ -20,6 +20,7 @@ jobs:
       run: |
         npm install
         export latest_version="'${{ steps.version.outputs.id }}'"
+        export sub_directory="/${GITHUB_REPOSITORY#*/}"
         npm run build
 
     - name: Upload artifact
