@@ -12,6 +12,7 @@ declare var __LATEST_VERSION__: string
 export const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
+const vanillaMcdocUrl = 'https://raw.githubusercontent.com/SpyglassMC/vanilla-mcdoc'
 const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 const fixesUrl = 'https://raw.githubusercontent.com/misode/mcfixes'
 const versionDiffUrl = 'https://mcmeta-diff.misode.workers.dev'
@@ -45,6 +46,19 @@ export function getVersionChecksum(versionId: VersionId) {
 		return (localStorage.getItem(CACHE_LATEST_VERSION) ?? '').toString()
 	}
 	return version.ref
+}
+
+export interface VanillaMcdocSymbols {
+	ref: string,
+	mcdoc: Record<string, unknown>,
+	'mcdoc/dispatcher': Record<string, Record<string, unknown>>,
+}
+export async function fetchVanillaMcdoc(): Promise<VanillaMcdocSymbols> {
+	try {
+		return cachedFetch<VanillaMcdocSymbols>(`${vanillaMcdocUrl}/generated/symbols.json`, { refresh: true })
+	} catch (e) {
+		throw new Error(`Error occured while fetching vanilla-mcdoc: ${message(e)}`)
+	}
 }
 
 export async function fetchDependencyMcdoc(dependency: string) {
@@ -488,43 +502,5 @@ async function applyPatches() {
 			await patch()
 		}
 		localStorage.setItem(CACHE_PATCH, i.toFixed())
-	}
-}
-
-export async function fetchWithCache(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-	const cache = await caches.open(CACHE_NAME)
-	const request = new Request(input, init)
-	const cachedResponse = await cache.match(request)
-	const cachedEtag = cachedResponse?.headers.get('ETag')
-	if (cachedEtag) {
-		request.headers.set('If-None-Match', cachedEtag)
-	}
-	try {
-		const response = await fetch(request)
-		if (response.status === 304 && cachedResponse) {
-			console.log(`[fetchWithCache] reusing cache for ${request.url}`)
-			return cachedResponse
-		} else if (!response.ok) {
-			let message = response.statusText
-			try {
-				message = (await response.json()).message
-			} catch (e) {}
-			throw new TypeError(`${response.status} ${message}`)
-		} else {
-			try {
-				await cache.put(request, response.clone())
-				console.log(`[fetchWithCache] updated cache for ${request.url}`)
-			} catch (e) {
-				console.warn('[fetchWithCache] put cache', e)
-			}
-			return response
-		}
-	} catch (e) {
-		console.warn('[fetchWithCache] fetch', e)
-		if (cachedResponse) {
-			console.log(`[fetchWithCache] falling back to cache for ${request.url}`)
-			return cachedResponse
-		}
-		throw e
 	}
 }
