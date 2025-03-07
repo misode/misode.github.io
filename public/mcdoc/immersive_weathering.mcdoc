@@ -1,5 +1,5 @@
-use ::java::server::util::direction::Direction
-use ::java::server::util::block_state::BlockState
+use ::java::util::direction::Direction
+use ::java::util::block_state::BlockState
 use ::java::data::worldgen::biome::Precipitation
 use ::java::data::worldgen::processor_list::BlockMatch
 use ::java::data::worldgen::processor_list::BlockStateMatch
