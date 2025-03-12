@@ -1,3 +1,4 @@
+import { assetPath } from '../App.jsx'
 import config from '../Config.js'
 import { Store } from '../Store.js'
 import { message } from '../Utils.js'
@@ -63,7 +64,7 @@ export async function fetchVanillaMcdoc(): Promise<VanillaMcdocSymbols> {
 
 export async function fetchDependencyMcdoc(dependency: string) {
 	try {
-		return cachedFetch(`/mcdoc/${dependency}.mcdoc`, { decode: res => res.text(), refresh: true })
+		return cachedFetch(assetPath(`/mcdoc/${dependency}.mcdoc`), { decode: res => res.text(), refresh: true })
 	} catch (e) {
 		throw new Error(`Error occured while fetching ${dependency} mcdoc: ${message(e)}`)
 	}

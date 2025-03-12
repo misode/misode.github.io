@@ -1,5 +1,6 @@
 import { ItemRenderer, ItemStack, NbtString } from 'deepslate'
 import { Identifier, ItemModel } from 'deepslate/render'
+import { assetPath } from '../../App.jsx'
 import { useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncCancel } from '../../hooks/useAsyncFn.js'
@@ -53,7 +54,7 @@ export const ItemModelPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	return <>
 		<div class="preview-overlay">
-			<img src="/images/single_item.png" alt="Container background" class="pixelated" draggable={false} />
+			<img src={assetPath("/images/single_item.png")} alt="Container background" class="pixelated" draggable={false} />
 			{render && <div class="flex items-center justify-center" style={slotStyle()}>
 				<img src={render} class="w-[88.888%]" />
 			</div>}
