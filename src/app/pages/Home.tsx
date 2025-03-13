@@ -46,6 +46,10 @@ function AvailableGenerators() {
 			/>
 			<GeneratorCard
 				minimal
+				id='shardborne.theme'
+			/>
+			<GeneratorCard
+				minimal
 				id='worldgen/processor_list'
 			/>
 			<GeneratorCard

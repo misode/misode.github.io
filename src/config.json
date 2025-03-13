@@ -29,6 +29,18 @@
       "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
     },
     {
+      "id": "shardborne.theme",
+      "url": "theme",
+      "tags": [
+        "shardborne"
+      ],
+      "path": "theme",
+      "schema": "shardborne:theme",
+      "minVersion": "1.20",
+      "maxVersion": "1.20",
+      "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
+    },
+    {
       "id": "dimension",
       "url": "dimension",
       "schema": "dimension",

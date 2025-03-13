@@ -4,6 +4,7 @@ import {
 	Case,
 	ChoiceNode,
 	ListNode,
+	MapNode,
 	Mod,
 	NumberNode,
 	ObjectNode,
@@ -20,7 +21,11 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 	const Reference = RawReference.bind(undefined, schemas)
 	const StringNode = RawStringNode.bind(undefined, collections)
 
-	collections.register('shardborne:features', ['shardborne:custom_npc', 'shardborne:processor_rules'])
+	collections.register('shardborne:features', [
+		'shardborne:custom_npc',
+		'shardborne:processor_rules',
+		'shardborne:theme',
+	])
 
 	collections.register(`${ID}:npcs`, [
 		'shardborne:wisp',
@@ -3607,6 +3612,38 @@ export function initShardborne(schemas: SchemaRegistry, collections: CollectionR
 				},
 			},
 			{ context: 'template_element', category: 'function' }
+		)
+	)
+
+	schemas.register(
+		'shardborne:theme',
+		Mod(
+			ObjectNode(
+				{
+					processor: StringNode({ validator: 'resource', params: { pool: '$worldgen/processor_list' } }),
+					weight: NumberNode({ integer: true, min: 1, max: 100 }),
+					generation_type: ChoiceNode([
+						{
+							type: 'string',
+							node: StringNode({ enum: ['open_world', 'maze'] }),
+							change: () => undefined,
+						},
+					]),
+					biome: StringNode({ validator: 'resource', params: { pool: '$worldgen/biome' } }),
+					structures: MapNode(
+						StringNode({ validator: 'resource', params: { pool: '$structure' } }),
+						ObjectNode({
+							min: NumberNode({ integer: true }),
+							max: NumberNode({ integer: true }),
+						})
+					),
+					theme_settings_id: StringNode(),
+				},
+				{ context: 'shardborne.themes' }
+			),
+			{
+				default: () => ({}),
+			}
 		)
 	)
 
