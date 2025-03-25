@@ -1,10 +1,10 @@
-import { route } from 'preact-router'
+import { appRoute } from '../App.jsx'
 
 interface Props {
 	path: string
 }
 export function LegacyPartners({ path }: Props) {
-	route(path.replace('/partners/', '/'))
+	appRoute(path.replace('/partners/', '/'))
 
 	return null
 }
