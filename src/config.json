@@ -1,6 +1,11 @@
 {
   "languages": [
     {
+      "code": "ar",
+      "name": "العربية",
+      "mc": "ar_sa"
+    },
+    {
       "code": "de",
       "name": "Deutsch",
       "mc": "de_de"
@@ -165,9 +170,16 @@
     },
     {
       "id": "1.21.4",
-      "dynamic": true,
+      "ref": "1.21.4",
       "name": "1.21.4",
       "pack_format": 61,
+      "show": true
+    },
+    {
+      "id": "1.21.5",
+      "dynamic": true,
+      "name": "1.21.5",
+      "pack_format": 62,
       "show": true
     }
   ],
@@ -231,6 +243,11 @@
       "minVersion": "1.20.5"
     },
     {
+      "id": "wolf_sound_variant",
+      "url": "wolf-sound-variant",
+      "minVersion": "1.21.5"
+    },
+    {
       "id": "enchantment",
       "url": "enchantment",
       "minVersion": "1.21",
@@ -263,6 +280,38 @@
       "id": "trial_spawner",
       "url": "trial-spawner",
       "minVersion": "1.21.2"
+    },
+    {
+      "id": "pig_variant",
+      "url": "pig-variant",
+      "minVersion": "1.21.5"
+    },
+    {
+      "id": "cat_variant",
+      "url": "cat-variant",
+      "minVersion": "1.21.5"
+    },
+    {
+      "id": "frog_variant",
+      "url": "frog-variant",
+      "minVersion": "1.21.5"
+    },
+    {
+      "id": "cow_variant",
+      "url": "cow-variant",
+      "minVersion": "1.21.5"
+    },
+    {
+      "id": "test_instance",
+      "url": "test-instance",
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Test_instance_definition"
+    },
+    {
+      "id": "test_environment",
+      "url": "test-environment",
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Test_environment_definition"
     },
     {
       "id": "text_component",
@@ -412,14 +461,6 @@
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
-      "id": "tag/enchantment",
-      "url": "tags/enchantment",
-      "tags": ["tags"],
-      "path": "tags/enchantment",
-      "minVersion": "1.20.5",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
-    },
-    {
       "id": "tag/entity_type",
       "url": "tags/entity-type",
       "tags": ["tags"],
@@ -556,6 +597,7 @@
       "url": "assets/item",
       "path": "items",
       "tags": ["assets"],
+      "aliases": ["item model"],
       "minVersion": "1.21.4",
       "wiki": "https://minecraft.wiki/w/Items_model_definition"
     },
@@ -723,7 +765,7 @@
     {
       "id": "sky_aesthetics:sky",
       "url": "sky-aesthetics/sky",
-      "path": "sky",
+      "path": "sky_aesthetics",
       "tags": ["partners", "assets"],
       "dependency": "sky_aesthetics",
       "minVersion": "1.21.1",

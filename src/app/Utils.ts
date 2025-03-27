@@ -11,6 +11,8 @@ import config from './Config.js'
 import type { VersionId } from './services/index.js'
 import { checkVersion } from './services/index.js'
 
+export const SOURCE_REPO_URL = 'https://github.com/misode/misode.github.io'
+
 export function isPromise(obj: any): obj is Promise<any> {
 	return typeof (obj as any)?.then === 'function' 
 }
@@ -49,6 +51,19 @@ export function generateColor() {
 	return Math.floor(Math.random() * 16777215)
 }
 
+function intToUnsigned(n: number) {
+	n |= 0 // Force to signed 32-bit integer
+	return n < 0 ? n + 0x100000000 : n
+}
+
+export function intToHexRgb(c: number | undefined) {
+	return c ? '#' + (c & 0xFFFFFF).toString(16).padStart(6, '0') : '#000000'
+}
+
+export function intToDisplayHexRgb(c: number | undefined) {
+	return c ? '#' + intToUnsigned(c).toString(16).toUpperCase().padStart(6, '0') : '#000000'
+}
+
 export function htmlEncode(str: string) {
 	return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
@@ -62,7 +77,7 @@ export function hashString(s: string) {
 }
 
 export function cleanUrl(url: string) {
-	return `/${url}/`.replaceAll('//', '/')
+	return `/${url}/`.replaceAll(/\/\/+/g, '/')
 }
 
 export function getPath(url: string) {

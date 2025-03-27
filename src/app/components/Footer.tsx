@@ -1,4 +1,5 @@
 import { useLocale } from '../contexts/index.js'
+import { SOURCE_REPO_URL } from '../Utils.js'
 import { Octicon } from './index.js'
 
 interface Props {
@@ -17,7 +18,7 @@ export function Footer({ donate }: Props) {
 		</p>}
 		<p>
 			{Octicon.mark_github}
-			<span>{locale('source_code_on')} <a href="https://github.com/misode/misode.github.io" target="_blank" rel="noreferrer">{locale('github')}</a></span>
+			<span>{locale('source_code_on')} <a href={SOURCE_REPO_URL} target="_blank" rel="noreferrer">{locale('github')}</a></span>
 		</p>
 	</footer>
 }

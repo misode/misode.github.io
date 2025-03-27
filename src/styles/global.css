@@ -136,18 +136,20 @@ header {
 	background-color: var(--background-2);
 }
 
-.title {
-	display: flex;
-	align-items: center;
-}
-
 .title h1 {
-	font-size: 27px;
 	color: var(--nav);
 }
 
-.home-link {
-	margin: 0 8px 0 0;
+.title h1 svg {
+	width: 24px;
+	height: 24px;
+	fill: var(--nav);
+	margin-left: 8px;
+	transition: margin 0.2s;
+}
+
+.title h1:hover svg {
+	margin-left: 14px;
 }
 
 .home-link svg {
@@ -221,6 +223,40 @@ nav li .btn svg {
 .title .btn-menu > .btn svg {
 	width: 24px;
 	height: 24px;
+}
+
+.fancy-menu {
+	max-width: calc(100vw - 32px);
+	background-color: var(--background-2);
+	color: var(--text-2);
+}
+
+.fancy-menu input {
+	background-color: var(--background-1);
+}
+
+.fancy-menu-results > * {
+	outline-offset: -2px;
+}
+
+.fancy-menu-results > * svg {
+	width: 16px;
+	height: 16px;
+	fill: var(--nav);
+	margin-left: 8px;
+	margin-right: 6px;
+	transition: margin 0.2s;
+}
+
+.fancy-menu-results > *:focus-visible,
+.fancy-menu-results > *:hover {
+	background-color: var(--background-3);
+}
+
+.fancy-menu-results > *:focus-visible svg,
+.fancy-menu-results > *:hover svg {
+	margin-left: 14px;
+	margin-right: 0px;
 }
 
 header .btn-menu > .btn {
@@ -3047,10 +3083,6 @@ hr {
 @media screen and (max-width: 580px) {
 	.card-group {
 		grid-template-columns: 1fr;
-	}
-
-	.title h1 {
-		font-size: 18px;
 	}
 
 	body nav li {

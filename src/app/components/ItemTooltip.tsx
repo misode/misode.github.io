@@ -2,7 +2,7 @@ import type { MobEffectInstance, NbtTag } from 'deepslate'
 import { ItemStack, NbtCompound, NbtList, PotionContents } from 'deepslate'
 import { Identifier } from 'deepslate/core'
 import type { ResolvedItem } from '../services/ResolvedItem.js'
-import { makeDescriptionId, mergeTextComponentStyles } from '../Utils.js'
+import { intToDisplayHexRgb, makeDescriptionId, mergeTextComponentStyles } from '../Utils.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
@@ -107,7 +107,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 			<EnchantmentsTooltip data={item.get('enchantments', tag => tag)} />
 		)}
 		{item.showInTooltip('dyed_color') && (advanced
-			? <TextComponent component={{ translate: 'item.color', with: [`#${item.get('dyed_color', tag => tag.isCompound() ? tag.getNumber('rgb') : tag.getAsNumber())?.toString(16).padStart(6, '0')}`], color: 'gray' }} />
+			? <TextComponent component={{ translate: 'item.color', with: [intToDisplayHexRgb(item.get('dyed_color', tag => tag.isCompound() ? tag.getNumber('rgb') : tag.getAsNumber()))], color: 'gray' }} />
 			: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />
 		)}
 		{item.getLore().map((component) =>
