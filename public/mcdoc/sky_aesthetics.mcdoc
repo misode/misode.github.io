@@ -95,7 +95,11 @@ struct RenderCondition {
 }
 
 enum(string) SkyType {
+    #[until="1.21.3"]
 	#[starred] Overworld = "OVERWORLD",
+    
+    #[until="1.21"]
+	#[starred] Normal = "NORMAL",
 	None = "NONE",
 	End = "END"
 }
