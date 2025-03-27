@@ -82,7 +82,8 @@ struct SkyObject {
     blend: boolean,
     size: float,
     height: int,
-    rotation: [float] @ 3,
+    rotation: [int] @ 3,
+    object_rotation: [float] @ 3,
     rotation_type: RotationType
 }
 
