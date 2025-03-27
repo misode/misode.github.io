@@ -2,10 +2,10 @@
 dispatch minecraft:resource[sky_aesthetics:sky] to struct SkyProperties {
     world: #[id="dimension"] string,
     id?: string,
-    cloud_settings: CloudSettings,
+    cloud_settings?: CloudSettings,
     fog_settings?: FogSettings,
     rain: boolean,
-    custom_vanilla_objects: CustomVanillaObjects,
+    custom_vanilla_objects?: CustomVanillaObjects,
     stars: Star,
     /// The R, G and B value for the color
     sunrise_color?: [float] @ 3,
@@ -16,10 +16,10 @@ dispatch minecraft:resource[sky_aesthetics:sky] to struct SkyProperties {
 
         /// The R, G, B and alpha value for the color
         #[until="1.21.2"]
-        color: [float] @ 4,
+        color?: [float] @ 4,
         /// The R, G and B value for the color
         #[since="1.21.3"]
-        color: [float] @ 3 ,
+        color?: [float] @ 3 ,
 
     },
     sky_objects: [SkyObject],
@@ -30,7 +30,7 @@ dispatch minecraft:resource[sky_aesthetics:sky] to struct SkyProperties {
 
 struct CloudSettings {
     cloud: boolean,
-    cloud_height: int,
+    cloud_height?: int,
     /// The R, G and B value for the color
     cloud_color?: struct CustomCloudColor {
         base_color: [double] @ 3,
@@ -49,14 +49,14 @@ struct FogSettings {
 
 struct CustomVanillaObjects {
     sun: boolean,
-    sun_texture: string,
-    sun_height: int,
-    sun_size: int,
+    sun_texture?: string,
+    sun_height?: int,
+    sun_size?: int,
     moon: boolean,
     moon_phase: boolean,
-    moon_texture: string,
-    moon_height: int,
-    moon_size: int,
+    moon_texture?: string,
+    moon_height?: int,
+    moon_size?: int,
 }
 
 struct Star {
