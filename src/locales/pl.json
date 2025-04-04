@@ -234,5 +234,10 @@
     "project.new_file": "Nowy pusty plik",
     "project.no_files": "Brak plików",
     "project.rename": "Zmień nazwę",
-    "project.rename_file": "Zmień nazwę pliku"
+    "project.rename_file": "Zmień nazwę pliku",
+    "project.save_current_file": "Zapisz plik do projektu",
+    "project.search": "Wyszukaj projekt",
+    "project.search_drafts": "Wyszukaj robocze",
+    "project.show_file_paths": "Pokaż ścieżkę pliku",
+    "project.show_resources": "Pokaż zasoby"
 }
