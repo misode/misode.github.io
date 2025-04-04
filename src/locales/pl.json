@@ -21,7 +21,7 @@
     "reset": "Reset",
     "share": "Podziel się",
     "title.generator": "Generator %0%",
-    "title.home": "Generatory Data Packów",
+    "title.home": "Generatory pakietów danych",
     "customized.basic": "Podstawowe",
     "customized.ores": "Rudy",
     "change.obsolete": "Ta zmiana została zastąpiona późniejszą zmianą w tym cyklu wydania",
@@ -280,10 +280,14 @@
     "versions.all": "Wszystkie wersje",
     "switch_version": "Przełącz wersję",
     "terrain_settings": "Ustawienia terenu",
-    "title.customized": "Dostosowane światy",
+    "title.customized": "Niestandardowe światy",
     "title.convert": "Konwertor",
     "title.partners": "Zmodowane generatory",
     "title.whats_new": "Co nowego?",
     "tools": "Narzędzia",
-    "title.new_project": "Stwórz nowy projekt"
+    "title.new_project": "Stwórz nowy projekt",
+    "title.convert.formats": "Konwertor z %0% do %1%",
+    "title.generator_category": "Generatory %0%",
+    "title.generators": "Generatory Pakietów danych",
+    "title.guides": "Przewodniki pakietów danych"
 }
