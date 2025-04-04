@@ -247,5 +247,14 @@
     "reset_default": "Zresetuj",
     "resource_location": "Lokalizacja zasobu",
     "restore_backup": "Przywróć ostatnią kopie zapasową",
-    "root": "Root"
+    "root": "Root",
+    "search": "Szukaj",
+    "sounds.add_sound": "Dodaj dźwięk",
+    "sounds.delay": "Opóźnienie",
+    "tags": "Oznaczenia",
+    "theme": "Motyw",
+    "theme.dark": "Ciemny",
+    "theme.system": "System",
+    "theme.light": "Jasny",
+    "title.changelog": "Dziennik zmian technicznych"
 }
