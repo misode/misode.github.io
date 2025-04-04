@@ -220,5 +220,7 @@
     "layer.vegetation": "Wilgotność",
     "learn_on_the_wiki": "Dowiedz się na wikipedii",
     "layer.depth": "Głębia",
-    "loading": "Ładowanie..."
+    "loading": "Ładowanie...",
+    "project.name": "Nazwa projektu",
+    "project.new": "Nowy projekt"
 }
