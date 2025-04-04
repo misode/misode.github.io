@@ -306,5 +306,12 @@
     "transformation.translation": "Tłumaczenie",
     "undo": "Cofnij",
     "versions.article": "Artykuł",
-    "versions.changelog": "Zmiany techniczne"
+    "versions.changelog": "Zmiany techniczne",
+    "unset": "-- brak --",
+    "version_diff.word_wrap": "Zawijanie słów",
+    "versions.data_pack_format": "Format pakietu danych",
+    "versions.data_version": "Wersja danych",
+    "versions.diff": "Mcmeta diff",
+    "versions.fixes": "Naprawione błędy",
+    "versions.fixes.no_results": "Brak naprawionych błędów"
 }
