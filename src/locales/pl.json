@@ -275,5 +275,15 @@
     "source_code_on": "Kod źródłowy włączony",
     "source_placeholder": "Wklej surową %0% treść",
     "switch_generator": "Przełącz generator",
-    "switch_project": "Przełącz projekt"
+    "switch_project": "Przełącz projekt",
+    "transformation.scale": "Skala",
+    "versions.all": "Wszystkie wersje",
+    "switch_version": "Przełącz wersję",
+    "terrain_settings": "Ustawienia terenu",
+    "title.customized": "Dostosowane światy",
+    "title.convert": "Konwertor",
+    "title.partners": "Zmodowane generatory",
+    "title.whats_new": "Co nowego?",
+    "tools": "Narzędzia",
+    "title.new_project": "Stwórz nowy projekt"
 }
