@@ -239,5 +239,8 @@
     "project.search": "Wyszukaj projekt",
     "project.search_drafts": "Wyszukaj robocze",
     "project.show_file_paths": "Pokaż ścieżkę pliku",
-    "project.show_resources": "Pokaż zasoby"
+    "project.show_resources": "Pokaż zasoby",
+    "project.unsaved_file": "Niezapisany plik",
+    "sounds.loading_sound": "Ładowanie dźwięku",
+    "settings.fields.path": "Kontekst"
 }
