@@ -282,7 +282,7 @@
     "terrain_settings": "Ustawienia terenu",
     "title.customized": "Niestandardowe światy",
     "title.convert": "Konwertor",
-    "title.partners": "Zmodowane generatory",
+    "title.partners": "Zmodyfikowane generatory",
     "title.whats_new": "Co nowego?",
     "tools": "Narzędzia",
     "title.new_project": "Stwórz nowy projekt",
@@ -302,5 +302,9 @@
     "transformation.rotation_mode.quaternion": "Kwaternion",
     "title.worldgen": "Generatory generacji świata",
     "transformation.copy_composed": "Skopiuj format matrixu",
-    "transformation.left_rotation": "Pochylenie w lewo"
+    "transformation.left_rotation": "Pochylenie w lewo",
+    "transformation.translation": "Tłumaczenie",
+    "undo": "Cofnij",
+    "versions.article": "Artykuł",
+    "versions.changelog": "Zmiany techniczne"
 }
