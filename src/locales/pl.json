@@ -293,5 +293,14 @@
     "title.project": "%0% Projekt",
     "title.sounds": "Eksplorator dźwięków",
     "title.transformation": "Wizualizator transformacji",
-    "title.versions": "Eksplorator wersji"
+    "title.versions": "Eksplorator wersji",
+    "transformation.copy_decomposed": "Skopiuj rozłożony format",
+    "transformation.matrix": "Matrix",
+    "transformation.right_rotation": "Pochylenie w prawo",
+    "transformation.rotation_mode": "Format: %0%",
+    "transformation.rotation_mode.axis_angle": "Kąt osi",
+    "transformation.rotation_mode.quaternion": "Kwaternion",
+    "title.worldgen": "Generatory generacji świata",
+    "transformation.copy_composed": "Skopiuj format matrixu",
+    "transformation.left_rotation": "Pochylenie w lewo"
 }
