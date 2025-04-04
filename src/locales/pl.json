@@ -222,5 +222,10 @@
     "layer.depth": "Głębia",
     "loading": "Ładowanie...",
     "project.name": "Nazwa projektu",
-    "project.new": "Nowy projekt"
+    "project.new": "Nowy projekt",
+    "remove": "Usuń",
+    "project.save": "Zapisz jako",
+    "settings": "Ustawienia",
+    "show_project": "Pokaż projekt",
+    "settings.fields.name": "Nazwa"
 }
