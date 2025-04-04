@@ -321,5 +321,21 @@
     "versions.no_results": "Brak wyników",
     "versions.previous": "Poprzedni",
     "versions.protocol_version": "Wersja protokołu",
-    "versions.pack_format": "Format pakietu"
+    "versions.pack_format": "Format pakietu",
+    "versions.release_target": "Cel wydania",
+    "versions.released": "Wydany",
+    "versions.resource_pack_format": "Format pakietu zasobów",
+    "versions.search": "Szukaj wersje",
+    "versions.wiki": "Wikipedia",
+    "weight": "Waga",
+    "whats_new": "Co nowego?",
+    "whats_new.description": "Dowiaduj się o najnowszych zmiana na misode.github.io. Przeczytaj niżej jakie nowości zostały dodane.",
+    "whats_new.new": "NOWE",
+    "wiki": "Wikipedia",
+    "worldgen": "Generacja świata",
+    "y": "Y",
+    "z": "Z",
+    "zoom_in": "Przybliż",
+    "zoom_in_limit": "Nie można dalej przybliżyć\n1 piksel = 4 bloki",
+    "zoom_out": "Oddal"
 }
