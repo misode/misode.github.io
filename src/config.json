@@ -29,12 +29,12 @@
       "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
     },
     {
-      "id": "shardborne.theme",
-      "url": "theme",
+      "id": "shardborne/dungeon",
+      "url": "themes",
       "tags": [
         "shardborne"
       ],
-      "path": "theme",
+      "path": "dungeon",
       "schema": "shardborne:theme",
       "minVersion": "1.20",
       "maxVersion": "1.20",

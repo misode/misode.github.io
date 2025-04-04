@@ -46,7 +46,7 @@ function AvailableGenerators() {
 			/>
 			<GeneratorCard
 				minimal
-				id='shardborne.theme'
+				id='shardborne/dungeon'
 			/>
 			<GeneratorCard
 				minimal
