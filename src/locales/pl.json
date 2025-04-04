@@ -289,5 +289,9 @@
     "title.convert.formats": "Konwertor z %0% do %1%",
     "title.generator_category": "Generatory %0%",
     "title.generators": "Generatory Pakietów danych",
-    "title.guides": "Przewodniki pakietów danych"
+    "title.guides": "Przewodniki pakietów danych",
+    "title.project": "%0% Projekt",
+    "title.sounds": "Eksplorator dźwięków",
+    "title.transformation": "Wizualizator transformacji",
+    "title.versions": "Eksplorator wersji"
 }
