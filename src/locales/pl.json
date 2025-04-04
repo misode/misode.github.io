@@ -242,5 +242,10 @@
     "project.show_resources": "Pokaż zasoby",
     "project.unsaved_file": "Niezapisany plik",
     "sounds.loading_sound": "Ładowanie dźwięku",
-    "settings.fields.path": "Kontekst"
+    "settings.fields.path": "Kontekst",
+    "redo": "Cofnij cofnięcie",
+    "reset_default": "Zresetuj",
+    "resource_location": "Lokalizacja zasobu",
+    "restore_backup": "Przywróć ostatnią kopie zapasową",
+    "root": "Root"
 }
