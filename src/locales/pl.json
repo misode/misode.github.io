@@ -315,5 +315,7 @@
     "versions.fixes": "Naprawione błędy",
     "versions.fixes.no_results": "Brak naprawionych błędów",
     "versions.latest_release": "Najnowsze wydanie",
-    "versions.next": "Następny"
+    "versions.next": "Następny",
+    "versions.latest_snapshot": "Najnowszy snapshot",
+    "versions.minecraft_versions": "Wersje Minecraft'a"
 }
