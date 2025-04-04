@@ -227,5 +227,12 @@
     "project.save": "Zapisz jako",
     "settings": "Ustawienia",
     "show_project": "Pokaż projekt",
-    "settings.fields.name": "Nazwa"
+    "settings.fields.name": "Nazwa",
+    "project.name.already_exists": "Już posiadasz projekt z tą nazwą",
+    "project.namespace": "Podstawowy namespace",
+    "project.namespace.invalid": "Niepoprawny namespace",
+    "project.new_file": "Nowy pusty plik",
+    "project.no_files": "Brak plików",
+    "project.rename": "Zmień nazwę",
+    "project.rename_file": "Zmień nazwę pliku"
 }
