@@ -317,5 +317,9 @@
     "versions.latest_release": "Najnowsze wydanie",
     "versions.next": "Następny",
     "versions.latest_snapshot": "Najnowszy snapshot",
-    "versions.minecraft_versions": "Wersje Minecraft'a"
+    "versions.minecraft_versions": "Wersje Minecraft'a",
+    "versions.no_results": "Brak wyników",
+    "versions.previous": "Poprzedni",
+    "versions.protocol_version": "Wersja protokołu",
+    "versions.pack_format": "Format pakietu"
 }
