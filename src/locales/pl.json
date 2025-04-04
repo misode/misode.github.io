@@ -337,5 +337,9 @@
     "z": "Z",
     "zoom_in": "Przybliż",
     "zoom_in_limit": "Nie można dalej przybliżyć\n1 piksel = 4 bloki",
-    "zoom_out": "Oddal"
+    "zoom_out": "Oddal",
+    "generator.neoforge:data_map_oxidizables": "Mapa danych Oxidizables",
+    "generator.neoforge:data_map_parrot_imitations": "Mapa danych na temat imitacji papugi",
+    "generator.neoforge:data_map_raid_hero_gifts": "Mapa danych darów dla bohaterów rajdu",
+    "generator.neoforge:data_map_vibration_frequencies": "Mapa danych częstotliwości wibracji"
 }
