@@ -14,7 +14,7 @@ export function getRootType(id: string): McdocType {
 		return { kind: 'reference', path: '::java::pack::Pack' }
 	}
 	if (id === 'text_component' ) {
-		return { kind: 'reference', path: '::java::server::util::text::Text' }
+		return { kind: 'reference', path: '::java::util::text::Text' }
 	}
 	if (id.startsWith('tag/')) {
 		const attribute: AttributeValue = {

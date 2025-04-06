@@ -27,7 +27,7 @@ export const DRAFTS_URI = `${ROOT_URI}drafts/`
 const INITIAL_DIRS = [CACHE_URI, ROOT_URI, DEPENDENCY_URI, UNSAVED_URI, PROJECTS_URI, DRAFTS_URI]
 
 const builtinMcdoc = `
-use ::java::server::util::text::Text
+use ::java::util::text::Text
 use ::java::data::worldgen::dimension::Dimension
 
 dispatch minecraft:resource[text_component] to Text
