@@ -177,7 +177,7 @@
     },
     {
       "id": "1.21.5",
-      "dynamic": true,
+      "ref": "1.21.5",
       "name": "1.21.5",
       "pack_format": 62,
       "show": true
