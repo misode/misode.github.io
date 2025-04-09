@@ -3,6 +3,7 @@ import { Case, Mod, ObjectNode, Path, StringNode as RawStringNode, Switch, Switc
 import type { LootContext } from '@mcschema/java-1.20/lib/LootContext.js'
 import { LootConditions, LootEntitySources, LootTableTypes } from '@mcschema/java-1.20/lib/LootContext.js'
 import { ConditionCases } from '../../common/common.js'
+import { ID } from './index.js'
 
 export function initLootTableSchemas(schemas: SchemaRegistry, collections: CollectionRegistry) {
 	const StringNode = RawStringNode.bind(undefined, collections)
@@ -29,28 +30,8 @@ export function initLootTableSchemas(schemas: SchemaRegistry, collections: Colle
 		cases.push({ match: (_) => true, node: getNode(collectionID) })
 		return SwitchNode(cases)
 	}
-	LootConditions.set('shardborne:loot_condition', [])
 
-	collections.register('loot_condition_type', [
-		'minecraft:alternative',
-		'minecraft:inverted',
-		'minecraft:reference',
-		'minecraft:entity_properties',
-		'minecraft:block_state_property',
-		'minecraft:match_tool',
-		'minecraft:damage_source_properties',
-		'minecraft:location_check',
-		'minecraft:weather_check',
-		'minecraft:time_check',
-		'minecraft:entity_scores',
-		'minecraft:random_chance',
-		'minecraft:random_chance_with_looting',
-		'minecraft:table_bonus',
-		'minecraft:killed_by_player',
-		'minecraft:survives_explosion',
-		'shardborne:dungeon_level',
-		'shardborne:dungeon_category',
-	])
+	LootConditions.set(`${ID}:loot_condition`, [])
 
 	const conditionIDSwtichNode = compileSwitchNode(LootConditions, 'loot_condition_type', (type) =>
 		StringNode({

@@ -46,7 +46,11 @@ function AvailableGenerators() {
 			/>
 			<GeneratorCard
 				minimal
-				id='shardborne/dungeon'
+				id='shardborne/dungeon/themes'
+			/>
+			<GeneratorCard
+				minimal
+				id='shardborne/dungeon/mob_spawning'
 			/>
 			<GeneratorCard
 				minimal

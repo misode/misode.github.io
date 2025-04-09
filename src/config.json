@@ -29,16 +29,26 @@
       "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
     },
     {
-      "id": "shardborne/dungeon",
-      "url": "themes",
+      "id": "shardborne/dungeon/themes",
+      "url": "dungeon/themes",
       "tags": [
         "shardborne"
       ],
       "path": "dungeon",
       "schema": "shardborne:theme",
       "minVersion": "1.20",
-      "maxVersion": "1.20",
-      "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
+      "maxVersion": "1.20"
+    },
+    {
+      "id": "shardborne/dungeon/mob_spawning",
+      "url": "dungeon/mob-spawning",
+      "tags": [
+        "shardborne"
+      ],
+      "path": "dungeon",
+      "schema": "shardborne:mob_spawning",
+      "minVersion": "1.20",
+      "maxVersion": "1.20"
     },
     {
       "id": "dimension",
