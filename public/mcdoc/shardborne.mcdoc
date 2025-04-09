@@ -1,0 +1,36 @@
+
+// Theme
+dispatch minecraft:resource[shardborne:dungeon/themes] to struct Theme {
+	processor:  #[id="worldgen/processor_list"] string,
+	weight: float @ 1..100,
+	generation_type: ("maze" | "open_world"),
+	biome: #[id(registry="worldgen/biome")] string,
+	structures: ThemeStructureEntry,
+	theme_settings_id: string
+}
+
+struct ThemeStructureEntry {
+	[#[id="worldgen/structure"] string]: ThemeStructure
+}
+
+struct ThemeStructure {
+	min?: int,
+	max?: int,
+}
+
+
+// Template Pool
+dispatch minecraft:resource[shardborne:worldgen/template_pool] to struct TemplatePool {
+	fallback: #[id="worldgen/template_pool"] string,
+    elements: TemplateElement
+}
+
+struct TemplateElement {
+    weight: int @1..150,
+    element: Element 
+}
+
+struct Element {
+	element_type: (#[id="worldgen/structure_pool_element"] string |["mod:test"]),
+	...minecraft:template_pool_element[[element_type]],
+}

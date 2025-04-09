@@ -29,13 +29,13 @@
       "wiki": "https://docs.shardborne.com/Custom-NPCs/npcs/"
     },
     {
-      "id": "shardborne/dungeon/themes",
+      "id": "shardborne:dungeon/themes",
       "url": "dungeon/themes",
+      "dependency": "shardborne",
       "tags": [
         "shardborne"
       ],
       "path": "dungeon",
-      "schema": "shardborne:theme",
       "minVersion": "1.20",
       "maxVersion": "1.20"
     },
@@ -91,13 +91,13 @@
       "wiki": "https://minecraft.wiki/w/Loot_table"
     },
     {
-      "id": "worldgen/template_pool",
+      "id": "shardborne:worldgen/template_pool",
       "url": "worldgen/template-pool",
       "tags": [
         "shardborne",
         "worldgen"
       ],
-      "schema": "shardborne:template_pools",
+      "dependency": "shardborne",
       "minVersion": "1.16",
       "wiki": "https://minecraft.wiki/w/Template_pool"
     },

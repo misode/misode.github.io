@@ -533,45 +533,35 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				>
 					{previewShown ? Octicon.x_circle : Octicon.play}
 				</div>
-				<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-					<PreviewPanel
-						{...{ model, version, id: gen.id }}
-						shown={previewShown}
-						onError={setError}
-					/>
-				</div>
-				<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-					<SourcePanel
-						{...{ model, blockStates, doCopy, doDownload, doImport }}
-						name={gen.schema ?? 'data'}
-						copySuccess={copySuccess}
-						onError={setError}
-					/>
-				</div>
-				<div class={`popup-share${shareShown ? ' shown' : ''}`}>
-					<TextInput
-						value={shareUrl}
-						readonly
-					/>
-					<Btn
-						icon={shareCopyActive ? 'check' : 'copy'}
-						onClick={copySharedId}
-						tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')}
-						tooltipLoc='nw'
-						active={shareCopyActive}
-					/>
+				<div
+					class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`}
+					aria-label={locale(shareLoading ? 'share.loading' : 'share')}
+					onClick={share}
+				>
+					{shareLoading ? Octicon.sync : Octicon.link}
 				</div>
 				<div
-					class='popup-actions left-actions'
-					style='--offset: 50px;'
+					class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`}
+					aria-label={locale('download')}
+					onClick={downloadSource}
 				>
-					<div
-						class={'popup-action action-project shown tooltipped tip-ne'}
-						aria-label={locale(projectShown ? 'hide_project' : 'show_project')}
-						onClick={toggleProjectShown}
-					>
-						{projectShown ? Octicon.chevron_left : Octicon.repo}
-					</div>
+					{Octicon.download}
+				</div>
+				<div
+					class={`popup-action action-copy${sourceShown ? ' shown' : ''}${
+						copyActive ? ' active' : ''
+					} tooltipped tip-nw`}
+					aria-label={locale(copyActive ? 'copied' : 'copy')}
+					onClick={copySource}
+				>
+					{copyActive ? Octicon.check : Octicon.copy}
+				</div>
+				<div
+					class={'popup-action action-code shown tooltipped tip-nw'}
+					aria-label={locale(sourceShown ? 'hide_output' : 'show_output')}
+					onClick={toggleSource}
+				>
+					{sourceShown ? Octicon.chevron_right : Octicon.code}
 				</div>
 			</div>
 			<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
