@@ -3,6 +3,7 @@ import { createContext } from 'preact'
 import { useCallback, useContext } from 'preact/hooks'
 import { useLocalStorage } from '../hooks/index.js'
 import type { Color } from '../Utils.js'
+import { safeJsonParse } from '../Utils.js'
 
 interface Store {
 	biomeColors: Record<string, [number, number, number]>
@@ -19,7 +20,7 @@ export function useStore() {
 }
 
 export function StoreProvider({ children }: { children: ComponentChildren }) {
-	const [biomeColors, setBiomeColors] = useLocalStorage<Record<string, Color>>('misode_biome_colors', {}, JSON.parse, JSON.stringify)
+	const [biomeColors, setBiomeColors] = useLocalStorage<Record<string, Color>>('misode_biome_colors', {}, s => safeJsonParse(s) ?? {}, JSON.stringify)
 
 	const setBiomeColor = useCallback((biome: string, color: Color) => {
 		setBiomeColors({...biomeColors, [biome]: color })

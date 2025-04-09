@@ -1,7 +1,7 @@
 import { NbtTag } from 'deepslate'
 import yaml from 'js-yaml'
 import { Store } from '../Store.js'
-import { jsonToNbt } from '../Utils.js'
+import { jsonToNbt, message, safeJsonParse } from '../Utils.js'
 
 const INDENTS: Record<string, number | string | undefined> = {
 	'2_spaces': 2,
@@ -10,28 +10,26 @@ const INDENTS: Record<string, number | string | undefined> = {
 	minified: undefined,
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let commentJson: typeof import('comment-json') | null = null
-
 const FORMATS: Record<string, {
-	parse: (v: string) => Promise<unknown>,
-	stringify: (v: unknown, indentation: string | number | undefined) => string,
+	parse: (source: string) => string,
+	stringify: (source: string, indent: string | number | undefined) => string,
 }> = {
 	json: {
-		parse: async (v) => {
+		parse: (s) => s,
+		stringify: (s, i) => {
 			try {
-				return JSON.parse(v)
+				const data = JSON.parse(s)
+				return JSON.stringify(data, null, i)
 			} catch (e) {
-				commentJson = await import('comment-json')
-				return commentJson.parse(v)
+				console.warn(`Failed to format JSON output. Falling back to source. ${message(e)}`)
+				return s
 			}
 		},
-		stringify: (v, i) => (commentJson ?? JSON).stringify(v, null, i) + '\n',
 	},
 	snbt: {
-		parse: async (v) => NbtTag.fromString(v).toSimplifiedJson(),
-		stringify: (v, i) => {
-			const tag = jsonToNbt(v)
+		parse: (s) => JSON.stringify(NbtTag.fromString(s).toSimplifiedJson(), null, 2),
+		stringify: (s, i) => {
+			const tag = jsonToNbt(safeJsonParse(s) ?? {})
 			if (i === undefined) {
 				return tag.toString()
 			}
@@ -39,20 +37,20 @@ const FORMATS: Record<string, {
 		},
 	},
 	yaml: {
-		parse: async (v) => yaml.load(v),
-		stringify: (v, i) => yaml.dump(v, {
+		parse: (s) => JSON.stringify(yaml.load(s), null, 2),
+		stringify: (s, i) => yaml.dump(safeJsonParse(s) ?? {}, {
 			flowLevel: i === undefined ? 0 : -1,
 			indent: typeof i === 'string' ? 4 : i,
 		}),
 	},
 }
 
-export function stringifySource(data: unknown, format?: string, indent?: string) {
-	return FORMATS[format ?? Store.getFormat()].stringify(data, INDENTS[indent ?? Store.getIndent()])
+export function stringifySource(source: string, format?: string, indent?: string) {
+	return FORMATS[format ?? Store.getFormat()].stringify(source, INDENTS[indent ?? Store.getIndent()])
 }
 
-export async function parseSource(data: string, format: string) {
-	return await FORMATS[format].parse(data)
+export async function parseSource(source: string, format: string) {
+	return FORMATS[format].parse(source)
 }
 
 export function getSourceIndent(indent: string) {

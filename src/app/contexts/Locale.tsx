@@ -46,13 +46,7 @@ async function loadLocale(language: string) {
 	const langConfig = config.languages.find(lang => lang.code === language)
 	if (!langConfig) return
 	const data = await import(`../../locales/${language}.json`)
-	const schema = langConfig.schemas !== false
-		&& await import(`../../../node_modules/@mcschema/locales/src/${language}.json`)
-	let partners = { default: {} }
-	if (language === 'en') {
-		partners = await import('../partners/locales/en.json')
-	}
-	Locales[language] = { ...data.default, ...schema.default, ...partners.default }
+	Locales[language] = data.default
 }
 
 export function useLocale() {

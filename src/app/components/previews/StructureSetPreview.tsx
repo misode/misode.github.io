@@ -1,28 +1,29 @@
-import { DataModel } from '@mcschema/core'
 import type { Identifier } from 'deepslate'
 import { ChunkPos } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import type { Color } from '../../Utils.js'
-import { computeIfAbsent, iterateWorld2D, randomSeed, stringToColor } from '../../Utils.js'
-import { useLocale } from '../../contexts/index.js'
+import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
+import type { Color } from '../../Utils.js'
+import { computeIfAbsent, iterateWorld2D, randomSeed, safeJsonParse, stringToColor } from '../../Utils.js'
 import { Btn } from '../index.js'
 import { featureColors } from './Decorator.js'
 import { DEEPSLATE } from './Deepslate.js'
-import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 import type { PreviewProps } from './index.js'
+import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const StructureSetPreview = ({ data, version, shown }: PreviewProps) => {
+export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value: structureSet } = useAsync(async () => {
 		await DEEPSLATE.loadVersion(version)
-		const structureSet = DEEPSLATE.loadStructureSet(DataModel.unwrapLists(data), seed)
+		const structureSet = DEEPSLATE.loadStructureSet(safeJsonParse(text) ?? {}, seed)
 		return structureSet
-	}, [state, version, seed])
+	}, [text, version, seed])
 
 	const { chunkStructures, structureColors } = useMemo(() => {
 		return {
@@ -51,7 +52,7 @@ export const StructureSetPreview = ({ data, version, shown }: PreviewProps) => {
 
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(x, y)
-			const structure = computeIfAbsent(chunkStructures, `${pos[0]} ${pos[1]}`, () => structureSet?.getStructureInChunk(pos[0], pos[1], context))
+			const structure = computeIfAbsent(chunkStructures, `${pos[0]} ${pos[1]}`, () => structureSet?.getStructureInChunk(pos[0], pos[1], context)?.id)
 			return { structure, pos }
 		}, ({ structure, pos }) => {
 			if (structure !== undefined) {

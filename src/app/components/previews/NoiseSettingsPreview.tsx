@@ -1,38 +1,40 @@
-import { DataModel } from '@mcschema/core'
 import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { vec2 } from 'gl-matrix'
-import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed } from '../../Utils.js'
-import { getProjectData, useLocale, useProject } from '../../contexts/index.js'
+import { useCallback, useRef, useState } from 'preact/hooks'
+import { getWorldgenProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
-import { CachedCollections } from '../../services/index.js'
+import { fetchRegistries } from '../../services/index.js'
+import { Store } from '../../Store.js'
+import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnInput, BtnMenu, ErrorPanel } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
 import { DEEPSLATE } from './Deepslate.js'
-import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 import type { PreviewProps } from './index.js'
+import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => {
+export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const { project } = useProject()
 	const [seed, setSeed] = useState(randomSeed())
 	const [biome, setBiome] = useState('minecraft:plains')
 	const [layer, setLayer] = useState('terrain')
-	const state = JSON.stringify(data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value, error } = useAsync(async () => {
-		const unwrapped = DataModel.unwrapLists(data)
-		await DEEPSLATE.loadVersion(version, getProjectData(project))
+		const data = safeJsonParse(text) ?? {}
+		const projectData = await getWorldgenProjectData(project)
+		await DEEPSLATE.loadVersion(version, projectData)
 		const biomeSource = { type: 'fixed', biome }
-		await DEEPSLATE.loadChunkGenerator(unwrapped, biomeSource, seed)
+		await DEEPSLATE.loadChunkGenerator(data, biomeSource, seed)
 		const noiseSettings = DEEPSLATE.getNoiseSettings()
-		const finalDensity = DEEPSLATE.loadDensityFunction(unwrapped?.noise_router?.final_density, noiseSettings.minY, noiseSettings.height, seed)
+		const finalDensity = DEEPSLATE.loadDensityFunction(data?.noise_router?.final_density, noiseSettings.minY, noiseSettings.height, seed)
 		return { noiseSettings, finalDensity }
-	}, [state, seed, version, project, biome])
+	}, [text, seed, version, project, biome])
 	const { noiseSettings, finalDensity } = value ?? {}
 
 	const imageData = useRef<ImageData>()
@@ -86,7 +88,10 @@ export const NoiseSettingsPreview = ({ data, shown, version }: PreviewProps) => 
 		}
 	}, [noiseSettings, finalDensity])
 
-	const allBiomes = useMemo(() => CachedCollections?.get('worldgen/biome') ?? [], [version])
+	const { value: allBiomes } = useAsync(async () => {
+		const registries = await fetchRegistries(version)
+		return registries.get('worldgen/biome')
+	}, [version])
 
 	if (error) {
 		return <ErrorPanel error={error} prefix="Failed to initialize preview: " />

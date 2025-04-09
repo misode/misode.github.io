@@ -1,18 +1,20 @@
 import { BlockPos, ChunkPos, LegacyRandom, PerlinNoise } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
-import { computeIfAbsent, iterateWorld2D, randomSeed } from '../../Utils.js'
+import { useLocale, useVersion } from '../../contexts/index.js'
+import { computeIfAbsent, iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { PlacedFeature, PlacementContext } from './Decorator.js'
 import { decorateChunk } from './Decorator.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
-export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
+export const DecoratorPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
-	const state = JSON.stringify(data)
+
+	const text = docAndNode.doc.getText()
 
 	const { context, chunkFeatures } = useMemo(() => {
 		const random = new LegacyRandom(seed)
@@ -31,7 +33,7 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 			context,
 			chunkFeatures: new Map<string, PlacedFeature[]>(),
 		}
-	}, [state, version, seed])
+	}, [text, version, seed])
 
 	const ctx = useRef<CanvasRenderingContext2D>()
 	const imageData = useRef<ImageData>()
@@ -48,7 +50,7 @@ export const DecoratorPreview = ({ data, version, shown }: PreviewProps) => {
 	}, [])
 	const onDraw = useCallback(function onDraw(transform: mat3) {
 		if (!ctx.current || !imageData.current || !shown) return
-
+		const data = safeJsonParse(text) ?? {}
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(Math.floor(x / 16), Math.floor(-y / 16))
 			const features = computeIfAbsent(chunkFeatures, `${pos[0]} ${pos[1]}`, () => decorateChunk(pos, data, context))

@@ -1,11 +1,11 @@
 import { useEffect, useErrorBoundary, useMemo } from 'preact/hooks'
-import config from '../Config.js'
 import { CustomizedPanel } from '../components/customized/CustomizedPanel.jsx'
 import { ErrorPanel, Footer, Octicon, VersionSwitcher } from '../components/index.js'
+import config from '../Config.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import { useSearchParam } from '../hooks/index.js'
-import type { VersionId } from '../services/Schemas.js'
-import { checkVersion } from '../services/Schemas.js'
+import type { VersionId } from '../services/Versions.js'
+import { checkVersion } from '../services/Versions.js'
 
 const MIN_VERSION = '1.20'
 const Tabs = ['basic', 'biomes', 'structures', 'ores']

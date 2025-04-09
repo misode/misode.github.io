@@ -2,8 +2,8 @@ import { useMemo } from 'preact/hooks'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
-import type { VersionId } from '../../services/Schemas.js'
-import { checkVersion } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
+import { checkVersion } from '../../services/Versions.js'
 import { cleanUrl } from '../../Utils.js'
 import { Badge, Card, Icons, ToolCard } from '../index.js'
 
@@ -53,7 +53,7 @@ export function GeneratorCard({ id, minimal }: Props) {
 		return []
 	}, [gen])
 
-	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.tags?.includes('partners') ? locale(`partner.${gen.id.substring(0, gen.id.indexOf('.'))}`) : versionText} link={cleanUrl(gen.url)}>
+	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.dependency ? locale(`partner.${gen.dependency}`) : versionText} link={cleanUrl(gen.url)}>
 		{!gen.noPath && <p class="card-subtitle">/{gen.path ?? gen.id}</p>}
 		{tags.length > 0 && <div class="badges-list">
 			{tags.sort().map(tag => <Badge label={tag} />)}

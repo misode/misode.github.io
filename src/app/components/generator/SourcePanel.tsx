@@ -1,10 +1,10 @@
-import { DataModel } from '@mcschema/core'
+import type { DocAndNode } from '@spyglassmc/core'
+import { fileUtil } from '@spyglassmc/core'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
-import { useLocalStorage, useModel } from '../../hooks/index.js'
-import { getOutput } from '../../schema/transformOutput.js'
-import type { BlockStateRegistry } from '../../services/index.js'
-import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, sortData, stringifySource } from '../../services/index.js'
+import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
+import { useLocalStorage } from '../../hooks/index.js'
+import { getSourceFormats, getSourceIndent, getSourceIndents, parseSource, stringifySource } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { message } from '../../Utils.js'
 import { Btn, BtnMenu } from '../index.js'
@@ -17,17 +17,16 @@ interface Editor {
 }
 
 type SourcePanelProps = {
-	name: string,
-	model: DataModel | undefined,
-	blockStates: BlockStateRegistry | undefined,
+	docAndNode: DocAndNode | undefined,
 	doCopy?: number,
 	doDownload?: number,
 	doImport?: number,
 	copySuccess: () => unknown,
 	onError: (message: string | Error) => unknown,
 }
-export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
+export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
+	const { service } = useSpyglass()
 	const [indent, setIndent] = useState(Store.getIndent())
 	const [format, setFormat] = useState(Store.getFormat())
 	const [sort, setSort] = useLocalStorage('misode_output_sort', 'schema')
@@ -36,24 +35,29 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	const download = useRef<HTMLAnchorElement>(null)
 	const retransform = useRef<Function>(() => {})
 	const onImport = useRef<() => Promise<void>>(async () => {})
+	const outputRef = useRef<string>()
 
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
-	const getSerializedOutput = useCallback((model: DataModel, blockStates: BlockStateRegistry) => {
-		let data = getOutput(model, blockStates)
-		if (sort === 'alphabetically') {
-			data = sortData(data)
-		}
-		return stringifySource(data, format, indent)
+	const getSerializedOutput = useCallback((text: string) => {
+		// TODO: implement sort
+		// if (sort === 'alphabetically') {
+		// 	data = sortData(data)
+		// }
+		return stringifySource(text, format, indent)
 	}, [indent, format, sort])
 
+	const text = useDocAndNode(docAndNode)?.doc.getText()
+	
 	useEffect(() => {
 		retransform.current = () => {
-			if (!editor.current) return
-			if (!model || !blockStates) return
+			if (!editor.current || text === undefined) {
+				return
+			}
 			try {
-				const output = getSerializedOutput(model, blockStates)
+				const output = getSerializedOutput(text)
+				outputRef.current = output
 				editor.current.setValue(output)
 			} catch (e) {
 				if (e instanceof Error) {
@@ -71,9 +75,10 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			if (!editor.current) return
 			const value = editor.current.getValue()
 			if (value.length === 0) return
+			if (!service || !docAndNode) return
 			try {
-				const data = await parseSource(value, format)
-				model?.reset(DataModel.wrapLists(data), false)
+				const text = await parseSource(value, format)
+				await service.writeFile(docAndNode.doc.uri, text)
 			} catch (e) {
 				if (e instanceof Error) {
 					e.message = `Error importing: ${e.message}`
@@ -84,7 +89,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 				console.error(e)
 			}
 		}
-	}, [model, blockStates, indent, format, sort, highlighting])
+	}, [service, docAndNode, text, indent, format, sort, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
@@ -145,14 +150,11 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 		}
 	}, [highlighting])
 
-	useModel(model, () => {
-		if (!retransform.current) return
-		retransform.current()
-	})
 	useEffect(() => {
-		if (!retransform.current) return
-		if (model) retransform.current()
-	}, [model])
+		if (retransform.current && text !== undefined) {
+			retransform.current()
+		}
+	}, [text])
 
 	useEffect(() => {
 		if (!editor.current || !retransform.current) return
@@ -163,22 +165,22 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 	}, [indent, format, sort, highlighting, braceLoaded])
 
 	useEffect(() => {
-		if (doCopy && model && blockStates) {
-			navigator.clipboard.writeText(getSerializedOutput(model, blockStates)).then(() => {
+		if (doCopy && outputRef.current) {
+			navigator.clipboard.writeText(outputRef.current).then(() => {
 				copySuccess()
 			})
 		}
-	}, [doCopy])
+	}, [doCopy, textarea])
 
 	useEffect(() => {
-		if (doDownload && model && blockStates && download.current) {
-			const content = encodeURIComponent(getSerializedOutput(model, blockStates))
+		if (doDownload && docAndNode && outputRef.current && download.current) {
+			const content = encodeURIComponent(outputRef.current)
 			download.current.setAttribute('href', `data:text/json;charset=utf-8,${content}`)
-			const fileName = name === 'pack_mcmeta' ? 'pack.mcmeta' : `${name}.${format}`
+			const fileName = fileUtil.basename(docAndNode.doc.uri)
 			download.current.setAttribute('download', fileName)
 			download.current.click()
 		}
-	}, [doDownload])
+	}, [doDownload, outputRef])
 
 	useEffect(() => {
 		if (doImport && editor.current) {
@@ -215,7 +217,7 @@ export function SourcePanel({ name, model, blockStates, doCopy, doDownload, doIm
 			{window.matchMedia('(pointer: coarse)').matches && <>
 				<Btn icon="paste" onClick={importFromClipboard} />
 			</>}
-			<BtnMenu icon="gear" tooltip={locale('output_settings')} data-cy="source-controls">
+			<BtnMenu icon="gear" tooltip={locale('output_settings')}>
 				{getSourceIndents().map(key =>
 					<Btn label={locale(`indentation.${key}`)} active={indent === key}
 						onClick={() => changeIndent(key)}/>

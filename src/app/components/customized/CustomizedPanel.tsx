@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import config from '../../Config.js'
-import { deepClone, deepEqual, writeZip } from '../../Utils.js'
 import { useVersion } from '../../contexts/Version.jsx'
 import { stringifySource } from '../../services/Source.js'
+import { deepClone, deepEqual, writeZip } from '../../Utils.js'
 import { Btn } from '../Btn.jsx'
 import { ErrorPanel } from '../ErrorPanel.jsx'
 import { Octicon } from '../Octicon.jsx'
@@ -44,11 +44,13 @@ export function CustomizedPanel({ tab }: Props) {
 			const entries = Object.entries(pack).flatMap(([type, files]) => {
 				const prefix = `data/minecraft/${type}/`
 				return [...files.entries()].map(([name, data]) => {
-					return [prefix + name + '.json', stringifySource(data, 'json')] as [string, string]
+					const text = stringifySource(JSON.stringify(data, null, 2), 'json')
+					return [prefix + name + '.json', new TextEncoder().encode(text)] as [string, Uint8Array]
 				})
 			})
 			const pack_format = config.versions.find(v => v.id === version)!.pack_format
-			entries.push(['pack.mcmeta', stringifySource({ pack: { pack_format, description: 'Customized world from misode.github.io' } }, 'json')])
+			const packMcmetaText = stringifySource(JSON.stringify({ pack: { pack_format, description: 'Customized world from misode.github.io' } }, null, 2), 'json')
+			entries.push(['pack.mcmeta', new TextEncoder().encode(packMcmetaText)])
 			const url = await writeZip(entries)
 			download.current.setAttribute('href', url)
 			download.current.setAttribute('download', 'customized.zip')

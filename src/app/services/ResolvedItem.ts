@@ -1,5 +1,6 @@
 import type { NbtTag } from 'deepslate'
 import { Identifier, ItemStack } from 'deepslate'
+import { safeJsonParse } from '../Utils.js'
 
 export class ResolvedItem extends ItemStack {
 
@@ -10,28 +11,8 @@ export class ResolvedItem extends ItemStack {
 		super(item.id, item.count, item.components)
 	}
 
-	public static create(id: string | Identifier, count: number, components: Map<string, NbtTag>, baseGetter: (id: string) => ReadonlyMap<string, NbtTag>) {
-		if (typeof id === 'string') {
-			id = Identifier.parse(id)
-		}
-		const item = new ItemStack(id, count, components)
-		return new ResolvedItem(item, baseGetter(id.toString()))
-	}
-
 	public clone(): ResolvedItem {
 		return new ResolvedItem(super.clone(), this.base)
-	}
-
-	public flatten(): ItemStack {
-		const components = new Map(this.base)
-		for (const [key, value] of this.components) {
-			if (key.startsWith('!')) {
-				components.delete(key.slice(1))
-			} else {
-				components.set(key, value)
-			}
-		}
-		return new ItemStack(this.id, this.count, components)
 	}
 
 	private getTag(key: string) {
@@ -108,11 +89,7 @@ export class ResolvedItem extends ItemStack {
 	public getLore() {
 		return this.get('lore', tag => {
 			return tag.isList() ? tag.map(e => {
-				try {
-					return JSON.parse(e.getAsString())
-				} catch (e) {
-					return { text: '(invalid lore line)' }
-				}
+				return safeJsonParse(e.getAsString()) ?? { text: '(invalid lore line)' }
 			}) : []
 		}) ?? []
 	}
@@ -153,11 +130,7 @@ export class ResolvedItem extends ItemStack {
 	public getHoverName() {
 		const customName = this.get('custom_name', tag => tag.isString() ? tag.getAsString() : undefined)
 		if (customName) {
-			try {
-				return JSON.parse(customName)
-			} catch (e) {
-				return '(invalid custom name)'
-			}
+			return safeJsonParse(customName) ?? '(invalid custom name)'
 		}
 
 		const bookTitle = this.get('written_book_content', tag => tag.isCompound() ? (tag.hasCompound('title') ? tag.getCompound('title').getString('raw') : tag.getString('title')) : undefined)
@@ -167,11 +140,7 @@ export class ResolvedItem extends ItemStack {
 
 		const itemName = this.get('item_name', tag => tag.isString() ? tag.getAsString() : undefined)
 		if (itemName) {
-			try {
-				return JSON.parse(itemName)
-			} catch (e) {
-				return { text: '(invalid item name)' }
-			}
+			return safeJsonParse(itemName) ?? { text: '(invalid item name)' }
 		}
 
 		const guess = this.id.path

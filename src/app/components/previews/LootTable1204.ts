@@ -1,7 +1,7 @@
 import type { Random } from 'deepslate-1.20.4/core'
 import { Enchantment, Identifier, ItemStack, LegacyRandom } from 'deepslate-1.20.4/core'
 import { NbtCompound, NbtInt, NbtList, NbtShort, NbtString, NbtTag, NbtType } from 'deepslate-1.20.4/nbt'
-import type { VersionId } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
 import { clamp, getWeightedRandom, isObject } from '../../Utils.js'
 
 export interface SlottedItem {
@@ -117,8 +117,11 @@ function shuffle<T>(array: T[], ctx: LootContext) {
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
+	if (!Array.isArray(table.pools)) {
+		return
+	}
 	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
-	for (const pool of table.pools ?? []) {
+	for (const pool of table.pools) {
 		generatePool(pool, tableConsumer, ctx)
 	}
 }
@@ -268,7 +271,7 @@ function composeFunctions(functions: any[]): LootFunction {
 		for (const fn of functions) {
 			if (Array.isArray(fn)) {
 				composeFunctions(fn)
-			} else if (composeConditions(fn.conditions ?? [])(ctx)) {
+			} else if (isObject(fn) && composeConditions(fn.conditions ?? [])(ctx)) {
 				const type = fn.function?.replace(/^minecraft:/, '');
 				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
@@ -348,6 +351,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
+		if (!isObject(enchantments)) {
+			return
+		}
 		Object.entries(enchantments).forEach(([id, level]) => {
 			const lvl = computeInt(level, ctx)
 			try {
@@ -356,6 +362,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		})
 	},
 	set_lore: ({ lore, replace }) => (item) => {
+		if (!Array.isArray(lore)) return
 		const lines: string[] = lore.flatMap((line: any) => line !== undefined ? [JSON.stringify(line)] : [])
 		const newLore = replace ? lines : [...item.tag.getCompound('display').getList('Lore', NbtType.String).map(s => s.getAsString()), ...lines]
 		getOrCreateTag(item, 'display').set('Lore', new NbtList(newLore.map(l => new NbtString(l))))
@@ -399,6 +406,9 @@ function composeConditions(conditions: any[]): LootCondition {
 function testCondition(condition: any, ctx: LootContext): boolean {
 	if (Array.isArray(condition)) {
 		return composeConditions(condition)(ctx)
+	}
+	if (!isObject(condition) || typeof condition.condition !== 'string') {
+		return false
 	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
@@ -546,8 +556,8 @@ function prepareIntRange(range: any, ctx: LootContext) {
 	if (typeof range === 'number') {
 		range = { min: range, max: range }
 	}
-	const min = computeInt(range.min, ctx)
-	const max = computeInt(range.max, ctx)
+	const min = computeInt(range?.min, ctx)
+	const max = computeInt(range?.max, ctx)
 	return { min, max }
 }
 

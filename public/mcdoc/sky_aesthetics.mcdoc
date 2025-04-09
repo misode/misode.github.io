@@ -1,0 +1,106 @@
+
+dispatch minecraft:resource[sky_aesthetics:sky] to struct SkyProperties {
+    world: #[id="dimension"] string,
+    id?: string,
+    cloud_settings: CloudSettings,
+    fog_settings?: FogSettings,
+    rain: boolean,
+    custom_vanilla_objects: CustomVanillaObjects,
+    stars: Star,
+    /// The R, G and B value for the color
+    sunrise_color?: [float] @ 3,
+    sunrise_alpha_modifier?: float,
+    sky_type: SkyType,
+    sky_color: struct {
+        custom_color: boolean,
+
+        /// The R, G, B and alpha value for the color
+        #[until="1.21.2"]
+        color: [float] @ 4,
+        /// The R, G and B value for the color
+        #[since="1.21.3"]
+        color: [float] @ 3 ,
+
+    },
+    sky_objects: [SkyObject],
+    constellations: [string],
+    condition: RenderCondition
+
+}
+
+struct CloudSettings {
+    cloud: boolean,
+    cloud_height: int,
+    /// The R, G and B value for the color
+    cloud_color?: struct CustomCloudColor {
+        base_color: [double] @ 3,
+        storm_color: [double] @ 3,
+        rain_color: [double] @ 3,
+        always_base_color: boolean
+    }
+}
+
+struct FogSettings {
+    fog: boolean,
+    /// The R, G, B and alpha value for the color
+    fog_color: [float] @ 4,
+    fog_density: [float] @ 2,
+}
+
+struct CustomVanillaObjects {
+    sun: boolean,
+    sun_texture: string,
+    sun_height: int,
+    sun_size: int,
+    moon: boolean,
+    moon_phase: boolean,
+    moon_texture: string,
+    moon_height: int,
+    moon_size: int,
+}
+
+struct Star {
+    vanilla: boolean,
+    moving_stars: boolean,
+    count: int,
+    all_days_visible: boolean,
+    scale: float,
+    /// The R, G and B value for the color
+    color: [float] @ 3,
+    shooting_stars? : struct shootingStars {
+        percentage: int,
+        random_lifetime: [double] @ 2,
+        scale: float,
+        speed: float,
+        color: [double] @ 3,
+        rotation?: int
+    }
+}
+
+struct SkyObject {
+    texture: string,
+    blend: boolean,
+    size: float,
+    height: int,
+    rotation: [float] @ 3,
+    rotation_type: RotationType
+}
+
+struct RenderCondition {
+    condition: boolean,
+    biome?: #[id="worldgen/biome"] string,
+    biomes?: #[id(registry="worldgen/biome",tags=allowed)] string,
+
+}
+
+enum(string) SkyType {
+	#[starred] Overworld = "OVERWORLD",
+	None = "NONE",
+	End = "END"
+}
+
+enum(string) RotationType {
+	Day = "DAY",
+	Night = "NIGHT",
+	Fixed = "FIXED"
+}

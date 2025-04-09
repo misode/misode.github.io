@@ -1,24 +1,18 @@
-import type { CollectionRegistry } from '@mcschema/core'
 import config from '../Config.js'
 import { Store } from '../Store.js'
 import { message } from '../Utils.js'
-import type { BlockStateRegistry, VersionId } from './Schemas.js'
-import { checkVersion } from './Schemas.js'
+import type { VersionId } from './Versions.js'
+import { checkVersion } from './Versions.js'
 
 const CACHE_NAME = 'misode-v2'
 const CACHE_LATEST_VERSION = 'cached_latest_version'
 const CACHE_PATCH = 'misode_cache_patch'
 
-type Version = {
-	id: string,
-	ref?: string,
-	dynamic?: boolean,
-}
-
 declare var __LATEST_VERSION__: string
 export const latestVersion = __LATEST_VERSION__ ?? ''
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 const mcmetaTarballUrl = 'https://github.com/misode/mcmeta/tarball'
+const vanillaMcdocUrl = 'https://raw.githubusercontent.com/SpyglassMC/vanilla-mcdoc'
 const changesUrl = 'https://raw.githubusercontent.com/misode/technical-changes'
 const fixesUrl = 'https://raw.githubusercontent.com/misode/mcfixes'
 const versionDiffUrl = 'https://mcmeta-diff.misode.workers.dev'
@@ -46,51 +40,39 @@ async function validateCache(version: RefInfo) {
 	}
 }
 
-export async function fetchData(versionId: string, collectionTarget: CollectionRegistry, blockStateTarget: BlockStateRegistry) {
-	const version = config.versions.find(v => v.id === versionId) as Version | undefined
-	if (!version) {
-		console.error(`[fetchData] Unknown version ${version} in ${JSON.stringify(config.versions)}`)
-		return
+export function getVersionChecksum(versionId: VersionId) {
+	const version = config.versions.find(v => v.id === versionId)!
+	if (version.dynamic) {
+		return (localStorage.getItem(CACHE_LATEST_VERSION) ?? '').toString()
 	}
-
-	await validateCache(version)
-
-	await Promise.all([
-		_fetchRegistries(version, collectionTarget),
-		_fetchBlockStateMap(version, blockStateTarget),
-	])
+	return version.ref
 }
 
-async function _fetchRegistries(version: Version, target: CollectionRegistry) {
-	console.debug(`[fetchRegistries] ${version.id}`)
+export interface VanillaMcdocSymbols {
+	ref: string,
+	mcdoc: Record<string, unknown>,
+	'mcdoc/dispatcher': Record<string, Record<string, unknown>>,
+}
+export async function fetchVanillaMcdoc(): Promise<VanillaMcdocSymbols> {
 	try {
-		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
-		for (const id in data) {
-			target.register(id, data[id].map((e: string) => 'minecraft:' + e))
-		}
+		return cachedFetch<VanillaMcdocSymbols>(`${vanillaMcdocUrl}/generated/symbols.json`, { refresh: true })
 	} catch (e) {
-		console.warn('Error occurred while fetching registries:', message(e))
+		throw new Error(`Error occured while fetching vanilla-mcdoc: ${message(e)}`)
 	}
 }
 
-async function _fetchBlockStateMap(version: Version, target: BlockStateRegistry) {
-	console.debug(`[fetchBlockStateMap] ${version.id}`)
+export async function fetchDependencyMcdoc(dependency: string) {
 	try {
-		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
-		for (const id in data) {
-			target['minecraft:' + id] = {
-				properties: data[id][0],
-				default: data[id][1],
-			}
-		}
+		return cachedFetch(`/mcdoc/${dependency}.mcdoc`, { decode: res => res.text(), refresh: true })
 	} catch (e) {
-		console.warn('Error occurred while fetching block state map:', message(e))
+		throw new Error(`Error occured while fetching ${dependency} mcdoc: ${message(e)}`)
 	}
 }
 
 export async function fetchRegistries(versionId: VersionId) {
 	console.debug(`[fetchRegistries] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
 		const result = new Map<string, string[]>()
@@ -99,21 +81,21 @@ export async function fetchRegistries(versionId: VersionId) {
 		}
 		return result
 	} catch (e) {
-		throw new Error(`Error occurred while fetching registries (2): ${message(e)}`)
+		throw new Error(`Error occurred while fetching registries: ${message(e)}`)
 	}
 }
+
+export type BlockStateData = [Record<string, string[]>, Record<string, string>]
 
 export async function fetchBlockStates(versionId: VersionId) {
 	console.debug(`[fetchBlockStates] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!
-	const result = new Map<string, {properties: Record<string, string[]>, default: Record<string, string>}>()
+	const result = new Map<string, BlockStateData>()
+	await validateCache(version)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/blocks/data.min.json`)
 		for (const id in data) {
-			result.set('minecraft:' + id, {
-				properties: data[id][0],
-				default: data[id][1],
-			})
+			result.set(id, data[id])
 		}
 	} catch (e) {
 		console.warn('Error occurred while fetching block states:', message(e))
@@ -128,6 +110,7 @@ export async function fetchItemComponents(versionId: VersionId) {
 	if (!checkVersion(versionId, '1.20.5')) {
 		return result
 	}
+	await validateCache(version)
 	try {
 		const data = await cachedFetch<Record<string, Record<string, unknown>>>(`${mcmeta(version, 'summary')}/item_components/data.min.json`)
 		for (const [id, components] of Object.entries(data)) {
@@ -152,16 +135,17 @@ export async function fetchItemComponents(versionId: VersionId) {
 export async function fetchPreset(versionId: VersionId, registry: string, id: string) {
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
 	const version = config.versions.find(v => v.id === versionId)!
+	await validateCache(version)
 	try {
 		let url
 		if (id.startsWith('immersive_weathering:')) {
 			url = `https://raw.githubusercontent.com/AstralOrdana/Immersive-Weathering/main/src/main/resources/data/immersive_weathering/block_growths/${id.slice(21)}.json`
 		} else {
-			const type = ['atlases', 'blockstates', 'models', 'font'].includes(registry) ? 'assets' : 'data'
+			const type = ['atlases', 'blockstates', 'items', 'font', 'lang', 'models', 'equipment', 'post_effect'].includes(registry) ? 'assets' : 'data'
 			url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
 		}
 		const res = await fetch(url)
-		return await res.json()
+		return await res.text()
 	} catch (e) {
 		throw new Error(`Error occurred while fetching ${registry} preset ${id}: ${message(e)}`)
 	}
@@ -172,7 +156,7 @@ export async function fetchAllPresets(versionId: VersionId, registry: string) {
 	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
-		const type = ['atlas', 'block_definition', 'model', 'font'].includes(registry) ? 'assets' : 'data'
+		const type = ['atlas', 'block_definition', 'item_definition', 'model', 'font', 'lang', 'equipment', 'post_effect'].includes(registry) ? 'assets' : 'data'
 		return new Map<string, unknown>(Object.entries(await cachedFetch(`${mcmeta(version, 'summary')}/${type}/${registry}/data.min.json`)))
 	} catch (e) {
 		throw new Error(`Error occurred while fetching all ${registry} presets: ${message(e)}`)
@@ -230,15 +214,19 @@ export function getAssetUrl(versionId: VersionId, type: string, path: string): s
 
 export async function fetchResources(versionId: VersionId) {
 	const version = config.versions.find(v => v.id === versionId)!
+	const needsItemModels = checkVersion(versionId, '1.20.5')
+	const hasItemModels = checkVersion(versionId, '1.21.4')
 	await validateCache(version)
 	try {
-		const [blockDefinitions, models, uvMapping, atlas] = await Promise.all([
+		const [blockDefinitions, models, uvMapping, atlas, itemDefinitions] = await Promise.all([
 			fetchAllPresets(versionId, 'block_definition'),
 			fetchAllPresets(versionId, 'model'),
 			fetch(`${mcmeta(version, 'atlas')}/all/data.min.json`).then(r => r.json()),
 			loadImage(`${mcmeta(version, 'atlas')}/all/atlas.png`),
+			// Always download the 1.21.4 item models for the version range 1.20.5 - 1.21.3
+			needsItemModels ? fetchAllPresets(hasItemModels ? versionId : '1.21.4', 'item_definition') : new Map<string, unknown>(),
 		])
-		return { blockDefinitions, models, uvMapping, atlas }
+		return { blockDefinitions, models, uvMapping, atlas, itemDefinitions }
 	} catch (e) {
 		throw new Error(`Error occured while fetching resources: ${message(e)}`)
 	}

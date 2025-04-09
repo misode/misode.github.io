@@ -5,7 +5,7 @@ import { useLocale } from '../contexts/Locale.jsx'
 import { useVersion } from '../contexts/Version.jsx'
 import { useAsync } from '../hooks/useAsync.js'
 import { getLanguage, getTranslation } from '../services/Resources.js'
-import { message } from '../Utils.js'
+import { intToDisplayHexRgb, message } from '../Utils.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
@@ -107,7 +107,7 @@ export function ItemTooltip1204({ item, advanced }: Props) {
 		})}
 		{item.tag.hasCompound('display') && <>
 			{shouldShow(item, 'dye') && item.tag.getCompound('display').hasNumber('color') && (advanced
-				? <TextComponent component={{ translate: 'item.color', with: [`#${item.tag.getCompound('display').getNumber('color').toString(16).padStart(6, '0')}`], color: 'gray' }} />
+				? <TextComponent component={{ translate: 'item.color', with: [intToDisplayHexRgb(item.tag.getCompound('display').getNumber('color'))], color: 'gray' }} />
 				: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />)}
 			{lore.map((component) => <TextComponent component={component} base={{ color: 'dark_purple', italic: true }} />)}
 		</>}

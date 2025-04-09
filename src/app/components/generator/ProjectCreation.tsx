@@ -1,19 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import { useCallback, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
-import type { Project } from '../../contexts/index.js'
-import { disectFilePath, useLocale, useProject } from '../../contexts/index.js'
+import { useLocale, useProject } from '../../contexts/index.js'
+import { useModal } from '../../contexts/Modal.jsx'
+import { useSpyglass } from '../../contexts/Spyglass.jsx'
 import type { VersionId } from '../../services/index.js'
-import { DEFAULT_VERSION, parseSource } from '../../services/index.js'
-import { message, readZip } from '../../Utils.js'
+import { DEFAULT_VERSION } from '../../services/index.js'
+import { PROJECTS_URI } from '../../services/Spyglass.js'
+import { hexId, message, readZip } from '../../Utils.js'
 import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '../index.js'
 import { Modal } from '../Modal.js'
 
-interface Props {
-	onClose: () => unknown,
-}
-export function ProjectCreation({ onClose }: Props) {
+export function ProjectCreation() {
 	const { locale } = useLocale()
-	const { projects, createProject, changeProject, updateProject } = useProject()
+	const { hideModal } = useModal()
+	const { projects, createProject, changeProject } = useProject()
+	const { client } = useSpyglass()
 
 	const [name, setName] = useState('')
 	const [namespace, setNamespace] = useState('')
@@ -32,43 +33,28 @@ export function ProjectCreation({ onClose }: Props) {
 		}
 	}
 
-	const projectUpdater = useRef(updateProject)
-	useEffect(() => {
-		projectUpdater.current = updateProject
-	}, [updateProject])
-
-	const onCreate = () => {
+	const onCreate = useCallback(async () => {
 		setCreating(true)
-		createProject(name, namespace || undefined, version)
+		const rootUri = `${PROJECTS_URI}${hexId()}/`
+		await client.fs.mkdir(rootUri)
+		createProject({ name, namespace, version, storage: { type: 'indexeddb', rootUri } })
 		changeProject(name)
 		if (file) {
 			readZip(file).then(async (entries) => {
-				const project: Partial<Project> = { files: [] }
-				await Promise.all(entries.map(async (entry) => {
-					const file = disectFilePath(entry[0], version)
-					if (file) {
-						try {
-							const data = await parseSource(entry[1], 'json')
-							project.files!.push({ ...file, data })
-							return
-						} catch (e) {
-							console.warn(`Failed parsing ${file.type} ${file.id}: ${message(e)}`)
-						}
-					}
-					if (project.unknownFiles === undefined) {
-						project.unknownFiles = []
-					}
-					project.unknownFiles.push({ path: entry[0], data: entry[1] })
+				await Promise.all(entries.map((entry) => {
+					const path = entry[0].startsWith('/') ? entry[0].slice(1) : entry[0]
+					return client.fs.writeFile(rootUri + path, entry[1])
 				}))
-				projectUpdater.current(project)
-				onClose()
-			}).catch(() => {
-				onClose()
+				hideModal()
+			}).catch((e) => {
+				// TODO: handle errors
+				console.warn(`Error importing data pack: ${message(e)}`)
+				hideModal()
 			})
 		} else {
-			onClose()
+			hideModal()
 		}
-	}
+	}, [createProject, changeProject, client, version, name, namespace, file])
 
 	const invalidName = useMemo(() => {
 		return projects.map(p => p.name.trim().toLowerCase()).includes(name.trim().toLowerCase())
@@ -80,7 +66,7 @@ export function ProjectCreation({ onClose }: Props) {
 
 	const versions = config.versions.map(v => v.id as VersionId).reverse()
 
-	return <Modal class="project-creation" onDismiss={onClose}>
+	return <Modal class="project-creation">
 		<p>{locale('project.create')}</p>
 		<div class="input-group">
 			<TextInput autofocus class={`btn btn-input${!creating && (invalidName || name.length === 0) ? ' invalid': ''}`} placeholder={locale('project.name')} value={name} onChange={setName} />
@@ -90,7 +76,7 @@ export function ProjectCreation({ onClose }: Props) {
 			<TextInput class={`btn btn-input${!creating && invalidNamespace ? ' invalid' : ''}`} placeholder={locale('project.namespace')} value={namespace} onChange={setNamespace} />
 			{!creating && invalidNamespace && <div class="status-icon danger tooltipped tip-e" aria-label={locale('project.namespace.invalid')}>{Octicon.issue_opened}</div>}
 		</div>
-		<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')} data-cy="version-switcher">
+		<BtnMenu icon="tag" label={version} tooltip={locale('switch_version')}>
 			{versions.map(v =>
 				<Btn label={v} active={v === version} onClick={() => setVersion(v)} />
 			)}

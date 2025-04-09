@@ -2,7 +2,7 @@ import type { MobEffectInstance, NbtTag } from 'deepslate'
 import { ItemStack, NbtCompound, NbtList, PotionContents } from 'deepslate'
 import { Identifier } from 'deepslate/core'
 import type { ResolvedItem } from '../services/ResolvedItem.js'
-import { makeDescriptionId, mergeTextComponentStyles } from '../Utils.js'
+import { intToDisplayHexRgb, makeDescriptionId, mergeTextComponentStyles } from '../Utils.js'
 import { TextComponent } from './TextComponent.jsx'
 
 interface Props {
@@ -11,10 +11,6 @@ interface Props {
 	resolver: (item: ItemStack) => ResolvedItem,
 }
 export function ItemTooltip({ item, advanced, resolver }: Props) {
-	if (item.has('hide_tooltip')) {
-		return <></>
-	}
-
 	return <>
 		<TextComponent component={item.getStyledHoverName()} />
 		{!advanced && !item.has('custom_name') && item.is('filled_map') && item.has('map_id') && (
@@ -111,7 +107,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 			<EnchantmentsTooltip data={item.get('enchantments', tag => tag)} />
 		)}
 		{item.showInTooltip('dyed_color') && (advanced
-			? <TextComponent component={{ translate: 'item.color', with: [`#${item.get('dyed_color', tag => tag.isCompound() ? tag.getNumber('rgb') : tag.getAsNumber())?.toString(16).padStart(6, '0')}`], color: 'gray' }} />
+			? <TextComponent component={{ translate: 'item.color', with: [intToDisplayHexRgb(item.get('dyed_color', tag => tag.isCompound() ? tag.getNumber('rgb') : tag.getAsNumber()))], color: 'gray' }} />
 			: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />
 		)}
 		{item.getLore().map((component) =>
@@ -265,7 +261,7 @@ function AttributeModifiersTooltip({ data }: { data: NbtTag | undefined }) {
 				const operation = MODIFIER_OPERATIONS.indexOf(e.getString('operation'))
 				let absolute = false
 				if (id.equals(Identifier.create('base_attack_damage'))) {
-					amount += 2
+					amount += 1
 					absolute = true
 				} else if (id.equals(Identifier.create('base_attack_speed'))) {
 					amount += 4

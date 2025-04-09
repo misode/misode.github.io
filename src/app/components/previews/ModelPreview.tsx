@@ -1,4 +1,3 @@
-import { DataModel } from '@mcschema/core'
 import { BlockDefinition, BlockModel, Identifier, Structure, StructureRenderer } from 'deepslate/render'
 import type { mat4 } from 'gl-matrix'
 import { useCallback, useRef } from 'preact/hooks'
@@ -6,33 +5,35 @@ import { useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncCancel } from '../../hooks/useAsyncFn.js'
 import { getResources, ResourceWrapper } from '../../services/Resources.js'
+import { safeJsonParse } from '../../Utils.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
 
 const PREVIEW_ID = Identifier.parse('misode:preview')
 const PREVIEW_DEFINITION = new BlockDefinition({ '': { model: PREVIEW_ID.toString() }}, undefined)
 
-export const ModelPreview = ({ data, shown }: PreviewProps) => {
+export const ModelPreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { version } = useVersion()
-	const serializedData = JSON.stringify(data)
+
+	const text = docAndNode.doc.getText()
 
 	const { value: resources } = useAsync(async () => {
 		if (!shown) return AsyncCancel
-		const resources = await getResources(version)
-		const model = BlockModel.fromJson(DataModel.unwrapLists(data))
-		model.flatten(resources)
+		const resources = await getResources(version, new Map())
+		const blockModel = BlockModel.fromJson(safeJsonParse(text) ?? {})
+		blockModel.flatten(resources)
 		const wrapper = new ResourceWrapper(resources, {
 			getBlockDefinition(id) {
 				if (id.equals(PREVIEW_ID)) return PREVIEW_DEFINITION
 				return null
 			},
 			getBlockModel(id) {
-				if (id.equals(PREVIEW_ID)) return model
+				if (id.equals(PREVIEW_ID)) return blockModel
 				return null
 			},
 		})
 		return wrapper
-	}, [shown, version, serializedData])
+	}, [shown, version, text])
 
 	const renderer = useRef<StructureRenderer | undefined>(undefined)
 

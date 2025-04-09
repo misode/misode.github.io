@@ -1,9 +1,10 @@
+import type { ItemComponentsProvider } from 'deepslate'
 import { NbtByte, NbtDouble, NbtLong } from 'deepslate'
 import type { Random } from 'deepslate/core'
 import { Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate/nbt'
 import { ResolvedItem } from '../../services/ResolvedItem.js'
-import type { VersionId } from '../../services/Schemas.js'
+import type { VersionId } from '../../services/Versions.js'
 import { clamp, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
 
 export interface SlottedItem {
@@ -20,7 +21,7 @@ const StackMixers = {
 
 type StackMixer = keyof typeof StackMixers
 
-interface LootOptions {
+interface LootOptions extends ItemComponentsProvider {
 	version: VersionId,
 	seed: bigint,
 	luck: number,
@@ -32,7 +33,6 @@ interface LootOptions {
 	getPredicate(id: string): any,
 	getEnchantments(): Map<string, any>,
 	getEnchantmentTag(id: string): string[],
-	getBaseComponents(id: string): Map<string, NbtTag>,
 }
 
 interface LootContext extends LootOptions {
@@ -122,8 +122,11 @@ function shuffle<T>(array: T[], ctx: LootContext) {
 }
 
 function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
+	if (!Array.isArray(table.pools)) {
+		return
+	}
 	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
-	for (const pool of table.pools ?? []) {
+	for (const pool of table.pools) {
 		generatePool(pool, tableConsumer, ctx)
 	}
 }
@@ -232,12 +235,12 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	switch (type) {
 		case 'item':
 			const id = Identifier.parse(entry.name)
-			entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getBaseComponents(id.toString())))
+			entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
 			break
 		case 'tag':
 			ctx.getItemTag(entry.name).forEach(tagEntry => {
 				const id = Identifier.parse(tagEntry)
-				entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getBaseComponents(id.toString())))
+				entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
 			})
 			break
 		case 'loot_table':
@@ -271,7 +274,7 @@ function composeFunctions(functions: any[]): LootFunction {
 		for (const fn of functions) {
 			if (Array.isArray(fn)) {
 				composeFunctions(fn)
-			} else if (composeConditions(fn.conditions ?? [])(ctx)) {
+			} else if (isObject(fn) && composeConditions(fn.conditions ?? [])(ctx)) {
 				const type = fn.function?.replace(/^minecraft:/, '');
 				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
@@ -300,7 +303,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		const level = ctx.random.nextInt(maxLevel - 1) + 1
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
-			item.base = ctx.getBaseComponents(item.id.toString())
+			item.base = ctx.getItemComponents(item.id)
 		}
 		updateEnchantments(item, levels => {
 			return levels.set(Identifier.parse(pick).toString(), level)
@@ -311,7 +314,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		const selected = selectEnchantments(item, computeInt(levels, ctx), allowed, ctx)
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
-			item.base = ctx.getBaseComponents(item.id.toString())
+			item.base = ctx.getItemComponents(item.id)
 		}
 		updateEnchantments(item, levelsMap => {
 			for (const { id, lvl } of selected) {
@@ -346,7 +349,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_attributes: ({ modifiers, replace }) => (item, ctx) => {
 		if (!Array.isArray(modifiers)) return
 		const newModifiers = modifiers.map<AttributeModifier>(m => {
-			if (typeof m !== 'object' || m === null) m = {}
+			if (!isObject(m)) m = {}
 			return {
 				id: Identifier.parse(typeof m.id === 'string' ? m.id : ''),
 				type: Identifier.parse(typeof m.attribute === 'string' ? m.attribute : ''),
@@ -383,6 +386,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		item.set('written_book_content', newContent)
 	},
 	set_components: ({ components }) => (item) => {
+		if (!isObject(components)) {
+			return
+		}
 		for (const [key, value] of Object.entries(components)) {
 			item.set(key, jsonToNbt(value))
 		}
@@ -426,9 +432,12 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	set_enchantments: ({ enchantments, add }) => (item, ctx) => {
+		if (!isObject(enchantments)) {
+			return
+		}
 		if (item.is('book')) {
 			item.id = Identifier.create('enchanted_book')
-			item.base = ctx.getBaseComponents(item.id.toString())
+			item.base = ctx.getItemComponents(item.id)
 		}
 		updateEnchantments(item, levels => {
 			Object.entries(enchantments).forEach(([id, level]) => {
@@ -454,7 +463,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 	set_item: ({ item: newId }) => (item, ctx) => {
 		if (typeof newId !== 'string') return
 		item.id = Identifier.parse(newId)
-		item.base = ctx.getBaseComponents(item.id.toString())
+		item.base = ctx.getItemComponents(item.id)
 	},
 	set_loot_table: ({ name, seed }) => (item) => {
 		item.set('container_loot', new NbtCompound()
@@ -462,6 +471,7 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 			.set('seed', new NbtLong(typeof seed === 'number' ? BigInt(seed) : BigInt(0))))
 	},
 	set_lore: ({ lore }) => (item) => {
+		if (!Array.isArray(lore)) return
 		const lines: string[] = lore.flatMap((line: any) => line !== undefined ? [JSON.stringify(line)] : [])
 		// TODO: account for mode
 		item.set('lore', new NbtList(lines.map(l => new NbtString(l))))
@@ -481,7 +491,9 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 		}
 	},
 	toggle_tooltips: ({ toggles }) => (item) => {
-		if (typeof toggles !== 'object' || toggles === null) return
+		if (!isObject(toggles)) {
+			return
+		}
 		Object.entries(toggles).forEach(([key, value]) => {
 			if (typeof value !== 'boolean') return
 			const tag = item.get(key, tag => tag)
@@ -509,6 +521,9 @@ function composeConditions(conditions: any[]): LootCondition {
 function testCondition(condition: any, ctx: LootContext): boolean {
 	if (Array.isArray(condition)) {
 		return composeConditions(condition)(ctx)
+	}
+	if (!isObject(condition) || typeof condition.condition !== 'string') {
+		return false
 	}
 	const type = condition.condition?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
@@ -656,8 +671,8 @@ function prepareIntRange(range: any, ctx: LootContext) {
 	if (typeof range === 'number') {
 		range = { min: range, max: range }
 	}
-	const min = computeInt(range.min, ctx)
-	const max = computeInt(range.max, ctx)
+	const min = computeInt(range?.min, ctx)
+	const max = computeInt(range?.max, ctx)
 	return { min, max }
 }
 

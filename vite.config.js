@@ -7,6 +7,8 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 const config = require('./src/config.json')
 const English = require('./src/locales/en.json')
 
+const convertFormats = ['give-command', 'loot-table', 'item-modifier', 'recipe-output']
+
 export default defineConfig({
 	server: {
 		port: 3000,
@@ -19,8 +21,14 @@ export default defineConfig({
 			{ find: 'react/jsx-runtime', replacement: 'preact/jsx-runtime' },
 		],
 	},
+	optimizeDeps: {
+		esbuildOptions: {
+			target: 'es2021',
+		},
+	},
 	build: {
 		sourcemap: true,
+		target: 'es2021',
 		rollupOptions: {
 			plugins: [
 				html({
@@ -36,6 +44,11 @@ export default defineConfig({
 				...config.generators.map(m => html({
 					fileName: `${m.url}/index.html`,
 					title: `${English[m.id] ?? ''} Generator${m.category === true ? 's' : ''} - ${getVersions(m)}`,
+					template,
+				})),
+				...convertFormats.flatMap(s => convertFormats.filter(t => s !== t).map(t => [s, t])).map(([s, t]) => html({
+					fileName: `convert/${s}-to-${t}/index.html`,
+					title: `${English[`convert.format.${s}`]} to ${English[`convert.format.${t}`]} Converter - ${getVersions({ minVersion: '1.20.5' })}`,
 					template,
 				})),
 				...config.legacyGuides.map(g => html({

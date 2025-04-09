@@ -3,7 +3,6 @@ import { Router } from 'preact-router'
 import '../styles/global.css'
 import '../styles/nodes.css'
 import { Analytics } from './Analytics.js'
-import { cleanUrl } from './Utils.js'
 import { Header } from './components/index.js'
 import {
 	Customized,
@@ -18,6 +17,7 @@ import {
 	Transformation,
 	Worldgen,
 } from './pages/index.js'
+import { cleanUrl } from './Utils.js'
 
 export function App() {
 	const changeRoute = (e: RouterOnChangeArgs) => {
