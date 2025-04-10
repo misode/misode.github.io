@@ -58,7 +58,7 @@ function AvailableGenerators() {
 			/>
 			<GeneratorCard
 				minimal
-				id='worldgen/template_pool'
+				id='shardborne:worldgen/template_pool'
 			/>
 			<GeneratorCard
 				minimal

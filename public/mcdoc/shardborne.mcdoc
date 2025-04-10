@@ -31,6 +31,6 @@ struct TemplateElement {
 }
 
 struct Element {
-	element_type: (#[id="worldgen/structure_pool_element"] string |["mod:test"]),
+	element_type: (#[id="worldgen/structure_pool_element"] string |"mod:test" ),
 	...minecraft:template_pool_element[[element_type]],
 }
