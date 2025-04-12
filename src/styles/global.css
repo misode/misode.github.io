@@ -340,7 +340,7 @@ main > .controls {
 	margin-left: auto;
 	position: sticky;
 	top: 68px;
-	z-index: 1;
+	z-index: 4;
 }
 
 .sounds-controls > *:not(:last-child),
@@ -1116,6 +1116,8 @@ main.has-project {
 	right: 0;
 	margin-top: 8px;
 	z-index: 10;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 .btn-group {
