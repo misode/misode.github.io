@@ -184,7 +184,7 @@ nav li {
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	margin: 0 16px;
+	margin: 0 12px;
 	fill: var(--nav);
 	user-select: none;
 	-webkit-user-select: none;
