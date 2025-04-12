@@ -144,15 +144,13 @@
       "id": "1.20.3",
       "ref": "1.20.4",
       "name": "1.20.3 — 1.20.4",
-      "pack_format": 26,
-      "show": true
+      "pack_format": 26
     },
     {
       "id": "1.20.5",
       "ref": "1.20.6",
       "name": "1.20.5 — 1.20.6",
-      "pack_format": 41,
-      "show": true
+      "pack_format": 41
     },
     {
       "id": "1.21",
@@ -165,8 +163,7 @@
       "id": "1.21.2",
       "ref": "1.21.3",
       "name": "1.21.2 — 1.21.3",
-      "pack_format": 57,
-      "show": true
+      "pack_format": 57
     },
     {
       "id": "1.21.4",
@@ -179,7 +176,14 @@
       "id": "1.21.5",
       "ref": "1.21.5",
       "name": "1.21.5",
-      "pack_format": 62,
+      "pack_format": 71,
+      "show": true
+    },
+    {
+      "id": "1.21.6",
+      "dynamic": true,
+      "name": "1.21.6",
+      "pack_format": 72,
       "show": true
     }
   ],
