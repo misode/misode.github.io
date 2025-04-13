@@ -9,33 +9,12 @@ import { useModal } from '../../contexts/Modal.jsx'
 import { useSpyglass, watchSpyglassUri } from '../../contexts/Spyglass.jsx'
 import { AsyncCancel, useActiveTimeout, useAsync, useLocalStorage, useSearchParam } from '../../hooks/index.js'
 import type { VersionId } from '../../services/index.js'
-import {
-	checkVersion,
-	fetchDependencyMcdoc,
-	fetchPreset,
-	fetchRegistries,
-	getSnippet,
-	shareSnippet,
-} from '../../services/index.js'
+import { checkVersion, fetchDependencyMcdoc, fetchPreset, fetchRegistries, getSnippet, shareSnippet } from '../../services/index.js'
 import { DEPENDENCY_URI } from '../../services/Spyglass.js'
 import { Store } from '../../Store.js'
 import { cleanUrl, genPath } from '../../Utils.js'
 import { FancyMenu } from '../FancyMenu.jsx'
-import {
-	Btn,
-	BtnMenu,
-	ErrorPanel,
-	FileCreation,
-	FileView,
-	Footer,
-	HasPreview,
-	Octicon,
-	PreviewPanel,
-	ProjectPanel,
-	SourcePanel,
-	TextInput,
-	VersionSwitcher,
-} from '../index.js'
+import { Btn, BtnMenu, ErrorPanel, FileCreation, FileView, Footer, HasPreview, Octicon, PreviewPanel, ProjectPanel, SourcePanel, TextInput, VersionSwitcher } from '../index.js'
 import { getRootDefault } from './McdocHelpers.js'
 
 export const SHARE_KEY = 'share'
@@ -43,7 +22,7 @@ const MIN_PROJECT_PANEL_WIDTH = 200
 
 interface Props {
 	gen: ConfigGenerator
-	allowedVersions: VersionId[]
+	allowedVersions: VersionId[],
 }
 export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { locale } = useLocale()
@@ -58,14 +37,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		if (errorBoundary.stack) {
 			generatorError.stack = errorBoundary.stack
 		}
-		return (
-			<main>
-				<ErrorPanel
-					error={generatorError}
-					onDismiss={errorRetry}
-				/>
-			</main>
-		)
+		return <main><ErrorPanel error={generatorError} onDismiss={errorRetry} /></main>
 	}
 
 	useEffect(() => Store.visitGenerator(gen.id), [gen.id])
@@ -91,11 +63,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [sharedSnippetId, setSharedSnippetId] = useSearchParam(SHARE_KEY)
 	const ignoreChange = useRef(false)
 
-	const {
-		value: docAndNode,
-		loading: docLoading,
-		error: docError,
-	} = useAsync(async () => {
+	const { value: docAndNode, loading: docLoading, error: docError } = useAsync(async () => {
 		let text: string | undefined = undefined
 		if (currentPreset && sharedSnippetId) {
 			setSharedSnippetId(undefined)
@@ -111,7 +79,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 				cancel = true
 			}
 			if (snippet.type && snippet.type !== gen.id) {
-				const snippetGen = config.generators.find((g) => g.id === snippet.type)
+				const snippetGen = config.generators.find(g => g.id === snippet.type)
 				if (snippetGen) {
 					route(`${cleanUrl(snippetGen.url)}?${SHARE_KEY}=${snippet.id}`)
 					cancel = true
@@ -158,18 +126,14 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 
 	const { doc } = docAndNode ?? {}
 
-	watchSpyglassUri(
-		uri,
-		() => {
-			if (!ignoreChange.current) {
-				setCurrentPreset(undefined, true)
-				setSharedSnippetId(undefined, true)
-			}
-			ignoreChange.current = false
-			setError(null)
-		},
-		[]
-	)
+	watchSpyglassUri(uri, () => {
+		if (!ignoreChange.current) {
+			setCurrentPreset(undefined, true)
+			setSharedSnippetId(undefined, true)
+		}
+		ignoreChange.current = false
+		setError(null)
+	}, [])
 
 	const reset = async () => {
 		if (!service || !uri) {
@@ -197,21 +161,12 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		await service?.redoEdit(uri)
 	}
 
-	const saveFile = useCallback(
-		(method: Method) => {
-			if (!docAndNode) {
-				return
-			}
-			showModal(() => (
-				<FileCreation
-					gen={gen}
-					docAndNode={docAndNode}
-					method={method}
-				/>
-			))
-		},
-		[showModal, gen, docAndNode]
-	)
+	const saveFile = useCallback((method: Method) => {
+		if (!docAndNode) {
+			return
+		}
+		showModal(() => <FileCreation gen={gen} docAndNode={docAndNode} method={method} />)
+	}, [showModal, gen, docAndNode])
 
 	useEffect(() => {
 		const onKeyDown = async (e: KeyboardEvent) => {
@@ -242,36 +197,25 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const { value: presets } = useAsync(async () => {
 		const registries = await fetchRegistries(version)
 		const entries = registries.get(gen.id) ?? []
-		return entries.map((e) => (e.startsWith('minecraft:') ? e.slice(10) : e))
+		return entries.map(e => e.startsWith('minecraft:') ? e.slice(10) : e)
 	}, [version, gen.id])
 
-	const getPresets = useCallback(
-		(search: string, close: () => void) => {
-			if (presets === undefined) {
-				return <span class='w-80 note'>{locale('loading')}</span>
-			}
-			if (!presets || presets.length === 0) {
-				return <span class='w-80 note'>{locale('presets.no_results')}</span>
-			}
-			const terms = search.trim().split(' ')
-			const results = presets?.filter((v) => terms.every((t) => v.includes(t))).slice(0, 100) ?? []
-			if (results.length === 0) {
-				return <span class='w-80 note'>{locale('presets.no_results_for_query')}</span>
-			}
-			return results.map((r) => (
-				<button
-					class='w-80 flex items-center cursor-pointer no-underline rounded p-1'
-					onClick={() => {
-						selectPreset(r)
-						close()
-					}}
-				>
-					{r}
-				</button>
-			))
-		},
-		[presets]
-	)
+	const getPresets = useCallback((search: string, close: () => void) => {
+		if (presets === undefined) {
+			return <span class="w-80 note">{locale('loading')}</span>
+		}
+		if (!presets || presets.length === 0) {
+			return <span class="w-80 note">{locale('presets.no_results')}</span>
+		}
+		const terms = search.trim().split(' ')
+		const results = presets?.filter(v => terms.every(t => v.includes(t))).slice(0, 100) ?? []
+		if (results.length === 0) {
+			return <span class="w-80 note">{locale('presets.no_results_for_query')}</span>
+		}
+		return results.map(r => <button class="w-80 flex items-center cursor-pointer no-underline rounded p-1"  onClick={() => {selectPreset(r); close()}}>
+			{r}
+		</button>)
+	}, [presets])
 
 	const selectPreset = (id: string) => {
 		Analytics.loadPreset(gen.id, id)
@@ -320,7 +264,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 					setShareUrl(url)
 					setShareShown(true)
 				})
-				.catch((e) => {
+				.catch(e => {
 					if (e instanceof Error) {
 						setError(e)
 					}
@@ -367,8 +311,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [copyActive, copySuccess] = useActiveTimeout()
 
 	const [previewShown, setPreviewShown] = useState(Store.getPreviewPanelOpen() ?? window.innerWidth > 800)
-	const hasPreview =
-		HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
+	const hasPreview = HasPreview.includes(gen.id) && !(gen.id === 'worldgen/configured_feature' && checkVersion(version, '1.18'))
 	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 2
 	if (hasPreview) actionsShown += 1
@@ -397,12 +340,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setProjectShown(!projectShown)
 	}, [projectShown])
 
-	const [panelWidth, setPanelWidth] = useLocalStorage(
-		'misode_project_panel_width',
-		MIN_PROJECT_PANEL_WIDTH,
-		(s) => Number(s),
-		(v) => v.toString()
-	)
+	const [panelWidth, setPanelWidth] = useLocalStorage('misode_project_panel_width', MIN_PROJECT_PANEL_WIDTH, (s) => Number(s), (v) => v.toString())
 	const [realPanelWidth, setRealPanelWidth] = useState(panelWidth)
 	const [resizeStart, setResizeStart] = useState<number>()
 
@@ -444,176 +382,66 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setProjectUri(undefined)
 	}, [gen, service, showModal])
 
-	return (
-		<>
-			<main
-				class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`}
-				style={`--project-panel-width: ${realPanelWidth}px`}
-			>
-				<div class='controls generator-controls'>
-					{gen.wiki && (
-						<a
-							class='btn btn-link tooltipped tip-se'
-							aria-label={locale('learn_on_the_wiki')}
-							href={gen.wiki}
-							target='_blank'
-						>
-							{Octicon.mortar_board}
-							<span>{locale('wiki')}</span>
-						</a>
-					)}
-					<FancyMenu
-						placeholder={locale('search')}
-						getResults={getPresets}
-						relative={false}
-						class='right-0 mt-2'
-					>
-						<Btn
-							icon='archive'
-							label={locale('presets')}
-						/>
-					</FancyMenu>
-					<VersionSwitcher
-						value={version}
-						onChange={selectVersion}
-						allowed={allowedVersions}
-					/>
-					<BtnMenu
-						icon='kebab_horizontal'
-						tooltip={locale('more')}
-					>
-						<Btn
-							icon='history'
-							label={locale('reset_default')}
-							onClick={reset}
-						/>
-						<Btn
-							icon='arrow_left'
-							label={locale('undo')}
-							onClick={undo}
-						/>
-						<Btn
-							icon='arrow_right'
-							label={locale('redo')}
-							onClick={redo}
-						/>
-						<Btn
-							icon='plus_circle'
-							label={locale('project.new_file')}
-							onClick={newEmptyFile}
-						/>
-						<Btn
-							icon='file'
-							label={locale('project.save')}
-							onClick={() => saveFile('menu')}
-						/>
-					</BtnMenu>
-				</div>
-				{error && (
-					<ErrorPanel
-						error={error}
-						onDismiss={() => setError(null)}
-					/>
-				)}
-				{docError ? (
-					<ErrorPanel error={docError} />
-				) : (
-					<FileView docAndNode={docLoading ? undefined : docAndNode} />
-				)}
-				<Footer donate={!gen.tags?.includes('partners')} />
-			</main>
-			<div
-				class='popup-actions right-actions'
-				style={`--offset: -${8 + actionsShown * 50}px;`}
-			>
-				<div
-					class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`}
-					aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')}
-					onClick={togglePreview}
-				>
-					{previewShown ? Octicon.x_circle : Octicon.play}
-				</div>
-				<div
-					class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`}
-					aria-label={locale(shareLoading ? 'share.loading' : 'share')}
-					onClick={share}
-				>
-					{shareLoading ? Octicon.sync : Octicon.link}
-				</div>
-				<div
-					class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`}
-					aria-label={locale('download')}
-					onClick={downloadSource}
-				>
-					{Octicon.download}
-				</div>
-				<div
-					class={`popup-action action-copy${sourceShown ? ' shown' : ''}${
-						copyActive ? ' active' : ''
-					} tooltipped tip-nw`}
-					aria-label={locale(copyActive ? 'copied' : 'copy')}
-					onClick={copySource}
-				>
-					{copyActive ? Octicon.check : Octicon.copy}
-				</div>
-				<div
-					class={'popup-action action-code shown tooltipped tip-nw'}
-					aria-label={locale(sourceShown ? 'hide_output' : 'show_output')}
-					onClick={toggleSource}
-				>
-					{sourceShown ? Octicon.chevron_right : Octicon.code}
-				</div>
+	return <>
+		<main class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`} style={`--project-panel-width: ${realPanelWidth}px`}>
+			<div class="controls generator-controls">
+				{gen.wiki && <a class="btn btn-link tooltipped tip-se" aria-label={locale('learn_on_the_wiki')} href={gen.wiki} target="_blank">
+					{Octicon.mortar_board}
+					<span>{locale('wiki')}</span>
+				</a>}
+				<FancyMenu placeholder={locale('search')} getResults={getPresets} relative={false} class="right-0 mt-2">
+					<Btn icon="archive" label={locale('presets')} />
+				</FancyMenu>
+				<VersionSwitcher value={version} onChange={selectVersion} allowed={allowedVersions} />
+				<BtnMenu icon="kebab_horizontal" tooltip={locale('more')}>
+					<Btn icon="history" label={locale('reset_default')} onClick={reset} />
+					<Btn icon="arrow_left" label={locale('undo')} onClick={undo} />
+					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
+					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={newEmptyFile} />
+					<Btn icon="file" label={locale('project.save')} onClick={() => saveFile('menu')} />
+				</BtnMenu>
 			</div>
-			<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
-				<PreviewPanel
-					docAndNode={docAndNode}
-					id={gen.id}
-					shown={previewShown}
-				/>
+			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
+			{docError
+				? <ErrorPanel error={docError} />
+				: <FileView docAndNode={docLoading ? undefined : docAndNode} />}
+			<Footer donate={!gen.tags?.includes('partners')} />
+		</main>
+		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
+			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>
+				{previewShown ? Octicon.x_circle : Octicon.play}
 			</div>
-			<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
-				<SourcePanel
-					docAndNode={docAndNode}
-					{...{ doCopy, doDownload, doImport }}
-					copySuccess={copySuccess}
-					onError={setError}
-				/>
+			<div class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`} aria-label={locale(shareLoading ? 'share.loading' : 'share')} onClick={share}>
+				{shareLoading ? Octicon.sync : Octicon.link}
 			</div>
-			<div class={`popup-share${shareShown ? ' shown' : ''}`}>
-				<TextInput
-					value={shareUrl}
-					readonly
-				/>
-				<Btn
-					icon={shareCopyActive ? 'check' : 'copy'}
-					onClick={copySharedId}
-					tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')}
-					tooltipLoc='nw'
-					active={shareCopyActive}
-				/>
+			<div class={`popup-action action-download${sourceShown ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale('download')} onClick={downloadSource}>
+				{Octicon.download}
 			</div>
-			<div
-				class='popup-actions left-actions'
-				style='--offset: 50px;'
-			>
-				<div
-					class={'popup-action action-project shown tooltipped tip-ne'}
-					aria-label={locale(projectShown ? 'hide_project' : 'show_project')}
-					onClick={toggleProjectShown}
-				>
-					{projectShown ? Octicon.chevron_left : Octicon.repo}
-				</div>
+			<div class={`popup-action action-copy${sourceShown ? ' shown' : ''}${copyActive ? ' active' : ''} tooltipped tip-nw`} aria-label={locale(copyActive ? 'copied' : 'copy')} onClick={copySource}>
+				{copyActive ? Octicon.check : Octicon.copy}
 			</div>
-			<div
-				class={`popup-project${projectShown ? ' shown' : ''}`}
-				style={`width: ${realPanelWidth}px`}
-			>
-				<ProjectPanel />
-				<div
-					class='panel-resize'
-					onMouseDown={(e) => setResizeStart(e.clientX - panelWidth)}
-				></div>
+			<div class={'popup-action action-code shown tooltipped tip-nw'} aria-label={locale(sourceShown ? 'hide_output' : 'show_output')} onClick={toggleSource}>
+				{sourceShown ? Octicon.chevron_right : Octicon.code}
 			</div>
-		</>
-	)
+		</div>
+		<div class={`popup-preview${previewShown ? ' shown' : ''}`}>
+			<PreviewPanel docAndNode={docAndNode} id={gen.id} shown={previewShown} />
+		</div>
+		<div class={`popup-source${sourceShown ? ' shown' : ''}`}>
+			<SourcePanel docAndNode={docAndNode} {...{doCopy, doDownload, doImport}} copySuccess={copySuccess} onError={setError} />
+		</div>
+		<div class={`popup-share${shareShown ? ' shown' : ''}`}>
+			<TextInput value={shareUrl} readonly />
+			<Btn icon={shareCopyActive ? 'check' : 'copy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
+		</div>
+		<div class="popup-actions left-actions" style="--offset: 50px;">
+			<div class={'popup-action action-project shown tooltipped tip-ne'} aria-label={locale(projectShown ? 'hide_project' : 'show_project')} onClick={toggleProjectShown}>
+				{projectShown ? Octicon.chevron_left : Octicon.repo}
+			</div>
+		</div>
+		<div class={`popup-project${projectShown ? ' shown' : ''}`} style={`width: ${realPanelWidth}px`}>
+			<ProjectPanel/>
+			<div class="panel-resize" onMouseDown={(e) => setResizeStart(e.clientX - panelWidth)}></div>
+		</div>
+	</>
 }

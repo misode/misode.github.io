@@ -33,15 +33,7 @@ async function validateCache(version: RefInfo) {
 	await applyPatches()
 	if (version.dynamic) {
 		if (localStorage.getItem(CACHE_LATEST_VERSION) !== latestVersion) {
-			await deleteMatching(
-				(url) =>
-					url.startsWith(`${mcmetaUrl}/summary/`) ||
-					url.startsWith(`${mcmetaUrl}/data/`) ||
-					url.startsWith(`${mcmetaUrl}/assets/`) ||
-					url.startsWith(`${mcmetaUrl}/registries/`) ||
-					url.startsWith(`${mcmetaUrl}/atlas/`) ||
-					url.startsWith(`${mcmetaTarballUrl}/assets-json/`)
-			)
+			await deleteMatching(url => url.startsWith(`${mcmetaUrl}/summary/`) || url.startsWith(`${mcmetaUrl}/data/`) || url.startsWith(`${mcmetaUrl}/assets/`) || url.startsWith(`${mcmetaUrl}/registries/`) || url.startsWith(`${mcmetaUrl}/atlas/`) || url.startsWith(`${mcmetaTarballUrl}/assets-json/`))
 			localStorage.setItem(CACHE_LATEST_VERSION, latestVersion)
 		}
 		version.ref = latestVersion
@@ -49,7 +41,7 @@ async function validateCache(version: RefInfo) {
 }
 
 export function getVersionChecksum(versionId: VersionId) {
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	if (version.dynamic) {
 		return (localStorage.getItem(CACHE_LATEST_VERSION) ?? '').toString()
 	}
@@ -57,9 +49,9 @@ export function getVersionChecksum(versionId: VersionId) {
 }
 
 export interface VanillaMcdocSymbols {
-	ref: string
-	mcdoc: Record<string, unknown>
-	'mcdoc/dispatcher': Record<string, Record<string, unknown>>
+	ref: string,
+	mcdoc: Record<string, unknown>,
+	'mcdoc/dispatcher': Record<string, Record<string, unknown>>,
 }
 export async function fetchVanillaMcdoc(): Promise<VanillaMcdocSymbols> {
 	try {
@@ -71,7 +63,7 @@ export async function fetchVanillaMcdoc(): Promise<VanillaMcdocSymbols> {
 
 export async function fetchDependencyMcdoc(dependency: string) {
 	try {
-		return cachedFetch(`/mcdoc/${dependency}.mcdoc`, { decode: (res) => res.text(), refresh: true })
+		return cachedFetch(`/mcdoc/${dependency}.mcdoc`, { decode: res => res.text(), refresh: true })
 	} catch (e) {
 		throw new Error(`Error occured while fetching ${dependency} mcdoc: ${message(e)}`)
 	}
@@ -79,20 +71,14 @@ export async function fetchDependencyMcdoc(dependency: string) {
 
 export async function fetchRegistries(versionId: VersionId) {
 	console.debug(`[fetchRegistries] ${versionId}`)
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
 		const data = await cachedFetch<any>(`${mcmeta(version, 'summary')}/registries/data.min.json`)
 		const result = new Map<string, string[]>()
 		for (const id in data) {
-			result.set(
-				id,
-				data[id].map((e: string) => 'minecraft:' + e)
-			)
+			result.set(id, data[id].map((e: string) => 'minecraft:' + e))
 		}
-		console.log('====================================')
-		console.log(result.get('worldgen/structure_pool_element'))
-		console.log('====================================')
 		result.get('worldgen/structure_pool_element')?.push('mod:test')
 		return result
 	} catch (e) {
@@ -104,7 +90,7 @@ export type BlockStateData = [Record<string, string[]>, Record<string, string>]
 
 export async function fetchBlockStates(versionId: VersionId) {
 	console.debug(`[fetchBlockStates] ${versionId}`)
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	const result = new Map<string, BlockStateData>()
 	await validateCache(version)
 	try {
@@ -120,20 +106,17 @@ export async function fetchBlockStates(versionId: VersionId) {
 
 export async function fetchItemComponents(versionId: VersionId) {
 	console.debug(`[fetchItemComponents] ${versionId}`)
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	const result = new Map<string, Map<string, unknown>>()
 	if (!checkVersion(versionId, '1.20.5')) {
 		return result
 	}
 	await validateCache(version)
 	try {
-		const data = await cachedFetch<Record<string, Record<string, unknown>>>(
-			`${mcmeta(version, 'summary')}/item_components/data.min.json`
-		)
+		const data = await cachedFetch<Record<string, Record<string, unknown>>>(`${mcmeta(version, 'summary')}/item_components/data.min.json`)
 		for (const [id, components] of Object.entries(data)) {
 			const base = new Map<string, unknown>()
-			if (Array.isArray(components)) {
-				// syntax before 1.21
+			if (Array.isArray(components)) { // syntax before 1.21
 				for (const entry of components) {
 					base.set(entry.type, entry.value)
 				}
@@ -152,27 +135,14 @@ export async function fetchItemComponents(versionId: VersionId) {
 
 export async function fetchPreset(versionId: VersionId, registry: string, id: string) {
 	console.debug(`[fetchPreset] ${versionId} ${registry} ${id}`)
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
 		let url
 		if (id.startsWith('immersive_weathering:')) {
-			url = `https://raw.githubusercontent.com/AstralOrdana/Immersive-Weathering/main/src/main/resources/data/immersive_weathering/block_growths/${id.slice(
-				21
-			)}.json`
+			url = `https://raw.githubusercontent.com/AstralOrdana/Immersive-Weathering/main/src/main/resources/data/immersive_weathering/block_growths/${id.slice(21)}.json`
 		} else {
-			const type = [
-				'atlases',
-				'blockstates',
-				'items',
-				'font',
-				'lang',
-				'models',
-				'equipment',
-				'post_effect',
-			].includes(registry)
-				? 'assets'
-				: 'data'
+			const type = ['atlases', 'blockstates', 'items', 'font', 'lang', 'models', 'equipment', 'post_effect'].includes(registry) ? 'assets' : 'data'
 			url = `${mcmeta(version, type)}/${type}/minecraft/${registry}/${id}.json`
 		}
 		const res = await fetch(url)
@@ -184,24 +154,11 @@ export async function fetchPreset(versionId: VersionId, registry: string, id: st
 
 export async function fetchAllPresets(versionId: VersionId, registry: string) {
 	console.debug(`[fetchAllPresets] ${versionId} ${registry}`)
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
-		const type = [
-			'atlas',
-			'block_definition',
-			'item_definition',
-			'model',
-			'font',
-			'lang',
-			'equipment',
-			'post_effect',
-		].includes(registry)
-			? 'assets'
-			: 'data'
-		return new Map<string, unknown>(
-			Object.entries(await cachedFetch(`${mcmeta(version, 'summary')}/${type}/${registry}/data.min.json`))
-		)
+		const type = ['atlas', 'block_definition', 'item_definition', 'model', 'font', 'lang', 'equipment', 'post_effect'].includes(registry) ? 'assets' : 'data'
+		return new Map<string, unknown>(Object.entries(await cachedFetch(`${mcmeta(version, 'summary')}/${type}/${registry}/data.min.json`)))
 	} catch (e) {
 		throw new Error(`Error occurred while fetching all ${registry} presets: ${message(e)}`)
 	}
@@ -209,11 +166,11 @@ export async function fetchAllPresets(versionId: VersionId, registry: string) {
 
 export type SoundEvents = {
 	[key: string]: {
-		sounds: (string | { name: string })[]
-	}
+		sounds: (string | { name: string })[],
+	},
 }
 export async function fetchSounds(versionId: VersionId): Promise<SoundEvents> {
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
 		const url = `${mcmeta(version, 'summary')}/sounds/data.min.json`
@@ -224,23 +181,23 @@ export async function fetchSounds(versionId: VersionId): Promise<SoundEvents> {
 }
 
 export function getSoundUrl(versionId: VersionId, path: string) {
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	return `${mcmeta(version, 'assets')}/assets/minecraft/sounds/${path}.ogg`
 }
 
 export type VersionMeta = {
-	id: string
-	name: string
-	release_target: string
-	type: 'snapshot' | 'release'
-	stable: boolean
-	data_version: number
-	protocol_version: number
-	data_pack_version: number
-	resource_pack_version: number
-	build_time: string
-	release_time: string
-	sha1: string
+	id: string,
+	name: string,
+	release_target: string,
+	type: 'snapshot' | 'release',
+	stable: boolean,
+	data_version: number,
+	protocol_version: number,
+	data_pack_version: number,
+	resource_pack_version: number,
+	build_time: string,
+	release_time: string,
+	sha1: string,
 }
 export async function fetchVersions(): Promise<VersionMeta[]> {
 	await validateCache({ dynamic: true })
@@ -252,12 +209,12 @@ export async function fetchVersions(): Promise<VersionMeta[]> {
 }
 
 export function getAssetUrl(versionId: VersionId, type: string, path: string): string {
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	return `${mcmeta(version, 'assets')}/assets/minecraft/${type}/${path}.png`
 }
 
 export async function fetchResources(versionId: VersionId) {
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	const needsItemModels = checkVersion(versionId, '1.20.5')
 	const hasItemModels = checkVersion(versionId, '1.21.4')
 	await validateCache(version)
@@ -265,12 +222,10 @@ export async function fetchResources(versionId: VersionId) {
 		const [blockDefinitions, models, uvMapping, atlas, itemDefinitions] = await Promise.all([
 			fetchAllPresets(versionId, 'block_definition'),
 			fetchAllPresets(versionId, 'model'),
-			fetch(`${mcmeta(version, 'atlas')}/all/data.min.json`).then((r) => r.json()),
+			fetch(`${mcmeta(version, 'atlas')}/all/data.min.json`).then(r => r.json()),
 			loadImage(`${mcmeta(version, 'atlas')}/all/atlas.png`),
 			// Always download the 1.21.4 item models for the version range 1.20.5 - 1.21.3
-			needsItemModels
-				? fetchAllPresets(hasItemModels ? versionId : '1.21.4', 'item_definition')
-				: new Map<string, unknown>(),
+			needsItemModels ? fetchAllPresets(hasItemModels ? versionId : '1.21.4', 'item_definition') : new Map<string, unknown>(),
 		])
 		return { blockDefinitions, models, uvMapping, atlas, itemDefinitions }
 	} catch (e) {
@@ -279,7 +234,7 @@ export async function fetchResources(versionId: VersionId) {
 }
 
 export async function loadImage(src: string) {
-	return new Promise<HTMLImageElement>((res) => {
+	return new Promise<HTMLImageElement>(res => {
 		const image = new Image()
 		image.onload = () => res(image)
 		image.crossOrigin = 'Anonymous'
@@ -311,16 +266,12 @@ interface DeprecatedInfo {
 }
 
 export async function fetchLanguage(versionId: VersionId, lang: string = 'en_us') {
-	const version = config.versions.find((v) => v.id === versionId)!
+	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
 	try {
-		const translations = await cachedFetch<Record<string, string>>(
-			`${mcmeta(version, 'assets')}/assets/minecraft/lang/${lang}.json`
-		)
+		const translations = await cachedFetch<Record<string, string>>(`${mcmeta(version, 'assets')}/assets/minecraft/lang/${lang}.json`)
 		if (checkVersion(versionId, '1.21.2')) {
-			const deprecated = await cachedFetch<DeprecatedInfo>(
-				`${mcmeta(version, 'assets')}/assets/minecraft/lang/deprecated.json`
-			)
+			const deprecated = await cachedFetch<DeprecatedInfo>(`${mcmeta(version, 'assets')}/assets/minecraft/lang/deprecated.json`)
 			for (const key of deprecated.removed) {
 				delete translations[key]
 			}
@@ -337,11 +288,11 @@ export async function fetchLanguage(versionId: VersionId, lang: string = 'en_us'
 }
 
 export interface Change {
-	group: string
-	version: string
-	order: number
-	tags: string[]
-	content: string
+	group: string,
+	version: string,
+	order: number,
+	tags: string[],
+	content: string,
 }
 
 export async function fetchChangelogs(): Promise<Change[]> {
@@ -351,26 +302,26 @@ export async function fetchChangelogs(): Promise<Change[]> {
 			fetchVersions(),
 		])
 		const versionMap = new Map(versions.map((v, i) => [v.id, versions.length - i]))
-		return changes.map((c) => ({ ...c, order: versionMap.get(c.version) ?? 0 }))
+		return changes.map(c => ({ ...c, order: versionMap.get(c.version) ?? 0 }))
 	} catch (e) {
 		throw new Error(`Error occured while fetching technical changes: ${message(e)}`)
 	}
 }
 
 export interface Bugfix {
-	id: string
-	summary: string
-	labels: string[]
-	status: string
-	confirmation_status: string
-	categories: string[]
-	priority: string
-	fix_versions: string[]
-	creation_date: string
-	resolution_date: string
-	updated_date: string
-	watches: number
-	votes: number
+	id: string,
+	summary: string,
+	labels: string[],
+	status: string,
+	confirmation_status: string,
+	categories: string[],
+	priority: string,
+	fix_versions: string[],
+	creation_date: string,
+	resolution_date: string,
+	updated_date: string,
+	watches: number,
+	votes: number,
 }
 
 export async function fetchBugfixes(version: string): Promise<Bugfix[]> {
@@ -383,28 +334,28 @@ export async function fetchBugfixes(version: string): Promise<Bugfix[]> {
 }
 
 export interface GitHubCommitFile {
-	sha: string
-	filename: string
-	previous_filename?: string
-	status: 'added' | 'modified' | 'removed' | 'renamed'
-	additions: number
-	deletions: number
-	changes: number
-	patch: string
+	sha: string,
+	filename: string,
+	previous_filename?: string,
+	status: 'added' | 'modified' | 'removed' | 'renamed',
+	additions: number,
+	deletions: number,
+	changes: number,
+	patch: string,
 }
 
 export interface GitHubCommit {
-	sha: string
-	html_url: string
+	sha: string,
+	html_url: string,
 	parents: {
-		sha: string
-	}[]
+		sha: string,
+	}[],
 	stats: {
-		total: number
-		additions: number
-		deletions: number
-	}
-	files: GitHubCommitFile[]
+		total: number,
+		additions: number,
+		deletions: number,
+	},
+	files: GitHubCommitFile[],
 }
 
 export async function fetchVersionDiff(version: string) {
@@ -417,12 +368,12 @@ export async function fetchVersionDiff(version: string) {
 }
 
 export interface WhatsNewItem {
-	id: string
-	title: string
-	body: string
-	url: string
-	createdAt: string
-	seenAt?: string
+	id: string,
+	title: string,
+	body: string,
+	url: string,
+	createdAt: string,
+	seenAt?: string,
 }
 
 export async function fetchWhatsNew(): Promise<WhatsNewItem[]> {
@@ -430,7 +381,7 @@ export async function fetchWhatsNew(): Promise<WhatsNewItem[]> {
 		const whatsNew = await cachedFetch<WhatsNewItem[]>(whatsNewUrl, { refresh: true })
 		const seenState = Store.getWhatsNewSeen()
 		for (const { id, time } of seenState) {
-			const item = whatsNew.find((i) => i.id === id)
+			const item = whatsNew.find(i => i.id === id)
 			if (item) {
 				item.seenAt = time
 			}
@@ -448,10 +399,7 @@ interface FetchOptions<D> {
 
 const REFRESHED = new Set<string>()
 
-async function cachedFetch<D = unknown>(
-	url: string,
-	{ decode = (r) => r.json(), refresh }: FetchOptions<D> = {}
-): Promise<D> {
+async function cachedFetch<D = unknown>(url: string, { decode = (r => r.json()), refresh }: FetchOptions<D> = {}): Promise<D> {
 	try {
 		const cache = await caches.open(CACHE_NAME)
 		console.debug(`[cachedFetch] Opened cache ${CACHE_NAME} ${url}`)
@@ -523,7 +471,7 @@ async function deleteMatching(matches: (url: string) => boolean) {
 		const cache = await caches.open(CACHE_NAME)
 		console.debug(`[deleteMatching] Opened cache ${CACHE_NAME}`)
 		const promises: Promise<boolean>[] = []
-
+  
 		for (const request of await cache.keys()) {
 			if (matches(request.url)) {
 				promises.push(cache.delete(request))
@@ -538,18 +486,18 @@ async function deleteMatching(matches: (url: string) => boolean) {
 
 const PATCHES: (() => Promise<void>)[] = [
 	async () => {
-		;['1.15', '1.16', '1.17'].forEach((v) => localStorage.removeItem(`cache_${v}`))
-		;['mcdata_master', 'vanilla_datapack_summary'].forEach((v) => localStorage.removeItem(`cached_${v}`))
+		['1.15', '1.16', '1.17'].forEach(v => localStorage.removeItem(`cache_${v}`));
+		['mcdata_master', 'vanilla_datapack_summary'].forEach(v => localStorage.removeItem(`cached_${v}`))
 		caches.delete('misode-v1')
 	},
 	async () => {
-		await deleteMatching((url) => url.startsWith(`${mcmetaUrl}/1.18.2-summary/`))
+		await deleteMatching(url => url.startsWith(`${mcmetaUrl}/1.18.2-summary/`))
 	},
 ]
 
 async function applyPatches() {
 	const start = parseInt(localStorage.getItem(CACHE_PATCH) ?? '0')
-	for (let i = start + 1; i <= PATCHES.length; i += 1) {
+	for (let i = start + 1; i <= PATCHES.length; i +=1) {
 		const patch = PATCHES[i - 1]
 		if (patch) {
 			await patch()
