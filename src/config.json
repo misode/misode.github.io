@@ -91,13 +91,12 @@
       "wiki": "https://minecraft.wiki/w/Loot_table"
     },
     {
-      "id": "shardborne:worldgen/template_pool",
+      "id": "worldgen/template_pool",
       "url": "worldgen/template-pool",
       "tags": [
         "shardborne",
         "worldgen"
       ],
-      "dependency": "shardborne",
       "minVersion": "1.16",
       "wiki": "https://minecraft.wiki/w/Template_pool"
     },
