@@ -31,9 +31,7 @@ dispatch minecraft:template_pool_element[shardborne:dungeon_pool_element] to str
 
 
 // Mob Spawning
-dispatch minecraft:resource[shardborne:dungeon/mob_spawning] to struct MobSpawning {
-	groups: MobSpawningStruct
-}
+dispatch minecraft:resource[shardborne:dungeon/mob_spawning] to [MobSpawningStruct]
 
 struct MobSpawningStruct {
 	id:string,

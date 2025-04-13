@@ -352,5 +352,7 @@
   "z": "Z",
   "zoom_in": "Zoom in",
   "zoom_in_limit": "Cannot zoom in further\n1 pixel = 4 blocks",
-  "zoom_out": "Zoom out"
+  "zoom_out": "Zoom out",
+  "generator.shardborne:dungeon/themes": "Themes",
+  "generator.shardborne:dungeon/mob_spawning": "Mob Spawning"
 }
