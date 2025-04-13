@@ -40,13 +40,13 @@
       "maxVersion": "1.20"
     },
     {
-      "id": "shardborne/dungeon/mob_spawning",
+      "id": "shardborne:dungeon/mob_spawning",
       "url": "dungeon/mob-spawning",
       "tags": [
         "shardborne"
       ],
       "path": "dungeon",
-      "schema": "shardborne:mob_spawning",
+      "dependency": "shardborne",
       "minVersion": "1.20",
       "maxVersion": "1.20"
     },
@@ -97,6 +97,7 @@
         "shardborne",
         "worldgen"
       ],
+      "dependency": "shardborne",
       "minVersion": "1.16",
       "wiki": "https://minecraft.wiki/w/Template_pool"
     },

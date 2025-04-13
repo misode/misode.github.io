@@ -1,3 +1,4 @@
+use ::java::data::worldgen::processor_list::ProcessorListRef
 
 // Theme
 dispatch minecraft:resource[shardborne:dungeon/themes] to struct Theme {
@@ -20,17 +21,28 @@ struct ThemeStructure {
 
 
 // Template Pool
-dispatch minecraft:resource[shardborne:worldgen/template_pool] to struct TemplatePool {
-	fallback: #[id="worldgen/template_pool"] string,
-    elements: TemplateElement
+dispatch minecraft:template_pool_element[shardborne:dungeon_pool_element] to struct TemplatePool {
+	projection: ("rigid" | "terrain_matching"),
+	processors: ProcessorListRef,
+	allow_overlap:boolean,
+	is_room:boolean,
+	disable_block_replacement:boolean,
 }
 
-struct TemplateElement {
-    weight: int @1..150,
-    element: Element 
+
+// Mob Spawning
+dispatch minecraft:resource[shardborne:dungeon/mob_spawning] to struct MobSpawning {
+	groups: MobSpawningStruct
 }
 
-struct Element {
-	element_type: (#[id="worldgen/structure_pool_element"] string |"mod:test" ),
-	...minecraft:template_pool_element[[element_type]],
+struct MobSpawningStruct {
+	id:string,
+	groups: [GroupStruct],
+	max_spawn_cost:int,
+	min_spawn_cost:int,
+}
+
+struct GroupStruct {
+	group_id:string,
+	weight: int
 }
