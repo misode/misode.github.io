@@ -53,7 +53,7 @@ export function FancyMenu({ placeholder, relative, class: clazz, getResults, chi
 		}
 	}, [setActive, inputRef])
 
-	return <div class={`px-1 ${relative ? 'relative' : ''}`}>
+	return <div class={`${relative ? 'relative' : ''}`}>
 		<div onClick={open}>
 			{children}
 		</div>

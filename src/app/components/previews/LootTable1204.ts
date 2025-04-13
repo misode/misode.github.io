@@ -476,6 +476,9 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 	},
 	survives_explosion: () => () => true,
 	table_bonus: ({ chances }) => (ctx) => {
+		if (!chances) {
+			return false
+		}
 		const level = 0 // TODO: get enchantment level from tool
 		const chance = chances[clamp(level, 0, chances.length - 1)]
 		return ctx.random.nextFloat() < chance
