@@ -50,7 +50,7 @@ struct GroupStruct {
 // NPC
 dispatch minecraft:resource[shardborne:custom_npc] to struct NPC {
 	id: string,
-	prerequisites: [Preqrequisites],
+	prerequisites?: [Preqrequisites],
 	quests: [Quests],
 	random_dialogue: [RandomDialogue]
 }
@@ -111,7 +111,7 @@ dispatch shardborne:dialogue_type[give_recipe] to struct {
 
 struct ItemStack {
 	id: string,
-	count: int,
+	count?: int,
 	nbt?: #[nbt=minecraft:item[[item]]] string
 }
 
@@ -125,7 +125,7 @@ dispatch shardborne:requirement_type[carry_item, make_recipe] to struct {
 }
 
 dispatch shardborne:requirement_type[locate_structure] to struct {
-	structure: #[id(registry="structure")] string
+	structure: (#[id=(registry="worldgen/structure",tags="allowed")] string | [#[id="worldgen/structure"] string]),
 }
 
 dispatch shardborne:requirement_type[enter_dimension] to struct {
