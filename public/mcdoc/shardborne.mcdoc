@@ -149,3 +149,8 @@ dispatch minecraft:template_processor[shardborne:block_replacement_processor] to
 	output_block:#[id="block"] string,
 	probability?:float @ 0..1,
 }
+
+dispatch minecraft:template_processor[shardborne:foliage_replacement_processor] to struct {
+	input_block:#[id="block"] string,
+	output_block:#[id="block"] string,
+}

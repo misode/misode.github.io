@@ -84,6 +84,7 @@ export async function fetchRegistries(versionId: VersionId) {
 		result.get('dimension')?.push('shardborne:nexus_realm')
 		result.get('dimension')?.push('shardborne:dungeon')
 		result.get('worldgen/structure_processor')?.push('shardborne:loot_box_processor')
+		result.get('worldgen/structure_processor')?.push('shardborne:foliage_replacement_processor')
 		result.get('worldgen/structure_processor')?.push('shardborne:spawner_block_processor')
 		result.get('worldgen/structure_processor')?.push('shardborne:block_replacement_processor')
 		result.get('block')?.push(...BLOCKS)
