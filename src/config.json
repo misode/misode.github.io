@@ -108,7 +108,7 @@
         "shardborne",
         "worldgen"
       ],
-      "schema": "shardborne:processors",
+      "dependency": "shardborne",
       "minVersion": "1.20",
       "maxVersion": "1.20",
       "wiki": "https://minecraft.wiki/w/Processor_list"

@@ -137,3 +137,15 @@ struct RandomDialogue {
 	initial_dialogue: [DialogueType],
 	dialogue: [[DialogueType]]
 }
+
+// Processors
+
+dispatch minecraft:template_processor[shardborne:spawner_block_processor] to struct {
+	spawner_group:string
+}
+
+dispatch minecraft:template_processor[shardborne:block_replacement_processor] to struct {
+	input_block:#[id="block"] string,
+	output_block:#[id="block"] string,
+	probability?:float @ 0..1,
+}

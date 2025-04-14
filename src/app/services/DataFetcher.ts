@@ -1,3 +1,4 @@
+import { BLOCKS } from '../blocks.js'
 import config from '../Config.js'
 import { Store } from '../Store.js'
 import { message } from '../Utils.js'
@@ -82,6 +83,10 @@ export async function fetchRegistries(versionId: VersionId) {
 		result.get('worldgen/structure_pool_element')?.push('shardborne:dungeon_pool_element')
 		result.get('dimension')?.push('shardborne:nexus_realm')
 		result.get('dimension')?.push('shardborne:dungeon')
+		result.get('worldgen/structure_processor')?.push('shardborne:loot_box_processor')
+		result.get('worldgen/structure_processor')?.push('shardborne:spawner_block_processor')
+		result.get('worldgen/structure_processor')?.push('shardborne:block_replacement_processor')
+		result.get('block')?.push(...BLOCKS)
 		return result
 	} catch (e) {
 		throw new Error(`Error occurred while fetching registries: ${message(e)}`)
