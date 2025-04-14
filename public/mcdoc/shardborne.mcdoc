@@ -1,4 +1,5 @@
 use ::java::data::worldgen::processor_list::ProcessorListRef
+use ::java::data::worldgen::template_pool::ElementBase
 
 // Theme
 dispatch minecraft:resource[shardborne:dungeon/themes] to struct Theme {
@@ -22,11 +23,12 @@ struct ThemeStructure {
 
 // Template Pool
 dispatch minecraft:template_pool_element[shardborne:dungeon_pool_element] to struct TemplatePool {
-	projection: ("rigid" | "terrain_matching"),
-	processors: ProcessorListRef,
-	allow_overlap:boolean,
-	is_room:boolean,
-	disable_block_replacement:boolean,
+	...ElementBase,
+	location: #[id="structure"] string,
+	processors: [string],
+	allow_overlap?:boolean,
+	is_room?:boolean,
+	disable_block_replacement?:boolean,
 }
 
 

@@ -125,10 +125,21 @@ export function ProjectPanel() {
 			evt.preventDefault()
 			setFocus()
 		}
+
+		const getCustomGenerator = (uri: string) => {
+			switch (true) {
+				case uri.includes('theme.json'):
+					return 'shardborne:dungeon/themes'		
+				case uri.endsWith('/pack.mcmeta'):
+					return 'pack_mcmeta'	
+				default:
+					return service?.dissectUri(uri)?.category
+			}
+		}
+
 		const onClick = () => {
-			const category = uri.endsWith('/pack.mcmeta')
-				? 'pack_mcmeta'
-				: service?.dissectUri(uri)?.category
+			const category = getCustomGenerator(uri)
+
 			const gen = config.generators.find(g => g.id === category)
 			if (!gen) {
 				throw new Error(`Cannot find generator for uri ${uri}`)

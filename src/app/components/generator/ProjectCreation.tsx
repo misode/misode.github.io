@@ -17,7 +17,7 @@ export function ProjectCreation() {
 	const { client } = useSpyglass()
 
 	const [name, setName] = useState('')
-	const [namespace, setNamespace] = useState('')
+	const [namespace, setNamespace] = useState('shardborne')
 	const [version, setVersion] = useState(DEFAULT_VERSION)
 	const [file, setFile] = useState<File | undefined>(undefined)
 	const [creating, setCreating] = useState(false)
