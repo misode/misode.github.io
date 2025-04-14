@@ -46,3 +46,94 @@ struct GroupStruct {
 	group_id:string,
 	weight: int
 }
+
+// NPC
+dispatch minecraft:resource[shardborne:custom_npc] to struct NPC {
+	id: string,
+	prerequisites: [Preqrequisites],
+	quests: [Quests],
+	random_dialogue: [RandomDialogue]
+}
+
+struct Preqrequisites {
+	type: ("questline"|"level"),
+	...shardborne:prerequisites_type[[type]],
+}
+
+enum(string) NPCs {
+	Wisp="shardborne:wisp",
+	Meld="shardborne:meld",
+	Sage="shardborne:sage",
+	Juuno="shardborne:juuno",
+	Aldhor="shardborne:aldhor",
+}
+
+
+struct Quests {
+	id:string,
+	npc: NPCs,
+	skip_requirements?: boolean,
+	finished_dialogue?: [DialogueType],
+	initial_dialogue?: [DialogueType],
+	requirements: [Requirements],
+	satisfied_dialogue?: [DialogueType],
+	unsatisfied_dialogue: [DialogueType],
+}
+
+dispatch shardborne:prerequisites_type[level] to struct LevelRequirement {
+	level:int
+}
+dispatch shardborne:preqrequisite_type[questline] to struct QuestlineRequirement {
+	questlines:[string]
+}
+
+struct DialogueType {
+	type: ("text"|"display_item"|"give_item"|"give_recipe"),
+	...shardborne:dialogue_type[[type]],
+}
+
+dispatch shardborne:dialogue_type[text] to struct {
+	text: [string]
+}
+
+dispatch shardborne:dialogue_type[display_item] to struct {
+	text: [string],
+	item: ItemStack
+}
+
+dispatch shardborne:dialogue_type[give_item] to struct {
+	item: ItemStack
+}
+
+dispatch shardborne:dialogue_type[give_recipe] to struct {
+	recipe: #[id="recipe"] string
+}
+
+struct ItemStack {
+	id: string,
+	count: int,
+	nbt?: #[nbt=minecraft:item[[item]]] string
+}
+
+struct Requirements {
+	type: ("carry_item"|"locate_structure"|"make_recipe"|"enter_dimension"),
+	...shardborne:requirement_type[[type]],
+}
+
+dispatch shardborne:requirement_type[carry_item, make_recipe] to struct {
+	item: ItemStack
+}
+
+dispatch shardborne:requirement_type[locate_structure] to struct {
+	structure: #[id(registry="structure")] string
+}
+
+dispatch shardborne:requirement_type[enter_dimension] to struct {
+	dimension: #[id="dimension"] string 
+}
+
+struct RandomDialogue {
+	npc: NPCs,
+	initial_dialogue: [DialogueType],
+	dialogue: [[DialogueType]]
+}

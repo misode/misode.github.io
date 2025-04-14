@@ -80,6 +80,8 @@ export async function fetchRegistries(versionId: VersionId) {
 			result.set(id, data[id].map((e: string) => 'minecraft:' + e))
 		}
 		result.get('worldgen/structure_pool_element')?.push('shardborne:dungeon_pool_element')
+		result.get('dimension')?.push('shardborne:nexus')
+		result.get('dimension')?.push('shardborne:dungeon')
 		return result
 	} catch (e) {
 		throw new Error(`Error occurred while fetching registries: ${message(e)}`)
