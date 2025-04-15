@@ -20,6 +20,13 @@ jobs:
       run: |
         npm install
         export latest_version="'${{ steps.version.outputs.id }}'"
+
+        repository=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
+        if [[ "$repository" != "$GITHUB_REPOSITORY_OWNER.github.io" ]]; then
+            export sub_directory="/${repository}"
+            echo "Deploying to $sub_directory"
+        fi
+
         npm run build
 
     - name: Upload artifact

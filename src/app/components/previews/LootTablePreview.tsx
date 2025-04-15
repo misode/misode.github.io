@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'preact/hooks'
+import { assetPath } from '../../App.jsx'
 import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { checkVersion, fetchAllPresets, fetchItemComponents } from '../../services/index.js'
@@ -63,7 +64,7 @@ export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 
 	return <>
 		<div ref={overlay} class="preview-overlay">
-			<img src="/images/container.png" alt="Container background" class="pixelated" draggable={false} />
+			<img src={assetPath("/images/container.png")} alt="Container background" class="pixelated" draggable={false} />
 			{items.map(({ slot, item }) =>
 				<div key={slot} style={slotStyle(slot)}>
 					{use1204 ?
