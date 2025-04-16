@@ -83,6 +83,8 @@ export async function fetchRegistries(versionId: VersionId) {
 		result.get('worldgen/structure_pool_element')?.push('shardborne:dungeon_pool_element')
 		result.get('dimension')?.push('shardborne:nexus_realm')
 		result.get('dimension')?.push('shardborne:dungeon')
+		result.get('loot_condition_type')?.push('shardborne:dungeon_level')
+		result.get('loot_condition_type')?.push('shardborne:dungeon_category')
 		result.get('worldgen/structure_processor')?.push('shardborne:loot_box_processor')
 		result.get('worldgen/structure_processor')?.push('shardborne:foliage_replacement_processor')
 		result.get('worldgen/structure_processor')?.push('shardborne:dungeon_room_processor')

@@ -86,7 +86,7 @@
       "tags": [
         "shardborne"
       ],
-      "schema": "loot_table",
+      "dependency": "shardborne",
       "minVersion": "1.16",
       "wiki": "https://minecraft.wiki/w/Loot_table"
     },

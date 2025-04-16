@@ -163,3 +163,18 @@ dispatch minecraft:template_processor[shardborne:dungeon_room_processor] to stru
 	max_blocks: int,
 	replacement_chance: float @ 0..1,
 }
+
+// Loot Conditions
+
+dispatch minecraft:loot_condition[shardborne:dungeon_level] to struct {
+	range: LevelRange
+}
+
+dispatch minecraft:loot_condition[shardborne:dungeon_category] to struct {
+	value: string
+}
+
+struct LevelRange {
+	min?: int,
+	max?: int,
+}
