@@ -154,3 +154,12 @@ dispatch minecraft:template_processor[shardborne:foliage_replacement_processor] 
 	input_block:#[id="block"] string,
 	output_block:#[id="block"] string,
 }
+
+dispatch minecraft:template_processor[shardborne:dungeon_room_processor] to struct {
+	target:#[id="block"] string,
+	success_replacement:#[id="block"] string,
+	fail_replacement?:#[id="block"] string,
+	min_blocks: int,
+	max_blocks: int,
+	replacement_chance: float @ 0..1,
+}
