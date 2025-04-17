@@ -3,9 +3,6 @@
 
 https://misode.github.io/
 
-Fr.json corriged
-](https://misode.github.io/
-
 ## Contributing
 This project uses [Preact](https://preactjs.com/) and [Vite](https://vitejs.dev/).
 1. Make sure you have [node](https://nodejs.org/), npm, and [git](https://git-scm.com/) installed.
@@ -56,4 +53,4 @@ You are allowed to fork this repository and use its base as a way to publish you
 5. Remove the contributors and giscus comment section on the homepage. You can do this easily by removing `<Contributors />` and `<Giscus />` in `Home.tsx`.
 6. Make some other changes to the home page. This will depend on what you need, but you might want to remove stuff like `<WhatsNew />` and/or `<Tools />`.
 7. Edit the `Footer.tsx` component. You can remove the donation link, but I would appreciate if you still kept a note that your fork is based on my work, for example by linking to my github profile or this repository.
-8. Change some of the translations in `src/locales/en.json`. Particularly you might want to change the `title.home` key.)
+8. Change some of the translations in `src/locales/en.json`. Particularly you might want to change the `title.home` key.
