@@ -5,6 +5,7 @@ import { Identifier, ItemStack, LegacyRandom } from 'deepslate/core'
 import { NbtCompound, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate/nbt'
 import { ResolvedItem } from '../../services/ResolvedItem.js'
 import type { VersionId } from '../../services/Versions.js'
+import { checkVersion } from '../../services/Versions.js'
 import { clamp, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
 
 export interface SlottedItem {
@@ -470,16 +471,22 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 			.set('loot_table', new NbtString(Identifier.parse(typeof name === 'string' ? name : '').toString()))
 			.set('seed', new NbtLong(typeof seed === 'number' ? BigInt(seed) : BigInt(0))))
 	},
-	set_lore: ({ lore }) => (item) => {
+	set_lore: ({ lore }) => (item, ctx) => {
 		if (!Array.isArray(lore)) return
-		const lines: string[] = lore.flatMap((line: any) => line !== undefined ? [JSON.stringify(line)] : [])
+		const lines: NbtTag[] = lore.flatMap((line: any) => line !== undefined ? [
+			!checkVersion(ctx.version, '1.21.5')
+				? new NbtString(JSON.stringify(line))
+				: jsonToNbt(line),
+		] : [])
 		// TODO: account for mode
-		item.set('lore', new NbtList(lines.map(l => new NbtString(l))))
+		item.set('lore', new NbtList(lines))
 	},
-	set_name: ({ name, target }) => (item) => {
+	set_name: ({ name, target }) => (item, ctx) => {
 		if (name !== undefined) {
-			const newName = JSON.stringify(name)
-			item.set(target ?? 'custom_name', new NbtString(newName))
+			const newName = !checkVersion(ctx.version, '1.21.5')
+				? new NbtString(JSON.stringify(name))
+				: jsonToNbt(name)
+			item.set(target ?? 'custom_name', newName)
 		}
 	},
 	set_ominous_bottle_amplifier: ({ amplifier }) => (item, ctx) => {

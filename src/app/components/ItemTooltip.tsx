@@ -1,6 +1,7 @@
 import type { MobEffectInstance, NbtTag } from 'deepslate'
 import { ItemStack, NbtCompound, NbtList, PotionContents } from 'deepslate'
 import { Identifier } from 'deepslate/core'
+import { useVersion } from '../contexts/Version.jsx'
 import type { ResolvedItem } from '../services/ResolvedItem.js'
 import { intToDisplayHexRgb, makeDescriptionId, mergeTextComponentStyles } from '../Utils.js'
 import { TextComponent } from './TextComponent.jsx'
@@ -11,8 +12,9 @@ interface Props {
 	resolver: (item: ItemStack) => ResolvedItem,
 }
 export function ItemTooltip({ item, advanced, resolver }: Props) {
+	const { version } = useVersion()
 	return <>
-		<TextComponent component={item.getStyledHoverName()} />
+		<TextComponent component={item.getStyledHoverName(version)} />
 		{!advanced && !item.has('custom_name') && item.is('filled_map') && item.has('map_id') && (
 			<TextComponent component={{ translate: 'filled_map.id', with: [item.get('map_id', tag => tag.getAsNumber())], color: 'gray' }} />
 		)}
@@ -25,7 +27,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 				<TextComponent component={{ translate: `${layer.isCompound() ? (layer.hasCompound('pattern') ? layer.getString('translation_key') : `block.minecraft.banner.${layer.getString('pattern').replace(/^minecraft:/, '')}`) : ''}.${layer.isCompound() ? layer.getString('color') : ''}`, color: 'gray' }} />
 			)}
 			{item.is('crossbow') && item.getChargedProjectile() && (
-				<TextComponent component={{ translate: 'item.minecraft.crossbow.projectile', extra: [' ', resolver(item.getChargedProjectile()!).getDisplayName()] }}/>
+				<TextComponent component={{ translate: 'item.minecraft.crossbow.projectile', extra: [' ', resolver(item.getChargedProjectile()!).getDisplayName(version)] }}/>
 			)}
 			{item.is('disc_fragment_5') && (
 				<TextComponent component={{ translate: `${makeDescriptionId('item', item.id)}.desc`, color: 'gray' }} />
@@ -63,7 +65,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 			{item.is('decorated_pot') && item.has('pot_decorations') && <>
 				<TextComponent component={''} />
 				{item.get('pot_decorations', tag => tag.isList() ? tag.map(e =>
-					<TextComponent component={mergeTextComponentStyles(resolver(new ItemStack(Identifier.parse(e.getAsString()), 1)).getHoverName(), { color: 'gray' })} />
+					<TextComponent component={mergeTextComponentStyles(resolver(new ItemStack(Identifier.parse(e.getAsString()), 1)).getHoverName(version), { color: 'gray' })} />
 				) : undefined)}
 			</>}
 			{item.id.path.endsWith('_shulker_box') && <>
@@ -72,7 +74,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 				)}
 				{(item.get('container', tag => tag.isList() ? tag.getItems() : []) ?? []).slice(0, 5).map(e => {
 					const subItem = resolver(ItemStack.fromNbt(e.isCompound() ? e.getCompound('item') : new NbtCompound()))
-					return <TextComponent component={{ translate: 'container.shulkerBox.itemCount', with: [subItem.getHoverName(), subItem.count] }} />
+					return <TextComponent component={{ translate: 'container.shulkerBox.itemCount', with: [subItem.getHoverName(version), subItem.count] }} />
 				})}
 				{(item.get('container', tag => tag.isList() ? tag.length : 0) ?? 0) > 5 && (
 					<TextComponent component={{ translate: 'container.shulkerBox.more', with: [(item.get('container', tag => tag.isList() ? tag.length : 0) ?? 0) - 5], italic: true }} />
@@ -110,7 +112,7 @@ export function ItemTooltip({ item, advanced, resolver }: Props) {
 			? <TextComponent component={{ translate: 'item.color', with: [intToDisplayHexRgb(item.get('dyed_color', tag => tag.isCompound() ? tag.getNumber('rgb') : tag.getAsNumber()))], color: 'gray' }} />
 			: <TextComponent component={{ translate: 'item.dyed', color: 'gray' }} />
 		)}
-		{item.getLore().map((component) =>
+		{item.getLore(version).map((component) =>
 			<TextComponent component={component} base={{ color: 'dark_purple', italic: true }} />
 		)}
 		{item.showInTooltip('attribute_modifiers') && (

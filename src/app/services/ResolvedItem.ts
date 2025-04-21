@@ -1,6 +1,8 @@
 import type { NbtTag } from 'deepslate'
 import { Identifier, ItemStack } from 'deepslate'
 import { safeJsonParse } from '../Utils.js'
+import type { VersionId } from './Versions.js'
+import { checkVersion } from './Versions.js'
 
 export class ResolvedItem extends ItemStack {
 
@@ -86,10 +88,10 @@ export class ResolvedItem extends ItemStack {
 		return this.has('enchantment_glint_override') || this.isEnchanted()
 	}
 
-	public getLore() {
+	public getLore(version: VersionId) {
 		return this.get('lore', tag => {
 			return tag.isList() ? tag.map(e => {
-				return safeJsonParse(e.getAsString()) ?? { text: '(invalid lore line)' }
+				return ResolvedItem.getTextComponent(e, version)
 			}) : []
 		}) ?? []
 	}
@@ -127,10 +129,10 @@ export class ResolvedItem extends ItemStack {
 		}
 	}
 
-	public getHoverName() {
-		const customName = this.get('custom_name', tag => tag.isString() ? tag.getAsString() : undefined)
+	public getHoverName(version: VersionId) {
+		const customName = this.get('custom_name', tag => ResolvedItem.getTextComponent(tag, version))
 		if (customName) {
-			return safeJsonParse(customName) ?? '(invalid custom name)'
+			return customName
 		}
 
 		const bookTitle = this.get('written_book_content', tag => tag.isCompound() ? (tag.hasCompound('title') ? tag.getCompound('title').getString('raw') : tag.getString('title')) : undefined)
@@ -138,9 +140,9 @@ export class ResolvedItem extends ItemStack {
 			return { text: bookTitle }
 		}
 
-		const itemName = this.get('item_name', tag => tag.isString() ? tag.getAsString() : undefined)
+		const itemName = this.get('item_name', tag => ResolvedItem.getTextComponent(tag, version))
 		if (itemName) {
-			return safeJsonParse(itemName) ?? { text: '(invalid item name)' }
+			return itemName
 		}
 
 		const guess = this.id.path
@@ -151,13 +153,13 @@ export class ResolvedItem extends ItemStack {
 		return { text: guess }
 	}
 
-	public getStyledHoverName() {
-		return { text: '', extra: [this.getHoverName()], color: this.getRarityColor(), italic: this.has('custom_name') }
+	public getStyledHoverName(version: VersionId) {
+		return { text: '', extra: [this.getHoverName(version)], color: this.getRarityColor(), italic: this.has('custom_name') }
 	}
 
-	public getDisplayName() {
+	public getDisplayName(version: VersionId) {
 		// Does not use translation key "chat.square_brackets" due to limitations of TextComponent
-		return { text: '[', extra: [this.getStyledHoverName(), ']'], color: this.getRarityColor() }
+		return { text: '[', extra: [this.getStyledHoverName(version), ']'], color: this.getRarityColor() }
 	}
 
 	public getChargedProjectile() {
@@ -167,5 +169,12 @@ export class ResolvedItem extends ItemStack {
 			}
 			return ItemStack.fromNbt(tag.getCompound(0))
 		})
+	}
+
+	private static getTextComponent(tag: NbtTag, version: VersionId) {
+		if (!checkVersion(version, '1.21.5')) {
+			return safeJsonParse(tag.getAsString()) ?? { text: '(invalid text component)' }
+		}
+		return tag.toSimplifiedJson()
 	}
 }
