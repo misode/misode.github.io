@@ -241,7 +241,7 @@
     "transformation.rotation_mode.quaternion": "Кватернион",
     "transformation.scale": "Размер",
     "transformation.translation": "Перемещение",
-    "undo": "Отмена",
+    "undo": "Отменить",
     "versions.all": "Все версии",
     "versions.article": "Статья",
     "versions.changelog": "Технические изменения",
@@ -353,5 +353,6 @@
     "generator.cow_variant": "Вариант Коровы",
     "generator.frog_variant": "Вариант Лягушки",
     "generator.test_instance": "Тестовая Задача",
-    "generator.test_environment": "Тестовая Среда"
+    "generator.test_environment": "Тестовая Среда",
+    "generator.wolf_sound_variant": "Вариация звука Волка"
 }
