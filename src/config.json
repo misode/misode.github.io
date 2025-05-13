@@ -183,7 +183,7 @@
       "id": "1.21.6",
       "dynamic": true,
       "name": "1.21.6",
-      "pack_format": 72,
+      "pack_format": 77,
       "show": true
     }
   ],
@@ -304,6 +304,11 @@
       "id": "cow_variant",
       "url": "cow-variant",
       "minVersion": "1.21.5"
+    },
+    {
+      "id": "dialog",
+      "url": "dialog",
+      "minVersion": "1.21.6"
     },
     {
       "id": "test_instance",

@@ -70,6 +70,7 @@
   "generator.chat_type": "Chat Type",
   "generator.cow_variant": "Cow Variant",
   "generator.damage_type": "Damage Type",
+  "generator.dialog": "Dialog",
   "generator.dimension": "Dimension",
   "generator.dimension_type": "Dimension Type",
   "generator.enchantment": "Enchantment",

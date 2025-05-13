@@ -409,7 +409,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 
 	registerAttributes(meta, release, versions)
 
-	json.initialize(ctx)
+	json.getInitializer()(ctx)
 	je.json.initialize(ctx)
 	je.mcf.initialize(ctx, summary.commands, release)
 	nbt.initialize(ctx)
