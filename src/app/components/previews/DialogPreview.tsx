@@ -220,8 +220,7 @@ function InputControl({ input }: { input: any }) {
 	}
 
 	if (type === 'number_range') {
-		// TODO: use label_format
-		const label = {translate: 'options.generic_value', with: [input.label ?? '', input.start ?? 0]}
+		const label = {translate: input.label_format ?? 'options.generic_value', with: [input.label ?? '', input.start ?? 0]}
 		return <div class="dialog-slider" style={`width: ${px(input.width ?? 200)}; height: ${px(20)};`}>
 			<div class="dialog-slider-track"></div>
 			<div class="dialog-slider-handle"></div>

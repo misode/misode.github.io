@@ -1981,6 +1981,7 @@ hr {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding-bottom: var(--dialog-px);
 }
 
 .project-files {

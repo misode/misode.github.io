@@ -112,7 +112,7 @@ function TextPart({ part, lang, oneline }: { part: PartData, lang: Record<string
 }
 
 function resolveTranslate(translate: string, fallback: string | undefined, with_: any[] | undefined, lang: Record<string, string>): string {
-	const str = lang[translate] ?? fallback
+	const str = lang[translate] ?? fallback ?? translate
 	if (typeof str !== 'string') return translate
 	const params = with_?.map((c): string => {
 		if (typeof c === 'string' || typeof c === 'number') return `${c}`
