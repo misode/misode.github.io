@@ -1882,11 +1882,11 @@ hr {
 }
 
 .dialog-preview .text-component {
-	font-size: calc(var(--dialog-px) * 12);
+	font-size: calc(var(--dialog-px) * 10);
 }
 
 .dialog-preview .text-component span {
-	text-shadow: calc(var(--dialog-px) * 1.2) calc(var(--dialog-px) * 1.2) var(--shadow-color, transparent);
+	text-shadow: calc(var(--dialog-px) * 1) calc(var(--dialog-px) * 1) var(--shadow-color, transparent);
 }
 
 .dialog-button,
@@ -1919,6 +1919,7 @@ hr {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding-bottom: var(--dialog-px);
 	overflow: hidden;
 }
 
