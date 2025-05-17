@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'preact/hooks'
 import config from '../Config.js'
-import { Store } from '../Store.js'
 import { useLocale } from '../contexts/index.js'
 import type { VersionId } from '../services/index.js'
+import { Store } from '../Store.js'
 import { Btn } from './Btn.js'
 import { BtnMenu } from './BtnMenu.js'
 
@@ -29,7 +29,7 @@ export function VersionSwitcher({ value, allowed, hasAny, onChange, onAny }: Pro
 
 	const hasMoreVersions = useMemo(() => {
 		return versions.some(v => !(v.show || v.id === value))
-	}, [])
+	}, [versions, value])
 
 	const shownVersions = useMemo(() => {
 		return versions.filter(v => v.show || v.id === value || showMore)
