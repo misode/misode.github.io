@@ -1895,7 +1895,8 @@ hr {
 .dialog-edit-box,
 .dialog-checkbox,
 .dialog-slider-track,
-.dialog-slider-handle {
+.dialog-slider-handle,
+.dialog-tooltip {
 	image-rendering: -moz-crisp-edges;
 	image-rendering: -webkit-crisp-edges;
 	image-rendering: crisp-edges;
@@ -1984,6 +1985,38 @@ hr {
 	align-items: center;
 	justify-content: center;
 	padding-bottom: var(--dialog-px);
+}
+
+.tooltip-container {
+	position: relative;
+}
+
+.tooltip-container > * > * {
+	pointer-events: none;
+}
+
+.dialog-tooltip {
+	padding: var(--dialog-px);
+	border: solid calc(var(--dialog-px) * 2) #220044;
+	border-image-source: url(/images/tooltip.png);
+	border-image-slice: 2 fill;
+	border-image-outset: calc(var(--dialog-px) * 1);
+	width: max-content;
+	max-width: calc(var(--dialog-px) * 150);
+	display: none;
+	position: absolute;
+	pointer-events: none;
+	z-index: 5;
+	padding: calc(var(--dialog-px) * 2);
+}
+
+.tooltip-container:hover > .dialog-tooltip {
+	display: block;
+}
+
+.tooltip-container > .dialog-tooltip .text-component {
+	white-space: pre-wrap;
+	text-align: initial;
 }
 
 .project-files {

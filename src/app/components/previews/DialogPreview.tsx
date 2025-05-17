@@ -1,6 +1,6 @@
 import { Identifier, ItemStack } from 'deepslate'
-import type { ComponentChild } from 'preact'
-import { useEffect, useRef } from 'preact/hooks'
+import type { ComponentChild, ComponentChildren } from 'preact'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import { safeJsonParse } from '../../Utils.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { TextComponent } from '../TextComponent.jsx'
@@ -46,7 +46,9 @@ function DialogTitle({ title }: { title: any }) {
 	// TODO: add warning button tooltip
 	return <div style={`height: ${px(33)}; display: flex; gap: ${px(10)}; justify-content: center; align-items: center`}>
 		<TextComponent component={title} />
-		<div class="dialog-warning-button" style={`width: ${px(20)}; height: ${px(20)};`}></div>
+		<WithTooltip tooltip="This is a custom screen. Click here to learn more.">
+			<div class="dialog-warning-button" style={`width: ${px(20)}; height: ${px(20)};`}></div>
+		</WithTooltip>
 	</div>
 }
 
@@ -111,7 +113,7 @@ function DialogContent({ dialog }: { dialog: any }) {
 	if (type === 'multi_action') {
 		return <ColumnsGrid columns={dialog.columns ?? 2}>
 			{dialog.actions?.map((a: any) =>
-				<Button label={a.label} width={a.width ?? 150} />
+				<Button label={a.label} width={a.width ?? 150} tooltip={a.tooltip} />
 			) ?? []}
 		</ColumnsGrid>
 	}
@@ -121,7 +123,7 @@ function DialogContent({ dialog }: { dialog: any }) {
 			{dialog.inputs?.map((i: any) => <InputControl input={i} />)}
 			<ColumnsGrid columns={2}>
 				{dialog.actions?.map((a: any) =>
-					<Button label={a.label} width={a.width ?? 150} />
+					<Button label={a.label} width={a.width ?? 150} tooltip={a.tooltip} />
 				) ?? []}
 			</ColumnsGrid>
 		</>
@@ -150,8 +152,8 @@ function DialogFooter({ dialog }: { dialog: any }) {
 
 	if (type === 'confirmation') {
 		return <div style={`display: flex; gap: ${px(8)}; justify-content: center;`}>
-			<Button label={dialog.yes?.label} width={dialog.yes?.width ?? 150} />
-			<Button label={dialog.no?.label} width={dialog.no?.width ?? 150} />
+			<Button label={dialog.yes?.label} width={dialog.yes?.width ?? 150} tooltip={dialog.yes?.tooltip} />
+			<Button label={dialog.no?.label} width={dialog.no?.width ?? 150} tooltip={dialog.no?.tooltip} />
 		</div>
 	}
 
@@ -165,7 +167,7 @@ function DialogFooter({ dialog }: { dialog: any }) {
 
 	if (type === 'notice') {
 		return <div style={`display: flex; gap: ${px(8)}; justify-content: center;`}>
-			<Button label={dialog.action?.label ?? {translate: 'gui.ok'}} width={dialog.action?.width ?? 150} />
+			<Button label={dialog.action?.label ?? {translate: 'gui.ok'}} width={dialog.action?.width ?? 150} tooltip={dialog.action?.tooltip} />
 		</div>
 	}
 
@@ -175,38 +177,11 @@ function DialogFooter({ dialog }: { dialog: any }) {
 
 	if (type === 'simple_input_form') {
 		return <div style={`display: flex; gap: ${px(8)}; justify-content: center;`}>
-			<Button label={dialog.action?.label} width={dialog.action?.width ?? 150} />
+			<Button label={dialog.action?.label} width={dialog.action?.width ?? 150} tooltip={dialog.action?.tooltip} />
 		</div>
 	}
 
 	return <></>
-}
-
-interface ColumnsGridProps {
-	columns: number
-	children: ComponentChild[]
-}
-function ColumnsGrid({ columns, children }: ColumnsGridProps) {
-	const totalCount = children.length
-	const gridCount = Math.floor(totalCount / columns) * columns
-	return <div style={`padding-top: ${px(4)}; display: grid; grid-template-columns: repeat(${columns}, minmax(0, 1fr)); gap: ${px(2)}; justify-content: center;`}>
-		{children.slice(0, gridCount)}
-		{totalCount > gridCount && <div style={`grid-column: span ${columns}; display: flex; gap: ${px(2)}; justify-content: center; padding-top: ${px(2)} /* MC-297977 */;`}>
-			{children.slice(gridCount)}
-		</div>}
-	</div>
-}
-
-interface ButtonProps {
-	label: any
-	width: number
-	tooltip?: any
-}
-function Button({ label, width }: ButtonProps) {
-	// TODO: add tooltip
-	return <div class="dialog-button" style={`width: ${px(width)}; height: ${px(20)};`}>
-		<TextComponent component={label} oneline />
-	</div>
 }
 
 function InputControl({ input }: { input: any }) {
@@ -247,6 +222,64 @@ function InputControl({ input }: { input: any }) {
 	}
 
 	return <></>
+}
+
+interface ColumnsGridProps {
+	columns: number
+	children: ComponentChild[]
+}
+function ColumnsGrid({ columns, children }: ColumnsGridProps) {
+	const totalCount = children.length
+	const gridCount = Math.floor(totalCount / columns) * columns
+	return <div style={`padding-top: ${px(4)}; display: grid; grid-template-columns: repeat(${columns}, minmax(0, 1fr)); gap: ${px(2)}; justify-content: center;`}>
+		{children.slice(0, gridCount)}
+		{totalCount > gridCount && <div style={`grid-column: span ${columns}; display: flex; gap: ${px(2)}; justify-content: center; padding-top: ${px(2)} /* MC-297977 */;`}>
+			{children.slice(gridCount)}
+		</div>}
+	</div>
+}
+
+interface ButtonProps {
+	label: any
+	width: number
+	tooltip?: any
+}
+function Button({ label, width, tooltip }: ButtonProps) {
+	return <WithTooltip tooltip={tooltip}>
+		<div class="dialog-button" style={`width: ${px(width)}; height: ${px(20)};`}>
+			<TextComponent component={label} oneline />
+		</div>
+	</WithTooltip>
+}
+
+interface WithTooltipProps {
+	tooltip?: any
+	children: ComponentChildren
+}
+function WithTooltip({ tooltip, children }: WithTooltipProps) {
+	if (!tooltip) {
+		return <>{children}</>
+	}
+
+	const el = useRef<HTMLDivElement>(null)
+	const [tooltipOffset, setTooltipOffset] = useState<[number, number]>([0, 0])
+
+	useEffect(() => {
+		const onMove = (e: MouseEvent) => {
+			requestAnimationFrame(() => {
+				setTooltipOffset([e.offsetX + 20, e.offsetY - 10])
+			})
+		}
+		el.current?.addEventListener('mousemove', onMove)
+		return () => el.current?.removeEventListener('mousemove', onMove)
+	}, [])
+
+	return <div ref={el} class="tooltip-container">
+		{children}
+		{<div class="dialog-tooltip" style={`left: ${tooltipOffset[0]}px; top: ${tooltipOffset[1]}px;`}>
+			<TextComponent component={tooltip} />
+		</div>}
+	</div>
 }
 
 function px(n: number) {
