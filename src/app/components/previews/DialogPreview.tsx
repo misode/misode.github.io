@@ -205,7 +205,7 @@ interface ButtonProps {
 function Button({ label, width }: ButtonProps) {
 	// TODO: add tooltip
 	return <div class="dialog-button" style={`width: ${px(width)}; height: ${px(20)};`}>
-		<TextComponent component={label} />
+		<TextComponent component={label} oneline />
 	</div>
 }
 

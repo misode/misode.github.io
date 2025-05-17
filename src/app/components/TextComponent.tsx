@@ -22,8 +22,9 @@ interface PartData extends StyleData {
 interface Props {
 	component: unknown,
 	base?: StyleData,
+	oneline?: boolean,
 }
-export function TextComponent({ component, base = { color: 'white' } }: Props) {
+export function TextComponent({ component, base = { color: 'white' }, oneline }: Props) {
 	const { version } = useVersion()
 	const { lang } = useLocale()
 
@@ -37,7 +38,7 @@ export function TextComponent({ component, base = { color: 'white' } }: Props) {
 	const { value: language } = useAsync(() => getLanguage(version, lang), [version, lang])
 
 	return <div class="text-component">
-		{parts.map(p => <TextPart part={p} lang={language ?? {}} />)}
+		{parts.map(p => <TextPart part={p} lang={language ?? {}} oneline={oneline} />)}
 	</div>
 }
 
@@ -102,12 +103,12 @@ const TextColors: Record<string, [string, string]> = {
 	white: ['#FFF', '#3F3F3F'],
 }
 
-function TextPart({ part, lang }: { part: PartData, lang: Record<string, string> }) {
-	if (part.translate) {
-		const str = resolveTranslate(part.translate, part.fallback, part.with, lang)
-		return <span style={createStyle(part)}>{str}</span>
-	}
-	return <span style={createStyle(part)}>{part.text}</span>
+function TextPart({ part, lang, oneline }: { part: PartData, lang: Record<string, string>, oneline?: boolean }) {
+	let text = part.translate
+		? resolveTranslate(part.translate, part.fallback, part.with, lang)
+		: (part.text ?? '')
+	text = oneline ? text.replaceAll('\n', '␊') : text
+	return <span style={createStyle(part)}>{text}</span>
 }
 
 function resolveTranslate(translate: string, fallback: string | undefined, with_: any[] | undefined, lang: Record<string, string>): string {
