@@ -72,14 +72,14 @@ function visitComponent(component: unknown, consumer: (c: PartData) => void) {
 	}
 }
 
-function inherit(component: object, base: PartData) {
+function inherit(component: any, base: PartData) {
 	return {
-		color: base.color,
-		bold: base.bold,
-		italic: base.italic,
-		underlined: base.underlined,
-		strikethrough: base.strikethrough,
 		...component,
+		color: component.color ?? base.color,
+		bold: component.bold ?? base.bold,
+		italic: component.italic ?? base.italic,
+		underlined: component.underlined ?? base.underlined,
+		strikethrough: component.strikethrough ?? base.strikethrough,
 	}
 }
 
