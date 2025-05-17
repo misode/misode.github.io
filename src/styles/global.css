@@ -1862,14 +1862,11 @@ hr {
 	font-size: 20px;
 	position: relative;
   white-space: pre;
-	line-height: 1.1	;
+	line-height: 1.1;
 }
 
-.text-component > .text-foreground {
-	position: absolute;
-	z-index: 1;
-	left: -2px;
-	top: -2px;
+.text-component span {
+	text-shadow: 2px 2px var(--shadow-color, transparent);
 }
 
 .text-component span:empty:before {
@@ -1888,9 +1885,8 @@ hr {
 	font-size: calc(var(--dialog-px) * 12);
 }
 
-.dialog-preview .text-component > .text-foreground {
-	left: calc(var(--dialog-px) * -1.2);
-	top: calc(var(--dialog-px) * -1.2);
+.dialog-preview .text-component span {
+	text-shadow: calc(var(--dialog-px) * 1.2) calc(var(--dialog-px) * 1.2) var(--shadow-color, transparent);
 }
 
 .dialog-button,
