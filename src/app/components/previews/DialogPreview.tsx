@@ -71,7 +71,9 @@ function DialogBody({ body }: { body: any }) {
 				console.log(item)
 				return <div style={`display: flex; gap: ${px(2)}; align-items: center; gap: ${px(4)}`}>
 					<div style={`width: ${px(b.width ?? 16)}; height: ${px(b.height ?? 16)}`}>
-						<ItemDisplay item={item} tooltip={b.show_tooltip ?? true} />
+						<div style={`width: ${px(16)}; height: ${px(16)}`}>
+							<ItemDisplay item={item} tooltip={b.show_tooltip ?? true} />
+						</div>
 					</div>
 					{b.description && <div style={`max-width: ${px(b.description.width ?? 200)};`}>
 						<TextComponent component={b.description.contents} />
@@ -230,9 +232,9 @@ function InputControl({ input }: { input: any }) {
 	}
 
 	if (type === 'single_option') {
-		const firstOption = input.options?.find((o: any) => o.initial) ?? input.options?.[0]
-		const optionLabel = firstOption?.display ?? firstOption?.id ?? ''
-		const label = input.label_visible === false ? optionLabel : {translate: 'options.generic_value', with: [input.label ?? '', optionLabel]}
+		const initial = input.options?.find((o: any) => o.initial) ?? input.options?.[0]
+		const initialLabel = typeof initial === 'string' ? initial : initial?.display ?? initial?.id ?? ''
+		const label = input.label_visible === false ? initialLabel : {translate: 'options.generic_value', with: [input.label ?? '', initialLabel]}
 		return <Button label={label} width={input.width ?? 200} />
 	}
 
