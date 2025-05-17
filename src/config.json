@@ -308,7 +308,8 @@
     {
       "id": "dialog",
       "url": "dialog",
-      "minVersion": "1.21.6"
+      "minVersion": "1.21.6",
+      "wiki": "https://minecraft.wiki/w/Dialog"
     },
     {
       "id": "test_instance",
@@ -504,6 +505,14 @@
       "tags": ["tags"],
       "path": "tags/damage_type",
       "minVersion": "1.19.4",
+      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+    },
+    {
+      "id": "tag/dialog",
+      "url": "tags/dialog",
+      "tags": ["tags"],
+      "path": "tags/dialog",
+      "minVersion": "1.21.6",
       "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
     },
     {
