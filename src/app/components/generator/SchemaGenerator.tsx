@@ -323,10 +323,8 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		} else {
 			Analytics.showPreview(gen.id, 'menu')
 		}
+		Store.setPreviewPanelOpen(!previewShown)
 		setPreviewShown(!previewShown)
-		if (!previewShown && sourceShown) {
-			setSourceShown(false)
-		}
 	}
 
 	const [projectShown, setProjectShown] = useState(Store.getProjectPanelOpen() ?? false)
