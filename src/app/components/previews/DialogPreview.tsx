@@ -91,7 +91,11 @@ function DialogContent({ dialog }: { dialog: any }) {
 		if (Array.isArray(dialog.dialogs)) {
 			dialogs = dialog.dialogs
 		} else if (typeof dialog.dialogs === 'string') {
-			dialogs = [dialog.dialogs]
+			if (dialog.dialogs.startsWith('#')) {
+				dialogs = ['dialog_1', 'dialog_2', 'dialog_3']
+			} else {
+				dialogs = [dialog.dialogs]
+			}
 		}
 		return <ColumnsGrid columns={dialog.columns ?? 2}>
 			{dialogs.map((d: any) => {
@@ -119,6 +123,15 @@ function DialogContent({ dialog }: { dialog: any }) {
 				) ?? []}
 			</ColumnsGrid>
 		</>
+	}
+
+	if (type === 'server_links') {
+		const links = ['Server link 1', 'Server link 2', 'Server link 3']
+		return <ColumnsGrid columns={dialog.columns ?? 2}>
+			{links.map((text: string) => {
+				return <Button label={text} width={dialog.button_width ?? 150} />
+			})}
+		</ColumnsGrid>
 	}
 
 	if (type === 'simple_input_form') {
@@ -150,7 +163,7 @@ function DialogFooter({ dialog }: { dialog: any }) {
 
 	if (type === 'notice') {
 		return <div style={`display: flex; gap: ${px(8)}; justify-content: center;`}>
-			<Button label={dialog.action?.label} width={dialog.action?.width ?? 150} />
+			<Button label={dialog.action?.label ?? {translate: 'gui.ok'}} width={dialog.action?.width ?? 150} />
 		</div>
 	}
 
@@ -206,7 +219,7 @@ function InputControl({ input }: { input: any }) {
 
 	if (type === 'number_range') {
 		// TODO: use label_format
-		const label = {translate: 'options.generic_value', with: [input.label, input.start ?? 0]}
+		const label = {translate: 'options.generic_value', with: [input.label ?? '', input.start ?? 0]}
 		return <div class="dialog-slider" style={`width: ${px(input.width ?? 200)}; height: ${px(20)};`}>
 			<div class="dialog-slider-track"></div>
 			<div class="dialog-slider-handle"></div>
