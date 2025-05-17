@@ -1876,6 +1876,116 @@ hr {
 	content: '\200b';
 }
 
+.dialog-preview {
+	cursor: default;
+}
+
+.dialog-preview * {
+	flex-shrink: 0;
+}
+
+.dialog-preview .text-component {
+	font-size: calc(var(--dialog-px) * 12);
+}
+
+.dialog-preview .text-component > .text-foreground {
+	left: calc(var(--dialog-px) * -1.2);
+	top: calc(var(--dialog-px) * -1.2);
+}
+
+.dialog-button,
+.dialog-edit-box,
+.dialog-checkbox,
+.dialog-slider-track,
+.dialog-slider-handle {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+.dialog-warning-button {
+	flex-shrink: 0;
+	background-image: url(/images/dialog/warning_button.png);
+	background-size: contain;
+}
+
+.dialog-warning-button:hover {
+	background-image: url(/images/dialog/warning_button_highlighted.png);
+}
+
+.dialog-button {
+	border: solid calc(var(--dialog-px)*2) #000;
+	border-bottom-width: calc(var(--dialog-px)*3);
+	border-image-source: url(/images/dialog/button.png);
+	border-image-slice: 2 2 3 2 fill;
+	border-image-repeat: repeat;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.dialog-button:hover {
+	border-image-source: url(/images/dialog/button_highlighted.png);
+}
+
+.dialog-edit-box {
+	border: solid calc(var(--dialog-px) * 1) #000;
+	border-image-source: url(/images/dialog/text_field.png);
+	border-image-slice: 1 fill;
+	border-image-repeat: repeat;
+	display: flex;
+	align-items: center;
+	padding-left: calc(var(--dialog-px) * 4);
+}
+
+.dialog-checkbox {
+	background-image: url(/images/dialog/checkbox.png);
+	background-size: contain;
+}
+
+.dialog-checkbox.dialog-selected {
+	background-image: url(/images/dialog/checkbox_selected.png);
+}
+
+.dialog-slider {
+	position: relative;
+}
+
+.dialog-slider-track {
+	border: solid calc(var(--dialog-px) * 1) #000;
+	border-image-source: url(/images/dialog/slider.png);
+	border-image-slice: 1 fill;
+	border-image-repeat: repeat;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.dialog-slider-handle {
+	background-image: url(/images/dialog/slider_handle.png);
+	background-size: contain;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: calc(var(--dialog-px) * 8);
+	height: 100%;
+}
+
+.dialog-slider-text {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .project-files {
 	background-color: var(--background-2);
 	color: var(--text-2);
