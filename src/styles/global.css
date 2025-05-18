@@ -1883,8 +1883,9 @@ hr {
 
 .dialog-preview .text-component {
 	font-size: calc(var(--dialog-px) * 10);
-	white-space: pre-wrap;
 	text-align: center;
+	white-space: pre-wrap;
+	word-break: break-word;
 }
 
 .dialog-preview .text-component span {
