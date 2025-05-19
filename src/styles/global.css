@@ -242,7 +242,8 @@ nav li .btn svg {
 .fancy-menu-results > * svg {
 	width: 16px;
 	height: 16px;
-	fill: var(--nav);
+	color: var(--nav);
+	fill: currentColor;
 	margin-left: 8px;
 	margin-right: 6px;
 	transition: margin 0.2s;
