@@ -1884,9 +1884,12 @@ hr {
 
 .dialog-preview .text-component {
 	font-size: calc(var(--dialog-px) * 10);
-	text-align: center;
 	white-space: pre-wrap;
 	word-break: break-word;
+}
+
+.dialog-body {
+	text-align: center;
 }
 
 .dialog-preview .text-component span {
@@ -1972,9 +1975,10 @@ hr {
 	background-size: contain;
 	position: absolute;
 	top: 0;
-	left: 0;
+	left: 50%;
 	width: calc(var(--dialog-px) * 8);
 	height: 100%;
+	transform: translateX(-50%);
 }
 
 .dialog-slider-text {

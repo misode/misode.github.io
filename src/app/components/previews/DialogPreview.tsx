@@ -1,7 +1,7 @@
 import { Identifier, ItemStack } from 'deepslate'
 import type { ComponentChild, ComponentChildren } from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { safeJsonParse } from '../../Utils.js'
+import { clamp, safeJsonParse } from '../../Utils.js'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { TextComponent } from '../TextComponent.jsx'
 import type { PreviewProps } from './index.js'
@@ -62,22 +62,20 @@ function DialogBody({ body }: { body: any }) {
 		{body?.map((b: any) => {
 			const type = b.type?.replace(/^minecraft:/, '')
 			if (type === 'plain_message') {
-				// TODO: make this text wrap
-				return <div style={`max-width: ${px(b.width ?? 200)}; padding: ${px(4)}`}>
+				return <div class="dialog-body" style={`max-width: ${px(clamp(b.width ?? 200, 1, 1024))}; padding: ${px(4)}`}>
 					<TextComponent component={b.contents} />
 				</div>
 			}
 			if (type == 'item') {
 				// TODO: add item components
 				const item = new ItemStack(Identifier.parse(b.item?.id ?? 'air'), b.show_decorations ? (b.item?.count ?? 1) : 1)
-				console.log(item)
 				return <div style={`display: flex; gap: ${px(2)}; align-items: center; gap: ${px(4)}`}>
-					<div style={`width: ${px(b.width ?? 16)}; height: ${px(b.height ?? 16)}`}>
+					<div style={`width: ${px(clamp(b.width ?? 16, 1, 256))}; height: ${px(clamp(b.height ?? 16, 1, 256))}`}>
 						<div style={`width: ${px(16)}; height: ${px(16)}`}>
 							<ItemDisplay item={item} tooltip={b.show_tooltip ?? true} />
 						</div>
 					</div>
-					{b.description && <div style={`max-width: ${px(b.description.width ?? 200)};`}>
+					{b.description && <div style={`max-width: ${px(clamp(b.description.width ?? 200, 1, 1024))};`}>
 						<TextComponent component={b.description.contents} />
 					</div>}
 				</div>
@@ -121,7 +119,7 @@ function DialogContent({ dialog }: { dialog: any }) {
 	if (type === 'multi_action_input_form') {
 		return <>
 			{dialog.inputs?.map((i: any) => <InputControl input={i} />)}
-			<ColumnsGrid columns={2}>
+			<ColumnsGrid columns={dialog.columns ?? 2}>
 				{dialog.actions?.map((a: any) =>
 					<Button label={a.label} width={a.width ?? 150} tooltip={a.tooltip} />
 				) ?? []}
@@ -186,6 +184,7 @@ function DialogFooter({ dialog }: { dialog: any }) {
 
 function InputControl({ input }: { input: any }) {
 	const type = input.type?.replace(/^minecraft:/, '')
+	// TODO: make interactive
 
 	if (type === 'boolean') {
 		return <div style={`display: flex; gap: ${px(4)}; align-items: center;`}>
@@ -195,8 +194,9 @@ function InputControl({ input }: { input: any }) {
 	}
 
 	if (type === 'number_range') {
-		const label = {translate: input.label_format ?? 'options.generic_value', with: [input.label ?? '', input.start ?? 0]}
-		return <div class="dialog-slider" style={`width: ${px(input.width ?? 200)}; height: ${px(20)};`}>
+		const initial = input.initial ?? (((input.start ?? 0) + (input.end ?? 0)) / 2)
+		const label = {translate: input.label_format ?? 'options.generic_value', with: [input.label ?? '', initial]}
+		return <div class="dialog-slider" style={`width: ${px(clamp(input.width ?? 200, 1, 1024))}; height: ${px(20)};`}>
 			<div class="dialog-slider-track"></div>
 			<div class="dialog-slider-handle"></div>
 			<div class="dialog-slider-text">
@@ -209,13 +209,18 @@ function InputControl({ input }: { input: any }) {
 		const initial = input.options?.find((o: any) => o.initial) ?? input.options?.[0]
 		const initialLabel = typeof initial === 'string' ? initial : initial?.display ?? initial?.id ?? ''
 		const label = input.label_visible === false ? initialLabel : {translate: 'options.generic_value', with: [input.label ?? '', initialLabel]}
-		return <Button label={label} width={input.width ?? 200} />
+		return <Button label={label} width={clamp(input.width ?? 200, 1, 1024)} />
 	}
 
 	if (type === 'text') {
+		const height = input.multiline
+			?	(input.multiline.height
+				? clamp(input.multiline.height, 1, 512)
+				: (9 * Math.max(input.multiline.max_lines ?? 4, 1) + 8))
+			: 20
 		return <div style={`display: flex; flex-direction: column; gap: ${px(4)};`}>
 			{input.label_visible !== false && <TextComponent component={input.label} />}
-			<div class="dialog-edit-box" style={`width: ${px(input.width ?? 200)}; height: ${px(20)};`}>
+			<div class="dialog-edit-box" style={`width: ${px(clamp(input.width ?? 200, 1, 1024))}; height: ${px(height)};`}>
 				{input.initial && <TextComponent component={input.initial} />}
 			</div>
 		</div>
@@ -233,7 +238,7 @@ function ColumnsGrid({ columns, children }: ColumnsGridProps) {
 	const gridCount = Math.floor(totalCount / columns) * columns
 	return <div style={`padding-top: ${px(4)}; display: grid; grid-template-columns: repeat(${columns}, minmax(0, 1fr)); gap: ${px(2)}; justify-content: center;`}>
 		{children.slice(0, gridCount)}
-		{totalCount > gridCount && <div style={`grid-column: span ${columns}; display: flex; gap: ${px(2)}; justify-content: center; padding-top: ${px(2)} /* MC-297977 */;`}>
+		{totalCount > gridCount && <div style={`grid-column: span ${columns}; display: flex; gap: ${px(2)}; justify-content: center;`}>
 			{children.slice(gridCount)}
 		</div>}
 	</div>
@@ -246,7 +251,7 @@ interface ButtonProps {
 }
 function Button({ label, width, tooltip }: ButtonProps) {
 	return <WithTooltip tooltip={tooltip}>
-		<div class="dialog-button" style={`width: ${px(width)}; height: ${px(20)};`}>
+		<div class="dialog-button" style={`width: ${px(clamp(width, 1, 1024))}; height: ${px(20)};`}>
 			<TextComponent component={label} oneline />
 		</div>
 	</WithTooltip>
