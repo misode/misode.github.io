@@ -74,6 +74,11 @@
       "code": "zh-tw",
       "name": "正體中文",
       "mc": "zh_hk"
+    },
+    {
+      "code": "vi",
+      "name": "Tiếng Việt",
+      "mc": "vi_vn"
     }
   ],
   "versions": [
