@@ -20,6 +20,7 @@ export interface ConfigGenerator {
 	id: string,
 	url: string,
 	path?: string,
+	ext?: string,
 	noPath?: boolean,
 	tags?: string[],
 	aliases?: string[],

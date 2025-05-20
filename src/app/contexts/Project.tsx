@@ -95,7 +95,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 						const { namespace, path } = Identifier.parse(file.id)
 						const uri = type === 'pack_mcmeta'
 							?	`${projectRoot}data/pack.mcmeta`
-							: `${projectRoot}data/${namespace}/${type}/${path}.json`
+							: `${projectRoot}data/${namespace}/${type}/${path}${gen.ext ?? '.json'}`
 						return SpyglassClient.FS.writeFile(uri, JSON.stringify(file.data, null, 2))
 					}))
 				}

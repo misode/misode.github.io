@@ -627,6 +627,14 @@
       "wiki": "https://minecraft.wiki/w/Model#Item_models"
     },
     {
+      "id": "texture_meta",
+      "url": "assets/texture-meta",
+      "path": "textures",
+      "ext": ".png.mcmeta",
+      "tags": ["assets"],
+      "wiki": "https://minecraft.wiki/w/Resource_pack#Texture_animation"
+    },
+    {
       "id": "equipment",
       "url": "assets/equipment",
       "path": "equipment",
