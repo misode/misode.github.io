@@ -801,6 +801,13 @@
       "dependency": "sky_aesthetics",
       "minVersion": "1.21.1",
       "wiki": "https://github.com/TathanDev/SkyAesthetics/wiki/Custom-Sky"
+    },
+    {
+      "id": "create:recipes",
+      "url": "create/recipes",
+      "path": "create",
+      "tags": ["partners"],
+      "dependency": "create"
     }
   ],
   "legacyGuides": [
