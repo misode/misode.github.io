@@ -25,19 +25,10 @@ struct NBT {
 	Potion?: string,
 }
 
-struct Item {
-	item?: string,
-	tag?: string,
-	fluid?: string,
-	fluidTag?: string,
-	amount?: int,
-	nbt?: NBT
-}
-
 dispatch create:recipes[create:crushing] to struct {
 	processingTime: int @ 1..,
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
@@ -50,7 +41,7 @@ dispatch create:recipes[create:crushing] to struct {
 dispatch create:recipes[create:cutting] to struct {
 	processingTime: int @ 1..,
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 		count?: int @ 1..,
 	}] @ 1,
@@ -63,7 +54,7 @@ dispatch create:recipes[create:cutting] to struct {
 dispatch create:recipes[create:deploying] to struct {
 	/// The first object is the base item and the second object is the ingredient
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string
 	}] @ 2,
 	keepHeldItem?: boolean,
@@ -74,24 +65,25 @@ dispatch create:recipes[create:deploying] to struct {
 
 dispatch create:recipes[create:emptying] to struct {
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
-		item?: string,
-		fluid?: string,
-		amount?: int @ 1..,
+		item: string,
+		count?: int @ 1..,
+	}, struct {
+		fluid: string,
+		amount: int @ 1..,
 	}],
 }
 
 dispatch create:recipes[create:filling] to struct {
-	/// The first object is the base and the second object is the fluid
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}, struct {
 		amount: int @ 1..,
-		fluid?: string,
+		fluid?: string, // Make the user select only one
 		fluidTag?: string,
 		nbt: NBT,
 	}],
@@ -100,7 +92,7 @@ dispatch create:recipes[create:filling] to struct {
 
 dispatch create:recipes[create:haunting] to struct {
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
@@ -113,7 +105,7 @@ dispatch create:recipes[create:haunting] to struct {
 dispatch create:recipes[create:item_application] to struct {
 	/// The first object is the base item and the second object is the ingredient
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string
 	}] @ 2,
 	results: [struct {
@@ -121,12 +113,26 @@ dispatch create:recipes[create:item_application] to struct {
 	}] @ 1,
 }
 
-dispatch create:recipes[create:mechanical_crafting] to MechanicalCrafting<string, string>
+dispatch create:recipes[create:mechanical_crafting] to struct {
+	acceptMirrored?: boolean,
+	/// Warning: JEI will not display recipes greater in size than 9x9
+	pattern: [string],
+	key: struct {
+		[string]: struct {
+			item?: string, // Make the user select only one
+			tag?: string,
+		}
+	},
+	result: struct {
+		count?: int @ 1..,
+		item: string,
+	},
+}
 
 dispatch create:recipes[create:milling] to struct {
 	processingTime: int @ 1..,
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
@@ -138,35 +144,49 @@ dispatch create:recipes[create:milling] to struct {
 
 dispatch create:recipes[create:mixing] to struct {
 	heatRequirement?: ("heated" | "superheated"),
-	ingredients: [Item],
-	results: [Item] @ 1,
+	ingredients: [struct {
+		count?: int @ 1..,
+		item?: string, // Make the user select only one
+		tag?: string,
+		fluid?: string,
+		fluidTag?: string,
+		amount?: int @ 1..,
+		nbt?: NBT,
+	}] @ 1..,
+	results: [struct {
+		count?: int @ 1..,
+		item?: string, // Make the user select only one
+		fluid?: string,
+		amount?: int @ 1..,
+		nbt?: NBT,
+	}] @ 1,
 }
 
 dispatch create:recipes[create:pressing] to struct {
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
-		item?: string,
-		tag?: string,
+		item: string,
+		count?: int @ 1..,
 	}] @ 1,
 }
 
 dispatch create:recipes[create:sandpaper_polishing] to struct {
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
-		item?: string,
-		tag?: string,
+		item: string,
+		count?: int @ 1..,
 	}] @ 1,
 }
 
 dispatch create:recipes[create:sequenced_assembly] to struct {
 	ingredient: struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	},
 	loops: int @ 1..,
@@ -175,7 +195,7 @@ dispatch create:recipes[create:sequenced_assembly] to struct {
 		count?: int @ 1..,
 		item: string,
 	}],
-	sequence: [Recipes],
+	sequence: [Recipes], // Remove the sequenced assembly recipe
 	transitionalItem: struct {
 		item: string,
 	},
@@ -183,7 +203,7 @@ dispatch create:recipes[create:sequenced_assembly] to struct {
 
 dispatch create:recipes[create:splashing] to struct {
 	ingredients: [struct {
-		item?: string,
+		item?: string, // Make the user select only one
 		tag?: string,
 	}] @ 1,
 	results: [struct {
@@ -191,16 +211,4 @@ dispatch create:recipes[create:splashing] to struct {
 		count?: int @ 1..,
 		item: string,
 	}] @ 1..,
-}
-
-type MechanicalCrafting<K, V> = struct {
-	acceptMirrored?: boolean,
-	pattern: [string],
-	key: struct {
-		[K]: (V)
-	},
-	result: struct {
-		count?: int @ 1..,
-		item: string,
-	},
 }
