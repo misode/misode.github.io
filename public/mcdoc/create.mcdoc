@@ -1,0 +1,200 @@
+dispatch minecraft:resource[create:recipes] to struct Recipes {
+	type: #[id] Type,
+	...create:recipes[[type]],
+}
+
+enum(string) Type {
+	Crushing = "create:crushing",
+	Cutting = "create:cutting",
+	Deploying = "create:deploying",
+	Emptying = "create:emptying",
+	Filling = "create:filling",
+	Haunting = "create:haunting",
+	ItemApplication = "create:item_application",
+	MechanicalCrafting = "create:mechanical_crafting",
+	Milling = "create:milling",
+	Mixing = "create:mixing",
+	Pressing = "create:pressing",
+	SandpaperPolishing = "create:sandpaper_polishing",
+	SequencedAssembly = "create:sequenced_assembly",
+	Splashing = "create:splashing",
+}
+
+struct NBT {
+	Bottle?: ("REGULAR" | "SPLASH" | "LINGERING"),
+	Potion?: string,
+}
+
+type ItemOrTag = (
+	struct {
+		item: string,
+	} | struct {
+		tag: string,
+	}
+)
+
+type FluidOrTag = (
+	struct {
+		fluid: string,
+		amount: int @ 1..,
+		nbt?: NBT,
+	} | struct {
+		fluidTag: string,
+		amount: int @ 1..,
+		nbt?: NBT,
+	}
+)
+
+dispatch create:recipes[create:crushing] to struct {
+	processingTime: int @ 1..,
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		chance?: float @ 0..,
+		count?: int @ 1..,
+		item: string,
+	}] @ 1..,
+}
+
+dispatch create:recipes[create:cutting] to struct {
+	processingTime: int @ 1..,
+	ingredients: [struct {
+		item?: string, // Make the user select only one
+		tag?: string,
+		count?: int @ 1..,
+	}] @ 1,
+	results: [struct {
+		item: string,
+		count?: int @ 1..,
+	}] @ 1,
+}
+
+dispatch create:recipes[create:deploying] to struct {
+	/// The first object is the base item and the second object is the ingredient
+	ingredients: [ItemOrTag] @ 2,
+	keepHeldItem?: boolean,
+	results: [struct {
+		item: string,
+	}] @ 1,
+}
+
+dispatch create:recipes[create:emptying] to struct {
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		item: string,
+		count?: int @ 1..,
+	}, struct {
+		fluid: string,
+		amount: int @ 1..,
+	}],
+}
+
+dispatch create:recipes[create:filling] to struct {
+	ingredients: [ItemOrTag, FluidOrTag],
+	results: [struct { item: string }] @ 1,
+}
+
+dispatch create:recipes[create:haunting] to struct {
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		chance?: float @ 0..,
+		count?: int @ 1..,
+		item: string,
+	}] @ 1..,
+}
+
+dispatch create:recipes[create:item_application] to struct {
+	/// The first object is the base item and the second object is the ingredient
+	ingredients: [ItemOrTag] @ 2,
+	results: [struct {
+		item: string,
+	}] @ 1,
+}
+
+dispatch create:recipes[create:mechanical_crafting] to struct {
+	acceptMirrored?: boolean,
+	/// Warning: JEI will not display recipes greater in size than 9x9
+	pattern: [string],
+	key: struct {
+		[string]: ItemOrTag,
+	},
+	result: struct {
+		count?: int @ 1..,
+		item: string,
+	},
+}
+
+dispatch create:recipes[create:milling] to struct {
+	processingTime: int @ 1..,
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		chance?: float @ 0..,
+		count?: int @ 1..,
+		item: string,
+	}] @ 1..,
+}
+
+dispatch create:recipes[create:mixing] to struct {
+	heatRequirement?: ("heated" | "superheated"),
+	ingredients: [(struct {
+		count: int @ 1..,
+		item: string,
+	} | struct {
+		count: int @ 1..,
+		tag: string,
+	} | struct {
+		fluid: string,
+		amount: int @ 1..,
+		nbt?: NBT,
+	} | struct {
+		fluidTag: string,
+		amount: int @ 1..,
+		nbt?: NBT,
+	})] @ 1..,
+	results: [(struct {
+		count: int @ 1..,
+		item: string,
+	} | struct {
+		fluid: string,
+		amount: int @ 1..,
+		nbt?: NBT,
+	})] @ 1,
+}
+
+dispatch create:recipes[create:pressing] to struct {
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		item: string,
+		count?: int @ 1..,
+	}] @ 1,
+}
+
+dispatch create:recipes[create:sandpaper_polishing] to struct {
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		item: string,
+		count?: int @ 1..,
+	}] @ 1,
+}
+
+dispatch create:recipes[create:sequenced_assembly] to struct {
+	ingredient: ItemOrTag,
+	loops: int @ 1..,
+	results: [struct {
+		chance?: float @ 0..,
+		count?: int @ 1..,
+		item: string,
+	}],
+	sequence: [Recipes],
+	transitionalItem: struct {
+		item: string,
+	},
+}
+
+dispatch create:recipes[create:splashing] to struct {
+	ingredients: [ItemOrTag] @ 1,
+	results: [struct {
+		chance?: float @ 0..,
+		count?: int @ 1..,
+		item: string,
+	}] @ 1..,
+}
