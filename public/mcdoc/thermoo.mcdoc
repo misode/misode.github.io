@@ -21,8 +21,13 @@ enum(string) Type {
 	Modify = "thermoo:modify",
 }
 
+enum(string) EnvironmentComponentType {
+	Temperature = "thermoo:temperature",
+	RelativeHumidity = "thermoo:relative_humidity"
+}
+
 struct EnvironmentComponentMap {
-	[#[id="thermoo:environment_component_type"] string]: thermoo:environment_component[[%key]],
+	[EnvironmentComponentType]: thermoo:environment_component[[%key]],
 }
 
 enum(string) TemperatureUnit {
