@@ -3,6 +3,11 @@ dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentP
 	...thermoo:environment_provider_type[[type]],
 }
 
+type EnvironmentProviderOrReference = (
+	#[id="thermoo:environment_provider"] string |
+	EnvironmentProvider
+)
+
 enum(string) Type {
 	Constant = "thermoo:constant",
 	TemperateSeasonal = "thermoo:seasonal/temperate",
@@ -41,15 +46,15 @@ dispatch thermoo:environment_provider_type[thermoo:constant] to struct {
 }
 
 struct TemperateSeasonsMap {
-	spring?: EnvironmentProvider,
-	summer?: EnvironmentProvider,
-	autumn?: EnvironmentProvider,
-	winter?: EnvironmentProvider,
+	spring?: EnvironmentProviderOrReference,
+	summer?: EnvironmentProviderOrReference,
+	autumn?: EnvironmentProviderOrReference,
+	winter?: EnvironmentProviderOrReference,
 }
 
 struct TropicalSeasonsMap {
-	wet?: EnvironmentProvider,
-	dry?: EnvironmentProvider,
+	wet?: EnvironmentProviderOrReference,
+	dry?: EnvironmentProviderOrReference,
 }
 
 /// seasons must contain at least one entry, and fallback_season, if specified, must be a key of seasons, but I'm not sure if these requirements can be 
@@ -62,4 +67,12 @@ dispatch thermoo:environment_provider_type[thermoo:seasonal/temperate] to struct
 dispatch thermoo:environment_provider_type[thermoo:seasonal/tropical] to struct { 
 	seasons: TemperateSeasonsMap,
 	fallback_season?: ("wet" | "dry"),
+}
+
+dispatch thermoo:environment_provider_type[thermoo:light_threshold] to struct {
+	light_type?: ("block" | "sky"),
+	apply_ambient_darkness?: boolean,
+	threshold: int @ 0..15,
+	above: EnvironmentProviderOrReference,
+	below: EnvironmentProviderOrReference
 }
