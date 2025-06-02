@@ -42,13 +42,13 @@ dispatch thermoo:environment_component[thermoo:temperature] to TemperatureRecord
 
 dispatch thermoo:environment_component[thermoo:relative_humidity] to double
 
-/// unsure how to make this autocomplete properly
+// unsure how to make this autocomplete properly
 dispatch thermoo:environment_provider_type[thermoo:constant] to struct {
 	components: EnvironmentComponentMap,
 }
 
-/// seasons must contain at least one entry, and fallback_season, if specified, must be a key of seasons, but I'm not sure if these requirements can be 
-/// enforced here
+// seasons must contain at least one entry, and fallback_season, if specified, must be a key of seasons, but I'm not sure if these requirements can be 
+// enforced here
 dispatch thermoo:environment_provider_type[thermoo:seasonal/temperate] to struct {
 	seasons: struct {
 		wet?: EnvironmentProviderOrReference,
@@ -84,9 +84,20 @@ dispatch thermoo:environment_provider_type[thermoo:weather_state] to struct {
 
 dispatch thermoo:environment_provider_type[thermoo:precipitation_type] to struct {
 	precipitation_type: struct {
-		/// at least one of these must be set
+		// at least one of these must be set
 		none?: EnvironmentProviderOrReference,
 		rain?: EnvironmentProviderOrReference,
 		snow?: EnvironmentProviderOrReference,
 	}
+}
+
+dispatch thermoo:environment_provider_type[thermoo:temperature_shift] to struct {
+	shift: TemperatureRecord
+}
+
+dispatch thermoo:environment_provider_type[thermoo:modify] to struct {
+	modifiers: (
+		[#[id(registry="thermoo:environment_provider")] string] @ 1.. |
+		#[id(registry="thermoo:environment_provider",tags="allowed")] string |
+	)
 }
