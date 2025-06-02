@@ -1,0 +1,15 @@
+dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentProvider {
+	type: #[id] Type,
+	...thermoo:environment_provider[[type]],
+}
+
+enum(string) Type {
+	Constant = "thermoo:constant",
+	TemperateSeasonal = "thermoo:seasonal/temperate",
+	TropicalSeasonal = "thermoo:seasonal/tropical",
+	LightThreshold = "thermoo:light_threshold",
+	WeatherState = "thermoo:weather_state",
+	PrecipitationType = "thermoo:precipitation_type",
+	TemperatureShift = "thermoo:temperature_shift",
+	Modify = "thermoo:modify"
+}

@@ -808,6 +808,15 @@
       "path": "create",
       "tags": ["partners"],
       "dependency": "create"
+    },
+    {
+      "id": "thermoo:environment_provider",
+      "url": "thermoo/environment_provider",
+      "path": "thermoo/environment_provider",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_provider_definition/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
