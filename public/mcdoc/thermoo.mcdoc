@@ -31,10 +31,10 @@ struct EnvironmentComponentMap {
 }
 
 enum(string) TemperatureUnit {
-	Celsius = "Celsius",
-	Kelvin = "Kelvin",
-	Fahrenheit = "Fahrenheit",
-	Rankine = "Rankine",
+	Celsius = "celsius",
+	Kelvin = "kelvin",
+	Fahrenheit = "fahrenheit",
+	Rankine = "rankine",
 }
 
 type TemperatureRecord = (
@@ -84,7 +84,6 @@ dispatch thermoo:environment_provider_type[thermoo:weather_state] to struct {
 	rain?: EnvironmentProviderOrReference,
 	thunder?: EnvironmentProviderOrReference,
 }
-
 
 dispatch thermoo:environment_provider_type[thermoo:precipitation_type] to struct {
 	precipitation_type: struct {
