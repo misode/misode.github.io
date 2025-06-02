@@ -269,5 +269,9 @@
     "mode.3d": "3D",
     "mode.side": "Lado",
     "mode.top": "Topo",
-    "project.show_file_paths": "Mostrar caminho de arquivos"
+    "project.show_file_paths": "Mostrar caminho de arquivos",
+    "contributor.report": "Relatador de erros",
+    "sounds.loading_sound": "Carregando sons",
+    "sounds.volume": "Volume",
+    "switch_version": "Mudar versão"
 }
