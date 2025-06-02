@@ -23,16 +23,6 @@ struct EnvironmentComponentMap {
 	[#[id="thermoo:environment_component_type"] string]: thermoo:environment_component[[%key]],
 }
 
-dispatch thermoo:environment_component[thermoo:temperature] to (
-	double |
-	struct TemperatureRecord {
-		value: double,
-		unit: TemperatureUnit,
-	}
-)
-
-dispatch thermoo:environment_component[thermoo:relative_humidity] to double
-
 enum(string) TemperatureUnit {
 	Celsius = "Celsius",
 	Kelvin = "Kelvin",
@@ -40,32 +30,40 @@ enum(string) TemperatureUnit {
 	Rankine = "Rankine",
 }
 
+type TemperatureRecord = (
+	double |
+	struct {
+		value: double,
+		unit: TemperatureUnit,
+	}
+)
+
+dispatch thermoo:environment_component[thermoo:temperature] to TemperatureRecord
+
+dispatch thermoo:environment_component[thermoo:relative_humidity] to double
+
 /// unsure how to make this autocomplete properly
 dispatch thermoo:environment_provider_type[thermoo:constant] to struct {
 	components: EnvironmentComponentMap,
 }
 
-struct TemperateSeasonsMap {
-	spring?: EnvironmentProviderOrReference,
-	summer?: EnvironmentProviderOrReference,
-	autumn?: EnvironmentProviderOrReference,
-	winter?: EnvironmentProviderOrReference,
-}
-
-struct TropicalSeasonsMap {
-	wet?: EnvironmentProviderOrReference,
-	dry?: EnvironmentProviderOrReference,
-}
-
 /// seasons must contain at least one entry, and fallback_season, if specified, must be a key of seasons, but I'm not sure if these requirements can be 
 /// enforced here
 dispatch thermoo:environment_provider_type[thermoo:seasonal/temperate] to struct {
-	seasons: TemperateSeasonsMap,
+	seasons: struct {
+		wet?: EnvironmentProviderOrReference,
+		dry?: EnvironmentProviderOrReference,
+	},
 	fallback_season?: ("spring" | "summer" | "autumn" | "winter"),
 }
 
 dispatch thermoo:environment_provider_type[thermoo:seasonal/tropical] to struct { 
-	seasons: TemperateSeasonsMap,
+	seasons: struct {
+		spring?: EnvironmentProviderOrReference,
+		summer?: EnvironmentProviderOrReference,
+		autumn?: EnvironmentProviderOrReference,
+		winter?: EnvironmentProviderOrReference,
+	},
 	fallback_season?: ("wet" | "dry"),
 }
 
@@ -74,5 +72,21 @@ dispatch thermoo:environment_provider_type[thermoo:light_threshold] to struct {
 	apply_ambient_darkness?: boolean,
 	threshold: int @ 0..15,
 	above: EnvironmentProviderOrReference,
-	below: EnvironmentProviderOrReference
+	below: EnvironmentProviderOrReference,
+}
+
+dispatch thermoo:environment_provider_type[thermoo:weather_state] to struct {
+	clear?: EnvironmentProviderOrReference,
+	rain?: EnvironmentProviderOrReference,
+	thunder?: EnvironmentProviderOrReference,
+}
+
+
+dispatch thermoo:environment_provider_type[thermoo:precipitation_type] to struct {
+	precipitation_type: struct {
+		/// at least one of these must be set
+		none?: EnvironmentProviderOrReference,
+		rain?: EnvironmentProviderOrReference,
+		snow?: EnvironmentProviderOrReference,
+	}
 }
