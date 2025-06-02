@@ -336,5 +336,6 @@
     "partner.sky_aesthetics": "Sky Aesthetics",
     "generator.fabric:fabric_mod_json": "fabric.mod.json",
     "generator.sky_aesthetics:sky": "Ciel personnalisé",
-    "partner.fabric": "Fabric"
+    "partner.fabric": "Fabric",
+    "generator.dialog": "Dialogue"
 }
