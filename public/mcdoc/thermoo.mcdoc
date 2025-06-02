@@ -1,6 +1,6 @@
 dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentProvider {
 	type: #[id] Type,
-	...thermoo:environment_provider[[type]],
+	...thermoo:environment_provider_type[[type]],
 }
 
 enum(string) Type {
@@ -11,5 +11,30 @@ enum(string) Type {
 	WeatherState = "thermoo:weather_state",
 	PrecipitationType = "thermoo:precipitation_type",
 	TemperatureShift = "thermoo:temperature_shift",
-	Modify = "thermoo:modify"
+	Modify = "thermoo:modify",
+}
+
+struct EnvironmentComponentMap {
+	[#[id="thermoo:environment_component_type"] string]: thermoo:environment_component[[%key]],
+}
+
+dispatch thermoo:environment_component[thermoo:temperature] to (
+	double |
+	struct TemperatureRecord {
+		value: double,
+		unit: TemperatureUnit,
+	}
+)
+
+dispatch thermoo:environment_component[thermoo:relative_humidity] to double
+
+enum(string) TemperatureUnit {
+	Celsius = "Celsius",
+	Kelvin = "Kelvin",
+	Fahrenheit = "Fahrenheit",
+	Rankine = "Rankine",
+}
+
+dispatch thermoo:environment_provider_type[thermoo:constant] to struct {
+	components: EnvironmentComponentMap,
 }
