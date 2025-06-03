@@ -835,6 +835,15 @@
       "dependency": "thermoo",
       "wiki": "https://thermoo.thedeathlycow.com/datapacks/temperature_effect_definition/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:predicate",
+      "url": "thermoo/predicate",
+      "path": "thermoo/predicate",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/loot_condition/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [

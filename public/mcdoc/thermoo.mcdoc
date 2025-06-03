@@ -1,5 +1,6 @@
 use ::java::data::worldgen::biome::Precipitation
 use ::java::util::attribute::AttributeOperation
+use ::java::data::util::MinMaxBounds
 
 dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentProvider {
 	type: #[id] EnvironmentProviderType,
@@ -20,6 +21,11 @@ dispatch minecraft:resource[thermoo:temperature_effect] to struct TemperatureEff
 	config: struct {
 		...thermoo:temperature_effect_type[[%parent.type]]
 	}
+}
+
+dispatch minecraft:resource[thermoo:predicate] to struct ThermooPredicate {
+	condition: #[id] ThermooLootConditionType,
+	...thermoo:loot_condition_type[[condition]]
 }
 
 type EnvironmentProviderOrReference = (
@@ -46,6 +52,11 @@ enum(string) TemperatureEffectType {
 	Damage = "thermoo:damage",
 	Function = "thermoo:function",
 	Sequence = "thermoo:sequence",
+}
+
+enum(string) ThermooLootConditionType {
+	Temperature = "thermoo:temperature",
+	Soaked = "thermoo:soaked",
 }
 
 enum(string) EnvironmentComponentType {
@@ -191,4 +202,14 @@ dispatch thermoo:temperature_effect_type[thermoo:function] to struct {
 
 dispatch thermoo:temperature_effect_type[thermoo:sequence] to struct {
 	children: [TemperatureEffect]
+}
+
+dispatch thermoo:loot_condition_type[thermoo:temperature] to struct {
+	value?: MinMaxBounds<int>,
+	scale?: MinMaxBounds<double>,
+}
+
+dispatch thermoo:loot_condition_type[thermoo:soaked] to struct {
+	value?: MinMaxBounds<int>,
+	scale?: MinMaxBounds<double>,
 }
