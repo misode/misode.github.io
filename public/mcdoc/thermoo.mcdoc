@@ -1,4 +1,5 @@
 use ::java::data::worldgen::biome::Precipitation
+use ::java::util::attribute::AttributeOperation
 
 dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentProvider {
 	type: #[id] EnvironmentProviderType,
@@ -40,6 +41,11 @@ enum(string) EnvironmentProviderType {
 enum(string) TemperatureEffectType {
 	Empty = "thermoo:empty",
 	StatusEffect = "thermoo:status_effect",
+	AttributeModifier = "thermoo:attribute_modifier",
+	ScalingAttributeModifier = "thermoo:scaling_attribute_modifier",
+	Damage = "thermoo:damage",
+	Function = "thermoo:function",
+	Sequence = "thermoo:sequence",
 }
 
 enum(string) EnvironmentComponentType {
@@ -87,21 +93,26 @@ enum(string) TropicalSeason {
 }
 
 dispatch thermoo:environment_provider_type[thermoo:seasonal/temperate] to struct {
+	/// Must contain at least one entry.
 	seasons: struct {
 		[TemperateSeason]: EnvironmentProviderOrReference
 	},
+	/// If specified, the `fallback_season` must be a member of the `seasons` field.
 	fallback_season?: TemperateSeason,
 }
 
 dispatch thermoo:environment_provider_type[thermoo:seasonal/tropical] to struct { 
+	/// Must contain at least one entry.
 	seasons: struct {
 		[TropicalSeason]: EnvironmentProviderOrReference
 	},
+	/// If specified, the `fallback_season` must be a member of the `seasons` field.
 	fallback_season?: TropicalSeason,
 }
 
 dispatch thermoo:environment_provider_type[thermoo:light_threshold] to struct {
 	light_type?: ("block" | "sky"),
+	/// Only applies if `light_type` is `sky`.
 	apply_ambient_darkness?: boolean,
 	threshold: int @ 0..15,
 	above: EnvironmentProviderOrReference,
@@ -137,10 +148,47 @@ dispatch thermoo:temperature_effect_type[thermoo:empty] to struct {
 
 struct StatusEffectEntry {
 	type: #[id="mob_effect"] string,
-	duration: int @ 1..,
+	duration?: int @ 1..,
 	amplifier: int @ 0..
 }
 
 dispatch thermoo:temperature_effect_type[thermoo:status_effect] to struct {
 	effects: [StatusEffectEntry]
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:attribute_modifier] to struct {
+	value: float,
+	attribute_type: #[id="attribute"] string,
+	/// Used when equipping and unequipping the item to identify which modifier to add or remove from the entity.
+	id: #[id="attribute_modifier"] string,
+	operation: AttributeOperation
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:scaling_attribute_modifier] to struct {
+	/// Default value of `1.0`.
+	scale?: float,
+	attribute_type: #[id="attribute"] string,
+	/// Used when equipping and unequipping the item to identify which modifier to add or remove from the entity.
+	id: #[id="attribute_modifier"] string,
+	operation: AttributeOperation
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:damage] to struct {
+	amount: float @ 0<..,
+	damage_interval: int @ 1..,
+	damage_type: #[id="damage_type"] string,
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:function] to struct {
+	function: #[id="function"] string,
+	/// Interpreted as an SNBT string. Required if and only if the specified `function` is a macro function.
+	arguments?: string,
+	/// Defaults to `20`.
+	interval?: int @ 1..,
+	/// Defaults to `2`.
+	permission_level?: int @ 0..4,
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:sequence] to struct {
+	children: [TemperatureEffect]
 }
