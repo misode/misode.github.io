@@ -14,6 +14,13 @@ dispatch minecraft:resource[thermoo:environment] to struct Environment {
 	priority?: int
 }
 
+dispatch minecraft:resource[thermoo:temperature_effect] to struct TemperatureEffect {
+	type: #[id] TemperatureEffectType,
+	config: struct {
+		...thermoo:temperature_effect_type[[%parent.type]]
+	}
+}
+
 type EnvironmentProviderOrReference = (
 	#[id="thermoo:environment_provider"] string |
 	EnvironmentProvider
@@ -28,6 +35,11 @@ enum(string) EnvironmentProviderType {
 	PrecipitationType = "thermoo:precipitation_type",
 	TemperatureShift = "thermoo:temperature_shift",
 	Modify = "thermoo:modify",
+}
+
+enum(string) TemperatureEffectType {
+	Empty = "thermoo:empty",
+	StatusEffect = "thermoo:status_effect",
 }
 
 enum(string) EnvironmentComponentType {
@@ -117,4 +129,18 @@ dispatch thermoo:environment_provider_type[thermoo:modify] to struct {
 		[#[id(registry="thermoo:environment_provider")] string] @ 1.. |
 		#[id(registry="thermoo:environment_provider",tags="allowed")] string |
 	)
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:empty] to struct {
+
+}
+
+struct StatusEffectEntry {
+	type: #[id="mob_effect"] string,
+	duration: int @ 1..,
+	amplifier: int @ 0..
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:status_effect] to struct {
+	effects: [StatusEffectEntry]
 }

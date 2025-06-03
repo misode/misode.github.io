@@ -826,6 +826,15 @@
       "dependency": "thermoo",
       "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_definition/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:temperature_effect",
+      "url": "thermoo/temperature_effect",
+      "path": "thermoo/temperature_effect",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/temperature_effect_definition/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [

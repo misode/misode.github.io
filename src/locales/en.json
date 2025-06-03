@@ -134,6 +134,7 @@
   "generator.text_component": "Text Component",
   "generator.thermoo:environment_provider": "Environment Provider",
   "generator.thermoo:environment": "Environment",
+  "generator.thermoo:temperature_effect": "Temperature Effect",
   "generator.trial_spawner": "Trial Spawner",
   "generator.trim_material": "Trim Material",
   "generator.trim_pattern": "Trim Pattern",
