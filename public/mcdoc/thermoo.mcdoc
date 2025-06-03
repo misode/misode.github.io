@@ -13,6 +13,7 @@ dispatch minecraft:resource[thermoo:environment] to struct Environment {
 	biomes: BiomeHolderList,
 	exclude_biomes?: BiomeHolderList,
 	provider: EnvironmentProviderOrReference,
+	/// Defaults to `1000`. Higher priority environments will be applied first, lower priority environments are applied last.
 	priority?: int
 }
 
