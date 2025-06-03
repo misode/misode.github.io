@@ -53,6 +53,7 @@ enum(string) TemperatureEffectType {
 	Damage = "thermoo:damage",
 	Function = "thermoo:function",
 	Sequence = "thermoo:sequence",
+	FreezeDamageLegacy = "thermoo:freeze_damage_legacy",
 }
 
 enum(string) ThermooLootConditionType {
@@ -168,6 +169,7 @@ dispatch thermoo:temperature_effect_type[thermoo:status_effect] to struct {
 	effects: [StatusEffectEntry]
 }
 
+#[since="1.21"]
 dispatch thermoo:temperature_effect_type[thermoo:attribute_modifier] to struct {
 	value: float,
 	attribute_type: #[id="attribute"] string,
@@ -181,8 +183,17 @@ dispatch thermoo:temperature_effect_type[thermoo:scaling_attribute_modifier] to 
 	scale?: float,
 	attribute_type: #[id="attribute"] string,
 	/// Used when equipping and unequipping the item to identify which modifier to add or remove from the entity.
+	#[since="1.21"]
 	id: #[id="attribute_modifier"] string,
-	operation: AttributeOperation
+	operation: (
+		#[until="1.20.5"] ("addition" | "multiply_base" | "multiply_total") |
+		#[since="1.20.5"] AttributeOperation |
+	),
+
+	#[until="1.21"]
+	name: string,
+	#[until="1.21"]
+	modifier_uuid: #[uuid] string
 }
 
 dispatch thermoo:temperature_effect_type[thermoo:damage] to struct {
@@ -191,6 +202,13 @@ dispatch thermoo:temperature_effect_type[thermoo:damage] to struct {
 	damage_type: #[id="damage_type"] string,
 }
 
+#[until="1.20.2"]
+dispatch thermoo:temperature_effect_type[thermoo:freeze_damage_legacy] to struct {
+	amount: float @ 0<..,
+	damage_interval: int @ 1..,
+}
+
+#[since="1.21"]
 dispatch thermoo:temperature_effect_type[thermoo:function] to struct {
 	function: #[id="function"] string,
 	/// Interpreted as an SNBT string. Required if and only if the specified `function` is a macro function.
@@ -201,6 +219,7 @@ dispatch thermoo:temperature_effect_type[thermoo:function] to struct {
 	permission_level?: int @ 0..4,
 }
 
+#[since="1.21"]
 dispatch thermoo:temperature_effect_type[thermoo:sequence] to struct {
 	children: [TemperatureEffect]
 }
