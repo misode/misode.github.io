@@ -23,7 +23,7 @@ enum(string) Type {
 
 enum(string) EnvironmentComponentType {
 	Temperature = "thermoo:temperature",
-	RelativeHumidity = "thermoo:relative_humidity"
+	RelativeHumidity = "thermoo:relative_humidity",
 }
 
 struct EnvironmentComponentMap {
@@ -53,22 +53,30 @@ dispatch thermoo:environment_provider_type[thermoo:constant] to struct {
 	components: EnvironmentComponentMap,
 }
 
+enum(string) TemperateSeason {
+	Spring = "spring",
+	Summer = "summer",
+	Autumn = "autumn",
+	Winter = "winter",
+}
+
+enum(string) TropicalSeason {
+	Wet = "wet",
+	Dry = "dry",
+}
+
 dispatch thermoo:environment_provider_type[thermoo:seasonal/temperate] to struct {
 	seasons: struct {
-		wet?: EnvironmentProviderOrReference,
-		dry?: EnvironmentProviderOrReference,
+		[TemperateSeason]: EnvironmentProviderOrReference
 	},
-	fallback_season?: ("spring" | "summer" | "autumn" | "winter"),
+	fallback_season?: TemperateSeason,
 }
 
 dispatch thermoo:environment_provider_type[thermoo:seasonal/tropical] to struct { 
 	seasons: struct {
-		spring?: EnvironmentProviderOrReference,
-		summer?: EnvironmentProviderOrReference,
-		autumn?: EnvironmentProviderOrReference,
-		winter?: EnvironmentProviderOrReference,
+		[TropicalSeason]: EnvironmentProviderOrReference
 	},
-	fallback_season?: ("wet" | "dry"),
+	fallback_season?: TropicalSeason,
 }
 
 dispatch thermoo:environment_provider_type[thermoo:light_threshold] to struct {
