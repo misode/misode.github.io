@@ -1,8 +1,17 @@
 use ::java::data::worldgen::biome::Precipitation
 
 dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentProvider {
-	type: #[id] Type,
+	type: #[id] EnvironmentProviderType,
 	...thermoo:environment_provider_type[[type]],
+}
+
+type BiomeHolderList = (#[id(registry="worldgen/biome",tags="allowed")] string | [#[id="worldgen/biome"] string])
+
+dispatch minecraft:resource[thermoo:environment] to struct Environment {
+	biomes: BiomeHolderList,
+	exclude_biomes?: BiomeHolderList,
+	provider: EnvironmentProviderOrReference,
+	priority?: int
 }
 
 type EnvironmentProviderOrReference = (
@@ -10,7 +19,7 @@ type EnvironmentProviderOrReference = (
 	EnvironmentProvider
 )
 
-enum(string) Type {
+enum(string) EnvironmentProviderType {
 	Constant = "thermoo:constant",
 	TemperateSeasonal = "thermoo:seasonal/temperate",
 	TropicalSeasonal = "thermoo:seasonal/tropical",

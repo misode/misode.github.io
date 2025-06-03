@@ -817,6 +817,15 @@
       "dependency": "thermoo",
       "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_provider_definition/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:environment",
+      "url": "thermoo/environment",
+      "path": "thermoo/environment",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_definition/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
