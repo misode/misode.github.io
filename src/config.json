@@ -808,6 +808,13 @@
       "path": "create",
       "tags": ["partners"],
       "dependency": "create"
+    },
+    {
+      "id": "loot-table-modifier:loot_modifier",
+      "url": "loot-table-modifier/loot_modifier",
+      "path": "loot-table-modifier",
+      "tags": ["partners"],
+      "dependency": "loot-table-modifier"
     }
   ],
   "legacyGuides": [
