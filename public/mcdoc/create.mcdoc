@@ -57,11 +57,7 @@ dispatch create:recipes[create:crushing] to struct {
 
 dispatch create:recipes[create:cutting] to struct {
 	processingTime: int @ 1..,
-	ingredients: [struct {
-		item?: string, // Make the user select only one
-		tag?: string,
-		count?: int @ 1..,
-	}] @ 1,
+	ingredients: [ItemOrTag] @ 1,
 	results: [struct {
 		item: string,
 		count?: int @ 1..,
