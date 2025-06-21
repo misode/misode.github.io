@@ -136,11 +136,11 @@ dispatch create:recipes[create:milling] to struct {
 dispatch create:recipes[create:mixing] to struct {
 	heatRequirement?: ("heated" | "superheated"),
 	ingredients: [(struct {
-		count: int @ 1..,
 		item: string,
-	} | struct {
 		count: int @ 1..,
+	} | struct {
 		tag: string,
+		count: int @ 1..,
 	} | struct {
 		fluid: string,
 		amount: int @ 1..,
