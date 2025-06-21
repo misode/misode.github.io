@@ -1,6 +1,6 @@
 import type { DocAndNode } from '@spyglassmc/core'
 import { fileUtil } from '@spyglassmc/core'
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale } from '../../contexts/index.js'
 import { useDocAndNode, useSpyglass } from '../../contexts/Spyglass.jsx'
 import { useLocalStorage } from '../../hooks/index.js'
@@ -12,7 +12,7 @@ import { Btn, BtnMenu } from '../index.js'
 interface Editor {
 	getValue(): string
 	setValue(value: string): void
-	configure(indent: string, format: string): void
+	configure(indent: string, format: string, wrap: boolean): void
 	select(): void
 }
 
@@ -27,9 +27,10 @@ type SourcePanelProps = {
 export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySuccess, onError }: SourcePanelProps) {
 	const { locale } = useLocale()
 	const { service } = useSpyglass()
-	const [indent, setIndent] = useState(Store.getIndent())
-	const [format, setFormat] = useState(Store.getFormat())
-	const [sort, setSort] = useLocalStorage('misode_output_sort', 'schema')
+	const [cIndent, setIndent] = useState(Store.getIndent())
+	const [cFormat, setFormat] = useState(Store.getFormat())
+	const [inline, setInline] = useLocalStorage('misode_output_inline', false, (s) => s === 'true', (b) => b ? 'true' : 'false')
+	// const [sort, setSort] = useLocalStorage('misode_output_sort', 'schema')
 	const [highlighting, setHighlighting] = useState(Store.getHighlighting())
 	const [braceLoaded, setBraceLoaded] = useState(false)
 	const download = useRef<HTMLAnchorElement>(null)
@@ -40,13 +41,14 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 	const textarea = useRef<HTMLTextAreaElement>(null)
 	const editor = useRef<Editor>()
 
+	const { indent, format } = useMemo(() => {
+		return inline ? { indent: 'minified', format: 'snbt' } : { indent: cIndent, format: cFormat }
+	}, [cIndent, cFormat, inline])
+
 	const getSerializedOutput = useCallback((text: string) => {
 		// TODO: implement sort
-		// if (sort === 'alphabetically') {
-		// 	data = sortData(data)
-		// }
 		return stringifySource(text, format, indent)
-	}, [indent, format, sort])
+	}, [indent, format])
 
 	const text = useDocAndNode(docAndNode)?.doc.getText()
 	
@@ -89,7 +91,7 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 				console.error(e)
 			}
 		}
-	}, [service, docAndNode, text, indent, format, sort, highlighting])
+	}, [service, docAndNode, text, indent, format, highlighting])
 
 	useEffect(() => {
 		if (highlighting) {
@@ -111,6 +113,7 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 					showFoldWidgets: false,
 					highlightSelectedWord: false,
 					scrollPastEnd: 0.5,
+					indentedSoftWrap: false,
 				})
 				braceEditor.$blockScrolling = Infinity
 				braceEditor.on('blur', () => onImport.current())
@@ -123,7 +126,8 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 					setValue(value) {
 						braceEditor.getSession().setValue(value)
 					},
-					configure(indent, format) {
+					configure(indent, format, wrap) {
+						braceEditor.setOption('wrap', wrap)
 						braceEditor.setOption('useSoftTabs', indent !== 'tabs')
 						braceEditor.setOption('tabSize', indent === 'tabs' ? 4 : getSourceIndent(indent))
 						braceEditor.getSession().setMode(`ace/mode/${format}`)
@@ -144,7 +148,11 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 					if (!textarea.current) return
 					textarea.current.value = value
 				},
-				configure() {},
+				configure(_indent, _format, wrap) {
+					if (!textarea.current) return
+					textarea.current.style.wordBreak = wrap ? 'break-all' : 'unset'
+					textarea.current.style.whiteSpace = wrap ? 'wrap' : 'pre'
+				},
 				select() {},
 			}
 		}
@@ -159,10 +167,10 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 	useEffect(() => {
 		if (!editor.current || !retransform.current) return
 		if (!highlighting || braceLoaded) {
-			editor.current.configure(indent, format === 'snbt' ? 'yaml' : format)
+			editor.current.configure(indent, format === 'snbt' ? 'yaml' : format, inline)
 			retransform.current()
 		}
-	}, [indent, format, sort, highlighting, braceLoaded])
+	}, [indent, format, inline, highlighting, braceLoaded])
 
 	useEffect(() => {
 		if (doCopy && outputRef.current) {
@@ -217,18 +225,19 @@ export function SourcePanel({ docAndNode, doCopy, doDownload, doImport, copySucc
 			{window.matchMedia('(pointer: coarse)').matches && <>
 				<Btn icon="paste" onClick={importFromClipboard} />
 			</>}
+			<Btn label={locale('inline')} active={inline} onClick={() => setInline(!inline)} />
 			<BtnMenu icon="gear" tooltip={locale('output_settings')}>
 				{getSourceIndents().map(key =>
-					<Btn label={locale(`indentation.${key}`)} active={indent === key}
+					<Btn label={locale(`indentation.${key}`)} active={cIndent === key}
 						onClick={() => changeIndent(key)}/>
 				)}
 				<hr />
 				{getSourceFormats().map(key =>
-					<Btn label={locale(`format.${key}`)} active={format === key}
+					<Btn label={locale(`format.${key}`)} active={cFormat === key}
 						onClick={() => changeFormat(key)} />)}
 				<hr />
-				<Btn icon={sort === 'alphabetically' ? 'square_fill' : 'square'} label={locale('sort_alphabetically')}
-					onClick={() => setSort(sort === 'alphabetically' ? 'schema' : 'alphabetically')} />
+				{/* <Btn icon={sort === 'alphabetically' ? 'square_fill' : 'square'} label={locale('sort_alphabetically')}
+					onClick={() => setSort(sort === 'alphabetically' ? 'schema' : 'alphabetically')} /> */}
 				<Btn icon={highlighting ? 'square_fill' : 'square'} label={locale('highlighting')}
 					onClick={() => changeHighlighting(!highlighting)} />
 			</BtnMenu>

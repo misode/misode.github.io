@@ -1,0 +1,12 @@
+{
+	"env": {
+		"dependencies": [
+			"@vanilla-mcdoc"
+		],
+		"exclude": [
+			".*/**",
+			"**/node_modules/**",
+			"**/dist/**"
+		]
+	}
+}

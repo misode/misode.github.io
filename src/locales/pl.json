@@ -46,7 +46,7 @@
     "convert.format.loot-table": "Tablica łupów (Loot table)",
     "convert.format.item-modifier": "Modyfikator przedmiotu (Item modifier)",
     "convert.format.give-command": "/give",
-    "convert.select": "Wybierz",
+    "convert.select": "-- Wybierz --",
     "github": "Github",
     "mode.side": "Bok",
     "generator.worldgen/density_function": "Funkcja gęstości",
@@ -237,7 +237,7 @@
     "project.rename_file": "Zmień nazwę pliku",
     "project.save_current_file": "Zapisz plik do projektu",
     "project.search": "Wyszukaj projekt",
-    "project.search_drafts": "Wyszukaj robocze",
+    "project.search_drafts": "Wyszukaj szkice",
     "project.show_file_paths": "Pokaż ścieżkę pliku",
     "project.show_resources": "Pokaż zasoby",
     "project.unsaved_file": "Niezapisany plik",
@@ -272,7 +272,7 @@
     "sounds.search": "Szukaj dźwięków",
     "sounds.unknown_sound": "Nieznany dźwięk",
     "sounds.volume": "Głośność",
-    "source_code_on": "Kod źródłowy włączony",
+    "source_code_on": "Kod źródłowy na",
     "source_placeholder": "Wklej surową %0% treść",
     "switch_generator": "Przełącz generator",
     "switch_project": "Przełącz projekt",
@@ -345,5 +345,10 @@
     "collapse": "Zwiń",
     "collapse_all": "Przytrzymaj %0%, aby zwinąć wszystkie",
     "generator.ohthetreesyoullgrow:configured_feature": "Twór OTTYG",
-    "generator.neoforge:data_map_waxables": "Mapowanie materiałów woskowalnych"
+    "generator.neoforge:data_map_waxables": "Mapowanie materiałów woskowalnych",
+    "generator.create:recipes": "Utwórz Receptury",
+    "generator.dialog": "Dialog",
+    "generator.texture_meta": "Metadata Textury",
+    "generator.tag/dialog": "­Oznaczenie Dialogu",
+    "partner.create": "Utwórz"
 }
