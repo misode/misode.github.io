@@ -808,6 +808,42 @@
       "path": "create",
       "tags": ["partners"],
       "dependency": "create"
+    },
+    {
+      "id": "thermoo:environment_provider",
+      "url": "thermoo/environment_provider",
+      "path": "thermoo/environment_provider",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_provider_definition/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:environment",
+      "url": "thermoo/environment",
+      "path": "thermoo/environment",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_definition/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:temperature_effect",
+      "url": "thermoo/temperature_effect",
+      "path": "thermoo/temperature_effect",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/temperature_effect_definition/",
+      "minVersion": "1.20.1"
+    },
+    {
+      "id": "thermoo:predicate",
+      "url": "thermoo/predicate",
+      "path": "thermoo/predicate",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/loot_condition/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
