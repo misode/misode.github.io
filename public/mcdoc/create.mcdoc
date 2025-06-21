@@ -1,3 +1,5 @@
+use ::java::world::component::DataComponentPatch
+
 dispatch minecraft:resource[create:recipes] to struct Recipes {
 	type: #[id] Type,
 	...create:recipes[[type]],
@@ -25,6 +27,42 @@ struct NBT {
 	Potion?: string,
 }
 
+type Item = struct {
+	#[until="1.20.2"]
+	item: string,
+	#[since="1.21.1"]
+	id: string,
+	chance?: float @ 0..,
+	count?: int @ 1..,
+}
+
+type ItemWithCount = struct {
+	#[until="1.20.2"]
+	item: string,
+	#[since="1.21.1"]
+	id: string,
+	chance?: float @ 0..,
+}
+
+type SimpleItem = struct {
+	#[until="1.20.2"]
+	item: string,
+	#[since="1.21.1"]
+	id: string,
+}
+
+type Fluid = struct {
+	#[until="1.20.2"]
+	fluid: string,
+	#[until="1.20.2"]
+	nbt?: NBT,
+	#[since="1.21.1"]
+	id: string,
+	#[since="1.21.1"]
+	amount: int @ 1..,
+	components?: DataComponentPatch,
+}
+
 type ItemOrTag = (
 	struct {
 		item: string,
@@ -36,101 +74,104 @@ type ItemOrTag = (
 type FluidOrTag = (
 	struct {
 		fluid: string,
+		#[since="1.21.1"]
+		type: "fluid_stack",
 		amount: int @ 1..,
+		#[until="1.20.2"]
 		nbt?: NBT,
 	} | struct {
+		#[until="1.20.2"]
 		fluidTag: string,
+		#[since="1.21.1"]
+		fluid_tag: string,
+		#[since="1.21.1"]
+		type: "fluid_tag",
 		amount: int @ 1..,
+		#[until="1.20.2"]
 		nbt?: NBT,
 	}
 )
 
 dispatch create:recipes[create:crushing] to struct {
+	#[until="1.20.2"]
 	processingTime: int @ 1..,
+	#[since="1.21.1"]
+	processing_time: int @ 1..,
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		chance?: float @ 0..,
-		count?: int @ 1..,
-		item: string,
-	}] @ 1..,
+	results: [Item] @ 1..,
 }
 
 dispatch create:recipes[create:cutting] to struct {
+	#[until="1.20.2"]
 	processingTime: int @ 1..,
+	#[since="1.21.1"]
+	processing_time: int @ 1..,
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		item: string,
-		count?: int @ 1..,
-	}] @ 1,
+	results: [Item] @ 1,
 }
 
 dispatch create:recipes[create:deploying] to struct {
 	/// The first object is the base item and the second object is the ingredient
 	ingredients: [ItemOrTag] @ 2,
+	#[until="1.20.2"]
 	keepHeldItem?: boolean,
-	results: [struct {
-		item: string,
-	}] @ 1,
+	#[since="1.21.1"]
+	keep_held_item?: boolean,
+	results: [SimpleItem] @ 1,
 }
 
 dispatch create:recipes[create:emptying] to struct {
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		item: string,
-		count?: int @ 1..,
-	}, struct {
-		fluid: string,
-		amount: int @ 1..,
-	}],
+	results: [SimpleItem, Fluid],
 }
 
 dispatch create:recipes[create:filling] to struct {
 	ingredients: [ItemOrTag, FluidOrTag],
-	results: [struct { item: string }] @ 1,
+	results: [SimpleItem] @ 1,
 }
 
 dispatch create:recipes[create:haunting] to struct {
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		chance?: float @ 0..,
-		count?: int @ 1..,
-		item: string,
-	}] @ 1..,
+	results: [Item] @ 1..,
 }
 
 dispatch create:recipes[create:item_application] to struct {
 	/// The first object is the base item and the second object is the ingredient
 	ingredients: [ItemOrTag] @ 2,
-	results: [struct {
-		item: string,
-	}] @ 1,
+	results: [SimpleItem] @ 1,
 }
 
 dispatch create:recipes[create:mechanical_crafting] to struct {
+	#[until="1.20.2"]
 	acceptMirrored?: boolean,
+	#[since="1.21.1"]
+	accept_mirrored?: boolean,
+	#[since="1.21.1"]
+	category: string,
 	/// Warning: JEI will not display recipes greater in size than 9x9
 	pattern: [string],
 	key: struct {
 		[string]: ItemOrTag,
 	},
-	result: struct {
-		count?: int @ 1..,
-		item: string,
-	},
+	result: ItemWithCount,
+	#[since="1.21.1"]
+	show_notification?: boolean,
 }
 
 dispatch create:recipes[create:milling] to struct {
+	#[until="1.20.2"]
 	processingTime: int @ 1..,
+	#[since="1.21.1"]
+	processing_time: int @ 1..,
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		chance?: float @ 0..,
-		count?: int @ 1..,
-		item: string,
-	}] @ 1..,
+	results: [Item] @ 1..,
 }
 
-dispatch create:recipes[create:mixing] to struct {
+dispatch create:recipes[create:mixing] to struct { // TODO
+	#[until="1.20.2"]
 	heatRequirement?: ("heated" | "superheated"),
+	#[since="1.21.1"]
+	heat_requirement?: ("heated" | "superheated"),
 	ingredients: [(struct {
 		item: string,
 		count: int @ 1..,
@@ -157,40 +198,24 @@ dispatch create:recipes[create:mixing] to struct {
 }
 
 dispatch create:recipes[create:pressing] to struct {
-	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		item: string,
-		count?: int @ 1..,
-	}] @ 1,
+	ingredients: [ItemOrTag] @ 1..,
+	results: [ItemWithCount] @ 1,
 }
 
 dispatch create:recipes[create:sandpaper_polishing] to struct {
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		item: string,
-		count?: int @ 1..,
-	}] @ 1,
+	results: [ItemWithCount] @ 1,
 }
 
 dispatch create:recipes[create:sequenced_assembly] to struct {
 	ingredient: ItemOrTag,
 	loops: int @ 1..,
-	results: [struct {
-		chance?: float @ 0..,
-		count?: int @ 1..,
-		item: string,
-	}],
+	results: [Item] @ 1..,
 	sequence: [Recipes],
-	transitionalItem: struct {
-		item: string,
-	},
+	transitionalItem: SimpleItem,
 }
 
 dispatch create:recipes[create:splashing] to struct {
 	ingredients: [ItemOrTag] @ 1,
-	results: [struct {
-		chance?: float @ 0..,
-		count?: int @ 1..,
-		item: string,
-	}] @ 1..,
+	results: [Item] @ 1..,
 }
