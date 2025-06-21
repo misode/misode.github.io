@@ -301,5 +301,20 @@
     "whats_new": "有什么新内容？",
     "generator.fabric:fabric_mod_json": "fabric.mod.json",
     "convert.format.give-command": "/give",
-    "mode.3d": "3D"
+    "mode.3d": "3D",
+    "generator.create:recipes": "创建配方",
+    "generator.dialog": "对话框",
+    "generator.texture_meta": "纹理元数据",
+    "generator.sky_aesthetics:sky": "自定义天空",
+    "generator.tag/dialog": "对话框标签",
+    "generator.wolf_sound_variant": "狼音效变种",
+    "inline": "内联",
+    "partner.create": "创建",
+    "partner.fabric": "Fabric",
+    "partner.neoforge": "NeoForge",
+    "partner.obsidian": "黑曜石",
+    "preview.height": "高度",
+    "generator.test_environment": "测试环境",
+    "generator.test_instance": "测试实例",
+    "presets.no_results": "没有预设"
 }
