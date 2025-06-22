@@ -201,5 +201,10 @@
     "versions.search": "버전 검색",
     "worldgen": "월드젠",
     "zoom_in": "줌 인",
-    "zoom_out": "줌 아웃"
+    "zoom_out": "줌 아웃",
+    "change.obsolete": "이 변경 사항은 이번 릴리스 주기의 이후 변경 사항으로 대체되었습니다",
+    "2d": "2D",
+    "3d": "3D",
+    "add_key": "키 추가",
+    "changelog": "기술적 변경 사항"
 }
