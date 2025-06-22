@@ -1,7 +1,7 @@
 use ::java::world::component::DataComponentPatch
 
 dispatch minecraft:resource[create:recipes] to struct Recipes {
-	type: #[id] Type,
+	type: Type,
 	...create:recipes[[type]],
 }
 
@@ -113,11 +113,21 @@ type FluidOrTag = (
 	}
 )
 
+type MixingResult = struct {
+	id: string,
+	/// Used for items; optional field.
+	count?: int @ 1..,
+	/// Used for fluids; mandatory field.
+	amount?: int @ 1..,
+	components?: DataComponentPatch,
+}
+
 dispatch create:recipes[create:compacting] to struct {
 	ingredients: [(ItemOrTagWithCount | FluidOrTag)] @ 1..,
-	/// Doesnt work properly
-	/// The options are id and id, it should item and fluid
-	results: [(ItemWithCount | Fluid)] @ 1,
+	#[until="1.20.2"]
+	results: [(ItemWithCount | Fluid)] @ 1..,
+	#[since="1.21.1"]
+	results: [MixingResult] @ 1,
 }
 
 dispatch create:recipes[create:crushing] to struct {
@@ -139,10 +149,12 @@ dispatch create:recipes[create:cutting] to struct {
 }
 
 dispatch create:recipes[create:deploying] to struct {
-	/// The first object is the base item and the second object is the ingredient
+	/// The first item is the base item; the second is the ingredient to be deployed.
 	ingredients: [ItemOrTag] @ 2,
+	/// Defaults to false.
 	#[until="1.20.2"]
 	keepHeldItem?: boolean,
+	/// Defaults to false.
 	#[since="1.21.1"]
 	keep_held_item?: boolean,
 	results: [SimpleItem] @ 1,
@@ -164,24 +176,26 @@ dispatch create:recipes[create:haunting] to struct {
 }
 
 dispatch create:recipes[create:item_application] to struct {
-	/// The first object is the base item and the second object is the ingredient
+	/// The first item is the base item; the second is the ingredient to be applied.
 	ingredients: [ItemOrTag] @ 2,
 	results: [SimpleItem] @ 1,
 }
 
 dispatch create:recipes[create:mechanical_crafting] to struct {
 	#[until="1.20.2"]
-	acceptMirrored?: boolean,
+	acceptMirrored: boolean,
 	#[since="1.21.1"]
-	accept_mirrored?: boolean,
+	accept_mirrored: boolean,
+	/// Identifier for the category this goes in the recipe book.
 	#[since="1.21.1"]
 	category: string,
-	/// Warning: JEI will not display recipes greater in size than 9x9
-	pattern: [string],
+	/// Warning: Recipes larger than 9x9 will not be displayed in JEI.
+	pattern: [#[crafting_ingredient(definition=true)] string],
 	key: struct {
-		[string]: ItemOrTag,
+		[#[crafting_ingredient] string]: ItemOrTag,
 	},
 	result: ItemWithCount,
+	/// Determines if a notification is shown when unlocking this recipe. Defaults to true.
 	#[since="1.21.1"]
 	show_notification?: boolean,
 }
@@ -201,9 +215,10 @@ dispatch create:recipes[create:mixing] to struct {
 	#[since="1.21.1"]
 	heat_requirement?: ("heated" | "superheated"),
 	ingredients: [(ItemOrTagWithCount | FluidOrTag)] @ 1..,
-	/// Doesnt work properly
-	/// The options are id and id, it should item and fluid
-	results: [(ItemWithCount | Fluid)] @ 1,
+	#[until="1.20.2"]
+	results: [(ItemWithCount | Fluid)] @ 1..,
+	#[since="1.21.1"]
+	results: [MixingResult] @ 1,
 }
 
 dispatch create:recipes[create:pressing] to struct {
