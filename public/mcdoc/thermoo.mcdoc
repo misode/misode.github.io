@@ -1,0 +1,235 @@
+use ::java::data::worldgen::biome::Precipitation
+use ::java::util::attribute::AttributeOperation
+use ::java::data::util::MinMaxBounds
+
+dispatch minecraft:resource[thermoo:environment_provider] to struct EnvironmentProvider {
+	type: #[id] EnvironmentProviderType,
+	...thermoo:environment_provider_type[[type]],
+}
+
+type BiomeHolderList = (#[id(registry="worldgen/biome",tags="allowed")] string | [#[id="worldgen/biome"] string])
+
+dispatch minecraft:resource[thermoo:environment] to struct Environment {
+	biomes: BiomeHolderList,
+	exclude_biomes?: BiomeHolderList,
+	provider: EnvironmentProviderOrReference,
+	/// Defaults to `1000`. Higher priority environments will be applied first, lower priority environments are applied last.
+	priority?: int
+}
+
+dispatch minecraft:resource[thermoo:temperature_effect] to struct TemperatureEffect {
+	type: #[id] TemperatureEffectType,
+	config: struct {
+		...thermoo:temperature_effect_type[[%parent.type]]
+	}
+}
+
+dispatch minecraft:resource[thermoo:predicate] to struct ThermooPredicate {
+	condition: #[id] ThermooLootConditionType,
+	...thermoo:loot_condition_type[[condition]]
+}
+
+type EnvironmentProviderOrReference = (
+	#[id="thermoo:environment_provider"] string |
+	EnvironmentProvider
+)
+
+enum(string) EnvironmentProviderType {
+	Constant = "thermoo:constant",
+	TemperateSeasonal = "thermoo:seasonal/temperate",
+	TropicalSeasonal = "thermoo:seasonal/tropical",
+	LightThreshold = "thermoo:light_threshold",
+	WeatherState = "thermoo:weather_state",
+	PrecipitationType = "thermoo:precipitation_type",
+	TemperatureShift = "thermoo:temperature_shift",
+	Modify = "thermoo:modify",
+}
+
+enum(string) TemperatureEffectType {
+	Empty = "thermoo:empty",
+	StatusEffect = "thermoo:status_effect",
+	AttributeModifier = "thermoo:attribute_modifier",
+	ScalingAttributeModifier = "thermoo:scaling_attribute_modifier",
+	Damage = "thermoo:damage",
+	Function = "thermoo:function",
+	Sequence = "thermoo:sequence",
+	FreezeDamageLegacy = "thermoo:freeze_damage_legacy",
+}
+
+enum(string) ThermooLootConditionType {
+	Temperature = "thermoo:temperature",
+	Soaked = "thermoo:soaked",
+}
+
+enum(string) EnvironmentComponentType {
+	Temperature = "thermoo:temperature",
+	RelativeHumidity = "thermoo:relative_humidity",
+}
+
+struct EnvironmentComponentMap {
+	[EnvironmentComponentType]: thermoo:environment_component[[%key]],
+}
+
+enum(string) TemperatureUnit {
+	Celsius = "celsius",
+	Kelvin = "kelvin",
+	Fahrenheit = "fahrenheit",
+	Rankine = "rankine",
+}
+
+type TemperatureRecord = (
+	double |
+	struct {
+		value: double,
+		unit: TemperatureUnit,
+	}
+)
+
+dispatch thermoo:environment_component[thermoo:temperature] to TemperatureRecord
+
+dispatch thermoo:environment_component[thermoo:relative_humidity] to double @ 0..1
+
+dispatch thermoo:environment_provider_type[thermoo:constant] to struct {
+	components: EnvironmentComponentMap,
+}
+
+enum(string) TemperateSeason {
+	Spring = "spring",
+	Summer = "summer",
+	Autumn = "autumn",
+	Winter = "winter",
+}
+
+enum(string) TropicalSeason {
+	Wet = "wet",
+	Dry = "dry",
+}
+
+dispatch thermoo:environment_provider_type[thermoo:seasonal/temperate] to struct {
+	/// Must contain at least one entry.
+	seasons: struct {
+		[TemperateSeason]: EnvironmentProviderOrReference
+	},
+	/// If specified, the `fallback_season` must be a member of the `seasons` field.
+	fallback_season?: TemperateSeason,
+}
+
+dispatch thermoo:environment_provider_type[thermoo:seasonal/tropical] to struct { 
+	/// Must contain at least one entry.
+	seasons: struct {
+		[TropicalSeason]: EnvironmentProviderOrReference
+	},
+	/// If specified, the `fallback_season` must be a member of the `seasons` field.
+	fallback_season?: TropicalSeason,
+}
+
+dispatch thermoo:environment_provider_type[thermoo:light_threshold] to struct {
+	light_type?: ("block" | "sky"),
+	/// Only applies if `light_type` is `sky`.
+	apply_ambient_darkness?: boolean,
+	threshold: int @ 0..15,
+	above: EnvironmentProviderOrReference,
+	below: EnvironmentProviderOrReference,
+}
+
+dispatch thermoo:environment_provider_type[thermoo:weather_state] to struct {
+	clear?: EnvironmentProviderOrReference,
+	rain?: EnvironmentProviderOrReference,
+	thunder?: EnvironmentProviderOrReference,
+}
+
+dispatch thermoo:environment_provider_type[thermoo:precipitation_type] to struct {
+	precipitation_type: struct {
+		[Precipitation]?: EnvironmentProviderOrReference,
+	}
+}
+
+dispatch thermoo:environment_provider_type[thermoo:temperature_shift] to struct {
+	shift: TemperatureRecord
+}
+
+dispatch thermoo:environment_provider_type[thermoo:modify] to struct {
+	modifiers: (
+		[#[id(registry="thermoo:environment_provider")] string] @ 1.. |
+		#[id(registry="thermoo:environment_provider",tags="allowed")] string |
+	)
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:empty] to struct {
+
+}
+
+struct StatusEffectEntry {
+	type: #[id="mob_effect"] string,
+	duration?: int @ 1..,
+	amplifier: int @ 0..
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:status_effect] to struct {
+	effects: [StatusEffectEntry]
+}
+
+#[since="1.21"]
+dispatch thermoo:temperature_effect_type[thermoo:attribute_modifier] to struct {
+	value: float,
+	attribute_type: #[id="attribute"] string,
+	/// Used when equipping and unequipping the item to identify which modifier to add or remove from the entity.
+	id: #[id="attribute_modifier"] string,
+	operation: AttributeOperation
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:scaling_attribute_modifier] to struct {
+	/// Default value of `1.0`.
+	scale?: float,
+	attribute_type: #[id="attribute"] string,
+	/// Used when equipping and unequipping the item to identify which modifier to add or remove from the entity.
+	#[since="1.21"]
+	id: #[id="attribute_modifier"] string,
+	operation: (
+		#[until="1.20.5"] ("addition" | "multiply_base" | "multiply_total") |
+		#[since="1.20.5"] AttributeOperation |
+	),
+
+	#[until="1.21"]
+	name: string,
+	#[until="1.21"]
+	modifier_uuid: #[uuid] string
+}
+
+dispatch thermoo:temperature_effect_type[thermoo:damage] to struct {
+	amount: float @ 0<..,
+	damage_interval: int @ 1..,
+	damage_type: #[id="damage_type"] string,
+}
+
+#[until="1.20.2"]
+dispatch thermoo:temperature_effect_type[thermoo:freeze_damage_legacy] to struct {
+	amount: float @ 0<..,
+	damage_interval: int @ 1..,
+}
+
+#[since="1.21"]
+dispatch thermoo:temperature_effect_type[thermoo:function] to struct {
+	function: #[id="function"] string,
+	/// Interpreted as an SNBT string. Required if and only if the specified `function` is a macro function.
+	arguments?: string,
+	/// Defaults to `20`.
+	interval?: int @ 1..,
+	/// Defaults to `2`.
+	permission_level?: int @ 0..4,
+}
+
+#[since="1.21"]
+dispatch thermoo:temperature_effect_type[thermoo:sequence] to struct {
+	children: [TemperatureEffect]
+}
+
+dispatch thermoo:loot_condition_type[thermoo:temperature] to struct {
+	value?: MinMaxBounds<int>,
+	scale?: MinMaxBounds<double>,
+}
+
+dispatch thermoo:loot_condition_type[thermoo:soaked] to struct {
+	value?: MinMaxBounds<int>,
+	scale?: MinMaxBounds<double>,
+}
