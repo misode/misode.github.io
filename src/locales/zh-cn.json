@@ -333,5 +333,7 @@
     "versions.wiki": "wiki",
     "generator.atlas": "图集",
     "transformation.copy_decomposed": "复制分解格式",
-    "transformation.copy_composed": "复制矩阵格式"
+    "transformation.copy_composed": "复制矩阵格式",
+    "generator.neoforge:data_map_compostables": "可堆肥物品配置表",
+    "generator.neoforge:data_map_furnace_fuels": "熔炉燃料配置表"
 }
