@@ -1,7 +1,7 @@
-# misode.github.io
+# McFunctions.com
 > Data Pack Generators for Minecraft Java Edition
 
-https://misode.github.io/
+https://mcfunctions.com/
 
 ## Contributing
 This project uses [Preact](https://preactjs.com/) and [Vite](https://vitejs.dev/).
@@ -14,18 +14,18 @@ npm run dev
 4. Open the browser in `localhost:3000`.
 
 ## Translating
-misode.github.io supports multiple languages. If you'd like to help us translate this project to your language, it would be really appreciated! If your language is not on this list, please create an issue for it.
+mcfunctions.com supports multiple languages. If you'd like to help us translate this project to your language, it would be really appreciated! If your language is not on this list, please create an issue for it.
 
 [![Localization status](https://weblate.spyglassmc.com/widgets/misode-github-io/-/multi-auto.svg)](https://weblate.spyglassmc.com/engage/misode-github-io/?utm_source=widget)
 
 1. Go to the [Spyglassmc localization website](https://weblate.spyglassmc.com/projects/) (hosted by [SPGoding](https://github.com/SPGoding)).
 2. [Register](https://l10n.spgoding.com/accounts/register) by linking your GitHub account (recommended), or using your email.
-    - Note that the username and email will be shown in the [repository](https://github.com/misode/misode.github.io)'s git commit log.
-3. See the components of misode.github.io [here](https://weblate.spyglassmc.com/projects/misode-github-io/web-app/).
+    - Note that the username and email will be shown in the [repository](https://github.com/Nogard-YT/mcfunctions.com)'s git commit log.
+3. See the components of mcfunctions.com [here](https://weblate.spyglassmc.com/projects/misode-github-io/web-app/).
 4. Start translating!
 
 ## Modded Generators
-This website contains a few [non-vanilla generators](https://misode.github.io/predicate/). It is possible to contribute additional generators. If instead you are interested in making custom generators but don't want them part of the main website, see the [forking section](#forking) below.
+This website contains a few [non-vanilla generators](https://mcfunctions.com/predicate/). It is possible to contribute additional generators. If instead you are interested in making custom generators but don't want them part of the main website, see the [forking section](#forking) below.
 
 1. Create a new file `public/mcdoc/<your_project>.mcdoc`. This will contain the definitions of the
 2. Create a new generator entry in the `src/app/config.json` file for each generator page that you want to add. Set its `dependency` field to the name of the mcdoc file you created.
