@@ -1,0 +1,43 @@
+name: 🔄 Sync with misode.github.io
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3 AM UTC
+  workflow_dispatch:     # Allow manual trigger from the GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout your fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch upstream and push to tracking branch
+        run: |
+          git config --global user.email "sync-bot@nogard.dev"
+          git config --global user.name "Upstream Sync Bot"
+          git remote add upstream https://github.com/misode/misode.github.io.git
+          git fetch upstream
+          git checkout -B misode-upstream upstream/master
+          git push origin misode-upstream --force
+
+      - name: Create or update pull request to main
+        id: cpr
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: misode-upstream
+          destination_branch: main
+          pr_title: "🔄 Sync with misode/misode.github.io"
+          pr_body: "This PR merges upstream changes from `misode.github.io` into your `main` branch."
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge PR if no conflicts
+        if: steps.cpr.outputs.has-conflicts == 'false'
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
+          github_token: ${{ secrets.GITHUB_TOKEN }}
