@@ -1,23 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-S982VZS08T"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
-		function gtag(){dataLayer.push(arguments);}
-		gtag('js', new Date());
-		gtag('config', 'G-S982VZS08T', {
-			send_page_view: false,
-			theme: localStorage.getItem('theme') || 'default',
-			version: localStorage.getItem('schema_version') || '1.21.5',
-			locale: localStorage.getItem('language') || 'en',
-			prefers_color_scheme: matchMedia('(prefers-color-scheme: light)').matches ? 'light' : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'none',
-			tree_view_mode: localStorage.getItem('misode_tree_view_mode') || 'default',
-			colormap: localStorage.getItem('misode_colormap') || 'default',
-		});
-	</script>
-	<!-- End: Global site tag (gtag.js) - Google Analytics -->
 	<script>
 		(() => {
 			const theme = localStorage.getItem('theme')
