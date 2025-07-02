@@ -1,5 +1,4 @@
 import { useMemo } from 'preact/hooks'
-import supporters from '../../supporters.json'
 import { Card, ChangelogEntry, Footer, GeneratorCard, ToolCard, ToolGroup } from '../components/index.js'
 import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
@@ -151,23 +150,23 @@ function WhatsNew() {
 	</ToolGroup>
 }
 
-function Contributors() {
-	return <div class="contributors">
-		<h3>Supporters</h3>
-		<ContributorsList list={supporters} large />
-	</div>
-}
+// function Contributors() {
+// 	return <div class="contributors">
+// 		<h3>Supporters</h3>
+// 		<ContributorsList list={supporters} large />
+// 	</div>
+// }
 
-interface ContributorsListProps {
-	list: typeof supporters
-	large?: boolean
-}
-function ContributorsList({ list, large }: ContributorsListProps) {
-	return <div class={`contributors-list ${large ? 'contributors-large' : ''}`}>
-		{list.map((c) =>
-			<a class="tooltipped tip-se" href={c.url} target="_blank" aria-label={c.name}>
-				<img width={large ? 48 : 32} height={large ? 48 : 32} src={c.avatar} alt={c.name} loading="lazy" />
-			</a>
-		)}
-	</div>
-}
+// interface ContributorsListProps {
+// 	list: typeof supporters
+// 	large?: boolean
+// }
+// function ContributorsList({ list, large }: ContributorsListProps) {
+// 	return <div class={`contributors-list ${large ? 'contributors-large' : ''}`}>
+// 		{list.map((c) =>
+// 			<a class="tooltipped tip-se" href={c.url} target="_blank" aria-label={c.name}>
+// 				<img width={large ? 48 : 32} height={large ? 48 : 32} src={c.avatar} alt={c.name} loading="lazy" />
+// 			</a>
+// 		)}
+// 	</div>
+// }
