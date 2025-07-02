@@ -1,0 +1,14 @@
+User-agent: *
+Disallow:
+
+User-agent: Googlebot-Image
+Allow: /
+User-agent: Googlebot-News
+Allow: /
+User-agent: Googlebot-Video
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://mcfunctions.com/sitemap.xml
