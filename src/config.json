@@ -844,6 +844,78 @@
       "dependency": "thermoo",
       "wiki": "https://thermoo.thedeathlycow.com/datapacks/loot_condition/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:raid_ally_set",
+      "url": "pixelmon/raid/ally",
+      "path": "pixelmon/raid/ally",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:raid_spawn_set",
+      "url": "pixelmon/raid/spawn",
+      "path": "pixelmon/raid/spawn",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:growth",
+      "url": "pixelmon/growth",
+      "path": "pixelmon/growth",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:type",
+      "url": "pixelmon/battle/type",
+      "path": "pixelmon/battle/type",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:spawn_replacement",
+      "url": "pixelmon/spawn_replacement",
+      "path": "pixelmon/spawn_replacement",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:interaction_event",
+      "url": "pixelmon/interaction_event",
+      "path": "pixelmon/interaction_event",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:research",
+      "url": "pixelmon/research/research",
+      "path": "pixelmon/research/research",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:research_trigger",
+      "url": "pixelmon/research/trigger",
+      "path": "pixelmon/research/trigger",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
