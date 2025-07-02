@@ -86,10 +86,10 @@ function Tools() {
 	const { locale } = useLocale()
 
 	return <ToolGroup title={locale('tools')}>
-		<ToolCard title="Converter" icon="convert"
+		<ToolCard title={locale('title.convert')} icon="convert"
 			link="/convert/"
 			desc="Turn /give commands into loot tables" />
-		<ToolCard title="Customized Worlds" icon="customized"
+		<ToolCard title={locale('title.customized')} icon="customized"
 			link="/customized/"
 			desc="Create data packs to customize your world" />
 		<ToolCard title="Report Inspector" icon="report"
@@ -98,7 +98,7 @@ function Tools() {
 		<ToolCard title="Minecraft Sounds" icon="sounds"
 			link="/sounds/"
 			desc="Browse through and mix all the vanilla sounds" />
-		<ToolCard title="Transformation preview"
+		<ToolCard title={locale('title.transformation')}
 			link="/transformation/"
 			desc="Visualize transformations for display entities" />
 		<ToolCard title="Template Placer"
