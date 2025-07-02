@@ -12,6 +12,6 @@ export function Partners({}: Props) {
 		<div class="legacy-container">
 			<GeneratorList predicate={gen => gen.tags?.includes('partners')} />
 		</div>
-		<Footer donate={false} />
+		<Footer/>
 	</main>
 }

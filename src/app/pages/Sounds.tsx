@@ -81,6 +81,6 @@ export function Sounds({}: Props) {
 				{soundKeys.map(s => <option key={s} value={s} />)}
 			</datalist>
 		</>}
-		<Footer donate={false} />
+		<Footer/>
 	</main>
 }

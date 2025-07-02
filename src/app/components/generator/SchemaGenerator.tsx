@@ -404,7 +404,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			{docError
 				? <ErrorPanel error={docError} />
 				: <FileView docAndNode={docLoading ? undefined : docAndNode} />}
-			<Footer donate={!gen.tags?.includes('partners')} />
+			<Footer/>
 		</main>
 		<div class="popup-actions right-actions" style={`--offset: -${8 + actionsShown * 50}px;`}>
 			<div class={`popup-action action-preview${hasPreview ? ' shown' : ''} tooltipped tip-nw`} aria-label={locale(previewShown ? 'hide_preview' : 'show_preview')} onClick={togglePreview}>

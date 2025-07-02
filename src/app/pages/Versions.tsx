@@ -41,7 +41,7 @@ export function Versions({}: Props) {
 				<BtnLink link="/changelog" icon="git_commit" label={locale('versions.changelog')} />
 			)} />
 		</div>}
-		<Footer donate={false} />
+		<Footer/>
 	</main>
 }
 
