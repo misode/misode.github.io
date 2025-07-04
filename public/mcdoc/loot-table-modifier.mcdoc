@@ -17,10 +17,13 @@ struct Predicate {
 }
 
 enum(string) ActionType {
-    AddPool = "loot-table-modifier:add_pool",
-    RemovePool = "loot-table-modifier:remove_pool",
+    PoolAdd = "loot-table-modifier:pool_add",
+    PoolRemove = "loot-table-modifier:pool_remove",
 
-    SetItem = "loot-table-modifier:set_item",
+
+    EntryAdd = "loot-table-modifier:entry_add",
+
+    EntryItemSet = "loot-table-modifier:entry_item_set",
 }
 
 enum(string) PredicateType {
@@ -28,8 +31,8 @@ enum(string) PredicateType {
     AnyOf = "loot-table-modifier:any_of",
     AllOf = "loot-table-modifier:all_of",
 
-    ItemEntry = "loot-table-modifier:item_entry",
-    LootTable = "loot-table-modifier:loot_table",
+    EntryItem = "loot-table-modifier:entry_item",
+    Table = "loot-table-modifier:table",
 }
 
 
@@ -41,16 +44,21 @@ struct Pattern {
 
 /// Actions
 
-dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:add_pool] to struct {
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:pool_add] to struct {
     pools: [LootPool],
 }
 
-dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:remove_pool] to struct {
-
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:pool_remove] to struct {
+    entries: [LootPoolEntry]
 }
 
 
-dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:set_item] to struct {
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_add] to struct {
+    name: #[id="item"] string,
+    canReplaceEntry?: boolean,
+}
+
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_item_set] to struct {
     name: #[id="item"] string,
     canReplaceEntry?: boolean,
 }
@@ -78,12 +86,12 @@ dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:a
 }
 
 /// # entry
-dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:item_entry] to struct {
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:entry_item] to struct {
     name: (#[id="item"] string | Pattern),
 }
 
 /// # table
-dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:loot_table] to struct {
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:table] to struct {
     identifiers?: (
         (#[id="loot_table"] string | Pattern) |
         [(#[id="loot_table"] string | Pattern)]
