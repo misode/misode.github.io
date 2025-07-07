@@ -3,7 +3,7 @@ use ::java::data::loot::LootContextType
 
 dispatch minecraft:resource[loot-table-modifier:loot_modifier] to struct {
     actions: [Action],
-    predicates: [Predicate],
+    predicate: Predicate,
 }
 
 struct Action {
@@ -22,6 +22,7 @@ enum(string) ActionType {
 
 
     EntryAdd = "loot-table-modifier:entry_add",
+    EntryRemove = "loot-table-modifier:entry_remove",
 
     EntryItemSet = "loot-table-modifier:entry_item_set",
 }
@@ -31,14 +32,17 @@ enum(string) PredicateType {
     AnyOf = "loot-table-modifier:any_of",
     AllOf = "loot-table-modifier:all_of",
 
+
     EntryItem = "loot-table-modifier:entry_item",
+
+
     Table = "loot-table-modifier:table",
 }
 
 
 /// Utils
 struct Pattern {
-    regexPattern: #[regex_pattern] string
+    regexPattern: #[regex_pattern] string,
 }
 
 
@@ -47,15 +51,16 @@ struct Pattern {
 dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:pool_add] to struct {
     pools: [LootPool],
 }
-
 dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:pool_remove] to struct {
-    entries: [LootPoolEntry]
+
 }
 
 
 dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_add] to struct {
-    name: #[id="item"] string,
-    canReplaceEntry?: boolean,
+    entries: [LootPoolEntry],
+}
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_remove] to struct {
+
 }
 
 dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_item_set] to struct {
@@ -72,17 +77,11 @@ dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:i
 }
 
 dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:any_of] to struct {
-    terms: (
-        Predicate |
-        [Predicate]
-    )
+    terms: [Predicate],
 }
 
 dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:all_of] to struct {
-    terms: (
-        Predicate |
-        [Predicate]
-    )
+    terms: [Predicate],
 }
 
 /// # entry
@@ -92,12 +91,6 @@ dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:e
 
 /// # table
 dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:table] to struct {
-    identifiers?: (
-        (#[id="loot_table"] string | Pattern) |
-        [(#[id="loot_table"] string | Pattern)]
-    ),
-    types?: (
-        (LootContextType | Pattern) |
-        [(LootContextType | Pattern)]
-    ),
+    identifiers?: [(#[id="loot_table"] string | Pattern)],
+    types?: [(LootContextType | Pattern)],
 }
