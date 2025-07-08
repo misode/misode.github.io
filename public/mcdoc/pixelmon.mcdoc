@@ -91,13 +91,13 @@ dispatch minecraft:resource[pixelmon:raid_spawn_set] to struct RaidSpawnSet {
 	spawns: [RaidSpawn]
 }
 
-type Color (
+type Color = (
 	int |
 	struct {
-		red: int @ 0...255,
-		green: int @ 0...255,
-		blue: int @ 0...255,
-		alpha: int @ 0...255,
+		red: int @ 0..255,
+		green: int @ 0..255,
+		blue: int @ 0..255,
+		alpha: int @ 0..255,
 	}
 )
 
@@ -107,7 +107,7 @@ enum(string) TextureProviderType {
 	SKIN = "pixelmon:player_skin_url",
 }
 
-type Fallback (
+type Fallback = (
 	ResourceWithFallback |
 	struct {
 		resource: ResourceWithFallback
@@ -126,7 +126,7 @@ dispatch pixelmon:texture_provider_type[pixelmon:player_skin_url] to struct {
    	target_location: string,
 }
 
-type TextureProvider (
+type TextureProvider = (
 	Fallback |
 	struct {
 		type: #[id] TextureProviderType,
@@ -150,7 +150,7 @@ enum(double) EffectivenessTypes {
 	NONE = 0.0,
 }
 
-type Effectiveness (
+type Effectiveness = (
 	EffectivenessTypes |
 	double 
 )
@@ -664,7 +664,7 @@ dispatch pixelmon:interaction_result_type[pixelmon:console_execute_command] to s
     commands: [string]
 }
 
-dispatch pixelmon:pixelmon:interaction_result_type[pixelmon:give_item] to struct {
+dispatch pixelmon:interaction_result_type[pixelmon:give_item] to struct {
     items: [ItemStack]
 }
 
@@ -1071,7 +1071,7 @@ dispatch pixelmon:interaction_condition_type[pixelmon:item_has_tag] to struct {
 }
 
 type InteractionCondition (
-	LogicalAnd |
+	[DataProvider] |
 	struct {
 		type: #[id] InteractionConditionType,
 		...pixelmon:interaction_condition_type[[type]]
@@ -1161,4 +1161,146 @@ dispatch minecraft:resource[pixelmon:research_trigger] to struct ResearchTrigger
 	events: [#[id(registry="pixelmon:")] string],
 	condition: InteractionCondition,
 	research: RewardPool<ConditionalResearch>
+}
+
+enum(string) SelectorTypeType {
+    CONSTANT = "pixelmon:constant",
+    UNIFORMLY_RANDOM = "pixelmon:uniformly_random",
+    WEIGHTED_RANDOM = "pixelmon:weighted_random",
+}
+
+type ConstantSelectorType<A> = struct {
+	value: A
+}
+
+dispatch pixelmon:selector_type_type[pixelmon:constant] to ConstantSelectorType
+
+type UniformlyRandomSelectorType<A> = struct {
+	values: [A]
+}
+
+dispatch pixelmon:selector_type_type[pixelmon:uniformly_random] to UniformlyRandomSelectorType
+
+type WeightedRandomSelectorTypeObject<A> = struct {
+	weight: double,
+	value: A
+}
+
+type WeightedRandomSelectorType<A> = struct {
+	values: [WeightedRandomSelectorTypeObject<A>]
+}
+
+dispatch pixelmon:selector_type_type[pixelmon:weighted_random] to WeightedRandomSelectorType
+
+type SelectorType<A> = struct {
+	type: #[id] SelectorTypeType,
+	...pixelmon:selector_type_type[[type]]<A>
+}
+
+struct Interaction {
+	event: #[id(registry="pixelmon:interaction_event")] string,
+	conditions: InteractionCondition,
+	results: SelectorType<[InteractionResult]>
+}
+
+struct InteractionSet {
+	interactions: [Interaction]
+}
+
+struct EntityDimensions {
+	width: float,
+	height: float,
+	/// Default: true
+	fixed?: boolean
+}
+
+struct EntityProperties {
+	child: boolean,
+	invulnerable: boolean,
+	immovable: boolean,
+	/// Default: true
+	pushable?: boolean,
+	nameplate: boolean,
+	health: float,
+	eyeHeight: float,
+	dimensions: EntityDimensions,
+	/// Default: none
+	icon?: ResourceWithFallback,
+	/// Default: none
+	title?: Text
+}
+
+enum(string) TeamSupplierType {
+    EMPTY = "pixelmon:empty",
+    POKE_PASTE = "pixelmon:poke_paste",
+    POKEMON_SPEC = "pixelmon:spec",
+    RANDOM_COMBINATION = "pixelmon:random_combination"
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:poke_paste] to struct {
+	url: string
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:spec] to struct {
+	specs: [string]
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:empty] to struct {
+	
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:random_combination] to struct {
+	options: [string],
+	min_selections: int,
+	max_selections: int,
+}
+
+struct TeamSupplier {
+		type: #[id] TeamSupplierType,
+		...pixelmon:team_supplier_type[[type]]
+}
+
+enum(string) AIProviderType {
+    LOOK_AT_NEARBY = "pixelmon:look_at_nearby",
+    RANDOM_STROLL = "pixelmon:random_stroll",
+    STROLL_THROUGH_VILLAGE = "pixelmon:stroll_through_village",
+}
+
+dispatch pixelmon:ai_provider_type[pixelmon:look_at_nearby] to struct {
+	look_distance: float,
+	probability: float
+}
+
+dispatch pixelmon:ai_provider_type[pixelmon:random_stroll] to struct {
+	speed_modifier: double,
+	interval: int,
+	check_no_action_time: boolean,
+}
+
+dispatch pixelmon:ai_provider_type[pixelmon:stroll_through_village] to struct {
+	interval: int,
+}
+
+struct AIProvider {
+		type: #[id] AIProviderType,
+		...pixelmon:ai_provider_type[[type]]
+}
+
+struct NPCGoal {
+	provider: AIProvider,
+	priority: int,
+}
+
+struct Goals {
+	goals: [NPCGoal]
+}
+
+dispatch minecraft:resource[pixelmon:npc_preset] to struct NPCPreset {
+	/// The names that can be selected from when generating an NPC
+	names: SelectorType<string>,
+	models: SelectorType<RenderingHandler>,
+	interactions: SelectorType<InteractionSet>,
+	properties: SelectorType<EntityProperties>,
+	party: SelectorType<TeamSupplier>,
+	goals: SelectorType<Goals>,
 }

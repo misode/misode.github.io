@@ -916,6 +916,15 @@
       "dependency": "pixelmon",
       "wiki": "https://pixelmonmod.com/wiki/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:npc_preset",
+      "url": "pixelmon/npc/preset",
+      "path": "pixelmon/npc/preset",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [

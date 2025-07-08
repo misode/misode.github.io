@@ -144,6 +144,7 @@
   "generator.pixelmon:interaction_event": "Pixelmon Interaction Event",
   "generator.pixelmon:research": "Pixelmon Research",
   "generator.pixelmon:research_trigger": "Pixelmon Research Trigger",
+  "generator.pixelmon:npc_preset": "Pixelmon NPC Preset",
   "generator.trial_spawner": "Trial Spawner",
   "generator.trim_material": "Trim Material",
   "generator.trim_pattern": "Trim Pattern",
