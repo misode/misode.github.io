@@ -80,6 +80,7 @@
   "generator.error_max_version": "This generator is not available in versions above %0%",
   "generator.error_min_version": "The minimum version for this generator is %0%",
   "generator.fabric:fabric_mod_json": "fabric.mod.json",
+  "generator.fabric:dependency_overrides": "fabric_loader_dependencies.json",
   "generator.font": "Font",
   "generator.frog_variant": "Frog Variant",
   "generator.immersive_weathering:block_growth": "Block Growth",
