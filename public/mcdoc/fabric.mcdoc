@@ -130,3 +130,39 @@ struct LanguageAdapters {
 struct CustomValues {
 	[string]: any,
 }
+
+// Sources:
+// - https://wiki.fabricmc.net/tutorial:dependency_overrides
+// - https://github.com/FabricMC/fabric-loader/blob/master/src/main/java/net/fabricmc/loader/impl/metadata/DependencyOverrides.java
+
+dispatch minecraft:resource[fabric:dependency_overrides] to struct DependencyOverrides {
+	/// Needed for internal mechanisms. Must always be `1`.
+	version: 1,
+	overrides: Overrides,
+}
+
+struct Overrides {
+	[string]: Override,
+}
+
+struct Override {
+	[DependencyType]: Dependencies,
+}
+
+enum(string) DependencyType {
+	ReplaceDepends = "depends",
+	ReplaceRecommends = "recommends",
+	ReplaceSuggests = "suggests",
+	ReplaceConflicts = "conflicts",
+	ReplaceBreaks = "breaks",
+	AddDepends = "+depends",
+	AddRecommends = "+recommends",
+	AddSuggests = "+suggests",
+	AddConflicts = "+conflicts",
+	AddBreaks = "+breaks",
+	RemoveDepends = "-depends",
+	RemoveRecommends = "-recommends",
+	RemoveSuggests = "-suggests",
+	RemoveConflicts = "-conflicts",
+	RemoveBreaks = "-breaks",
+}
