@@ -1,0 +1,1306 @@
+use ::java::data::worldgen::IntProvider
+use ::java::util::text::Text
+use ::java::world::item::ItemStack
+use ::java::util::block_state::BlockState
+
+type ResourceWithFallback = (
+	string |
+	struct {
+		resource: string,
+		fallback: string,
+	}
+)
+
+enum(string) BattleAIMode {
+	DEFAULT = "default",
+	RANDOM = "random",
+	AGGRESSIVE = "aggressive",
+	TACTICAL = "tactical",
+	ADVANCED = "advanced",
+}
+
+struct RaidAlly {
+	weight: double,
+	name: string,
+	skin: ResourceWithFallback,
+	ai_mode: BattleAIMode,
+	spec: string,
+	/// If the NPC that spawns will use the child model
+	child: boolean
+}
+
+struct IntegerRange {
+	min: int,
+	max: int,
+}
+
+type BiomeHolderList = (#[id(registry="worldgen/biome",tags="allowed")] string | [#[id="worldgen/biome"] string])
+type ItemHolderList = (#[id(registry="item",tags="allowed")] string | [#[id="item"] string])
+type BlockHolderList = (#[id(registry="block",tags="allowed")] string | [#[id="block"] string])
+
+dispatch minecraft:resource[pixelmon:raid_ally_set] to struct RaidAllySet {
+   	/// The biomes these raid allies will be able to appear in
+	biomes: BiomeHolderList,
+	/// This represents the star range of the raid that the allies from this set will appear in (i.e. 1, 5 means it will spawn in all raids or 1,1 would only spawn in 1 star raids)
+	star_range: IntegerRange,
+	/// The allies that will spawn
+	allies: [RaidAlly],
+}
+
+
+enum(string) GrowthComparatorType {
+	GreaterThan = "pixelmon:greater_than",
+	LessThan = "pixelmon:less_than",
+	Range = "pixelmon:range",
+}
+
+struct GrowthComparator {
+	type: #[id] GrowthComparatorType,
+	...pixelmon:growth_comparator_type[[type]]
+}
+
+dispatch pixelmon:growth_comparator_type[pixelmon:greater_than] to struct {
+   	min: int,
+}
+
+dispatch pixelmon:growth_comparator_type[pixelmon:less_than] to struct {
+   	max: int,
+}
+
+dispatch pixelmon:growth_comparator_type[pixelmon:range] to struct {
+   	max: int,
+   	min: int,
+}
+
+dispatch minecraft:resource[pixelmon:growth] to struct Growth {
+	/// The icon used to represent this growth
+   	sprite: ResourceWithFallback,
+   	/// The range of sizes (represented by the number of standard deviations from the mean) that this growth
+   	range: GrowthComparator
+}
+
+struct RaidSpawn {
+	biomes: BiomeHolderList,
+	weight: double,
+	spec: string,
+	loot_table: #[id="loot_table"] string,
+	stars: IntProvider
+}
+
+dispatch minecraft:resource[pixelmon:raid_spawn_set] to struct RaidSpawnSet {
+	spawns: [RaidSpawn]
+}
+
+type Color = (
+	int |
+	struct {
+		red: int @ 0..255,
+		green: int @ 0..255,
+		blue: int @ 0..255,
+		alpha: int @ 0..255,
+	}
+)
+
+enum(string) TextureProviderType {
+	FALLBACK = "pixelmon:fallback",
+	URL = "pixelmon:url",
+	SKIN = "pixelmon:player_skin_url",
+}
+
+type Fallback = (
+	ResourceWithFallback |
+	struct {
+		resource: ResourceWithFallback
+	}
+)
+
+dispatch pixelmon:texture_provider_type[pixelmon:fallback] to Fallback
+
+dispatch pixelmon:texture_provider_type[pixelmon:url] to struct {
+   	url: string,
+   	target_location: string,
+}
+
+dispatch pixelmon:texture_provider_type[pixelmon:player_skin_url] to struct {
+   	url: string,
+   	target_location: string,
+}
+
+type TextureProvider = (
+	Fallback |
+	struct {
+		type: #[id] TextureProviderType,
+		...pixelmon:texture_provider_type[[type]]
+	}
+)
+
+dispatch minecraft:resource[pixelmon:type] to struct Type {
+	name: Text,
+	icon: TextureProvider,
+	color: Color,
+	relations: [TypeRelation],
+}
+
+enum(double) EffectivenessTypes {
+	NORMAL = 1.0,
+	SUPER = 2.0,
+	MAX = 4.0,
+	NOT = 0.5,
+	BARELY = 0.25,
+	NONE = 0.0,
+}
+
+type Effectiveness = (
+	EffectivenessTypes |
+	double 
+)
+
+type TypeHolderList = (#[id(registry="pixelmon:battle/type",tags="allowed")] string | [#[id="pixelmon:battle/type"] string])
+
+struct TypeRelation {
+	types: TypeHolderList,
+	effectiveness: Effectiveness
+}
+
+
+enum(string) SpawnDetectionType {
+	Simple = "pixelmon:simple",
+	Partial = "pixelmon:partial",
+}
+
+enum(string) SpawnReplacementType {
+	Simple = "pixelmon:simple",
+	Bees = "pixelmon:bees",
+	Villager = "pixelmon:villager",
+	None = "pixelmon:none",
+}
+
+struct SpawnDetection {
+	type: #[id] SpawnDetectionType,
+	...pixelmon:spawn_detection_type[[type]]
+}
+
+struct SpawnReplacement {
+	type: #[id] SpawnReplacementType,
+	...pixelmon:spawn_replacement_type[[type]]
+}
+
+dispatch pixelmon:spawn_detection_type[pixelmon:simple] to struct {
+   	types: (#[id(registry="entity_type",tags="allowed")] string | [#[id="entity_type"] string]),
+}
+
+dispatch pixelmon:spawn_detection_type[pixelmon:partial] to struct {
+   	types: (#[id(registry="entity_type",tags="allowed")] string | [#[id="entity_type"] string]),
+   	chance: float,
+}
+
+dispatch pixelmon:spawn_replacement_type[pixelmon:simple] to struct {
+   	replacements: [string],
+}
+
+dispatch pixelmon:spawn_replacement_type[pixelmon:bees] to struct {
+   	replacements: [string],
+}
+
+dispatch pixelmon:spawn_replacement_type[pixelmon:villager] to struct {
+   	replacements: string,
+}
+
+dispatch pixelmon:spawn_replacement_type[pixelmon:none] to struct {
+   	
+}
+
+dispatch minecraft:resource[pixelmon:spawn_replacement] to struct Replacement {
+	detection: SpawnDetection,
+	replacement: SpawnReplacement,
+}
+
+enum(string) InteractionEventType {
+	RIGHT_CLICK = "pixelmon:right_click",
+	LEFT_CLICK = "pixelmon:left_click",
+	HIT_WITH_POKE_BALL = "pixelmon:hit_with_poke_ball",
+	SELECT_STARTER = "pixelmon:select_starter",
+	FIRST_JOIN = "pixelmon:first_join",
+	JOIN = "pixelmon:join",
+	CRAFT_ITEM = "pixelmon:craft_item",
+	FILL_SHRINE_ORB = "pixelmon:fill_shrine_orb",
+	FIND_STRUCTURE = "pixelmon:find_structure",
+	ACTIVATE_SHRINE = "pixelmon:activate_shrine",
+	BATTLE_THROW_POKEBALL = "pixelmon:battle_throw_pokeball",
+	ENTER_WILD_BATTLE = "pixelmon:enter_wild_battle",
+	CAPTURE_POKEMON = "pixelmon:capture_pokemon",
+	PICK_UP_ITEM = "pixelmon:pick_up_item",
+	RAID_DROP_ITEM = "pixelmon:raid_drop_item",
+	SPIN_POKESTOP = "pixelmon:spin_pokestop",
+	RELEASE_POKEMON = "pixelmon:release_pokemon",
+	HATCH_EGG = "pixelmon:hatch_egg",
+	USE_LURE = "pixelmon:use_lure",
+	THROW_POKEBALL_IN_BATTLE = "pixelmon:throw_pokeball_in_battle",
+	EVOLVE_POKEMON = "pixelmon:evolve_pokemon",
+	DEFEAT_RAID = "pixelmon:defeat_raid",
+	POKEDEX_POKEMON = "pixelmon:pokedex_pokemon",
+	MEGA_EVOLVE = "pixelmon:mega_evolve",
+	ULTRA_BURST = "pixelmon:ultra_burst",
+	USE_BATTLE_ITEM = "pixelmon:use_battle_item",
+	DYNAMAX = "pixelmon:dynamax",
+	GIGANTAMAX = "pixelmon:gigantamax",
+	LEVEL_POKEMON = "pixelmon:level_pokemon",
+	BREAK_BLOCK = "pixelmon:break_block",
+	KNOCKOUT_POKEMON = "pixelmon:knockout_pokemon",
+	PICK_APRICORN = "pixelmon:pick_apricorn",
+	PICK_BERRY = "pixelmon:pick_berry",
+	HARVEST_CROP = "pixelmon:harvest_crop",
+	CHANGE_DIMENSION = "pixelmon:change_dimension",
+	TRADE_POKEMON = "pixelmon:trade_pokemon",
+	OPEN_GIFT = "pixelmon:open_gift",
+	PLAYER_TICK = "pixelmon:player_tick",
+	EAT_CAKE = "pixelmon:eat_cake",
+	DEFEAT_NPC = "pixelmon:defeat_npc",
+	EMPTY = "pixelmon:empty"
+}
+
+struct InteractionEventLogic {
+	type: #[id] InteractionEventType,
+	...pixelmon:interaction_event_type[[type]]
+}
+
+
+dispatch pixelmon:interaction_event_type[pixelmon:right_click] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:left_click] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:hit_with_poke_ball] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:select_starter] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:first_join] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:join] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:craft_item] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:fill_shrine_orb] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:find_structure] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:activate_shrine] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:battle_throw_pokeball] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:enter_wild_battle] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:capture_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:pick_up_item] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:raid_drop_item] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:spin_pokestop] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:release_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:hatch_egg] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:use_lure] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:throw_pokeball_in_battle] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:evolve_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:defeat_raid] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:pokedex_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:mega_evolve] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:ultra_burst] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:use_battle_item] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:dynamax] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:gigantamax] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:level_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:break_block] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:knockout_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:pick_apricorn] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:pick_berry] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:harvest_crop] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:change_dimension] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:trade_pokemon] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:open_gift] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:player_tick] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:eat_cake] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:defeat_npc] to struct {
+    
+}
+
+dispatch pixelmon:interaction_event_type[pixelmon:empty] to struct {
+    
+}
+
+dispatch minecraft:resource[pixelmon:interaction_event] to struct InteractionEvent {
+	type: InteractionEventLogic,
+}
+
+enum(string) DataProviderType {
+	PARTY_SLOT = "pixelmon:party_slot",
+	PLAYER_EXP_LEVEL = "pixelmon:player_exp_level",
+	CONSTANT_NUMBER = "pixelmon:constant_number",
+	CONSTANT_BOOLEAN = "pixelmon:constant_boolean",
+	CONSTANT_STRING = "pixelmon:constant_string",
+	CONSTANT_ITEMSTACK = "pixelmon:constant_itemstack",
+	CONTEXT_ITEM = "pixelmon:context_item",
+	CONTEXT_PLAYER = "pixelmon:context_player",
+	CONSTANT_BLOCK_STATE = "pixelmon:constant_block_state",
+	CONTEXT_BLOCK_STATE = "pixelmon:context_block_state",
+	INTERACTION_CONDITION = "pixelmon:interaction_condition",
+	POKEMON_MATCHES = "pixelmon:pokemon_matches",
+	HAS_PERMISSION = "pixelmon:has_permission",
+	PLAYER_NAME = "pixelmon:player_name",
+	PLAYER_UUID = "pixelmon:player_uuid",
+	PLAYER_IP = "pixelmon:player_ip",
+	PLAYER_GAME_MODE = "pixelmon:player_game_mode",
+	PLAYER_INVENTORY = "pixelmon:player_inventory",
+	HAND_USED = "pixelmon:hand_used",
+	POKEDEX = "pixelmon:pokedex",
+	POKEMON_LEVEL = "pixelmon:pokemon_level",
+	CONTEXT_POKEMON = "pixelmon:context_pokemon",
+	CONTEXT_POKEMON_ENTITY = "pixelmon:context_pokemon_entity",
+	INTEGER_CONTEXT = "pixelmon:integer_context",
+	STRING_CONTEXT = "pixelmon:string_context",
+	DAY_OF_MONTH = "pixelmon:day_of_month",
+	PLAYER_ARMOR = "pixelmon:player_armor"
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:party_slot] to struct {
+    slot: int,
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_exp_level] to struct {
+    
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:constant_number] to struct {
+    value: double
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:constant_boolean] to struct {
+    value: boolean
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:constant_string] to struct {
+    value: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:constant_itemstack] to struct {
+    value: ItemStack
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:context_item] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:context_player] to struct {
+   key: string,
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:constant_block_state] to struct {
+   value: BlockState,
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:context_block_state] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:interaction_condition] to struct {
+   condition: InteractionCondition
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:pokemon_matches] to struct {
+   pokemon: DataProvider,
+   spec: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:has_permission] to struct {
+   permission: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_name] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_uuid] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_ip] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_game_mode] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_inventory] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:hand_used] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:pokedex] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:pokemon_level] to struct {
+   pokemon: DataProvider
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:context_pokemon] to struct {
+   key: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:context_pokemon_entity] to struct {
+   key: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:integer_context] to struct {
+   key: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:string_context] to struct {
+   key: string
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:day_of_month] to struct {
+   
+}
+
+dispatch pixelmon:data_provider_type[pixelmon:player_armor] to struct {
+   slot: string
+}
+
+struct DataProvider {
+	type: #[id] DataProviderType,
+	...pixelmon:data_provider_type[[type]]
+}
+
+enum(string) RenderingHandlerType {
+	PLAYER = "pixelmon:player",
+	POKEMON = "pixelmon:pokemon"
+}
+
+
+dispatch pixelmon:rendering_handler_type[pixelmon:player] to struct {
+   slim: boolean,
+   texture: TextureProvider
+}
+
+enum(string) Gender {
+	MALE = "MALE",
+	FEMALE = "FEMALE",
+	NONE = "NONE",
+}
+
+enum(string) AnimationType {
+	IDLE = "IDLE",
+	WALK = "WALK",
+	FLY = "FLY",
+	RIDE = "RIDE",
+	SWIM = "SWIM",
+	IDLE_SWIM = "IDLE_SWIM",
+	SPECIAL = "SPECIAL",
+	SPECIAL2 = "SPECIAL2",
+	SPECIAL3 = "SPECIAL3"
+}
+
+dispatch pixelmon:rendering_handler_type[pixelmon:pokemon] to struct {
+   dex: int,
+   form: string,
+   gender: Gender,
+   palette: string,
+   model?: int,
+   scale?: double,
+   animationType?: AnimationType
+}
+
+struct RenderingHandler {
+	type: #[id] RenderingHandlerType,
+	...pixelmon:rendering_handler_type[[type]]
+}
+
+enum(string) InteractionResultType {
+	PLAYER_EXECUTE_COMMAND = "pixelmon:player_execute_command",
+	CONSOLE_EXECUTE_COMMAND = "pixelmon:console_execute_command",
+	GIVE_ITEM = "pixelmon:give_item",
+	GIVE_POKEMON = "pixelmon:give_pokemon",
+	TRIGGER_INTERACTION_EVENT = "pixelmon:trigger_interaction_event",
+	PLAYER_START_NPC_BATTLE = "pixelmon:player_start_npc_battle",
+	EMPTY = "pixelmon:empty",
+	MESSAGE_PLAYER = "pixelmon:message_player",
+	HEAL_PLAYER = "pixelmon:heal_player",
+	SET_ICON = "pixelmon:set_icon",
+	OPEN_TRADE = "pixelmon:open_trade",
+	OPEN_SHOP = "pixelmon:open_shop",
+	OPEN_DIALOGUE = "pixelmon:open_dialogue",
+	OPEN_PAGED_DIALOGUE = "pixelmon:open_paged_dialogue",
+	APPRAISE_ROD = "pixelmon:appraise_rod",
+	RELEARN_MOVE = "pixelmon:relearn_move",
+	TUTOR_MOVE = "pixelmon:tutor_move",
+	GIVE_EXPERIENCE = "pixelmon:give_experience",
+	GIVE_MONEY = "pixelmon:give_money",
+	SPAWN_AND_ENTER_BATTLE = "pixelmon:spawn_and_enter_battle",
+	GIVE_LOOT_TABLE = "pixelmon:give_loot_table",
+	POKEDEX_SEEN = "pixelmon:pokedex_seen",
+	MESSAGE_SPAWN_LOCATION = "pixelmon:message_spawn_location",
+	SET_COOLDOWN = "pixelmon:set_cooldown",
+	UNLOCK_DYNAMAX = "pixelmon:unlock_dynamax",
+	UNLOCK_MEGA_EVOLUTION = "pixelmon:unlock_mega_evolution",
+	OPEN_PROFESSOR_DIALOGUE = "pixelmon:open_professor_dialogue",
+	CLOSE_SCREEN = "pixelmon:close_screen",
+	DELAY_RESULTS = "pixelmon:delay_results",
+	SET_STRING_CONTEXT = "pixelmon:set_string_context",
+	APPLY_SPEC = "pixelmon:apply_spec",
+	OPEN_POKEMON_SELECTION = "pixelmon:open_pokemon_selection"
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:player_execute_command] to struct {
+    commands: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:console_execute_command] to struct {
+    commands: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:give_item] to struct {
+    items: [ItemStack]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:give_pokemon] to struct {
+    specs: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:trigger_interaction_event] to struct {
+    event: #[id(registry="pixelmon:interaction_event")] string
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:player_start_npc_battle] to struct {
+    
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:empty] to struct {
+    
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:message_player] to struct {
+    messages: [Text]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:heal_player] to struct {
+	/// Requires boolean data providers
+    require_healer_block: DataProvider
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:set_icon] to struct {
+    icon: ResourceWithFallback
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:open_trade] to struct {
+    required: string,
+    given: string
+}
+
+struct ShopItem {
+	item: ItemStack,
+	buyPrice: double,
+	sellPrice: double,
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:open_shop] to struct {
+    items: [ShopItem],
+    sellable?: boolean 
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:open_dialogue] to struct {
+    title: string,
+    message: string,
+    /// Defaults to true
+    fire_close_event?: boolean 
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:open_paged_dialogue] to struct {
+    title: string,
+    pages: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:appraise_rod] to struct {
+    title: string
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:relearn_move] to struct {
+    cost: ItemStack
+}
+
+struct LearnableMove {
+	attack: string,
+	costs: [ItemStack],
+	learnable: boolean
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:tutor_move] to struct {
+    learnable_moves: [LearnableMove]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:give_experience] to struct {
+    exp: int
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:give_money] to struct {
+    money: double,
+    message?: string
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:spawn_and_enter_battle] to struct {
+    spec: string
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:give_loot_table] to struct {
+    loot_table: #[id="loot_table"] string
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:pokedex_seen] to struct {
+    specs: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:message_spawn_location] to struct {
+    messages: [Text],
+    specs?: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:set_cooldown] to struct {
+    player: DataProvider,
+    key: string
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:unlock_dynamax] to struct {
+
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:unlock_mega_evolution] to struct {
+
+}
+
+struct ChatPage {
+	title: Text,
+	text: Text
+}
+
+struct ProfessorDialogue {
+	pages: [ChatPage],
+	rendering_handler: RenderingHandler,
+	/// Default: 25
+	floating_up_ticks?: int,
+	/// Default black
+	text_color?: Color,
+	/// Default white
+	background_color?: Color,
+	icon?: ResourceWithFallback,
+	watermark?: ResourceWithFallback
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:open_professor_dialogue] to struct {
+	dialogue: ProfessorDialogue
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:close_screen] to struct {
+	
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:delay_results] to struct {
+	results: [InteractionResult],
+	delay_ticks: int
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:set_string_context] to struct {
+	key: string,
+	value: string,
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:apply_spec] to struct {
+	specs: [string]
+}
+
+dispatch pixelmon:interaction_result_type[pixelmon:open_pokemon_selection] to struct {
+	title: Text,
+	text: Text,
+	selectable_pokemon: [string],
+	selected_pokemon_event: #[id(registry="pixelmon:interaction_event")] string,
+	none_selected_event: #[id(registry="pixelmon:interaction_event")] string
+}
+
+struct InteractionResult {
+	type: #[id] InteractionResultType,
+	...pixelmon:interaction_result_type[[type]]
+}
+
+enum(string) InteractionConditionType {
+    TRUE = "pixelmon:true",
+    FALSE = "pixelmon:false",
+    LOGICAL_AND = "pixelmon:logical_and",
+    LOGICAL_OR = "pixelmon:logical_or",
+    LOGICAL_NOT = "pixelmon:logical_not",
+    LOGICAL_XOR = "pixelmon:logical_xor",
+    LOGICAL_NOR = "pixelmon:logical_nor",
+    LOGICAL_NAND = "pixelmon:logical_nand",
+    LOGICAL_XNOR = "pixelmon:logical_xnor",
+
+    GREATER_THAN = "pixelmon:greater_than",
+    GREATER_THAN_OR_EQUAL = "pixelmon:greater_than_or_equal",
+    LESS_THAN = "pixelmon:less_than",
+    LESS_THAN_OR_EQUAL = "pixelmon:less_than_or_equal",
+    EQUAL = "pixelmon:equal",
+    NOT_EQUAL = "pixelmon:not_equal",
+    IN_RANGE_INCLUSIVE = "pixelmon:in_range_inclusive",
+    IN_RANGE_EXCLUSIVE = "pixelmon:in_range_exclusive",
+    NUMBER_LIST_CONTAINS = "pixelmon:number_list_contains",
+
+    STRING_COMPARE = "pixelmon:string_compare",
+    STRING_COMPARE_CASE_INSENSITIVE = "pixelmon:string_compare_case_insensitive",
+    STRING_CONTAINS = "pixelmon:string_contains",
+    STRING_LIST_CONTAINS = "pixelmon:string_list_contains",
+
+    ITEMS_EQUAL = "pixelmon:items_equal",
+    ITEM_IS_ONE_OF = "pixelmon:item_is_one_of",
+    BLOCK_IS_ONE_OF = "pixelmon:block_is_one_of",
+    CONTAINS_ITEM = "pixelmon:contains_item",
+    ITEM_TAGS_MATCH = "pixelmon:item_tags_match",
+
+    RANDOM_CHANCE = "pixelmon:random_chance",
+    RECIPE_MATCHES = "pixelmon:recipe_matches",
+    STRUCTURE_IS_ONE_OF = "pixelmon:structure_is_one_of",
+    SPEC_MATCHES = "pixelmon:spec_matches",
+    SPEC_MATCHES_ENTITY = "pixelmon:spec_matches_entity",
+    MONTH_IS = "pixelmon:month_is",
+    ON_COOLDOWN = "pixelmon:on_cooldown",
+    CAN_BATTLE = "pixelmon:can_battle",
+    HAS_POKEMON_IN_PARTY = "pixelmon:has_pokemon_in_party",
+    HAS_RESEARCH = "pixelmon:has_research",
+    ITEM_HAS_TAG = "pixelmon:item_has_tag"
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:true] to struct {
+
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:false] to struct {
+
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_and] to struct LogicalAnd {
+	conditions: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_or] to struct {
+	conditions: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_not] to struct {
+	condition: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_xor] to struct {
+	conditions: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_nor] to struct {
+	conditions: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_nand] to struct {
+	conditions: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:logical_xnor] to struct {
+	conditions: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:greater_than] to struct {
+	min: DataProvider,
+	value: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:greater_than_or_equal] to struct {
+	min: DataProvider,
+	value: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:less_than] to struct {
+	min: DataProvider,
+	value: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:less_than_or_equal] to struct {
+	min: DataProvider,
+	value: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:equal] to struct {
+	first: DataProvider,
+	second: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:not_equal] to struct {
+	first: DataProvider,
+	second: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:in_range_inclusive] to struct {
+	min: DataProvider,
+	max: DataProvider,
+	value: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:in_range_exclusive] to struct {
+	min: DataProvider,
+	max: DataProvider,
+	value: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:number_list_contains] to struct {
+	value: DataProvider,
+	list: [DataProvider]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:string_compare] to struct {
+	first: DataProvider,
+	second: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:string_compare_case_insensitive] to struct {
+	first: DataProvider,
+	second: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:string_contains] to struct {
+	text: DataProvider,
+	sub_text: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:string_list_contains] to struct {
+	value: DataProvider,
+	list: [DataProvider],
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:items_equal] to struct {
+	first: DataProvider,
+	second: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:item_is_one_of] to struct {
+	items: ItemHolderList,
+	item: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:block_is_one_of] to struct {
+	blocks: BlockHolderList,
+	block: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:contains_item] to struct {
+	items: [DataProvider],
+	item: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:item_tags_match] to struct {
+	first: DataProvider,
+	second: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:random_chance] to struct {
+	chance: double
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:recipe_matches] to struct {
+	recipe: string
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:structure_is_one_of] to struct {
+	structures: [string]
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:spec_matches] to struct {
+	spec: DataProvider,
+	pokemon: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:spec_matches_entity] to struct {
+	spec: DataProvider,
+	pokemon: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:month_is] to struct {
+	month: DataProvider
+}
+
+enum(string) TimeUnit {
+	NANOSECONDS = "NANOSECONDS",
+	MICROSECONDS = "MICROSECONDS",
+	MILLISECONDS = "MILLISECONDS",
+	SECONDS = "SECONDS",
+	MINUTES = "MINUTES",
+	HOURS = "HOURS",
+	DAYS = "DAYS",
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:on_cooldown] to struct {
+	player: DataProvider,
+	cooldown_key: string,
+	cooldown: int,
+	unit: TimeUnit
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:can_battle] to struct {
+	player: DataProvider
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:has_pokemon_in_party] to struct {
+	player: DataProvider,
+	spec: DataProvider,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:has_research] to struct {
+	player: DataProvider,
+	research: string,
+}
+
+dispatch pixelmon:interaction_condition_type[pixelmon:item_has_tag] to struct {
+	item: DataProvider,
+	tag: string
+}
+
+type InteractionCondition (
+	[DataProvider] |
+	struct {
+		type: #[id] InteractionConditionType,
+		...pixelmon:interaction_condition_type[[type]]
+	}
+)
+
+struct ResearchTier {
+	name: Text,
+	main_color?: Color,
+	accent_color?: Color
+}
+
+type OptionalListRenderableSprite (
+	RenderableSprite |
+	[RenderableSprite]
+)
+
+type RenderableSprite (
+	ResourceWithFallback |
+	struct {
+		resource: ResourceWithFallback,
+		color?: Color,
+		offset?: [float],
+		scale?: [float]
+	}
+)
+
+type DescribableResource (
+	RenderableSprite |
+	struct {
+		resource: OptionalListRenderableSprite,
+		description?: Text
+	}
+)
+
+struct ResearchObjective {
+	name: Text,
+	sprite: DescribableResource,
+	event: (#[id(registry="pixelmon:interaction_event")] string | [#[id="interaction_event"] string]),
+	condition: InteractionCondition,
+	result: [InteractionResult],
+	/// Defaults to 1
+	required_amount?: int
+}
+
+struct ResearchStage {
+	objectives: [ResearchObjective],
+	result: [InteractionResult],
+	result_sprites: [DescribableResource],
+}
+
+dispatch minecraft:resource[pixelmon:research] to struct Reserach {
+	/// The name/title of the research
+	name?: Text,
+	/// The description of the research - Keep this short (will not show for assignment type research)
+	description?: Text,
+	/// The "tier" of the research -  this is purely for the visuals in the UI
+	tier?: ResearchTier,
+	stages: [ResearchStage],
+	/// If the player can abandon the research (default: false)
+	abandonable?: boolean,
+	/// If the player can do the research multiple times (default: false)
+	repeatable?: boolean,
+	/// If true the player can only have one of these research at a time (default: false)
+	unique?: boolean,
+}
+
+struct ConditionalResearch {
+	research: #[id(registry="pixelmon:research/research")] string,
+	condition: InteractionCondition
+}
+
+type RandomWeightedEntry<T> = struct {
+	entry: T,
+	weight: double
+}
+
+type RewardPool<T> = struct {
+	guaranteed_reward: T,
+	reward_rolls_min: int,
+	reward_rolls_max: int,
+	chance_of_additional_rewards: double,
+	rewards: [RandomWeightedEntry<T>]
+}
+
+dispatch minecraft:resource[pixelmon:research_trigger] to struct ResearchTrigger {
+	events: [#[id(registry="pixelmon:")] string],
+	condition: InteractionCondition,
+	research: RewardPool<ConditionalResearch>
+}
+
+enum(string) SelectorTypeType {
+    CONSTANT = "pixelmon:constant",
+    UNIFORMLY_RANDOM = "pixelmon:uniformly_random",
+    WEIGHTED_RANDOM = "pixelmon:weighted_random",
+}
+
+type ConstantSelectorType<A> = struct {
+	value: A
+}
+
+dispatch pixelmon:selector_type_type[pixelmon:constant] to ConstantSelectorType
+
+type UniformlyRandomSelectorType<A> = struct {
+	values: [A]
+}
+
+dispatch pixelmon:selector_type_type[pixelmon:uniformly_random] to UniformlyRandomSelectorType
+
+type WeightedRandomSelectorTypeObject<A> = struct {
+	weight: double,
+	value: A
+}
+
+type WeightedRandomSelectorType<A> = struct {
+	values: [WeightedRandomSelectorTypeObject<A>]
+}
+
+dispatch pixelmon:selector_type_type[pixelmon:weighted_random] to WeightedRandomSelectorType
+
+type SelectorType<A> = struct {
+	type: #[id] SelectorTypeType,
+	...pixelmon:selector_type_type[[type]]<A>
+}
+
+struct Interaction {
+	event: #[id(registry="pixelmon:interaction_event")] string,
+	conditions: InteractionCondition,
+	results: SelectorType<[InteractionResult]>
+}
+
+struct InteractionSet {
+	interactions: [Interaction]
+}
+
+struct EntityDimensions {
+	width: float,
+	height: float,
+	/// Default: true
+	fixed?: boolean
+}
+
+struct EntityProperties {
+	child: boolean,
+	invulnerable: boolean,
+	immovable: boolean,
+	/// Default: true
+	pushable?: boolean,
+	nameplate: boolean,
+	health: float,
+	eyeHeight: float,
+	dimensions: EntityDimensions,
+	/// Default: none
+	icon?: ResourceWithFallback,
+	/// Default: none
+	title?: Text
+}
+
+enum(string) TeamSupplierType {
+    EMPTY = "pixelmon:empty",
+    POKE_PASTE = "pixelmon:poke_paste",
+    POKEMON_SPEC = "pixelmon:spec",
+    RANDOM_COMBINATION = "pixelmon:random_combination"
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:poke_paste] to struct {
+	url: string
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:spec] to struct {
+	specs: [string]
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:empty] to struct {
+	
+}
+
+dispatch pixelmon:team_supplier_type[pixelmon:random_combination] to struct {
+	options: [string],
+	min_selections: int,
+	max_selections: int,
+}
+
+struct TeamSupplier {
+		type: #[id] TeamSupplierType,
+		...pixelmon:team_supplier_type[[type]]
+}
+
+enum(string) AIProviderType {
+    LOOK_AT_NEARBY = "pixelmon:look_at_nearby",
+    RANDOM_STROLL = "pixelmon:random_stroll",
+    STROLL_THROUGH_VILLAGE = "pixelmon:stroll_through_village",
+}
+
+dispatch pixelmon:ai_provider_type[pixelmon:look_at_nearby] to struct {
+	look_distance: float,
+	probability: float
+}
+
+dispatch pixelmon:ai_provider_type[pixelmon:random_stroll] to struct {
+	speed_modifier: double,
+	interval: int,
+	check_no_action_time: boolean,
+}
+
+dispatch pixelmon:ai_provider_type[pixelmon:stroll_through_village] to struct {
+	interval: int,
+}
+
+struct AIProvider {
+		type: #[id] AIProviderType,
+		...pixelmon:ai_provider_type[[type]]
+}
+
+struct NPCGoal {
+	provider: AIProvider,
+	priority: int,
+}
+
+struct Goals {
+	goals: [NPCGoal]
+}
+
+dispatch minecraft:resource[pixelmon:npc_preset] to struct NPCPreset {
+	/// The names that can be selected from when generating an NPC
+	names: SelectorType<string>,
+	models: SelectorType<RenderingHandler>,
+	interactions: SelectorType<InteractionSet>,
+	properties: SelectorType<EntityProperties>,
+	party: SelectorType<TeamSupplier>,
+	goals: SelectorType<Goals>,
+}
