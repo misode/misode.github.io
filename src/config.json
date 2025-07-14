@@ -6,6 +6,11 @@
       "mc": "ar_sa"
     },
     {
+      "code": "cz",
+      "name": "Čeština",
+      "mc": "cs_cz"
+    },
+    {
       "code": "de",
       "name": "Deutsch",
       "mc": "de_de"
