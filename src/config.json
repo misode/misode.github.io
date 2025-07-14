@@ -701,6 +701,14 @@
       "wiki": "https://wiki.fabricmc.net/documentation:fabric_mod_json"
     },
     {
+      "id": "fabric:dependency_overrides",
+      "url": "fabric/dependency-overrides",
+      "noPath": true,
+      "tags": ["partners"],
+      "dependency": "fabric",
+      "wiki": "https://wiki.fabricmc.net/tutorial:dependency_overrides"
+    },
+    {
       "id": "immersive_weathering:block_growth",
       "url": "immersive-weathering/block-growth",
       "path": "block_growths",
