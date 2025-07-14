@@ -186,9 +186,9 @@
     },
     {
       "id": "1.21.6",
-      "dynamic": true,
-      "name": "1.21.6",
-      "pack_format": 77,
+      "ref": "1.21.7",
+      "name": "1.21.6 — 1.21.7",
+      "pack_format": 81,
       "show": true
     }
   ],
@@ -244,12 +244,14 @@
     {
       "id": "banner_pattern",
       "url": "banner-pattern",
-      "minVersion": "1.20.5"
+      "minVersion": "1.20.5",
+      "wiki": "https://minecraft.wiki/w/Banner/Patterns#JSON_Format"
     },
     {
       "id": "wolf_variant",
       "url": "wolf-variant",
-      "minVersion": "1.20.5"
+      "minVersion": "1.20.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Wolf"
     },
     {
       "id": "wolf_sound_variant",
@@ -283,32 +285,44 @@
     {
       "id": "instrument",
       "url": "instrument",
-      "minVersion": "1.21.2"
+      "minVersion": "1.21.2",
+      "wiki": "https://minecraft.wiki/w/Instrument_definition"
     },
     {
       "id": "trial_spawner",
       "url": "trial-spawner",
-      "minVersion": "1.21.2"
+      "minVersion": "1.21.2",
+      "wiki": "https://minecraft.wiki/w/Trial_spawner_configuration"
     },
     {
       "id": "pig_variant",
       "url": "pig-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Pig"
     },
     {
       "id": "cat_variant",
       "url": "cat-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Cat"
     },
     {
       "id": "frog_variant",
       "url": "frog-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Frog"
+    },
+    {
+      "id": "chicken_variant",
+      "url": "chicken-variant",
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Chicken"
     },
     {
       "id": "cow_variant",
       "url": "cow-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Cow"
     },
     {
       "id": "dialog",

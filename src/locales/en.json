@@ -68,6 +68,7 @@
   "generator.browse_available": "Browse available generators for %0%",
   "generator.cat_variant": "Cat Variant",
   "generator.chat_type": "Chat Type",
+  "generator.chicken_variant": "Chicken Variant",
   "generator.cow_variant": "Cow Variant",
   "generator.create:recipes": "Create Recipes",
   "generator.damage_type": "Damage Type",
