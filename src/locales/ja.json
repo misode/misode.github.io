@@ -326,7 +326,7 @@
     "convert.select": "--選択--",
     "convert.swap": "入れ替える",
     "generator.banner_pattern": "旗の模様 (Banner Pattern)",
-    "generator.cat_variant": "猫の亜種 (Cat Variant)",
+    "generator.cat_variant": "ネコの亜種 (Cat Variant)",
     "generator.cow_variant": "ウシの亜種 (Cow Variant)",
     "partner.fabric": "Fabric",
     "partner.neoforge": "NeoForge",
@@ -338,5 +338,6 @@
     "z": "Z",
     "generator.tag/instrument": "楽器タグ (#Instrument)",
     "generator.tag/worldgen/structure": "構造物タグ (#Structure)",
-    "generator.tag/worldgen/structure_set": "構造物セット (#Structure Set)"
+    "generator.tag/worldgen/structure_set": "構造物セット (#Structure Set)",
+    "generator.chicken_variant": "ニワトリの亜種 (Chicken Variant)"
 }
