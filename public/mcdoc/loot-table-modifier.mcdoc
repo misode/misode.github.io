@@ -1,4 +1,5 @@
 use ::java::data::loot::LootPool
+use ::java::data::loot::LootPoolEntry
 use ::java::data::loot::LootContextType
 
 dispatch minecraft:resource[loot-table-modifier:loot_modifier] to struct {
