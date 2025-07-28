@@ -335,5 +335,16 @@
     "transformation.copy_decomposed": "复制分解格式",
     "transformation.copy_composed": "复制矩阵格式",
     "generator.neoforge:data_map_compostables": "可堆肥物品配置表",
-    "generator.neoforge:data_map_furnace_fuels": "熔炉燃料配置表"
+    "generator.neoforge:data_map_furnace_fuels": "熔炉燃料配置表",
+    "generators.partners": "模组扩展数据包生成器",
+    "mode.side": "侧视图",
+    "mode.top": "俯视图",
+    "preview.final_density": "显示最终密度",
+    "zoom_in_limit": "无法进一步缩放\n1像素=4方块",
+    "whats_new.new": "新特性",
+    "generator.chicken_variant": "鸡变种",
+    "generator.fabric:dependency_overrides": "fabric_loader_dependencies.json",
+    "wiki": "Wiki",
+    "preview.luck": "幸运值",
+    "preview.min_y": "最小 Y 坐标"
 }
