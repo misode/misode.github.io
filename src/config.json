@@ -6,6 +6,11 @@
       "mc": "ar_sa"
     },
     {
+      "code": "cz",
+      "name": "Čeština",
+      "mc": "cs_cz"
+    },
+    {
       "code": "de",
       "name": "Deutsch",
       "mc": "de_de"
@@ -186,9 +191,16 @@
     },
     {
       "id": "1.21.6",
+      "ref": "1.21.7",
+      "name": "1.21.6 — 1.21.8",
+      "pack_format": 81,
+      "show": true
+    },
+    {
+      "id": "1.21.9",
       "dynamic": true,
-      "name": "1.21.6",
-      "pack_format": 77,
+      "name": "1.21.9",
+      "pack_format": 83,
       "show": true
     }
   ],
@@ -244,12 +256,14 @@
     {
       "id": "banner_pattern",
       "url": "banner-pattern",
-      "minVersion": "1.20.5"
+      "minVersion": "1.20.5",
+      "wiki": "https://minecraft.wiki/w/Banner/Patterns#JSON_Format"
     },
     {
       "id": "wolf_variant",
       "url": "wolf-variant",
-      "minVersion": "1.20.5"
+      "minVersion": "1.20.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Wolf"
     },
     {
       "id": "wolf_sound_variant",
@@ -283,32 +297,44 @@
     {
       "id": "instrument",
       "url": "instrument",
-      "minVersion": "1.21.2"
+      "minVersion": "1.21.2",
+      "wiki": "https://minecraft.wiki/w/Instrument_definition"
     },
     {
       "id": "trial_spawner",
       "url": "trial-spawner",
-      "minVersion": "1.21.2"
+      "minVersion": "1.21.2",
+      "wiki": "https://minecraft.wiki/w/Trial_spawner_configuration"
     },
     {
       "id": "pig_variant",
       "url": "pig-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Pig"
     },
     {
       "id": "cat_variant",
       "url": "cat-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Cat"
     },
     {
       "id": "frog_variant",
       "url": "frog-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Frog"
+    },
+    {
+      "id": "chicken_variant",
+      "url": "chicken-variant",
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Chicken"
     },
     {
       "id": "cow_variant",
       "url": "cow-variant",
-      "minVersion": "1.21.5"
+      "minVersion": "1.21.5",
+      "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Cow"
     },
     {
       "id": "dialog",
@@ -687,6 +713,14 @@
       "wiki": "https://wiki.fabricmc.net/documentation:fabric_mod_json"
     },
     {
+      "id": "fabric:dependency_overrides",
+      "url": "fabric/dependency-overrides",
+      "noPath": true,
+      "tags": ["partners"],
+      "dependency": "fabric",
+      "wiki": "https://wiki.fabricmc.net/tutorial:dependency_overrides"
+    },
+    {
       "id": "immersive_weathering:block_growth",
       "url": "immersive-weathering/block-growth",
       "path": "block_growths",
@@ -808,6 +842,123 @@
       "path": "create",
       "tags": ["partners"],
       "dependency": "create"
+    },
+    {
+      "id": "thermoo:environment_provider",
+      "url": "thermoo/environment_provider",
+      "path": "thermoo/environment_provider",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_provider_definition/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:environment",
+      "url": "thermoo/environment",
+      "path": "thermoo/environment",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/environment_definition/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "thermoo:temperature_effect",
+      "url": "thermoo/temperature_effect",
+      "path": "thermoo/temperature_effect",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/temperature_effect_definition/",
+      "minVersion": "1.20.1"
+    },
+    {
+      "id": "thermoo:predicate",
+      "url": "thermoo/predicate",
+      "path": "thermoo/predicate",
+      "tags": ["partners"],
+      "dependency": "thermoo",
+      "wiki": "https://thermoo.thedeathlycow.com/datapacks/loot_condition/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:raid_ally_set",
+      "url": "pixelmon/raid/ally",
+      "path": "pixelmon/raid/ally",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:raid_spawn_set",
+      "url": "pixelmon/raid/spawn",
+      "path": "pixelmon/raid/spawn",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:growth",
+      "url": "pixelmon/growth",
+      "path": "pixelmon/growth",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:type",
+      "url": "pixelmon/battle/type",
+      "path": "pixelmon/battle/type",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:spawn_replacement",
+      "url": "pixelmon/spawn_replacement",
+      "path": "pixelmon/spawn_replacement",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:interaction_event",
+      "url": "pixelmon/interaction_event",
+      "path": "pixelmon/interaction_event",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:research",
+      "url": "pixelmon/research/research",
+      "path": "pixelmon/research/research",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:research_trigger",
+      "url": "pixelmon/research/trigger",
+      "path": "pixelmon/research/trigger",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:npc_preset",
+      "url": "pixelmon/npc/preset",
+      "path": "pixelmon/npc/preset",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
