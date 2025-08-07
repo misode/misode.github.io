@@ -29,7 +29,7 @@ struct NBT {
 }
 
 type Item = struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	item: string,
 	#[since="1.21.1"]
 	id: string,
@@ -40,7 +40,7 @@ type Item = struct {
 }
 
 type ItemWithCount = struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	item: string,
 	#[since="1.21.1"]
 	id: string,
@@ -50,7 +50,7 @@ type ItemWithCount = struct {
 }
 
 type SimpleItem = struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	item: string,
 	#[since="1.21.1"]
 	id: string,
@@ -59,9 +59,9 @@ type SimpleItem = struct {
 }
 
 type Fluid = struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	fluid: string,
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	nbt?: NBT,
 	#[since="1.21.1"]
 	id: string,
@@ -94,19 +94,19 @@ type FluidOrTag = (
 		#[since="1.21.1"]
 		type: "fluid_stack",
 		amount: int @ 1..,
-		#[until="1.20.2"]
+		#[until="1.21.1"]
 		nbt?: NBT,
 		#[since="1.21.1"]
 		components?: DataComponentPatch,
 	} | struct {
-		#[until="1.20.2"]
+		#[until="1.21.1"]
 		fluidTag: string,
 		#[since="1.21.1"]
 		fluid_tag: string,
 		#[since="1.21.1"]
 		type: "fluid_tag",
 		amount: int @ 1..,
-		#[until="1.20.2"]
+		#[until="1.21.1"]
 		nbt?: NBT,
 		#[since="1.21.1"]
 		components?: DataComponentPatch,
@@ -125,7 +125,7 @@ type MixingResult = struct {
 dispatch create:recipes[create:compacting] to struct {
 	ingredients: [(ItemOrTagWithCount | FluidOrTag)] @ 1..,
 	results: (
-		#[until="1.20.2"]
+		#[until="1.21.1"]
 		[(ItemWithCount | Fluid)] @ 1.. |
 		#[since="1.21.1"]
 		[MixingResult] @ 1 |
@@ -133,7 +133,7 @@ dispatch create:recipes[create:compacting] to struct {
 }
 
 dispatch create:recipes[create:crushing] to struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	processingTime: int @ 1..,
 	#[since="1.21.1"]
 	processing_time: int @ 1..,
@@ -142,7 +142,7 @@ dispatch create:recipes[create:crushing] to struct {
 }
 
 dispatch create:recipes[create:cutting] to struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	processingTime: int @ 1..,
 	#[since="1.21.1"]
 	processing_time: int @ 1..,
@@ -154,7 +154,7 @@ dispatch create:recipes[create:deploying] to struct {
 	/// The first item is the base item; the second is the ingredient to be deployed.
 	ingredients: [ItemOrTag] @ 2,
 	/// Defaults to false.
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	keepHeldItem?: boolean,
 	/// Defaults to false.
 	#[since="1.21.1"]
@@ -184,7 +184,7 @@ dispatch create:recipes[create:item_application] to struct {
 }
 
 dispatch create:recipes[create:mechanical_crafting] to struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	acceptMirrored: boolean,
 	#[since="1.21.1"]
 	accept_mirrored: boolean,
@@ -203,7 +203,7 @@ dispatch create:recipes[create:mechanical_crafting] to struct {
 }
 
 dispatch create:recipes[create:milling] to struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	processingTime: int @ 1..,
 	#[since="1.21.1"]
 	processing_time: int @ 1..,
@@ -212,13 +212,13 @@ dispatch create:recipes[create:milling] to struct {
 }
 
 dispatch create:recipes[create:mixing] to struct {
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	heatRequirement?: ("heated" | "superheated"),
 	#[since="1.21.1"]
 	heat_requirement?: ("heated" | "superheated"),
 	ingredients: [(ItemOrTagWithCount | FluidOrTag)] @ 1..,
 	results: (
-		#[until="1.20.2"]
+		#[until="1.21.1"]
 		[(ItemWithCount | Fluid)] @ 1.. |
 		#[since="1.21.1"]
 		[MixingResult] @ 1 |
@@ -240,7 +240,7 @@ dispatch create:recipes[create:sequenced_assembly] to struct {
 	loops: int @ 1..,
 	results: [Item] @ 1..,
 	sequence: [Recipes],
-	#[until="1.20.2"]
+	#[until="1.21.1"]
 	transitionalItem: SimpleItem,
 	#[since="1.21.1"]
 	transitional_item: SimpleItem,
