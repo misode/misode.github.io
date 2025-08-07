@@ -124,10 +124,12 @@ type MixingResult = struct {
 
 dispatch create:recipes[create:compacting] to struct {
 	ingredients: [(ItemOrTagWithCount | FluidOrTag)] @ 1..,
-	#[until="1.20.2"]
-	results: [(ItemWithCount | Fluid)] @ 1..,
-	#[since="1.21.1"]
-	results: [MixingResult] @ 1,
+	results: (
+		#[until="1.20.2"]
+		[(ItemWithCount | Fluid)] @ 1.. |
+		#[since="1.21.1"]
+		[MixingResult] @ 1 |
+	),
 }
 
 dispatch create:recipes[create:crushing] to struct {
@@ -189,7 +191,7 @@ dispatch create:recipes[create:mechanical_crafting] to struct {
 	/// Identifier for the category this goes in the recipe book.
 	#[since="1.21.1"]
 	category: string,
-	/// <b style="color: var(--accent-warning);">Warning: </b>Recipes larger than 9x9 will not be displayed in JEI.
+	/// **Warning:** Recipes larger than 9x9 will not be displayed in JEI.
 	pattern: [#[crafting_ingredient(definition=true)] string],
 	key: struct {
 		[#[crafting_ingredient] string]: ItemOrTag,
@@ -215,10 +217,12 @@ dispatch create:recipes[create:mixing] to struct {
 	#[since="1.21.1"]
 	heat_requirement?: ("heated" | "superheated"),
 	ingredients: [(ItemOrTagWithCount | FluidOrTag)] @ 1..,
-	#[until="1.20.2"]
-	results: [(ItemWithCount | Fluid)] @ 1..,
-	#[since="1.21.1"]
-	results: [MixingResult] @ 1,
+	results: (
+		#[until="1.20.2"]
+		[(ItemWithCount | Fluid)] @ 1.. |
+		#[since="1.21.1"]
+		[MixingResult] @ 1 |
+	),
 }
 
 dispatch create:recipes[create:pressing] to struct {
