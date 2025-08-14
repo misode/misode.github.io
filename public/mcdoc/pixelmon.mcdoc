@@ -1304,3 +1304,92 @@ dispatch minecraft:resource[pixelmon:npc_preset] to struct NPCPreset {
 	party: SelectorType<TeamSupplier>,
 	goals: SelectorType<Goals>,
 }
+
+enum(string) PokedexRegistrationStatus {
+    UNKNOWN = "UNKNOWN",
+    SEEN = "SEEN",
+    CAUGHT = "CAUGHT",
+}
+
+enum(string) Gender {
+	MALE = "MALE",
+	FEMALE = "FEMALE",
+	NONE = "NONE",
+}
+
+dispatch minecraft:resource[pixelmon:pokedex_trigger] to struct PokedexTrigger {
+	events: [#[id(registry="pixelmon:")] string],
+	condition: InteractionCondition,
+	resulting_states: [PokedexRegistrationStatus],
+	player_context_key: string,
+	pokemon_context_key: string,
+}
+
+struct PokemonBase {
+	species: int,
+	form: string,
+	gender: Gender,
+	palette: string
+}
+
+dispatch minecraft:resource[pixelmon:pokedex_region] to struct Region {
+	generation_id: int,
+	name: Text,
+	starters: [PokemonBase],
+	pokemon: [int],
+}
+
+enum(string) PokemonProviderType {
+    ALL = "pixelmon:all",
+    ALL_WITH_PALETTE_TAG = "pixelmon:all_with_palette_tag",
+    DEX = "pixelmon:dex",
+}
+
+dispatch pixelmon:pokemon_provider_type[pixelmon:all] to struct {}
+
+dispatch pixelmon:pokemon_provider_type[pixelmon:all_with_palette_tag] to struct {
+	tag: string
+}
+
+struct Dex {
+	dex: int,
+	form?: string,
+	palette?: string, 
+	gender?: Gender,
+}
+
+dispatch pixelmon:pokemon_provider_type[pixelmon:dex] to struct {
+	dex_numbers: [Dex]
+}
+
+struct PokemonProvider {
+		type: #[id] PokemonProviderType,
+		...pixelmon:pokemon_provider_type[[type]]
+}
+
+enum(string) PokemonPredicateType {
+    ANY = "pixelmon:any",
+    SPEC = "pixelmon:spec",
+}
+
+dispatch pixelmon:pokemon_predicate_type[pixelmon:any] to struct {}
+
+dispatch pixelmon:pokemon_predicate_type[pixelmon:spec] to struct {
+	spec: string,
+}
+
+struct PokemonPredicate {
+		type: #[id] PokemonPredicateType,
+		...pixelmon:pokemon_predicate_type[[type]]
+}
+
+dispatch minecraft:resource[pixelmon:pokedex] to struct Pokedex {
+	name: Text,
+	/// Used to determine which order the pokedexes appear in the survival tab
+	priority: int,
+	primary_color: Color,
+	secondary_color: Color,
+	text_color: Color,
+	pokemon: PokemonProvider,
+	accetpance_test: PokemonPredicate,
+}
