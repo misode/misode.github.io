@@ -107,8 +107,13 @@ function DialogActions({ dialog }: { dialog: any }) {
 		}
 		return <ColumnsGrid columns={dialog.columns ?? 2}>
 			{dialogs.map((d: any) => {
-				let text = Identifier.parse(d).path.replaceAll('/', ' ').replaceAll('_', ' ')
-				text = text.charAt(0).toUpperCase() + text.substring(1)
+				let text = ''
+				if (typeof d === 'string') {
+					text = Identifier.parse(d).path.replaceAll('/', ' ').replaceAll('_', ' ')
+					text = text.charAt(0).toUpperCase() + text.substring(1)
+				} else {
+					text = d?.external_title ?? d?.title ?? ''
+				}
 				return <Button label={text} width={dialog.button_width ?? 150} />
 			})}
 		</ColumnsGrid>

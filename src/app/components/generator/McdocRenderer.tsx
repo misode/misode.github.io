@@ -9,6 +9,7 @@ import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier, ItemStack } from 'deepslate'
+import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
@@ -1185,9 +1186,16 @@ interface KeyProps {
 function Key({ label, doc, raw }: KeyProps) {
 	const [shown, setShown] = useFocus()
 
+	const cleanDoc = useMemo(() => {
+		if (!doc) {
+			return doc
+		}
+		return DOMPurify.sanitize(marked(doc), { FORBID_ATTR: ['style'] })
+	}, [doc])
+
 	return <label onClick={() => setShown(true)}>
 		<span class={doc ? `underline ${shown ? '' : 'decoration-dotted hover:decoration-solid'}` : ''}>{raw ? label.toString() : formatIdentifier(label.toString())}</span>
-		{doc && <div class={`node-doc ${shown ? '' : 'hidden'}`} onClick={e => e.stopPropagation()} dangerouslySetInnerHTML={{ __html: marked(doc) }}></div>}
+		{cleanDoc && <div class={`node-doc ${shown ? '' : 'hidden'}`} onClick={e => e.stopPropagation()} dangerouslySetInnerHTML={{ __html: cleanDoc }}></div>}
 	</label>
 }
 
