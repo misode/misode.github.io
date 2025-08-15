@@ -959,6 +959,33 @@
       "dependency": "pixelmon",
       "wiki": "https://pixelmonmod.com/wiki/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:pokedex_trigger",
+      "url": "pixelmon/pokemon/pokedex/trigger",
+      "path": "pixelmon/pokemon/pokedex/trigger",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:pokedex_region",
+      "url": "pixelmon/pokemon/pokedex/region",
+      "path": "pixelmon/pokemon/pokedex/region",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
+    },
+    {
+      "id": "pixelmon:pokedex",
+      "url": "pixelmon/pokemon/pokedex/pokedex",
+      "path": "pixelmon/pokemon/pokedex/pokedex",
+      "tags": ["partners"],
+      "dependency": "pixelmon",
+      "wiki": "https://pixelmonmod.com/wiki/",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
