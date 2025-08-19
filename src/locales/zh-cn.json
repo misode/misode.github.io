@@ -349,7 +349,7 @@
     "preview.min_y": "最小 Y 坐标",
     "generator.thermoo:environment": "环境",
     "generator.thermoo:environment_provider": "环境提供者",
-    "generator.ohthetreesyoullgrow:configured_feature": "OTTYG特性（译者注：OTTYG是什么？）",
+    "generator.ohthetreesyoullgrow:configured_feature": "OTTYG地物",
     "generator.immersive_weathering:block_growth": "方块生长",
     "generator.neoforge:data_map_monster_room_mobs": "刷怪笼怪物数据表",
     "generator.neoforge:data_map_raid_hero_gifts": "村庄英雄奖励配置",
@@ -358,5 +358,8 @@
     "generator.neoforge:data_map_oxidizables": "可氧化方块数据表",
     "generator.neoforge:data_map_parrot_imitations": "鹦鹉模仿怪物声音数据",
     "contributor.infrastructure": "基础设施",
-    "cutoff": "截止时间"
+    "cutoff": "截止时间",
+    "generator.thermoo:temperature_effect": "温度效果",
+    "generator.thermoo:predicate": "Thermoo谓词",
+    "partner.ohthetreesyoullgrow": ""
 }
