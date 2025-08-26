@@ -354,5 +354,19 @@
     "generator.frog_variant": "Вариант Лягушки",
     "generator.test_instance": "Тестовая Задача",
     "generator.test_environment": "Тестовая Среда",
-    "generator.wolf_sound_variant": "Вариация звука Волка"
+    "generator.wolf_sound_variant": "Вариация звука Волка",
+    "generator.chicken_variant": "Вариант Курицы",
+    "generator.create:recipes": "Создать рецепт",
+    "generator.dialog": "Диалог",
+    "generator.fabric:dependency_overrides": "fabric_loader_dependencies.json",
+    "generator.texture_meta": "Метаданные текстуры",
+    "generator.tag/dialog": "Тэг для Диалога",
+    "generator.thermoo:environment_provider": "Поставщик Окружения",
+    "generator.thermoo:environment": "Окружение",
+    "generator.thermoo:temperature_effect": "Температурный Эффект",
+    "generator.thermoo:predicate": "Предикаты Thermoo",
+    "generator.pixelmon:pokedex_region": "Регион",
+    "inline": "Встроенный",
+    "partner.create": "Create",
+    "partner.thermoo": "Thermoo"
 }
