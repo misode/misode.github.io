@@ -705,6 +705,14 @@
       "wiki": "https://minecraft.wiki/w/Shader#Post-processing_effects"
     },
     {
+      "id": "ad_astra:planets",
+      "url": "ad-astra/planets",
+      "noPath": true,
+      "tags": ["partners"],
+      "dependency": "ad_astra",
+      "wiki": "https://ad-astra.terrarium.wiki/datapack.html"
+    },
+    {
       "id": "fabric:fabric_mod_json",
       "url": "fabric/fabric-mod-json",
       "noPath": true,
