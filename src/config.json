@@ -707,7 +707,7 @@
     {
       "id": "ad_astra:planets",
       "url": "ad-astra/planets",
-      "noPath": "planets",
+      "path": "planets",
       "tags": ["partners"],
       "dependency": "ad_astra",
       "minVersion": "1.20",
