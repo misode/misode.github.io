@@ -1,0 +1,19 @@
+
+dispatch minecraft:resource[ad_astra:planets] to struct AdAstraPlanet {
+	/// The dimension id for this planet to use
+	dimension: #[id="dimension"] string,
+	/// Due to floating point precision, the actual gravity may be slightly off in-game
+	gravity: float @ 0..,
+	/// The orbit dimension id. If left blank, this planet is treated as an orbit dimension
+	orbit?: #[id="dimension"] string,
+	oxygen: boolean,
+	solar_power: int @ 1..,
+	/// Controls where the planet will be on the selector screen
+	solar_system: #[id="dimension"] string,
+	/// Below -50 will freeze, above 70 will burn
+	temperature: int,
+	/// The minimum rocket tier required to reach this planet
+	tier: int @ 1..,
+	/// Additional dimensions that the player can launch from
+	additional_launch_dimensions: [#[id="dimension"] string]
+}
