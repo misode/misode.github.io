@@ -119,7 +119,7 @@
     "generator.tag/worldgen/structure_set": "Tag d'ensemble de structures",
     "generator.tag/worldgen/world_preset": "Tag de préréglage de monde",
     "generator.text_component": "Composant de texte",
-    "generator.trial_spawner": "Générateur d'épreuve",
+    "generator.trial_spawner": "Générateur des épreuves",
     "generator.trim_material": "Matériau d'ornement",
     "generator.trim_pattern": "Modèle d'ornement",
     "generator.wolf_variant": "Variante de loup",
@@ -357,5 +357,17 @@
     "partner.thermoo": "Thermoo",
     "partner.pixelmon": "Pixelmon",
     "presets.no_results": "Pas de préréglages",
-    "presets.no_results_for_query": "Pas de préréglages pour cette requête"
+    "presets.no_results_for_query": "Pas de préréglages pour cette requête",
+    "generator.thermoo:temperature_effect": "Effets de température",
+    "generator.pixelmon:pokedex_region": "Région",
+    "generator.pixelmon:type": "Type de pixelmon",
+    "generator.pixelmon:growth": "Croissance des Pixelmons",
+    "generator.pixelmon:interaction_event": "Événement d'interaction des Pixelmon",
+    "generator.pixelmon:research": "Recherche des Pixelmon",
+    "generator.pixelmon:research_trigger": "Déclencheur de recherche des Pixelmon",
+    "generator.pixelmon:npc_preset": "Préréglage PNJ de Pixelmon",
+    "generator.pixelmon:pokedex": "Pokédex",
+    "generator.pixelmon:pokedex_trigger": "Déclencheur de Pokédex",
+    "generator.thermoo:environment_provider": "Fournisseur d'environnement",
+    "generator.pixelmon:spawn_replacement": "Remplacement du spawn des Pixelmons"
 }
