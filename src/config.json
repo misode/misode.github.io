@@ -748,6 +748,15 @@
       "wiki": "https://docs.neoforged.net/docs/worldgen/biomemodifier"
     },
     {
+      "id": "neoforge:data_map_acceptable_villager_distances",
+      "url": "neoforge/data-map-acceptable-villager-distances",
+      "path": "neoforge/data_map_acceptable_villager_distances",
+      "tags": ["partners"],
+      "dependency": "neoforge",
+      "minVersion": "1.21.7",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin/#neoforgeacceptable_villager_distances"
+    },
+    {
       "id": "neoforge:data_map_compostables",
       "url": "neoforge/data-map-compostables",
       "path": "neoforge/data_map_compostables",
@@ -802,6 +811,15 @@
       "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgeraid_hero_gifts"
     },
     {
+      "id": "neoforge:data_map_strippables",
+      "url": "neoforge/data-map-strippables",
+      "path": "neoforge/data_map_strippables",
+      "tags": ["partners"],
+      "dependency": "neoforge",
+      "minVersion": "1.21.8",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgestrippables"
+    },
+    {
       "id": "neoforge:data_map_vibration_frequencies",
       "url": "neoforge/data-map-vibration-frequencies",
       "path": "neoforge/data_map_vibration_frequencies",
@@ -809,6 +827,15 @@
       "dependency": "neoforge",
       "minVersion": "1.20.4",
       "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgevibration_frequencies"
+    },
+    {
+      "id": "neoforge:data_map_villager_types",
+      "url": "neoforge/data-map-villager-types",
+      "path": "neoforge/data_map_villager_types",
+      "tags": ["partners"],
+      "dependency": "neoforge",
+      "minVersion": "1.21.4",
+      "wiki": "https://docs.neoforged.net/docs/resources/server/datamaps/builtin#neoforgevillager_types"
     },
     {
       "id": "neoforge:data_map_waxables",

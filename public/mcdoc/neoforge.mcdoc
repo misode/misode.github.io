@@ -123,6 +123,13 @@ type DataMap<K, V> = struct {
 	remove?: [K],
 }
 
+dispatch minecraft:resource[neoforge:data_map_acceptable_villager_distances] to DataMap<#[id(registry="entity_type", tags="allowed")] string, (
+	float |
+	struct AcceptableVillagerDistance {
+		acceptable_villager_distance: float,
+	} |
+)>
+
 dispatch minecraft:resource[neoforge:data_map_compostables] to DataMap<#[id(registry="item",tags="allowed")] string, (
 	float @ 0..1 |
 	struct Compostable {
@@ -166,10 +173,24 @@ dispatch minecraft:resource[neoforge:data_map_raid_hero_gifts] to DataMap<#[id(r
 	} |
 )>
 
+dispatch minecraft:resource[neoforge:data_map_strippables] to DataMap<#[id(registry="block",tags="allowed")] string, (
+	#[id="block"] string |
+	struct Strippable {
+		stripped_block: #[id="block"] string,
+	} |
+)>
+
 dispatch minecraft:resource[neoforge:data_map_vibration_frequencies] to DataMap<#[id(registry="game_event",tags="allowed")] string, (
 	int @ 1..15 |
 	struct VibrationFrequency {
 		frequency: int @ 1..15,
+	} |
+)>
+
+dispatch minecraft:resource[neoforge:data_map_villager_types] to DataMap<#[id(registry="worldgen/biome",tags="allowed")] string, (
+	#[id="villager_type"] string |
+	struct BiomeVillagerType {
+		villager_type: #[id="villager_type"] string,
 	} |
 )>
 
