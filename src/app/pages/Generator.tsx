@@ -1,12 +1,12 @@
 import { getCurrentUrl, route } from 'preact-router'
 import { useMemo } from 'preact/hooks'
-import config from '../Config.js'
-import { getGenerator } from '../Utils.js'
 import { SchemaGenerator } from '../components/generator/SchemaGenerator.jsx'
 import { ErrorPanel, Octicon } from '../components/index.js'
+import config from '../Config.js'
 import { useLocale, useTitle, useVersion } from '../contexts/index.js'
 import type { VersionId } from '../services/index.js'
 import { checkVersion } from '../services/index.js'
+import { getGenerator } from '../Utils.js'
 
 export const SHARE_KEY = 'share'
 
@@ -19,7 +19,7 @@ export function Generator({}: Props) {
 
 	const gen = getGenerator(getCurrentUrl())
 	if (!gen) {
-		return <main><ErrorPanel error={locale('generator.not_found', getCurrentUrl())} /></main>
+		return <main><ErrorPanel error={locale('generator.not_found', getCurrentUrl())} reportable={false} /></main>
 	}
 
 	const allowedVersions = useMemo(() => {
