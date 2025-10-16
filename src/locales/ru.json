@@ -368,5 +368,22 @@
     "generator.pixelmon:pokedex_region": "Регион",
     "inline": "Встроенный",
     "partner.create": "Create",
-    "partner.thermoo": "Thermoo"
+    "partner.thermoo": "Thermoo",
+    "generator.ad_astra:planets": "Планета Ad Astra",
+    "generator.neoforge:data_map_acceptable_villager_distances": "Карта реакций жителей на сущность",
+    "generator.neoforge:data_map_strippables": "Карта удаляемых значений",
+    "generator.neoforge:data_map_villager_types": "Карта биомов для типов жителей",
+    "generator.pixelmon:raid_ally_set": "Набор союзников для рейда Pixelmon",
+    "generator.pixelmon:raid_spawn_set": "Набор спавнов в рейде Pixelmon",
+    "generator.pixelmon:spawn_replacement": "Замена спавна Pixelmon",
+    "generator.pixelmon:type": "Тип Pixelmon",
+    "generator.pixelmon:growth": "Рост Pixelmon",
+    "generator.pixelmon:interaction_event": "Событие взаимодействия Pixelmon",
+    "generator.pixelmon:research": "Исследование Pixelmon",
+    "generator.pixelmon:research_trigger": "Триггер Исследования Pixelmon",
+    "generator.pixelmon:npc_preset": "Пресет NPC Pixelmon",
+    "generator.pixelmon:pokedex": "Покедекс",
+    "generator.pixelmon:pokedex_trigger": "Триггер Покедекса",
+    "partner.ad_astra": "Ad Astra (К Звёздам!)",
+    "partner.pixelmon": "Pixelmon"
 }
