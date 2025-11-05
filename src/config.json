@@ -362,6 +362,17 @@
       "wiki": "https://minecraft.wiki/w/Test_environment_definition"
     },
     {
+      "id": "timeline",
+      "url": "timeline",
+      "minVersion": "1.21.11",
+      "wiki": "https://minecraft.wiki/w/Timeline"
+    },
+    {
+      "id": "zombie_nautilus_variant",
+      "url": "zombie-nautilus-variant",
+      "minVersion": "1.21.11"
+    },
+    {
       "id": "text_component",
       "url": "text-component",
       "noPath": true,
@@ -506,21 +517,21 @@
       "url": "tags/block",
       "tags": ["tags"],
       "path": "tags/block",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/entity_type",
       "url": "tags/entity-type",
       "tags": ["tags"],
       "path": "tags/entity_type",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/fluid",
       "url": "tags/fluid",
       "tags": ["tags"],
       "path": "tags/fluid",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/game_event",
@@ -528,14 +539,14 @@
       "tags": ["tags"],
       "path": "tags/game_event",
       "minVersion": "1.17",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/item",
       "url": "tags/item",
       "tags": ["tags"],
       "path": "tags/item",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/damage_type",
@@ -543,7 +554,7 @@
       "tags": ["tags"],
       "path": "tags/damage_type",
       "minVersion": "1.19.4",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/dialog",
@@ -551,7 +562,7 @@
       "tags": ["tags"],
       "path": "tags/dialog",
       "minVersion": "1.21.6",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/worldgen/biome",
@@ -559,7 +570,7 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/biome",
       "minVersion": "1.18.2",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/worldgen/structure",
@@ -567,7 +578,7 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/structure",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/worldgen/structure_set",
@@ -575,7 +586,7 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/structure_set",
       "minVersion": "1.18.2",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/worldgen/flat_level_generator_preset",
@@ -583,7 +594,7 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/flat_level_generator_preset",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/worldgen/world_preset",
@@ -591,7 +602,7 @@
       "tags": ["tags", "worldgen"],
       "path": "tags/worldgen/world_preset",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/banner_pattern",
@@ -599,7 +610,7 @@
       "tags": ["tags"],
       "path": "tags/banner_pattern",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/cat_variant",
@@ -607,7 +618,7 @@
       "tags": ["tags"],
       "path": "tags/cat_variant",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/enchantment",
@@ -615,7 +626,7 @@
       "tags": ["tags"],
       "path": "tags/enchantment",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/instrument",
@@ -623,7 +634,7 @@
       "tags": ["tags"],
       "path": "tags/instrument",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/painting_variant",
@@ -631,7 +642,7 @@
       "tags": ["tags"],
       "path": "tags/painting_variant",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "tag/point_of_interest_type",
@@ -639,7 +650,23 @@
       "tags": ["tags"],
       "path": "tags/point_of_interest_type",
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Tag#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
+    },
+    {
+      "id": "tag/timeline",
+      "url": "tags/timeline",
+      "tags": ["tags"],
+      "path": "tags/timeline",
+      "minVersion": "1.21.11",
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
+    },
+    {
+      "id": "tag/zombie_nautilus_variant",
+      "url": "tags/zombie-nautilus-variant",
+      "tags": ["tags"],
+      "path": "tags/zombie_nautilus_variant",
+      "minVersion": "1.21.11",
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {
       "id": "block_definition",
