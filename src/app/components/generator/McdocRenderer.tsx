@@ -8,16 +8,20 @@ import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType,
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
-import { Identifier, ItemStack } from 'deepslate'
+import { Identifier as Identifier1204, ItemStack as ItemStack1204 } from 'deepslate-1.20.4/core'
+import { Identifier, ItemStack } from 'deepslate/core'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
+import { useVersion } from '../../contexts/Version.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
+import { checkVersion } from '../../services/Versions.js'
 import { generateColor, hexId, intToHexRgb, randomInt, randomSeed } from '../../Utils.js'
 import { Btn } from '../Btn.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
+import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
 import { Octicon } from '../Octicon.jsx'
 import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
@@ -138,6 +142,8 @@ const SPECIAL_UNSET = '__unset__'
 
 function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
+	const { version } = useVersion()
+	const use1204 = !checkVersion(version, '1.20.5')
 
 	const nodeValue = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
 	const [value, setValue] = useState(nodeValue)
@@ -202,7 +208,9 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 
 	return <>
 		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <label>
-			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
+			{use1204
+				? <ItemDisplay1204 item={new ItemStack1204(Identifier1204.parse(value), 1)} />
+				: <ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />}
 		</label>}
 		{isSelect ? <>
 			<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
