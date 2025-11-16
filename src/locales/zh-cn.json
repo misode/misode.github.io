@@ -380,5 +380,8 @@
     "generator.pixelmon:type": "像素宝可梦属性",
     "partner.ad_astra": "Ad Astra",
     "partner.lithostitched": "Lithostitched",
-    "partner.sky_aesthetics": "Sky Aesthetics"
+    "partner.sky_aesthetics": "Sky Aesthetics",
+    "generator.tag/timeline": "时间线标签",
+    "generator.timeline": "时间线",
+    "generator.pixelmon:pokedex_region": "区域"
 }
