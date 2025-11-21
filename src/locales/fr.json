@@ -369,5 +369,9 @@
     "generator.pixelmon:pokedex": "Pokédex",
     "generator.pixelmon:pokedex_trigger": "Déclencheur de Pokédex",
     "generator.thermoo:environment_provider": "Fournisseur d'environnement",
-    "generator.pixelmon:spawn_replacement": "Remplacement du spawn des Pixelmons"
+    "generator.pixelmon:spawn_replacement": "Remplacement du spawn des Pixelmons",
+    "generator.ad_astra:planets": "Planète Ad Astra",
+    "generator.tag/zombie_nautilus_variant": "Tag de variante de Zombie Nautile",
+    "generator.zombie_nautilus_variant": "Variante de Zombie Nautile",
+    "partner.ad_astra": "Ad Astra"
 }
