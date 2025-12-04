@@ -312,7 +312,7 @@
     "partner.create": "机械动力",
     "partner.fabric": "Fabric",
     "partner.neoforge": "NeoForge",
-    "partner.obsidian": "",
+    "partner.obsidian": "Obsidian模组",
     "preview.height": "高度",
     "generator.test_environment": "测试环境",
     "generator.test_instance": "测试实例",
@@ -378,10 +378,14 @@
     "generator.pixelmon:interaction_event": "像素宝可梦交互事件",
     "generator.pixelmon:growth": "像素宝可梦体型",
     "generator.pixelmon:type": "像素宝可梦属性",
-    "partner.ad_astra": "Ad Astra",
-    "partner.lithostitched": "Lithostitched",
-    "partner.sky_aesthetics": "Sky Aesthetics",
+    "partner.ad_astra": "Ad Astra模组",
+    "partner.lithostitched": "Lithostitched库模组",
+    "partner.sky_aesthetics": "Sky Aesthetics库模组",
     "generator.tag/timeline": "时间线标签",
     "generator.timeline": "时间线",
-    "generator.pixelmon:pokedex_region": "区域"
+    "generator.pixelmon:pokedex_region": "区域",
+    "generator.neoforge:data_map_strippables": "可去皮原木数据映射表",
+    "generator.tag/zombie_nautilus_variant": "僵尸鹦鹉螺标签",
+    "generator.zombie_nautilus_variant": "僵尸鹦鹉螺",
+    "version_diff.word_wrap": "自动换行"
 }
