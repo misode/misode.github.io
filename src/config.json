@@ -205,9 +205,16 @@
     },
     {
       "id": "1.21.11",
-      "dynamic": true,
+      "ref": "1.21.11",
       "name": "1.21.11",
-      "pack_format": 90,
+      "pack_format": 94,
+      "show": true
+    },
+    {
+      "id": "26.1",
+      "dynamic": true,
+      "name": "26.1 (dev)",
+      "pack_format": 95,
       "show": true
     }
   ],
@@ -371,6 +378,17 @@
       "id": "zombie_nautilus_variant",
       "url": "zombie-nautilus-variant",
       "minVersion": "1.21.11"
+    },
+    {
+      "id": "villager_trade",
+      "url": "villager-trade",
+      "minVersion": "26.1",
+      "wiki": "https://minecraft.wiki/w/Villager_trade_definition"
+    },
+    {
+      "id": "trade_set",
+      "url": "trade-set",
+      "minVersion": "26.1"
     },
     {
       "id": "text_component",
@@ -666,6 +684,22 @@
       "tags": ["tags"],
       "path": "tags/zombie_nautilus_variant",
       "minVersion": "1.21.11",
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
+    },
+    {
+      "id": "tag/villager_trade",
+      "url": "tags/villager-trade",
+      "tags": ["tags"],
+      "path": "tags/villager_trade",
+      "minVersion": "26.1",
+      "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
+    },
+    {
+      "id": "tag/trade_set",
+      "url": "tags/trade-set",
+      "tags": ["tags"],
+      "path": "tags/trade_set",
+      "minVersion": "26.1",
       "wiki": "https://minecraft.wiki/w/Tag_(Java_Edition)"
     },
     {

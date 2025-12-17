@@ -336,35 +336,35 @@ class MeshRenderer extends Renderer {
 
 		this.mesh = new Mesh([
 			new Quad( // E
-				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.25, 0.50], undefined, undefined),
-				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.25, 0.25], undefined, undefined),
-				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.00, 0.25], undefined, undefined),
-				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.00, 0.50], undefined, undefined)),
+				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.25, 0.50], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.25, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.00, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.00, 0.50], undefined, undefined, undefined)),
 			new Quad( // W
-				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.75, 0.50], undefined, undefined),
-				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.75, 0.25], undefined, undefined),
-				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined),
-				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.50], undefined, undefined)),
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.75, 0.50], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.75, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.50], undefined, undefined, undefined)),
 			new Quad( // U
-				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined),
-				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined),
-				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.50, 0.00], undefined, undefined),
-				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.25, 0.00], undefined, undefined)),
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [0.50, 0.00], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.25, 0.00], undefined, undefined, undefined)),
 			new Quad( // D
-				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined),
-				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined),
-				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.75, 0.00], undefined, undefined),
-				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.50, 0.00], undefined, undefined)),
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.50, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.75, 0.00], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.50, 0.00], undefined, undefined, undefined)),
 			new Quad( // S
-				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.25, 0.50], undefined, undefined),
-				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.50, 0.50], undefined, undefined),
-				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined),
-				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined)),
+				new Vertex(new Vector(0, 0, 1), [0, 0, 0], [0.25, 0.50], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 0, 1), [0, 0, 0], [0.50, 0.50], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 1, 1), [0, 0, 0], [0.50, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 1, 1), [0, 0, 0], [0.25, 0.25], undefined, undefined, undefined)),
 			new Quad( // N
-				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.75, 0.50], undefined, undefined),
-				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [1.00, 0.50], undefined, undefined),
-				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [1.00, 0.25], undefined, undefined),
-				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined)),
+				new Vertex(new Vector(0, 1, 0), [0, 0, 0], [0.75, 0.50], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 1, 0), [0, 0, 0], [1.00, 0.50], undefined, undefined, undefined),
+				new Vertex(new Vector(1, 0, 0), [0, 0, 0], [1.00, 0.25], undefined, undefined, undefined),
+				new Vertex(new Vector(0, 0, 0), [0, 0, 0], [0.75, 0.25], undefined, undefined, undefined)),
 		])
 		for (const q of this.mesh.quads) {
 			const normal = q.normal()
