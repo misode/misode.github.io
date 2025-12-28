@@ -371,5 +371,9 @@
     "generator.pixelmon:pokedex_region": "Region",
     "partner.create": "Erstellen",
     "partner.thermoo": "Thermoo",
-    "partner.pixelmon": "Pixelmon"
+    "partner.pixelmon": "Pixelmon",
+    "generator.tag/timeline": "Zeitleisten Tag",
+    "generator.timeline": "Zeitleiste",
+    "generator.zombie_nautilus_variant": "Zombienautilus Variante",
+    "generator.tag/zombie_nautilus_variant": "Zombienautilus Variante Tag"
 }
