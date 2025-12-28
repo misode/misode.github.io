@@ -274,5 +274,14 @@
     "sounds.loading_sound": "Carregando sons",
     "sounds.volume": "Volume",
     "switch_version": "Mudar versão",
-    "cutoff": "Limite"
+    "cutoff": "Limite",
+    "generator.ad_astra:planets": "Planeta do Ad Astra",
+    "generator.chicken_variant": "Variante de Galinha",
+    "generator.create:recipes": "Criar receitas",
+    "generator.dialog": "Diálogo",
+    "generator.fabric:dependency_overrides": "fabric_loader_dependencies.json",
+    "generator.texture_meta": "Metadados de textura",
+    "generator.neoforge:data_map_acceptable_villager_distances": "Mapa de dados das distâncias aceitáveis entre aldeões",
+    "generator.neoforge:data_map_strippables": "Mapa de dados de objetos descascáveis",
+    "generator.neoforge:data_map_villager_types": "Mapa de dados dos tipos de aldeão com bioma"
 }
