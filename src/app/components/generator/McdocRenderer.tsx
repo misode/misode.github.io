@@ -142,8 +142,6 @@ const SPECIAL_UNSET = '__unset__'
 
 function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
-	const { version } = useVersion()
-	const use1204 = !checkVersion(version, '1.20.5')
 
 	const nodeValue = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
 	const [value, setValue] = useState(nodeValue)
@@ -207,11 +205,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 	}, [onChangeValue])
 
 	return <>
-		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <label>
-			{use1204
-				? <ItemDisplay1204 item={new ItemStack1204(Identifier1204.parse(value), 1)} />
-				: <ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />}
-		</label>}
+		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <ItemIdPreview id={value}/>}
 		{isSelect ? <>
 			<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
 				{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
@@ -232,6 +226,27 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
 		</>}
 	</>
+}
+
+function ItemIdPreview({ id }: { id: string }) {
+	const { version } = useVersion()
+
+	const stack = useMemo(() => {
+		try {
+			if (!checkVersion(version, '1.20.5')) {
+				return new ItemStack1204(Identifier1204.parse(id), 1)
+			}
+			return new ItemStack(Identifier.parse(id), 1)
+		} catch (e) {
+			return undefined
+		}
+	}, [id, version])
+
+	return <>{stack && <label>
+		{stack instanceof ItemStack1204
+			? <ItemDisplay1204 item={stack} />
+			: <ItemDisplay item={stack} />}
+	</label>}</>
 }
 
 function EnumHead({ type, optional, excludeStrings, node, ctx }: Props<SimplifiedEnum>) {
