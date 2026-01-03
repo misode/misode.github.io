@@ -1,4 +1,5 @@
 import { useMemo } from 'preact/hooks'
+import { useVersion } from '../../contexts/Version.jsx'
 import { deepClone } from '../../Utils.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchRegistries } from '../../services/DataFetcher.js'
@@ -13,7 +14,11 @@ interface Props {
 	changeModel: (model: Partial<CustomizedModel>) => void,
 }
 export function BiomesSettings({ model, initialModel, changeModel }: Props) {
-	const { value: registries } = useAsync(() => fetchRegistries('1.20'))
+	const { version } = useVersion()
+	const { value: registries } = useAsync(async () => {
+		const registries = await fetchRegistries(version)
+		return registries
+	}, [version])
 
 	const biomes = useMemo(() => {
 		const hiddenBiomes = new Set(['end_barrens', 'end_highlands', 'end_midlands', 'small_end_islands', 'the_end', 'basalt_deltas', 'crimson_forest', 'nether_wastes', 'soul_sand_valley', 'warped_forest', 'the_void'])
@@ -105,6 +110,7 @@ const DefaultReplacements: Record<string, string> = {
 	old_growth_birch_forest: 'birch_forest',
 	old_growth_pine_taiga: 'taiga',
 	old_growth_spruce_taiga: 'taiga',
+	pale_garden: 'forest',
 	plains: 'the_void',
 	river: 'plains',
 	savanna: 'plains',
