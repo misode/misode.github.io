@@ -375,5 +375,14 @@
     "generator.tag/timeline": "Zeitleisten Tag",
     "generator.timeline": "Zeitleiste",
     "generator.zombie_nautilus_variant": "Zombienautilus Variante",
-    "generator.tag/zombie_nautilus_variant": "Zombienautilus Variante Tag"
+    "generator.tag/zombie_nautilus_variant": "Zombienautilus Variante Tag",
+    "generator.ad_astra:planets": "Ad Astra-Planet",
+    "generator.tag/trade_set": "Handelsset-Tag",
+    "generator.tag/villager_trade": "Handel-Tag",
+    "generator.trade_set": "Handelsset",
+    "generator.villager_trade": "Handel",
+    "inline": "Inline",
+    "partner.ad_astra": "Ad Astra",
+    "generator.neoforge:data_map_acceptable_villager_distances": "Datenkarte akzeptabler Dorfbewohner-Distanzen",
+    "generator.neoforge:data_map_villager_types": "Datenkarte von Dorfbewohner-Biom-Typen"
 }
