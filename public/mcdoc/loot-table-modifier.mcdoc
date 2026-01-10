@@ -1,6 +1,7 @@
 use ::java::data::loot::LootPool
 use ::java::data::loot::LootPoolEntry
 use ::java::data::loot::LootContextType
+use ::java::data::loot::LootCondition
 
 dispatch minecraft:resource[loot-table-modifier:loot_modifier] to struct {
     actions: [Action],
@@ -26,6 +27,9 @@ enum(string) ActionType {
     EntryRemove = "loot-table-modifier:entry_remove",
 
     EntryItemSet = "loot-table-modifier:entry_item_set",
+
+
+    ConditionAdd = "loot-table-modifier:condition_add"
 }
 
 enum(string) PredicateType {
@@ -67,6 +71,13 @@ dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entr
 dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_item_set] to struct {
     name: #[id="item"] string,
     canReplaceEntry?: boolean,
+}
+
+
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:condition_add] to struct {
+    conditions: [LootCondition],
+    includePools?: boolean,
+    includeEntries?: boolean,
 }
 
 
