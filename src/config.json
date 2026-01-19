@@ -949,6 +949,13 @@
       "dependency": "create"
     },
     {
+      "id": "loot-table-modifier:loot_modifier",
+      "url": "loot-table-modifier/loot_modifier",
+      "path": "loot-table-modifier/loot_modifier",
+      "tags": ["partners"],
+      "dependency": "loot-table-modifier"
+    },
+    {
       "id": "thermoo:environment_provider",
       "url": "thermoo/environment_provider",
       "path": "thermoo/environment_provider",

@@ -432,6 +432,10 @@ function UnionHead({ type, optional, node, ctx }: Props<UnionType<SimplifiedMcdo
 }
 
 function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedMcdocTypeNoUnion[]): string {
+	const memberNameAttribute = type.attributes?.find(a => a.name === 'misode_member_name')?.value
+	if (memberNameAttribute?.kind === 'literal' && memberNameAttribute.value.kind === 'string') {
+		return memberNameAttribute.value.value
+	}
 	if (type.kind === 'literal') {
 		return formatIdentifier(type.value.value.toString())
 	}
