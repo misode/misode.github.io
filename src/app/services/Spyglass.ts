@@ -377,7 +377,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 		const uri: string = new core.Uri('downloads/misode-mcdoc.tar.gz', cacheRoot).toString()
 		const buffer = await compressBall([['builtin.mcdoc', builtinMcdoc]])
 		await core.fileUtil.writeFile(externals, uri, buffer)
-		return { uri }
+		return { type: 'tarball-file', uri }
 	})
 
 	meta.registerUriBinder(je.binder.uriBinder)

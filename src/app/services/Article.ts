@@ -61,10 +61,13 @@ export function getArticleLink(version: string): string | undefined {
 	if ((match = version.match(/^(\d\dw\d\d)[a-z]$/)) && match[1]) {
 		return ARTICLE_PREFIX + 'minecraft-snapshot-' + match[1] + 'a'
 	}
-	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-pre([0-9]+)$/)) && match[1] && match[2]) {
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-snapshot-(\d+)$/)) && match[1] && match[2]) {
+		return ARTICLE_PREFIX + 'minecraft-' + match[1].replaceAll('.', '-') + '-snapshot-' + match[2]
+	}
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-pre(\d+)$/)) && match[1] && match[2]) {
 		return ARTICLE_PREFIX + 'minecraft-' + match[1].replaceAll('.', '-') + '-pre-release-' + match[2]
 	}
-	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-rc([0-9]+)$/)) && match[1]) {
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-rc(\d+)$/)) && match[1]) {
 		return ARTICLE_PREFIX + 'minecraft-' + match[1].replaceAll('.', '-') + '-release-candidate-' + match[2] 
 	}
 	if (version.match(/^\d+\.\d+(\.\d+)?$/)) {

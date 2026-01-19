@@ -1941,7 +1941,8 @@ hr {
 	border-image-slice: 1 fill;
 	border-image-repeat: repeat;
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
+	padding-top: calc(var(--dialog-px) * 4);
 	padding-left: calc(var(--dialog-px) * 4);
 }
 

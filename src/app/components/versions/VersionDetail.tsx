@@ -43,8 +43,8 @@ export function VersionDetail({ id, version }: Props) {
 					{version.release_target !== null && <VersionMetaData label={locale('versions.release_target')} value={version.release_target} link={version.id !== version.release_target ? `/versions/?id=${version.release_target}` : undefined} />}
 					<VersionMetaData label={locale('versions.data_version')} value={version.data_version} />
 					<VersionMetaData label={locale('versions.protocol_version')} value={version.protocol_version} />
-					<VersionMetaData label={locale('versions.data_pack_format')} value={version.data_pack_version} />
-					<VersionMetaData label={locale('versions.resource_pack_format')} value={version.resource_pack_version} />
+					<VersionMetaData label={locale('versions.data_pack_format')} value={new Date(version.release_time) > new Date(2025, 6, 28) ? `${version.data_pack_version}.${version.data_pack_version_minor}` : version.data_pack_version} />
+					<VersionMetaData label={locale('versions.resource_pack_format')} value={new Date(version.release_time) > new Date(2025, 6, 28) ? `${version.resource_pack_version}.${version.resource_pack_version_minor}` : version.resource_pack_version} />
 				</> : filteredChangelogs?.length ?? 0 > 1 ? <p>
 					This version is not released yet.
 				</p> : <p>

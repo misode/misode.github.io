@@ -8,15 +8,20 @@ import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType,
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
-import { Identifier, ItemStack } from 'deepslate'
+import { Identifier as Identifier1204, ItemStack as ItemStack1204 } from 'deepslate-1.20.4/core'
+import { Identifier, ItemStack } from 'deepslate/core'
+import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
+import { useVersion } from '../../contexts/Version.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
+import { checkVersion } from '../../services/Versions.js'
 import { generateColor, hexId, intToHexRgb, randomInt, randomSeed } from '../../Utils.js'
 import { Btn } from '../Btn.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
+import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
 import { Octicon } from '../Octicon.jsx'
 import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
@@ -200,9 +205,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 	}, [onChangeValue])
 
 	return <>
-		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <label>
-			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
-		</label>}
+		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <ItemIdPreview id={value}/>}
 		{isSelect ? <>
 			<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
 				{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
@@ -223,6 +226,27 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
 		</>}
 	</>
+}
+
+function ItemIdPreview({ id }: { id: string }) {
+	const { version } = useVersion()
+
+	const stack = useMemo(() => {
+		try {
+			if (!checkVersion(version, '1.20.5')) {
+				return new ItemStack1204(Identifier1204.parse(id), 1)
+			}
+			return new ItemStack(Identifier.parse(id), 1)
+		} catch (e) {
+			return undefined
+		}
+	}, [id, version])
+
+	return <>{stack && <label>
+		{stack instanceof ItemStack1204
+			? <ItemDisplay1204 item={stack} />
+			: <ItemDisplay item={stack} />}
+	</label>}</>
 }
 
 function EnumHead({ type, optional, excludeStrings, node, ctx }: Props<SimplifiedEnum>) {
@@ -1189,9 +1213,16 @@ interface KeyProps {
 function Key({ label, doc, raw }: KeyProps) {
 	const [shown, setShown] = useFocus()
 
+	const cleanDoc = useMemo(() => {
+		if (!doc) {
+			return doc
+		}
+		return DOMPurify.sanitize(marked(doc), { FORBID_ATTR: ['style'] })
+	}, [doc])
+
 	return <label onClick={() => setShown(true)}>
 		<span class={doc ? `underline ${shown ? '' : 'decoration-dotted hover:decoration-solid'}` : ''}>{raw ? label.toString() : formatIdentifier(label.toString())}</span>
-		{doc && <div class={`node-doc ${shown ? '' : 'hidden'}`} onClick={e => e.stopPropagation()} dangerouslySetInnerHTML={{ __html: marked(doc) }}></div>}
+		{cleanDoc && <div class={`node-doc ${shown ? '' : 'hidden'}`} onClick={e => e.stopPropagation()} dangerouslySetInnerHTML={{ __html: cleanDoc }}></div>}
 	</label>
 }
 

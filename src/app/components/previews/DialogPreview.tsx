@@ -12,7 +12,7 @@ export const DialogPreview = ({ docAndNode }: PreviewProps) => {
 	const text = docAndNode.doc.getText()
 	const dialog = safeJsonParse(text) ?? {}
 	const type = dialog.type?.replace(/^minecraft:/, '')
-	const footerHeight = type === 'multi_action_input_form' ? 5 : 33
+	const footerHeight = (type === 'dialog_list' || type == 'multi_action' || type == 'server_links') && dialog.exit_action == undefined ? 5 : 33
 
 	useEffect(() => {
 		function resizeHandler() {
@@ -30,9 +30,10 @@ export const DialogPreview = ({ docAndNode }: PreviewProps) => {
 			<img src="/images/dialog/background.webp" alt="" draggable={false} />
 			<div style={'top: 0; left: 0; width: 100%; height: 100%;'}>
 				<DialogTitle title={dialog.title} />
-				<div style={`display: flex; flex-direction: column; gap: ${px(10)}; align-items: center; padding-right: ${px(10)} /* MC-297972 */; overflow-y: auto; height: calc(100% - ${px(33 + footerHeight)})`}>
+				<div style={`display: flex; flex-direction: column; gap: ${px(10)}; align-items: center; overflow-y: auto; height: calc(100% - ${px(33 + footerHeight)})`}>
 					<DialogBody body={dialog.body} />
-					<DialogContent dialog={dialog} />
+					<DialogInputs inputs={dialog.inputs} />
+					<DialogActions dialog={dialog} />
 				</div>
 				<div style={`bottom: 0; left: 0; width: 100%; height: ${px(footerHeight)}; display: flex; justify-content: center; align-items: center;`}>
 					<DialogFooter dialog={dialog} />
@@ -43,7 +44,6 @@ export const DialogPreview = ({ docAndNode }: PreviewProps) => {
 }
 
 function DialogTitle({ title }: { title: any }) {
-	// TODO: add warning button tooltip
 	return <div style={`height: ${px(33)}; display: flex; gap: ${px(10)}; justify-content: center; align-items: center`}>
 		<TextComponent component={title} />
 		<WithTooltip tooltip="This is a custom screen. Click here to learn more.">
@@ -85,7 +85,13 @@ function DialogBody({ body }: { body: any }) {
 	</>
 }
 
-function DialogContent({ dialog }: { dialog: any }) {
+function DialogInputs({ inputs }: { inputs: any[] | undefined }) {
+	return <>
+		{inputs?.map((i: any) => <InputControl input={i} />)}
+	</>
+}
+
+function DialogActions({ dialog }: { dialog: any }) {
 	const type = dialog.type?.replace(/^minecraft:/, '')
 
 	if (type === 'dialog_list') {
@@ -101,8 +107,13 @@ function DialogContent({ dialog }: { dialog: any }) {
 		}
 		return <ColumnsGrid columns={dialog.columns ?? 2}>
 			{dialogs.map((d: any) => {
-				let text = Identifier.parse(d).path.replaceAll('/', ' ').replaceAll('_', ' ')
-				text = text.charAt(0).toUpperCase() + text.substring(1)
+				let text = ''
+				if (typeof d === 'string') {
+					text = Identifier.parse(d).path.replaceAll('/', ' ').replaceAll('_', ' ')
+					text = text.charAt(0).toUpperCase() + text.substring(1)
+				} else {
+					text = d?.external_title ?? d?.title ?? ''
+				}
 				return <Button label={text} width={dialog.button_width ?? 150} />
 			})}
 		</ColumnsGrid>
@@ -116,17 +127,6 @@ function DialogContent({ dialog }: { dialog: any }) {
 		</ColumnsGrid>
 	}
 
-	if (type === 'multi_action_input_form') {
-		return <>
-			{dialog.inputs?.map((i: any) => <InputControl input={i} />)}
-			<ColumnsGrid columns={dialog.columns ?? 2}>
-				{dialog.actions?.map((a: any) =>
-					<Button label={a.label} width={a.width ?? 150} tooltip={a.tooltip} />
-				) ?? []}
-			</ColumnsGrid>
-		</>
-	}
-
 	if (type === 'server_links') {
 		const links = ['Server link 1', 'Server link 2', 'Server link 3']
 		return <ColumnsGrid columns={dialog.columns ?? 2}>
@@ -134,12 +134,6 @@ function DialogContent({ dialog }: { dialog: any }) {
 				return <Button label={text} width={dialog.button_width ?? 150} />
 			})}
 		</ColumnsGrid>
-	}
-
-	if (type === 'simple_input_form') {
-		return <>
-			{dialog.inputs?.map((i: any) => <InputControl input={i} />)}
-		</>
 	}
 
 	return <></>
@@ -155,27 +149,13 @@ function DialogFooter({ dialog }: { dialog: any }) {
 		</div>
 	}
 
-	if (type === 'dialog_list') {
-		return <Button label={{translate: dialog.on_cancel ? 'gui.cancel' : 'gui.back'}} width={200} />
-	}
-
-	if (type === 'multi_action') {
-		return <Button label={{translate: dialog.on_cancel ? 'gui.cancel' : 'gui.back'}} width={200} />
+	if ((type === 'dialog_list' || type == 'multi_action' || type == 'server_links') && dialog.exit_action) {
+		return <Button label={dialog.exit_action.label} width={200} />
 	}
 
 	if (type === 'notice') {
 		return <div style={`display: flex; gap: ${px(8)}; justify-content: center;`}>
 			<Button label={dialog.action?.label ?? {translate: 'gui.ok'}} width={dialog.action?.width ?? 150} tooltip={dialog.action?.tooltip} />
-		</div>
-	}
-
-	if (type === 'server_links') {
-		return <Button label={{translate: dialog.on_cancel ? 'gui.cancel' : 'gui.back'}} width={200} />
-	}
-
-	if (type === 'simple_input_form') {
-		return <div style={`display: flex; gap: ${px(8)}; justify-content: center;`}>
-			<Button label={dialog.action?.label} width={dialog.action?.width ?? 150} tooltip={dialog.action?.tooltip} />
 		</div>
 	}
 
