@@ -50,6 +50,11 @@ struct Pattern {
     regexPattern: #[regex_pattern] string,
 }
 
+type LiteralOrPattern<T> = (
+    #[misode_member_name="Literal"] T |
+    #[misode_member_name="Regex pattern"] Pattern |
+)
+
 
 /// Actions
 
@@ -98,11 +103,11 @@ dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:a
 
 /// # entry
 dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:entry_item] to struct {
-    name: (#[id="item"] string | Pattern),
+    name: LiteralOrPattern<#[id="item"] string>,
 }
 
 /// # table
 dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:table] to struct {
-    identifiers?: [(#[id="loot_table"] string | Pattern)],
-    types?: [(LootContextType | Pattern)],
+    identifiers?: [LiteralOrPattern<#[id="loot_table"] string>],
+    types?: [LiteralOrPattern<LootContextType>],
 }
