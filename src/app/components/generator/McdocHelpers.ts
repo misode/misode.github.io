@@ -42,7 +42,7 @@ export function getRootDefault(id: string, ctx: core.CheckerContext) {
 	return getDefault(type, core.Range.create(0), ctx)
 }
 
-export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: core.CheckerContext): JsonNode {
+export function getDefault(type: McdocType, range: core.Range, ctx: core.CheckerContext): JsonNode {
 	if (type.kind === 'string') {
 		return JsonStringNode.mock(range)
 	}
@@ -391,6 +391,7 @@ export function isSelectRegistry(registry: string) {
 
 const defaultCollapsedTypes = new Set([
 	'::java::data::worldgen::surface_rule::SurfaceRule',
+	'::java::data::worldgen::density_function::DensityFunctionRef'
 ])
 
 export function isDefaultCollapsedType(type: McdocType) {
@@ -399,7 +400,10 @@ export function isDefaultCollapsedType(type: McdocType) {
 	}
 	return false
 }
-
+export function canCollapse(node:JsonNode | undefined)
+{
+	return node !== undefined && (node.type === 'json:array' || node.type == 'json:object');
+}
 interface SimplifyNodeContext {
 	key?: JsonStringNode
 	parent?: JsonObjectNode
