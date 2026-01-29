@@ -407,11 +407,10 @@ export function canCollapse(node:JsonNode | undefined)
 }
 
 interface SimplifyNodeContext {
-	original?: JsonNode
 	key?: JsonStringNode
 	parent?: JsonObjectNode
 }
-export function simplifyType(type: McdocType, ctx: core.CheckerContext, { original, key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
+export function simplifyType(type: McdocType, ctx: core.CheckerContext, { key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
 	const simplifyNode: SimplifyValueNode<JsonNode | undefined> = {
 		entryNode: {
 			parent: parent ? {
@@ -430,8 +429,8 @@ export function simplifyType(type: McdocType, ctx: core.CheckerContext, { origin
 			} : undefined,
 		},
 		node: {
-			originalNode: original,
-			inferredType: original ? inferType(original) : { kind: 'any' },
+			originalNode: undefined,
+			inferredType: { kind: 'any' },
 		},
 	}
 	const context: McdocCheckerContext<JsonNode | undefined> = { 
