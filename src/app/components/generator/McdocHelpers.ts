@@ -406,30 +406,6 @@ export function canCollapse(node:JsonNode | undefined)
 	return node !== undefined && (node.type === 'json:array' || node.type == 'json:object');
 }
 
-export function isRecursiveType(type: McdocType | undefined) {
-	const recursiveReferences = ['::java::data::worldgen::density_function::DensityFunctionRef']
-	const recursiveDispatchers = ['worldgen/density_function',]
-	return (type?.kind == 'reference' && type.path != undefined && recursiveReferences.includes(type.path) )
-		|| (type?.kind == 'dispatcher' && type.parallelIndices.some(v => 
-		{
-			if(v.kind == 'static')
-			{
-				return recursiveDispatchers.includes(v.value)
-			} else if(v.kind == 'dynamic')
-			{
-				for(const index of v.accessor)
-				{
-					if(recursiveDispatchers.includes(index.toString()))
-					{
-						return true;
-					}
-				}
-			}
-			return false
-		})
-	)
-}
-
 interface SimplifyNodeContext {
 	original?: JsonNode
 	key?: JsonStringNode
