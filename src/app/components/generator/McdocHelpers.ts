@@ -2,13 +2,13 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
-import type { Attributes, AttributeValue, DispatcherType, ListType, McdocType, NumericType, PrimitiveArrayType, ReferenceType, StructTypePairField, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import type { Attributes, AttributeValue, DispatcherType, ListType, McdocType, NumericType, PrimitiveArrayType, ReferenceType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { NumericRange, RangeKind } from '@spyglassmc/mcdoc'
+import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import config from '../../Config.js'
 import { randomInt, randomSeed } from '../../Utils.js'
-import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 
 export function getRootType(id: string): McdocType {
 	if (id === 'pack_mcmeta') {
@@ -571,7 +571,7 @@ export function collectRecursiveDefinitions(ctx:core.CheckerContext, type: Mcdoc
 	
 	return recursiveSlots
 }
-function addRecursiveDefinitions(ctx:core.CheckerContext, targetType: ReferenceType, referencedType:McdocType | undefined, recursiveSlots:RecursiveSlots[]) {
+function addRecursiveDefinitions(ctx:core.CheckerContext, targetType: ReferenceType, referencedType:McdocType | undefined, recursiveSlots:RecursiveSlot[]) {
 	if(referencedType == undefined) return;
 	if(referencedType.kind === 'union') {
 		for(const member of referencedType.members){
@@ -624,7 +624,7 @@ function addRecursiveDefinitions(ctx:core.CheckerContext, targetType: ReferenceT
 									const querySymbol:core.Symbol | undefined = ctx.symbols.query(ctx.doc, 'mcdoc', checkType.path).symbol
 									if(!querySymbol?.data) break;
 									checkType = (querySymbol.data as TypeDefSymbolData | undefined)?.typeDef
-								
+								}
 							}
 						}
 					}
