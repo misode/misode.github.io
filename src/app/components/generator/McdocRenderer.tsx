@@ -4,7 +4,7 @@ import type { JsonPairNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
-import { DispatcherType, type ListType, type LiteralType, type McdocType, type NumericType, type PrimitiveArrayType, type ReferenceType, type StringType, type TupleType, type UnionType } from '@spyglassmc/mcdoc'
+import { type ListType, type LiteralType, type McdocType, type NumericType, type PrimitiveArrayType, type StringType, type TupleType, type UnionType } from '@spyglassmc/mcdoc'
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
 import { type SimplifiedEnum, type SimplifiedMcdocType, type SimplifiedMcdocTypeNoUnion, type SimplifiedStructType, type SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
@@ -669,29 +669,6 @@ function StaticField({ pair, index, field, fieldKey, staticFields, isToggled, ex
 		</div>
 		{!isCollapsed && <Body type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
 	</div>
-}
-function isRecursiveType(type: McdocType | undefined) : type is ReferenceType | DispatcherType{
-	const recursiveReferences = ['::java::data::worldgen::density_function::DensityFunctionRef']
-	const recursiveDispatchers = ['worldgen/density_function']
-	return (type?.kind == 'reference' && type.path != undefined && recursiveReferences.includes(type.path) )
-		|| (type?.kind == 'dispatcher' && type.parallelIndices.some(v => 
-		{
-			if(v.kind == 'static')
-			{
-				return recursiveDispatchers.includes(v.value)
-			} else if(v.kind == 'dynamic')
-			{
-				for(const index of v.accessor)
-				{
-					if(recursiveDispatchers.includes(index.toString()))
-					{
-						return true;
-					}
-				}
-			}
-			return false
-		})
-	)
 }
 interface RecursiveContextMenuProps{
 	type: McdocType
