@@ -5,9 +5,8 @@ import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
 import { DispatcherType, type ListType, type LiteralType, type McdocType, type NumericType, type PrimitiveArrayType, type ReferenceType, type StringType, type TupleType, type UnionType } from '@spyglassmc/mcdoc'
-import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
-import { isAssignable, type SimplifiedEnum, type SimplifiedMcdocType, type SimplifiedMcdocTypeNoUnion, type SimplifiedStructType, type SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import { type SimplifiedEnum, type SimplifiedMcdocType, type SimplifiedMcdocTypeNoUnion, type SimplifiedStructType, type SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier as Identifier1204, ItemStack as ItemStack1204 } from 'deepslate-1.20.4/core'
 import { Identifier, ItemStack } from 'deepslate/core'
@@ -25,7 +24,7 @@ import { BtnMenu } from '../BtnMenu.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
 import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
 import { Octicon } from '../Octicon.jsx'
-import { canCollapse, formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
+import { canCollapse, collectRecursiveDefinitions, formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, RecursiveSlot, simplifyType } from './McdocHelpers.js'
 
 export interface McdocContext extends core.CheckerContext {
 	makeEdit: MakeEdit
@@ -694,12 +693,6 @@ function isRecursiveType(type: McdocType | undefined) : type is ReferenceType | 
 		})
 	)
 }
-type RecursiveSlots = {
-	identifier: string
-	dispatcher: DispatcherType
-	fieldKey: string
-	fieldCount: number
-}
 interface RecursiveContextMenuProps{
 	type: McdocType
 	node: JsonNode
@@ -707,108 +700,10 @@ interface RecursiveContextMenuProps{
 }
 function RecursiveContextMenu({type, node, ctx} : RecursiveContextMenuProps){
 	const wrapTargets = useMemo(() => {
-		function addRecursiveDefinitions(mcdoc:core.SymbolMap, targetType: McdocType, referencedType:McdocType | undefined, recursiveSlots:RecursiveSlots[]) {
-			if(referencedType == undefined) return;
-			if(referencedType.kind === 'union') {
-				for(const member of referencedType.members){
-					addRecursiveDefinitions(mcdoc, targetType, member, recursiveSlots)
-				}
-			} else if(referencedType.kind === 'reference' && referencedType.path != undefined) {
-				addRecursiveDefinitions(mcdoc, targetType, (mcdoc[referencedType.path].data as TypeDefSymbolData | undefined)?.typeDef , recursiveSlots);
-			} else if(referencedType.kind === 'struct') {
-				for(const field of referencedType.fields) {
-					if(field.kind === 'spread')
-					{
-						if(field.type.kind === 'dispatcher'){
-							const symbols = ctx.symbols.global['mcdoc/dispatcher']?.[field.type.registry]
-							for(const key in symbols?.members)
-							{
-								const item = symbols.members[key] as core.Symbol
-								if(item == undefined || item.data == undefined) continue;
+		return collectRecursiveDefinitions(ctx, type)
+	}, [type, ctx.doc, ctx.symbols]);
 
-								const itemData = item.data as TypeDefSymbolData;
-								if(itemData.typeDef.kind != 'reference' || itemData.typeDef.path == undefined) continue;
-
-								const simplified = simplifyType(itemData.typeDef, ctx);
-								if(simplified.kind != 'struct') continue;
-							
-								for(const spreadField of simplified.fields){
-									if(spreadField.key.kind !== 'literal') continue;
-									const simpleSpread = simplifyType(spreadField.type, ctx);
-									const canAssign = isAssignable(targetType, simpleSpread, ctx, (inferred, def) => {
-                						if (def.kind === 'boolean') {
-                						    // TODO: this should check whether the value is 0 or 1
-                						    return inferred.kind === 'byte';
-                						}
-                						if (inferred.kind === 'list') {
-                						    return def.kind === 'list' || def.kind === 'tuple';
-                						}
-                						switch (inferred.kind) {
-                						    case 'struct':
-												return def.kind === 'struct';
-                						    case 'byte':
-                						    case 'short':
-                						    case 'int':
-                						    case 'long':
-                						        return ['byte', 'short', 'int', 'long', 'float', 'double'].includes(def.kind);
-                						    case 'float':
-                						    case 'double':
-                						        return ['float', 'double'].includes(def.kind);
-                						    default:
-                						        return false;
-                						}
-            						});
-									if(canAssign)
-									{
-										//spreadField.type.kind === 'reference' && spreadField.type.path === targetType.path
-										recursiveSlots.push({identifier: 'minecraft:' + key, dispatcher: field.type, fieldKey: spreadField.key.value.value.toString(), fieldCount: simplified.fields.length})
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		let recursiveSlots:RecursiveSlots[] = []
-		const mcdoc = ctx.symbols.global['mcdoc'];
-		if(mcdoc == undefined) return recursiveSlots;
-		if(type.kind === 'reference')
-		{
-			if(type.path == undefined) return recursiveSlots;
-			const docValue = ctx.symbols.query(ctx.doc, 'mcdoc', type.path).symbol;
-			if(docValue?.data){
-				addRecursiveDefinitions(mcdoc, simplifyType(type, ctx), (docValue.data as TypeDefSymbolData).typeDef, recursiveSlots);
-			}
-			//const denseVal = mcdoc["::java::data::worldgen::density_function::DensityFunction"];
-			//const symbols = ctx.symbols.global['mcdoc/dispatcher']?.['minecraft:density_function']
-		} else if(type.kind === 'dispatcher')
-		{
-			for(const index of type.parallelIndices)
-			{
-				if(index.kind === 'static')
-				{
-					const docValue = ctx.symbols.query(ctx.doc, 'mcdoc/dispatcher', type.registry, index.value).symbol 
-					if(docValue?.data)
-						addRecursiveDefinitions(mcdoc, simplifyType(type, ctx), (docValue.data as TypeDefSymbolData).typeDef, recursiveSlots);
-				} else if(index.kind === 'dynamic')
-				{
-					for(const accessor of index.accessor)
-					{
-						const docValue = ctx.symbols.query(ctx.doc, 'mcdoc/dispatcher', type.registry, accessor.toString()).symbol 
-						if(docValue?.data)
-							addRecursiveDefinitions(mcdoc, simplifyType(type, ctx), (docValue.data as TypeDefSymbolData).typeDef, recursiveSlots);
-					}
-				}
-			}
-		}
-		
-		return recursiveSlots
-	}, [type, ctx.symbols.global]);
-
-	const onclick = useCallback((wrappable: RecursiveSlots) => {
-		
+	const onclick = useCallback((wrappable: RecursiveSlot) => {
 		ctx.makeEdit(range => {
 			//const keyNode = JsonStringNode.mock(core.Range.create(0))
 			//keyNode.value = 'type'

@@ -2,12 +2,13 @@ import * as core from '@spyglassmc/core'
 import type { JsonNode, JsonPairNode } from '@spyglassmc/json'
 import { JsonArrayNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { JsonStringOptions } from '@spyglassmc/json/lib/parser/string.js'
-import type { Attributes, AttributeValue, ListType, McdocType, NumericType, PrimitiveArrayType, TupleType, UnionType } from '@spyglassmc/mcdoc'
+import type { Attributes, AttributeValue, DispatcherType, ListType, McdocType, NumericType, PrimitiveArrayType, ReferenceType, StructTypePairField, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { NumericRange, RangeKind } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import config from '../../Config.js'
 import { randomInt, randomSeed } from '../../Utils.js'
+import { TypeDefSymbolData } from '@spyglassmc/mcdoc/lib/binder/index.js'
 
 export function getRootType(id: string): McdocType {
 	if (id === 'pack_mcmeta') {
@@ -404,11 +405,37 @@ export function canCollapse(node:JsonNode | undefined)
 {
 	return node !== undefined && (node.type === 'json:array' || node.type == 'json:object');
 }
+
+export function isRecursiveType(type: McdocType | undefined) {
+	const recursiveReferences = ['::java::data::worldgen::density_function::DensityFunctionRef']
+	const recursiveDispatchers = ['worldgen/density_function',]
+	return (type?.kind == 'reference' && type.path != undefined && recursiveReferences.includes(type.path) )
+		|| (type?.kind == 'dispatcher' && type.parallelIndices.some(v => 
+		{
+			if(v.kind == 'static')
+			{
+				return recursiveDispatchers.includes(v.value)
+			} else if(v.kind == 'dynamic')
+			{
+				for(const index of v.accessor)
+				{
+					if(recursiveDispatchers.includes(index.toString()))
+					{
+						return true;
+					}
+				}
+			}
+			return false
+		})
+	)
+}
+
 interface SimplifyNodeContext {
+	original?: JsonNode
 	key?: JsonStringNode
 	parent?: JsonObjectNode
 }
-export function simplifyType(type: McdocType, ctx: core.CheckerContext, { key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
+export function simplifyType(type: McdocType, ctx: core.CheckerContext, { original, key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
 	const simplifyNode: SimplifyValueNode<JsonNode | undefined> = {
 		entryNode: {
 			parent: parent ? {
@@ -427,7 +454,54 @@ export function simplifyType(type: McdocType, ctx: core.CheckerContext, { key, p
 			} : undefined,
 		},
 		node: {
-			originalNode: undefined,
+			originalNode: original,
+			inferredType: original ? inferType(original) : { kind: 'any' },
+		},
+	}
+	const context: McdocCheckerContext<JsonNode | undefined> = { 
+		...ctx,
+		allowMissingKeys: false,
+		requireCanonical: false,
+		isEquivalent: () => false,
+		getChildren: (node) => {
+			if (JsonObjectNode.is(node)) {
+				return node.children.filter(kvp => kvp.key).map(kvp => ({
+					key: { originalNode: kvp.key!, inferredType: inferType(kvp.key!) },
+					possibleValues: kvp.value
+						? [{ originalNode: kvp.value, inferredType: inferType(kvp.value) }]
+						: [],
+				}))
+			}
+			return []
+		},
+		reportError: () => {},
+		attachTypeInfo: () => {},
+		nodeAttacher:  () => {},
+		stringAttacher:  () => {},
+	}
+	const result = simplify(type, { node: simplifyNode, ctx: context })
+	return result.typeDef
+}
+export function simplifyValue(type: McdocType, node:JsonNode, ctx: core.CheckerContext, { key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
+	const simplifyNode: SimplifyValueNode<JsonNode | undefined> = {
+		entryNode: {
+			parent: parent ? {
+				entryNode: {
+					parent: undefined,
+					runtimeKey: undefined,
+				},
+				node: {
+					originalNode: parent,
+					inferredType: inferType(parent),
+				},
+			} : undefined,
+			runtimeKey: key ? {
+				originalNode: key,
+				inferredType: inferType(key),
+			} : undefined,
+		},
+		node: {
+			originalNode: node,
 			inferredType: { kind: 'any' },
 		},
 	}
@@ -455,7 +529,6 @@ export function simplifyType(type: McdocType, ctx: core.CheckerContext, { key, p
 	const result = simplify(type, { node: simplifyNode, ctx: context })
 	return result.typeDef
 }
-
 function inferType(node: JsonNode): Exclude<McdocType, UnionType> {
 	switch (node.type) {
 		case 'json:boolean':
@@ -473,6 +546,115 @@ function inferType(node: JsonNode): Exclude<McdocType, UnionType> {
 			return { kind: 'list', item: { kind: 'any' } }
 		case 'json:object':
 			return { kind: 'struct', fields: [] }
+	}
+}
+
+export type RecursiveSlot = {
+	identifier: string
+	dispatcher: DispatcherType
+	fieldKey: string
+	fieldCount: number
+}
+export function collectRecursiveDefinitions(ctx:core.CheckerContext, type: McdocType){
+	let recursiveSlots:RecursiveSlot[] = []
+	if(type.kind === 'reference')
+	{
+		let finalRefType = type;
+		while(true)
+		{
+			const newTypeDef = (ctx.symbols.query(ctx.doc, 'mcdoc', finalRefType.path!).symbol?.data as TypeDefSymbolData | undefined)?.typeDef
+			if(newTypeDef?.kind === 'reference')
+				finalRefType = newTypeDef
+			else break;
+		}
+		addRecursiveDefinitions(ctx, finalRefType, finalRefType, recursiveSlots);
+	}
+	else if(type.kind === 'dispatcher')
+	{
+		for(const index of type.parallelIndices)
+		{
+			if(index.kind === 'static')
+			{
+				const querySymbol = ctx.symbols.query(ctx.doc, 'mcdoc/dispatcher', type.registry, index.value).symbol
+				const targetType = (querySymbol?.data as TypeDefSymbolData | undefined)?.typeDef
+				if(targetType?.kind === 'reference')
+				{
+					let finalRefType = targetType;
+					while(true)
+					{
+						const newTypeDef = (ctx.symbols.query(ctx.doc, 'mcdoc', finalRefType.path!).symbol?.data as TypeDefSymbolData | undefined)?.typeDef
+						if(newTypeDef?.kind === 'reference')
+							finalRefType = newTypeDef
+						else break;
+					}
+					addRecursiveDefinitions(ctx, finalRefType, finalRefType, recursiveSlots);
+				}
+			}
+		}
+	}
+	
+	return recursiveSlots
+}
+function addRecursiveDefinitions(ctx:core.CheckerContext, targetType: ReferenceType, referencedType:McdocType | undefined, recursiveSlots:RecursiveSlots[]) {
+	if(referencedType == undefined) return;
+	if(referencedType.kind === 'union') {
+		for(const member of referencedType.members){
+			addRecursiveDefinitions(ctx, targetType, member, recursiveSlots)
+		}
+	} else if(referencedType.kind === 'reference' && referencedType.path != undefined) {
+		
+		if(referencedType.path == undefined) return;
+		const docValue = ctx.symbols.query(ctx.doc, 'mcdoc', referencedType.path).symbol;
+		if(!docValue?.data) return;
+		addRecursiveDefinitions(ctx, targetType, (docValue.data as TypeDefSymbolData | undefined)?.typeDef , recursiveSlots);
+	} else if(referencedType.kind === 'dispatcher')
+	{
+		for(const index of referencedType.parallelIndices)
+		{
+			if(index.kind === 'static')
+			{
+				const docValue = ctx.symbols.query(ctx.doc, 'mcdoc/dispatcher', referencedType.registry, index.value).symbol 
+				if(docValue?.data)
+					addRecursiveDefinitions(ctx, targetType, (docValue.data as TypeDefSymbolData).typeDef, recursiveSlots);
+			}
+		}
+	}
+	else if(referencedType.kind === 'struct') {
+		for(const field of referencedType.fields) {
+			if(field.kind === 'spread')
+			{
+				if(field.type.kind === 'dispatcher'){
+					const symbols = ctx.symbols.global['mcdoc/dispatcher']?.[field.type.registry]
+					for(const key in symbols?.members)
+					{
+						const item = symbols.members[key] as core.Symbol
+						if(item == undefined || item.data == undefined) continue
+						const itemData = item.data as TypeDefSymbolData;
+						if(itemData.typeDef.kind != 'reference' || itemData.typeDef.path == undefined) continue
+						const simplified = simplifyType(itemData.typeDef, ctx);
+						if(simplified.kind != 'struct') continue;
+					
+						for(const spreadField of simplified.fields){
+							if(spreadField.key.kind !== 'literal') continue;
+							let checkType: McdocType | undefined = spreadField.type;
+							while(checkType !== undefined && checkType.kind === 'reference' && checkType.path)
+							{
+								if(checkType.path === targetType.path)
+								{
+									recursiveSlots.push({identifier: 'minecraft:' + key, dispatcher: field.type, fieldKey: spreadField.key.value.value.toString(), fieldCount: simplified.fields.length})
+									break;
+								}
+								else{
+									const querySymbol:core.Symbol | undefined = ctx.symbols.query(ctx.doc, 'mcdoc', checkType.path).symbol
+									if(!querySymbol?.data) break;
+									checkType = (querySymbol.data as TypeDefSymbolData | undefined)?.typeDef
+								
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
