@@ -457,53 +457,7 @@ export function simplifyType(type: McdocType, ctx: core.CheckerContext, { key, p
 	const result = simplify(type, { node: simplifyNode, ctx: context })
 	return result.typeDef
 }
-export function simplifyValue(type: McdocType, node:JsonNode, ctx: core.CheckerContext, { key, parent }: SimplifyNodeContext = {}): SimplifiedMcdocType {
-	const simplifyNode: SimplifyValueNode<JsonNode | undefined> = {
-		entryNode: {
-			parent: parent ? {
-				entryNode: {
-					parent: undefined,
-					runtimeKey: undefined,
-				},
-				node: {
-					originalNode: parent,
-					inferredType: inferType(parent),
-				},
-			} : undefined,
-			runtimeKey: key ? {
-				originalNode: key,
-				inferredType: inferType(key),
-			} : undefined,
-		},
-		node: {
-			originalNode: node,
-			inferredType: { kind: 'any' },
-		},
-	}
-	const context: McdocCheckerContext<JsonNode | undefined> = { 
-		...ctx,
-		allowMissingKeys: false,
-		requireCanonical: false,
-		isEquivalent: () => false,
-		getChildren: (node) => {
-			if (JsonObjectNode.is(node)) {
-				return node.children.filter(kvp => kvp.key).map(kvp => ({
-					key: { originalNode: kvp.key!, inferredType: inferType(kvp.key!) },
-					possibleValues: kvp.value
-						? [{ originalNode: kvp.value, inferredType: inferType(kvp.value) }]
-						: [],
-				}))
-			}
-			return []
-		},
-		reportError: () => {},
-		attachTypeInfo: () => {},
-		nodeAttacher:  () => {},
-		stringAttacher:  () => {},
-	}
-	const result = simplify(type, { node: simplifyNode, ctx: context })
-	return result.typeDef
-}
+
 function inferType(node: JsonNode): Exclude<McdocType, UnionType> {
 	switch (node.type) {
 		case 'json:boolean':
