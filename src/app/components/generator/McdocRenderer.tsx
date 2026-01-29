@@ -4,9 +4,9 @@ import type { JsonPairNode } from '@spyglassmc/json'
 import * as json from '@spyglassmc/json'
 import { JsonArrayNode, JsonBooleanNode, JsonNode, JsonNumberNode, JsonObjectNode, JsonStringNode } from '@spyglassmc/json'
 import { localeQuote } from '@spyglassmc/locales'
-import { type ListType, type LiteralType, type McdocType, type NumericType, type PrimitiveArrayType, type StringType, type TupleType, type UnionType } from '@spyglassmc/mcdoc'
+import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType, StringType, TupleType, UnionType } from '@spyglassmc/mcdoc'
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
-import { type SimplifiedEnum, type SimplifiedMcdocType, type SimplifiedMcdocTypeNoUnion, type SimplifiedStructType, type SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
+import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
 import { Identifier as Identifier1204, ItemStack as ItemStack1204 } from 'deepslate-1.20.4/core'
 import { Identifier, ItemStack } from 'deepslate/core'
@@ -54,7 +54,7 @@ export function McdocRoot({ type, rootType, node, ctx } : McdocRootProps) {
 			<Errors type={type} node={node} ctx={ctx} />
 			<Key label={locale('root')} />
 			<Head type={type} node={node} ctx={ctx} />
-			{/* isRecursiveType(rootType) && */node != undefined && <RecursiveContextMenu type={rootType} node={node} ctx={ctx}/>}
+			{node != undefined && <RecursiveContextMenu type={rootType} node={node} ctx={ctx}/>}
 		</div>
 		<Body type={type} node={node} ctx={ctx} />
 	</>
@@ -665,7 +665,7 @@ function StaticField({ pair, index, field, fieldKey, staticFields, isToggled, ex
 			)}
 			<Key label={fieldKey} doc={field.desc} />
 			{!isCollapsed && <Head type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
-			{/* isRecursiveType(field.type) && */child != undefined && <RecursiveContextMenu type={field.type} node={child} ctx={fieldCtx}/>}
+			{child != undefined && <RecursiveContextMenu type={field.type} node={child} ctx={fieldCtx}/>}
 		</div>
 		{!isCollapsed && <Body type={childType} node={child} optional={field.optional} ctx={fieldCtx} />}
 	</div>
