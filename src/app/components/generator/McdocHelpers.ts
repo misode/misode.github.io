@@ -482,21 +482,27 @@ export type RecursiveSlot = {
 	identifier: string
 	dispatcher: DispatcherType
 	fieldKey: string
+	isArrayField?: boolean
 	fieldCount: number
+}
+function simplifyReference(type: ReferenceType, ctx:core.CheckerContext)
+{
+	let finalRefType = type;
+	while(true)
+	{
+		const newTypeDef = (ctx.symbols.query(ctx.doc, 'mcdoc', finalRefType.path!).symbol?.data as TypeDefSymbolData | undefined)?.typeDef
+		if(newTypeDef?.kind === 'reference')
+			finalRefType = newTypeDef
+		else break;
+	}
+	return finalRefType;
 }
 export function collectRecursiveDefinitions(ctx:core.CheckerContext, type: McdocType){
 	let recursiveSlots:RecursiveSlot[] = []
 	if(type.kind === 'reference')
 	{
-		let finalRefType = type;
-		while(true)
-		{
-			const newTypeDef = (ctx.symbols.query(ctx.doc, 'mcdoc', finalRefType.path!).symbol?.data as TypeDefSymbolData | undefined)?.typeDef
-			if(newTypeDef?.kind === 'reference')
-				finalRefType = newTypeDef
-			else break;
-		}
-		addRecursiveDefinitions(ctx, finalRefType, finalRefType, recursiveSlots);
+		const targetType = simplifyReference(type, ctx);
+		addRecursiveDefinitions(ctx, targetType, targetType, recursiveSlots);
 	}
 	else if(type.kind === 'dispatcher')
 	{
@@ -505,18 +511,11 @@ export function collectRecursiveDefinitions(ctx:core.CheckerContext, type: Mcdoc
 			if(index.kind === 'static')
 			{
 				const querySymbol = ctx.symbols.query(ctx.doc, 'mcdoc/dispatcher', type.registry, index.value).symbol
-				const targetType = (querySymbol?.data as TypeDefSymbolData | undefined)?.typeDef
-				if(targetType?.kind === 'reference')
+				const dispatchedType = (querySymbol?.data as TypeDefSymbolData | undefined)?.typeDef
+				if(dispatchedType?.kind === 'reference')
 				{
-					let finalRefType = targetType;
-					while(true)
-					{
-						const newTypeDef = (ctx.symbols.query(ctx.doc, 'mcdoc', finalRefType.path!).symbol?.data as TypeDefSymbolData | undefined)?.typeDef
-						if(newTypeDef?.kind === 'reference')
-							finalRefType = newTypeDef
-						else break;
-					}
-					addRecursiveDefinitions(ctx, finalRefType, finalRefType, recursiveSlots);
+					const targetType = simplifyReference(dispatchedType, ctx);
+					addRecursiveDefinitions(ctx, targetType, targetType, recursiveSlots);
 				}
 			}
 		}
@@ -561,23 +560,35 @@ function addRecursiveDefinitions(ctx:core.CheckerContext, targetType: ReferenceT
 						const itemData = item.data as TypeDefSymbolData;
 						if(itemData.typeDef.kind != 'reference' || itemData.typeDef.path == undefined) continue
 						const simplified = simplifyType(itemData.typeDef, ctx);
-						if(simplified.kind != 'struct') continue;
-					
-						for(const spreadField of simplified.fields){
-							if(spreadField.key.kind !== 'literal') continue;
-							let checkType: McdocType | undefined = spreadField.type;
-							while(checkType !== undefined && checkType.kind === 'reference' && checkType.path)
-							{
-								if(checkType.path === targetType.path)
+						if(simplified.kind === 'struct')
+						{
+							for(const spreadField of simplified.fields){
+								if(spreadField.key.kind !== 'literal') continue;
+								if(spreadField.type.kind === 'reference')
 								{
-									recursiveSlots.push({identifier: 'minecraft:' + key, dispatcher: field.type, fieldKey: spreadField.key.value.value.toString(), fieldCount: simplified.fields.length})
-									break;
+									if(simplifyReference(spreadField.type, ctx).path === targetType.path)
+									{
+										recursiveSlots.push({identifier: 'minecraft:' + key, dispatcher: field.type, fieldKey: spreadField.key.value.value.toString(), fieldCount: simplified.fields.length})
+									}
 								}
-								else{
-									const querySymbol:core.Symbol | undefined = ctx.symbols.query(ctx.doc, 'mcdoc', checkType.path).symbol
-									if(!querySymbol?.data) break;
-									checkType = (querySymbol.data as TypeDefSymbolData | undefined)?.typeDef
+								else if(spreadField.type.kind === 'list' && spreadField.type.item.kind === 'reference'){
+									if(simplifyReference(spreadField.type.item, ctx).path === targetType.path)
+									{
+										recursiveSlots.push({identifier: 'minecraft:' + key, dispatcher: field.type, fieldKey: spreadField.key.value.value.toString(), isArrayField: true, fieldCount: simplified.fields.length})
+									}
 								}
+								// else if(spreadField.type.kind === 'struct') {
+								// 	for(const childField of spreadField.type.fields)
+								// 	{
+								// 		console.log('todo', childField);
+								// 	}
+								// }
+								// else if(spreadField.type.kind === 'union') {
+								// 	for(const childMember of spreadField.type.members)
+								// 	{
+								// 		console.log('todo', childMember);
+								// 	}
+								// }
 							}
 						}
 					}

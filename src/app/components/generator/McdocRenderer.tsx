@@ -718,6 +718,19 @@ function RecursiveContextMenu({type, node, ctx} : RecursiveContextMenuProps){
 				}
 			}
 			
+			let assignedNode = node;
+
+			if(wrappable.isArrayField)
+			{
+				const arrayNode = JsonArrayNode.mock(core.Range.create(0));
+				arrayNode.children.push(
+					{
+						type: 'item',
+						range: core.Range.create(0),
+						value: assignedNode
+					});
+				assignedNode = arrayNode
+			}
 
 			let childKeyNode = JsonStringNode.mock(core.Range.create(0));
 			childKeyNode.value = wrappable.fieldKey
@@ -725,7 +738,7 @@ function RecursiveContextMenu({type, node, ctx} : RecursiveContextMenuProps){
 				type: 'pair',
 				range: core.Range.create(0),
 				key: childKeyNode,
-				value: node,
+				value: assignedNode,
 			}
 			objectNode.children.push(newPair)
 			
