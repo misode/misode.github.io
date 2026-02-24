@@ -362,7 +362,6 @@
   "versions.data_version": "Data version",
   "versions.diff": "Mcmeta diff",
   "versions.fixes": "Fixed bugs",
-  "versions.fixes.no_results": "No fixes",
   "versions.latest_release": "Latest release",
   "versions.latest_snapshot": "Latest snapshot",
   "versions.minecraft_versions": "Minecraft Versions",
