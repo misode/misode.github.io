@@ -384,5 +384,8 @@
     "inline": "Inline",
     "partner.ad_astra": "Ad Astra",
     "generator.neoforge:data_map_acceptable_villager_distances": "Datenkarte akzeptabler Dorfbewohner-Distanzen",
-    "generator.neoforge:data_map_villager_types": "Datenkarte von Dorfbewohner-Biom-Typen"
+    "generator.neoforge:data_map_villager_types": "Datenkarte von Dorfbewohner-Biom-Typen",
+    "generator.loot-table-modifier:loot_modifier": "Beutetabellemodifikator",
+    "generator.neoforge:data_map_strippables": "Entrindbare Datenzuordnung",
+    "partner.loot-table-modifier": "Beutetabllenmodifikator"
 }
