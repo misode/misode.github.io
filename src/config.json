@@ -238,12 +238,12 @@
     {
       "id": "advancement",
       "url": "advancement",
-      "wiki": "https://minecraft.wiki/w/Custom_advancement"
+      "wiki": "https://minecraft.wiki/w/Advancement_definition"
     },
     {
       "id": "recipe",
       "url": "recipe",
-      "wiki": "https://minecraft.wiki/w/Recipe#JSON_format"
+      "wiki": "https://minecraft.wiki/w/Recipe_(Java_Edition)#JSON_format"
     },
     {
       "id": "chat_type",
@@ -271,7 +271,7 @@
       "id": "banner_pattern",
       "url": "banner-pattern",
       "minVersion": "1.20.5",
-      "wiki": "https://minecraft.wiki/w/Banner/Patterns#JSON_Format"
+      "wiki": "https://minecraft.wiki/w/Banner_pattern_definition"
     },
     {
       "id": "wolf_variant",
@@ -288,7 +288,7 @@
       "id": "enchantment",
       "url": "enchantment",
       "minVersion": "1.21",
-      "wiki": "https://minecraft.wiki/w/Custom_enchantment"
+      "wiki": "https://minecraft.wiki/w/Enchantment_definition"
     },
     {
       "id": "enchantment_provider",
@@ -300,7 +300,7 @@
       "id": "painting_variant",
       "url": "painting-variant",
       "minVersion": "1.21",
-      "wiki": "https://minecraft.wiki/w/Painting_variant"
+      "wiki": "https://minecraft.wiki/w/Painting_variant_definition"
     },
     {
       "id": "jukebox_song",
@@ -394,19 +394,19 @@
       "id": "text_component",
       "url": "text-component",
       "noPath": true,
-      "wiki": "https://minecraft.wiki/w/Raw_JSON_text_format#Java_Edition"
+      "wiki": "https://minecraft.wiki/w/Text_component_format#Java_Edition"
     },
     {
       "id": "pack_mcmeta",
       "url": "pack-mcmeta",
-      "wiki": "https://minecraft.wiki/w/Data_pack#pack.mcmeta"
+      "wiki": "https://minecraft.wiki/w/pack.mcmeta"
     },
     {
       "id": "dimension",
       "url": "dimension",
       "tags": ["worldgen"],
       "minVersion": "1.16",
-      "wiki": "https://minecraft.wiki/w/Custom_dimension"
+      "wiki": "https://minecraft.wiki/w/Dimension_definition"
     },
     {
       "id": "dimension_type",
@@ -420,14 +420,14 @@
       "url": "worldgen/biome",
       "tags": ["worldgen"],
       "minVersion": "1.16",
-      "wiki": "https://minecraft.wiki/w/Custom_biome"
+      "wiki": "https://minecraft.wiki/w/Biome_definition"
     },
     {
       "id": "worldgen/configured_carver",
       "url": "worldgen/carver",
       "tags": ["worldgen"],
       "minVersion": "1.16",
-      "wiki": "https://minecraft.wiki/w/Custom_carver"
+      "wiki": "https://minecraft.wiki/w/Carver_definition"
     },
     {
       "id": "worldgen/configured_feature",
@@ -462,7 +462,7 @@
       "url": "worldgen/noise-settings",
       "tags": ["worldgen"],
       "minVersion": "1.16",
-      "wiki": "https://minecraft.wiki/w/Custom_noise_settings"
+      "wiki": "https://minecraft.wiki/w/Noise_settings"
     },
     {
       "id": "worldgen/configured_structure_feature",
@@ -476,7 +476,7 @@
       "url": "worldgen/structure",
       "tags": ["worldgen"],
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Custom_structure"
+      "wiki": "https://minecraft.wiki/w/Structure_definition"
     },
     {
       "id": "worldgen/structure_set",
@@ -512,14 +512,14 @@
       "url": "worldgen/world-preset",
       "tags": ["worldgen"],
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Custom_world_preset"
+      "wiki": "https://minecraft.wiki/w/World_preset_definition"
     },
     {
       "id": "worldgen/flat_level_generator_preset",
       "url": "worldgen/flat-world-preset",
       "tags": ["worldgen"],
       "minVersion": "1.19",
-      "wiki": "https://minecraft.wiki/w/Custom_world_preset#Superflat_Level_Generation_Preset"
+      "wiki": "https://minecraft.wiki/w/World_preset_definition#Superflat_Level_Generation_Preset"
     },
     {
       "id": "world",
@@ -739,7 +739,7 @@
       "path": "equipment",
       "tags": ["assets"],
       "minVersion": "1.21.4",
-      "wiki": "https://minecraft.wiki/w/Model#Equipment_models"
+      "wiki": "https://minecraft.wiki/w/Equipment"
     },
     {
       "id": "lang",
@@ -754,7 +754,7 @@
       "path": "font",
       "tags": ["assets"],
       "minVersion": "1.16",
-      "wiki": "https://minecraft.wiki/w/Resource_pack#Fonts"
+      "wiki": "https://minecraft.wiki/w/Font#Providers"
     },
     {
       "id": "atlas",
@@ -762,7 +762,7 @@
       "path": "atlases",
       "tags": ["assets"],
       "minVersion": "1.19.3",
-      "wiki": "https://minecraft.wiki/w/Resource_pack#Atlases"
+      "wiki": "https://minecraft.wiki/w/Atlas"
     },
     {
       "id": "post_effect",
