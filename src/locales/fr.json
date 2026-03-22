@@ -381,5 +381,7 @@
     "generator.thermoo:predicate": "Prédicats de Thermoo",
     "generator.timeline": "Chronologie",
     "generator.pixelmon:raid_ally_set": "Ensemble d'alliés de Raid Pixelmon",
-    "generator.pixelmon:raid_spawn_set": "Ensemble de spawns de Raid Pixelmon"
+    "generator.pixelmon:raid_spawn_set": "Ensemble de spawns de Raid Pixelmon",
+    "generator.loot-table-modifier:loot_modifier": "Modificateur de butin",
+    "partner.loot-table-modifier": "Modificateur de table de butin"
 }
