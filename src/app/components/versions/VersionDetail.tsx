@@ -88,10 +88,10 @@ function getFixesLink(version: string) {
 	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-snapshot-(\d+)$/)) && match[1] && match[2]) {
 		return FIXES_PREFIX + encodeURIComponent(`${match[1]} Snapshot ${match[2]}`)
 	}
-	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-pre(\d+)$/)) && match[1] && match[2]) {
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-pre-?(\d+)$/)) && match[1] && match[2]) {
 		return FIXES_PREFIX + encodeURIComponent(`${match[1]} Pre-Release ${match[2]}`)
 	}
-	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-rc(\d+)$/)) && match[1]) {
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-rc-?(\d+)$/)) && match[1]) {
 		return FIXES_PREFIX + encodeURIComponent(`${match[1]} Release Candidate ${match[2]}`)
 	}
 	return FIXES_PREFIX + encodeURIComponent(version)
@@ -162,10 +162,10 @@ function getArticleLink(version: string): string | undefined {
 	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-snapshot-(\d+)$/)) && match[1] && match[2]) {
 		return ARTICLE_PREFIX + 'minecraft-' + match[1].replaceAll('.', '-') + '-snapshot-' + match[2]
 	}
-	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-pre(\d+)$/)) && match[1] && match[2]) {
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-pre-?(\d+)$/)) && match[1] && match[2]) {
 		return ARTICLE_PREFIX + 'minecraft-' + match[1].replaceAll('.', '-') + '-pre-release-' + match[2]
 	}
-	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-rc(\d+)$/)) && match[1]) {
+	if ((match = version.match(/^(\d+\.\d+(?:\.\d+)?)-rc-?(\d+)$/)) && match[1]) {
 		return ARTICLE_PREFIX + 'minecraft-' + match[1].replaceAll('.', '-') + '-release-candidate-' + match[2] 
 	}
 	if (version.match(/^\d+\.\d+(\.\d+)?$/)) {
