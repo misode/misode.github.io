@@ -212,9 +212,9 @@
     },
     {
       "id": "26.1",
-      "dynamic": true,
-      "name": "26.1 (dev)",
-      "pack_format": 95,
+      "ref": "26.1.1",
+      "name": "26.1 — 26.1.1",
+      "pack_format": 101,
       "show": true
     }
   ],
