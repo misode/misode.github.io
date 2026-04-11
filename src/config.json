@@ -213,7 +213,14 @@
     {
       "id": "26.1",
       "ref": "26.1.1",
-      "name": "26.1 — 26.1.1",
+      "name": "26.1",
+      "pack_format": 101,
+      "show": true
+    },
+    {
+      "id": "26.2",
+      "dynamic": true,
+      "name": "26.2",
       "pack_format": 101,
       "show": true
     }
@@ -388,7 +395,13 @@
     {
       "id": "trade_set",
       "url": "trade-set",
-      "minVersion": "26.1"
+      "minVersion": "26.1",
+      "wiki": "https://minecraft.wiki/w/Trade_set"
+    },
+    {
+      "id": "sulfur_cube_archetype",
+      "url": "sulfur-cube-archetype",
+      "minVersion": "26.2"
     },
     {
       "id": "text_component",
