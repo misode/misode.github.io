@@ -18,7 +18,7 @@
     "configure_layers": "Выбрать слой",
     "contributor.code": "Коддер",
     "contributor.infrastructure": "Инфраструктура",
-    "contributor.report": "QA",
+    "contributor.report": "Отчёт об ошибке",
     "contributor.support": "Поддержка",
     "contributor.translation": "Переводчик",
     "copied": "Скопировано!",
@@ -154,7 +154,7 @@
     "preview.weather.rain": "Дождь",
     "preview.weather.thunder": "Гроза",
     "preview.width": "Ширина",
-    "project.cancel": "Отмена",
+    "project.cancel": "Отменить",
     "project.create": "Создать новый проект",
     "project.delete": "Удалить проект",
     "project.delete_confirm.1": "Вы собираетесь удалить %0%",
@@ -389,5 +389,12 @@
     "generator.loot-table-modifier:loot_modifier": "Модификатор выпадение",
     "generator.tag/zombie_nautilus_variant": "Тэг варианта зомби-наутилуса",
     "generator.zombie_nautilus_variant": "Вариант зомби-наутилуса",
-    "partner.loot-table-modifier": "Модификатор таблицы выпадения"
+    "partner.loot-table-modifier": "Модификатор таблицы выпадения",
+    "generator.tag/timeline": "Тег Временной Шкалы",
+    "generator.villager_trade": "Торг с жителем",
+    "generator.tag/villager_trade": "Тег Продаж Жителя",
+    "generator.timeline": "Временная Шкала",
+    "generator.sulfur_cube_archetype": "Архетип Серного Куба",
+    "generator.tag/trade_set": "Тег Набора Торговли",
+    "generator.trade_set": "Набор Торговли"
 }
