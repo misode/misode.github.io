@@ -26,5 +26,15 @@ struct CustomEntity {
 		weight: int @ 1..,
 		requires_sky: boolean,
 		speleothem_caves: boolean
+	},
+	visuals: struct {
+		texture: string,
+		model_id: NamespacedId,
+		sound_personality: enum(string) {
+			None = "none",
+			Royal = "royal",
+			Moody = "moody",
+			Mini = "mini"
+		}
 	}
 }
