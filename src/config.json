@@ -31,6 +31,11 @@
       "mc": "fr_fr"
     },
     {
+      "code": "hi",
+      "name": "हिन्दी",
+      "mc": "hi_in"
+    },
+    {
       "code": "it",
       "name": "Italiano",
       "mc": "it_it"
