@@ -227,6 +227,12 @@
   ],
   "generators": [
     {
+  "id": "custom-entity",
+  "url": "/custom-entity/",
+  "dependency": "custom_entity",
+  "tags": ["datapack", "entity", "26.x"]
+},
+    {
       "id": "loot_table",
       "url": "loot-table",
       "wiki": "https://minecraft.wiki/w/Loot_table"
