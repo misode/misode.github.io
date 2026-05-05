@@ -1,0 +1,30 @@
+struct CustomEntity {
+	base_type: NamespacedId,
+	display_name: TextComponent,
+	[[min(0.1), max(10.0)]]
+	scale: float,
+	attributes: struct {
+		max_health: float @ 1..2048,
+		movement_speed: float,
+		attack_damage: float,
+		bounciness: float,
+		friction_modifier: float
+	},
+	behavior: struct {
+		is_immune_to_fire: boolean,
+		can_pick_up_loot: boolean,
+		silent: boolean,
+		attack_type: enum(string) {
+			Melee = "melee",
+			Ranged = "ranged",
+			Explosive = "explosive",
+			Geyser = "geyser"
+		}
+	},
+	spawning: struct {
+		biomes: [NamespacedId],
+		weight: int @ 1..,
+		requires_sky: boolean,
+		speleothem_caves: boolean
+	}
+}
