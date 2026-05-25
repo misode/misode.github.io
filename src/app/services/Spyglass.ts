@@ -313,6 +313,10 @@ export class SpyglassService {
 							world: {
 								category: 'world',
 							},
+							// Temporary until spyglass core is updated
+							sulfur_cube_archetype : {
+								category: 'sulfur_cube_archetype',
+							},
 							// Partner resources
 							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
 								[gen.path ?? gen.id, {
