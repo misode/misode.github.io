@@ -1115,8 +1115,8 @@
     },
     {
       "id": "starexpress:guidebook_entry",
-      "url": "starexpress/guidebook_entry",
-      "path": "starexpress",
+      "url": "starexpress/guidebook-entry",
+      "path": "guidebook_entries",
       "tags": ["partners"],
       "dependency": "starexpress",
       "wiki": "https://github.com/AussieBox/StarryExpress/wiki/The-Guidebook",
