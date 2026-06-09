@@ -1112,6 +1112,15 @@
       "dependency": "pixelmon",
       "wiki": "https://pixelmonmod.com/wiki/",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "starexpress:guidebook_entry",
+      "url": "starexpress/guidebook-entry",
+      "path": "guidebook_entries",
+      "tags": ["partners"],
+      "dependency": "starexpress",
+      "wiki": "https://github.com/AussieBox/StarryExpress/wiki/The-Guidebook",
+      "minVersion": "1.21.1"
     }
   ],
   "legacyGuides": [
