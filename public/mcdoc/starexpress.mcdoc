@@ -1,0 +1,175 @@
+use ::java::util::BlockState
+use ::java::world::item::ItemStack
+
+dispatch minecraft:resource[starexpress:guidebook_entry] to struct GuidebookEntry {
+	/// The guidebook entry's title. Can point to a translation key, and supports MiniMessage.
+	title: string,
+	/// The guidebook entry's subtitle. Can point to a translation key, and supports MiniMessage.
+	subtitle?: string,
+	/// Keywords that replace all instances of themselves with a link to this guidebook entry. All keywords must be a translation key.
+	keywords?: [string],
+	description: [DescriptionElement]
+}
+
+enum(string) ElementType {
+	/// Represents a block.
+	BlockElement = "block",
+	/// Represents a fake hotbar. Displays up to 9 stacks of items.
+	HotbarElement = "hotbar",
+	/// Represents an item.
+	ItemElement = "item",
+	/// Represents a semi-transparent line.
+	SpacerElement = "spacer",
+	/// Represents text. Can point to a translation key, and supports MiniMessage.
+	TextElement = "text",
+	/// Represents a texture. Takes a full path (e.g. "minecraft:textures/item/diamond.png").
+	TextureElement = "texture",
+	/// Represents text alongside a block. Text can point to a translation key, and supports MiniMessage.
+	TextWithBlockElement = "text_with_block",
+	/// Represents text alongside an item. Text can point to a translation key, and supports MiniMessage.
+	TextWithItemElement = "text_with_item",
+	/// Represents text alongside a texture. Text can point to a translation key, and supports MiniMessage. Texture takes a full path (e.g. "minecraft:textures/item/diamond.png").
+	TextWithTextureElement = "text_with_texture",
+
+	/// Checks if the given variable is either true or false, and returns a different element depending on the outcome.
+	BooleanConditional = "conditional_boolean",
+	/// Checks if the given variable contains the given string, and returns a different element depending on the outcome.
+	StringContainsConditional = "conditional_string_contains",
+	/// Checks if the given variable matches the given string, and returns a different element depending on the outcome.
+	StringMatchesConditional = "conditional_string_matches"
+}
+
+type DescriptionElement = struct {
+	/// A unique ID for the element. No other element in the guidebook entry can have this ID.
+	id: string,
+	/// The element's type. Controls what the element represents and what it requires as input.
+	type: ElementType,
+	...starexpress:guidebook_entry[[type]],
+}
+
+dispatch starexpress:guidebook_entry[block] to struct {
+	/// The BlockState to display.
+	block: BlockState,
+	/// The size of the displayed BlockState. Defaults to 16.
+	sizing?: int
+}
+
+dispatch starexpress:guidebook_entry[hotbar] to struct {
+	/// The ItemStack in the hotbar's first slot.
+	item0?: ItemStack,
+	/// The ItemStack in the hotbar's second slot.
+	item1?: ItemStack,
+	/// The ItemStack in the hotbar's third slot.
+	item2?: ItemStack,
+	/// The ItemStack in the hotbar's fourth slot.
+	item3?: ItemStack,
+	/// The ItemStack in the hotbar's fifth slot.
+	item4?: ItemStack,
+	/// The ItemStack in the hotbar's sixth slot.
+	item5?: ItemStack,
+	/// The ItemStack in the hotbar's seventh slot.
+	item6?: ItemStack,
+	/// The ItemStack in the hotbar's eighth slot.
+	item7?: ItemStack,
+	/// The ItemStack in the hotbar's ninth slot.
+	item8?: ItemStack
+}
+
+dispatch starexpress:guidebook_entry[item] to struct {
+	/// The ItemStack to display.
+	item: ItemStack,
+	/// The size of the displayed ItemStack. Defaults to 16.
+	sizing?: int
+}
+
+dispatch starexpress:guidebook_entry[spacer] to struct {
+	
+}
+
+dispatch starexpress:guidebook_entry[text] to struct {
+	/// The text to display. Can point to a translation key, and supports MiniMessage.
+	text: string
+}
+
+dispatch starexpress:guidebook_entry[texture] to struct {
+	/// The texture to display. Takes a full path (e.g. "minecraft:textures/item/diamond.png").
+	texture: #[id="texture"] string,
+	/// The native width of the texture.
+	width: int,
+	/// The native width of the texture.
+	height: int,
+	/// The width of the texture when displayed on-screen.
+	region_width?: int,
+	/// The height of the texture when displayed on-screen.
+	region_height?: int
+}
+
+dispatch starexpress:guidebook_entry[text_with_block] to struct {
+	/// The text to display. Can point to a translation key, and supports MiniMessage.
+	text: string,
+	/// The alignment of the text. The displayed BlockState will appear on the opposite side.
+	text_alignment: ("left" | "right"),
+	/// The BlockState to display.
+	block: BlockState,
+	/// The size of the displayed BlockState. Defaults to 16.
+	sizing?: int
+}
+
+dispatch starexpress:guidebook_entry[text_with_item] to struct {
+	/// The text to display. Can point to a translation key, and supports MiniMessage.
+	text: string,
+	/// The alignment of the text. The displayed ItemStack will appear on the opposite side.
+	text_alignment: ("left" | "right"),
+	/// The ItemStack to display.
+	item: ItemStack,
+	/// The size of the displayed ItemStack. Defaults to 16.
+	sizing?: int
+}
+
+dispatch starexpress:guidebook_entry[text_with_texture] to struct {
+	/// The text to display. Can point to a translation key, and supports MiniMessage.
+	text: string,
+	/// The alignment of the text. The displayed texture will appear on the opposite side.
+	text_alignment: ("left" | "right"),
+	/// The texture to display. Takes a full path (e.g. "minecraft:textures/item/diamond.png").
+	texture: #[id="texture"] string,
+	/// The native width of the texture.
+	width: int,
+	/// The native width of the texture.
+	height: int,
+	/// The width of the texture when displayed on-screen.
+	region_width?: int,
+	/// The height of the texture when displayed on-screen.
+	region_height?: int
+}
+
+dispatch starexpress:guidebook_entry[conditional_boolean] to struct {
+	/// The variable to check. Returns its value, and errors if the variable is not a boolean.
+	variable: #[id="variable"] string,
+	/// The element to return if the result is true.
+	true?: DescriptionElement,
+	/// The element to return if the result is false.
+	false?: DescriptionElement,
+}
+
+dispatch starexpress:guidebook_entry[conditional_string_contains] to struct {
+	/// The variable to check. Returns true if it contains the given regex, and errors if the variable is not a string or text.
+	variable: #[id="variable"] string,
+	/// The regex that the variable must contain in order to return true.
+	regex: string,
+	/// The element to return if the result is true.
+	true?: DescriptionElement,
+	/// The element to return if the result is false.
+	false?: DescriptionElement,
+}
+
+dispatch starexpress:guidebook_entry[conditional_string_matches] to struct {
+	/// The variable to check. Returns true if it matches the given regex, and errors if the variable is not a string or text.
+	variable: #[id="variable"] string,
+	/// The regex that the variable must match in order to return true.
+	regex: string,
+	/// The element to return if the result is true.
+	true?: DescriptionElement,
+	/// The element to return if the result is false.
+	false?: DescriptionElement,
+}
