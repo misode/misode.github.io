@@ -1,0 +1,49 @@
+
+dispatch minecraft:resource[treeplacer:sapling_overrides] to struct TreeplacerSaplingOverrides {
+	/// Should this override other datapack's files of the same name. False will merge them. Default to false
+	replace: boolean,
+	/// Dictionary of keys (biome or block ids) to their features.
+	/// Tags do not work yet.
+	/// Biomes apply the rule when the sapling is inside them. 
+	/// Blocks apply whenever that sapling is on them.
+	/// Order of rule application: Block > Biome > All_Biomes > Vanilla
+	values: SaplingEntries
+}
+struct SaplingEntries {
+	[Key]: (#[id=feature]string | FeatureEntry | [FeatureEntry]),
+}
+
+type Key = (
+    string |
+    "treeplacer:all_biomes"
+)
+
+struct FeatureEntry {
+	/// Configured feature id
+    feature: #[id=feature]string,
+	/// (optional) Only useful in a list context to weight the random selection 
+    weight?: int,
+	/// (optional) Vanilla weirdness used in terrain gen. w > 0 is true. 
+	/// Useful for basic regions as weirdness swaps along rivers
+    weird?: boolean,
+	/// (optional) Restrict rule to world positions 
+	x?: HeightRange,
+	/// (optional) Restrict rule to world positions 
+    y?: HeightRange,
+	/// (optional) Restrict rule to world positions 
+	z?: HeightRange,
+	/// (optional) Block ids the sapling must be on for the rule to apply to.
+	/// Redundant for global block keys, use with biome keys
+    block?: [BlockPredicate],
+}
+
+struct HeightRange {
+	/// (optional) Inclusive 
+    min?: int,
+	/// (optional) Inclusive 
+    max?: int,
+}
+
+struct BlockPredicate {
+    id: #[id=block]string,
+}
