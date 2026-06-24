@@ -1121,6 +1121,15 @@
       "dependency": "starexpress",
       "wiki": "https://github.com/AussieBox/StarryExpress/wiki/The-Guidebook",
       "minVersion": "1.21.1"
+    },
+    {
+      "id": "treeplacer:sapling_overrides",
+      "url": "treeplacer/sapling_overrides",
+      "path": "sapling_overrides/minecraft",
+      "tags": ["partners"],
+      "dependency": "treeplacer",
+      "minVersion": "1.20.1",
+      "wiki": "https://github.com/OutrightWings/treeplacer_mod/wiki"
     }
   ],
   "legacyGuides": [
