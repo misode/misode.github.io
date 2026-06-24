@@ -6,6 +6,9 @@ dispatch minecraft:resource[blood:blood-quest] to struct Quest {
   name: Text,
   description: Text,
   actor: string,
+  /// True by default
+  condition?: Condition,
+  activation?: Activation,
   /// Changing this will reset players' progress if quest is active upon reload
   version: string,
   rewards: [Reward],
@@ -23,6 +26,10 @@ enum(string) QuestType {
 enum(string) RewardType {
   Item = "blood:item",
   Currency = "blood:currency",
+}
+
+enum(string) ActivationType {
+  Dialog = "dialog",
 }
 
 // --- Rewards ---
@@ -70,6 +77,21 @@ dispatch blood:item_definition[blood:material] to struct {
 
 // --- Helper Structs ---
 
+struct Condition {
+  condition: string,
+  and?: [Condition],
+  or?: [Condition],
+}
+
+dispatch minecraft:resource[blood:activation] to struct Activation {
+  type: ActivationType,
+  ...blood:activation[[type]],
+}
+
+dispatch blood:activation[dialog] to struct {
+  startDialog: string,
+}
+
 dispatch minecraft:resource[blood:stage] to struct Stage {
   name: Text,
   coordinates: string,
@@ -95,6 +117,7 @@ enum(string) GoalType {
   InteractBlock = "blood:interact_block",
   ShootArea = "blood:shoot_area",
   Consume = "blood:consume",
+  Dialog = "blood:dialog",
   Die = "blood:die", // lmao
   KillPlayer = "blood:kill_player",
   Pickup = "blood:pickup",
@@ -149,6 +172,10 @@ dispatch blood:goal[blood:shoot_area] to struct {
 dispatch blood:goal[blood:consume] to struct {
   item: ItemDefinition,
   amount: int@1..,
+}
+
+dispatch blood:goal[blood:dialog] to struct {
+  dialog: string,
 }
 
 dispatch blood:goal[blood:die] to struct {
