@@ -206,16 +206,16 @@
     },
     {
       "id": "26.1",
-      "ref": "26.1.1",
+      "ref": "26.1.2",
       "name": "26.1",
       "pack_format": 101,
       "show": true
     },
     {
       "id": "26.2",
-      "dynamic": true,
+      "ref": "26.2",
       "name": "26.2",
-      "pack_format": 106,
+      "pack_format": 107,
       "show": true
     }
   ],
