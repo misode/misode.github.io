@@ -1,5 +1,9 @@
 use ::java::util::text::Text
 
+// Source dialog scripts also support graph helpers outside JSON:
+// @label_name, -> label_name, ? condition:value -> label_name, condition blocks
+// ? condition:value { ... } { ... }, and ! end. Label names must match [A-Za-z0-9_.-]+.
+
 dispatch minecraft:resource[blood:blood-dialog] to struct Dialog {
   id: string,
   /// True by default
