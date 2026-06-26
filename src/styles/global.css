@@ -1377,6 +1377,11 @@ main.has-project {
 	color: var(--text-2);
 }
 
+.dialog-file-picker-label {
+	color: var(--text-2);
+	font-size: 13px;
+}
+
 .dialog-file-picker-content > input {
 	padding: 9px 10px;
 	border-radius: 8px;
@@ -1397,6 +1402,20 @@ main.has-project {
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
+}
+
+.quest-server-status {
+	position: fixed;
+	right: 16px;
+	bottom: 16px;
+	z-index: 80;
+	max-width: min(420px, calc(100vw - 32px));
+	padding: 8px 10px;
+	border-radius: 8px;
+	background-color: var(--background-4);
+	color: var(--text-1);
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+	font-size: 13px;
 }
 
 .tooltipped {

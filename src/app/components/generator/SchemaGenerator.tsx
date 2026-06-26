@@ -11,6 +11,8 @@ import {useModal} from '../../contexts/Modal.jsx'
 import {useSpyglass, watchSpyglassUri} from '../../contexts/Spyglass.jsx'
 import {AsyncCancel, useActiveTimeout, useAsync, useLocalStorage, useSearchParam} from '../../hooks/index.js'
 import {Configuration, DefaultApi} from '../../services/integration/gen/index.js'
+import type {QuestRoot} from '../../services/integration/QuestApi.js'
+import {QuestApi} from '../../services/integration/QuestApi.js'
 import type {VersionId} from '../../services/index.js'
 import {
   checkVersion,
@@ -49,9 +51,10 @@ const MIN_PROJECT_PANEL_WIDTH = 200
 interface DialogTokenModalProps {
 	onToken: (token: string) => void
 	onCancel: () => void
+	serviceName?: string
 }
 
-function DialogTokenModal({ onToken, onCancel }: DialogTokenModalProps) {
+function DialogTokenModal({ onToken, onCancel, serviceName = 'dialog' }: DialogTokenModalProps) {
 	const [token, setToken] = useState('')
 	const [error, setError] = useState<string | null>(null)
 
@@ -68,7 +71,7 @@ function DialogTokenModal({ onToken, onCancel }: DialogTokenModalProps) {
 	return (
 		<Modal class="dialog-token-modal">
 			<div class="flex flex-col gap-2">
-				<p>Enter authorization token for dialog API</p>
+				<p>Enter authorization token for {serviceName} API</p>
 				<PasswordInput
 					class="btn btn-input"
 					value={token}
@@ -372,9 +375,32 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	const [dialogUploadLoading, setDialogUploadLoading] = useState(false)
 	const [dialogDownloadLoading, setDialogDownloadLoading] = useState(false)
 	const [dialogDeleteLoading, setDialogDeleteLoading] = useState(false)
+	const isQuestGenerator = gen.id === 'blood:blood-quest'
+	const QUEST_TOKEN_KEY = 'blood_quest_api_token'
+	const [questToken, setQuestToken] = useLocalStorage(QUEST_TOKEN_KEY, '')
+	const [questRootId, setQuestRootId] = useLocalStorage('blood_quest_api_root', 'live')
+	const [serverQuestId, setServerQuestId] = useLocalStorage('blood_quest_api_file', '')
+	const hasQuestToken = questToken.trim().length > 0
+	const questApi = useMemo(
+		() => hasQuestToken ? new QuestApi(new Configuration({ headers: { Authorization: questToken } })) : null,
+		[questToken, hasQuestToken]
+	)
+	const questFilePickerRef = useRef<HTMLDialogElement>(null)
+	const [questFilePickerLoading, setQuestFilePickerLoading] = useState(false)
+	const [questFileAction, setQuestFileAction] = useState<'open' | 'save'>('open')
+	const [questRoots, setQuestRoots] = useState<QuestRoot[]>([])
+	const [questFiles, setQuestFiles] = useState<string[]>([])
+	const [questTargetId, setQuestTargetId] = useState('')
+	const [questOpenLoading, setQuestOpenLoading] = useState(false)
+	const [questSaveLoading, setQuestSaveLoading] = useState(false)
+	const [questStatus, setQuestStatus] = useState('')
 
 	const closeDialogFilePicker = useCallback(() => {
 		dialogFilePickerRef.current?.close()
+	}, [])
+
+	const closeQuestFilePicker = useCallback(() => {
+		questFilePickerRef.current?.close()
 	}, [])
 
 	const openDialogTokenModal = useCallback(() => {
@@ -470,6 +496,169 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		}
 	}, [uri, service, dialogTargetFile, dialogFileAction, dialogFiles, doc, dialogApi, closeDialogFilePicker])
 
+	const openQuestTokenModal = useCallback(() => {
+		if (!isQuestGenerator) {
+			return
+		}
+		showModal(() => (
+			<DialogTokenModal
+				serviceName="quest"
+				onToken={(t) => {
+					setQuestToken(t)
+					hideModal()
+				}}
+				onCancel={hideModal}
+			/>
+		))
+	}, [isQuestGenerator, showModal, hideModal, setQuestToken])
+
+	const questIdFromDocument = useCallback(() => {
+		if (!doc) {
+			return ''
+		}
+		const body = JSON.parse(doc.getText()) as { id?: unknown }
+		return typeof body.id === 'string' ? body.id : ''
+	}, [doc])
+
+	const loadQuestFiles = useCallback(async (rootId: string) => {
+		if (!questApi) {
+			return []
+		}
+		const files = await questApi.list(rootId)
+		const uniqueFiles = Array.from(new Set(files)).sort((a, b) => a.localeCompare(b))
+		setQuestFiles(uniqueFiles)
+		return uniqueFiles
+	}, [questApi])
+
+	const openQuestFilePicker = useCallback(async (action: 'open' | 'save') => {
+		if (!isQuestGenerator || !uri || !questApi) {
+			return
+		}
+		setQuestFileAction(action)
+		setQuestFilePickerLoading(true)
+		questFilePickerRef.current?.showModal()
+		try {
+			const roots = await questApi.roots()
+			if (roots.length === 0) {
+				throw new Error('No quest roots are available')
+			}
+			setQuestRoots(roots)
+			const selectedRoot = roots.some(root => root.id === questRootId) ? questRootId : roots[0].id
+			setQuestRootId(selectedRoot)
+			const files = await loadQuestFiles(selectedRoot)
+			const currentQuestId = action === 'save'
+				? (() => {
+					try {
+						return questIdFromDocument()
+					} catch {
+						return ''
+					}
+				})()
+				: ''
+			const previousQuestId = serverQuestId && files.includes(serverQuestId) ? serverQuestId : ''
+			setQuestTargetId(action === 'save' ? currentQuestId || serverQuestId : previousQuestId || files[0] || '')
+		} catch (e) {
+			if (e instanceof Error) {
+				setError(e)
+				setQuestStatus(`Error: ${e.message}`)
+			} else {
+				setError('Failed to list quest files')
+				setQuestStatus('Error: failed to list quest files')
+			}
+			closeQuestFilePicker()
+		} finally {
+			setQuestFilePickerLoading(false)
+		}
+	}, [isQuestGenerator, uri, questApi, questRootId, setQuestRootId, loadQuestFiles, questIdFromDocument, serverQuestId, closeQuestFilePicker])
+
+	const changeQuestRoot = useCallback(async (rootId: string) => {
+		setQuestRootId(rootId)
+		setQuestFilePickerLoading(true)
+		try {
+			const files = await loadQuestFiles(rootId)
+			if (questFileAction === 'open') {
+				setQuestTargetId(files.includes(serverQuestId) ? serverQuestId : files[0] || '')
+			}
+		} catch (e) {
+			if (e instanceof Error) {
+				setError(e)
+				setQuestStatus(`Error: ${e.message}`)
+			} else {
+				setError('Failed to list quest files')
+				setQuestStatus('Error: failed to list quest files')
+			}
+		} finally {
+			setQuestFilePickerLoading(false)
+		}
+	}, [setQuestRootId, loadQuestFiles, questFileAction, serverQuestId])
+
+	const submitQuestFileAction = useCallback(async () => {
+		if (!uri || !service || !questApi) {
+			return
+		}
+		const targetId = questTargetId.trim().replace(/\.json$/, '')
+		if (!questRootId) {
+			setError('Quest root is required')
+			setQuestStatus('Error: quest root is required')
+			return
+		}
+		if (!targetId) {
+			setError('Quest id is required')
+			setQuestStatus('Error: quest id is required')
+			return
+		}
+
+		try {
+			if (questFileAction === 'open') {
+				if (!questFiles.includes(targetId)) {
+					throw new Error(`Quest \"${targetId}\" was not found`)
+				}
+				setQuestOpenLoading(true)
+				setQuestStatus(`Opening ${targetId}...`)
+				const body = await questApi.file(questRootId, targetId)
+				try {
+					ignoreChange.current = true
+					await service.writeFile(uri, `${JSON.stringify(body, null, 2)}\n`)
+				} finally {
+					ignoreChange.current = false
+				}
+				setServerQuestId(targetId)
+				setQuestStatus(`Opened ${targetId}`)
+			} else {
+				if (!doc) {
+					return
+				}
+				setQuestSaveLoading(true)
+				setQuestStatus(`Saving ${targetId}...`)
+				const body = JSON.parse(doc.getText()) as { id?: unknown }
+				if (typeof body.id !== 'string' || body.id.trim() === '') {
+					throw new Error('Current quest JSON must contain an id')
+				}
+				if (body.id !== targetId) {
+					throw new Error(`Current quest id '${body.id}' does not match target id '${targetId}'`)
+				}
+				const result = await questApi.save(questRootId, targetId, body)
+				setServerQuestId(targetId)
+				setQuestFiles(prev => Array.from(new Set([...prev, targetId])).sort((a, b) => a.localeCompare(b)))
+				setQuestStatus(result.reloaded
+					? `Saved and reloaded ${targetId}`
+					: `Saved ${targetId}; non-live root was not reloaded`)
+			}
+			closeQuestFilePicker()
+		} catch (e) {
+			if (e instanceof Error) {
+				setError(e)
+				setQuestStatus(`Error: ${e.message}`)
+			} else {
+				setError(`Failed to ${questFileAction} quest file`)
+				setQuestStatus(`Error: failed to ${questFileAction} quest file`)
+			}
+		} finally {
+			setQuestOpenLoading(false)
+			setQuestSaveLoading(false)
+		}
+	}, [uri, service, questApi, questTargetId, questRootId, questFileAction, questFiles, doc, setServerQuestId, closeQuestFilePicker])
+
 	const copySource = () => {
 		Analytics.copyOutput(gen.id, 'menu')
 		setCopy(doCopy + 1)
@@ -497,9 +686,11 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 	if (previewShown && !hasPreview) setPreviewShown(false)
 	let actionsShown = 2
 	if (isDialogGenerator) actionsShown += 4
+	if (isQuestGenerator) actionsShown += 3
 	if (hasPreview) actionsShown += 1
 	if (sourceShown) actionsShown += 2
 	const dialogActionsEnabled = isDialogGenerator && hasDialogToken && !!dialogApi
+	const questActionsEnabled = isQuestGenerator && hasQuestToken && !!questApi
 
 	const togglePreview = () => {
 		if (sourceShown) {
@@ -627,6 +818,31 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			>
 				{dialogDeleteLoading ? Octicon.sync : Octicon.trashcan}
 			</div>
+			<div
+				class={`popup-action action-quest-token${isQuestGenerator ? ' shown' : ''} tooltipped tip-nw${hasQuestToken ? '' : ' active'}`}
+				aria-label={hasQuestToken ? 'Quest token is set' : 'Set quest API token'}
+				onClick={openQuestTokenModal}
+			>
+				{hasQuestToken ? Octicon.unlock : Octicon.lock}
+			</div>
+			<div
+				class={`popup-action action-quest-open${isQuestGenerator ? ' shown' : ''} tooltipped tip-nw${questOpenLoading ? ' loading' : ''}`}
+				style={!questActionsEnabled ? 'opacity: 0.4; cursor: not-allowed;' : undefined}
+				aria-label={!questActionsEnabled ? 'Set quest token to enable' : 'Open from server'}
+				aria-disabled={!questActionsEnabled}
+				onClick={questActionsEnabled ? () => openQuestFilePicker('open') : undefined}
+			>
+				{questOpenLoading ? Octicon.sync : Octicon.download}
+			</div>
+			<div
+				class={`popup-action action-quest-save${isQuestGenerator ? ' shown' : ''} tooltipped tip-nw${questSaveLoading ? ' loading' : ''}`}
+				style={!questActionsEnabled ? 'opacity: 0.4; cursor: not-allowed;' : undefined}
+				aria-label={!questActionsEnabled ? 'Set quest token to enable' : 'Save to server'}
+				aria-disabled={!questActionsEnabled}
+				onClick={questActionsEnabled ? () => openQuestFilePicker('save') : undefined}
+			>
+				{questSaveLoading ? Octicon.sync : Octicon.upload}
+			</div>
 			<div class={`popup-action action-share shown tooltipped tip-nw${shareLoading ? ' loading' : ''}`} aria-label={locale(shareLoading ? 'share.loading' : 'share')} onClick={share}>
 				{shareLoading ? Octicon.sync : Octicon.link}
 			</div>
@@ -650,6 +866,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 			<TextInput value={shareUrl} readonly />
 			<Btn icon={shareCopyActive ? 'check' : 'copy'} onClick={copySharedId} tooltip={locale(shareCopyActive ? 'copied' : 'copy_share')} tooltipLoc="nw" active={shareCopyActive} />
 		</div>
+		{isQuestGenerator && questStatus && <div class="quest-server-status">{questStatus}</div>}
 		<dialog ref={dialogFilePickerRef} class="dialog-file-picker">
 			<div class="dialog-file-picker-content">
 				<h3>{dialogFileAction === 'upload' ? 'Upload dialog JSON' : dialogFileAction === 'delete' ? 'Delete saved dialog' : 'Download dialog JSON'}</h3>
@@ -675,6 +892,47 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 						onClick={submitDialogFileAction}
 					>
 						{dialogFileAction === 'upload' ? 'Upload' : dialogFileAction === 'delete' ? 'Delete' : 'Download'}
+					</button>
+				</div>
+			</div>
+		</dialog>
+		<dialog ref={questFilePickerRef} class="dialog-file-picker">
+			<div class="dialog-file-picker-content">
+				<h3>{questFileAction === 'save' ? 'Save to server' : 'Open from server'}</h3>
+				<label class="dialog-file-picker-label" htmlFor="quest-root">Root</label>
+				<select
+					id="quest-root"
+					value={questRootId}
+					disabled={questFilePickerLoading}
+					onInput={(e) => void changeQuestRoot((e.target as HTMLSelectElement).value)}
+				>
+					{questRoots.map(root => <option value={root.id} key={root.id}>{root.label}{root.live ? ' (live)' : ' (non-live)'}</option>)}
+				</select>
+				{questFilePickerLoading
+					? <p>Loading quests...</p>
+					: questFileAction === 'open'
+						? <select value={questTargetId} onInput={(e) => setQuestTargetId((e.target as HTMLSelectElement).value)}>
+							{questFiles.map(file => <option value={file} key={file}>{file}</option>)}
+						</select>
+						: <input
+							type="text"
+							value={questTargetId}
+							onInput={(e) => setQuestTargetId((e.target as HTMLInputElement).value)}
+							placeholder="quest_intro"
+						/>
+				}
+				{questRoots.find(root => root.id === questRootId)?.live
+					? <p class="note">Live root: save reloads quests on the running server.</p>
+					: <p class="note">Non-live root: save writes the file without server reload.</p>}
+				<div class="dialog-file-picker-actions">
+					<button type="button" class="btn" onClick={closeQuestFilePicker}>Cancel</button>
+					<button
+						type="button"
+						class="btn"
+						disabled={questFilePickerLoading || questOpenLoading || questSaveLoading}
+						onClick={submitQuestFileAction}
+					>
+						{questFileAction === 'save' ? 'Save' : 'Open'}
 					</button>
 				</div>
 			</div>
