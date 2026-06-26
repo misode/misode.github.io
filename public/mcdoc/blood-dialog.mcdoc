@@ -3,6 +3,9 @@ use ::java::util::text::Text
 // Source dialog scripts also support graph helpers outside JSON:
 // @label_name, -> label_name, ? condition:value -> label_name, condition blocks
 // ? condition:value { ... } { ... }, and ! end. Label names must match [A-Za-z0-9_.-]+.
+// Source action shorthands: ! give_item <material> <amount>,
+// ! give_currency <BLOOD_ORB|SILVER> <amount>, ! teleport <location>,
+// ! set_flag <key> [true|false|string:value|int:value], and ! clear_flag <key>.
 
 dispatch minecraft:resource[blood:blood-dialog] to struct Dialog {
   id: string,
@@ -115,7 +118,70 @@ dispatch blood:actions[blood:set_actor_name_action] to struct {
   actorName: Text,
 }
 
+dispatch blood:actions[blood:give_item_action] to struct {
+  item: ItemDefinition,
+}
+
+enum(string) Currency {
+  BloodOrb = "BLOOD_ORB",
+  Silver = "SILVER",
+}
+
+dispatch blood:actions[blood:give_currency_action] to struct {
+  currency: Currency,
+  amount: int@1..,
+}
+
+dispatch blood:actions[blood:teleport_action] to struct {
+  /// `world x y z` or `/execute in minecraft:overworld run tp @s x y z yaw pitch`.
+  location: string,
+}
+
+enum(string) PlayerFlagValueType {
+  Boolean = "BOOLEAN",
+  String = "STRING",
+  Int = "INT",
+}
+
+dispatch blood:actions[blood:set_player_flag_action] to struct {
+  key: string,
+  /// Defaults to boolean true when omitted.
+  value?: string,
+  valueType?: PlayerFlagValueType,
+}
+
+dispatch blood:actions[blood:clear_player_flag_action] to struct {
+  key: string,
+}
+
+// --- Item Definitions ---
+
+enum(string) ItemDefinitionType {
+  ItemStack = "blood:item_stack",
+  Material = "blood:material",
+}
+
+dispatch minecraft:resource[blood:dialog_item_definition] to struct ItemDefinition {
+  type: ItemDefinitionType,
+  ...blood:item_definition[[type]],
+}
+
+dispatch blood:item_definition[blood:item_stack] to struct {
+  /// Bukkit ItemStack serialized data.
+  yml: string,
+}
+
+dispatch blood:item_definition[blood:material] to struct {
+  material: string,
+  amount: int@1..,
+}
+
 enum(string) ActionType {
   Command = "blood:command_action",
-  SetActorName = "blood:set_actor_name_action"
+  SetActorName = "blood:set_actor_name_action",
+  GiveItem = "blood:give_item_action",
+  GiveCurrency = "blood:give_currency_action",
+  Teleport = "blood:teleport_action",
+  SetPlayerFlag = "blood:set_player_flag_action",
+  ClearPlayerFlag = "blood:clear_player_flag_action"
 }
