@@ -79,8 +79,11 @@ dispatch blood:item_definition[blood:material] to struct {
 
 struct Condition {
   condition: string,
+  /// Provider argument, for example a flag key, quest id, level, or "<quest_id>:<stage_number>" for quest_stage.
+  value?: string,
   and?: [Condition],
   or?: [Condition],
+  not?: Condition,
 }
 
 dispatch minecraft:resource[blood:activation] to struct Activation {
