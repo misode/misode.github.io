@@ -315,6 +315,18 @@ export class SpyglassService {
 								category: 'world',
 							},
 							// Temporary until spyglass core is updated
+							cat_sound_variant : {
+								category: 'cat_sound_variant',
+							},
+							chicken_sound_variant : {
+								category: 'chicken_sound_variant',
+							},
+							cow_sound_variant : {
+								category: 'cow_sound_variant',
+							},
+							pig_sound_variant : {
+								category: 'pig_sound_variant',
+							},
 							sulfur_cube_archetype : {
 								category: 'sulfur_cube_archetype',
 							},
