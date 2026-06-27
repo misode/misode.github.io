@@ -335,10 +335,20 @@
       "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Pig"
     },
     {
+      "id": "pig_sound_variant",
+      "url": "pig-sound-variant",
+      "minVersion": "26.1"
+    },
+    {
       "id": "cat_variant",
       "url": "cat-variant",
       "minVersion": "1.21.5",
       "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Cat"
+    },
+    {
+      "id": "cat_sound_variant",
+      "url": "cat-sound-variant",
+      "minVersion": "26.1"
     },
     {
       "id": "frog_variant",
@@ -353,10 +363,20 @@
       "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Chicken"
     },
     {
+      "id": "chicken_sound_variant",
+      "url": "chicken-sound-variant",
+      "minVersion": "26.1"
+    },
+    {
       "id": "cow_variant",
       "url": "cow-variant",
       "minVersion": "1.21.5",
       "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Cow"
+    },
+    {
+      "id": "cow_sound_variant",
+      "url": "cow-sound-variant",
+      "minVersion": "26.1"
     },
     {
       "id": "dialog",
@@ -386,6 +406,12 @@
       "id": "zombie_nautilus_variant",
       "url": "zombie-nautilus-variant",
       "minVersion": "1.21.11"
+    },
+    {
+      "id": "world_clock",
+      "url": "world-clock",
+      "minVersion": "26.1",
+      "wiki": "https://minecraft.wiki/w/World_clock"
     },
     {
       "id": "villager_trade",
