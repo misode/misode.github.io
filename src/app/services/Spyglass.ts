@@ -1,6 +1,7 @@
 import * as core from '@spyglassmc/core'
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js'
 import * as je from '@spyglassmc/java-edition'
+import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import { ReleaseVersion } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as json from '@spyglassmc/json'
 import { localize } from '@spyglassmc/locales'
@@ -317,6 +318,21 @@ export class SpyglassService {
 							sulfur_cube_archetype : {
 								category: 'sulfur_cube_archetype',
 							},
+							slot_source : {
+								category: 'slot_source',
+							},
+							decorated_pot_pattern : {
+								category: 'decorated_pot_pattern',
+							},
+							'worldgen/feature' : {
+								category: 'worldgen/feature',
+							},
+							'worldgen/material_condition' : {
+								category: 'worldgen/material_condition',
+							},
+							'worldgen/material_rule' : {
+								category: 'worldgen/material_rule',
+							},
 							// Partner resources
 							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
 								[gen.path ?? gen.id, {
@@ -411,7 +427,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 
 	meta.registerSymbolRegistrar('mcmeta-summary', {
 		checksum: versionChecksum,
-		registrar: je.dependency.symbolRegistrar(summary, release),
+		registrar: customSymbolRegistrar(summary, release),
 	})
 
 	registerAttributes(meta, release, versions)
@@ -470,6 +486,24 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 			}
 		},
 	})
+}
+
+const McmetaSummaryUri = 'mcmeta://summary/registries.json'
+
+function customSymbolRegistrar(summary: McmetaSummary, release: ReleaseVersion): core.SymbolRegistrar {
+	return (symbols, ctx) => {
+		je.dependency.symbolRegistrar(summary, release)(symbols, ctx)
+
+		// Temporary until spyglass core is updated
+		for (const [registryId, registry] of Object.entries(summary.registries)) {
+			if (['worldgen/feature_type', 'worldgen/material_condition_type', 'worldgen/material_rule_type'].includes(registryId)) {
+				for (const entryId of registry) {
+					symbols.query(McmetaSummaryUri, registryId, core.ResourceLocation.lengthen(entryId))
+						.enter({ usage: { type: 'declaration' } })
+				}
+			}
+		}
+	}
 }
 
 const VanillaMcdocUri = 'mcdoc://vanilla-mcdoc/symbols.json'

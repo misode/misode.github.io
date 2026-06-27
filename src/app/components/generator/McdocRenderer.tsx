@@ -142,6 +142,7 @@ const SPECIAL_UNSET = '__unset__'
 
 function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 
 	const nodeValue = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
 	const [value, setValue] = useState(nodeValue)
@@ -159,7 +160,9 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 	const idTags = idAttribute?.kind === 'tree' && idAttribute.values.tags?.kind === 'literal' && idAttribute.values.tags.value.kind === 'string'
 		? idAttribute.values.tags.value.value
 		: undefined
-	const isSelect = idRegistry && isSelectRegistry(idRegistry)
+	const isSelect = idRegistry && isSelectRegistry(idRegistry, version)
+
+	console.log(type, idAttribute, idRegistry, isSelect)
 
 	const onChangeValue = useCallback((newValue: string) => {
 		newValue = newValue.replaceAll('\\n', '\n')
@@ -188,6 +191,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 		const values = getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
 			.filter(c => c.kind === 'string' && c.value !== 'THIS')
 			.filter(c => !excludeStrings?.includes(c.value))
+		console.log(type, values)
 		values.sort((a, b) => a.value.localeCompare(b.value))
 		return values
 	}, [type, excludeStrings, node, ctx])
