@@ -162,8 +162,6 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 		: undefined
 	const isSelect = idRegistry && isSelectRegistry(idRegistry, version)
 
-	console.log(type, idAttribute, idRegistry, isSelect)
-
 	const onChangeValue = useCallback((newValue: string) => {
 		newValue = newValue.replaceAll('\\n', '\n')
 		if (nodeValue === newValue) {
@@ -191,7 +189,6 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 		const values = getValues(type, { ...ctx, offset: node?.range.start ?? 0 })
 			.filter(c => c.kind === 'string' && c.value !== 'THIS')
 			.filter(c => !excludeStrings?.includes(c.value))
-		console.log(type, values)
 		values.sort((a, b) => a.value.localeCompare(b.value))
 		return values
 	}, [type, excludeStrings, node, ctx])
