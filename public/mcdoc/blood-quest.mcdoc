@@ -5,7 +5,6 @@ dispatch minecraft:resource[blood:blood-quest] to struct Quest {
   type: QuestType,
   name: Text,
   description: Text,
-  actor: string,
   /// True by default
   condition?: Condition,
   activation?: Activation,
