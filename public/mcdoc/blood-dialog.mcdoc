@@ -159,6 +159,8 @@ dispatch blood:actions[blood:clear_player_flag_action] to struct {
 enum(string) ItemDefinitionType {
   ItemStack = "blood:item_stack",
   Material = "blood:material",
+  ArcItem = "blood:arc_item",
+  ArcPotion = "blood:arc_potion",
 }
 
 dispatch minecraft:resource[blood:dialog_item_definition] to struct ItemDefinition {
@@ -173,6 +175,16 @@ dispatch blood:item_definition[blood:item_stack] to struct {
 
 dispatch blood:item_definition[blood:material] to struct {
   material: string,
+  amount: int@1..,
+}
+
+dispatch blood:item_definition[blood:arc_item] to struct {
+  id: string,
+  amount: int@1..,
+}
+
+dispatch blood:item_definition[blood:arc_potion] to struct {
+  id: string,
   amount: int@1..,
 }
 

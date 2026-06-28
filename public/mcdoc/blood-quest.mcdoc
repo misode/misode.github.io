@@ -57,6 +57,8 @@ dispatch blood:reward[blood:currency] to struct {
 enum(string) ItemDefinitionType {
   ItemStack = "blood:item_stack",
   Material = "blood:material",
+  ArcItem = "blood:arc_item",
+  ArcPotion = "blood:arc_potion",
 }
 
 dispatch minecraft:resource[blood:reward] to struct ItemDefinition {
@@ -71,6 +73,16 @@ dispatch blood:item_definition[blood:item_stack] to struct {
 
 dispatch blood:item_definition[blood:material] to struct {
   material: string,
+  amount: int@1..,
+}
+
+dispatch blood:item_definition[blood:arc_item] to struct {
+  id: string,
+  amount: int@1..,
+}
+
+dispatch blood:item_definition[blood:arc_potion] to struct {
+  id: string,
   amount: int@1..,
 }
 
@@ -122,8 +134,7 @@ enum(string) GoalType {
   Dialog = "blood:dialog",
   Die = "blood:die", // lmao
   KillPlayer = "blood:kill_player",
-  Pickup = "blood:pickup",
-  GetTag = "blood:get_tag",
+  Level = "blood:level",
 }
 
 dispatch minecraft:resource[blood:goal] to struct Goal {
@@ -132,8 +143,10 @@ dispatch minecraft:resource[blood:goal] to struct Goal {
 }
 
 dispatch blood:goal[blood:kill] to struct {
-  /// Registry Key
-  entity_type: string,
+  /// Registry key. Use either entity_type or mythic_mob.
+  entity_type?: string,
+  /// MythicMobs internal name. Use either mythic_mob or entity_type.
+  mythic_mob?: string,
   /// Amount of entities to kill
   amount: int@1..,
 }
@@ -188,6 +201,6 @@ dispatch blood:goal[blood:kill_player] to struct {
   amount: int@1..,
 }
 
-dispatch blood:goal[blood:get_tag] to struct {
-  tag: string,
+dispatch blood:goal[blood:level] to struct {
+  level: int@1..,
 }
