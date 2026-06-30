@@ -369,7 +369,7 @@ const selectRegistries = new Set([
 	'trigger_type',
 	'worldgen/biome_source',
 	'worldgen/block_state_provider_type',
-	'worldgen/carver',
+	'worldgen/carver_type',
 	'worldgen/chunk_generator',
 	'worldgen/density_function_type',
 	'worldgen/feature_type',
@@ -390,7 +390,7 @@ const selectRegistries = new Set([
 
 export function isSelectRegistry(registry: string, version: VersionId) {
 	if (!checkVersion(version, '26.3') && []) {
-		if (['worldgen/feature', 'worldgen/material_condition', 'worldgen/material_rule'].includes(registry)) {
+		if (['worldgen/carver', 'worldgen/feature', 'worldgen/material_condition', 'worldgen/material_rule'].includes(registry)) {
 			return true
 		}
 	}

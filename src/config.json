@@ -476,9 +476,17 @@
     },
     {
       "id": "worldgen/configured_carver",
-      "url": "worldgen/carver",
+      "url": "worldgen/configured-carver",
       "tags": ["worldgen"],
       "minVersion": "1.16",
+      "maxVersion": "26.2",
+      "wiki": "https://minecraft.wiki/w/Carver_definition"
+    },
+    {
+      "id": "worldgen/carver",
+      "url": "worldgen/carver",
+      "tags": ["worldgen"],
+      "minVersion": "26.3",
       "wiki": "https://minecraft.wiki/w/Carver_definition"
     },
     {

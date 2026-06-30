@@ -180,6 +180,7 @@
   "generator.world": "World Settings",
   "generator.world_clock": "World Clock",
   "generator.worldgen/biome": "Biome",
+  "generator.worldgen/carver": "Carver",
   "generator.worldgen/configured_carver": "Configured Carver",
   "generator.worldgen/configured_feature": "Configured Feature",
   "generator.worldgen/configured_structure_feature": "Structure Feature",
