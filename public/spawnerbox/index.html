@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spawner Box Generator - Arc-Blood</title>
+  <link rel="stylesheet" href="./spawnerbox.css" />
+</head>
+<body>
+  <div class="cogfield" aria-hidden="true"></div>
+
+  <header class="top">
+    <svg class="gear gear-a" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear" /></svg>
+    <svg class="gear gear-b" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear" /></svg>
+    <div class="plaque">
+      <span class="eyebrow">Arc-Blood &middot; MythicMobs Works</span>
+      <h1>Spawner Box Generator</h1>
+      <p class="sub">Feed the machine coloured concrete markers &mdash; it forges grouped spawner YAML.</p>
+    </div>
+  </header>
+
+  <main>
+    <details class="panel guide">
+      <summary><span class="cog">?</span> Guide &amp; reference</summary>
+      <div class="guide-body">
+        <h3>In-game commands</h3>
+        <ul class="cmds">
+          <li><code>/spawnerbox pos1</code> — set corner 1 (stand there)</li>
+          <li><code>/spawnerbox pos2</code> — set the opposite corner</li>
+          <li><code>/spawnerbox dump [name]</code> — scan the box → write a <b>markers .json</b> to <code>plugins/arc-blood/spawnerbox/</code> (upload it here)</li>
+          <li><code>/spawnerbox scan &lt;folder&gt; &lt;zone&gt; &lt;area&gt; &lt;difficulty&gt;</code> — generate YAML in-game instead</li>
+          <li><code>/spawnerbox preview [n]</code> — list spots / show one YAML</li>
+          <li><code>/spawnerbox export [overwrite]</code> — write files to <code>MythicMobs/spawners</code></li>
+          <li><code>/spawnerbox clear</code> — reset selection</li>
+          <li>Permission: <code>arcblood.command.spawnerbox</code> (OP by default)</li>
+        </ul>
+
+        <h3>Setup checklist</h3>
+        <div class="checklist" id="checklist">
+          <label><input type="checkbox" data-k="build"> Build &amp; run the plugin (IDEA → Gradle <code>runServer</code>)</label>
+          <label><input type="checkbox" data-k="pos1"> In-game <code>/spawnerbox pos1</code> at one corner</label>
+          <label><input type="checkbox" data-k="pos2"> <code>/spawnerbox pos2</code> at the opposite corner</label>
+          <label><input type="checkbox" data-k="dump"> <code>/spawnerbox dump myzone</code> → creates the markers .json</label>
+          <label><input type="checkbox" data-k="load"> Load that .json here (<b>Load .yml / .json</b>)</label>
+          <label><input type="checkbox" data-k="edit"> Tweak sliders &amp; mobs per spot</label>
+          <label><input type="checkbox" data-k="dl"> Download all (.zip) / combined .yml</label>
+          <label><input type="checkbox" data-k="drop"> Drop files into <code>run/plugins/MythicMobs/spawners/</code> (server stopped or via in-game reload)</label>
+        </div>
+
+        <h3>Zone levels</h3>
+        <div class="tablewrap"><table id="zoneTable"></table></div>
+
+        <h3>Mob categories</h3>
+        <div class="tablewrap"><table id="mobTable"></table></div>
+
+        <h3>Marker blocks</h3>
+        <div class="tablewrap"><table id="markerTable"></table></div>
+
+        <h3>Naming</h3>
+        <p class="hint">Spawner name <code>{ZONE}_{AREA}_{DIFFICULTY}_{NNN}</code>, group <code>{ZONE}_{AREA}_{DIFFICULTY}</code>,
+          file under <code>spawners/{folder}/</code>. Example: <code>bst/BST_FLD_E_001.yml</code>.</p>
+      </div>
+    </details>
+
+    <section class="panel">
+      <h2><span class="cog">&#9733;</span> Zones <span id="zoneCount" class="muted"></span></h2>
+      <p class="hint">Spawner groups tracked in this browser. Tick the box when a zone is done; <b>Open</b> reloads its
+        spawners so you can re-edit and re-export them.</p>
+      <div id="zoneList" class="zonelist"></div>
+    </section>
+
+    <section class="panel">
+      <h2><span class="cog">I</span> Markers</h2>
+      <p class="hint">
+        Paste marker blocks, one per line as <code>x y z colour</code> (colour = green/yellow/orange/red/pink),
+        or a JSON array of <code>{x,y,z,color}</code>. This is the same data <code>/spawnerbox scan</code> reads in-game.
+      </p>
+      <textarea id="markers" spellcheck="false" placeholder="214 74 -273 green&#10;215 75 -273 green&#10;216 74 -273 green&#10;260 70 -273 red"></textarea>
+      <div class="row">
+        <button id="sample" class="ghost">Load sample</button>
+        <button id="loadBtn" class="ghost">Load .yml / .json</button>
+        <input id="loadFile" type="file" accept=".yml,.yaml,.json" multiple hidden />
+        <span id="markerCount" class="muted"></span>
+      </div>
+      <div id="dropzone" class="dropzone">
+        <span class="dz-idle">&#11015; Drag &amp; drop <b>.yml / .json</b> files here — or click to browse</span>
+        <span class="dz-hot">Release to load</span>
+      </div>
+      <p class="hint" style="margin-top:8px">
+        <strong>Load .yml</strong> opens spawner files you already exported
+        (e.g. <code>run/plugins/MythicMobs/spawners/bst/*.yml</code>) so you can tweak and re-export them.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2><span class="cog">II</span> Settings</h2>
+      <div class="grid">
+        <label>Folder <input id="folder" value="bst" /></label>
+        <label>Zone <input id="zone" value="BST" /></label>
+        <label>Area <input id="area" value="FLD" /></label>
+        <label>Difficulty <input id="difficulty" value="E" /></label>
+        <label>World <input id="world" value="world" /></label>
+        <label>mergeRadius <input id="mergeRadius" type="number" value="10" min="1" /></label>
+        <label>minSpawnRadius <input id="minSpawnRadius" type="number" value="4" step="0.5" /></label>
+        <label>radiusPerHeightBlock <input id="radiusPerHeightBlock" type="number" value="2" step="0.5" /></label>
+        <label>maxSpawnRadius <input id="maxSpawnRadius" type="number" value="24" step="0.5" /></label>
+        <label>mobsPerSpawn <input id="mobsPerSpawn" type="number" value="1" min="1" /></label>
+        <label>onblock filter <input id="onBlockFilter" value="#dirt" /></label>
+        <label>mobsInRadius radius <input id="condRadius" type="number" value="4" min="0" /></label>
+      </div>
+      <div class="chipwrap">
+        <span class="chip-title">Popular onblock tags — click to toggle</span>
+        <div class="chips" id="onblockChips"></div>
+      </div>
+      <button id="generate" class="primary">&#9881; Generate spots</button>
+    </section>
+
+    <section class="panel" id="resultsPanel" hidden>
+      <h2><span class="cog">III</span> Spots <span id="summary" class="muted"></span></h2>
+      <div id="warnings"></div>
+      <div id="spots" class="cards"></div>
+    </section>
+
+    <section class="panel" id="yamlPanel" hidden>
+      <h2><span class="cog">IV</span> Output</h2>
+      <div class="row">
+        <button id="zip" class="primary">&#11015; Download all (.zip)</button>
+        <button id="combined" class="primary">&#11015; Download combined .yml</button>
+        <button id="copy">Copy YAML</button>
+        <span id="copied" class="muted"></span>
+      </div>
+      <pre id="yaml"></pre>
+    </section>
+  </main>
+
+  <footer class="foot">Powered by steam, brass &amp; MythicMobs Spawners.</footer>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="gear" viewBox="0 0 100 100">
+        <path d="M50 6l6 2 4-7 8 4-1 8 7 4 6-5 5 7-5 6 4 7h8l1 9-8 2-1 8 7 4-4 8-8-2-5 6 2 8-9 3-4-7h-8l-4 7-9-3 2-8-5-6-8 2-4-8 7-4-1-8-8-2 1-9h8l4-7-5-6 5-7 6 5 7-4-1-8 8-4 4 7 6-2z"
+          fill="currentColor"/>
+        <circle cx="50" cy="50" r="16" fill="none" stroke="#1a1410" stroke-width="7"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script src="./spawnerbox.js"></script>
+</body>
+</html>
