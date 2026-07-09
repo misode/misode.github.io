@@ -150,14 +150,18 @@ function computeMaxMobs(mobCount, mobName, s) {
 }
 
 function toDrafts(groups, s) {
-  const spawnerGroup = `${s.zone}_${s.area}_${s.difficulty}`
+  const counters = {}
   return groups.map((g, index) => {
     const pool = MOB_POOLS[g.color] || []
     const mobName = pool.length ? pool[index % pool.length] : ''
     const zone = ZONE_LEVELS[g.color]
-    const name = `${spawnerGroup}_${String(index + 1).padStart(3, '0')}`
+    const difficulty = s.difficultyByColor[g.color] || 'E'
+    const spawnerGroup = `${s.zone}_${s.area}_${difficulty}`
+    counters[spawnerGroup] = (counters[spawnerGroup] || 0) + 1
+    const name = `${spawnerGroup}_${String(counters[spawnerGroup]).padStart(3, '0')}`
     return {
       name, spawnerGroup, folder: s.folder, world: s.world,
+      zoneName: s.zone, areaName: s.area, difficulty, batch: `${s.zone}_${s.area}`,
       x: g.centerX, y: g.baseY, z: g.centerZ,
       color: g.color, maxColumnHeight: g.maxColumnHeight, mobCount: g.mobCount,
       mobName, mobs: parseMobs(mobName), zone, mobLevel: zone.max,
@@ -216,10 +220,16 @@ function finishImported(block, folder, s) {
   const mult = pureMobIds(mobName).reduce((m, id) => Math.max(m, COUNT_MULTIPLIER[id] || 1), 1)
   const onblock = (block.conditions.find(c => c.includes('onblock')) || '').match(/m=([^}\s]+)/)
   const cond = (block.conditions.find(c => c.includes('mobsInRadius')) || '').match(/radius=(\d+)/)
+  const group = f.SpawnerGroup || block.name.replace(/_\d+$/, '')
+  const parts = group.split('_')
+  const difficulty = parts.length >= 3 ? parts[parts.length - 1] : '?'
+  const areaName = parts.length >= 3 ? parts[parts.length - 2] : '?'
+  const zoneName = parts.length >= 3 ? parts.slice(0, parts.length - 2).join('_') : group
   return {
     name: block.name,
-    spawnerGroup: f.SpawnerGroup || block.name.replace(/_\d+$/, ''),
+    spawnerGroup: group,
     folder,
+    zoneName, areaName, difficulty, batch: `${zoneName}_${areaName}`,
     world: f.World || 'world',
     x: Math.round(num('X', 0)), y: Math.round(num('Y', 0)), z: Math.round(num('Z', 0)),
     color, maxColumnHeight: height, mobCount: Math.round(maxMobs * mult),
@@ -234,6 +244,10 @@ function finishImported(block, folder, s) {
   }
 }
 
+function zoneFromFileName(fileName) {
+  return fileName.replace(/\.[^.]+$/, '').trim().toUpperCase().replace(/[^A-Z0-9_]+/g, '_').replace(/^_+|_+$/g, '')
+}
+
 async function loadFiles(fileList) {
   const files = [...fileList]
   if (!files.length) return
@@ -241,16 +255,21 @@ async function loadFiles(fileList) {
   const folder = s.folder
   let imported = []
   let markerText = null
+  let markerFileName = null
   for (const file of files) {
     const text = await file.text()
     const trimmed = text.trimStart()
     if (file.name.endsWith('.json') || trimmed[0] === '[' || trimmed[0] === '{') {
       markerText = text // JSON marker dump -> run the normal pipeline
+      markerFileName = file.name
     } else {
       imported = imported.concat(importSpawnerYaml(text, folder, s))
     }
   }
   if (markerText !== null) {
+    // Zone token always comes from the loaded JSON's name.
+    const zone = zoneFromFileName(markerFileName || '')
+    if (zone) { $('zone').value = zone; $('folder').value = zone.toLowerCase() }
     $('markers').value = markerText
     $('markers').dispatchEvent(new Event('input'))
     generate()
@@ -298,13 +317,21 @@ function renderYaml(d) {
 const $ = id => document.getElementById(id)
 let drafts = []
 
+function difficultyByColor() {
+  const g = id => ($(id).value.trim().toUpperCase() || '?')
+  return {
+    green: g('diff-green'), yellow: g('diff-yellow'), orange: g('diff-orange'),
+    red: g('diff-red'), pink: g('diff-pink'),
+  }
+}
+
 function readSettings() {
   const num = (id, d) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : d }
   return {
     folder: $('folder').value.trim(),
     zone: $('zone').value.trim().toUpperCase(),
     area: $('area').value.trim().toUpperCase(),
-    difficulty: $('difficulty').value.trim().toUpperCase(),
+    difficultyByColor: difficultyByColor(),
     world: $('world').value.trim() || 'world',
     mergeRadius: num('mergeRadius', 10),
     minSpawnRadius: num('minSpawnRadius', 4),
@@ -603,6 +630,119 @@ function downloadCombined() {
 }
 
 // ============================================================================================
+// Fixme — re-name existing spawner folders so Difficulty follows the mob colour.
+// ============================================================================================
+let fixResults = []
+
+function scanYamlBlocks(lines) {
+  const blocks = []
+  let cur = null
+  lines.forEach((raw, i) => {
+    const head = raw.match(/^([A-Za-z0-9_]+):\s*$/)
+    if (head) { cur = { name: head[1], keyLine: i, sgLine: -1, mob: null }; blocks.push(cur); return }
+    if (!cur) return
+    const mob = raw.match(/^\s+MobName:\s*(.+?)\s*$/)
+    if (mob && cur.mob === null) cur.mob = mob[1].trim().replace(/^'(.*)'$/, '$1')
+    if (/^\s+SpawnerGroup:/.test(raw)) cur.sgLine = i
+  })
+  return blocks
+}
+
+function fixOneFile(text, zone, area, diffMap, counters) {
+  const lines = text.split(/\r?\n/)
+  const blocks = scanYamlBlocks(lines)
+  const rows = []
+  let outName = null
+  for (const b of blocks) {
+    const color = MOB_TO_CATEGORY[pureMobIds(b.mob || '')[0]] || null
+    const diff = color ? (diffMap[color] || '?') : '?'
+    const group = `${zone}_${area}_${diff}`
+    counters[group] = (counters[group] || 0) + 1
+    const newName = `${group}_${String(counters[group]).padStart(3, '0')}`
+    lines[b.keyLine] = `${newName}:`
+    if (b.sgLine >= 0) lines[b.sgLine] = `  SpawnerGroup: ${group}`
+    rows.push({ old: b.name, new: newName, color: color || '?' })
+    if (!outName) outName = newName
+  }
+  return { outName: outName || 'unnamed', content: lines.join('\n'), rows }
+}
+
+async function processFix(fileList) {
+  const files = [...fileList].filter(f => /\.ya?ml$/i.test(f.name))
+  if (!files.length) return
+  files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  const zone = $('fixZone').value.trim().toUpperCase() || 'ZONE'
+  const area = $('fixArea').value.trim().toUpperCase() || 'FLD'
+  const diffMap = difficultyByColor()
+  const counters = {}
+  fixResults = []
+  for (const file of files) {
+    const text = await file.text()
+    fixResults.push(fixOneFile(text, zone, area, diffMap, counters))
+  }
+  renderFixPreview()
+  $('fixDownload').disabled = fixResults.length === 0
+  $('fixCount').textContent = `${fixResults.length} file(s) → ${Object.keys(counters).length} group(s)`
+}
+
+function renderFixPreview() {
+  const host = $('fixPreview')
+  host.innerHTML = ''
+  const flat = fixResults.flatMap(r => r.rows)
+  if (!flat.length) { host.innerHTML = '<p class="muted">Nothing loaded.</p>'; return }
+  const byGroup = {}
+  for (const r of flat) { const g = r.new.replace(/_\d+$/, ''); byGroup[g] = (byGroup[g] || 0) + 1 }
+  const summary = el('div', 'fixsummary', Object.entries(byGroup).map(([g, n]) => `${g}: ${n}`).join('   '))
+  host.appendChild(summary)
+  for (const r of flat.slice(0, 300)) {
+    const row = el('div', 'fixrow')
+    row.innerHTML = `<span class="dot c-${r.color}"></span><span class="fold">${r.old}</span>` +
+      `<span class="farr">→</span><span class="fnew">${r.new}</span>`
+    host.appendChild(row)
+  }
+  if (flat.length > 300) host.appendChild(el('p', 'muted', `…and ${flat.length - 300} more`))
+}
+
+function downloadFix() {
+  if (!fixResults.length) return
+  const folder = $('fixFolder').value.trim()
+  const files = fixResults.map(r => ({
+    name: folder ? `${folder}/${r.outName}.yml` : `${r.outName}.yml`,
+    content: r.content.endsWith('\n') ? r.content : r.content + '\n',
+  }))
+  download('spawners-fixed.zip', makeZip(files))
+}
+
+// Recursively collect files from a drag-drop that may include folders.
+function walkEntry(entry, out) {
+  return new Promise(resolve => {
+    if (entry.isFile) {
+      entry.file(f => { out.push(f); resolve() }, () => resolve())
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader()
+      const readBatch = () => reader.readEntries(async ents => {
+        if (!ents.length) { resolve(); return }
+        for (const en of ents) await walkEntry(en, out)
+        readBatch()
+      }, () => resolve())
+      readBatch()
+    } else {
+      resolve()
+    }
+  })
+}
+async function filesFromDataTransfer(dt) {
+  const items = dt.items ? [...dt.items] : []
+  const entries = items.map(it => (it.webkitGetAsEntry ? it.webkitGetAsEntry() : null)).filter(Boolean)
+  if (entries.length) {
+    const out = []
+    for (const e of entries) await walkEntry(e, out)
+    return out
+  }
+  return [...dt.files]
+}
+
+// ============================================================================================
 // Guide / reference tables, setup checklist, and the persistent Zones tracker.
 // ============================================================================================
 const MARKER_BLOCKS = [
@@ -654,7 +794,7 @@ function saveZones(z) { try { localStorage.setItem(ZONE_KEY, JSON.stringify(z)) 
 
 function persistCurrent() {
   if (!drafts.length) return
-  const group = drafts[0].spawnerGroup || 'spawners'
+  const group = drafts[0].batch || drafts[0].spawnerGroup || 'spawners'
   const z = loadZones()
   z[group] = {
     group,
@@ -748,6 +888,28 @@ $('onBlockFilter').addEventListener('input', renderOnblockChips)
 renderOnblockChips()
 $('loadBtn').addEventListener('click', () => $('loadFile').click())
 $('loadFile').addEventListener('change', e => { loadFiles(e.target.files); e.target.value = '' })
+
+// Fixme wiring
+$('fixPick').addEventListener('click', () => $('fixFiles').click())
+$('fixPickDir').addEventListener('click', () => $('fixDir').click())
+$('fixFiles').addEventListener('change', e => { processFix(e.target.files); e.target.value = '' })
+$('fixDir').addEventListener('change', e => { processFix(e.target.files); e.target.value = '' })
+$('fixDownload').addEventListener('click', downloadFix)
+{
+  const fdz = $('fixDrop')
+  fdz.addEventListener('click', () => $('fixDir').click())
+  ;['dragenter', 'dragover'].forEach(ev => fdz.addEventListener(ev, e => {
+    if (!hasFiles(e)) return
+    e.preventDefault(); e.stopPropagation(); fdz.classList.add('drag')
+  }))
+  ;['dragleave', 'dragend'].forEach(ev => fdz.addEventListener(ev, () => fdz.classList.remove('drag')))
+  fdz.addEventListener('drop', async e => {
+    e.preventDefault(); e.stopPropagation()
+    fdz.classList.remove('drag')
+    const files = await filesFromDataTransfer(e.dataTransfer)
+    if (files.length) processFix(files)
+  })
+}
 
 // ---- drag & drop: drop files anywhere on the page (and highlight the dropzone) ----
 const dropzone = $('dropzone')

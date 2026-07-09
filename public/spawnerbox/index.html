@@ -95,10 +95,14 @@
     <section class="panel">
       <h2><span class="cog">II</span> Settings</h2>
       <div class="grid">
+        <label>Zone <span class="lblhint">(auto from JSON name)</span> <input id="zone" value="BST" /></label>
+        <label>Area
+          <select id="area">
+            <option value="FLD">FLD</option>
+            <option value="UND">UND</option>
+          </select>
+        </label>
         <label>Folder <input id="folder" value="bst" /></label>
-        <label>Zone <input id="zone" value="BST" /></label>
-        <label>Area <input id="area" value="FLD" /></label>
-        <label>Difficulty <input id="difficulty" value="E" /></label>
         <label>World <input id="world" value="world" /></label>
         <label>mergeRadius <input id="mergeRadius" type="number" value="10" min="1" /></label>
         <label>minSpawnRadius <input id="minSpawnRadius" type="number" value="4" step="0.5" /></label>
@@ -107,6 +111,16 @@
         <label>mobsPerSpawn <input id="mobsPerSpawn" type="number" value="1" min="1" /></label>
         <label>onblock filter <input id="onBlockFilter" value="#dirt" /></label>
         <label>mobsInRadius radius <input id="condRadius" type="number" value="4" min="0" /></label>
+      </div>
+      <div class="diffmap">
+        <span class="chip-title">Difficulty by marker colour — auto per spot</span>
+        <div class="diffrow">
+          <label class="dmi"><span class="dot c-green"></span>green <input id="diff-green" value="E" maxlength="3" /></label>
+          <label class="dmi"><span class="dot c-yellow"></span>yellow <input id="diff-yellow" value="M" maxlength="3" /></label>
+          <label class="dmi"><span class="dot c-orange"></span>orange <input id="diff-orange" value="H" maxlength="3" /></label>
+          <label class="dmi"><span class="dot c-red"></span>red <input id="diff-red" value="D" maxlength="3" /></label>
+          <label class="dmi"><span class="dot c-pink"></span>pink <input id="diff-pink" value="N" maxlength="3" /></label>
+        </div>
       </div>
       <div class="chipwrap">
         <span class="chip-title">Popular onblock tags — click to toggle</span>
@@ -130,6 +144,38 @@
         <span id="copied" class="muted"></span>
       </div>
       <pre id="yaml"></pre>
+    </section>
+
+    <section class="panel">
+      <h2><span class="cog">&#9874;</span> Fixme — rename existing folders</h2>
+      <p class="hint">
+        Drop a folder (or its <code>.yml</code> files) of already-exported spawners. This rewrites the file
+        name and <code>SpawnerGroup</code> so <b>Difficulty comes from the mob's colour</b> (per the map above)
+        and re-numbers each <code>ZONE_AREA_DIFF</code> group. Set the target Zone/Area below.
+      </p>
+      <div class="grid">
+        <label>Target Zone <input id="fixZone" value="BST" /></label>
+        <label>Target Area
+          <select id="fixArea">
+            <option value="FLD">FLD</option>
+            <option value="UND">UND</option>
+          </select>
+        </label>
+        <label>Folder (in zip) <input id="fixFolder" value="bst" /></label>
+      </div>
+      <div class="row">
+        <button id="fixPick" class="ghost">Choose files</button>
+        <button id="fixPickDir" class="ghost">Choose folder</button>
+        <input id="fixFiles" type="file" accept=".yml,.yaml" multiple hidden />
+        <input id="fixDir" type="file" webkitdirectory multiple hidden />
+        <button id="fixDownload" class="primary" disabled>&#11015; Download fixed .zip</button>
+        <span id="fixCount" class="muted"></span>
+      </div>
+      <div id="fixDrop" class="dropzone" style="margin-top:12px">
+        <span class="dz-idle">&#11015; Drag &amp; drop a folder or .yml files here to rename</span>
+        <span class="dz-hot">Release to load</span>
+      </div>
+      <div id="fixPreview" class="fixpreview"></div>
     </section>
   </main>
 
