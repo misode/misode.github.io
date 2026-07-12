@@ -46,5 +46,5 @@ struct HeightRange {
 
 struct BlockPredicate {
 	/// Block tags are valid
-    id: string,
+    id: #[id(registry="block",tags="allowed")] string,
 }
