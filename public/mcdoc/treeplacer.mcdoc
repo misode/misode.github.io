@@ -3,7 +3,7 @@ dispatch minecraft:resource[treeplacer:sapling_overrides] to struct TreeplacerSa
 	/// Should this override other datapack's files of the same name. False will merge them. Default to false
 	replace: boolean,
 	/// Dictionary of keys (biome or block ids) to their features.
-	/// Tags do not work yet.
+	/// Biome tags and Block tags are valid
 	/// Biomes apply the rule when the sapling is inside them. 
 	/// Blocks apply whenever that sapling is on them.
 	/// Order of rule application: Block > Biome > All_Biomes > Vanilla
@@ -32,7 +32,7 @@ struct FeatureEntry {
     y?: HeightRange,
 	/// (optional) Restrict rule to world positions 
 	z?: HeightRange,
-	/// (optional) Block ids the sapling must be on for the rule to apply to.
+	/// (optional) Block ids/tags the sapling must be on for the rule to apply to.
 	/// Redundant for global block keys, use with biome keys
     block?: [BlockPredicate],
 }
@@ -45,5 +45,6 @@ struct HeightRange {
 }
 
 struct BlockPredicate {
-    id: #[id=block]string,
+	/// Block tags are valid
+    id: string,
 }
