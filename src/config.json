@@ -1077,6 +1077,15 @@
       "wiki": "https://thermoo.thedeathlycow.com/datapacks/loot_condition/",
       "minVersion": "1.21.1"
     },
+
+    {
+      "id": "grimoire:quests",
+      "url": "questtome/quests",
+      "tags": ["partners"],
+      "dependency": "questtome",
+      "wiki": "https://github.com/sensitivepigeon/QuestTome/wiki",
+      "minVersion": "1.20.1"
+    },
     {
       "id": "pixelmon:raid_ally_set",
       "url": "pixelmon/raid/ally",

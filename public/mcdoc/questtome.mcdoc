@@ -1,0 +1,44 @@
+
+use ::java::world::item::ItemStack
+
+/// A single reward entry within a bundle.
+struct RewardEntry {
+	/// The item ID to reward.
+	item: #[id="item"] string,
+	/// How many of the item to grant.
+	count: int,
+}
+
+/// A QuestTome bargain definition.
+struct Quest {
+	/// Display title of the bargain.
+	title: string,
+	/// Short flavor line.
+	lore?: string,
+	/// Longer description shown on the detail page. Empty = no detail page.
+	description?: string,
+	/// Patron key this bargain belongs to. Lower case, no spaces.
+	patron?: string,
+	/// Reserved compatibility field. Leave at 1 unless told otherwise.
+	format?: int,
+	/// Tier rank (1-5).
+	tier: int,
+	/// Item the player must turn in.
+	required_item: #[id="item"] string,
+	/// How many of the required item.
+	required_count: int,
+
+	/// Multiple rewards (preferred syntax).
+	rewards?: [RewardEntry],
+	/// Legacy single-reward item (use `rewards` instead for new bargains).
+	reward_item?: #[id="item"] string,
+	/// Legacy single-reward count.
+	reward_count?: int,
+
+	/// If false, this bargain can be completed only once, ever. Default true.
+	repeatable?: boolean,
+	/// ID of a prerequisite bargain that must be completed first.
+	requires_quest?: string,
+}
+
+dispatch minecraft:resource[grimoire:quests] to Quest
