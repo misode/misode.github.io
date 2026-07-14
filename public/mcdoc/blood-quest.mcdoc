@@ -1,13 +1,19 @@
-use ::java::util::text::Text
-
 dispatch minecraft:resource[blood:blood-quest] to struct Quest {
   id: string,
   type: QuestType,
-  name: Text,
-  description: Text,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  name?: LocalizedText,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  description?: LocalizedText,
   /// True by default
   condition?: Condition,
   activation?: Activation,
+  /// Actor id of the NPC that offers the quest
+  giverActor?: string,
+  /// Actor id of the NPC that gives the reward
+  rewardActor?: string,
+  /// String custom model data used by quest GUIs
+  icon?: string,
   /// Changing this will reset players' progress if quest is active upon reload
   version: string,
   rewards: [Reward],
@@ -97,6 +103,38 @@ struct Condition {
   not?: Condition,
 }
 
+struct LocalizedText {
+  /// Resource-pack lang key. Generated on save when omitted.
+  key?: string,
+  en_us?: string,
+  ru_ru?: string,
+  /// Placeholder values for %s in the lang string.
+  arguments?: [LocalizedText],
+  /// Extra text parts appended after this text.
+  append?: [LocalizedText],
+  color?: string,
+  shadow_color?: string,
+  font?: string,
+  bold?: boolean,
+  italic?: boolean,
+  underlined?: boolean,
+  strikethrough?: boolean,
+  obfuscated?: boolean,
+  insertion?: string,
+  click_event?: ClickEvent,
+  hover_event?: HoverEvent,
+}
+
+struct ClickEvent {
+  action: string,
+  value: string,
+}
+
+struct HoverEvent {
+  action: string,
+  value: string,
+}
+
 dispatch minecraft:resource[blood:activation] to struct Activation {
   type: ActivationType,
   ...blood:activation[[type]],
@@ -107,14 +145,26 @@ dispatch blood:activation[dialog] to struct {
 }
 
 dispatch minecraft:resource[blood:stage] to struct Stage {
-  name: Text,
-  coordinates: string,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  name?: LocalizedText,
+  coordinates: QuestLocation,
   goals: [Goal]
 }
 
+type QuestLocation = (QuestPosition | string)
+
+struct QuestPosition {
+  world: string,
+  x: double,
+  y: double,
+  z: double,
+  yaw?: float,
+  pitch?: float,
+}
+
 struct Area {
-  /// Center coordinates in "world x y z" or F3+C format
-  location: string,
+  /// Center coordinates
+  location: QuestLocation,
   /// Radius in blocks
   radius: float,
 }
@@ -135,9 +185,17 @@ enum(string) GoalType {
   Die = "blood:die", // lmao
   KillPlayer = "blood:kill_player",
   Level = "blood:level",
+  Craft = "blood:craft",
+  Dungeon = "blood:dungeon",
+  InteractObject = "blood:interact_object",
+  NpcZone = "blood:npc_zone",
+  Condition = "blood:condition",
+  ScoreboardTag = "blood:scoreboard_tag",
 }
 
 dispatch minecraft:resource[blood:goal] to struct Goal {
+  /// Stable unique id; generated on server save when omitted
+  id?: string,
   type: GoalType,
   ...blood:goal[[type]],
 }
@@ -176,8 +234,10 @@ dispatch blood:goal[blood:interact_entity] to struct {
 }
 
 dispatch blood:goal[blood:interact_block] to struct {
-  /// Block position formatted as "world x y z"
-  block: string,
+  /// Block position
+  block?: QuestLocation,
+  /// Multiple block positions; every position must be used once
+  blocks?: [QuestLocation],
 }
 
 dispatch blood:goal[blood:shoot_area] to struct {
@@ -203,4 +263,45 @@ dispatch blood:goal[blood:kill_player] to struct {
 
 dispatch blood:goal[blood:level] to struct {
   level: int@1..,
+}
+
+dispatch blood:goal[blood:craft] to struct {
+  item: ItemDefinition,
+  amount: int@1..,
+}
+
+enum(string) DungeonMode {
+  Solo = "SOLO",
+  Party = "PARTY",
+}
+
+dispatch blood:goal[blood:dungeon] to struct {
+  dungeon: string,
+  mode: DungeonMode,
+  /// Defaults to 3 for PARTY
+  min_players?: int@1..,
+}
+
+dispatch blood:goal[blood:interact_object] to struct {
+  objectId: string,
+  amount: int@1..,
+}
+
+enum(string) ZoneDirection {
+  Enter = "ENTER",
+  Exit = "EXIT",
+}
+
+dispatch blood:goal[blood:npc_zone] to struct {
+  actor: string,
+  radius: float@0.1..,
+  direction: ZoneDirection,
+}
+
+dispatch blood:goal[blood:condition] to struct {
+  condition: Condition,
+}
+
+dispatch blood:goal[blood:scoreboard_tag] to struct {
+  tag: string,
 }

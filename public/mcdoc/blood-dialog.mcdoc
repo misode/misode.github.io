@@ -1,4 +1,34 @@
-use ::java::util::text::Text
+struct LocalizedText {
+  /// Resource-pack lang key. Generated on save when omitted.
+  key?: string,
+  en_us?: string,
+  ru_ru?: string,
+  /// Placeholder values for %s in the lang string.
+  arguments?: [LocalizedText],
+  /// Extra text parts appended after this text.
+  append?: [LocalizedText],
+  color?: string,
+  shadow_color?: string,
+  font?: string,
+  bold?: boolean,
+  italic?: boolean,
+  underlined?: boolean,
+  strikethrough?: boolean,
+  obfuscated?: boolean,
+  insertion?: string,
+  click_event?: ClickEvent,
+  hover_event?: HoverEvent,
+}
+
+struct ClickEvent {
+  action: string,
+  value: string,
+}
+
+struct HoverEvent {
+  action: string,
+  value: string,
+}
 
 // Source dialog scripts also support graph helpers outside JSON:
 // @label_name, -> label_name, ? condition:value -> label_name, condition blocks
@@ -33,13 +63,15 @@ struct Actor {
 // --- Nodes ---
 
 dispatch blood:nodes[blood:tell_node] to struct {
-  text: Text,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  text?: LocalizedText,
   actor: string,
   pauseAfterMessage?: boolean,
 }
 
 dispatch blood:nodes[blood:say_node] to struct {
-  text: Text,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  text?: LocalizedText,
   pauseAfterMessage?: boolean,
 }
 
@@ -61,7 +93,8 @@ dispatch blood:nodes[blood:condition_branch_node] to struct {
 }
 
 struct Choice {
-  text: Text,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  text?: LocalizedText,
   /// Jumps to said label
   label: string,
 }
@@ -115,7 +148,8 @@ dispatch blood:actions[blood:command_action] to struct {
 }
 
 dispatch blood:actions[blood:set_actor_name_action] to struct {
-  actorName: Text,
+  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  actorName?: LocalizedText,
 }
 
 dispatch blood:actions[blood:give_item_action] to struct {
