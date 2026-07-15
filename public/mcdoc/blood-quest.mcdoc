@@ -1,20 +1,20 @@
 dispatch minecraft:resource[blood:blood-quest] to struct Quest {
   id: string,
   type: QuestType,
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   name?: LocalizedText,
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   description?: LocalizedText,
-  /// True by default
+  /// По умолчанию true.
   condition?: Condition,
   activation?: Activation,
-  /// Actor id of the NPC that offers the quest
+  /// ID актёра NPC, который выдаёт квест.
   giverActor?: string,
-  /// Actor id of the NPC that gives the reward
+  /// ID актёра NPC, который выдаёт награду.
   rewardActor?: string,
-  /// String custom model data used by quest GUIs
+  /// Строковый custom model data для GUI квестов.
   icon?: string,
-  /// Changing this will reset players' progress if quest is active upon reload
+  /// Изменение версии сбросит прогресс игроков, если квест активен при перезагрузке.
   version: string,
   rewards: [Reward],
   stages: [Stage],
@@ -73,7 +73,7 @@ dispatch minecraft:resource[blood:reward] to struct ItemDefinition {
 }
 
 dispatch blood:item_definition[blood:item_stack] to struct {
-  /// Bukkit ItemStack serialized data
+  /// Сериализованные данные Bukkit ItemStack.
   yml: string,
 }
 
@@ -96,7 +96,7 @@ dispatch blood:item_definition[blood:arc_potion] to struct {
 
 struct Condition {
   condition: string,
-  /// Provider argument, for example a flag key, quest id, level, or "<quest_id>:<stage_number>" for quest_stage.
+  /// Аргумент провайдера: например ключ флага, id квеста, уровень или "<quest_id>:<stage_number>" для quest_stage.
   value?: string,
   and?: [Condition],
   or?: [Condition],
@@ -104,13 +104,13 @@ struct Condition {
 }
 
 struct LocalizedText {
-  /// Resource-pack lang key. Generated on save when omitted.
+  /// Ключ локализации ресурспака. Создаётся при сохранении, если поле пустое.
   key?: string,
   en_us?: string,
   ru_ru?: string,
-  /// Placeholder values for %s in the lang string.
+  /// Значения для плейсхолдеров %s в lang-строке.
   arguments?: [LocalizedText],
-  /// Extra text parts appended after this text.
+  /// Дополнительные части текста, добавленные после этого текста.
   append?: [LocalizedText],
   color?: string,
   shadow_color?: string,
@@ -145,7 +145,7 @@ dispatch blood:activation[dialog] to struct {
 }
 
 dispatch minecraft:resource[blood:stage] to struct Stage {
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   name?: LocalizedText,
   coordinates: QuestLocation,
   goals: [Goal]
@@ -163,9 +163,9 @@ struct QuestPosition {
 }
 
 struct Area {
-  /// Center coordinates
+  /// Координаты центра
   location: QuestLocation,
-  /// Radius in blocks
+  /// Радиус в блоках
   radius: float,
 }
 
@@ -182,7 +182,7 @@ enum(string) GoalType {
   ShootArea = "blood:shoot_area",
   Consume = "blood:consume",
   Dialog = "blood:dialog",
-  Die = "blood:die", // lmao
+  Die = "blood:die",
   KillPlayer = "blood:kill_player",
   Level = "blood:level",
   Craft = "blood:craft",
@@ -190,22 +190,23 @@ enum(string) GoalType {
   InteractObject = "blood:interact_object",
   NpcZone = "blood:npc_zone",
   Condition = "blood:condition",
+  Scoreboard = "blood:scoreboard",
   ScoreboardTag = "blood:scoreboard_tag",
 }
 
 dispatch minecraft:resource[blood:goal] to struct Goal {
-  /// Stable unique id; generated on server save when omitted
+  /// Стабильный уникальный id; создаётся сервером при сохранении, если поле пустое.
   id?: string,
   type: GoalType,
   ...blood:goal[[type]],
 }
 
 dispatch blood:goal[blood:kill] to struct {
-  /// Registry key. Use either entity_type or mythic_mob.
+  /// Ключ реестра. Укажите entity_type или mythic_mob.
   entity_type?: string,
-  /// MythicMobs internal name. Use either mythic_mob or entity_type.
+  /// Внутреннее имя MythicMobs. Укажите mythic_mob или entity_type.
   mythic_mob?: string,
-  /// Amount of entities to kill
+  /// Количество сущностей для убийства.
   amount: int@1..,
 }
 
@@ -215,12 +216,12 @@ dispatch blood:goal[blood:gather] to struct {
 
 dispatch blood:goal[blood:deliver] to struct {
   item: ItemDefinition,
-  /// ActorId of NPC to whom to deliver
+  /// ID актёра NPC, которому нужно отнести предмет.
   actor: string,
 }
 
 dispatch blood:goal[blood:talk] to struct {
-  /// ActorId of NPC to whom to talk
+  /// ID актёра NPC, с которым нужно поговорить.
   actor: string,
 }
 
@@ -229,14 +230,14 @@ dispatch blood:goal[blood:reach] to struct {
 }
 
 dispatch blood:goal[blood:interact_entity] to struct {
-  /// Entity registry key
+  /// Ключ реестра сущности.
   entity_type: string,
 }
 
 dispatch blood:goal[blood:interact_block] to struct {
-  /// Block position
+  /// Позиция блока.
   block?: QuestLocation,
-  /// Multiple block positions; every position must be used once
+  /// Несколько позиций блоков; каждую позицию нужно использовать один раз.
   blocks?: [QuestLocation],
 }
 
@@ -257,7 +258,7 @@ dispatch blood:goal[blood:die] to struct {
 }
 
 dispatch blood:goal[blood:kill_player] to struct {
-  // TODO: Player Predicate?
+  // Позже: предикат игрока.
   amount: int@1..,
 }
 
@@ -278,7 +279,7 @@ enum(string) DungeonMode {
 dispatch blood:goal[blood:dungeon] to struct {
   dungeon: string,
   mode: DungeonMode,
-  /// Defaults to 3 for PARTY
+  /// По умолчанию 3 для PARTY.
   min_players?: int@1..,
 }
 
@@ -302,6 +303,14 @@ dispatch blood:goal[blood:condition] to struct {
   condition: Condition,
 }
 
+dispatch blood:goal[blood:scoreboard] to struct {
+  /// Имя цели vanilla scoreboard.
+  objective: string,
+  /// Требуемое значение счёта.
+  min: int@1..,
+}
+
 dispatch blood:goal[blood:scoreboard_tag] to struct {
+  /// Entity-тег vanilla из команды /tag <player> add <tag>.
   tag: string,
 }

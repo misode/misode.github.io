@@ -1,11 +1,11 @@
 struct LocalizedText {
-  /// Resource-pack lang key. Generated on save when omitted.
+  /// Ключ локализации ресурспака. Создаётся при сохранении, если поле пустое.
   key?: string,
   en_us?: string,
   ru_ru?: string,
-  /// Placeholder values for %s in the lang string.
+  /// Значения для плейсхолдеров %s в lang-строке.
   arguments?: [LocalizedText],
-  /// Extra text parts appended after this text.
+  /// Дополнительные части текста, добавленные после этого текста.
   append?: [LocalizedText],
   color?: string,
   shadow_color?: string,
@@ -30,16 +30,16 @@ struct HoverEvent {
   value: string,
 }
 
-// Source dialog scripts also support graph helpers outside JSON:
-// @label_name, -> label_name, ? condition:value -> label_name, condition blocks
-// ? condition:value { ... } { ... }, and ! end. Label names must match [A-Za-z0-9_.-]+.
-// Source action shorthands: ! give_item <material> <amount>,
+// Source-скрипты диалогов также поддерживают вспомогательный графовый синтаксис вне JSON:
+// @label_name, -> label_name, ? condition:value -> label_name, блоки условий
+// ? condition:value { ... } { ... } и ! end. Имена label должны совпадать с [A-Za-z0-9_.-]+.
+// Короткие source-action команды: ! give_item <material> <amount>,
 // ! give_currency <BLOOD_ORB|SILVER> <amount>, ! teleport <location>,
-// ! set_flag <key> [true|false|string:value|int:value], and ! clear_flag <key>.
+// ! set_flag <key> [true|false|string:value|int:value] и ! clear_flag <key>.
 
 dispatch minecraft:resource[blood:blood-dialog] to struct Dialog {
   id: string,
-  /// True by default
+  /// По умолчанию true.
   condition?: Condition,
   actors: [Actor],
   root: [Node],
@@ -47,7 +47,7 @@ dispatch minecraft:resource[blood:blood-dialog] to struct Dialog {
 
 struct Condition {
   condition: string,
-  /// Provider argument, for example a flag key, quest id, level, or "<quest_id>:<stage_number>" for quest_stage.
+  /// Аргумент провайдера: например ключ флага, id квеста, уровень или "<quest_id>:<stage_number>" для quest_stage.
   value?: string,
   and?: [Condition],
   or?: [Condition],
@@ -55,7 +55,7 @@ struct Condition {
 }
 
 struct Actor {
-  /// Can be used as ref in TellNode
+  /// Можно использовать как ref в TellNode.
   id: string,
   entity: string,
 }
@@ -63,14 +63,14 @@ struct Actor {
 // --- Nodes ---
 
 dispatch blood:nodes[blood:tell_node] to struct {
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   text?: LocalizedText,
   actor: string,
   pauseAfterMessage?: boolean,
 }
 
 dispatch blood:nodes[blood:say_node] to struct {
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   text?: LocalizedText,
   pauseAfterMessage?: boolean,
 }
@@ -83,7 +83,7 @@ dispatch blood:nodes[blood:branch_node] to struct {
 struct ConditionBranch {
   condition: Condition,
   label: string,
-  /// Lower priorities are tested first. If omitted, JSON order is used after prioritized branches.
+  /// Меньший priority проверяется раньше. Если поле пустое, после priority-веток используется порядок JSON.
   priority?: int,
 }
 
@@ -93,9 +93,9 @@ dispatch blood:nodes[blood:condition_branch_node] to struct {
 }
 
 struct Choice {
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   text?: LocalizedText,
-  /// Jumps to said label
+  /// Переход к указанному label.
   label: string,
 }
 
@@ -148,7 +148,7 @@ dispatch blood:actions[blood:command_action] to struct {
 }
 
 dispatch blood:actions[blood:set_actor_name_action] to struct {
-  /// Localized text. Set key manually or leave it empty to generate a lang key on save.
+  /// Локализованный текст. Укажите key вручную или оставьте пустым, чтобы ключ создался при сохранении.
   actorName?: LocalizedText,
 }
 
@@ -179,7 +179,7 @@ enum(string) PlayerFlagValueType {
 
 dispatch blood:actions[blood:set_player_flag_action] to struct {
   key: string,
-  /// Defaults to boolean true when omitted.
+  /// Если поле пустое, используется boolean true.
   value?: string,
   valueType?: PlayerFlagValueType,
 }
@@ -203,7 +203,7 @@ dispatch minecraft:resource[blood:dialog_item_definition] to struct ItemDefiniti
 }
 
 dispatch blood:item_definition[blood:item_stack] to struct {
-  /// Bukkit ItemStack serialized data.
+  /// Сериализованные данные Bukkit ItemStack.
   yml: string,
 }
 
