@@ -33,6 +33,9 @@ const ZONE_LEVELS = {
   pink: { min: 150, max: 200, leash: 30, cooldown: 1200, dir: 'CENTER_HIGH' },
 }
 
+const GLOBAL_ZONE_LEVEL_MIN = 1
+const GLOBAL_ZONE_LEVEL_MAX = 200
+
 // ---------------------------------------------------------------------------------------------
 // Parsing
 // ---------------------------------------------------------------------------------------------
@@ -409,6 +412,89 @@ function slider(label, min, max, step, value, onChange) {
   wrap.appendChild(controls)
   return wrap
 }
+
+function zoneSlider(label, zone, value, onChange) {
+  const wrap = el('div', 'slider-row zone-slider')
+  const labelEl = el('label', 'slabel', `${label} <span class="sval">${trimVal(value)}</span>`)
+
+  wrap.appendChild(labelEl)
+
+  const controls = el('div', 'scontrols')
+  const rangeWrap = el('div', 'zone-range-wrap')
+
+  const range = document.createElement('input')
+  range.type = 'range'
+  range.min = GLOBAL_ZONE_LEVEL_MIN
+  range.max = GLOBAL_ZONE_LEVEL_MAX
+  range.step = 1
+  range.value = value
+  range.className = 'zone-range'
+
+  const zones = el('div', 'zone-background')
+
+  Object.entries(ZONE_LEVELS).forEach(([name, z]) => {
+    const segment = el('div', `zone-segment c-${name}`)
+    const left = ((z.min - GLOBAL_ZONE_LEVEL_MIN) / (GLOBAL_ZONE_LEVEL_MAX - GLOBAL_ZONE_LEVEL_MIN)) * 100
+    const width = ((z.max - z.min) / (GLOBAL_ZONE_LEVEL_MAX - GLOBAL_ZONE_LEVEL_MIN)) * 100
+    segment.style.left = `${left}%`
+    segment.style.width = `${width}%`
+    zones.appendChild(segment)
+  })
+
+  const markers = el('div', 'zone-markers')
+
+  Object.entries(ZONE_LEVELS).forEach(([name, z]) => {
+    const marker = el('span', 'zone-marker', z.min)
+    const left = ((z.min - GLOBAL_ZONE_LEVEL_MIN) / (GLOBAL_ZONE_LEVEL_MAX - GLOBAL_ZONE_LEVEL_MIN)) * 100
+    marker.style.left = `${left}%`
+    markers.appendChild(marker)
+  })
+
+  const maxMarker = el('span', 'zone-marker', GLOBAL_ZONE_LEVEL_MAX)
+
+  maxMarker.style.left = '100%'
+  markers.appendChild(maxMarker)
+
+  rangeWrap.append(zones, range, markers)
+
+  const box = document.createElement('input')
+  box.type = 'number'
+  box.min = zone.min
+  box.max = zone.max
+  box.step = 1
+  box.value = value
+
+  const valEl = wrap.querySelector('.sval')
+
+  const apply = (v, from) => {
+    let n = parseFloat(v)
+    if (!Number.isFinite(n)) return
+
+    n = Math.min(GLOBAL_ZONE_LEVEL_MAX, Math.max(GLOBAL_ZONE_LEVEL_MIN, n))
+    n = Math.round(n)
+
+    if (from !== 'range') range.value = n
+    if (from !== 'box') box.value = n
+
+    valEl.textContent = trimVal(n)
+    onChange(n)
+  }
+
+  range.addEventListener('input', () => {
+    apply(range.value, 'range')
+    range.value = Math.min(GLOBAL_ZONE_LEVEL_MAX, Math.max(GLOBAL_ZONE_LEVEL_MIN, parseInt(range.value)))
+  })
+
+  box.addEventListener('input', () => {
+    apply(box.value, 'box')
+  })
+
+  controls.append(rangeWrap, box)
+  wrap.appendChild(controls)
+
+  return wrap
+}
+
 function trimVal(v) { return Number.isInteger(v) ? String(v) : Number(v).toFixed(1) }
 
 function renderCards() {
@@ -436,7 +522,7 @@ function buildCard(d, i) {
   const sliders = el('div', 'sliders')
   sliders.appendChild(slider('Radius', s.minSpawnRadius, Math.max(s.maxSpawnRadius, d.radius), 0.5, d.radius, v => { d.radius = v; refresh() }))
   sliders.appendChild(slider('RadiusY', 1, 16, 0.5, d.radiusY, v => { d.radiusY = v; refresh() }))
-  sliders.appendChild(slider('MobLevel', zone.min, zone.max, 1, clampInt(d.mobLevel, zone.min, zone.max), v => { d.mobLevel = Math.round(v); refresh() }))
+  sliders.appendChild(zoneSlider('MobLevel', zone, Number.isFinite(d.mobLevel) ? clampInt(d.mobLevel, GLOBAL_ZONE_LEVEL_MIN, GLOBAL_ZONE_LEVEL_MAX) : zone.max, v => { d.mobLevel = Math.round(v); refresh() }))
   sliders.appendChild(slider('MaxMobs', 1, Math.max(20, d.mobCount * 2, d.maxMobs), 1, d.maxMobs, v => { d.maxMobs = Math.round(v); refresh() }))
   card.appendChild(sliders)
 

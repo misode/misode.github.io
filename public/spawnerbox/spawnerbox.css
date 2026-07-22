@@ -485,6 +485,101 @@ td.mono, .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px
 .zone-row button { padding: 5px 12px; font-size: 12px; }
 .zone-row .zdel { color: var(--danger); border-color: transparent; padding: 5px 9px; }
 
+.zone-range-wrap {
+  position: relative;
+  flex: 1;
+  height: 24px;
+}
+
+.zone-background {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.zone-segment {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 6px currentColor;
+}
+
+.zone-range {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  top: 50%;
+  width: 100%;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  transform: translateY(-50%);
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.zone-range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+
+.zone-range::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+
+.zone-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: none;
+  border-radius: 50%;
+  background: var(--amber);
+  cursor: pointer;
+}
+
+.zone-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--amber);
+  cursor: pointer;
+}
+
+.zone-markers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 8px);
+  height: 12px;
+  pointer-events: none;
+}
+
+.zone-marker {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  color: var(--copper);
+}
+
 /* ------------------------------------------------------------- spot cards */
 .cards { display: flex; flex-direction: column; gap: 16px; }
 
