@@ -97,7 +97,7 @@
   "generator.lang": "Language",
   "generator.loot_table": "Loot Table",
   "generator.loot-table-modifier:loot_modifier": "Loot Modifier",
-  "generator.lychee:recipes": "Lychee Recipes",
+  "generator.lychee:recipe": "Lychee Recipe",
   "generator.model": "Model",
   "generator.texture_meta": "Texture Metadata",
   "generator.neoforge:biome_modifier": "Biome Modifier",

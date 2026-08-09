@@ -1186,8 +1186,8 @@
       "minVersion": "1.21.1"
     },
     {
-      "id": "lychee:recipes",
-      "url": "lychee/recipes",
+      "id": "lychee:recipe",
+      "url": "lychee/recipe",
       "path": "lychee",
       "tags": ["partners"],
       "dependency": "lychee",

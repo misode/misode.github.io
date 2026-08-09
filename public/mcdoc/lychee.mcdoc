@@ -662,10 +662,10 @@ struct FabricCondition {
 }
 
 /// Lychee recipe common fields. Dispatched by the `type` field.
-dispatch minecraft:resource[lychee:recipes] to struct Recipes {
+dispatch minecraft:resource[lychee:recipe] to struct Recipes {
 	/// The recipe type identifier.
 	type: Type,
-	...lychee:recipes[[type]],
+	...lychee:recipe[[type]],
 	/// Contextual condition(s) for the recipe.
 	#[since="1.21"]
 	if?: (ContextualCondition | [ContextualCondition]),
@@ -718,7 +718,7 @@ enum(string) Type {
 }
 
 /// Use Item on a Block. Not repeatable. Default: item is consumed.
-dispatch lychee:recipes[lychee:block_interacting] to struct {
+dispatch lychee:recipe[lychee:block_interacting] to struct {
 	/// The item(s) in player's hand. Can accept 2 ingredients: main hand + off hand.
 	item_in: (SizedIngredient | [SizedIngredient] @ 1..2),
 	/// The block being used.
@@ -726,7 +726,7 @@ dispatch lychee:recipes[lychee:block_interacting] to struct {
 }
 
 /// Click on a Block with Item. Not repeatable. Default: item is consumed.
-dispatch lychee:recipes[lychee:block_clicking] to struct {
+dispatch lychee:recipe[lychee:block_clicking] to struct {
 	/// The item(s) in player's hand. Can accept 2 ingredients: main hand + off hand.
 	item_in: (SizedIngredient | [SizedIngredient] @ 1..2),
 	/// The block being clicked.
@@ -734,13 +734,13 @@ dispatch lychee:recipes[lychee:block_clicking] to struct {
 }
 
 /// Item Entity Burning. Repeatable. Default: none.
-dispatch lychee:recipes[lychee:item_burning] to struct {
+dispatch lychee:recipe[lychee:item_burning] to struct {
 	/// The burnt item.
 	item_in: SizedIngredient,
 }
 
 /// Item Entity inside a Block. Repeatable. Default: item is consumed.
-dispatch lychee:recipes[lychee:item_inside] to struct {
+dispatch lychee:recipe[lychee:item_inside] to struct {
 	/// The ticking item(s).
 	item_in: (SizedIngredient | [SizedIngredient]),
 	/// The block the item is inside.
@@ -750,7 +750,7 @@ dispatch lychee:recipes[lychee:item_inside] to struct {
 }
 
 /// Anvil Crafting. Not repeatable. Default: anvil is damaged.
-dispatch lychee:recipes[lychee:anvil_crafting] to struct {
+dispatch lychee:recipe[lychee:anvil_crafting] to struct {
 	/// The input items. First is left slot, second is right slot (optional).
 	item_in: (LycheeIngredient | [LycheeIngredient] @ 1..2),
 	/// The result item.
@@ -766,7 +766,7 @@ dispatch lychee:recipes[lychee:anvil_crafting] to struct {
 }
 
 /// Block Crushing. Repeatable. Default: falling block becomes block.
-dispatch lychee:recipes[lychee:block_crushing] to struct {
+dispatch lychee:recipe[lychee:block_crushing] to struct {
 	/// The crushed items.
 	item_in?: (SizedIngredient | [SizedIngredient]),
 	/// The falling block. Defaults to "#anvil".
@@ -776,13 +776,13 @@ dispatch lychee:recipes[lychee:block_crushing] to struct {
 }
 
 /// Lightning Channeling. Repeatable. Default: items are consumed.
-dispatch lychee:recipes[lychee:lightning_channeling] to struct {
+dispatch lychee:recipe[lychee:lightning_channeling] to struct {
 	/// Items nearby the lightning strike.
 	item_in?: (SizedIngredient | [SizedIngredient]),
 }
 
 /// Item Exploding. Repeatable. Default: items are consumed.
-dispatch lychee:recipes[lychee:item_exploding] to struct {
+dispatch lychee:recipe[lychee:item_exploding] to struct {
 	/// Items affected by the explosion.
 	item_in?: (SizedIngredient | [SizedIngredient]),
 	/// Explosion source displayed in viewers.
@@ -794,7 +794,7 @@ dispatch lychee:recipes[lychee:item_exploding] to struct {
 }
 
 /// Block Exploding. Not repeatable. Default: block drops items from loot table.
-dispatch lychee:recipes[lychee:block_exploding] to struct {
+dispatch lychee:recipe[lychee:block_exploding] to struct {
 	/// Block destroyed by the explosion.
 	block_in?: LycheeBlockPredicate,
 	/// Explosion source displayed in viewers.
@@ -807,7 +807,7 @@ dispatch lychee:recipes[lychee:block_exploding] to struct {
 
 /// Entity Ticking. Not repeatable. No JEI/REI/EMI integration.
 #[since="1.21"]
-dispatch lychee:recipes[lychee:entity_ticking] to struct {
+dispatch lychee:recipe[lychee:entity_ticking] to struct {
 	/// Entity predicate.
 	entity: EntityPredicate,
 	/// Interval in ticks between checking this recipe. Defaults to 1.
@@ -815,13 +815,13 @@ dispatch lychee:recipes[lychee:entity_ticking] to struct {
 }
 
 /// Random Block Ticking. Not repeatable. No JEI/REI/EMI integration.
-dispatch lychee:recipes[lychee:random_block_ticking] to struct {
+dispatch lychee:recipe[lychee:random_block_ticking] to struct {
 	/// The block being randomly ticked.
 	block_in: LycheeBlockPredicate,
 }
 
 /// Dripstone Dripping. Not repeatable.
-dispatch lychee:recipes[lychee:dripstone_dripping] to struct {
+dispatch lychee:recipe[lychee:dripstone_dripping] to struct {
 	/// Block two blocks above the root dripstone.
 	source_block: LycheeBlockPredicate,
 	/// The block being dripped on.
@@ -829,7 +829,7 @@ dispatch lychee:recipes[lychee:dripstone_dripping] to struct {
 }
 
 /// Advanced Shaped Crafting. Not repeatable.
-dispatch lychee:recipes[lychee:crafting] to struct {
+dispatch lychee:recipe[lychee:crafting] to struct {
 	...CraftingShaped,
 	/// Actions that run before the result is displayed in the viewer.
 	assembling?: (PostAction | [PostAction]),
@@ -837,7 +837,7 @@ dispatch lychee:recipes[lychee:crafting] to struct {
 
 /// Sculk Spreading. Not repeatable.
 #[since="26.1"]
-dispatch lychee:recipes[lychee:sculk_spreading] to struct {
+dispatch lychee:recipe[lychee:sculk_spreading] to struct {
 	/// The block being consumed by sculk spread.
 	block_in: LycheeBlockPredicate,
 	/// The sculk charge value to be consumed.
@@ -845,7 +845,7 @@ dispatch lychee:recipes[lychee:sculk_spreading] to struct {
 }
 
 #[since="26.1"]
-dispatch lychee:recipes[fruitfulfun:hybridizing] to struct {
+dispatch lychee:recipe[fruitfulfun:hybridizing] to struct {
 	/// Block IDs for the pollen step.
 	pollens?: [#[id="block"] string] @ ..4,
 	/// Block IDs for the ending step.
@@ -855,7 +855,7 @@ dispatch lychee:recipes[fruitfulfun:hybridizing] to struct {
 }
 
 #[since="26.1"]
-dispatch lychee:recipes[fruitfulfun:dragon_ritual] to struct {
+dispatch lychee:recipe[fruitfulfun:dragon_ritual] to struct {
 	/// The input item.
 	item_in: SizedIngredient,
 }
