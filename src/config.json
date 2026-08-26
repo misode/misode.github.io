@@ -458,6 +458,11 @@
       "wiki": "https://minecraft.wiki/w/Number_provider"
     },
     {
+      "id": "block_transformer",
+      "url": "block-transformer",
+      "minVersion": "26.3"
+    },
+    {
       "id": "text_component",
       "url": "text-component",
       "noPath": true,

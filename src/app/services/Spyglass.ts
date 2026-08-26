@@ -339,6 +339,9 @@ export class SpyglassService {
 							number_provider : {
 								category: 'number_provider',
 							},
+							block_transformer: {
+								category: 'block_transformer',
+							},
 							'worldgen/carver' : {
 								category: 'worldgen/carver',
 							},
