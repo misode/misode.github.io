@@ -327,6 +327,8 @@ const selectRegistries = new Set([
 	'block_predicate_type',
 	'chunk_status',
 	'consume_effect_type',
+	'context_float_provider_type',
+	'context_int_provider_type',
 	'creative_mode_tab',
 	'data_component_predicate_type',
 	'data_component_type',

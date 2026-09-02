@@ -520,7 +520,7 @@ function customSymbolRegistrar(summary: McmetaSummary, release: ReleaseVersion):
 
 		// Temporary until spyglass core is updated
 		for (const [registryId, registry] of Object.entries(summary.registries)) {
-			if (['context_float_provider', 'context_int_provider', 'worldgen/carver_type', 'worldgen/feature_type', 'worldgen/material_condition_type', 'worldgen/material_rule_type'].includes(registryId)) {
+			if (['context_float_provider', 'context_float_provider_type', 'context_int_provider', 'context_int_provider_type', 'worldgen/carver_type', 'worldgen/feature_type', 'worldgen/material_condition_type', 'worldgen/material_rule_type'].includes(registryId)) {
 				for (const entryId of registry) {
 					symbols.query(McmetaSummaryUri, registryId, core.ResourceLocation.lengthen(entryId))
 						.enter({ usage: { type: 'declaration' } })
