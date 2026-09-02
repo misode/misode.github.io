@@ -26,5 +26,6 @@
 	"files.trimFinalNewlines": true,
 	"js/ts.format.semicolons": "remove",
 	"js/ts.tsdk.path": "node_modules\\typescript\\lib",
-	"workbench.browser.openLocalhostLinks": false
+	"workbench.browser.openLocalhostLinks": false,
+	"js/ts.experimental.useTsgo": false
 }

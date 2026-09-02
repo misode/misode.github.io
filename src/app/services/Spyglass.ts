@@ -321,6 +321,12 @@ export class SpyglassService {
 							chicken_sound_variant : {
 								category: 'chicken_sound_variant',
 							},
+							context_float_provider : {
+								category: 'context_float_provider',
+							},
+							context_int_provider : {
+								category: 'context_int_provider',
+							},
 							cow_sound_variant : {
 								category: 'cow_sound_variant',
 							},
@@ -335,9 +341,6 @@ export class SpyglassService {
 							},
 							decorated_pot_pattern : {
 								category: 'decorated_pot_pattern',
-							},
-							number_provider : {
-								category: 'number_provider',
 							},
 							block_transformer: {
 								category: 'block_transformer',
@@ -517,7 +520,7 @@ function customSymbolRegistrar(summary: McmetaSummary, release: ReleaseVersion):
 
 		// Temporary until spyglass core is updated
 		for (const [registryId, registry] of Object.entries(summary.registries)) {
-			if (['number_provider', 'worldgen/carver_type', 'worldgen/feature_type', 'worldgen/material_condition_type', 'worldgen/material_rule_type'].includes(registryId)) {
+			if (['context_float_provider', 'context_int_provider', 'worldgen/carver_type', 'worldgen/feature_type', 'worldgen/material_condition_type', 'worldgen/material_rule_type'].includes(registryId)) {
 				for (const entryId of registry) {
 					symbols.query(McmetaSummaryUri, registryId, core.ResourceLocation.lengthen(entryId))
 						.enter({ usage: { type: 'declaration' } })
