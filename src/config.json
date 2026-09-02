@@ -222,7 +222,7 @@
       "id": "26.3",
       "dynamic": true,
       "name": "26.3",
-      "pack_format": 113,
+      "pack_format": 119,
       "show": true
     }
   ],
@@ -374,6 +374,16 @@
       "wiki": "https://minecraft.wiki/w/Mob_variant_definitions#Chicken_sounds"
     },
     {
+      "id": "context_float_provider",
+      "url": "context-float-provider",
+      "minVersion": "26.3"
+    },
+    {
+      "id": "context_int_provider",
+      "url": "context-int-provider",
+      "minVersion": "26.3"
+    },
+    {
       "id": "cow_variant",
       "url": "cow-variant",
       "minVersion": "1.21.5",
@@ -450,12 +460,6 @@
       "url": "decorated-pot-pattern",
       "minVersion": "26.3",
       "wiki": "https://minecraft.wiki/w/Decorated_pot_pattern_definition"
-    },
-    {
-      "id": "number_provider",
-      "url": "number-provider",
-      "minVersion": "26.3",
-      "wiki": "https://minecraft.wiki/w/Number_provider"
     },
     {
       "id": "block_transformer",

@@ -315,7 +315,8 @@ export function getCategory(type: McdocType) {
 			case '::java::data::loot::LootFunction':
 			case '::java::data::worldgen::density_function::CubicSpline':
 			case '::java::data::worldgen::processor_list::Processor':
-			case '::java::data::number_provider::NumberProvider':
+			case '::java::data::number_provider::FloatNumberProviderRef':
+			case '::java::data::number_provider::IntegerNumberProviderRef':
 				return 'function'
 		}
 	}
@@ -326,6 +327,8 @@ const selectRegistries = new Set([
 	'block_predicate_type',
 	'chunk_status',
 	'consume_effect_type',
+	'context_float_provider_type',
+	'context_int_provider_type',
 	'creative_mode_tab',
 	'data_component_predicate_type',
 	'data_component_type',
