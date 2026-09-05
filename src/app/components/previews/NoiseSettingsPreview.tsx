@@ -1,17 +1,16 @@
 import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
-import { vec2 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
 import { getWorldgenProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
-import { fetchRegistries } from '../../services/index.js'
+import { checkVersion, fetchRegistries } from '../../services/index.js'
 import { Store } from '../../Store.js'
 import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnInput, BtnMenu, ErrorPanel } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
-import { DEEPSLATE } from './Deepslate.js'
+import { Deepslate } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
@@ -25,17 +24,20 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const text = docAndNode.doc.getText()
 
+	const { value: deepslate } = useAsync(async () => {
+		return Deepslate.load(version)
+	}, [version])
+
 	const { value, error } = useAsync(async () => {
+		if (!deepslate) return undefined
 		const data = safeJsonParse(text) ?? {}
 		const projectData = await getWorldgenProjectData(project)
-		await DEEPSLATE.loadVersion(version, projectData)
-		const biomeSource = { type: 'fixed', biome }
-		await DEEPSLATE.loadChunkGenerator(data, biomeSource, seed)
-		const noiseSettings = DEEPSLATE.getNoiseSettings()
-		const finalDensity = DEEPSLATE.loadDensityFunction(data?.noise_router?.final_density, noiseSettings.minY, noiseSettings.height, seed)
-		return { noiseSettings, finalDensity }
-	}, [text, seed, version, project, biome])
-	const { noiseSettings, finalDensity } = value ?? {}
+		deepslate.loadProjectData(projectData)
+		const chunkGenerator = deepslate.initChunkGenerator(seed, data, biome)
+		const finalDensity = checkVersion(version, '1.18.2') ? deepslate.initDensitySampler(seed, data?.noise_router?.final_density) : undefined
+		return { chunkGenerator, finalDensity }
+	}, [deepslate, version, text, seed, project, biome])
+	const { chunkGenerator, finalDensity } = value ?? {}
 
 	const imageData = useRef<ImageData>()
 	const ctx = useRef<CanvasRenderingContext2D>()
@@ -55,38 +57,35 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 		if (!ctx.current || !imageData.current || !shown) return
 
 		if (layer === 'terrain') {
-			const pos = vec2.create()
-			const minX = vec2.transformMat3(pos, vec2.fromValues(0, 0), transform)[0]
-			const maxX = vec2.transformMat3(pos, vec2.fromValues(imageData.current.width-1, 0), transform)[0]
-			DEEPSLATE.generateChunks(minX, maxX - minX + 1, biome)
+			if (!chunkGenerator) return
 			iterateWorld2D(imageData.current, transform, (x, y) => {
-				return DEEPSLATE.getBlockState(x, y)?.getName().toString()
+				return chunkGenerator.getBlockState(x, y, 0)
 			}, (block) => {
-				return BlockColors[block ?? 'minecraft:air'] ?? [0, 0, 0]
+				return BlockColors[block] ?? [0, 0, 0]
 			})
 		} else if (layer === 'final_density') {
+			if (!finalDensity) return
 			const colormapFn = getColormap(colormap)
 			const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
 			iterateWorld2D(imageData.current, transform, (x, y) => {
-				return finalDensity?.compute({ x, y, z: 0 }) ?? 0
+				return finalDensity.sample(x, y, 0)
 			}, (density) => {
 				const color = colorPicker(clampedMap(density, -1, 1, 1, 0))
 				return [color[0] * 256, color[1] * 256, color[2] * 256]
 			})
 		}
 		ctx.current.putImageData(imageData.current, 0, 0)
-	}, [noiseSettings, finalDensity, layer, colormap, biome, shown])
+	}, [chunkGenerator, finalDensity, layer, colormap, biome, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
-		if (!pos || !noiseSettings || !finalDensity) {
+		if (!pos || !chunkGenerator || !finalDensity) {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const inVoid = -y < noiseSettings.minY || -y >= noiseSettings.minY + noiseSettings.height
-			const density = finalDensity.compute({ x, y: -y, z: 0})
-			const block = inVoid ? 'void' : DEEPSLATE.getBlockState(x, -y)?.getName().path ?? 'unknown'
+			const density = finalDensity.sample(x, -y, 0)
+			const block = chunkGenerator.getBlockState(x, -y, 0).replace(/^minecraft:/, '')
 			setFocused([`${block} D=${density.toPrecision(3)}`, `X=${x} Y=${-y}`])
 		}
-	}, [noiseSettings, finalDensity])
+	}, [chunkGenerator, finalDensity])
 
 	const { value: allBiomes } = useAsync(async () => {
 		const registries = await fetchRegistries(version)

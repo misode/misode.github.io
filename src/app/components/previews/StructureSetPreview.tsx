@@ -1,4 +1,3 @@
-import type { Identifier } from 'deepslate'
 import { ChunkPos } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
@@ -6,9 +5,10 @@ import { useLocale, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import type { Color } from '../../Utils.js'
 import { computeIfAbsent, iterateWorld2D, randomSeed, safeJsonParse, stringToColor } from '../../Utils.js'
+import { ErrorPanel } from '../ErrorPanel.jsx'
 import { Btn } from '../index.js'
 import { featureColors } from './Decorator.js'
-import { DEEPSLATE } from './Deepslate.js'
+import { Deepslate } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
@@ -19,15 +19,18 @@ export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const text = docAndNode.doc.getText()
 
-	const { value: structureSet } = useAsync(async () => {
-		await DEEPSLATE.loadVersion(version)
-		const structureSet = DEEPSLATE.loadStructureSet(safeJsonParse(text) ?? {}, seed)
-		return structureSet
-	}, [text, version, seed])
+	const { value: deepslate } = useAsync(async () => {
+		return Deepslate.load(version)
+	}, [version])
+
+	const { value: structureSet, error: structureError } = useAsync(async () => {
+		if (!deepslate) return undefined
+		return deepslate.initStructureSet(seed, safeJsonParse(text) ?? {})
+	}, [deepslate, text, seed])
 
 	const { chunkStructures, structureColors } = useMemo(() => {
 		return {
-			chunkStructures: new Map<string, Identifier | undefined>(),
+			chunkStructures: new Map<string, string | undefined>(),
 			structureColors: new Map<string, Color>(),
 		}
 	}, [structureSet])
@@ -47,18 +50,15 @@ export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 	}, [])
 	const onDraw = useCallback(function onDraw(transform: mat3) {
 		if (!ctx.current || !imageData.current || !shown || !structureSet) return
-		const context = DEEPSLATE.getWorldgenStructureContext()
-		if (!context) return
-
 		iterateWorld2D(imageData.current, transform, (x, y) => {
 			const pos = ChunkPos.create(x, y)
-			const structure = computeIfAbsent(chunkStructures, `${pos[0]} ${pos[1]}`, () => structureSet?.getStructureInChunk(pos[0], pos[1], context)?.id)
+			const structure = computeIfAbsent(chunkStructures, `${pos[0]} ${pos[1]}`, () => structureSet.getStructure(pos[0], pos[1]))
 			return { structure, pos }
 		}, ({ structure, pos }) => {
 			if (structure !== undefined) {
-				const color = computeIfAbsent(structureColors, structure.toString(), () => {
+				const color = computeIfAbsent(structureColors, structure, () => {
 					const index = structureColors.size
-					return index < featureColors.length ? featureColors[index] : stringToColor(structure.toString())
+					return index < featureColors.length ? featureColors[index] : stringToColor(structure)
 				})
 				return [0.8 * color[0], 0.8 * color[1], 0.8 * color[2]]
 			}
@@ -70,16 +70,18 @@ export const StructureSetPreview = ({ docAndNode, shown }: PreviewProps) => {
 		ctx.current.putImageData(imageData.current, 0, 0)
 	}, [structureSet, chunkStructures, structureColors, shown])
 	const onHover = useCallback(function onHover(pos: [number, number] | undefined) {
-		if (!pos) {
+		if (!pos || !structureSet) {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const context = DEEPSLATE.getWorldgenStructureContext()
-			if (!context) return
-			const structure = structureSet?.getStructureInChunk(x, -y, context)
+			const structure = structureSet.getStructure(x, -y)
 			setFocused([...(structure ? [structure.toString().replace(/^minecraft:/, '')] : []), `X=${x << 4} Z=${(-y) << 4}`])
 		}
 	}, [structureSet])
+
+	if (structureError) {
+		return <ErrorPanel error={structureError} prefix="Failed to initialize structure set: " />
+	}
 
 	return <>
 		<div class="controls preview-controls">

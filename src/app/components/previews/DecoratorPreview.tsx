@@ -1,4 +1,4 @@
-import { BlockPos, ChunkPos, LegacyRandom, PerlinNoise } from 'deepslate'
+import { BlockPos, ChunkPos, LegacyRandom, SimplexNoise } from 'deepslate/core'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
 import { useLocale, useVersion } from '../../contexts/index.js'
@@ -22,7 +22,7 @@ export const DecoratorPreview = ({ docAndNode, shown }: PreviewProps) => {
 			placements: [],
 			features: [],
 			random,
-			biomeInfoNoise: new PerlinNoise(random.fork(), 0, [1]),
+			biomeInfoNoise: new SimplexNoise(new LegacyRandom(BigInt(2345)), true),
 			seaLevel: 63,
 			version: version,
 			nextFloat: () => random.nextFloat(),

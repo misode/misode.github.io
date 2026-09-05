@@ -7,11 +7,12 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useLocalStorage } from '../../hooks/useLocalStorage.js'
 import { Store } from '../../Store.js'
 import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
+import { ErrorPanel } from '../ErrorPanel.jsx'
 import { Btn, BtnMenu, NumberInput } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
-import { DEEPSLATE } from './Deepslate.js'
+import { Deepslate } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 import { InteractiveCanvas3D } from './InteractiveCanvas3D.jsx'
@@ -31,12 +32,16 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const text = docAndNode.doc.getText()
 
-	const { value: df } = useAsync(async () => {
+	const { value: deepslate } = useAsync(async () => {
+		return Deepslate.load(version)
+	}, [version])
+
+	const { value: df, error: dfError } = useAsync(async () => {
+		if (!deepslate) return undefined
 		const projectData = await getWorldgenProjectData(project)
-		await DEEPSLATE.loadVersion(version, projectData)
-		const df = DEEPSLATE.loadDensityFunction(safeJsonParse(text) ?? {}, minY, height, seed)
-		return df
-	}, [version, project, minY, height, seed, text])
+		deepslate.loadProjectData(projectData)
+		return deepslate.initDensitySampler(seed, safeJsonParse(text) ?? {})
+	}, [deepslate, project, seed, text])
 
 	// === 2D ===
 	const imageData = useRef<ImageData>()
@@ -61,7 +66,7 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 		const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
 		let limit = 0.01
 		iterateWorld2D(imageData.current, transform, (x, y) => {
-			const density = df.compute(topDown ? { x, y: offset, z: y } : { x, y, z: offset })
+			const density = topDown ? df.sample(x, offset, y) : df.sample(x, y, offset)
 			limit = Math.max(limit, Math.min(1, Math.abs(density)))
 			return density
 		}, (density) => {
@@ -75,7 +80,7 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const output = df.compute(topDown ? { x, y: offset, z: -y } : { x: x, y: -y, z: offset })
+			const output = topDown ? df.sample(x, offset, -y) : df.sample(x, -y, offset)
 			setFocused([output.toPrecision(3), `X=${x} ${topDown ? 'Z' : 'Y'}=${-y}`])
 		}
 	}, [mode, df, offset])
@@ -103,7 +108,7 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 		for (let x = 0; x < 16; x += 1) {
 			for (let y = minY; y < maxY; y += 1) {
 				for (let z = 0; z < 16; z += 1) {
-					const density = df.compute({ x, y, z })
+					const density = df.sample(x, y, z)
 					if (density > cutoff) {
 						voxels.push({ x, y, z, color: [200, 200, 200] })
 					}
@@ -113,6 +118,10 @@ export const DensityFunctionPreview = ({ docAndNode, shown }: PreviewProps) => {
 		renderer.current.setVoxels(voxels)
 		setState(state => state + 1)
 	}, [voxelMode, df, cutoff])
+
+	if (dfError) {
+		return <ErrorPanel error={dfError} prefix="Failed to initialize density function: " />
+	}
 
 	return <>
 		<div class="controls preview-controls">
