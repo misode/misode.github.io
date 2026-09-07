@@ -10,7 +10,7 @@ import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
 import sparkmd5 from 'spark-md5'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import type { ConfigGenerator } from '../Config.js'
+import type { ConfigGenerator, ConfigVersion } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
 import type { VanillaMcdocSymbols, VersionMeta } from './DataFetcher.js'
@@ -415,49 +415,83 @@ async function compressBall(files: [string, string][]): Promise<Uint8Array> {
 const initialize: core.ProjectInitializer = async (ctx) => {
 	const { config, logger, meta, externals, cacheRoot } = ctx
 
-	const vanillaMcdoc = await fetchVanillaMcdoc()
-	meta.registerSymbolRegistrar('vanilla-mcdoc', {
-		checksum: vanillaMcdoc.ref,
-		registrar: vanillaMcdocRegistrar(vanillaMcdoc, logger),
-	})
-
-	meta.registerDependencyProvider('@misode-mcdoc', async () => {
-		const uri: string = new core.Uri('downloads/misode-mcdoc.tar.gz', cacheRoot).toString()
-		const buffer = await compressBall([['builtin.mcdoc', builtinMcdoc]])
-		await core.fileUtil.writeFile(externals, uri, buffer)
-		return { type: 'tarball-file', uri }
-	})
-
-	meta.registerUriBinder(je.binder.uriBinder)
-
-	const versions = await fetchVersions()
-	const release = config.env.gameVersion as ReleaseVersion
-	const version = siteConfig.versions.find(v => {
-		return v.dynamic ? v.id === release : v.ref === release
-	})
-	if (version !== undefined) {
-		logger.info(`[initialize] Found game version matching ${release}: ${JSON.stringify(version)}`)
-	} else {
-		logger.error(`[initialize] Failed finding game version matching ${release}`)
-		return
+	try {
+		const vanillaMcdoc = await fetchVanillaMcdoc()
+		meta.registerSymbolRegistrar('vanilla-mcdoc', {
+			checksum: vanillaMcdoc.ref,
+			registrar: vanillaMcdocRegistrar(vanillaMcdoc, logger),
+		})
+	} catch (e) {
+		logger.error(`Failed to register vanilla-mcdoc: ${e}`)
+		throw e
 	}
 
-	const summary: je.dependency.McmetaSummary = {
-		registries: Object.fromEntries((await fetchRegistries(version.id)).entries()),
-		blocks: Object.fromEntries([...(await fetchBlockStates(version.id)).entries()]
-			.map(([id, data]) => [id, data])),
-		fluids: je.dependency.Fluids,
-		commands: { type: 'root', children: {} },
+	try {
+		meta.registerDependencyProvider('@misode-mcdoc', async () => {
+			const uri: string = new core.Uri('downloads/misode-mcdoc.tar.gz', cacheRoot).toString()
+			const buffer = await compressBall([['builtin.mcdoc', builtinMcdoc]])
+			await core.fileUtil.writeFile(externals, uri, buffer)
+			return { type: 'tarball-file', uri }
+		})
+	} catch (e) {
+		logger.error(`Failed to register misode-mcdoc: ${e}`)
+		throw e
 	}
 
-	const versionChecksum = getVersionChecksum(version.id)
+	try {
+		meta.registerUriBinder(je.binder.uriBinder)
+	} catch (e) {
+		logger.error(`Failed to register URI binder: ${e}`)
+		throw e
+	}
 
-	meta.registerSymbolRegistrar('mcmeta-summary', {
-		checksum: versionChecksum,
-		registrar: customSymbolRegistrar(summary, release),
-	})
+	let versions: VersionMeta[]
+	let release: ReleaseVersion
+	let version: ConfigVersion | undefined
+	try {
+		versions = await fetchVersions()
+		release = config.env.gameVersion as ReleaseVersion
+		version = siteConfig.versions.find(v => {
+			return v.dynamic ? v.id === release : v.ref === release
+		})
+		if (version !== undefined) {
+			logger.info(`[initialize] Found game version matching ${release}: ${JSON.stringify(version)}`)
+		} else {
+			logger.error(`[initialize] Failed finding game version matching ${release}`)
+			return
+		}
+	} catch (e) {
+		logger.error(`Failed to fetch versions: ${e}`)
+		throw e
+	}
 
-	registerAttributes(meta, release, versions)
+	let summary: je.dependency.McmetaSummary
+	try {
+		summary = {
+			registries: Object.fromEntries((await fetchRegistries(version.id)).entries()),
+			blocks: Object.fromEntries([...(await fetchBlockStates(version.id)).entries()]
+				.map(([id, data]) => [id, data])),
+			fluids: je.dependency.Fluids,
+			commands: { type: 'root', children: {} },
+		}
+	
+		const versionChecksum = getVersionChecksum(version.id)
+	
+		meta.registerSymbolRegistrar('mcmeta-summary', {
+			checksum: versionChecksum,
+			registrar: customSymbolRegistrar(summary, release),
+		})
+	} catch (e) {
+		logger.error(`Failed to register symbol registrar: ${e}`)
+		throw e
+	}
+
+	try {
+		registerAttributes(meta, release, versions)
+	} catch (e) {
+		logger.error(`Failed to register mcdoc attributes: ${e}`)
+		throw e
+	}
 
 	json.getInitializer()(ctx)
 	je.json.initialize(ctx)
@@ -537,27 +571,31 @@ const VanillaMcdocUri = 'mcdoc://vanilla-mcdoc/symbols.json'
 
 function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols, logger: core.Logger): core.SymbolRegistrar {
 	return (symbols) => {
-		const start = performance.now()
-		for (const [id, typeDef] of Object.entries(vanillaMcdoc.mcdoc)) {
-			symbols.query(VanillaMcdocUri, 'mcdoc', id).enter({
-				data: { data: { typeDef } },
-				usage: { type: 'declaration' },
-			})
-		}
-		for (const [dispatcher, ids] of Object.entries(vanillaMcdoc['mcdoc/dispatcher'])) {
-			symbols.query(VanillaMcdocUri, 'mcdoc/dispatcher', dispatcher)
-				.enter({ usage: { type: 'declaration' } })
-				.onEach(Object.entries(ids), ([id, typeDef], query) => {
-					query.member(id, (memberQuery) => {
-						memberQuery.enter({
-							data: { data: { typeDef } },
-							usage: { type: 'declaration' },
+		try {
+			const start = performance.now()
+			for (const [id, typeDef] of Object.entries(vanillaMcdoc.mcdoc)) {
+				symbols.query(VanillaMcdocUri, 'mcdoc', id).enter({
+					data: { data: { typeDef } },
+					usage: { type: 'declaration' },
+				})
+			}
+			for (const [dispatcher, ids] of Object.entries(vanillaMcdoc['mcdoc/dispatcher'])) {
+				symbols.query(VanillaMcdocUri, 'mcdoc/dispatcher', dispatcher)
+					.enter({ usage: { type: 'declaration' } })
+					.onEach(Object.entries(ids), ([id, typeDef], query) => {
+						query.member(id, (memberQuery) => {
+							memberQuery.enter({
+								data: { data: { typeDef } },
+								usage: { type: 'declaration' },
+							})
 						})
 					})
-				})
+			}
+			const duration = performance.now() - start
+			logger.info(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
+		} catch (e) {
+
 		}
-		const duration = performance.now() - start
-		logger.info(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
 	}
 }
 
