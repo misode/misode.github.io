@@ -1,9 +1,10 @@
 import type * as deepslate263 from 'deepslate'
+import { HolderSet } from 'deepslate'
 import type * as deepslate118 from 'deepslate-1.18'
 import type * as deepslate1182 from 'deepslate-1.18.2'
 import type * as deepslate119 from 'deepslate-1.19'
 import type { VersionId } from '../../services/index.js'
-import { checkVersion, fetchAllPresets } from '../../services/index.js'
+import { checkVersion, fetchAllPresets, fetchRegistries } from '../../services/index.js'
 import { computeIfAbsent, isObject } from '../../Utils.js'
 
 export type ProjectData = Record<string, Record<string, unknown>>
@@ -58,11 +59,23 @@ export class Deepslate263 implements Deepslate {
 
 	static async init(version: VersionId, d: typeof deepslate263) {
 		const dynamicRegistries = new Set(['minecraft:worldgen/noise', 'minecraft:worldgen/density_function', 'minecraft:worldgen/noise_settings', 'minecraft:worldgen/material_rule', 'minecraft:worldgen/material_condition'])
+		const allRegistries = await fetchRegistries(version)
 		await Promise.all(d.Registry.REGISTRY.map(async (id, registry) => {
 			if (dynamicRegistries.has(id.toString())) {
 				const entries = await fetchAllPresets(version, id.path)
 				for (const [key, value] of entries.entries()) {
 					registry.register(d.Identifier.parse(key), registry.parse(value), true)
+				}
+			} else if (id.is('minecraft:worldgen/biome')) {
+				const keys = allRegistries.get(id.path)
+				for (const key of keys ?? []) {
+					registry.register(d.Identifier.parse(key), {}, true)
+				}
+				const tags = await fetchAllPresets(version, `tag/${id.path}`)
+				const tagsRegistry = registry.getTagRegistry()
+				for (const [key, value] of tags.entries()) {
+					const tagId = d.Identifier.parse(key)
+					tagsRegistry.register(tagId, HolderSet.fromJson(tagsRegistry, value, tagId), true)
 				}
 			}
 		}))

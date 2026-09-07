@@ -5,7 +5,8 @@ import { getWorldgenProjectData, useLocale, useProject, useVersion } from '../..
 import { useAsync } from '../../hooks/index.js'
 import { checkVersion, fetchRegistries } from '../../services/index.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
+import type { Color } from '../../Utils.js'
+import { hexToRgb, iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnInput, BtnMenu, ErrorPanel } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
@@ -113,21 +114,40 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 	</>
 }
 
-const BlockColors: Record<string, [number, number, number]> = {
-	'minecraft:air': [150, 160, 170],
-	'minecraft:water': [20, 80, 170],
-	'minecraft:lava': [200, 100, 0],
-	'minecraft:stone': [55, 55, 55],
-	'minecraft:deepslate': [34, 34, 36],
-	'minecraft:bedrock': [10, 10, 10],
-	'minecraft:grass_block': [47, 120, 23],
-	'minecraft:dirt': [64, 40, 8],
-	'minecraft:gravel': [70, 70, 70],
-	'minecraft:sand': [196, 180, 77],
-	'minecraft:sandstone': [148, 135, 52],
-	'minecraft:netherrack': [100, 40, 40],
-	'minecraft:crimson_nylium': [144, 22, 22],
-	'minecraft:warped_nylium': [28, 115, 113],
-	'minecraft:basalt': [73, 74, 85],
-	'minecraft:end_stone': [200, 200, 140],
+const BlockColors: Record<string, Color> = {
+	'minecraft:air': hexToRgb('#96a0aa'),
+	'minecraft:water': hexToRgb('#1450aa'),
+	'minecraft:lava': hexToRgb('#c86400'),
+	'minecraft:stone': hexToRgb('#686868'),
+	'minecraft:deepslate': hexToRgb('#2f2f36'),
+	'minecraft:bedrock': hexToRgb('#0a0a0a'),
+	'minecraft:grass_block': hexToRgb('#2f7817'),
+	'minecraft:dirt': hexToRgb('#71563e'),
+	'minecraft:coarse_dirt': hexToRgb('#684f39'),
+	'minecraft:podzol': hexToRgb('#4d3d1e'),
+	'minecraft:mycelium': hexToRgb('#675e62'),
+	'minecraft:mud': hexToRgb('#3c3836'),
+	'minecraft:gravel': hexToRgb('#464646'),
+	'minecraft:sand': hexToRgb('#c4b44d'),
+	'minecraft:sandstone': hexToRgb('#948734'),
+	'minecraft:snow_block': hexToRgb('#ffffff'),
+	'minecraft:powder_snow': hexToRgb('#f0fbfb'),
+	'minecraft:ice': hexToRgb('#7c8fbe'),
+	'minecraft:packed_ice': hexToRgb('#93aef2'),
+	'minecraft:calcite': hexToRgb('#d9dbd7'),
+	'minecraft:sulfur': hexToRgb('#bdb275'),
+	'minecraft:cinnabar': hexToRgb('#884f45'),
+	'minecraft:red_sand': hexToRgb('#ae6b33'),
+	'minecraft:red_sandstone': hexToRgb('#9c5b26'),
+	'minecraft:terracotta': hexToRgb('#8a6048'),
+	'minecraft:orange_terracotta': hexToRgb('#915730'),
+	'minecraft:white_terracotta': hexToRgb('#c7b0a1'),
+	'minecraft:netherrack': hexToRgb('#642828'),
+	'minecraft:crimson_nylium': hexToRgb('#901616'),
+	'minecraft:warped_nylium': hexToRgb('#1c7371'),
+	'minecraft:basalt': hexToRgb('#32333c'),
+	'minecraft:blackstone': hexToRgb('#26221d'),
+	'minecraft:soul_sand': hexToRgb('#45382e'),
+	'minecraft:soul_soil': hexToRgb('#3a2f26'),
+	'minecraft:end_stone': hexToRgb('#c8c88c'),
 }

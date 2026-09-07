@@ -284,7 +284,7 @@ export function getWeightedRandom<T>(random: Random, entries: T[], getWeight: (e
 	return undefined
 }
 
-export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: number, y: number) => D, getColor: (d: D) => [number, number, number]) {
+export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: number, y: number) => D, getColor: (d: D) => Color) {
 	const pos = vec2.create()
 	const arr = Array(img.width * img.height)
 	for (let x = 0; x < img.width; x += 1) {
