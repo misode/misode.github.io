@@ -87,6 +87,7 @@ export class SpyglassService {
 
 	private constructor (
 		public readonly version: VersionId,
+		public readonly logger: StoredLogger,
 		private readonly service: core.Service,
 		private readonly client: SpyglassClient,
 	) {
@@ -289,7 +290,7 @@ export class SpyglassService {
 		const currentServiceId = SpyglassService.activeServiceId
 		await Promise.allSettled(INITIAL_DIRS.map(async uri => client.externals.fs.mkdir(uri)))
 		const version = siteConfig.versions.find(v => v.id === versionId)!
-		const logger = console
+		const logger = new StoredLogger(console)
 		const service = new core.Service({
 			logger,
 			profilers: new core.ProfilerFactory(logger, [
@@ -388,7 +389,7 @@ export class SpyglassService {
 				logger.info('[SpyglassService] Skipped saving the cache because another service is active')
 			}
 		}, 10_000)
-		return new SpyglassService(versionId, service, client)
+		return new SpyglassService(versionId, logger, service, client)
 	}
 }
 
@@ -417,7 +418,7 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	const vanillaMcdoc = await fetchVanillaMcdoc()
 	meta.registerSymbolRegistrar('vanilla-mcdoc', {
 		checksum: vanillaMcdoc.ref,
-		registrar: vanillaMcdocRegistrar(vanillaMcdoc),
+		registrar: vanillaMcdocRegistrar(vanillaMcdoc, logger),
 	})
 
 	meta.registerDependencyProvider('@misode-mcdoc', async () => {
@@ -434,8 +435,10 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 	const version = siteConfig.versions.find(v => {
 		return v.dynamic ? v.id === release : v.ref === release
 	})
-	if (version === undefined) {
-		logger.error(`[initialize] Failed finding game version matching ${release}.`)
+	if (version !== undefined) {
+		logger.info(`[initialize] Found game version matching ${release}: ${JSON.stringify(version)}`)
+	} else {
+		logger.error(`[initialize] Failed finding game version matching ${release}`)
 		return
 	}
 
@@ -532,7 +535,7 @@ function customSymbolRegistrar(summary: McmetaSummary, release: ReleaseVersion):
 
 const VanillaMcdocUri = 'mcdoc://vanilla-mcdoc/symbols.json'
 
-function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols): core.SymbolRegistrar {
+function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols, logger: core.Logger): core.SymbolRegistrar {
 	return (symbols) => {
 		const start = performance.now()
 		for (const [id, typeDef] of Object.entries(vanillaMcdoc.mcdoc)) {
@@ -554,6 +557,30 @@ function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols): core.SymbolRe
 				})
 		}
 		const duration = performance.now() - start
-		console.log(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
+		logger.info(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
+	}
+}
+
+export class StoredLogger implements core.Logger {
+	public readonly logs: string[] = []
+	constructor(
+		private readonly parent: core.Logger,
+	) {}
+
+	error(data: any, ...args: any[]): void {
+		this.logs.push(`[ERROR] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.error(data, ...args)
+	}
+	info(data: any, ...args: any[]): void {
+		this.logs.push(`[INFO] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.info(data, ...args)
+	}
+	log(data: any, ...args: any[]): void {
+		this.logs.push(`[LOG] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.log(data, ...args)
+	}
+	warn(data: any, ...args: any[]): void {
+		this.logs.push(`[WARN] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.warn(data, ...args)
 	}
 }

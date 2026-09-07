@@ -1455,6 +1455,7 @@ main.has-project {
 	color: var(--text-1);
 	background-color: var(--errors-background);
 	border-radius: 3px;
+	overflow: hidden;
 }
 
 .error > * {
@@ -1485,6 +1486,11 @@ main.has-project {
 
 .error a {
 	color: var(--text-1)
+}
+
+.error .btn {
+	display: inline-flex;
+	margin-top: 0;
 }
 
 .error-actions {
