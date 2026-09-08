@@ -376,11 +376,13 @@
     {
       "id": "context_float_provider",
       "url": "context-float-provider",
+      "aliases": ["number", "number provider"],
       "minVersion": "26.3"
     },
     {
       "id": "context_int_provider",
       "url": "context-int-provider",
+      "aliases": ["number", "number provider"],
       "minVersion": "26.3"
     },
     {
