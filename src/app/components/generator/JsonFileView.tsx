@@ -62,11 +62,11 @@ export function JsonFileView({ docAndNode, node }: JsonFileViewProps) {
 		}
 		const rootType = getRootType(resourceType)
 		const type = simplifyType(rootType, ctx)
-		return type
+		return {type, rootType}
 	}, [resourceType, ctx])
 
 	return <div class="file-view node-root" data-category={getCategory(resourceType)}>
-		{(ctx && mcdocType) && <McdocRoot type={mcdocType} node={node} ctx={ctx} />}
+		{(ctx && mcdocType) && <McdocRoot type={mcdocType.type} node={node} ctx={ctx} rootType={mcdocType.rootType} />}
 	</div>
 }
 
