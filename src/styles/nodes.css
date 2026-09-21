@@ -124,6 +124,9 @@
   padding-left: 9px;
   background-color: var(--node-background-input);
 }
+.node-header > .btn-menu > .btn{
+  border-radius: 0;
+}
 
 .node-header > input[type="color"] {
   padding: 0 2px;
