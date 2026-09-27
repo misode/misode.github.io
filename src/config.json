@@ -31,6 +31,11 @@
       "mc": "fr_fr"
     },
     {
+      "code": "id",
+      "name": "Bahasa Indonesia",
+      "mc": "id_id"
+    },
+    {
       "code": "it",
       "name": "Italiano",
       "mc": "it_it"
