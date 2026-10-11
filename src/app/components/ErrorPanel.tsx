@@ -1,6 +1,7 @@
 import type { ComponentChildren } from 'preact'
 import { getCurrentUrl } from 'preact-router'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
+import { useLocale } from '../contexts/Locale.jsx'
 import { useProject } from '../contexts/Project.jsx'
 import { useSpyglass } from '../contexts/Spyglass.jsx'
 import { useVersion } from '../contexts/Version.jsx'
@@ -19,6 +20,7 @@ type ErrorPanelProps = {
 	children?: ComponentChildren,
 }
 export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, children }: ErrorPanelProps) {
+	const { locale } = useLocale()
 	const { version } = useVersion()
 	const { service } = useSpyglass()
 	const { projectUri } = useProject()
@@ -101,7 +103,7 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 		</h3>
 		{stack && stackVisible && <pre>{stack}</pre>}
 		{reportable !== false && <p>If you think this is a bug, you can report it <a href={url} target="_blank">on GitHub</a></p>}
-		{spyglassLogs && <Btn icon={copySpyglassActive ? 'check' : 'copy'} label="Copy logs" onClick={copySpyglassLogs} />}
+		{spyglassLogs && !children && <Btn icon={copySpyglassActive ? 'check' : 'copy'} label={locale('copy_logs')} onClick={copySpyglassLogs} />}
 		{children}
 	</div>
 }

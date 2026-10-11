@@ -380,6 +380,13 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 		setProjectUri(undefined)
 	}, [gen, service, showModal])
 
+	const copySpyglassLogs = useCallback(() => {
+		const spyglassLogs = service?.logger.logs
+		if (spyglassLogs) {
+			navigator.clipboard.writeText(spyglassLogs.join('\n'))
+		}
+	}, [service])
+
 	return <>
 		<main class={`${previewShown ? 'has-preview' : ''} ${projectShown ? 'has-project' : ''}`} style={`--project-panel-width: ${realPanelWidth}px`}>
 			{!gen.tags?.includes('partners') && <Ad id="data-pack-generator" type="text" />}
@@ -398,6 +405,7 @@ export function SchemaGenerator({ gen, allowedVersions }: Props) {
 					<Btn icon="arrow_right" label={locale('redo')} onClick={redo} />
 					<Btn icon="plus_circle" label={locale('project.new_file')} onClick={newEmptyFile} />
 					<Btn icon="file" label={locale('project.save')} onClick={() => saveFile('menu')} />
+					<Btn icon="copy" label={locale('copy_logs')} onClick={copySpyglassLogs} />
 				</BtnMenu>
 			</div>
 			{error && <ErrorPanel error={error} onDismiss={() => setError(null)} />}
