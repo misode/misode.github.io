@@ -1,0 +1,146 @@
+use ::java::data::recipe::Ingredient
+use ::java::world::component::DataComponentPatch
+use ::java::data::worldgen::IntProvider
+
+enum(string) Type {
+	CauldronMelting = "jsg_core:cauldron_melting",
+	CauldronMixture = "jsg_core:cauldron_mixture",
+	CauldronBathing = "jsg_core:cauldron_bathing",
+	CauldronCasting = "jsg_core:cauldron_casting",
+}
+
+type ItemOrTag = (
+	struct {
+		item: string,
+	} | struct {
+		tag: string,
+	}
+)
+
+type ItemOrTagWithCount = (
+	struct {
+		item: string,
+		count?: int @ 1..,
+	} | struct {
+		tag: string,
+		count?: int @ 1..,
+	}
+)
+
+type ItemWithCount = (
+	struct {
+		item: string,
+		count?: int @ 1..,
+	}
+)
+
+type FluidIngredient = (
+	struct {
+		fluid: string,
+		/// Optimal values: nugget = 10 mB, ingot = 90 mB, block = 810 mB
+		amount: int @ 1..,
+	} | struct {
+		tag: string,
+		/// Optimal values: nugget = 10 mB, ingot = 90 mB, block = 810 mB
+		amount: int @ 1..,
+	}
+)
+
+type SizedIngredient = (
+	struct {
+		count?: int @ 1..,
+		ingredient: Ingredient,
+	}
+)
+
+type ItemOrFluidIngredient = (
+	struct {
+		item: Ingredient,
+	} | struct {
+		fluid: FluidIngredient,
+	}
+)
+
+// ----------------------
+// Recipes
+
+dispatch minecraft:resource[jsg_core:recipes] to struct Recipes {
+	type: Type,
+	...jsg_core:recipes[[type]],
+}
+
+dispatch jsg_core:recipes[jsg_core:cauldron_melting] to struct {
+	/// Requires the cauldron to be overheated? Defaults to false
+	overheated?: boolean,
+	/// Item to melt
+	input: Ingredient,
+	/// Fluid that will appear in the cauldron
+	result_fluid: FluidIngredient
+}
+
+dispatch jsg_core:recipes[jsg_core:cauldron_mixture] to struct {
+	/// Item that needs to clicked with on the cauldron
+	fluid_modifier: Ingredient,
+	/// Fluid that needs to be in the cauldron
+	input_fluid: FluidIngredient,
+	/// Fluid that will replace the input fluid
+	result_fluid: FluidIngredient
+}
+
+dispatch jsg_core:recipes[jsg_core:cauldron_bathing] to struct {
+	/// Fluid that needs to be in the cauldron
+	bathing_fluid: FluidIngredient,
+	/// Chance of not consuming the fluid (0 = consumes every time)
+	fluidless_chance: double @ 0..1,
+	/// Item to bath
+	input: SizedIngredient,
+	/// Result item
+	result: ItemWithCount
+}
+
+dispatch jsg_core:recipes[jsg_core:cauldron_casting] to struct {
+	/// Fluid that needs to be in the cauldron
+	input: FluidIngredient,
+	cooling: ItemOrFluidIngredient,
+	/// Result item
+	result: ItemWithCount
+}
+
+// ----------------------
+// RIG
+
+enum(string) Difficulty {
+	PEACEFUL = "PEACEFUL",
+   	EASY = "EASY",
+   	NORMAL = "NORMAL",
+   	HARD = "HARD"
+}
+
+type RIGEntityNBT = (
+	struct {
+		[string]: any
+	}
+)
+
+type RIGEntity = (
+	struct {
+		name: #[id="entity_type"] string,
+		weight: int @ 1..,
+    	nbt: RIGEntityNBT
+	}
+)
+
+dispatch minecraft:resource[jsg:rig_waves] to struct RIGWaves {
+	weight: int @ 1..,
+	chevronsToDial: int @ 7..9,
+	/// List of gate types (jsg:milkyway, jsg:pegasus...)
+	allowedOnGates: [string],
+	allowedInDims?: [#[id="dimension"] string],
+	allowedBiomes?: [#[id="worldgen/biome"] string],
+	blacklistedBiomes?: [#[id="worldgen/biome"] string],
+	allowedForDifficulties: [Difficulty],
+	entities: [RIGEntity],
+	selectRandomMobs: boolean,
+	shouldOpenIrisChance: double @ 0..,
+	randomMobsCount: IntProvider<int>
+}
