@@ -220,7 +220,7 @@
     },
     {
       "id": "26.3",
-      "dynamic": true,
+      "ref": "26.3",
       "name": "26.3",
       "pack_format": 119,
       "show": true
