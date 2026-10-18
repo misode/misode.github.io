@@ -1242,6 +1242,24 @@
       "dependency": "treeplacer",
       "minVersion": "1.20.1",
       "wiki": "https://github.com/OutrightWings/treeplacer_mod/wiki"
+    },
+    {
+      "id": "jsg_core:recipes",
+      "url": "jsg_core/recipes",
+      "path": "jsg_core/recipes",
+      "tags": ["partners"],
+      "minVersion": "1.20.1",
+      "dependency": "tauridev",
+      "wiki": "https://docs.tauridev.eu/jsg-core/"
+    },
+    {
+      "id": "jsg:rig_waves",
+      "url": "jsg/rig_waves",
+      "path": "jsg/rig_waves",
+      "tags": ["partners"],
+      "minVersion": "1.20.1",
+      "dependency": "tauridev",
+      "wiki": "https://docs.tauridev.eu/jsg/"
     }
   ],
   "legacyGuides": [
