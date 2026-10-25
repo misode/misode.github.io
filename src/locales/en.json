@@ -68,6 +68,7 @@
   "generator.banner_pattern": "Banner Pattern",
   "generator.block_definition": "Blockstate",
   "generator.block_transformer": "Block Transformer",
+  "generator.block_sound_set": "Block Sound Set",
   "generator.browse_available": "Browse available generators for %0%",
   "generator.cat_sound_variant": "Cat Sound Variant",
   "generator.cat_variant": "Cat Variant",

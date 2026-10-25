@@ -15,7 +15,7 @@ interface Version {
 	changeTargetVersion: (version: VersionId, replace?: boolean) => unknown,
 }
 const Version = createContext<Version>({
-	version: '1.18.2',
+	version: '26.3',
 	changeVersion: () => {},
 	changeTargetVersion: () => {},
 })

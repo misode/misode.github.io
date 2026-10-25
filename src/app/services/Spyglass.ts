@@ -17,6 +17,7 @@ import type { VanillaMcdocSymbols, VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import { IndexedDbFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
+import { checkVersion } from './Versions.js'
 
 export const CACHE_URI = 'file:///cache/'
 export const ROOT_URI = 'file:///root/'
@@ -346,6 +347,9 @@ export class SpyglassService {
 							block_transformer: {
 								category: 'block_transformer',
 							},
+							block_sound_set: {
+								category: 'block_sound_set',
+							},
 							'worldgen/carver' : {
 								category: 'worldgen/carver',
 							},
@@ -553,6 +557,11 @@ const McmetaSummaryUri = 'mcmeta://summary/registries.json'
 
 function customSymbolRegistrar(summary: McmetaSummary, release: ReleaseVersion): core.SymbolRegistrar {
 	return (symbols, ctx) => {
+		if (checkVersion(release, '26.4')) {
+			// Hacky fix until spyglass can be updated
+			delete summary.fluids['flowing_lava']
+			delete summary.fluids['flowing_water']
+		}
 		je.dependency.symbolRegistrar(summary, release)(symbols, ctx)
 
 		// Temporary until spyglass core is updated
