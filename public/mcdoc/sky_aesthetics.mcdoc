@@ -1,5 +1,10 @@
 
 dispatch minecraft:resource[sky_aesthetics:sky] to struct SkyProperties {
+    #[until="26.1"] ...LegacySkyProperties,
+    #[since="26.1"] ...SkyPropertiesV2,
+}
+
+struct LegacySkyProperties {
     world: #[id="dimension"] string,
     id?: string,
     cloud_settings: CloudSettings,
@@ -103,4 +108,293 @@ enum(string) RotationType {
 	Day = "DAY",
 	Night = "NIGHT",
 	Fixed = "FIXED"
+}
+
+/// The R, G and B value for the color (0-255 per channel)
+type RgbColor = [int @ 0..255] @ 3
+
+struct SkyPropertiesV2 {
+    world: #[id="dimension"] string,
+    id: string,
+    cloud_settings?: struct {
+        cloud: boolean,
+        /// Defaults to 192
+        cloud_height?: int,
+        cloud_color?: RgbColor,
+    },
+    /// Whether rain and snow are rendered. Defaults to true
+    weather?: boolean,
+    sun?: struct {
+        /// Defaults to true
+        show?: boolean,
+        /// Celestials atlas texture. When absent, the vanilla sun is rendered
+        texture?: string,
+        /// Defaults to 30
+        size?: float,
+        /// Brightness multiplier. Defaults to 1
+        intensity?: float,
+    },
+    moon?: struct {
+        /// Defaults to true
+        show?: boolean,
+        /// Celestials atlas texture. When absent, the vanilla moon is rendered.
+        /// For phases, the texture must be a 4×2 sprite sheet like vanilla
+        texture?: string,
+        /// Defaults to 20
+        size?: float,
+        /// If true, only the current moon phase is rendered. Defaults to true
+        show_phases?: boolean,
+        /// Brightness multiplier. Defaults to 1
+        intensity?: float,
+    },
+    stars?: StarSettings,
+    sky_color?: struct {
+        /// The R, G, B and alpha value for the color
+        sky_color?: [float] @ 4,
+        sunset_color?: RgbColor,
+        sunset_alpha_modifier?: int,
+    },
+    sky_objects: [SkyObjectV2],
+    /// The sky is only rendered when every setting is true
+    condition?: struct {
+        biomes?: #[id(registry="worldgen/biome",tags="implicit")] string,
+        biome?: #[id="worldgen/biome"] string,
+        /// The min and max height of the player
+        height_range?: [float] @ 2,
+    },
+    environment_attributes?: ::java::data::worldgen::attribute::GlobalEnvironmentAttributeMap,
+    /// Legacy skybox, use `sky_boxes` instead
+    sky_box?: struct {
+        gradation: int,
+        texture: string,
+        rotation: [float] @ 3,
+        dynamic_rotation?: struct {
+            axis: LegacySkyBoxAxis,
+            rotation: SkyObjectRotationType,
+        },
+    },
+    light_settings?: struct {
+        /// Forces a bright lightmap regardless of the time of day. Defaults to false
+        forceBrightLightmap?: boolean,
+        /// Keeps a constant ambient light level. Defaults to false
+        constantAmbientLight?: boolean,
+    },
+    fog_settings?: struct {
+        fog: boolean,
+        fog_color?: RgbColor,
+        /// The near and far distance of the fog
+        fog_density?: [float] @ 2,
+    },
+    sky_boxes?: [SkyBoxLayer],
+    /// The ticks to transition from the previous sky to this one. Defaults to 0
+    transition_ticks?: int @ 0..24000,
+}
+
+struct StarSettings {
+    vanilla: boolean,
+    moving_stars: boolean,
+    count: int,
+    all_days_visible: boolean,
+    scale: float,
+    color: RgbColor,
+    shooting_stars?: struct {
+        percentage: int,
+        random_lifetime: [float] @ 2,
+        scale: float,
+        speed: float,
+        /// The R, G and B value for the color
+        color: [double] @ 3,
+        rotation?: int,
+    },
+}
+
+struct SkyObjectV2 {
+    texture: string,
+    blend: boolean,
+    size: float,
+    /// The position of the object in the sky
+    rotation: [float] @ 3,
+    /// The rotation of the object around its own center
+    object_rotation: [float] @ 3,
+    height: int,
+    rotation_type: SkyObjectRotationType,
+}
+
+enum(string) SkyObjectRotationType {
+	Day = "DAY",
+	Night = "NIGHT",
+	Static = "STATIC",
+}
+
+enum(string) LegacySkyBoxAxis {
+	XP = "XP",
+	YP = "YP",
+	ZP = "ZP",
+	/// The axis of the vanilla sun
+	Sun = "SUN",
+}
+
+struct SkyBoxLayer {
+    /// An equirectangular panorama or the six faces of a cubemap
+    texture: (string | SkyBoxCubemap),
+    // Look
+    /// The quality of the sphere for panoramas. Defaults to 32
+    gradation?: int @ 4..256,
+    color?: RgbColor,
+    /// Color multiplier. Defaults to 1
+    brightness?: float,
+    /// If the layer is multiplied by the vanilla sky color. Defaults to false
+    tint_with_sky?: boolean,
+    /// How the layer is mixed with the sky behind it. Defaults to `alpha`
+    blend?: SkyBoxBlend,
+    /// UV units per tick, only for standalone panoramas
+    scroll?: [float] @ 2,
+    /// A vertical strip of frames, only for standalone textures
+    animation?: struct {
+        /// The number of frames, from top to bottom
+        frames: int @ 1..,
+        /// The number of ticks per frame. Defaults to 1
+        frametime?: int @ 1..,
+    },
+    /// `upper` hides everything below the horizon. Defaults to `full`
+    hemisphere?: SkyBoxHemisphere,
+    /// With `upper`, the height in degrees where the layer fades out near the horizon. Defaults to 0
+    horizon_fade?: float @ 0..90,
+    /// If the layer fades into the sky fog like the vanilla sky. Defaults to false
+    fog_fade?: boolean,
+    // Visibility
+    /// A preset of the day cycle. Cannot be used with `opacity`
+    visible?: SkyBoxPreset,
+    /// The length in ticks of the preset transitions. Defaults to 1500
+    fade?: int @ 1..12000,
+    /// Custom keyframes over the day. Cannot be used with `visible`
+    opacity?: [SkyBoxKeyframe] @ 1..,
+    /// The opacity when it fully rains
+    rain_opacity?: float @ 0..1,
+    /// The opacity during a full thunderstorm
+    thunder_opacity?: float @ 0..1,
+    /// The moon phases where the layer is visible (0 is the full moon)
+    moon_phases?: [int @ 0..7],
+    /// If the layer fades like the vanilla stars. Defaults to false
+    follow_star_brightness?: boolean,
+    /// The player heights where the layer fades in (reversed to fade out)
+    height_fade?: [float] @ 2,
+    /// The layer is only visible when every setting is true
+    condition?: SkyBoxLayerCondition,
+    /// The ticks to fade in or out when the condition changes. Defaults to 20
+    condition_fade?: int @ 0..24000,
+    // Placement
+    /// How the layer turns over time
+    rotation?: SkyBoxRotation,
+    /// Where the layer is drawn in the sky. Defaults to `sky`
+    slot?: SkyBoxSlot,
+    /// The vanilla parts hidden while the layer is visible
+    hide?: [SkyBoxHidePart],
+}
+
+/// Each face is drawn as seen from inside the sky.
+/// The side faces are upright, up and down have their top edge pointing north
+struct SkyBoxCubemap {
+    up: string,
+    down: string,
+    north: string,
+    south: string,
+    east: string,
+    west: string,
+}
+
+struct SkyBoxKeyframe {
+    /// The time in ticks
+    time: int @ 0..24000,
+    value: float @ 0..1,
+}
+
+struct SkyBoxLayerCondition {
+    biomes?: #[id(registry="worldgen/biome",tags="implicit")] string,
+    biome?: #[id="worldgen/biome"] string,
+    /// The min and max height of the player
+    height_range?: [float] @ 2,
+    weather?: SkyBoxWeather,
+    /// The layer is visible when the player has one of these effects
+    effects?: [#[id="mob_effect"] string],
+}
+
+/// The final rotation is tilt * spin(axis, angle) * orientation
+struct SkyBoxRotation {
+    /// What drives the angle. Defaults to `sun`
+    source?: SkyBoxRotationSource,
+    /// Multiplier on the source, in degrees per tick with `game_time`. Defaults to 1
+    speed?: float,
+    /// Degrees added to the angle. Defaults to 0
+    offset?: float,
+    /// An axis name or a vector. Defaults to `sun`
+    axis?: (SkyBoxAxis | [float] @ 3),
+    /// Rotation in degrees applied around the spin, to tip the spin axis
+    tilt?: (float | [float] @ 3),
+    /// Rotation in degrees of the texture itself, inside the spin
+    orientation?: [float] @ 3,
+}
+
+enum(string) SkyBoxAxis {
+	/// The axis of the vanilla sun
+	Sun = "sun",
+	XP = "XP",
+	YP = "YP",
+	ZP = "ZP",
+}
+
+enum(string) SkyBoxRotationSource {
+	Sun = "sun",
+	Moon = "moon",
+	Stars = "stars",
+	DayTime = "day_time",
+	GameTime = "game_time",
+	Static = "static",
+}
+
+enum(string) SkyBoxBlend {
+	Opaque = "opaque",
+	Alpha = "alpha",
+	Add = "add",
+	Multiply = "multiply",
+	Screen = "screen",
+}
+
+enum(string) SkyBoxHemisphere {
+	Full = "full",
+	Upper = "upper",
+}
+
+enum(string) SkyBoxPreset {
+	Always = "always",
+	Day = "day",
+	Night = "night",
+	Sunrise = "sunrise",
+	Sunset = "sunset",
+}
+
+enum(string) SkyBoxWeather {
+	Clear = "clear",
+	Rain = "rain",
+	Thunder = "thunder",
+}
+
+enum(string) SkyBoxSlot {
+	/// Before the vanilla sky color
+	Background = "background",
+	/// After the sky color, before the sunrise
+	Sky = "sky",
+	/// After the stars, before the sun, moon and sky objects
+	OverStars = "over_stars",
+	/// After everything
+	Foreground = "foreground",
+}
+
+enum(string) SkyBoxHidePart {
+	SkyDisc = "sky_disc",
+	Sunrise = "sunrise",
+	Stars = "stars",
+	Sun = "sun",
+	Moon = "moon",
+	SkyObjects = "sky_objects",
 }
