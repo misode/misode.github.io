@@ -10,6 +10,28 @@ import { hexId, message, readZip } from '../../Utils.js'
 import { Btn, BtnMenu, FileUpload, Octicon, TextInput } from '../index.js'
 import { Modal } from '../Modal.js'
 
+function isAppleDoubleFile(data: Uint8Array): boolean {
+    return (
+        data.length >= 4 &&
+        data[0] === 0x00 &&
+        data[1] === 0x05 &&
+        data[2] === 0x16 &&
+        data[3] === 0x07
+    )
+}
+
+function isMacOSMetadataEntry(path: string, data: Uint8Array): boolean {
+    const normalizedPath = path.replace(/\\/g, '/')
+    const segments = normalizedPath.split('/')
+    const filename = segments[segments.length - 1]
+
+    const isKnownMetadataName =
+        filename === '.DS_Store' ||
+        filename.startsWith('._')
+
+    return isKnownMetadataName && isAppleDoubleFile(data)
+}
+
 export function ProjectCreation() {
 	const { locale } = useLocale()
 	const { hideModal } = useModal()
@@ -40,12 +62,21 @@ export function ProjectCreation() {
 		createProject({ name, namespace, version, storage: { type: 'indexeddb', rootUri } })
 		changeProject(name)
 		if (file) {
-			readZip(file).then(async (entries) => {
-				await Promise.all(entries.map((entry) => {
-					const path = entry[0].startsWith('/') ? entry[0].slice(1) : entry[0]
-					return client.fs.writeFile(rootUri + path, entry[1])
-				}))
-				hideModal()
+			
+       readZip(file).then(async (entries) => {
+		   const filteredEntries = entries.filter(
+			   ([entryName, data]) => !isMacOSMetadataEntry(entryName, data))
+
+        await Promise.all(filteredEntries.map(([entryName, data]) => {
+        const path = entryName.startsWith('/')
+            ? entryName.slice(1)
+            : entryName
+
+            return client.fs.writeFile(rootUri + path, data)
+            }))
+
+               hideModal()
+
 			}).catch((e) => {
 				// TODO: handle errors
 				console.warn(`Error importing data pack: ${message(e)}`)
