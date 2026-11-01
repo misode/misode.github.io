@@ -31,6 +31,7 @@ interface LootOptions extends ItemComponentsProvider {
 	stackMixer: StackMixer,
 	getItemTag(id: string): string[],
 	getLootTable(id: string): any,
+	getLootTableTag(id: string): string[],
 	getPredicate(id: string): any,
 	getEnchantments(): Map<string, any>,
 	getEnchantmentTag(id: string): string[],
@@ -126,7 +127,7 @@ function generateTable(table: any, consumer: ItemConsumer, ctx: LootContext) {
 	if (!Array.isArray(table.pools)) {
 		return
 	}
-	const tableConsumer = decorateFunctions(table.functions ?? [], consumer, ctx)
+	const tableConsumer = decorateFunction(table.modifier ?? table.functions, consumer, ctx)
 	for (const pool of table.pools) {
 		generatePool(pool, tableConsumer, ctx)
 	}
@@ -143,8 +144,8 @@ function createLootContext(options: LootOptions): LootContext {
 }
 
 function generatePool(pool: any, consumer: ItemConsumer, ctx: LootContext) {
-	if (composeConditions(pool.conditions ?? [])(ctx)) {
-		const poolConsumer = decorateFunctions(pool.functions ?? [], consumer, ctx)
+	if (testCondition(pool.condition ?? pool.conditions, ctx)) {
+		const poolConsumer = decorateFunction(pool.modifier ?? pool.functions, consumer, ctx)
 
 		const rolls = computeInt(pool.rolls, ctx) + Math.floor(computeFloat(pool.bonus_rolls, ctx) * ctx.luck)
 		for (let i = 0; i < rolls; i += 1) {
@@ -161,6 +162,7 @@ function generatePool(pool: any, consumer: ItemConsumer, ctx: LootContext) {
 					}
 				})
 			}
+			console.log('EXPANDED RESULT', entries)
 
 			// Select random entry
 			if (totalWeight === 0 || entries.length === 0) {
@@ -183,7 +185,7 @@ function generatePool(pool: any, consumer: ItemConsumer, ctx: LootContext) {
 }
 
 function expandEntry(entry: any, ctx: LootContext, consumer: (entry: any) => void): boolean {
-	if (!canEntryRun(entry, ctx)) {
+	if (!testCondition(entry.condition ?? entry.conditions, ctx)) {
 		return false
 	}
 	const type = entry.type?.replace(/^minecraft:/, '')
@@ -209,9 +211,20 @@ function expandEntry(entry: any, ctx: LootContext, consumer: (entry: any) => voi
 			return true
 		case 'tag':
 			if (entry.expand) {
-				ctx.getItemTag(entry.name ?? '').forEach(tagEntry => {
-					consumer({ type: 'item', name: tagEntry })
-				})
+				const items = getHomogeneousList(entry.items ?? entry.name, ctx.getItemTag)
+				for (const item of items) {
+					consumer({ type: 'tag', name: item, weight: entry.weight, quality: entry.quality, modifier: entry.modifier })
+				}
+			} else {
+				consumer(entry)
+			}
+			return true
+		case 'loot_table':
+			if (entry.expand) {
+				const lootTables = getHomogeneousList(entry.value ?? entry.name, ctx.getLootTableTag)
+				for (const lootTable of lootTables) {
+					consumer({ type: 'loot_table', value: lootTable, weight: entry.weight, quality: entry.quality, modifier: entry.modifier })
+				}
 			} else {
 				consumer(entry)
 			}
@@ -222,32 +235,27 @@ function expandEntry(entry: any, ctx: LootContext, consumer: (entry: any) => voi
 	}
 }
 
-function canEntryRun(entry: any, ctx: LootContext): boolean {
-	return composeConditions(entry.conditions ?? [])(ctx)
-}
-
 function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
-	const entryConsumer = decorateFunctions(entry.functions ?? [], consumer, ctx)
+	const entryConsumer = decorateFunction(entry.modifier ?? entry.functions, consumer, ctx)
 
 	const type = entry.type?.replace(/^minecraft:/, '')
-	if (typeof entry.name !== 'string') {
-		return
-	}
 	switch (type) {
 		case 'item':
 			const id = Identifier.parse(entry.name)
 			entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
 			break
 		case 'tag':
-			ctx.getItemTag(entry.name).forEach(tagEntry => {
-				const id = Identifier.parse(tagEntry)
+			const items = getHomogeneousList(entry.items ?? entry.name, ctx.getItemTag)
+			for (const item of items) {
+				const id = Identifier.parse(item)
 				entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
-			})
+			}
 			break
 		case 'loot_table':
-			const lootTable = typeof entry.value === 'string' ? ctx.getLootTable(entry.value) : entry.value
-			if (lootTable !== undefined) {
-				generateTable(lootTable, entryConsumer, ctx)
+			const lootTables = getHomogeneousList(entry.value ?? entry.name, ctx.getLootTableTag)
+			for (const lootTable of lootTables) {
+				const table = ctx.getLootTable(lootTable)
+				generateTable(table, entryConsumer, ctx)
 			}
 			break
 		case 'dynamic':
@@ -262,23 +270,26 @@ function computeWeight(entry: any, luck: number) {
 
 type LootFunction = (item: ResolvedItem, ctx: LootContext) => void
 
-function decorateFunctions(functions: any[], consumer: ItemConsumer, ctx: LootContext): ItemConsumer {
-	const compositeFunction = composeFunctions(functions)
+function decorateFunction(func: any[], consumer: ItemConsumer, ctx: LootContext): ItemConsumer {
+	const compositeFunction = composeFunctions(func)
 	return (item) => {
 		compositeFunction(item, ctx)
 		consumer(item)
 	}
 }
 
-function composeFunctions(functions: any[]): LootFunction {
+function composeFunctions(func: any): LootFunction {
+	if (!func) {
+		return () => {}
+	}
 	return (item, ctx) => {
-		for (const fn of functions) {
-			if (Array.isArray(fn)) {
+		if (Array.isArray(func)) {
+			for (const fn of func) {
 				composeFunctions(fn)
-			} else if (isObject(fn) && composeConditions(fn.conditions ?? [])(ctx)) {
-				const type = fn.function?.replace(/^minecraft:/, '');
-				(LootFunctions[type]?.(fn) ?? (i => i))(item, ctx)
 			}
+		} else if (isObject(func) && testCondition(func.condition ?? func.conditions, ctx)) {
+			const type = (func.type ?? func.function)?.replace(/^minecraft:/, '');
+			(LootFunctions[type]?.(func) ?? (i => i))(item, ctx)
 		}
 	}
 }
@@ -516,25 +527,22 @@ const LootFunctions: Record<string, (params: any) => LootFunction> = {
 
 type LootCondition = (ctx: LootContext) => boolean
 
-function composeConditions(conditions: any[]): LootCondition {
-	return (ctx) => {
-		for (const cond of conditions) {
+function testCondition(condition: any, ctx: LootContext): boolean {
+	if (!condition) {
+		return true
+	}
+	if (Array.isArray(condition)) {
+		for (const cond of condition) {
 			if (!testCondition(cond, ctx)) {
 				return false
 			}
 		}
 		return true
 	}
-}
-
-function testCondition(condition: any, ctx: LootContext): boolean {
-	if (Array.isArray(condition)) {
-		return composeConditions(condition)(ctx)
-	}
-	if (!isObject(condition) || typeof condition.condition !== 'string') {
+	if (!isObject(condition)) {
 		return false
 	}
-	const type = condition.condition?.replace(/^minecraft:/, '')
+	const type = (condition.type || condition.condition)?.replace(/^minecraft:/, '')
 	return (LootConditions[type]?.(condition) ?? (() => true))(ctx)
 }
 
@@ -593,9 +601,6 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 	},
 	reference: ({ name }) => (ctx) => {
 		const predicate = ctx.getPredicate(name) ?? []
-		if (Array.isArray(predicate)) {
-			return composeConditions(predicate)(ctx)
-		}
 		return testCondition(predicate, ctx)
 	},
 	survives_explosion: () => () => true,

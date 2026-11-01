@@ -54,6 +54,7 @@ export const LootTablePreview = ({ docAndNode }: PreviewProps) => {
 			stackMixer: mixItems ? 'container' : 'default',
 			getItemTag: (id) => (itemTags.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
 			getLootTable: (id) => lootTables.get(id.replace(/^minecraft:/, '')),
+			getLootTableTag: () => [], // No vanilla loot table tags
 			getPredicate: () => undefined,
 			getEnchantments: () => enchantments ?? new Map(),
 			getEnchantmentTag: (id) => (enchantmentTags?.get(id.replace(/^minecraft:/, '')) as any)?.values ?? [],
