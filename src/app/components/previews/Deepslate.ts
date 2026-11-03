@@ -245,7 +245,6 @@ export class Deepslate119 implements Deepslate {
 		const biomeSource = this.d.BiomeSource.fromJson(biomeSourceData)
 		const chunkGenerator = new this.d.NoiseChunkGenerator(biomeSource, settings)
 		const randomState = new this.d.RandomState(settings, seed)
-		console.log('BIOME SAMPLER', chunkGenerator, randomState)
 		return {
 			sample: (x, y, z) => chunkGenerator.computeBiome(randomState, x, y, z).toString(),
 		}

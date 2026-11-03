@@ -63,6 +63,17 @@ export function intToDisplayHexRgb(c: number | undefined) {
 	return c ? '#' + intToUnsigned(c).toString(16).toUpperCase().padStart(6, '0') : '#000000'
 }
 
+export function floorMod(x: number, y: number) {
+	const r = x % y
+	if (r === 0) return 0
+	return (r < 0) !== (y < 0) ? r + y : r
+}
+
+export function floorDiv(x: number, y: number) {
+	const r = x % y
+	return (x - r) / y
+}
+
 export function htmlEncode(str: string) {
 	return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')

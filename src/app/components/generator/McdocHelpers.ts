@@ -101,6 +101,9 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 						valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 					}
 					const value = getDefault(simplifyType(field.type, ctx), range, ctx)
+					if (key.value === 'rolls' && value.type === 'json:number' && value.value.type === 'long' && value.value.value === BigInt(0)) {
+						value.value.value = BigInt(1)
+					}
 					const pair: JsonPairNode = {
 						type: 'pair',
 						range,
@@ -298,7 +301,7 @@ export function formatIdentifier(id: string, attributes?: Attributes): string {
 	return (isStarred ? '✨ ' : '') + text.charAt(0).toUpperCase() + text.substring(1)
 }
 
-export function getCategory(type: McdocType) {
+export function getCategory(type: McdocType): string | undefined {
 	if (type.kind === 'reference' && type.path) {
 		switch (type.path) {
 			case '::java::data::loot::LootPool':
@@ -315,10 +318,10 @@ export function getCategory(type: McdocType) {
 			case '::java::data::loot::LootFunction':
 			case '::java::data::worldgen::density_function::CubicSpline':
 			case '::java::data::worldgen::processor_list::Processor':
-			case '::java::data::number_provider::FloatNumberProviderRef':
-			case '::java::data::number_provider::IntegerNumberProviderRef':
 				return 'function'
 		}
+	} else if (type.kind === 'union') {
+		return type.members.map(m => getCategory(m)).find(c => c)
 	}
 	return undefined
 }

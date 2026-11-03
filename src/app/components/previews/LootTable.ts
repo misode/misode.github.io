@@ -6,7 +6,7 @@ import { NbtCompound, NbtInt, NbtList, NbtString, NbtTag } from 'deepslate/nbt'
 import { ResolvedItem } from '../../services/ResolvedItem.js'
 import type { VersionId } from '../../services/Versions.js'
 import { checkVersion } from '../../services/Versions.js'
-import { clamp, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
+import { clamp, floorDiv, floorMod, getWeightedRandom, isObject, jsonToNbt } from '../../Utils.js'
 
 export interface SlottedItem {
 	slot: number,
@@ -162,7 +162,6 @@ function generatePool(pool: any, consumer: ItemConsumer, ctx: LootContext) {
 					}
 				})
 			}
-			console.log('EXPANDED RESULT', entries)
 
 			// Select random entry
 			if (totalWeight === 0 || entries.length === 0) {
@@ -241,7 +240,7 @@ function createItem(entry: any, consumer: ItemConsumer, ctx: LootContext) {
 	const type = entry.type?.replace(/^minecraft:/, '')
 	switch (type) {
 		case 'item':
-			const id = Identifier.parse(entry.name)
+			const id = Identifier.parse(entry.name ?? '')
 			entryConsumer(new ResolvedItem(new ItemStack(id, 1), ctx.getItemComponents(id)))
 			break
 		case 'tag':
@@ -578,8 +577,18 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 	entity_scores: () => () => {
 		return false // TODO
 	},
+	float_value_check: ({ value, test }) => (ctx) => {
+		const val = computeFloat(value, ctx)
+		const { min, max } = prepareFloatRange(test, ctx)
+		return min <= val && val <= max
+	},
 	inverted: ({ term }) => (ctx) => {
 		return !testCondition(term, ctx)
+	},
+	int_value_check: ({ value, test }) => (ctx) => {
+		const val = computeInt(value, ctx)
+		const { min, max } = prepareIntRange(test, ctx)
+		return min <= val && val <= max
 	},
 	killed_by_player: ({ inverted }) => () => {
 		return (inverted ?? false) === false // TODO
@@ -587,17 +596,23 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 	location_check: () => () => {
 		return false // TODO
 	},
+	match_block: () => () => {
+		return false // TODO
+	},
 	match_tool: () => () => {
 		return false // TODO
 	},
 	random_chance: ({ chance }) => (ctx) => {
-		return ctx.random.nextFloat() < chance
+		return ctx.random.nextFloat() < (chance ?? 0)
+	},
+	random_chance_with_enchanted_bonus: ({ unenchanted_chance }) => (ctx) => {
+		// TODO: get enchantment level from attacking_entity
+		return ctx.random.nextFloat() < (unenchanted_chance ?? 0)
 	},
 	random_chance_with_looting: ({ chance, looting_multiplier }) => (ctx) => {
 		const level = 0 // TODO: get looting level from killer
-		const probability = chance + level * looting_multiplier
+		const probability = (chance ?? 0) + level * (looting_multiplier ?? 0)
 		return ctx.random.nextFloat() < probability
-
 	},
 	reference: ({ name }) => (ctx) => {
 		const predicate = ctx.getPredicate(name) ?? []
@@ -620,8 +635,10 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 		const { min, max } = prepareIntRange(value, ctx)
 		return min <= time && time <= max
 	},
-	value_check: () => () => {
-		return false // TODO
+	value_check: ({ value, range }) => (ctx) => {
+		const val = computeInt(value, ctx)
+		const { min, max } = prepareIntRange(range, ctx)
+		return min <= val && val <= max
 	},
 	weather_check: ({ raining, thundering }) => (ctx) => {
 		const isRaining = ctx.weather === 'rain' || ctx.weather === 'thunder'
@@ -632,21 +649,36 @@ const LootConditions: Record<string, (params: any) => LootCondition> = {
 	},
 }
 
-function computeInt(provider: any, ctx: LootContext): number {
-	if (typeof provider === 'number') return Math.round(provider)
-	if (!isObject(provider)) return 0
+function computeInt(root: any, ctx: LootContext): number {
+	if (typeof root === 'number') {
+		return Math.round(root)
+	} else if (!isObject(root)) {
+		return 0
+	}
 
-	const type = provider.type?.replace(/^minecraft:/, '') ?? 'uniform'
+	const type = root.type?.replace(/^minecraft:/, '') ?? 'uniform'
 	switch (type) {
-		case 'constant':
-			return Math.round(provider.value ?? 0)
-		case 'uniform':
-			const min = computeInt(provider.min, ctx)
-			const max = computeInt(provider.max, ctx)
-			return max < min ? min : ctx.random.nextInt(max - min + 1) + min
-		case 'binomial':
-			const n = computeInt(provider.n, ctx)
-			const p = computeFloat(provider.p, ctx)
+		case 'abs':
+			return Math.abs(root.value)
+		case 'add': {
+			let value = 0
+			for (const operand of root.inputs ?? []) {
+				value += computeInt(operand, ctx)
+			}
+			return value
+		}
+		case 'avg': {
+			let sum = 0
+			let count = 0
+			for (const operand of root.inputs ?? []) {
+				sum += computeInt(operand, ctx)
+				count += 1
+			}
+			return Math.floor(sum / count)
+		}
+		case 'binomial': {
+			const n = computeInt(root.n, ctx)
+			const p = computeFloat(root.p, ctx)
 			let result = 0
 			for (let i = 0; i < n; i += 1) {
 				if (ctx.random.nextFloat() < p) {
@@ -654,31 +686,120 @@ function computeInt(provider: any, ctx: LootContext): number {
 				}
 			}
 			return result
-		case 'sum':
-			let sum = 0
-			for (const summand of provider.summands ?? []) {
-				sum += computeInt(summand, ctx)
+		}
+		case 'conditional': {
+			if (testCondition(root.condition, ctx)) {
+				return computeInt(root.on_true, ctx)
 			}
-			return sum
+			return computeInt(root.on_false, ctx)
+		}
+		case 'constant':
+			return Math.floor(root.value ?? 0)
+		case 'div':
+			return Math.floor(computeInt(root.left, ctx) / computeInt(root.right, ctx))
+		case 'environment_attribute':
+			return 0 // No int environment attributes
+		case 'floor_mod':
+			return floorMod(computeInt(root.left, ctx), computeInt(root.right, ctx))
+		case 'floor_div':
+			return floorDiv(computeInt(root.left, ctx), computeInt(root.right, ctx))
+		case 'from_float':
+			return Math.floor(computeFloat(root.input, ctx))
+		case 'max': {
+			let value = -Infinity
+			for (const operand of root.inputs ?? []) {
+				value = Math.max(value, computeInt(operand, ctx))
+			}
+			return value
+		}
+		case 'min': {
+			let value = Infinity
+			for (const operand of root.inputs ?? []) {
+				value = Math.min(value, computeInt(operand, ctx))
+			}
+			return value
+		}
+		case 'mod':
+			return computeInt(root.left, ctx) % computeInt(root.right, ctx)
+		case 'mul': {
+			let value = 1
+			for (const operand of root.inputs ?? []) {
+				value *= computeInt(operand, ctx)
+			}
+			return value
+		}
+		case 'negate':
+			return -computeInt(root.input, ctx)
+		case 'number_dispatcher': {
+			for (const c of root.cases ?? []) {
+				if (testCondition(c.condition, ctx)) {
+					return computeInt(c.value, ctx)
+				}
+			}
+			return computeInt(root.default, ctx)
+		}
+		case 'pow':
+			return Math.floor(Math.pow(computeInt(root.left, ctx), computeInt(root.right, ctx)))
+		case 'score':
+			return 0 // TODO
+		case 'storage':
+			return 0 // TODO
+		case 'sum': { // Removed in 26.3
+			let value = 0
+			for (const operand of root.summands ?? []) {
+				value += computeInt(operand, ctx)
+			}
+			return value
+		}
+		case 'sub': {
+			return computeInt(root.left, ctx) - computeInt(root.right, ctx)
+		}
+		case 'uniform': {
+			const min = computeInt(root.min, ctx)
+			const max = computeInt(root.max, ctx)
+			return max < min ? min : ctx.random.nextInt(max - min + 1) + min
+		}
+		case 'weighted_list': {
+			const entry = getWeightedRandom(ctx.random, root.distribution, (e) => isObject(e) ? e.weight : 0)
+			return isObject(entry) ? computeInt(entry.data, ctx) : 0
+		}
+		default:
+			console.warn(`Unsupported context int type '${type}'`)
 	}
 	return 0
 }
 
-function computeFloat(provider: any, ctx: LootContext): number {
-	if (typeof provider === 'number') return provider
-	if (!isObject(provider)) return 0
+function computeFloat(root: any, ctx: LootContext): number {
+	if (typeof root === 'number') {
+		return root
+	} else if (!isObject(root)) {
+		return 0
+	}
 
-	const type = provider.type?.replace(/^minecraft:/, '') ?? 'uniform'
+	const type = root.type?.replace(/^minecraft:/, '') ?? 'uniform'
 	switch (type) {
-		case 'constant':
-			return provider.value ?? 0
-		case 'uniform':
-			const min = computeFloat(provider.min, ctx)
-			const max = computeFloat(provider.max, ctx)
-			return max < min ? min : ctx.random.nextFloat() * (max-min) + min
-		case 'binomial':
-			const n = computeInt(provider.n, ctx)
-			const p = computeFloat(provider.p, ctx)
+		case 'abs':
+			return Math.abs(computeFloat(root.input, ctx))
+		case 'add':
+		case 'sum': {
+			let value = 0
+			for (const operand of root.inputs ?? root.summands ?? []) {
+				value += computeFloat(operand, ctx)
+			}
+			return value
+		}
+		case 'avg': {
+			let sum = 0
+			let count = 0
+			for (const operand of root.inputs ?? []) {
+				sum += computeFloat(operand, ctx)
+				count += 1
+			}
+			return sum / count
+		}
+		case 'binomial': { // Removed in 26.3
+			const n = computeInt(root.n, ctx)
+			const p = computeFloat(root.p, ctx)
 			let result = 0
 			for (let i = 0; i < n; i += 1) {
 				if (ctx.random.nextFloat() < p) {
@@ -686,12 +807,95 @@ function computeFloat(provider: any, ctx: LootContext): number {
 				}
 			}
 			return result
-		case 'sum':
-			let sum = 0
-			for (const summand of provider.summands ?? []) {
-				sum += computeFloat(summand, ctx)
+		}
+		case 'ceil':
+			return Math.ceil(computeFloat(root.input, ctx))
+		case 'conditional': {
+			if (testCondition(root.condition, ctx)) {
+				return computeFloat(root.on_true, ctx)
 			}
-			return sum
+			return computeFloat(root.on_false, ctx)
+		}
+		case 'constant':
+			return root.value ?? 0
+		case 'cos':
+			return Math.cos(computeFloat(root.input, ctx))
+		case 'div':
+			return computeFloat(root.left, ctx) / computeFloat(root.right, ctx)
+		case 'enchantment_level':
+			return 0 // TODO
+		case 'environment_attribute':
+			return 0 // TODO
+		case 'floor':
+			return Math.floor(computeFloat(root.input, ctx))
+		case 'from_int':
+			return computeInt(root.input, ctx)
+		case 'length': {
+			let sumOfSquares = 0
+			for (const operand of root.inputs ?? []) {
+				const value = computeFloat(operand, ctx)
+				sumOfSquares += value * value
+			}
+			return Math.sqrt(sumOfSquares)
+		}
+		case 'max': {
+			let value = -Infinity
+			for (const operand of root.inputs ?? []) {
+				value = Math.max(value, computeFloat(operand, ctx))
+			}
+			return value
+		}
+		case 'min': {
+			let value = Infinity
+			for (const operand of root.inputs ?? []) {
+				value = Math.min(value, computeFloat(operand, ctx))
+			}
+			return value
+		}
+		case 'mod':
+			return computeFloat(root.left, ctx) % computeFloat(root.right, ctx)
+		case 'mul': {
+			let value = 1
+			for (const operand of root.inputs ?? []) {
+				value *= computeFloat(operand, ctx)
+			}
+			return value
+		}
+		case 'negate':
+			return -computeFloat(root.input, ctx)
+		case 'number_dispatcher': {
+			for (const c of root.cases ?? []) {
+				if (testCondition(c.condition, ctx)) {
+					return computeFloat(c.value, ctx)
+				}
+			}
+			return computeFloat(root.default, ctx)
+		}
+		case 'pow':
+			return Math.pow(computeFloat(root.left, ctx), computeFloat(root.right, ctx))
+		case 'round':
+			return Math.round(computeFloat(root.input, ctx))
+		case 'sin':
+			return Math.sin(computeFloat(root.input, ctx))
+		case 'sqrt':
+			return Math.sqrt(computeFloat(root.input, ctx))
+		case 'storage':
+			return 0 // TODO
+		case 'sub':
+			return computeFloat(root.left, ctx) - computeFloat(root.right, ctx)
+		case 'truncate':
+			return Math.trunc(computeFloat(root.input, ctx))
+		case 'uniform': {
+			const min = computeFloat(root.min, ctx)
+			const max = computeFloat(root.max, ctx)
+			return max < min ? min : ctx.random.nextFloat() * (max-min) + min
+		}
+		case 'weighted_list': {
+			const entry = getWeightedRandom(ctx.random, root.distribution, (e) => isObject(e) ? e.weight : 0)
+			return isObject(entry) ? computeFloat(entry.data, ctx) : 0
+		}
+		default:
+			console.warn(`Unsupported context float type '${type}'`)
 	}
 	return 0
 }
@@ -702,6 +906,15 @@ function prepareIntRange(range: any, ctx: LootContext) {
 	}
 	const min = computeInt(range?.min, ctx)
 	const max = computeInt(range?.max, ctx)
+	return { min, max }
+}
+
+function prepareFloatRange(range: any, ctx: LootContext) {
+	if (typeof range === 'number') {
+		range = { min: range, max: range }
+	}
+	const min = computeFloat(range?.min, ctx)
+	const max = computeFloat(range?.max, ctx)
 	return { min, max }
 }
 
