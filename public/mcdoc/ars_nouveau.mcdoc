@@ -1,0 +1,164 @@
+use ::java::data::recipe::Ingredient
+use ::java::world::item::ItemStack
+
+dispatch minecraft:resource[ars_nouveau:recipes] to struct Recipes {
+	type: Type,
+	...ars_nouveau:recipes[[type]],
+}
+
+enum(string) Type {
+	EnchantingApparatus = "ars_nouveau:enchanting_apparatus",
+	ApparatusEnchanting = "ars_nouveau:enchantment",
+	Imbuement = "ars_nouveau:imbuement",
+	Crush = "ars_nouveau:crush",
+	Glyph = "ars_nouveau:glyph",
+	ScryRitual = "ars_nouveau:scry_ritual",
+	SummonRitual = "ars_nouveau:summon_ritual",
+	AlakarkinosConversion = "ars_nouveau:alakarkinos_conversion",
+	BuddingConversion = "ars_nouveau:budding_conversion",
+	CasterTome = "ars_nouveau:caster_tome",
+	ArmorUpgrade = "ars_nouveau:armor_upgrade",
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:enchanting_apparatus] to struct {
+	pedestalItems: [Ingredient] @ 1..,
+	reagent: Ingredient,
+	keepNbtOfReagent: boolean,
+	result: ItemStack,
+	sourceCost: int @ 0..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:enchantment] to struct {
+	pedestalItems: [Ingredient] @ 1..,
+	enchantment: #[id="enchantment"] string,
+	/// Defaults to `1`.
+	level: int @ 1..,
+	sourceCost: int @ 0..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:armor_upgrade] to struct {
+	pedestalItems: [Ingredient] @ 1..,
+	sourceCost: int @ 0..,
+	/// 0-indexed, tier 1 would be represented as `0`.
+	tier: int @ 0..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:imbuement] to struct {
+	pedestalItems: [Ingredient],
+	input: Ingredient,
+	output: ItemStack,
+	source: int @ 0..,
+}
+
+struct CrushOutput {
+	stack: ItemStack,
+	chance: float @ 0..,
+	maxRange: int @ 1..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:crush] to struct {
+	input: Ingredient,
+	output: CrushOutput,
+	source: int @ 0..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:glyph] to struct {
+	inputs: [Ingredient],
+	output: ItemStack,
+	exp: int @ 0..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:scry_ritual] to struct {
+	augment: #[id(registry="item", tags="implicit")] string,
+	highlight: #[id(registry="block", tags="implicit")] string,
+}
+
+enum(string) MobSource {
+	CURRENT_BIOME = "CURRENT_BIOME",
+	MOB_LIST = "MOB_LIST",
+}
+
+struct WeightedMobType {
+	mob: #[id(registry="entity_type")] string,
+	weight: int @ 1..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:summon_ritual] to struct {
+	augment: Ingredient,
+	source: struct {
+		mobSource: MobSource,
+	},
+	count: int @ 1..,
+	mobs: [WeightedMobType],
+}
+
+struct LootDrop {
+	item: ItemStack,
+	chance: float @ 0..,
+}
+
+struct LootDrops {
+	list: [LootDrop] @ 1..,
+	weight: int @ 1..,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:alakarkinos_conversion] to struct {
+	block: #[id(registry="block")] string,
+	table: #[id(registry="loot_table")] string,
+	weight: int @ 1..,
+	drops?: LootDrops,
+}
+
+struct ParticleColor {
+	id: string,
+	r: int @ 0..255,
+	g: int @ 0..255,
+	b: int @ 0..255,
+}
+
+struct SpellSound {
+	id: string,
+}
+
+struct ConfiguredSpellSound {
+	sound: SpellSound,
+	/// Defaults to `1.0`.
+	volume: float,
+	/// Defaults to `1.0`.
+	pitch: float,
+}
+
+type IParticleTimelineType = string
+
+type IParticleTimeline = any
+
+struct StringToAny {
+	[string]: any,
+}
+
+struct TimelineMap {
+	[IParticleTimelineType]: any,
+}
+
+struct Spell {
+	name: string,
+	color: ParticleColor,
+	sound: SpellSound,
+	recipe: [string],
+	particleTimeline?: TimelineMap,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:caster_tome] to struct {
+	name: string,
+	spell: [string],
+	tome_type: string,
+	flavour_text: string,
+	color: ParticleColor,
+	sound: SpellSound,
+	spellData: Spell,
+}
+
+dispatch ars_nouveau:recipes[ars_nouveau:budding_conversion] to struct {
+	input: #[id(registry="block")] string,
+	result: #[id(registry="block")] string,
+}
