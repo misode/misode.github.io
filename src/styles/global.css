@@ -2908,14 +2908,9 @@ hr {
 	margin: 3px;
 	border-radius: 50%;
 	background-color: var(--background-2);
-	width: 32px;
-	height: 32px;
-	transition: background-color 200ms;
-}
-
-.contributors-list.contributors-large > * {
 	width: 48px;
 	height: 48px;
+	transition: background-color 200ms;
 }
 
 .contributors-list > * img {

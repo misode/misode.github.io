@@ -565,12 +565,14 @@
       "id": "worldgen/material_condition",
       "url": "worldgen/material-condition",
       "tags": ["worldgen"],
+      "aliases": ["surface condition"],
       "minVersion": "26.3"
     },
     {
       "id": "worldgen/material_rule",
       "url": "worldgen/material-rule",
       "tags": ["worldgen"],
+      "aliases": ["surface rule"],
       "minVersion": "26.3"
     },
     {

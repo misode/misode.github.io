@@ -12,7 +12,7 @@ export function Partners({}: Props) {
 		<div class="legacy-container">
 			<GeneratorList predicate={gen => gen.tags?.includes('partners')} compare={(f, s) => {
 				// Compares by dependency but missing dependency will be treated last
-				return (s.dependency ?? "").localeCompare(f.dependency ?? "") * -1
+				return (s.dependency ?? '').localeCompare(f.dependency ?? '') * -1
 			}}/>
 		</div>
 		<Footer donate={false} />

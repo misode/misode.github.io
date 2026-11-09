@@ -1,20 +1,26 @@
+import type { ComponentChildren } from 'preact'
 import { useMemo, useState } from 'preact/hooks'
 import type { ConfigGenerator } from '../../Config.js'
 import config from '../../Config.js'
 import { useLocale, useVersion } from '../../contexts/index.js'
+import { useSearchParam } from '../../hooks/useSearchParam.js'
 import { checkVersion } from '../../services/Versions.js'
 import { GeneratorCard, TextInput, VersionSwitcher } from '../index.js'
 
+const SEARCH_KEY = 'search'
+
 interface Props {
 	path?: string,
+	limit?: number,
 	predicate?: (gen: ConfigGenerator) => boolean | undefined,
 	compare?: (first: ConfigGenerator, second: ConfigGenerator) => number,
+	extra?: ComponentChildren,
 }
-export function GeneratorList({ predicate , compare }: Props) {
+export function GeneratorList({ limit, predicate, compare, extra }: Props) {
 	const { locale } = useLocale()
 	const { version, changeVersion } = useVersion()
 
-	const [search, setSearch] = useState('')
+	const [search, setSearch] = useSearchParam(SEARCH_KEY)
 
 	const [versionFilter, setVersionFiler] = useState(true)
 
@@ -32,20 +38,37 @@ export function GeneratorList({ predicate , compare }: Props) {
 		return searchGenerators(results, search, compare)
 	}, [versionedGenerators, search, locale])
 
-	return <div class="generator-list">
+	const limitedGenerators = useMemo(() => {
+		if (limit === undefined) return filteredGenerators
+		return filteredGenerators.slice(0, limit)
+	}, [filteredGenerators, limit])
+
+	return <div>
 		<div class="navigation">
 			<TextInput class="btn btn-input query-search" placeholder={locale('generators.search')} value={search} onChange={setSearch} autofocus />
+			{extra}
 			<VersionSwitcher value={versionFilter ? version : undefined} onChange={v => {changeVersion(v); setVersionFiler(true)}} hasAny onAny={() => setVersionFiler(false)} />
 		</div>
-		{filteredGenerators.length === 0 ? <>
-			<span class="note">{locale('generators.no_results')}</span>
+		{limitedGenerators.length === 0 ? <>
+			<span class="block note mt-2">{locale('generators.no_results')}</span>
 		</> : <div class="card-grid">
-			{filteredGenerators.map(gen =>
+			{limitedGenerators.map(gen =>
 				<GeneratorCard id={gen.id} />
 			)}
 		</div>}
 	</div>
 }
+
+const popularGeneratorsReversed = [
+	'loot_table',
+	'recipe',
+	'advancement',
+	'predicate',
+	'worldgen/biome',
+	'worldgen/density_function',
+	'dimension',
+	'worldgen/noise_settings',
+].reverse()
 
 export function searchGenerators(generators: (ConfigGenerator & { name: string})[], search?: string, compare?: (first: ConfigGenerator, second: ConfigGenerator) => number) {
 	if (search) {
@@ -61,6 +84,8 @@ export function searchGenerators(generators: (ConfigGenerator & { name: string})
 	})
 	if (search) {
 		generators.sort((a, b) => (b.name.startsWith(search) ? 1 : 0) - (a.name.startsWith(search) ? 1 : 0))
+	} else if (!compare) {
+		generators.sort((a, b) => popularGeneratorsReversed.indexOf(b.id) - popularGeneratorsReversed.indexOf(a.id))
 	}
 	return generators
 }

@@ -5,7 +5,7 @@ import { useLocale } from '../../contexts/Locale.jsx'
 import type { VersionId } from '../../services/Versions.js'
 import { checkVersion } from '../../services/Versions.js'
 import { cleanUrl } from '../../Utils.js'
-import { Badge, Card, Icons, ToolCard } from '../index.js'
+import { Card, Icons, ToolCard } from '../index.js'
 
 const VERSION_SEP = ' • '
 
@@ -48,15 +48,7 @@ export function GeneratorCard({ id, minimal }: Props) {
 			+ versions.slice(-2).join(VERSION_SEP)
 	}, [versions])
 
-	const tags = useMemo(() => {
-		if (gen.tags?.includes('assets')) return ['resource-pack']
-		return []
-	}, [gen])
-
 	return <Card title={<>{title}{icon && Icons[icon]}</>} overlay={gen.dependency ? locale(`partner.${gen.dependency}`) : versionText} link={cleanUrl(gen.url)}>
 		{!gen.noPath && <p class="card-subtitle">/{gen.path ?? gen.id}</p>}
-		{tags.length > 0 && <div class="badges-list">
-			{tags.sort().map(tag => <Badge label={tag} />)}
-		</div>}
 	</Card>
 }
