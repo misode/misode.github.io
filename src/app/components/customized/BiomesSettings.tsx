@@ -1,8 +1,8 @@
 import { useMemo } from 'preact/hooks'
 import { useVersion } from '../../contexts/Version.jsx'
-import { deepClone } from '../../Utils.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchRegistries } from '../../services/DataFetcher.js'
+import { deepClone } from '../../Utils.js'
 import { Octicon, TextInput } from '../index.js'
 import { CustomizedInput } from './CustomizedInput.jsx'
 import type { CustomizedModel } from './CustomizedModel.js'
@@ -84,6 +84,7 @@ const DefaultReplacements: Record<string, string> = {
 	cherry_grove: 'meadow',
 	cold_ocean: 'ocean',
 	dark_forest: 'forest',
+	dappled_forest: 'forest',
 	deep_cold_ocean: 'deep_ocean',
 	deep_dark: 'plains',
 	deep_frozen_ocean: 'deep_ocean',
@@ -122,6 +123,7 @@ const DefaultReplacements: Record<string, string> = {
 	sparse_jungle: 'jungle',
 	stony_peaks: 'plains',
 	stony_shore: 'beach',
+	sulfur_caves: 'plains',
 	sunflower_plains: 'plains',
 	swamp: 'river',
 	taiga: 'forest',

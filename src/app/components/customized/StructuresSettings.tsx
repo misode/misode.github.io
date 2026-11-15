@@ -9,6 +9,9 @@ interface Props {
 }
 export function StructuresSettings({ model, initialModel, changeModel }: Props) {
 	return <>
+		<CustomizedToggle label="Abandoned camps"
+			value={model.abandonedCamps} onChange={v => changeModel({ abandonedCamps: v })}
+			initial={initialModel.abandonedCamps} />
 		<CustomizedToggle label="Ancient cities"
 			value={model.ancientCities} onChange={v => changeModel({ ancientCities: v })}
 			initial={initialModel.ancientCities} />
@@ -51,6 +54,9 @@ export function StructuresSettings({ model, initialModel, changeModel }: Props) 
 		<CustomizedToggle label="Trail ruins"
 			value={model.trailRuins} onChange={v => changeModel({ trailRuins: v })}
 			initial={initialModel.trailRuins} />
+		<CustomizedToggle label="Trial Chambers"
+			value={model.trialChambers} onChange={v => changeModel({ trialChambers: v })}
+			initial={initialModel.trialChambers} />
 		<CustomizedToggle label="Villages"
 			value={model.villages} onChange={v => changeModel({ villages: v })}
 			initial={initialModel.villages} />
