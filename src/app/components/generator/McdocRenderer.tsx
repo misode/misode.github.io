@@ -531,8 +531,16 @@ function StructBody({ type: outerType, node, ctx }: Props<SimplifiedStructType>)
 		})
 		return keep
 	})
-	const staticFields = fields.filter(field => field.key.kind === 'literal')
-	const dynamicFields = fields.filter(field => field.key.kind !== 'literal')
+	const staticFieldsMap: Record<string, SimplifiedStructTypePairField> = {}
+	const dynamicFields: SimplifiedStructTypePairField[] = []
+	for (const field of fields) {
+		if (field.key.kind === 'literal') {
+			staticFieldsMap[`${field.key.value.value}`] = field
+		} else {
+			dynamicFields.push(field)
+		}
+	}
+	const staticFields = Object.values(staticFieldsMap)
 	const staticChilds: core.PairNode<JsonStringNode, JsonNode>[] = []
 	return <>
 		{staticFields.map(field => {
