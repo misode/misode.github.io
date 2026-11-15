@@ -26,6 +26,7 @@ export interface CustomizedModel {
 	biomeSize: number,
 	biomeReplacements: Record<string, string>,
 	// Structures
+	abandonedCamps: boolean,
 	ancientCities: boolean,
 	buriedTreasures: boolean,
 	desertPyramids: boolean,
@@ -40,6 +41,7 @@ export interface CustomizedModel {
 	strongholds: boolean,
 	swampHuts: boolean,
 	trailRuins: boolean,
+	trialChambers: boolean,
 	villages: boolean,
 	woodlandMansions: boolean,
 	// Features
@@ -91,6 +93,7 @@ export namespace CustomizedModel {
 			biomeSize: 4,
 			biomeReplacements: {},
 
+			abandonedCamps: true,
 			ancientCities: true,
 			buriedTreasures: true,
 			desertPyramids: true,
@@ -105,6 +108,7 @@ export namespace CustomizedModel {
 			strongholds: true,
 			swampHuts: true,
 			trailRuins: true,
+			trialChambers: true,
 			villages: true,
 			woodlandMansions: true,
 

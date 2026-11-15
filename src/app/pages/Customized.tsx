@@ -46,7 +46,7 @@ export function Customized({}: Props) {
 				)}
 				<VersionSwitcher value={version} onChange={changeVersion} allowed={allowedVersions} />
 			</div>
-			{checkVersion(version, '1.20') ? <>
+			{checkVersion(version, MIN_VERSION) ? <>
 				<CustomizedPanel tab={tab} />
 			</> : <>
 				<ErrorPanel error={locale('customized.error_min_version', MIN_VERSION)} reportable={false}>

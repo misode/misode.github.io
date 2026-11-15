@@ -157,6 +157,7 @@ function generateBiomeReplacements(ctx: Context) {
 }
 
 const Structures: Partial<Record<keyof CustomizedModel, string>> = {
+	abandonedCamps: 'abandoned_camp',
 	ancientCities: 'ancient_cities',
 	buriedTreasures: 'buried_treasures',
 	desertPyramids: 'desert_pyramids',
@@ -171,6 +172,7 @@ const Structures: Partial<Record<keyof CustomizedModel, string>> = {
 	strongholds: 'strongholds',
 	swampHuts: 'swamp_huts',
 	trailRuins: 'trail_ruins',
+	trialChambers: 'trial_chambers',
 	villages: 'villages',
 	woodlandMansions: 'woodland_mansions',
 }
