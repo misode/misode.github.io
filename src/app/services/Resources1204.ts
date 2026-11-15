@@ -39,7 +39,10 @@ export async function renderItem(version: VersionId, item: ItemStack) {
 		canvas.width = RENDER_SIZE
 		canvas.height = RENDER_SIZE
 		const resources = await getResources(version)
-		const gl = canvas.getContext('webgl2', { preserveDrawingBuffer: true })
+		const gl = canvas.getContext('webgl2', {
+			preserveDrawingBuffer: true,
+			premultipliedAlpha: false,
+		})
 		if (!gl) {
 			throw new Error('Cannot get WebGL2 context')
 		}

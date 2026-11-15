@@ -21,9 +21,10 @@
 		"editor.insertSpaces": true,
 		"editor.tabSize": 2
 	},
-	"typescript.format.semicolons": "remove",
 	"editor.insertSpaces": false,
 	"files.insertFinalNewline": true,
 	"files.trimFinalNewlines": true,
-	"typescript.tsdk": "node_modules\\typescript\\lib"
+	"js/ts.format.semicolons": "remove",
+	"js/ts.tsdk.path": "node_modules\\typescript\\lib",
+	"workbench.browser.openLocalhostLinks": false
 }

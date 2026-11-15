@@ -82,7 +82,7 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 		if (project.storage === undefined) {
 			try {
 				const projectRoot = project.name === DRAFT_PROJECT.name ? DRAFTS_URI : `${PROJECTS_URI}${hexId()}/`
-				console.log(`Upgrading project ${openProject} to IndexedDB at ${projectRoot}`)
+				console.info(`Upgrading project ${openProject} to IndexedDB at ${projectRoot}`)
 				await SpyglassClient.FS.mkdir(projectRoot)
 				if (project.files) {
 					await Promise.all(project.files.map(async file => {
@@ -95,7 +95,9 @@ export function ProjectProvider({ children }: { children: ComponentChildren }) {
 						const { namespace, path } = Identifier.parse(file.id)
 						const uri = type === 'pack_mcmeta'
 							?	`${projectRoot}data/pack.mcmeta`
-							: `${projectRoot}data/${namespace}/${type}/${path}${gen.ext ?? '.json'}`
+							: type === 'sounds'
+								? `${projectRoot}assets/${namespace}/sounds.json`
+								: `${projectRoot}data/${namespace}/${type}/${path}${gen.ext ?? '.json'}`
 						return SpyglassClient.FS.writeFile(uri, JSON.stringify(file.data, null, 2))
 					}))
 				}

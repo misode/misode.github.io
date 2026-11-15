@@ -1,0 +1,113 @@
+use ::java::data::loot::LootPool
+use ::java::data::loot::LootPoolEntry
+use ::java::data::loot::LootContextType
+use ::java::data::loot::LootCondition
+
+dispatch minecraft:resource[loot-table-modifier:loot_modifier] to struct {
+    actions: [Action],
+    predicate: Predicate,
+}
+
+struct Action {
+    type: #[id] ActionType,
+    ...loot-table-modifier:loot_modifier_action_types[[type]],
+}
+
+struct Predicate {
+    type: #[id] PredicateType,
+    ...loot-table-modifier:loot_modifier_predicate_types[[type]],
+}
+
+enum(string) ActionType {
+    PoolAdd = "loot-table-modifier:pool_add",
+    PoolRemove = "loot-table-modifier:pool_remove",
+
+
+    EntryAdd = "loot-table-modifier:entry_add",
+    EntryRemove = "loot-table-modifier:entry_remove",
+
+    EntryItemSet = "loot-table-modifier:entry_item_set",
+
+
+    ConditionAdd = "loot-table-modifier:condition_add"
+}
+
+enum(string) PredicateType {
+    Inverted = "loot-table-modifier:inverted",
+    AnyOf = "loot-table-modifier:any_of",
+    AllOf = "loot-table-modifier:all_of",
+
+
+    EntryItem = "loot-table-modifier:entry_item",
+
+
+    Table = "loot-table-modifier:table",
+}
+
+
+/// Utils
+struct Pattern {
+    regexPattern: #[regex_pattern] string,
+}
+
+type LiteralOrPattern<T> = (
+    #[misode_member_name="Literal"] T |
+    #[misode_member_name="Regex pattern"] Pattern |
+)
+
+
+/// Actions
+
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:pool_add] to struct {
+    pools: [LootPool],
+}
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:pool_remove] to struct {
+
+}
+
+
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_add] to struct {
+    entries: [LootPoolEntry],
+}
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_remove] to struct {
+
+}
+
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:entry_item_set] to struct {
+    name: #[id="item"] string,
+    canReplaceEntry?: boolean,
+}
+
+
+dispatch loot-table-modifier:loot_modifier_action_types[loot-table-modifier:condition_add] to struct {
+    conditions: [LootCondition],
+    includePools?: boolean,
+    includeEntries?: boolean,
+}
+
+
+/// Predicates
+
+/// # op
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:inverted] to struct {
+    term: Predicate,
+}
+
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:any_of] to struct {
+    terms: [Predicate],
+}
+
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:all_of] to struct {
+    terms: [Predicate],
+}
+
+/// # entry
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:entry_item] to struct {
+    name: LiteralOrPattern<#[id="item"] string>,
+}
+
+/// # table
+dispatch loot-table-modifier:loot_modifier_predicate_types[loot-table-modifier:table] to struct {
+    identifiers?: [LiteralOrPattern<#[id="loot_table"] string>],
+    types?: [LiteralOrPattern<LootContextType>],
+}

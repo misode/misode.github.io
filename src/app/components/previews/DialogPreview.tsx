@@ -216,7 +216,7 @@ interface ColumnsGridProps {
 function ColumnsGrid({ columns, children }: ColumnsGridProps) {
 	const totalCount = children.length
 	const gridCount = Math.floor(totalCount / columns) * columns
-	return <div style={`padding-top: ${px(4)}; display: grid; grid-template-columns: repeat(${columns}, minmax(0, 1fr)); gap: ${px(2)}; justify-content: center;`}>
+	return <div style={`padding-top: ${px(4)}; display: grid; grid-template-columns: repeat(${columns}, auto); gap: ${px(2)}; justify-content: center; justify-items: center;`}>
 		{children.slice(0, gridCount)}
 		{totalCount > gridCount && <div style={`grid-column: span ${columns}; display: flex; gap: ${px(2)}; justify-content: center;`}>
 			{children.slice(gridCount)}

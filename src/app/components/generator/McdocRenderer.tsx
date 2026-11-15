@@ -8,16 +8,20 @@ import type { ListType, LiteralType, McdocType, NumericType, PrimitiveArrayType,
 import { handleAttributes } from '@spyglassmc/mcdoc/lib/runtime/attribute/index.js'
 import type { SimplifiedEnum, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifiedStructType, SimplifiedStructTypePairField } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { getValues } from '@spyglassmc/mcdoc/lib/runtime/completer/index.js'
-import { Identifier, ItemStack } from 'deepslate'
+import { Identifier as Identifier1204, ItemStack as ItemStack1204 } from 'deepslate-1.20.4/core'
+import { Identifier, ItemStack } from 'deepslate/core'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
 import config from '../../Config.js'
 import { useLocale } from '../../contexts/Locale.jsx'
+import { useVersion } from '../../contexts/Version.jsx'
 import { useFocus } from '../../hooks/useFocus.js'
+import { checkVersion } from '../../services/Versions.js'
 import { generateColor, hexId, intToHexRgb, randomInt, randomSeed } from '../../Utils.js'
 import { Btn } from '../Btn.jsx'
 import { ItemDisplay } from '../ItemDisplay.jsx'
+import { ItemDisplay1204 } from '../ItemDisplay1204.jsx'
 import { Octicon } from '../Octicon.jsx'
 import { formatIdentifier, getCategory, getChange, getDefault, getItemType, isDefaultCollapsedType, isFixedList, isInlineTuple, isListOrArray, isNumericType, isSelectRegistry, quickEqualTypes, simplifyType } from './McdocHelpers.js'
 
@@ -117,7 +121,7 @@ function Body({ type, optional, node, ctx }: Props<SimplifiedMcdocType>) {
 			return <></>
 		}
 		return <div class="node-body">
-			<ListBody type={type} node={node} ctx={ctx} />
+			<ListBody type={type} optional={optional} node={node} ctx={ctx} />
 		</div>
 	}
 	if (type.kind === 'tuple') {
@@ -138,6 +142,7 @@ const SPECIAL_UNSET = '__unset__'
 
 function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringType>) {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 
 	const nodeValue = (JsonStringNode.is(node) ? node.value : undefined)?.replaceAll('\n', '\\n')
 	const [value, setValue] = useState(nodeValue)
@@ -155,7 +160,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 	const idTags = idAttribute?.kind === 'tree' && idAttribute.values.tags?.kind === 'literal' && idAttribute.values.tags.value.kind === 'string'
 		? idAttribute.values.tags.value.value
 		: undefined
-	const isSelect = idRegistry && isSelectRegistry(idRegistry)
+	const isSelect = idRegistry && isSelectRegistry(idRegistry, version)
 
 	const onChangeValue = useCallback((newValue: string) => {
 		newValue = newValue.replaceAll('\\n', '\n')
@@ -201,9 +206,7 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 	}, [onChangeValue])
 
 	return <>
-		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <label>
-			<ItemDisplay item={new ItemStack(Identifier.parse(value), 1)} />	
-		</label>}
+		{((idRegistry === 'item' || idRegistry === 'block') && idTags !== 'implicit' && value && !value.startsWith('#')) && <ItemIdPreview id={value}/>}
 		{isSelect ? <>
 			<select value={value === undefined ? SPECIAL_UNSET : value} onInput={(e) => onChangeValue((e.target as HTMLInputElement).value)}>
 				{(value === undefined || optional) && <option value={SPECIAL_UNSET}>{locale('unset')}</option>}
@@ -224,6 +227,27 @@ function StringHead({ type, optional, excludeStrings, node, ctx }: Props<StringT
 			<button class="tooltipped tip-se" aria-label={locale('generate_new_color')} onClick={onRandomColor}>{Octicon.sync}</button>
 		</>}
 	</>
+}
+
+function ItemIdPreview({ id }: { id: string }) {
+	const { version } = useVersion()
+
+	const stack = useMemo(() => {
+		try {
+			if (!checkVersion(version, '1.20.5')) {
+				return new ItemStack1204(Identifier1204.parse(id), 1)
+			}
+			return new ItemStack(Identifier.parse(id), 1)
+		} catch (e) {
+			return undefined
+		}
+	}, [id, version])
+
+	return <>{stack && <label>
+		{stack instanceof ItemStack1204
+			? <ItemDisplay1204 item={stack} />
+			: <ItemDisplay item={stack} />}
+	</label>}</>
 }
 
 function EnumHead({ type, optional, excludeStrings, node, ctx }: Props<SimplifiedEnum>) {
@@ -409,6 +433,10 @@ function UnionHead({ type, optional, node, ctx }: Props<UnionType<SimplifiedMcdo
 }
 
 function formatUnionMember(type: SimplifiedMcdocTypeNoUnion, others: SimplifiedMcdocTypeNoUnion[]): string {
+	const memberNameAttribute = type.attributes?.find(a => a.name === 'misode_member_name')?.value
+	if (memberNameAttribute?.kind === 'literal' && memberNameAttribute.value.kind === 'string') {
+		return memberNameAttribute.value.value
+	}
 	if (type.kind === 'literal') {
 		return formatIdentifier(type.value.value.toString())
 	}
@@ -503,8 +531,16 @@ function StructBody({ type: outerType, node, ctx }: Props<SimplifiedStructType>)
 		})
 		return keep
 	})
-	const staticFields = fields.filter(field => field.key.kind === 'literal')
-	const dynamicFields = fields.filter(field => field.key.kind !== 'literal')
+	const staticFieldsMap: Record<string, SimplifiedStructTypePairField> = {}
+	const dynamicFields: SimplifiedStructTypePairField[] = []
+	for (const field of fields) {
+		if (field.key.kind === 'literal') {
+			staticFieldsMap[`${field.key.value.value}`] = field
+		} else {
+			dynamicFields.push(field)
+		}
+	}
+	const staticFields = Object.values(staticFieldsMap)
 	const staticChilds: core.PairNode<JsonStringNode, JsonNode>[] = []
 	return <>
 		{staticFields.map(field => {
@@ -822,7 +858,7 @@ function ListHead({ type, node, ctx }: Props<ListType | PrimitiveArrayType>) {
 	</button>
 }
 
-function ListBody({ type: outerType, node, ctx }: Props<ListType | PrimitiveArrayType>) {
+function ListBody({ type: outerType, optional, node, ctx }: Props<ListType | PrimitiveArrayType>) {
 	if (!JsonArrayNode.is(node)) {
 		return <></>
 	}
@@ -865,6 +901,21 @@ function ListBody({ type: outerType, node, ctx }: Props<ListType | PrimitiveArra
 		}
 	}, [type, node, ctx, canAdd])
 
+	const makeListEdit: MakeEdit = useCallback((edit) => {
+		ctx.makeEdit(() => {
+			const newNode = edit(node.range)
+			if (JsonArrayNode.is(newNode) && newNode.children.length === 0 && optional && type.kind === 'list' && (type.lengthRange?.min ?? 0) > 0) {
+				// Remove entire list when empty list is not allowed and field is optional
+				return undefined
+			}
+			return newNode
+		})
+	}, [ctx, node, optional, type])
+
+	const listCtx = useMemo(() => {
+		return { ...ctx, makeEdit: makeListEdit }
+	}, [ctx, makeListEdit])
+
 	return <>
 		{node.children.map((item, index) => {
 			if (index === maxShown) {
@@ -878,7 +929,7 @@ function ListBody({ type: outerType, node, ctx }: Props<ListType | PrimitiveArra
 				return <></>
 			}
 			const key = index.toString()
-			return <ListItem key={key} item={item} index={index} category={category} type={childType} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} node={node} ctx={ctx} />
+			return <ListItem key={key} item={item} index={index} category={category} type={childType} isToggled={isToggled(key)} expand={expand(key)} collapse={collapse(key)} node={node} ctx={listCtx} />
 		})}
 		{node.children.length > 0 && <div class="node-header">
 			<button class="add tooltipped tip-se" aria-label={locale('add_bottom')} onClick={() => onAddBottom()} disabled={!canAdd}>

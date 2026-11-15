@@ -252,6 +252,8 @@ function AttributeModifiersTooltip({ data }: { data: NbtTag | undefined }) {
 			let first = true
 			return modifiers.map((e) => {
 				if (!e.isCompound()) return
+				const display = e.getCompound('display').getString('type')
+				if (display == 'hidden') return
 				const slot = e.has('slot') ? e.getString('slot') : 'any'
 				if (slot !== group) return
 				const wasFirst = first

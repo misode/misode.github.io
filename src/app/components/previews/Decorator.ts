@@ -1,4 +1,4 @@
-import type { BlockPos, ChunkPos, PerlinNoise, Random } from 'deepslate/worldgen'
+import type { BlockPos, ChunkPos, Noise, Random } from 'deepslate/worldgen'
 import type { VersionId } from '../../services/index.js'
 import { checkVersion } from '../../services/index.js'
 import type { Color } from '../../Utils.js'
@@ -10,7 +10,7 @@ export type PlacementContext = {
 	placements: Placement[],
 	features: string[],
 	random: Random,
-	biomeInfoNoise: PerlinNoise,
+	biomeInfoNoise: Noise,
 	seaLevel: number,
 	version: VersionId,
 	nextFloat(): number,
@@ -221,13 +221,13 @@ const Decorators: {
 			])
 	},
 	count_noise: (config, pos, ctx) => {
-		const noise = ctx.biomeInfoNoise.sample(pos[0] / 200, 0, pos[2] / 200)
+		const noise = ctx.biomeInfoNoise.get2D(pos[0] / 200, pos[2] / 200)
 		const count = noise < config.noise_level ? config.below_noise : config.above_noise
 		return new Array(count).fill(pos)
 	},
 	count_noise_biased: (config, pos, ctx) => {
 		const factor = Math.max(1, config.noise_factor)
-		const noise = ctx.biomeInfoNoise.sample(pos[0] / factor, 0, pos[2] / factor)
+		const noise = ctx.biomeInfoNoise.get2D(pos[0] / factor, pos[2] / factor)
 		const count = Math.max(0, Math.ceil((noise + (config.noise_offset ?? 0)) * config.noise_to_count_ratio))
 		return new Array(count).fill(pos)
 	},
@@ -402,12 +402,12 @@ const PlacementModifiers: {
 	},
 	noise_based_count: ({ noise_to_count_ratio, noise_factor, noise_offset }, pos, ctx) => {
 		const factor = Math.max(1, noise_factor)
-		const noise = ctx.biomeInfoNoise.sample(pos[0] / factor, 0, pos[2] / factor)
+		const noise = ctx.biomeInfoNoise.get2D(pos[0] / factor, pos[2] / factor)
 		const count = Math.max(0, Math.ceil((noise + (noise_offset ?? 0)) * noise_to_count_ratio))
 		return new Array(count).fill(pos)
 	},
 	noise_threshold_count: ({ noise_level, below_noise, above_noise }, pos, ctx) => {
-		const noise = ctx.biomeInfoNoise.sample(pos[0] / 200, 0, pos[2] / 200)
+		const noise = ctx.biomeInfoNoise.get2D(pos[0] / 200, pos[2] / 200)
 		const count = noise < noise_level ? below_noise : above_noise
 		return new Array(count).fill(pos)
 	},

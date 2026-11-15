@@ -1,13 +1,15 @@
 import type { ComponentChildren } from 'preact'
 import { getCurrentUrl } from 'preact-router'
-import { useEffect, useMemo, useState } from 'preact/hooks'
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks'
+import { useLocale } from '../contexts/Locale.jsx'
 import { useProject } from '../contexts/Project.jsx'
 import { useSpyglass } from '../contexts/Spyglass.jsx'
 import { useVersion } from '../contexts/Version.jsx'
+import { useActiveTimeout } from '../hooks/useActiveTimout.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { latestVersion } from '../services/DataFetcher.js'
 import { getGenerator, SOURCE_REPO_URL } from '../Utils.js'
-import { Octicon } from './index.js'
+import { Btn, Octicon } from './index.js'
 
 type ErrorPanelProps = {
 	error: string | Error,
@@ -18,6 +20,7 @@ type ErrorPanelProps = {
 	children?: ComponentChildren,
 }
 export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, children }: ErrorPanelProps) {
+	const { locale } = useLocale()
 	const { version } = useVersion()
 	const { service } = useSpyglass()
 	const { projectUri } = useProject()
@@ -36,6 +39,10 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 		}
 		return await service.readFile(uri)
 	}, [service, version, projectUri, gen])
+
+	const spyglassLogs = useMemo(() => {
+		return service?.logger.logs
+	}, [service])
 
 	useEffect(() => {
 		if (error instanceof Error) {
@@ -78,6 +85,14 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 		return url
 	}, [error, name, body_, version, stack, source, gen?.id])
 
+	const [copySpyglassActive, setCopySpyglassActive] = useActiveTimeout()
+	const copySpyglassLogs = useCallback(() => {
+		if (spyglassLogs) {
+			navigator.clipboard.writeText(spyglassLogs.join('\n'))
+				.then(() => setCopySpyglassActive())
+		}
+	}, [spyglassLogs, setCopySpyglassActive])
+
 	return <div class="error">
 		{onDismiss && <div class="error-dismiss" onClick={onDismiss}>{Octicon.x}</div>}
 		<h3 class="font-bold text-xl !my-[10px]">
@@ -88,6 +103,7 @@ export function ErrorPanel({ error, prefix, reportable, onDismiss, body: body_, 
 		</h3>
 		{stack && stackVisible && <pre>{stack}</pre>}
 		{reportable !== false && <p>If you think this is a bug, you can report it <a href={url} target="_blank">on GitHub</a></p>}
+		{spyglassLogs && !children && <Btn icon={copySpyglassActive ? 'check' : 'copy'} label={locale('copy_logs')} onClick={copySpyglassLogs} />}
 		{children}
 	</div>
 }

@@ -1,7 +1,6 @@
 import preact from '@preact/preset-vite'
 import html from '@rollup/plugin-html'
 import { env } from 'process'
-import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 const config = require('./src/config.json')
@@ -73,7 +72,6 @@ export default defineConfig({
 				{ src: 'src/styles/giscus-burn.css', dest: 'assets' },
 			],
 		}),
-		visualizer({ open: true }),
 	],
 })
 

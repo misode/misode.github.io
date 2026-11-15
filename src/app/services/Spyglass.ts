@@ -1,6 +1,7 @@
 import * as core from '@spyglassmc/core'
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js'
 import * as je from '@spyglassmc/java-edition'
+import type { McmetaSummary } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import { ReleaseVersion } from '@spyglassmc/java-edition/lib/dependency/index.js'
 import * as json from '@spyglassmc/json'
 import { localize } from '@spyglassmc/locales'
@@ -9,13 +10,14 @@ import * as nbt from '@spyglassmc/nbt'
 import * as zip from '@zip.js/zip.js'
 import sparkmd5 from 'spark-md5'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import type { ConfigGenerator } from '../Config.js'
+import type { ConfigGenerator, ConfigVersion } from '../Config.js'
 import siteConfig from '../Config.js'
 import { computeIfAbsent, genPath } from '../Utils.js'
 import type { VanillaMcdocSymbols, VersionMeta } from './DataFetcher.js'
 import { fetchBlockStates, fetchRegistries, fetchVanillaMcdoc, fetchVersions, getVersionChecksum } from './DataFetcher.js'
 import { IndexedDbFileSystem } from './FileSystem.js'
 import type { VersionId } from './Versions.js'
+import { checkVersion } from './Versions.js'
 
 export const CACHE_URI = 'file:///cache/'
 export const ROOT_URI = 'file:///root/'
@@ -86,6 +88,7 @@ export class SpyglassService {
 
 	private constructor (
 		public readonly version: VersionId,
+		public readonly logger: StoredLogger,
 		private readonly service: core.Service,
 		private readonly client: SpyglassClient,
 	) {
@@ -256,6 +259,9 @@ export class SpyglassService {
 		if (gen.id === 'pack_mcmeta') {
 			return `${UNSAVED_URI}pack.mcmeta`
 		}
+		if (gen.id === 'sounds') {
+			return `${UNSAVED_URI}assets/minecraft/sounds.json`
+		}
 		const pack = gen.tags?.includes('assets') ? 'assets' : 'data'
 		return `${UNSAVED_URI}${pack}/draft/${genPath(gen, this.version)}/draft${gen.ext ?? '.json'}`
 	}
@@ -285,7 +291,7 @@ export class SpyglassService {
 		const currentServiceId = SpyglassService.activeServiceId
 		await Promise.allSettled(INITIAL_DIRS.map(async uri => client.externals.fs.mkdir(uri)))
 		const version = siteConfig.versions.find(v => v.id === versionId)!
-		const logger = console
+		const logger = new StoredLogger(console)
 		const service = new core.Service({
 			logger,
 			profilers: new core.ProfilerFactory(logger, [
@@ -309,6 +315,52 @@ export class SpyglassService {
 							},
 							world: {
 								category: 'world',
+							},
+							// Temporary until spyglass core is updated
+							cat_sound_variant : {
+								category: 'cat_sound_variant',
+							},
+							chicken_sound_variant : {
+								category: 'chicken_sound_variant',
+							},
+							context_float_provider : {
+								category: 'context_float_provider',
+							},
+							context_int_provider : {
+								category: 'context_int_provider',
+							},
+							cow_sound_variant : {
+								category: 'cow_sound_variant',
+							},
+							pig_sound_variant : {
+								category: 'pig_sound_variant',
+							},
+							sulfur_cube_archetype : {
+								category: 'sulfur_cube_archetype',
+							},
+							slot_source : {
+								category: 'slot_source',
+							},
+							decorated_pot_pattern : {
+								category: 'decorated_pot_pattern',
+							},
+							block_transformer: {
+								category: 'block_transformer',
+							},
+							block_sound_set: {
+								category: 'block_sound_set',
+							},
+							'worldgen/carver' : {
+								category: 'worldgen/carver',
+							},
+							'worldgen/feature' : {
+								category: 'worldgen/feature',
+							},
+							'worldgen/material_condition' : {
+								category: 'worldgen/material_condition',
+							},
+							'worldgen/material_rule' : {
+								category: 'worldgen/material_rule',
 							},
 							// Partner resources
 							...Object.fromEntries(siteConfig.generators.filter(gen => gen.dependency).map(gen =>
@@ -341,7 +393,7 @@ export class SpyglassService {
 				logger.info('[SpyglassService] Skipped saving the cache because another service is active')
 			}
 		}, 10_000)
-		return new SpyglassService(versionId, service, client)
+		return new SpyglassService(versionId, logger, service, client)
 	}
 }
 
@@ -367,47 +419,83 @@ async function compressBall(files: [string, string][]): Promise<Uint8Array> {
 const initialize: core.ProjectInitializer = async (ctx) => {
 	const { config, logger, meta, externals, cacheRoot } = ctx
 
-	const vanillaMcdoc = await fetchVanillaMcdoc()
-	meta.registerSymbolRegistrar('vanilla-mcdoc', {
-		checksum: vanillaMcdoc.ref,
-		registrar: vanillaMcdocRegistrar(vanillaMcdoc),
-	})
-
-	meta.registerDependencyProvider('@misode-mcdoc', async () => {
-		const uri: string = new core.Uri('downloads/misode-mcdoc.tar.gz', cacheRoot).toString()
-		const buffer = await compressBall([['builtin.mcdoc', builtinMcdoc]])
-		await core.fileUtil.writeFile(externals, uri, buffer)
-		return { uri }
-	})
-
-	meta.registerUriBinder(je.binder.uriBinder)
-
-	const versions = await fetchVersions()
-	const release = config.env.gameVersion as ReleaseVersion
-	const version = siteConfig.versions.find(v => {
-		return v.dynamic ? v.id === release : v.ref === release
-	})
-	if (version === undefined) {
-		logger.error(`[initialize] Failed finding game version matching ${release}.`)
-		return
+	try {
+		const vanillaMcdoc = await fetchVanillaMcdoc()
+		meta.registerSymbolRegistrar('vanilla-mcdoc', {
+			checksum: vanillaMcdoc.ref,
+			registrar: vanillaMcdocRegistrar(vanillaMcdoc, logger),
+		})
+	} catch (e) {
+		logger.error(`Failed to register vanilla-mcdoc: ${e}`)
+		throw e
 	}
 
-	const summary: je.dependency.McmetaSummary = {
-		registries: Object.fromEntries((await fetchRegistries(version.id)).entries()),
-		blocks: Object.fromEntries([...(await fetchBlockStates(version.id)).entries()]
-			.map(([id, data]) => [id, data])),
-		fluids: je.dependency.Fluids,
-		commands: { type: 'root', children: {} },
+	try {
+		meta.registerDependencyProvider('@misode-mcdoc', async () => {
+			const uri: string = new core.Uri('downloads/misode-mcdoc.tar.gz', cacheRoot).toString()
+			const buffer = await compressBall([['builtin.mcdoc', builtinMcdoc]])
+			await core.fileUtil.writeFile(externals, uri, buffer)
+			return { type: 'tarball-file', uri }
+		})
+	} catch (e) {
+		logger.error(`Failed to register misode-mcdoc: ${e}`)
+		throw e
 	}
 
-	const versionChecksum = getVersionChecksum(version.id)
+	try {
+		meta.registerUriBinder(je.binder.uriBinder)
+	} catch (e) {
+		logger.error(`Failed to register URI binder: ${e}`)
+		throw e
+	}
 
-	meta.registerSymbolRegistrar('mcmeta-summary', {
-		checksum: versionChecksum,
-		registrar: je.dependency.symbolRegistrar(summary, release),
-	})
+	let versions: VersionMeta[]
+	let release: ReleaseVersion
+	let version: ConfigVersion | undefined
+	try {
+		versions = await fetchVersions()
+		release = config.env.gameVersion as ReleaseVersion
+		version = siteConfig.versions.find(v => {
+			return v.dynamic ? v.id === release : v.ref === release
+		})
+		if (version !== undefined) {
+			logger.info(`[initialize] Found game version matching ${release}: ${JSON.stringify(version)}`)
+		} else {
+			logger.error(`[initialize] Failed finding game version matching ${release}`)
+			return
+		}
+	} catch (e) {
+		logger.error(`Failed to fetch versions: ${e}`)
+		throw e
+	}
 
-	registerAttributes(meta, release, versions)
+	let summary: je.dependency.McmetaSummary
+	try {
+		summary = {
+			registries: Object.fromEntries((await fetchRegistries(version.id)).entries()),
+			blocks: Object.fromEntries([...(await fetchBlockStates(version.id)).entries()]
+				.map(([id, data]) => [id, data])),
+			fluids: je.dependency.Fluids,
+			commands: { type: 'root', children: {} },
+		}
+	
+		const versionChecksum = getVersionChecksum(version.id)
+	
+		meta.registerSymbolRegistrar('mcmeta-summary', {
+			checksum: versionChecksum,
+			registrar: customSymbolRegistrar(summary, release),
+		})
+	} catch (e) {
+		logger.error(`Failed to register symbol registrar: ${e}`)
+		throw e
+	}
+
+	try {
+		registerAttributes(meta, release, versions)
+	} catch (e) {
+		logger.error(`Failed to register mcdoc attributes: ${e}`)
+		throw e
+	}
 
 	json.getInitializer()(ctx)
 	je.json.initialize(ctx)
@@ -420,20 +508,12 @@ const initialize: core.ProjectInitializer = async (ctx) => {
 // Duplicate these from spyglass for now, until they are exported separately
 function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, versions: VersionMeta[]) {
 	mcdoc.runtime.registerAttribute(meta, 'since', mcdoc.runtime.attribute.validator.string, {
-		filterElement: (config, ctx) => {
-			if (!config.startsWith('1.')) {
-				ctx.logger.warn(`Invalid mcdoc attribute for "since": ${config}`)
-				return true
-			}
+		filterElement: (config, _) => {
 			return ReleaseVersion.cmp(release, config as ReleaseVersion) >= 0
 		},
 	})
 	mcdoc.runtime.registerAttribute(meta, 'until', mcdoc.runtime.attribute.validator.string, {
-		filterElement: (config, ctx) => {
-			if (!config.startsWith('1.')) {
-				ctx.logger.warn(`Invalid mcdoc attribute for "until": ${config}`)
-				return true
-			}
+		filterElement: (config, _) => {
 			return ReleaseVersion.cmp(release, config as ReleaseVersion) < 0
 		},
 	})
@@ -442,13 +522,9 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 		'deprecated',
 		mcdoc.runtime.attribute.validator.optional(mcdoc.runtime.attribute.validator.string),
 		{
-			mapField: (config, field, ctx) => {
+			mapField: (config, field, _) => {
 				if (config === undefined) {
 					return { ...field, deprecated: true }
-				}
-				if (!config.startsWith('1.')) {
-					ctx.logger.warn(`Invalid mcdoc attribute for "deprecated": ${config}`)
-					return field
 				}
 				if (ReleaseVersion.cmp(release, config as ReleaseVersion) >= 0) {
 					return { ...field, deprecated: true }
@@ -477,30 +553,81 @@ function registerAttributes(meta: core.MetaRegistry, release: ReleaseVersion, ve
 	})
 }
 
+const McmetaSummaryUri = 'mcmeta://summary/registries.json'
+
+function customSymbolRegistrar(summary: McmetaSummary, release: ReleaseVersion): core.SymbolRegistrar {
+	return (symbols, ctx) => {
+		if (checkVersion(release, '26.4')) {
+			// Hacky fix until spyglass can be updated
+			delete summary.fluids['flowing_lava']
+			delete summary.fluids['flowing_water']
+		}
+		je.dependency.symbolRegistrar(summary, release)(symbols, ctx)
+
+		// Temporary until spyglass core is updated
+		for (const [registryId, registry] of Object.entries(summary.registries)) {
+			if (['context_float_provider', 'context_float_provider_type', 'context_int_provider', 'context_int_provider_type', 'worldgen/carver_type', 'worldgen/feature_type', 'worldgen/material_condition', 'worldgen/material_condition_type', 'worldgen/material_rule', 'worldgen/material_rule_type'].includes(registryId)) {
+				for (const entryId of registry) {
+					symbols.query(McmetaSummaryUri, registryId, core.ResourceLocation.lengthen(entryId))
+						.enter({ usage: { type: 'declaration' } })
+				}
+			}
+		}
+	}
+}
+
 const VanillaMcdocUri = 'mcdoc://vanilla-mcdoc/symbols.json'
 
-function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols): core.SymbolRegistrar {
+function vanillaMcdocRegistrar(vanillaMcdoc: VanillaMcdocSymbols, logger: core.Logger): core.SymbolRegistrar {
 	return (symbols) => {
-		const start = performance.now()
-		for (const [id, typeDef] of Object.entries(vanillaMcdoc.mcdoc)) {
-			symbols.query(VanillaMcdocUri, 'mcdoc', id).enter({
-				data: { data: { typeDef } },
-				usage: { type: 'declaration' },
-			})
-		}
-		for (const [dispatcher, ids] of Object.entries(vanillaMcdoc['mcdoc/dispatcher'])) {
-			symbols.query(VanillaMcdocUri, 'mcdoc/dispatcher', dispatcher)
-				.enter({ usage: { type: 'declaration' } })
-				.onEach(Object.entries(ids), ([id, typeDef], query) => {
-					query.member(id, (memberQuery) => {
-						memberQuery.enter({
-							data: { data: { typeDef } },
-							usage: { type: 'declaration' },
+		try {
+			const start = performance.now()
+			for (const [id, typeDef] of Object.entries(vanillaMcdoc.mcdoc)) {
+				symbols.query(VanillaMcdocUri, 'mcdoc', id).enter({
+					data: { data: { typeDef } },
+					usage: { type: 'declaration' },
+				})
+			}
+			for (const [dispatcher, ids] of Object.entries(vanillaMcdoc['mcdoc/dispatcher'])) {
+				symbols.query(VanillaMcdocUri, 'mcdoc/dispatcher', dispatcher)
+					.enter({ usage: { type: 'declaration' } })
+					.onEach(Object.entries(ids), ([id, typeDef], query) => {
+						query.member(id, (memberQuery) => {
+							memberQuery.enter({
+								data: { data: { typeDef } },
+								usage: { type: 'declaration' },
+							})
 						})
 					})
-				})
+			}
+			const duration = performance.now() - start
+			logger.info(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
+		} catch (e) {
+
 		}
-		const duration = performance.now() - start
-		console.log(`[vanillaMcdocRegistrar] Done in ${duration}ms`)
+	}
+}
+
+export class StoredLogger implements core.Logger {
+	public readonly logs: string[] = []
+	constructor(
+		private readonly parent: core.Logger,
+	) {}
+
+	error(data: any, ...args: any[]): void {
+		this.logs.push(`[ERROR] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.error(data, ...args)
+	}
+	info(data: any, ...args: any[]): void {
+		this.logs.push(`[INFO] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.info(data, ...args)
+	}
+	log(data: any, ...args: any[]): void {
+		this.logs.push(`[LOG] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.log(data, ...args)
+	}
+	warn(data: any, ...args: any[]): void {
+		this.logs.push(`[WARN] ${data}${args.map(a => ` ${a}`).join('')}`)
+		this.parent.warn(data, ...args)
 	}
 }

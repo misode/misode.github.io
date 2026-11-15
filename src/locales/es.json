@@ -235,5 +235,11 @@
     "generator.frog_variant": "Variante de la Rana",
     "generator.test_instance": "Instancia de prueba",
     "generator.test_environment": "Entorno de prueba",
-    "generator.wolf_variant": "Variante del lobo"
+    "generator.wolf_variant": "Variante del lobo",
+    "generator.create:recipes": "Crear recetas",
+    "generator.dialog": "Diálogo",
+    "generator.tag/dialog": "Etiqueta de diálogo",
+    "generator.tag/timeline": "Etiqueta de línea de tiempo",
+    "generator.tag/zombie_nautilus_variant": "Etiqueta de variante de Nautilus zombi",
+    "generator.thermoo:environment_provider": "Proveedor de entorno"
 }

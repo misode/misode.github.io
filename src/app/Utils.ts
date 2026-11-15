@@ -3,7 +3,6 @@ import type { Identifier, NbtTag, Random } from 'deepslate'
 import { Matrix3, Matrix4, NbtByte, NbtCompound, NbtDouble, NbtInt, NbtList, NbtString, Vector } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { quat, vec2 } from 'gl-matrix'
-import yaml from 'js-yaml'
 import { route } from 'preact-router'
 import rfdc from 'rfdc'
 import type { ConfigGenerator } from './Config.js'
@@ -64,6 +63,17 @@ export function intToDisplayHexRgb(c: number | undefined) {
 	return c ? '#' + intToUnsigned(c).toString(16).toUpperCase().padStart(6, '0') : '#000000'
 }
 
+export function floorMod(x: number, y: number) {
+	const r = x % y
+	if (r === 0) return 0
+	return (r < 0) !== (y < 0) ? r + y : r
+}
+
+export function floorDiv(x: number, y: number) {
+	const r = x % y
+	return (x - r) / y
+}
+
 export function htmlEncode(str: string) {
 	return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
@@ -100,74 +110,6 @@ export function changeUrl({ path, search, hash, replace }: { path?: string, sear
 	route(url, replace)
 }
 
-export function parseFrontMatter(source: string): Record<string, any> {
-	const data = yaml.load(source.substring(3, source.indexOf('---', 3)))
-	if (!isObject(data)) return {}
-	return data
-}
-
-export function versionContent(content: string, version: string) {
-	let cursor = 0
-	while (true) {
-		const start = content.indexOf('{#', cursor)
-		if (start < 0) {
-			break
-		}
-		const end = findMatchingClose(content, start + 2)
-		const vStart = content.indexOf('#[', start + 1)
-		let sub = ''
-		if (vStart >= 0 && vStart < end) {
-			const vEnd = content.indexOf(']', vStart + 2)
-			const v = content.substring(vStart + 2, vEnd)
-			if (v === version) {
-				sub = content.substring(vEnd + 1, end).trim()
-			}
-		} else {
-			const key = content.substring(start + 2, end)
-			const versionConfig = config.versions.find(v => v.id === version)
-			sub = ({
-				version: versionConfig?.id,
-				pack_format: versionConfig?.pack_format.toString(),
-			} as Record<string, string | undefined>)[key] ?? ''
-		}
-		content = content.substring(0, start) + sub + content.substring(end + 2)
-		cursor = start
-		
-	}
-	return content
-}
-
-function findMatchingClose(source: string, index: number) {
-	let depth = 0
-	let iteration = 0
-	while (iteration++ < 1000) {
-		const close = source.indexOf('#}', index)
-		const open = source.indexOf('{#', index)
-		if (close < 0) {
-			console.warn('Missing closing bracket')
-			return source.length
-		}
-		if (open < 0) {
-			if (depth === 0) {
-				return close
-			} else {
-				depth -= 1
-				index = close + 2
-			}
-		} else if (open < close) {
-			depth += 1
-			index = open + 2
-		} else if (depth === 0) {
-			return close
-		} else {
-			depth -= 1
-			index = close + 2
-		}
-	}
-	console.warn('Exceeded max iterations while finding closing bracket')
-	return source.length
-}
-
 export type Color = [number, number, number]
 
 export function stringToColor(str: string): Color {
@@ -196,32 +138,6 @@ export function square(a: number) {
 
 export function clamp(a: number, b: number, c: number) {
 	return Math.max(b, Math.min(a, c))
-}
-
-export function clampedLerp(a: number, b: number, c: number): number {
-	if (c < 0) {
-		return a
-	} else if (c > 1) {
-		return b
-	} else {
-		return lerp(c, a, b)
-	}
-}
-
-export function lerp(a: number, b: number, c: number): number {
-	return b + a * (c - b)
-}
-
-export function lerp2(a: number, b: number, c: number, d: number, e: number, f: number): number {
-	return lerp(b, lerp(a, c, d), lerp(a, e, f))
-}
-
-export function lerp3(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) {
-	return lerp(c, lerp2(a, b, d, e, f, g), lerp2(a, b, h, i, j, k))
-}
-
-export function smoothstep(x: number): number {
-	return x * x * x * (x * (x * 6 - 15) + 10)
 }
 
 export function message(e: unknown): string {
@@ -379,7 +295,7 @@ export function getWeightedRandom<T>(random: Random, entries: T[], getWeight: (e
 	return undefined
 }
 
-export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: number, y: number) => D, getColor: (d: D) => [number, number, number]) {
+export function iterateWorld2D<D>(img: ImageData, transform: mat3, getData: (x: number, y: number) => D, getColor: (d: D) => Color) {
 	const pos = vec2.create()
 	const arr = Array(img.width * img.height)
 	for (let x = 0; x < img.width; x += 1) {

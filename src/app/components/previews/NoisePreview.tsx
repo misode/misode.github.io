@@ -1,27 +1,33 @@
-import { clampedMap, NoiseParameters, NormalNoise, XoroshiroRandom } from 'deepslate'
+import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks'
-import { useLocale } from '../../contexts/index.js'
+import { useLocale, useVersion } from '../../contexts/index.js'
+import { useAsync } from '../../hooks/index.js'
 import { Store } from '../../Store.js'
 import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
+import { Deepslate } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
 export const NoisePreview = ({ docAndNode, shown }: PreviewProps) => {
 	const { locale } = useLocale()
+	const { version } = useVersion()
 	const [seed, setSeed] = useState(randomSeed())
 
 	const text = docAndNode.doc.getText()
 
+	const { value: deepslate } = useAsync(async () => {
+		return Deepslate.load(version)
+	}, [version])
+
 	const noise = useMemo(() => {
-		const random = XoroshiroRandom.create(seed)
-		const params = NoiseParameters.fromJson(safeJsonParse(text) ?? {})
-		return new NormalNoise(random, params)
-	}, [text, seed])
+		if (!deepslate) return undefined
+		return deepslate.initNoiseSampler(seed, safeJsonParse(text) ?? {})
+	}, [deepslate, seed, text])
 
 	const imageData = useRef<ImageData>()
 	const ctx = useRef<CanvasRenderingContext2D>()
@@ -38,7 +44,7 @@ export const NoisePreview = ({ docAndNode, shown }: PreviewProps) => {
 		imageData.current = ctx.current.getImageData(0, 0, width, height)
 	}, [])
 	const onDraw = useCallback((transform: mat3) => {
-		if (!ctx.current || !imageData.current || !shown) return
+		if (!ctx.current || !imageData.current || !shown || !noise) return
 
 		const colorPicker = getColormap(colormap)
 		iterateWorld2D(imageData.current, transform, (x, y) => {
@@ -50,7 +56,7 @@ export const NoisePreview = ({ docAndNode, shown }: PreviewProps) => {
 		ctx.current.putImageData(imageData.current, 0, 0)
 	}, [noise, colormap, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
-		if (!pos) {
+		if (!pos || !noise) {
 			setFocused([])
 		} else {
 			const [x, y] = pos

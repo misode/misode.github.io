@@ -24,7 +24,7 @@ export function FileCreation({ docAndNode, gen, method }: Props) {
 	const { project } = useProject()
 	const { client } = useSpyglass()
 
-	const [fileId, setFileId] = useState(gen.id === 'pack_mcmeta' ? 'pack' : '')
+	const [fileId, setFileId] = useState(gen.id === 'pack_mcmeta' ? 'pack' : gen.id === 'sounds' ? 'sounds' : '')
 	const [error, setError] = useState<string>()
 	
 	const changeFileId = (str: string) => {
@@ -45,7 +45,9 @@ export function FileCreation({ docAndNode, gen, method }: Props) {
 		const projectRoot = getProjectRoot(project)
 		const uri = gen.id === 'pack_mcmeta'
 			? `${projectRoot}pack.mcmeta`
-			: `${projectRoot}${pack}/${id.namespace}/${genPath(gen, version)}/${id.path}${gen.ext ?? '.json'}`
+			: gen.id === 'sounds'
+				? `${projectRoot}assets/${id.namespace}/sounds.json`
+				: `${projectRoot}${pack}/${id.namespace}/${genPath(gen, version)}/${id.path}${gen.ext ?? '.json'}`
 		Analytics.saveProjectFile(method)
 		const text = docAndNode.doc.getText()
 		client.fs.writeFile(uri, text).then(() => {

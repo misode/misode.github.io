@@ -42,9 +42,7 @@ export const ItemModelPreview = ({ docAndNode, shown }: PreviewProps) => {
 		})))
 		const renderer = new ItemRenderer(gl, item, wrapper, { display_context: 'gui' })
 		renderer.drawItem()
-		const url = canvas.toDataURL()
-		console.log('DRAW', url)
-		return url
+		return canvas.toDataURL()
 	}, [shown, version, text])
 
 	if (error) {

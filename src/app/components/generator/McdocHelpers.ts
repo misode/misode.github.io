@@ -7,6 +7,8 @@ import { NumericRange, RangeKind } from '@spyglassmc/mcdoc'
 import type { McdocCheckerContext, SimplifiedMcdocType, SimplifiedMcdocTypeNoUnion, SimplifyValueNode } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import { simplify } from '@spyglassmc/mcdoc/lib/runtime/checker/index.js'
 import config from '../../Config.js'
+import type { VersionId } from '../../services/Versions.js'
+import { checkVersion } from '../../services/Versions.js'
 import { randomInt, randomSeed } from '../../Utils.js'
 
 export function getRootType(id: string): McdocType {
@@ -99,6 +101,9 @@ export function getDefault(type: SimplifiedMcdocType, range: core.Range, ctx: co
 						valueMap: [{ inner: core.Range.create(0), outer: core.Range.create(range.start) }],
 					}
 					const value = getDefault(simplifyType(field.type, ctx), range, ctx)
+					if (key.value === 'rolls' && value.type === 'json:number' && value.value.type === 'long' && value.value.value === BigInt(0)) {
+						value.value.value = BigInt(1)
+					}
 					const pair: JsonPairNode = {
 						type: 'pair',
 						range,
@@ -296,7 +301,7 @@ export function formatIdentifier(id: string, attributes?: Attributes): string {
 	return (isStarred ? '✨ ' : '') + text.charAt(0).toUpperCase() + text.substring(1)
 }
 
-export function getCategory(type: McdocType) {
+export function getCategory(type: McdocType): string | undefined {
 	if (type.kind === 'reference' && type.path) {
 		switch (type.path) {
 			case '::java::data::loot::LootPool':
@@ -315,6 +320,8 @@ export function getCategory(type: McdocType) {
 			case '::java::data::worldgen::processor_list::Processor':
 				return 'function'
 		}
+	} else if (type.kind === 'union') {
+		return type.members.map(m => getCategory(m)).find(c => c)
 	}
 	return undefined
 }
@@ -323,6 +330,8 @@ const selectRegistries = new Set([
 	'block_predicate_type',
 	'chunk_status',
 	'consume_effect_type',
+	'context_float_provider_type',
+	'context_int_provider_type',
 	'creative_mode_tab',
 	'data_component_predicate_type',
 	'data_component_type',
@@ -359,6 +368,7 @@ const selectRegistries = new Set([
 	'rule_block_entity_modifier',
 	'rule_test',
 	'slot_display',
+	'slot_source_type',
 	'spawn_condition_type',
 	'stat_type',
 	'test_instance_type',
@@ -366,14 +376,14 @@ const selectRegistries = new Set([
 	'trigger_type',
 	'worldgen/biome_source',
 	'worldgen/block_state_provider_type',
-	'worldgen/carver',
+	'worldgen/carver_type',
 	'worldgen/chunk_generator',
 	'worldgen/density_function_type',
-	'worldgen/feature',
+	'worldgen/feature_type',
 	'worldgen/feature_size_type',
 	'worldgen/foliage_placer_type',
-	'worldgen/material_condition',
-	'worldgen/material_rule',
+	'worldgen/material_condition_type',
+	'worldgen/material_rule_type',
 	'worldgen/placement_modifier_type',
 	'worldgen/pool_alias_binding',
 	'worldgen/root_placer_type',
@@ -385,7 +395,12 @@ const selectRegistries = new Set([
 	'worldgen/trunk_placer_type',
 ])
 
-export function isSelectRegistry(registry: string) {
+export function isSelectRegistry(registry: string, version: VersionId) {
+	if (!checkVersion(version, '26.3') && []) {
+		if (['worldgen/carver', 'worldgen/feature', 'worldgen/material_condition', 'worldgen/material_rule'].includes(registry)) {
+			return true
+		}
+	}
 	return selectRegistries.has(registry)
 }
 

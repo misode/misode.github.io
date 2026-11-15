@@ -84,7 +84,7 @@ struct RaidSpawn {
 	weight: double,
 	spec: string,
 	loot_table: #[id="loot_table"] string,
-	stars: IntProvider
+	stars: IntProvider<int>,
 }
 
 dispatch minecraft:resource[pixelmon:raid_spawn_set] to struct RaidSpawnSet {
@@ -1070,7 +1070,7 @@ dispatch pixelmon:interaction_condition_type[pixelmon:item_has_tag] to struct {
 	tag: string
 }
 
-type InteractionCondition (
+type InteractionCondition = (
 	[DataProvider] |
 	struct {
 		type: #[id] InteractionConditionType,
@@ -1084,12 +1084,12 @@ struct ResearchTier {
 	accent_color?: Color
 }
 
-type OptionalListRenderableSprite (
+type OptionalListRenderableSprite = (
 	RenderableSprite |
 	[RenderableSprite]
 )
 
-type RenderableSprite (
+type RenderableSprite = (
 	ResourceWithFallback |
 	struct {
 		resource: ResourceWithFallback,
@@ -1099,7 +1099,7 @@ type RenderableSprite (
 	}
 )
 
-type DescribableResource (
+type DescribableResource = (
 	RenderableSprite |
 	struct {
 		resource: OptionalListRenderableSprite,
@@ -1173,13 +1173,13 @@ type ConstantSelectorType<A> = struct {
 	value: A
 }
 
-dispatch pixelmon:selector_type_type[pixelmon:constant] to ConstantSelectorType
+dispatch pixelmon:selector_type_type[pixelmon:constant]<A> to ConstantSelectorType<A>
 
 type UniformlyRandomSelectorType<A> = struct {
 	values: [A]
 }
 
-dispatch pixelmon:selector_type_type[pixelmon:uniformly_random] to UniformlyRandomSelectorType
+dispatch pixelmon:selector_type_type[pixelmon:uniformly_random]<A> to UniformlyRandomSelectorType<A>
 
 type WeightedRandomSelectorTypeObject<A> = struct {
 	weight: double,
@@ -1190,7 +1190,7 @@ type WeightedRandomSelectorType<A> = struct {
 	values: [WeightedRandomSelectorTypeObject<A>]
 }
 
-dispatch pixelmon:selector_type_type[pixelmon:weighted_random] to WeightedRandomSelectorType
+dispatch pixelmon:selector_type_type[pixelmon:weighted_random]<A> to WeightedRandomSelectorType<A>
 
 type SelectorType<A> = struct {
 	type: #[id] SelectorTypeType,
@@ -1309,12 +1309,6 @@ enum(string) PokedexRegistrationStatus {
     UNKNOWN = "UNKNOWN",
     SEEN = "SEEN",
     CAUGHT = "CAUGHT",
-}
-
-enum(string) Gender {
-	MALE = "MALE",
-	FEMALE = "FEMALE",
-	NONE = "NONE",
 }
 
 dispatch minecraft:resource[pixelmon:pokedex_trigger] to struct PokedexTrigger {

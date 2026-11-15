@@ -1,17 +1,17 @@
 import { clampedMap } from 'deepslate'
 import type { mat3 } from 'gl-matrix'
-import { vec2 } from 'gl-matrix'
 import { useCallback, useRef, useState } from 'preact/hooks'
 import { getWorldgenProjectData, useLocale, useProject, useVersion } from '../../contexts/index.js'
 import { useAsync } from '../../hooks/index.js'
-import { fetchRegistries } from '../../services/index.js'
+import { checkVersion, fetchRegistries } from '../../services/index.js'
 import { Store } from '../../Store.js'
-import { iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
+import type { Color } from '../../Utils.js'
+import { hexToRgb, iterateWorld2D, randomSeed, safeJsonParse } from '../../Utils.js'
 import { Btn, BtnInput, BtnMenu, ErrorPanel } from '../index.js'
 import type { ColormapType } from './Colormap.js'
 import { getColormap } from './Colormap.js'
 import { ColormapSelector } from './ColormapSelector.jsx'
-import { DEEPSLATE } from './Deepslate.js'
+import { Deepslate } from './Deepslate.js'
 import type { PreviewProps } from './index.js'
 import { InteractiveCanvas2D } from './InteractiveCanvas2D.jsx'
 
@@ -25,17 +25,20 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 
 	const text = docAndNode.doc.getText()
 
+	const { value: deepslate } = useAsync(async () => {
+		return Deepslate.load(version)
+	}, [version])
+
 	const { value, error } = useAsync(async () => {
+		if (!deepslate) return undefined
 		const data = safeJsonParse(text) ?? {}
 		const projectData = await getWorldgenProjectData(project)
-		await DEEPSLATE.loadVersion(version, projectData)
-		const biomeSource = { type: 'fixed', biome }
-		await DEEPSLATE.loadChunkGenerator(data, biomeSource, seed)
-		const noiseSettings = DEEPSLATE.getNoiseSettings()
-		const finalDensity = DEEPSLATE.loadDensityFunction(data?.noise_router?.final_density, noiseSettings.minY, noiseSettings.height, seed)
-		return { noiseSettings, finalDensity }
-	}, [text, seed, version, project, biome])
-	const { noiseSettings, finalDensity } = value ?? {}
+		deepslate.loadProjectData(projectData)
+		const chunkGenerator = deepslate.initChunkGenerator(seed, data, biome)
+		const finalDensity = checkVersion(version, '1.18.2') ? deepslate.initDensitySampler(seed, data?.noise_router?.final_density) : undefined
+		return { chunkGenerator, finalDensity }
+	}, [deepslate, version, text, seed, project, biome])
+	const { chunkGenerator, finalDensity } = value ?? {}
 
 	const imageData = useRef<ImageData>()
 	const ctx = useRef<CanvasRenderingContext2D>()
@@ -55,38 +58,35 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 		if (!ctx.current || !imageData.current || !shown) return
 
 		if (layer === 'terrain') {
-			const pos = vec2.create()
-			const minX = vec2.transformMat3(pos, vec2.fromValues(0, 0), transform)[0]
-			const maxX = vec2.transformMat3(pos, vec2.fromValues(imageData.current.width-1, 0), transform)[0]
-			DEEPSLATE.generateChunks(minX, maxX - minX + 1, biome)
+			if (!chunkGenerator) return
 			iterateWorld2D(imageData.current, transform, (x, y) => {
-				return DEEPSLATE.getBlockState(x, y)?.getName().toString()
+				return chunkGenerator.getBlockState(x, y, 0)
 			}, (block) => {
-				return BlockColors[block ?? 'minecraft:air'] ?? [0, 0, 0]
+				return BlockColors[block] ?? [0, 0, 0]
 			})
 		} else if (layer === 'final_density') {
+			if (!finalDensity) return
 			const colormapFn = getColormap(colormap)
 			const colorPicker = (t: number) => colormapFn(t <= 0.5 ? t - 0.08 : t + 0.08)
 			iterateWorld2D(imageData.current, transform, (x, y) => {
-				return finalDensity?.compute({ x, y, z: 0 }) ?? 0
+				return finalDensity.sample(x, y, 0)
 			}, (density) => {
 				const color = colorPicker(clampedMap(density, -1, 1, 1, 0))
 				return [color[0] * 256, color[1] * 256, color[2] * 256]
 			})
 		}
 		ctx.current.putImageData(imageData.current, 0, 0)
-	}, [noiseSettings, finalDensity, layer, colormap, biome, shown])
+	}, [chunkGenerator, finalDensity, layer, colormap, biome, shown])
 	const onHover = useCallback((pos: [number, number] | undefined) => {
-		if (!pos || !noiseSettings || !finalDensity) {
+		if (!pos || !chunkGenerator || !finalDensity) {
 			setFocused([])
 		} else {
 			const [x, y] = pos
-			const inVoid = -y < noiseSettings.minY || -y >= noiseSettings.minY + noiseSettings.height
-			const density = finalDensity.compute({ x, y: -y, z: 0})
-			const block = inVoid ? 'void' : DEEPSLATE.getBlockState(x, -y)?.getName().path ?? 'unknown'
+			const density = finalDensity.sample(x, -y, 0)
+			const block = chunkGenerator.getBlockState(x, -y, 0).replace(/^minecraft:/, '')
 			setFocused([`${block} D=${density.toPrecision(3)}`, `X=${x} Y=${-y}`])
 		}
-	}, [noiseSettings, finalDensity])
+	}, [chunkGenerator, finalDensity])
 
 	const { value: allBiomes } = useAsync(async () => {
 		const registries = await fetchRegistries(version)
@@ -114,21 +114,40 @@ export const NoiseSettingsPreview = ({ docAndNode, shown }: PreviewProps) => {
 	</>
 }
 
-const BlockColors: Record<string, [number, number, number]> = {
-	'minecraft:air': [150, 160, 170],
-	'minecraft:water': [20, 80, 170],
-	'minecraft:lava': [200, 100, 0],
-	'minecraft:stone': [55, 55, 55],
-	'minecraft:deepslate': [34, 34, 36],
-	'minecraft:bedrock': [10, 10, 10],
-	'minecraft:grass_block': [47, 120, 23],
-	'minecraft:dirt': [64, 40, 8],
-	'minecraft:gravel': [70, 70, 70],
-	'minecraft:sand': [196, 180, 77],
-	'minecraft:sandstone': [148, 135, 52],
-	'minecraft:netherrack': [100, 40, 40],
-	'minecraft:crimson_nylium': [144, 22, 22],
-	'minecraft:warped_nylium': [28, 115, 113],
-	'minecraft:basalt': [73, 74, 85],
-	'minecraft:end_stone': [200, 200, 140],
+const BlockColors: Record<string, Color> = {
+	'minecraft:air': hexToRgb('#96a0aa'),
+	'minecraft:water': hexToRgb('#1450aa'),
+	'minecraft:lava': hexToRgb('#c86400'),
+	'minecraft:stone': hexToRgb('#686868'),
+	'minecraft:deepslate': hexToRgb('#2f2f36'),
+	'minecraft:bedrock': hexToRgb('#0a0a0a'),
+	'minecraft:grass_block': hexToRgb('#2f7817'),
+	'minecraft:dirt': hexToRgb('#71563e'),
+	'minecraft:coarse_dirt': hexToRgb('#684f39'),
+	'minecraft:podzol': hexToRgb('#4d3d1e'),
+	'minecraft:mycelium': hexToRgb('#675e62'),
+	'minecraft:mud': hexToRgb('#3c3836'),
+	'minecraft:gravel': hexToRgb('#464646'),
+	'minecraft:sand': hexToRgb('#c4b44d'),
+	'minecraft:sandstone': hexToRgb('#948734'),
+	'minecraft:snow_block': hexToRgb('#ffffff'),
+	'minecraft:powder_snow': hexToRgb('#f0fbfb'),
+	'minecraft:ice': hexToRgb('#7c8fbe'),
+	'minecraft:packed_ice': hexToRgb('#93aef2'),
+	'minecraft:calcite': hexToRgb('#d9dbd7'),
+	'minecraft:sulfur': hexToRgb('#bdb275'),
+	'minecraft:cinnabar': hexToRgb('#884f45'),
+	'minecraft:red_sand': hexToRgb('#ae6b33'),
+	'minecraft:red_sandstone': hexToRgb('#9c5b26'),
+	'minecraft:terracotta': hexToRgb('#8a6048'),
+	'minecraft:orange_terracotta': hexToRgb('#915730'),
+	'minecraft:white_terracotta': hexToRgb('#c7b0a1'),
+	'minecraft:netherrack': hexToRgb('#642828'),
+	'minecraft:crimson_nylium': hexToRgb('#901616'),
+	'minecraft:warped_nylium': hexToRgb('#1c7371'),
+	'minecraft:basalt': hexToRgb('#32333c'),
+	'minecraft:blackstone': hexToRgb('#26221d'),
+	'minecraft:soul_sand': hexToRgb('#45382e'),
+	'minecraft:soul_soil': hexToRgb('#3a2f26'),
+	'minecraft:end_stone': hexToRgb('#c8c88c'),
 }

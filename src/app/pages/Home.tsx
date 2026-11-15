@@ -1,15 +1,11 @@
 import { useMemo } from 'preact/hooks'
 import supporters from '../../supporters.json'
-import { Card, ChangelogEntry, Footer, GeneratorCard, Giscus, ToolCard, ToolGroup } from '../components/index.js'
+import { BtnLink, Card, ChangelogEntry, Footer, GeneratorList, Giscus, ToolCard, ToolGroup } from '../components/index.js'
 import { WhatsNewTime } from '../components/whatsnew/WhatsNewTime.jsx'
 import { useLocale, useTitle } from '../contexts/index.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery } from '../hooks/useMediaQuery.js'
 import { fetchChangelogs, fetchVersions, fetchWhatsNew } from '../services/DataFetcher.js'
-import { Store } from '../Store.js'
-
-const MIN_FAVORITES = 2
-const MAX_FAVORITES = 5
 
 interface Props {
 	path?: string,
@@ -18,68 +14,26 @@ export function Home({}: Props) {
 	const { locale } = useLocale()
 	useTitle(locale('title.home'))
 
-	const smallScreen = useMediaQuery('(max-width: 580px)')
-
 	return <main>
-		<div class="legacy-container">
-			<div class="card-group">
-				{smallScreen ? /* mobile */ <>
-					<PopularGenerators />
-					<FavoriteGenerators />
-					<WhatsNew />
-					<Changelog />
+		<div class="grid gap-4 p-4 max-w-[960px] mx-auto">
+			<GeneratorList limit={8} predicate={gen => !gen.tags?.includes('partners')} extra={<>
+				<BtnLink icon="link_external" label={locale('modded')} link="/partners/" />
+			</>} />
+			<div class="grid md:grid-cols-2 gap-2">
+				<div class="flex flex-col gap-2">
 					<Versions />
+					<Changelog />
+				</div>
+				<div class="flex flex-col gap-2">
 					<Tools />
-				</> : /* desktop */ <>
-					<div class="card-column">
-						<PopularGenerators />
-						<Changelog />
-						<Versions />
-					</div>
-					{!smallScreen && <div class="card-column">
-						<FavoriteGenerators />
-						<WhatsNew />
-						<Tools />
-					</div>}
-				</>}
+					<WhatsNew />
+				</div>
 			</div>
-			<Contributors />
+			<Supporters />
 			<Giscus />
 			<Footer />
 		</div>
 	</main>
-}
-
-function PopularGenerators() {
-	const { locale } = useLocale()
-	return <ToolGroup title={locale('generators.popular')} link="/generators/">
-		<GeneratorCard minimal id="loot_table" />
-		<GeneratorCard minimal id="advancement" />
-		<GeneratorCard minimal id="recipe" />
-		<ToolCard title={locale('worldgen')} link="/worldgen/" titleIcon="worldgen" />
-		<ToolCard title={locale('generators.all')} link="/generators/" titleIcon="arrow_right" />
-		<ToolCard title={locale('generators.partners')} link="/partners/" titleIcon="arrow_right" />
-	</ToolGroup>
-}
-
-function FavoriteGenerators() {
-	const { locale } = useLocale()
-
-	const favorites = useMemo(() => {
-		const history: string[] = []
-		for (const id of Store.getGeneratorHistory().reverse()) {
-			if (!history.includes(id)) {
-				history.push(id)
-			}
-		}
-		return history.slice(0, MAX_FAVORITES)
-	}, [])
-
-	if (favorites.length < MIN_FAVORITES) return <></>
-
-	return <ToolGroup title={locale('generators.recent')}>
-		{favorites.map(f => <GeneratorCard minimal id={f} />)}
-	</ToolGroup>
 }
 
 function Tools() {
@@ -95,7 +49,7 @@ function Tools() {
 		<ToolCard title="Report Inspector" icon="report"
 			link="https://misode.github.io/report/"
 			desc="Analyse your performance reports" />
-		<ToolCard title="Minecraft Sounds" icon="sounds"
+		<ToolCard title="Minecraft Sounds" icon="sound_explorer"
 			link="/sounds/"
 			desc="Browse through and mix all the vanilla sounds" />
 		<ToolCard title="Transformation preview"
@@ -151,23 +105,15 @@ function WhatsNew() {
 	</ToolGroup>
 }
 
-function Contributors() {
+function Supporters() {
 	return <div class="contributors">
 		<h3>Supporters</h3>
-		<ContributorsList list={supporters} large />
-	</div>
-}
-
-interface ContributorsListProps {
-	list: typeof supporters
-	large?: boolean
-}
-function ContributorsList({ list, large }: ContributorsListProps) {
-	return <div class={`contributors-list ${large ? 'contributors-large' : ''}`}>
-		{list.map((c) =>
-			<a class="tooltipped tip-se" href={c.url} target="_blank" aria-label={c.name}>
-				<img width={large ? 48 : 32} height={large ? 48 : 32} src={c.avatar} alt={c.name} loading="lazy" />
-			</a>
-		)}
+		<div class="contributors-list">
+			{supporters.map((s) =>
+				<a class="tooltipped tip-se" href={s.url} target="_blank" aria-label={s.name}>
+					<img width="48" height="48" src={s.avatar} alt={s.name} loading="lazy" />
+				</a>
+			)}
+		</div>
 	</div>
 }

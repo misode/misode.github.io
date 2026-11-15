@@ -1,0 +1,861 @@
+// =============================================================================
+// Lychee Mod - Recipe Schema
+// Mod homepage: https://modrinth.com/mod/lychee
+// Documentation: https://lycheetweaker.readthedocs.io/
+// =============================================================================
+
+use ::java::util::text::Text
+use ::java::util::direction::Direction
+use ::java::util::particle::Particle
+use ::java::data::util::SoundEventRef
+use ::java::data::recipe::Ingredient
+use ::java::data::advancement::predicate::LocationPredicate
+use ::java::data::advancement::predicate::BlockPredicate
+use ::java::data::advancement::predicate::EntityPredicate
+use ::java::data::advancement::predicate::ItemPredicate
+use ::java::data::loot::condition::TimeCheck
+use ::java::data::enchantment::effect::ExplosionParticleInfo
+use ::java::data::enchantment::effect::BlockInteraction
+use ::java::data::enchantment::level_based_value::LevelBasedValue
+use ::java::data::recipe::CraftingShaped
+use ::java::data::worldgen::IntProvider
+use ::java::world::item::ItemStack
+
+// ─── Common Types ────────────────────────────────────────────────────────────
+
+/// An IntBounds describes an inclusive integer range, or a plain `int` for [n, n].
+type IntBounds = (
+	int |
+	struct {
+		/// Minimum value. Defaults to negative infinity.
+		min?: int,
+		/// Maximum value. Defaults to positive infinity.
+		max?: int,
+	}
+)
+
+/// A DoubleBounds describes an inclusive float range, or a plain `float` for [n, n].
+type DoubleBounds = (
+	float |
+	struct {
+		/// Minimum value. Defaults to negative infinity.
+		min?: float,
+		/// Maximum value. Defaults to positive infinity.
+		max?: float,
+	}
+)
+
+/// A JsonPointer is a string path within a JSON structure (e.g. "/key/B").
+type JsonPointer = #[match_regex="^(?:/([^/~]|~[01])*)*$"] string @ 1..
+
+/// A Lychee-compatible ingredient. Extends the vanilla Ingredient with custom types.
+type LycheeIngredient = (
+	Ingredient |
+	struct {
+		/// Custom ingredient type ID (NeoForge).
+		type?: #[id] string,
+		/// Custom ingredient type ID (Fabric).
+		"fabric:type"?: #[id] string,
+		/// Additional properties for the custom ingredient.
+		[string]: any,
+	}
+)
+
+/// A SizedIngredient: an ingredient with an optional count.
+/// Shorthand: `<count>x <item_id>` or `<count>x #<tag>`.
+type SizedIngredient = (
+	#[until="1.21"]
+	Ingredient |
+	#[since="1.21"]
+	string |
+	#[since="1.21"]
+	struct {
+		/// The ingredient. Can be a string shorthand or object.
+		ingredient: LycheeIngredient,
+		/// Item count. Defaults to 1.
+		count?: int @ 1..,
+	}
+)
+
+/// A Lychee-compatible block predicate. Extends the vanilla BlockPredicate.
+/// Shorthand: `*` (all), `<block_id>[<prop>=<val>,...]{<nbt>}`, `#<tag>`.
+type LycheeBlockPredicate = (
+	#[since="1.21"]
+	#[id(registry="block",tags="allowed")] string |
+	#[since="1.21"]
+	string |
+	BlockPredicate
+)
+
+/// A Lychee-compatible item stack. Extends the vanilla ItemStack.
+/// Shorthand: `<count>x <item_id>`.
+type LycheeItemStack = (
+	#[since="1.21"]
+	#[id(registry="item",tags="allowed")] string |
+	#[since="1.21"]
+	string |
+	ItemStack
+)
+
+// ─── Contextual Conditions ───────────────────────────────────────────────────
+
+/// A contextual condition that is tested during crafting/interaction.
+/// Can be applied to a recipe or a single post action.
+struct ContextualCondition {
+	/// The condition type identifier.
+	type: #[id] ContextualConditionType,
+	...lychee:conditions[[type]],
+	/// Displays as "???" in player's tooltip. Defaults to false.
+	secret?: boolean,
+	/// Overrides the default description with a translation key.
+	description?: Text,
+}
+
+enum(string) ContextualConditionType {
+	Not = "not",
+	Or = "or",
+	And = "and",
+	Chance = "chance",
+	Location = "location",
+	#[since="1.21"]
+	ItemCooldown = "is_off_item_cooldown",
+	Weather = "weather",
+	Difficulty = "difficulty",
+	Time = "time",
+	Execute = "execute",
+	FallDistance = "fall_distance",
+	EntityHealth = "entity_health",
+	IsSneaking = "is_sneaking",
+	Direction = "direction",
+	#[since="1.21"]
+	Param = "param",
+	#[since="1.21"]
+	SkyDarken = "sky_darken",
+	#[since="26.1"]
+	BeeHasTrait = "fruitfulfun:bee_has_trait",
+	#[since="26.1"]
+	BeeIsVariant = "fruitfulfun:bee_is_variant",
+	CustomCondition = "custom",
+}
+
+/// Inverts another condition.
+dispatch lychee:conditions[not] to struct {
+	/// The condition to invert.
+	contextual: ContextualCondition,
+}
+
+/// True if any of the wrapped conditions passes.
+dispatch lychee:conditions[or] to struct {
+	/// The conditions to check.
+	contextual: [ContextualCondition] @ 1..,
+}
+
+/// True if all of the wrapped conditions pass.
+dispatch lychee:conditions[and] to struct {
+	/// The conditions to check.
+	contextual: [ContextualCondition] @ 1..,
+}
+
+/// Generates a random chance 0.0–1.0.
+dispatch lychee:conditions[chance] to struct {
+	/// Success rate as a number between 0.0 and 1.0.
+	chance: float @ 0..1,
+}
+
+/// Checks a location predicate (biome, dimension, position, etc.).
+dispatch lychee:conditions[location] to struct {
+	/// X offset from the current position.
+	offsetX?: int,
+	/// Y offset from the current position.
+	offsetY?: int,
+	/// Z offset from the current position.
+	offsetZ?: int,
+	/// The location predicate to test.
+	predicate: LocationPredicate,
+}
+
+/// Checks if an item is off cooldown.
+#[since="1.21"]
+dispatch lychee:conditions[is_off_item_cooldown] to struct {
+	/// The item resource ID to check.
+	item: string,
+}
+
+/// Checks the current weather.
+dispatch lychee:conditions[weather] to struct {
+	/// The weather type: clear, rain, or thunder.
+	weather: ("clear" | "rain" | "thunder"),
+}
+
+/// Checks if the world difficulty matches.
+dispatch lychee:conditions[difficulty] to struct {
+	/// The difficulty level(s).
+	difficulty: (string | [string]),
+}
+
+/// Compares the current game time.
+dispatch lychee:conditions[time] to struct {
+	...TimeCheck,
+}
+
+/// Executes a command and checks the return value.
+dispatch lychee:conditions[execute] to struct {
+	/// The command to run.
+	command: #[command(slash="allowed")] string,
+	/// Range to match the return value. Defaults to [1, +infinity).
+	value?: IntBounds,
+}
+
+/// Checks entity fall distance.
+dispatch lychee:conditions[fall_distance] to struct {
+	/// The fall distance range.
+	range: DoubleBounds,
+}
+
+/// Checks if entity's health is in a range.
+dispatch lychee:conditions[entity_health] to struct {
+	/// The health range.
+	range: DoubleBounds,
+}
+
+/// Checks if the entity is crouching/sneaking.
+dispatch lychee:conditions[is_sneaking] to struct {}
+
+/// Checks the direction being interacted with.
+dispatch lychee:conditions[direction] to struct {
+	/// Direction value: "up", "down", "north", "south", "east", "west", "side", or "forward".
+	direction: (Direction | "side" | "forward"),
+}
+
+/// Checks if a parameter exists in the context.
+/// Replaces `check_param` from 1.20.
+#[since="1.21"]
+dispatch lychee:conditions[param] to struct {
+	/// Parameter name.
+	key: string @ 1..,
+	/// Loot parameter name.
+	loot?: string,
+	/// Create the parameter if possible. Defaults to true.
+	create?: boolean,
+}
+
+/// Checks the sky darken level.
+#[since="1.21"]
+dispatch lychee:conditions[sky_darken] to struct {
+	/// The darken level range.
+	value: IntBounds,
+	/// Whether the location must be able to see the sky. Defaults to false. Renamed from `can_see_sky` in 26.1.
+	#[until="26.1"]
+	can_see_sky?: boolean,
+	#[since="26.1"]
+	require_sky_light?: boolean,
+}
+
+#[since="26.1"]
+dispatch lychee:conditions[bee_has_trait] to struct {
+	/// The bee trait ID or list of trait IDs.
+	trait: (#[id] string | [#[id] string]),
+}
+
+#[since="26.1"]
+dispatch lychee:conditions[bee_is_variant] to struct {
+	/// The bee variant ID.
+	variant: #[id] string,
+}
+
+/// Custom modded contextual condition.
+dispatch lychee:conditions[custom] to struct {
+	/// Custom condition type identifier.
+	id: #[id] string,
+	/// Stuctured data for the custom condition.
+	#[since="1.21"]
+	data?: struct {
+		[string]: any,
+	},
+	/// Arbitrary additional properties.
+	#[until="1.21"]
+	[string]: any,
+}
+
+// ─── Post Actions ────────────────────────────────────────────────────────────
+
+/// A post action executed after a recipe is successfully matched.
+/// Can also be expressed as a shorthand string (e.g. "drop diamond", "place stone").
+type PostAction = (
+	PostActionObject |
+	#[since="1.21"]
+	string
+)
+
+/// Object form of a PostAction, dispatched by the `type` field.
+struct PostActionObject {
+	/// The action type identifier.
+	type: #[id] PostActionType,
+	...lychee:actions[[type]],
+	/// Contextual condition(s) that must pass for this action to execute.
+	#[since="1.21"]
+	if?: (ContextualCondition | [ContextualCondition]),
+	/// Contextual condition(s) that must pass for this action to execute.
+	#[until="1.21"]
+	contextual?: (ContextualCondition | [ContextualCondition]),
+	/// Hide this action in JEI/REI/EMI. Defaults to false.
+	#[since="1.21"]
+	hide?: boolean,
+	/// Sprite icon location for the viewer (e.g. "lychee:left_click").
+	/// Sprite icon location for the viewer (e.g. "lychee:left_click").
+	#[since="1.21"]
+	icon?: #[id] string,
+	/// Display name for the action in the viewer.
+	#[since="26.1"]
+	name?: Text,
+}
+
+enum(string) PostActionType {
+	DropItem = "drop_item",
+	DropXp = "drop_xp",
+	#[since="1.21"]
+	SetBlock = "set_block",
+	Place = "place",
+	CycleStateProperty = "cycle_state_property",
+	DamageItem = "damage_item",
+	SetItem = "set_item",
+	AddItemCooldown = "add_item_cooldown",
+	#[since="1.21"]
+	CopyComponent = "copy_component",
+	#[since="1.21"]
+	RemoveComponent = "remove_component",
+	#[since="1.21"]
+	CopyDurability = "copy_durability",
+	PreventDefault = "prevent_default",
+	Delay = "delay",
+	Exit = "exit",
+	Random = "random",
+	If = "if",
+	#[since="1.21"]
+	Move = "move",
+	MoveTowardsFace = "move_towards_face",
+	Execute = "execute",
+	Explode = "explode",
+	AnvilDamageChance = "anvil_damage_chance",
+	InsertItem = "insert_item",
+	ExtractItem = "extract_item",
+	#[since="26.1"]
+	TransformBees = "fruitfulfun:transform_bees",
+	CustomAction = "custom",
+}
+
+/// Spawns an item entity on the ground.
+/// Shorthand: `drop <ItemStack>`.
+dispatch lychee:actions[drop_item] to struct {
+	...ItemStack,
+}
+
+/// Spawns experience orbs.
+/// Shorthand: `drop <amount>xp`.
+dispatch lychee:actions[drop_xp] to struct {
+	/// Experience amount.
+	xp: int @ 1..,
+}
+
+/// Sets the block of a falling block entity.
+/// Shorthand: `set_block <BlockPredicate>`.
+#[since="1.21"]
+dispatch lychee:actions[set_block] to struct {
+	/// The block to set the falling block to.
+	block: LycheeBlockPredicate,
+}
+
+/// Places a block in the world.
+/// Shorthand: `place <BlockPredicate> [offsetX offsetY offsetZ]`.
+dispatch lychee:actions[place] to struct {
+	/// The block to place.
+	block: LycheeBlockPredicate,
+	/// X offset from the current position.
+	offsetX?: int,
+	/// Y offset from the current position.
+	offsetY?: int,
+	/// Z offset from the current position.
+	offsetZ?: int,
+	/// Places multiblocks (beds, doors) and triggers special actions.
+	#[since="26.1"]
+	multi?: boolean,
+}
+
+/// Cycles a block state property value.
+dispatch lychee:actions[cycle_state_property] to struct {
+	/// Only matched block-states will be cycled.
+	block: LycheeBlockPredicate,
+	/// The property name to cycle.
+	property: string @ 1..,
+	/// X offset from the current position.
+	offsetX?: int,
+	/// Y offset from the current position.
+	offsetY?: int,
+	/// Z offset from the current position.
+	offsetZ?: int,
+	/// Cycle in reversed order. Defaults to false.
+	#[since="1.21"]
+	reversed?: boolean,
+}
+
+/// Consumes the item's durability.
+/// Shorthand: `damage_item`.
+dispatch lychee:actions[damage_item] to struct {
+	/// Damage amount. Defaults to 1.
+	damage?: int @ 1..,
+	/// Target items via JSON pointer. Defaults to all items.
+	target?: JsonPointer,
+}
+
+/// Replaces the inputs or the results.
+dispatch lychee:actions[set_item] to struct {
+	/// Target item via JSON pointer.
+	target?: JsonPointer,
+	...ItemStack,
+}
+
+/// Adds an item cooldown (like ender pearl cooldown).
+/// Shorthand: `add_item_cooldown <seconds>`.
+dispatch lychee:actions[add_item_cooldown] to struct {
+	/// Cooldown duration in seconds.
+	s: float @ 0..,
+	/// Item resource ID. Defaults to the item in player's hand.
+	#[since="1.21"]
+	item?: #[id="item"] string,
+}
+
+/// Copies an item component to another item.
+/// Shorthand: `copy_component <component>`.
+#[since="1.21"]
+dispatch lychee:actions[copy_component] to struct {
+	/// The component ID(s) to copy.
+	component: (string | [string]),
+	/// Source item via JSON pointer. Defaults to "/item_in/0".
+	source?: JsonPointer,
+	/// Target item via JSON pointer. Defaults to "/item_out".
+	target?: JsonPointer,
+}
+
+/// Removes an item's component.
+/// Shorthand: `remove_component <component>`.
+#[since="1.21"]
+dispatch lychee:actions[remove_component] to struct {
+	/// The component ID(s) to remove.
+	component: (string | [string]),
+	/// Target item via JSON pointer. Defaults to "/item_out".
+	target?: JsonPointer,
+}
+
+/// Copies durability percentage from one item to another.
+#[since="1.21"]
+dispatch lychee:actions[copy_durability] to struct {
+	/// Source item via JSON pointer. Defaults to "/item_in/0".
+	source?: JsonPointer,
+	/// Target item via JSON pointer. Defaults to "/item_out".
+	target?: JsonPointer,
+	/// Extra durability factor. Defaults to 0.
+	bonus?: float,
+}
+
+/// Prevents the default recipe behavior.
+/// Shorthand: `prevent_default`.
+dispatch lychee:actions[prevent_default] to struct {}
+
+/// Waits for several seconds, then executes following actions.
+/// Shorthand: `delay <seconds>`.
+dispatch lychee:actions[delay] to struct {
+	/// Delay duration in seconds.
+	s: float @ 0..,
+}
+
+/// Stops executing the following actions.
+/// Shorthand: `exit`.
+dispatch lychee:actions[exit] to struct {}
+
+/// Randomly selects entries from an action list (similar to loot tables).
+dispatch lychee:actions[random] to struct {
+	/// Number of rolls on the pool.
+	rolls?: IntBounds,
+	/// List of weighted actions that can be applied.
+	entries: [WeightedPostAction] @ 1..,
+	/// Extra weight for the "empty" option. Defaults to 0.
+	empty_weight?: int,
+}
+
+type WeightedPostAction = struct {
+	/// Weight for how often this action is chosen.
+	weight?: int @ 1..,
+	...PostAction,
+}
+
+/// Executes actions conditionally (if/else). The condition is specified via the `if` field.
+dispatch lychee:actions[if] to struct {
+	/// Actions to execute if conditions are met.
+	then?: (PostAction | [PostAction]),
+	/// Actions to execute if conditions are not met.
+	else?: (PostAction | [PostAction]),
+}
+
+/// Moves the anchored position in the context.
+/// Shorthand: `move <x> <y> <z>`.
+#[since="1.21"]
+dispatch lychee:actions[move] to struct {
+	/// The offset to move as [x, y, z].
+	offset: [float] @ 3,
+	/// Block property name. The offset will be rotated from "up" based on this facing.
+	with?: (Direction | string),
+}
+
+/// Moves the anchored position towards the interacted face.
+dispatch lychee:actions[move_towards_face] to struct {
+	/// Factor to apply. Defaults to 1.
+	factor?: float,
+}
+
+/// Executes a command.
+/// Shorthand: `run "<command>"` or `execute "<command>"`.
+dispatch lychee:actions[execute] to struct {
+	/// The command to run.
+	command: #[command(slash="allowed")] string,
+	/// Execute by repetition count. Defaults to true.
+	repeat?: boolean,
+	/// Hide this action in JEI/REI/EMI. (Pre-1.21 field, now global.)
+	#[until="1.21"]
+	hide?: boolean,
+}
+
+/// Creates an explosion at the current location.
+dispatch lychee:actions[explode] to struct {
+	/// Whether the explosion is attributed to an entity. Defaults to true.
+	#[since="26.1"]
+	attribute_to_entity?: boolean,
+	/// Custom damage type. Defaults to no custom type (ordinary explosion damage).
+	#[since="26.1"]
+	damage_type?: #[id="damage_type"] string,
+	/// Knockback multiplier per level of repeat.
+	#[since="26.1"]
+	knockback_multiplier?: LevelBasedValue,
+	/// Block IDs or tags that are immune to this explosion.
+	/// List of Blocks or hash-prefixed Block Tag specifying which blocks fully block the explosion.
+	immune_blocks?: (#[id(registry="block", tags="allowed")] string | [#[id="block"] string]),
+	/// X offset from the current position.
+	#[until="26.1"]
+	offsetX?: int,
+	/// Y offset from the current position.
+	#[until="26.1"]
+	offsetY?: int,
+	/// Z offset from the current position.
+	#[until="26.1"]
+	offsetZ?: int,
+	/// Position offset. Defaults to [0, 0, 0].
+	#[since="26.1"]
+	offset?: [float] @ 3,
+	/// Explosion radius.
+	radius?: (
+		#[until="26.1"] float @ 0.. |
+		#[since="26.1"] LevelBasedValue |
+	),
+	/// Explosion radius step.
+	#[until="26.1"]
+	radius_step?: float,
+	/// Whether to create fire. Defaults to false.
+	#[until="26.1"]
+	fire?: boolean,
+	/// Whether to create fire. Defaults to false. Also accepts alias `fire`.
+	#[since="26.1"]
+	create_fire?: boolean,
+	/// Whether the explosion has special effects on blocks.
+	block_interaction?: (
+		#[until="26.1"] ("none" | "keep" | "destroy" | "break" | "destroy_with_decay") |
+		#[since="26.1"] BlockInteraction |
+	),
+	/// Small particle type. Defaults to "minecraft:explosion".
+	#[since="26.1"]
+	small_particle?: Particle,
+	/// Large particle type. Defaults to "minecraft:explosion_emitter".
+	#[since="26.1"]
+	large_particle?: Particle,
+	/// Block particles. Defaults to default explosion block particles.
+	#[since="26.1"]
+	block_particles?: [ExplosionParticleInfo],
+	/// Explosion sound. Defaults to "minecraft:entity.generic.explode".
+	#[since="26.1"]
+	sound?: SoundEventRef,
+}
+
+/// Sets the anvil damage chance for block crushing recipes.
+dispatch lychee:actions[anvil_damage_chance] to struct {
+	/// Chance between 0 and 1.
+	chance: float @ 0..1,
+}
+
+type InsertItemSource = (
+	struct ItemInsertItemSource {
+		/// The item to insert.
+		item?: LycheeItemStack,
+	} |
+	struct ContextualInsertItemSource {
+		/// Source of items.
+		from?: JsonPointer,
+	}
+)
+
+/// Inserts the input item(s) into the target block's inventory.
+dispatch lychee:actions[insert_item] to struct {
+	// ...InsertItemSource,
+	/// The item to insert.
+	item?: LycheeItemStack,
+	/// Source of items.
+	from?: JsonPointer,
+	/// Drop items on the ground if the target inventory does not accept them. Defaults to true.
+	drop_if_fail?: boolean,
+}
+
+/// Extracts items from the target block's inventory.
+dispatch lychee:actions[extract_item] to struct {
+	/// The ingredient describing items to extract.
+	item: ItemPredicate,
+	/// Number of items to extract.
+	count?: int @ 1..,
+}
+
+#[since="26.1"]
+dispatch lychee:actions[transform_bees] to struct {
+	/// Target bees via JSON pointer.
+	target?: JsonPointer,
+	/// Bee trait(s) to add.
+	add_trait?: (#[id] string | [#[id] string]),
+	/// Bee trait(s) to remove.
+	remove_trait?: (#[id] string | [#[id] string]),
+	/// Bee variant to set.
+	variant?: #[id] string,
+}
+
+/// Custom modded post action.
+dispatch lychee:actions[custom] to struct {
+	/// Custom action type identifier.
+	id: #[id] string,
+	/// Structured data for the custom action.
+	#[since="1.21"]
+	data?: struct {
+		[string]: any,
+	},
+	/// Arbitrary additional properties.
+	#[until="1.21"]
+	[string]: any,
+}
+
+// ─── Recipes ─────────────────────────────────────────────────────────────────
+
+struct NeoForgeCondition {
+	/// Condition type identifier.
+	type: #[id] string,
+	/// Additional properties for the condition.
+	[string]: any,
+}
+
+struct FabricCondition {
+	/// Condition type identifier.
+	condition: #[id] string,
+	/// Additional properties for the condition.
+	[string]: any,
+}
+
+/// Lychee recipe common fields. Dispatched by the `type` field.
+dispatch minecraft:resource[lychee:recipe] to struct Recipes {
+	/// The recipe type identifier.
+	type: Type,
+	...lychee:recipe[[type]],
+	/// Contextual condition(s) for the recipe.
+	#[since="1.21"]
+	if?: (ContextualCondition | [ContextualCondition]),
+	/// Contextual condition(s) for the recipe.
+	#[until="1.21"]
+	contextual?: (ContextualCondition | [ContextualCondition]),
+	/// Post action(s) to execute when matched.
+	post?: (PostAction | [PostAction]),
+	/// Language key shown in JEI/REI/EMI.
+	comment?: Text,
+	/// Only shown in viewers, does not take effect. Defaults to false.
+	ghost?: boolean,
+	/// Hide in JEI/REI/EMI. Defaults to false.
+	hide_in_viewer?: boolean,
+	/// Show this recipe in a custom viewer category.
+	group?: #[id] string,
+	/// Max repeats for processing. Does not work for unrepeatable recipes.
+	max_repeats?: IntBounds,
+	/// NeoForge-specific recipe conditions.
+	#[since="1.21"]
+	"neoforge:conditions"?: [NeoForgeCondition],
+	/// Forge-specific recipe conditions.
+	#[until="1.21"]
+	"forge:conditions"?: [NeoForgeCondition],
+	/// Fabric-specific load conditions.
+	"fabric:load_conditions"?: [FabricCondition],
+}
+
+enum(string) Type {
+	BlockInteracting = "lychee:block_interacting",
+	BlockClicking = "lychee:block_clicking",
+	ItemBurning = "lychee:item_burning",
+	ItemInside = "lychee:item_inside",
+	AnvilCrafting = "lychee:anvil_crafting",
+	BlockCrushing = "lychee:block_crushing",
+	LightningChanneling = "lychee:lightning_channeling",
+	ItemExploding = "lychee:item_exploding",
+	BlockExploding = "lychee:block_exploding",
+	#[since="1.21"]
+	EntityTicking = "lychee:entity_ticking",
+	RandomBlockTicking = "lychee:random_block_ticking",
+	DripstoneDripping = "lychee:dripstone_dripping",
+	Crafting = "lychee:crafting",
+	#[since="26.1"]
+	SculkSpreading = "lychee:sculk_spreading",
+	#[since="26.1"]
+	Hybridizing = "fruitfulfun:hybridizing",
+	#[since="26.1"]
+	DragonRitual = "fruitfulfun:dragon_ritual",
+}
+
+/// Use Item on a Block. Not repeatable. Default: item is consumed.
+dispatch lychee:recipe[lychee:block_interacting] to struct {
+	/// The item(s) in player's hand. Can accept 2 ingredients: main hand + off hand.
+	item_in: (SizedIngredient | [SizedIngredient] @ 1..2),
+	/// The block being used.
+	block_in: LycheeBlockPredicate,
+}
+
+/// Click on a Block with Item. Not repeatable. Default: item is consumed.
+dispatch lychee:recipe[lychee:block_clicking] to struct {
+	/// The item(s) in player's hand. Can accept 2 ingredients: main hand + off hand.
+	item_in: (SizedIngredient | [SizedIngredient] @ 1..2),
+	/// The block being clicked.
+	block_in: LycheeBlockPredicate,
+}
+
+/// Item Entity Burning. Repeatable. Default: none.
+dispatch lychee:recipe[lychee:item_burning] to struct {
+	/// The burnt item.
+	item_in: SizedIngredient,
+}
+
+/// Item Entity inside a Block. Repeatable. Default: item is consumed.
+dispatch lychee:recipe[lychee:item_inside] to struct {
+	/// The ticking item(s).
+	item_in: (SizedIngredient | [SizedIngredient]),
+	/// The block the item is inside.
+	block_in: LycheeBlockPredicate,
+	/// Waiting time in seconds.
+	time?: int @ 1..,
+}
+
+/// Anvil Crafting. Not repeatable. Default: anvil is damaged.
+dispatch lychee:recipe[lychee:anvil_crafting] to struct {
+	/// The input items. First is left slot, second is right slot (optional).
+	item_in: (LycheeIngredient | [LycheeIngredient] @ 1..2),
+	/// The result item.
+	item_out: LycheeItemStack,
+	/// Player XP level cost. Defaults to 1.
+	level_cost?: int @ 1..,
+	/// Amount of items from right input slot to consume. Defaults to 1.
+	material_cost?: int @ 0..,
+	/// Actions that run before the result is displayed in the viewer.
+	assembling?: (PostAction | [PostAction]),
+	#[since="1.21"]
+	preserve_enchantments?: boolean,
+}
+
+/// Block Crushing. Repeatable. Default: falling block becomes block.
+dispatch lychee:recipe[lychee:block_crushing] to struct {
+	/// The crushed items.
+	item_in?: (SizedIngredient | [SizedIngredient]),
+	/// The falling block. Defaults to "#anvil".
+	falling_block?: LycheeBlockPredicate,
+	/// The landing block. Defaults to any block.
+	landing_block?: LycheeBlockPredicate,
+}
+
+/// Lightning Channeling. Repeatable. Default: items are consumed.
+dispatch lychee:recipe[lychee:lightning_channeling] to struct {
+	/// Items nearby the lightning strike.
+	item_in?: (SizedIngredient | [SizedIngredient]),
+}
+
+/// Item Exploding. Repeatable. Default: items are consumed.
+dispatch lychee:recipe[lychee:item_exploding] to struct {
+	/// Items affected by the explosion.
+	item_in?: (SizedIngredient | [SizedIngredient]),
+	/// Explosion source displayed in viewers.
+	#[since="26.1"]
+	display_tnt?: LycheeBlockPredicate,
+	/// Allows small explosions like wind charges.
+	#[since="26.1"]
+	allow_small_explosion?: boolean,
+}
+
+/// Block Exploding. Not repeatable. Default: block drops items from loot table.
+dispatch lychee:recipe[lychee:block_exploding] to struct {
+	/// Block destroyed by the explosion.
+	block_in?: LycheeBlockPredicate,
+	/// Explosion source displayed in viewers.
+	#[since="26.1"]
+	display_tnt?: LycheeBlockPredicate,
+	/// Allows small explosions like wind charges.
+	#[since="26.1"]
+	allow_small_explosion?: boolean,
+}
+
+/// Entity Ticking. Not repeatable. No JEI/REI/EMI integration.
+#[since="1.21"]
+dispatch lychee:recipe[lychee:entity_ticking] to struct {
+	/// Entity predicate.
+	entity: EntityPredicate,
+	/// Interval in ticks between checking this recipe. Defaults to 1.
+	interval?: int @ 1..,
+}
+
+/// Random Block Ticking. Not repeatable. No JEI/REI/EMI integration.
+dispatch lychee:recipe[lychee:random_block_ticking] to struct {
+	/// The block being randomly ticked.
+	block_in: LycheeBlockPredicate,
+}
+
+/// Dripstone Dripping. Not repeatable.
+dispatch lychee:recipe[lychee:dripstone_dripping] to struct {
+	/// Block two blocks above the root dripstone.
+	source_block: LycheeBlockPredicate,
+	/// The block being dripped on.
+	target_block: LycheeBlockPredicate,
+}
+
+/// Advanced Shaped Crafting. Not repeatable.
+dispatch lychee:recipe[lychee:crafting] to struct {
+	...CraftingShaped,
+	/// Actions that run before the result is displayed in the viewer.
+	assembling?: (PostAction | [PostAction]),
+}
+
+/// Sculk Spreading. Not repeatable.
+#[since="26.1"]
+dispatch lychee:recipe[lychee:sculk_spreading] to struct {
+	/// The block being consumed by sculk spread.
+	block_in: LycheeBlockPredicate,
+	/// The sculk charge value to be consumed.
+	charge?: (int | IntProvider<int>),
+}
+
+#[since="26.1"]
+dispatch lychee:recipe[fruitfulfun:hybridizing] to struct {
+	/// Block IDs for the pollen step.
+	pollens?: [#[id="block"] string] @ ..4,
+	/// Block IDs for the ending step.
+	ending_step?: [#[id="block"] string] @ ..4,
+	/// Whether to reset to the initial step after completion.
+	reset?: boolean,
+}
+
+#[since="26.1"]
+dispatch lychee:recipe[fruitfulfun:dragon_ritual] to struct {
+	/// The input item.
+	item_in: SizedIngredient,
+}

@@ -1,13 +1,10 @@
-// import { createRequire } from 'module'
 import type { ComponentChildren } from 'preact'
 import { createContext } from 'preact'
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks'
+import English from '../../locales/en.json'
 import { Analytics } from '../Analytics.js'
 import config from '../Config.js'
 import { Store } from '../Store.js'
-// const require = createRequire(import.meta.url)
-// const English = require('../../locales/en.json')
-import English from '../../locales/en.json'
 
 interface Locale {
 	lang: string,
