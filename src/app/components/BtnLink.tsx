@@ -6,10 +6,11 @@ interface Props {
 	label?: string,
 	tooltip?: string,
 	tooltipLoc?: 'se' | 'sw' | 'nw',
+	tabIndex?: number,
 	swapped?: boolean,
 }
-export function BtnLink({ link, icon, label, tooltip, tooltipLoc, swapped }: Props) {
-	return <a {...link ? { href: link } : { disabled: true }} class={`btn btn-link${tooltip ? ` tooltipped tip-${tooltipLoc ?? 'sw'}` : ''}`} aria-label={tooltip}>
+export function BtnLink({ link, icon, label, tooltip, tooltipLoc, tabIndex, swapped }: Props) {
+	return <a {...link ? { href: link } : { disabled: true }} class={`btn btn-link${tooltip ? ` tooltipped tip-${tooltipLoc ?? 'sw'}` : ''}`} aria-label={tooltip} tabIndex={tabIndex}>
 		{swapped ? <>
 			{label && <span>{label}</span>}
 			{icon && Octicon[icon]}

@@ -17,7 +17,7 @@ export function Home({}: Props) {
 	return <main>
 		<div class="grid gap-4 p-4 max-w-[960px] mx-auto">
 			<GeneratorList limit={8} predicate={gen => !gen.tags?.includes('partners')} extra={<>
-				<BtnLink icon="link_external" label={locale('modded')} link="/partners/" />
+				<BtnLink icon="link_external" label={locale('modded')} link="/partners/" tabIndex={-1} />
 			</>} />
 			<div class="grid md:grid-cols-2 gap-2">
 				<div class="flex flex-col gap-2">
