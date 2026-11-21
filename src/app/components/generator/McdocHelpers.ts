@@ -294,9 +294,17 @@ export function formatIdentifier(id: string, attributes?: Attributes): string {
 		return '! ' + formatIdentifier(id.substring(1), attributes)
 	}
 	const isStarred = attributes?.some(a => a.name === 'starred')
-	const text = id
-		.replace(/^minecraft:/, '')
-		.replaceAll('_', ' ')
+	let text = id
+	const namespace = id.match(/[a-z._-]*:/g)
+	if (namespace) {
+		text = text.replace(namespace[0], '')
+		if (namespace[0] !== "minecraft:") {
+			let mod = namespace[0].replaceAll('_', ' ').replaceAll(':', '')
+				.replaceAll(/ [a-z]/g, m => m.charAt(0) + ' ' + m.substring(1).toUpperCase())
+			text += ` (${mod.charAt(0).toUpperCase() + mod.substring(1)})`
+		}
+	}
+	text = text.replaceAll('_', ' ')
 		.replace(/[a-z][A-Z]+/g, m => m.charAt(0) + ' ' + m.substring(1).toLowerCase())
 	return (isStarred ? '✨ ' : '') + text.charAt(0).toUpperCase() + text.substring(1)
 }

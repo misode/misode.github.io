@@ -72,18 +72,38 @@ export async function fetchDependencyMcdoc(dependency: string) {
 	}
 }
 
+function merge<T>(
+	a: Record<string, T[]>,
+	b: Record<string, T[]>
+): Record<string, T[]> {
+	const result: Record<string, T[]> = { ...a }
+	for (const [key, value] of Object.entries(b)) {
+		result[key] = [...(result[key] ?? []), ...value]
+	}
+	return result
+}
+
 export async function fetchRegistries(versionId: VersionId) {
 	console.debug(`[fetchRegistries] ${versionId}`)
 	const version = config.versions.find(v => v.id === versionId)!
 	await validateCache(version)
+	async function handleOverride(currentValue: any) {
+		try {
+			const addition = await cachedFetch("/registries.json", { decode: res => res.json(), refresh: true })
+			return merge(currentValue, addition)
+		} catch (e) {
+			console.error(`Failed additional loading registry entries in file “/registries.json”`, e)
+		}
+		return currentValue
+	}
 	try {
-		const data = await cachedFetchBackup<any>([
+		const data = await handleOverride(await cachedFetchBackup<any>([
 			`${mcmeta(version, 'summary')}/registries/data.min.json`,
 			`${spyglassApiUrl}/versions/${version.ref}/registries`,
-		])
+		]))
 		const result = new Map<string, string[]>()
 		for (const id in data) {
-			result.set(id, data[id].map((e: string) => 'minecraft:' + e))
+			result.set(id, data[id].map((e: string) => e.includes(':') ? e : 'minecraft:' + e))
 		}
 		return result
 	} catch (e) {
@@ -471,7 +491,7 @@ async function deleteMatching(matches: (url: string) => boolean) {
 		const cache = await caches.open(CACHE_NAME)
 		console.debug(`[deleteMatching] Opened cache ${CACHE_NAME}`)
 		const promises: Promise<boolean>[] = []
-  
+
 		for (const request of await cache.keys()) {
 			if (matches(request.url)) {
 				promises.push(cache.delete(request))
